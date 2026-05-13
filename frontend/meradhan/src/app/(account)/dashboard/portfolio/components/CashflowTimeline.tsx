@@ -35,14 +35,22 @@ export default function CashflowTimelinePage() {
     period: CashflowPeriodPreset;
     fromDate: string;
     toDate: string;
+    isin: string;
   }>(() => {
     const { fromDate, toDate } = getCashflowPeriodRange(DEFAULT_CASHFLOW_PERIOD);
-    return { types: [], period: DEFAULT_CASHFLOW_PERIOD, fromDate, toDate };
+    return {
+      types: [],
+      period: DEFAULT_CASHFLOW_PERIOD,
+      fromDate,
+      toDate,
+      isin: "",
+    };
   });
 
   const debouncedFromDate = useDebounced(activeFilters.fromDate, DEBOUNCE_MS);
   const debouncedToDate = useDebounced(activeFilters.toDate, DEBOUNCE_MS);
   const debouncedTypes = useDebounced(activeFilters.types, DEBOUNCE_MS);
+  const debouncedIsin = useDebounced(activeFilters.isin, DEBOUNCE_MS);
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: [
@@ -50,12 +58,14 @@ export default function CashflowTimelinePage() {
       debouncedFromDate,
       debouncedToDate,
       debouncedTypes,
+      debouncedIsin,
     ],
     queryFn: async () => {
       return portfolioApi.getCashflowTimeline(
         debouncedFromDate || undefined,
         debouncedToDate || undefined,
-        debouncedTypes.length > 0 ? debouncedTypes : undefined
+        debouncedTypes.length > 0 ? debouncedTypes : undefined,
+        debouncedIsin ? [debouncedIsin] : undefined
       );
     },
   });

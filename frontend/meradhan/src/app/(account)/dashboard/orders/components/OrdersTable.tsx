@@ -8,11 +8,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PiCurrencyInrBold } from "react-icons/pi";
-import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { formatAmount } from "@/global/utils/formate";
 import type { Order } from "@root/apiGateway";
-import { FaEye } from "react-icons/fa6";
-import { getStatusDisplay, getBondType, getIssuerCode } from "../_utils";
+import {
+  getStatusDisplay,
+  getBondType,
+  getIssuerCode,
+  formatOrderHistoryDate,
+} from "../_utils";
+import { OrderPdfDownloads } from "./OrderPdfDownloads";
 import { OrdersEmptyState } from "@/components/ui/empty";
 import { Spinner } from "@/components/ui/spinner";
 
@@ -67,8 +71,8 @@ function OrdersTable({ orders, isLoading }: OrdersTableProps) {
                 <TableHead className="bg-[#F5F5F5] py-4 px-6">Face Value</TableHead>
                 <TableHead className="bg-[#F5F5F5] py-4 px-6">Quantity</TableHead>
                 <TableHead className="bg-[#F5F5F5] py-4 px-6">Value</TableHead>
-                <TableHead className="bg-[#F5F5F5] py-4 px-6">
-                  Request Date
+                <TableHead className="bg-[#F5F5F5] py-4 px-6 min-w-[148px]">
+                  Dates
                 </TableHead>
                 <TableHead className="bg-[#F5F5F5] py-4 px-6">Status</TableHead>
                 <TableHead className="bg-[#F5F5F5] rounded-r-md text-center py-4 px-6">
@@ -78,17 +82,17 @@ function OrdersTable({ orders, isLoading }: OrdersTableProps) {
             </TableHeader>
             <TableBody className="border-b border-gray-100">
               {orders.map((order) => {
-                const statusDisplay = getStatusDisplay(order.status);
+                const statusDisplay = getStatusDisplay(
+                  order.status,
+                  order.paymentStatus,
+                  order.settleStatus,
+                );
                 const bondType = getBondType(order.bondDetails);
                 const issuerCode = getIssuerCode(order.bondDetails);
-                const formattedDate = dateTimeUtils.formatDateTime(
-                  order.createdAt,
-                  "DD MMM YYYY"
+                const tradeDate = formatOrderHistoryDate(order.createdAt);
+                const settlementDate = formatOrderHistoryDate(
+                  order.settlementDate,
                 );
-                const requestDate =
-                  !formattedDate || formattedDate === "Invalid Date"
-                    ? "-"
-                    : formattedDate;
                 const faceValue = formatAmount(parseFloat(order.faceValue));
                 const totalValue = formatAmount(parseFloat(order.totalAmount));
 
@@ -120,13 +124,27 @@ function OrdersTable({ orders, isLoading }: OrdersTableProps) {
                         <PiCurrencyInrBold /> {totalValue}
                       </div>
                     </TableCell>
-                    <TableCell className="py-4 px-6">{requestDate}</TableCell>
+                    <TableCell className="py-4 px-6 align-top">
+                      <div className="text-sm leading-relaxed text-gray-900">
+                        <div>
+                          <span className="text-gray-500">Trade:</span>{" "}
+                          {tradeDate}
+                        </div>
+                        <div className="mt-0.5">
+                          <span className="text-gray-500">Settlement:</span>{" "}
+                          {settlementDate}
+                        </div>
+                      </div>
+                    </TableCell>
                     <TableCell className={`py-4 px-6 ${statusDisplay.className}`}>
                       {statusDisplay.text}
                     </TableCell>
                     <TableCell className="py-4 px-6">
-                      <div className="flex cursor-pointer items-center justify-center text-center text-primary">
-                        <FaEye size={18} />
+                      <div className="flex items-center justify-center text-center">
+                        <OrderPdfDownloads
+                          orderNumber={order.orderNumber}
+                          variant="table"
+                        />
                       </div>
                     </TableCell>
                   </TableRow>

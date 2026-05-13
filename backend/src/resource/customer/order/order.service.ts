@@ -95,6 +95,30 @@ export class OrderService {
     };
   }
 
+  /** RFQ / deal reference sometimes stored on `metadata` (e.g. assisted onboarding). */
+  private rfqFromMetadata(metadata: unknown): string | undefined {
+    const v = (metadata as { rfqNumber?: unknown } | null)?.rfqNumber;
+    return typeof v === "string" && v.trim().length > 0 ? v.trim() : undefined;
+  }
+
+  /**
+   * Key into `settle_order.orderNumber` (NSE MOD trade id). Prefer explicit metadata;
+   * direct-checkout orders often only have `reqOrderNumber` after deal proposal.
+   */
+  private settleOrderLinkKey(order: {
+    metadata: unknown;
+    reqOrderNumber: string | null;
+  }): string | undefined {
+    return this.rfqFromMetadata(order.metadata) ?? this.normalizeReqOrderNumber(order.reqOrderNumber);
+  }
+
+  private normalizeReqOrderNumber(reqOrderNumber: string | null): string | undefined {
+    if (typeof reqOrderNumber === "string" && reqOrderNumber.trim().length > 0) {
+      return reqOrderNumber.trim();
+    }
+    return undefined;
+  }
+
   private async assertCrmInventoryForOrder(
     bondService: BondService,
     isin: string,
@@ -426,19 +450,36 @@ export class OrderService {
     };
 
     if (status) {
-      // Status filter is for order status, not payment status
-      const validOrderStatuses = ["PENDING", "SETTLED", "APPLIED", "REJECTED"];
-      if (validOrderStatuses.includes(status)) {
-        whereClause.status = status as
-          | "PENDING"
-          | "SETTLED"
-          | "APPLIED"
-          | "REJECTED";
-        countWhereClause.status = status as
-          | "PENDING"
-          | "SETTLED"
-          | "APPLIED"
-          | "REJECTED";
+      const u = status.trim().toUpperCase();
+      /** Matches Prisma `OrderStatus` + synthetic `NOT_COMPLETED` (checkout / payment abandoned). */
+      if (u === "NOT_COMPLETED") {
+        const notCompleted = {
+          OR: [
+            { paymentStatus: "CANCELLED" as const },
+            {
+              AND: [
+                { status: "REJECTED" as const },
+                { paymentStatus: { notIn: ["COMPLETED" as const, "REFUNDED" as const] } },
+              ],
+            },
+          ],
+        };
+        Object.assign(whereClause, notCompleted);
+        Object.assign(countWhereClause, notCompleted);
+      } else {
+        const validOrderStatuses = [
+          "PENDING",
+          "SETTLED",
+          "APPLIED",
+          "REJECTED",
+          "EXPIRED",
+          "CANCELLED",
+          "IN_PROGRESS",
+        ] as const;
+        if ((validOrderStatuses as readonly string[]).includes(u)) {
+          whereClause.status = u as (typeof validOrderStatuses)[number];
+          countWhereClause.status = u as (typeof validOrderStatuses)[number];
+        }
       }
     }
 
@@ -470,8 +511,43 @@ export class OrderService {
       }),
     ]);
 
+    const rfqKeys = [
+      ...new Set(
+        orders
+          .map((o) => this.settleOrderLinkKey(o))
+          .filter((v): v is string => v != null && v.length > 0),
+      ),
+    ];
+
+    const settleByRfq = new Map<
+      string,
+      { settleStatus: number; modSettleDate: string | null }
+    >();
+    if (rfqKeys.length > 0) {
+      const settleRows = await db.dataBase.settleOrderModel.findMany({
+        where: { orderNumber: { in: rfqKeys } },
+        select: { orderNumber: true, settleStatus: true, modSettleDate: true },
+      });
+      for (const row of settleRows) {
+        if (!settleByRfq.has(row.orderNumber)) {
+          settleByRfq.set(row.orderNumber, {
+            settleStatus: row.settleStatus,
+            modSettleDate: row.modSettleDate ?? null,
+          });
+        }
+      }
+    }
+
+    const data = orders.map((order) => {
+      const linkKey = this.settleOrderLinkKey(order);
+      const info = linkKey != null ? settleByRfq.get(linkKey) : undefined;
+      const settleStatus = info?.settleStatus ?? null;
+      const settlementDate = info?.modSettleDate ?? null;
+      return { ...order, settleStatus, settlementDate };
+    });
+
     return {
-      data: orders,
+      data,
       meta: {
         total,
         page,
