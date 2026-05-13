@@ -77,11 +77,9 @@ const TimelineFilters = ({ activeFilters, onFilterChange }: TimelineFiltersProps
   };
 
   const handleFromDateChange = (nextFrom: string) => {
-    let nextFromDate = nextFrom;
-    let nextToDate = toDate;
-    if (nextFromDate && nextToDate && nextFromDate > nextToDate) {
-      nextToDate = nextFromDate;
-    }
+    const nextFromDate = nextFrom;
+    const nextToDate =
+      nextFromDate && toDate && nextFromDate > toDate ? nextFromDate : toDate;
     onFilterChange({
       ...activeFilters,
       period: "CUSTOM",
@@ -91,11 +89,9 @@ const TimelineFilters = ({ activeFilters, onFilterChange }: TimelineFiltersProps
   };
 
   const handleToDateChange = (nextTo: string) => {
-    let nextFromDate = fromDate;
-    let nextToDate = nextTo;
-    if (nextFromDate && nextToDate && nextFromDate > nextToDate) {
-      nextFromDate = nextToDate;
-    }
+    const nextToDate = nextTo;
+    const nextFromDate =
+      fromDate && nextToDate && fromDate > nextToDate ? nextToDate : fromDate;
     onFilterChange({
       ...activeFilters,
       period: "CUSTOM",
