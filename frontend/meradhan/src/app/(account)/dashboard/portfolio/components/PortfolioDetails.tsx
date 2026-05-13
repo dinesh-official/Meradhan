@@ -22,6 +22,7 @@ interface PortfolioFilterOptions {
   bondRatings: string[];
   couponRanges: string[];
   paymentFrequencies: string[];
+  isins: { isin: string; bondName: string }[];
 }
 
 export default function PortfolioDetails() {

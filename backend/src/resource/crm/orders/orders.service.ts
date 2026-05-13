@@ -158,6 +158,23 @@ function parseRfqMasterDateTime(
 }
 
 export class CrmOrdersService {
+  /**
+   * NSE `settle_order.orderNumber` is the trade id; customer-facing `order.orderNumber` is usually MD-*.
+   */
+  private resolveSettleOrderTradeKey(order: {
+    orderNumber: string;
+    reqOrderNumber: string | null;
+    metadata: unknown;
+  }): string {
+    const meta = (order.metadata as Record<string, unknown> | null) ?? {};
+    const rfq = typeof meta.rfqNumber === "string" ? meta.rfqNumber.trim() : "";
+    const req =
+      order.reqOrderNumber != null && String(order.reqOrderNumber).trim() !== ""
+        ? String(order.reqOrderNumber).trim()
+        : "";
+    return req || rfq || order.orderNumber;
+  }
+
   async getSettlementAutomationLogGroups(search?: string) {
     const where = search?.trim()
       ? {
@@ -789,7 +806,9 @@ export class CrmOrdersService {
       });
     }
 
-    const settleOrder = await this.getRfqByOrderNumber(orderNumber);
+    const settleOrder = await this.getRfqByOrderNumber(
+      this.resolveSettleOrderTradeKey(order),
+    );
 
     const negotation = await db.dataBase.rFQNegotiation.findFirst({
       where: {
@@ -1011,7 +1030,9 @@ export class CrmOrdersService {
       });
     }
 
-    const settleOrder = await this.getRfqByOrderNumber(orderNumber);
+    const settleOrder = await this.getRfqByOrderNumber(
+      this.resolveSettleOrderTradeKey(order),
+    );
 
     // Settlement status
     // 0 = Settlement Pending

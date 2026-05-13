@@ -13,7 +13,8 @@ export type CashflowPeriodPreset =
   | "THIS_QUARTER"
   | "NEXT_QUARTER"
   | "THIS_FY"
-  | "NEXT_FY";
+  | "NEXT_FY"
+  | "CUSTOM";
 
 export const CASHFLOW_PERIOD_OPTIONS: ReadonlyArray<{
   value: CashflowPeriodPreset;
@@ -25,6 +26,7 @@ export const CASHFLOW_PERIOD_OPTIONS: ReadonlyArray<{
   { value: "NEXT_QUARTER", label: "Next Quarter" },
   { value: "THIS_FY", label: "This FY" },
   { value: "NEXT_FY", label: "Next FY" },
+  { value: "CUSTOM", label: "Custom range" },
 ];
 
 export const DEFAULT_CASHFLOW_PERIOD: CashflowPeriodPreset = "THIS_MONTH";
@@ -80,5 +82,9 @@ export function getCashflowPeriodRange(
       return fyRange(fyStartYear(y, m));
     case "NEXT_FY":
       return fyRange(fyStartYear(y, m) + 1);
+    case "CUSTOM":
+      throw new Error(
+        "getCashflowPeriodRange: CUSTOM uses explicit fromDate/toDate from filters",
+      );
   }
 }

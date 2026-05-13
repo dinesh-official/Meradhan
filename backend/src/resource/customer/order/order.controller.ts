@@ -5,11 +5,13 @@ import { OrderService } from "./order.service";
 import { OrderPdfService } from "./order-pdf.service";
 import { db } from "@core/database/database";
 import { AppConfigService } from "@resource/app-config/app-config.service";
+import { CrmOrdersService } from "@resource/crm/orders/orders.service";
 
 export class OrderController {
   private orderService = new OrderService();
   private orderPdfService = new OrderPdfService();
   private appConfigService = new AppConfigService();
+  private crmOrdersService = new CrmOrdersService();
 
   getPaymentGatewayMode = async (_req: Request, res: Response) => {
     const paymentGatewayMode =
@@ -99,6 +101,106 @@ export class OrderController {
       statusCode: HttpStatus.OK,
       responseData: { message: "Order status updated successfully" },
     });
+  };
+
+  downloadOrderReceiptPdf = async (req: Request, res: Response) => {
+    const customerId = req.customer?.id;
+    if (!customerId) throw new AppError("Unauthorized");
+
+    const p = req.params.orderNumber;
+    const orderNumber = String(Array.isArray(p) ? p[0] : p ?? "").trim();
+    if (!orderNumber) {
+      throw new AppError("Order number is required", {
+        statusCode: HttpStatus.BAD_REQUEST,
+      });
+    }
+
+    const order = await db.dataBase.order.findFirst({
+      where: { orderNumber, customerProfileId: customerId },
+      select: { orderNumber: true },
+    });
+    if (!order) {
+      throw new AppError("Order not found", { statusCode: HttpStatus.NOT_FOUND });
+    }
+
+    try {
+      const pdfQuery = req.query as Record<string, string | undefined>;
+      const { buffer, filename } =
+        await this.crmOrdersService.generateOrderReceiptPdfBuffer(
+          order.orderNumber,
+          pdfQuery,
+        );
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${filename.replace(/"/g, "")}"`,
+      );
+      return res.send(buffer);
+    } catch (err) {
+      console.error("Customer order receipt PDF failed:", err);
+      if (err instanceof AppError) {
+        return res.status(err.statusCode).json({
+          status: false,
+          message: err.message,
+          code: err.code,
+        });
+      }
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        status: false,
+        message:
+          err instanceof Error ? err.message : "Failed to generate order receipt PDF",
+      });
+    }
+  };
+
+  downloadDealSheetPdf = async (req: Request, res: Response) => {
+    const customerId = req.customer?.id;
+    if (!customerId) throw new AppError("Unauthorized");
+
+    const p = req.params.orderNumber;
+    const orderNumber = String(Array.isArray(p) ? p[0] : p ?? "").trim();
+    if (!orderNumber) {
+      throw new AppError("Order number is required", {
+        statusCode: HttpStatus.BAD_REQUEST,
+      });
+    }
+
+    const order = await db.dataBase.order.findFirst({
+      where: { orderNumber, customerProfileId: customerId },
+      select: { orderNumber: true },
+    });
+    if (!order) {
+      throw new AppError("Order not found", { statusCode: HttpStatus.NOT_FOUND });
+    }
+
+    try {
+      const pdfQuery = req.query as Record<string, string | undefined>;
+      const { buffer, filename } =
+        await this.crmOrdersService.generateDealSheetPdfBuffer(
+          order.orderNumber,
+          pdfQuery,
+        );
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${filename.replace(/"/g, "")}"`,
+      );
+      return res.send(buffer);
+    } catch (err) {
+      console.error("Customer deal sheet PDF failed:", err);
+      if (err instanceof AppError) {
+        return res.status(err.statusCode).json({
+          status: false,
+          message: err.message,
+          code: err.code,
+        });
+      }
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        status: false,
+        message:
+          err instanceof Error ? err.message : "Failed to generate deal sheet PDF",
+      });
+    }
   };
 
   getOrderPdf = async (req: Request, res: Response) => {

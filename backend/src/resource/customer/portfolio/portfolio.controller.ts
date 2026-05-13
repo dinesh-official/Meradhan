@@ -159,12 +159,20 @@ export class PortfolioController {
 
   const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
   const endDate   = req.query.endDate   ? new Date(req.query.endDate   as string) : undefined;
-  //  const bondType  = req.query.bondType  ? (req.query.bondType as string) : undefined;
    const bondTypes = req.query.bondType
     ? (req.query.bondType as string).split(",").map((t) => t.trim()).filter(Boolean)
     : undefined;
+  const isins = req.query.isin
+    ? (req.query.isin as string).split(",").map((t) => t.trim()).filter(Boolean)
+    : undefined;
 
-  const result = await this.portfolioService.getCashflowTimeline(customerId, startDate, endDate,bondTypes);
+  const result = await this.portfolioService.getCashflowTimeline(
+    customerId,
+    startDate,
+    endDate,
+    bondTypes,
+    isins,
+  );
 
   return res.sendResponse({
     statusCode: HttpStatus.OK,

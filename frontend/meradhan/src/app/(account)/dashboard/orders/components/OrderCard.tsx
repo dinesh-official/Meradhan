@@ -1,12 +1,16 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { formatAmount } from "@/global/utils/formate";
 import type { Order } from "@root/apiGateway";
 import { useState } from "react";
-import { FaEye } from "react-icons/fa6";
-import { getBondType, getIssuerCode, getStatusDisplay } from "../_utils";
+import {
+  getBondType,
+  getIssuerCode,
+  getStatusDisplay,
+  formatOrderHistoryDate,
+} from "../_utils";
+import { OrderPdfDownloads } from "./OrderPdfDownloads";
 
 interface OrderCardProps {
   order: Order;
@@ -16,13 +20,15 @@ interface OrderCardProps {
 function OrderCard({ order, showSeparator = false }: OrderCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const statusDisplay = getStatusDisplay(order.status);
+  const statusDisplay = getStatusDisplay(
+    order.status,
+    order.paymentStatus,
+    order.settleStatus,
+  );
   const issuerCode = getIssuerCode(order.bondDetails);
   const bondType = getBondType(order.bondDetails);
-  const formattedDate = dateTimeUtils.formatDateTime(
-    order.createdAt,
-    "DD MMM YYYY"
-  );
+  const tradeDate = formatOrderHistoryDate(order.createdAt);
+  const settlementDate = formatOrderHistoryDate(order.settlementDate);
   const faceValue = formatAmount(parseFloat(order.faceValue));
   const totalValue = formatAmount(parseFloat(order.totalAmount));
 
@@ -53,7 +59,7 @@ function OrderCard({ order, showSeparator = false }: OrderCardProps) {
           </div>
         </div>
 
-        {/* Lower Section: Status and Date (2-column grid) */}
+        {/* Lower Section: Status and Dates (2-column grid) */}
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <div className="text-xs text-gray-500 mb-1">Status</div>
@@ -62,8 +68,16 @@ function OrderCard({ order, showSeparator = false }: OrderCardProps) {
             </div>
           </div>
           <div>
-            <div className="text-xs text-gray-500 mb-1">Date</div>
-            <div className="text-sm text-gray-900">{formattedDate}</div>
+            <div className="text-xs text-gray-500 mb-1">Dates</div>
+            <div className="text-sm text-gray-900 leading-relaxed">
+              <div>
+                <span className="text-gray-500">Trade:</span> {tradeDate}
+              </div>
+              <div className="mt-0.5">
+                <span className="text-gray-500">Settlement:</span>{" "}
+                {settlementDate}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -93,9 +107,9 @@ function OrderCard({ order, showSeparator = false }: OrderCardProps) {
               <div>
                 <div className="text-xs text-gray-500 mb-1">Payment Ref.</div>
                 <div className="flex items-center justify-start">
-                  <FaEye
-                    className="text-primary-600 cursor-pointer"
-                    size={16}
+                  <OrderPdfDownloads
+                    orderNumber={order.orderNumber}
+                    variant="card"
                   />
                 </div>
               </div>

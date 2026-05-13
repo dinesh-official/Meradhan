@@ -41,6 +41,18 @@ orderRoutes.get(
   orderController.getOrderHistory
 );
 
+orderRoutes.get(
+  "/api/customer/order/:orderNumber/receipt-pdf",
+  allowAccessMiddleware("USER"),
+  orderController.downloadOrderReceiptPdf
+);
+
+orderRoutes.get(
+  "/api/customer/order/:orderNumber/deal-pdf",
+  allowAccessMiddleware("USER"),
+  orderController.downloadDealSheetPdf
+);
+
 orderRoutes.all(
   "/api/customer/order/pdf",
   allowAccessMiddleware("USER"),

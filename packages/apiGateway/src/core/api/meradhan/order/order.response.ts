@@ -12,8 +12,23 @@ export interface Order {
   paymentOrderId?: string | null;
   paymentId?: string | null;
   paymentMetadata?: Record<string, unknown>;
-  paymentStatus: "PENDING" | "COMPLETED";
-  status: "PENDING" | "SETTLED" | "APPLIED" | "REJECTED";
+  paymentStatus: "PENDING" | "COMPLETED" | "CANCELLED" | "REFUNDED";
+  /** Matches Prisma `OrderStatus` (orders.prisma). */
+  status:
+    | "PENDING"
+    | "SETTLED"
+    | "APPLIED"
+    | "REJECTED"
+    | "EXPIRED"
+    | "CANCELLED"
+    | "IN_PROGRESS";
+  /**
+   * NSE `settle_order.settleStatus` (0–9) when the order is linked via `metadata.rfqNumber`
+   * to a row in `settle_order`. Null when no settlement row exists yet.
+   */
+  settleStatus?: number | null;
+  /** NSE `settle_order.modSettleDate` when linked via `metadata.rfqNumber` (often DD-MM-YYYY). */
+  settlementDate?: string | null;
   subTotal: string;
   stampDuty: string;
   totalAmount: string;
@@ -24,6 +39,8 @@ export interface Order {
   unitPrice: string;
   bondDetails: Record<string, unknown>;
   metadata?: Record<string, unknown>;
+  /** NSE trade number after deal proposal; joins to `settle_order.orderNumber` when set. */
+  reqOrderNumber?: string | null;
   createdAt: string;
   updatedAt: string;
 }
