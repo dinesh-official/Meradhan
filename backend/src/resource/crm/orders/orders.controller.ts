@@ -18,6 +18,18 @@ function formatProposalDate(value: string | number | Date | null | undefined) {
   return `${day}-${month}-${year}`;
 }
 
+/** Deal / settlement lines in email: DD-MMM-YYYY (full year). */
+function formatProposalDateDdMmmYyyy(value: string | number | Date | null | undefined) {
+  if (value == null || value === "") return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = months[date.getMonth()] ?? "—";
+  const year = String(date.getFullYear());
+  return `${day}-${month}-${year}`;
+}
+
 function formatProposalCurrency(value: number | string | null | undefined) {
   const numeric = Number(value);
   if (!Number.isFinite(numeric)) return "—";
@@ -132,75 +144,142 @@ function buildProposalEmailTemplate(payload: {
   totalConsideration: number | null;
   stampDuty: number | null;
   settlementAmount: number | null;
+  maturityDate?: string | null;
+  faceValue?: number | null;
+  cleanPrice?: number | null;
+  /** Annual coupon % (e.g. from bond master). */
+  couponRate?: number | null;
 }) {
-  const sideText = payload.side.toLowerCase();
+  const orderSideWord = payload.side === "SELL" ? "sell" : "buy";
   const settlementAmount = Number(payload.settlementAmount ?? 0);
   const amountInWords = proposalNumberToWords(settlementAmount);
 
-  const rows = [
-    ["Name of Security", payload.bondName || "—"],
+  const cleanPxSource = payload.cleanPrice ?? payload.rate;
+  const cleanPriceDisplay =
+    cleanPxSource != null && Number.isFinite(Number(cleanPxSource))
+      ? `INR ${formatProposalNumber(Number(cleanPxSource), 4)}`
+      : "—";
+
+  const couponPct =
+    payload.couponRate != null && Number.isFinite(Number(payload.couponRate))
+      ? Number(payload.couponRate)
+      : null;
+  const couponDisplay =
+    couponPct != null ? `${formatProposalNumber(couponPct, 2)}%` : "—";
+
+  const accruedDisplay =
+    payload.accruedInterest != null && Number.isFinite(Number(payload.accruedInterest))
+      ? `${formatProposalCurrency(payload.accruedInterest)}${payload.noOfDays != null && Number.isFinite(Number(payload.noOfDays))
+        ? ` (No. of Days: ${payload.noOfDays})`
+        : ""
+      }`
+      : "—";
+
+  const faceValueDisplay =
+    payload.faceValue != null && Number.isFinite(Number(payload.faceValue))
+      ? formatProposalCurrency(payload.faceValue)
+      : "—";
+
+  const confirmationQuote =
+    "I confirm the above order details and authorize BondNest Capital India Securities Private Limited (MeraDhan) to proceed with the order placement on the RFQ Platform.";
+
+  const rows: [string, string][] = [
+    ["Security Name", payload.bondName || "—"],
     ["ISIN", payload.isin || "—"],
-    ["Deal Date", formatProposalDate(payload.dealDate)],
-    ["Settlement Date", formatProposalDate(payload.settlementDate)],
-    ["Quantum", formatProposalInteger(payload.quantum)],
+    ["Deal Date", formatProposalDateDdMmmYyyy(payload.dealDate)],
+    ["Settlement Date", formatProposalDateDdMmmYyyy(payload.settlementDate)],
+    ["Maturity", formatProposalDateDdMmmYyyy(payload.maturityDate ?? null)],
+    ["Coupon Rate", couponDisplay],
+    ["Face Value", faceValueDisplay],
     ["Quantity", formatProposalInteger(payload.quantity)],
-    ["Rate", formatProposalNumber(payload.rate, 4)],
-    ["YTM Ann", payload.ytmAnn != null ? formatProposalNumber(payload.ytmAnn, 2) : "—"],
-    ["Last IP Date", formatProposalDate(payload.lastIpDate)],
-    ["No of Days", payload.noOfDays != null ? String(payload.noOfDays) : "—"],
+    ["Quantum", formatProposalCurrency(payload.quantum)],
+    ["Clean Price", cleanPriceDisplay],
+    ["YTM Ann", payload.ytmAnn != null ? `${formatProposalNumber(payload.ytmAnn, 2)}%` : "—"],
+    ["Last IP Date", formatProposalDateDdMmmYyyy(payload.lastIpDate)],
     ["Principal Amount", formatProposalCurrency(payload.principalAmount)],
-    ["Accrued Interest", formatProposalCurrency(payload.accruedInterest)],
+    ["Accrued / Ex Interest", accruedDisplay],
     ["Total Consideration", formatProposalCurrency(payload.totalConsideration)],
     ["Stamp Duty", formatProposalCurrency(payload.stampDuty)],
     ["Settlement Amount", formatProposalCurrency(payload.settlementAmount)],
     ["Amount in Words", amountInWords],
   ];
 
-  const subject = `RFQ Order Confirmation Required – ${payload.isin} Deal Date ${formatProposalDate(payload.dealDate)}`;
+  const subject = `RFQ Order Confirmation Required – ${payload.isin} Deal Date ${formatProposalDateDdMmmYyyy(payload.dealDate)}`;
+
   const html = `
-    <p>Dear ${escapeHtml(payload.customerName)},</p>
-    <p>Thank you for placing your ${escapeHtml(sideText)} order through BondNest Capital India Securities Private Limited. Based on your authorization, we propose to initiate a non-negotiable order (One-to-One Mode) on the RFQ Platform of the Stock Exchanges.</p>
-    <p>The proposed order details are provided below for your reference and confirmation. Kindly confirm the same to enable us to proceed with placing the order. You are also requested to arrange the pay-in obligation (funds) within the stipulated timeline today.</p>
-    <table style="border-collapse:collapse;width:100%;margin:16px 0;">
+    <p>Dear Mr. / Ms. ${escapeHtml(payload.customerName)},</p>
+    <p>Thank you for placing your ${escapeHtml(orderSideWord)} order on BondNest Capital India Securities Private Limited (MeraDhan). Your order request has been recorded successfully and is currently pending confirmation.</p>
+    <p>To proceed with the order placement, kindly reply to this email with the following confirmation text:</p>
+    <p style="margin:12px 0;padding:12px 16px;border-left:4px solid #2563eb;background:#f8fafc;font-style:italic;">&ldquo;${escapeHtml(confirmationQuote)}&rdquo;</p>
+    <p>The transaction details are provided below for your review:</p>
+    <table style="border-collapse:collapse;width:100%;max-width:720px;margin:16px 0;">
       <tbody>
         ${rows
       .map(
         ([label, value]) => `
               <tr>
-                <td style="border:1px solid #e5e7eb;padding:8px;font-weight:600;vertical-align:top;">${escapeHtml(String(label))}</td>
+                <td style="border:1px solid #e5e7eb;padding:8px;font-weight:600;vertical-align:top;width:40%;">${escapeHtml(String(label))}</td>
                 <td style="border:1px solid #e5e7eb;padding:8px;vertical-align:top;">${escapeHtml(String(value))}</td>
-              </tr>`
+              </tr>`,
       )
       .join("")}
       </tbody>
     </table>
-    <p>Please note that the Order Receipt will be generated post placement of the order on the RFQ Platform and merely indicates the intention of the parties to enter into a transaction. It should not be construed as a Deal Confirmation. The Deal Sheet will be issued upon successful settlement of the transaction.</p>
-    <p>Please ensure that the payment is made only from the bank account that you have registered and verified on the MeraDhan platform. Payments made from any other bank account may result in trade settlement failure.</p>
-    <p>Kindly ensure that the funds are transferred via RTGS to the NSCCL Account maintained with HDFC Bank or RBI, as applicable.</p>
-    <p>Note: Kindly ensure that the Demat Account verified on our platform is active for the receipt of Bonds/Securities. The same account details will be captured in the Order Receipt upon placement of the order.</p>
-    <p>Best regards,<br/><br/>MeraDhan Team</p>
+    <p><strong>Please note:</strong></p>
+    <ul style="margin:8px 0 16px 18px;padding:0;">
+      <li style="margin-bottom:8px;">This transaction is expected to be settled on a T+1 basis.</li>
+      <li style="margin-bottom:8px;">The order will be processed only upon receipt of your confirmation through the registered email address.</li>
+      <li style="margin-bottom:8px;">The Order Receipt will be generated after successful placement of the order on the RFQ Platform of the Stock Exchange(s).</li>
+      <li style="margin-bottom:8px;">The Order Receipt merely indicates the intention of the parties to enter into a transaction. It should not be construed as a Deal Confirmation.</li>
+      <li style="margin-bottom:8px;">The Deal Sheet will be issued only upon successful settlement of the transaction.</li>
+      <li style="margin-bottom:8px;">Please ensure that the payment is made only from the bank account that you have registered and verified on the MeraDhan platform. Payments made from any other bank account may result in trade settlement failure.</li>
+      <li style="margin-bottom:8px;">Kindly ensure that the funds are transferred via NEFT/RTGS to the NSCCL Account maintained with HDFC Bank or RBI, as applicable.</li>
+    </ul>
+    <p>For any assistance, please contact us at <a href="mailto:backoffice@meradhan.co">backoffice@meradhan.co</a>.</p>
+    <p><strong>Note:</strong> Kindly ensure that the Demat Account verified on our platform is active for the receipt of Bonds/Securities. The same account details will be captured in the Order Receipt upon placement of the order.</p>
+    <p>Best regards,<br/>MeraDhan Team</p>
+    <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;" />
+    <p style="font-size:11px;color:#64748b;line-height:1.5;"><strong>Disclaimer:</strong> Fixed returns do not constitute guaranteed or assured returns. Investments in corporate debt securities, municipal debt securities/securitised debt instruments are subject to credit risks, market risks and default risks including delay and/or default in payment. Read all the offer related documents carefully.</p>
+    <p style="font-size:11px;color:#64748b;line-height:1.5;">BondNest Capital India Securities Private Limited operates the MeraDhan platform as an Online Bond Platform Provider (OBPP).</p>
+    <p style="font-size:11px;color:#64748b;line-height:1.5;">SEBI Registration No.: INZ000330234<br/>NSE Member ID: 90480<br/>BSE Member ID: 6963</p>
   `;
 
   const text = [
-    `Dear ${payload.customerName},`,
+    `Dear Mr. / Ms. ${payload.customerName},`,
     "",
-    `Thank you for placing your ${sideText} order through BondNest Capital India Securities Private Limited. Based on your authorization, we propose to initiate a non-negotiable order (One-to-One Mode) on the RFQ Platform of the Stock Exchanges.`,
+    `Thank you for placing your ${orderSideWord} order on BondNest Capital India Securities Private Limited (MeraDhan). Your order request has been recorded successfully and is currently pending confirmation.`,
     "",
-    "The proposed order details are provided below for your reference and confirmation. Kindly confirm the same to enable us to proceed with placing the order. You are also requested to arrange the pay-in obligation (funds) within the stipulated timeline today.",
+    "To proceed with the order placement, kindly reply to this email with the following confirmation text:",
+    "",
+    `"${confirmationQuote}"`,
+    "",
+    "The transaction details are provided below for your review:",
     "",
     ...rows.map(([label, value]) => `${label}: ${value}`),
     "",
-    "Please note that the Order Receipt will be generated post placement of the order on the RFQ Platform and merely indicates the intention of the parties to enter into a transaction. It should not be construed as a Deal Confirmation. The Deal Sheet will be issued upon successful settlement of the transaction.",
+    "Please note:",
+    "- This transaction is expected to be settled on a T+1 basis.",
+    "- The order will be processed only upon receipt of your confirmation through the registered email address.",
+    "- The Order Receipt will be generated after successful placement of the order on the RFQ Platform of the Stock Exchange(s).",
+    "- The Order Receipt merely indicates the intention of the parties to enter into a transaction. It should not be construed as a Deal Confirmation.",
+    "- The Deal Sheet will be issued only upon successful settlement of the transaction.",
+    "- Please ensure that the payment is made only from the bank account that you have registered and verified on the MeraDhan platform. Payments made from any other bank account may result in trade settlement failure.",
+    "- Kindly ensure that the funds are transferred via NEFT/RTGS to the NSCCL Account maintained with HDFC Bank or RBI, as applicable.",
     "",
-    "Please ensure that the payment is made only from the bank account that you have registered and verified on the MeraDhan platform. Payments made from any other bank account may result in trade settlement failure.",
-    "",
-    "Kindly ensure that the funds are transferred via RTGS to the NSCCL Account maintained with HDFC Bank or RBI, as applicable.",
+    "For any assistance, please contact us at backoffice@meradhan.co.",
     "",
     "Note: Kindly ensure that the Demat Account verified on our platform is active for the receipt of Bonds/Securities. The same account details will be captured in the Order Receipt upon placement of the order.",
     "",
     "Best regards,",
-    "",
     "MeraDhan Team",
+    "",
+    "Disclaimer: Fixed returns do not constitute guaranteed or assured returns. Investments in corporate debt securities, municipal debt securities/securitised debt instruments are subject to credit risks, market risks and default risks including delay and/or default in payment. Read all the offer related documents carefully.",
+    "",
+    "BondNest Capital India Securities Private Limited operates the MeraDhan platform as an Online Bond Platform Provider (OBPP).",
+    "",
+    "SEBI Registration No.: INZ000330234",
+    "NSE Member ID: 90480",
+    "BSE Member ID: 6963",
   ].join("\n");
 
   return { subject, html, text };
@@ -749,6 +828,10 @@ export class CrmOrdersController {
       totalConsideration?: number | string | null;
       stampDuty?: number | string | null;
       settlementAmount?: number | string | null;
+      maturityDate?: string | null;
+      faceValue?: number | string | null;
+      cleanPrice?: number | string | null;
+      couponRate?: number | string | null;
     };
 
     const recipientEmail = String(body.toEmail ?? "").trim();
@@ -807,6 +890,16 @@ export class CrmOrdersController {
         body.settlementAmount == null || body.settlementAmount === ""
           ? null
           : Number(body.settlementAmount),
+      maturityDate:
+        typeof body.maturityDate === "string" && body.maturityDate.trim() !== ""
+          ? body.maturityDate
+          : null,
+      faceValue:
+        body.faceValue == null || body.faceValue === "" ? null : Number(body.faceValue),
+      cleanPrice:
+        body.cleanPrice == null || body.cleanPrice === "" ? null : Number(body.cleanPrice),
+      couponRate:
+        body.couponRate == null || body.couponRate === "" ? null : Number(body.couponRate),
     });
 
     try {

@@ -298,6 +298,10 @@ export class CrmOrdersApi {
       totalConsideration?: number | null;
       stampDuty?: number | null;
       settlementAmount?: number | null;
+      maturityDate?: string | null;
+      faceValue?: number | null;
+      cleanPrice?: number | null;
+      couponRate?: number | null;
     },
     config?: AxiosRequestConfig
   ): Promise<SendOrderPdfEmailResponse> {
