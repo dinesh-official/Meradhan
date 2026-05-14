@@ -8,11 +8,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PiCurrencyInrBold } from "react-icons/pi";
-import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { formatAmount } from "@/global/utils/formate";
 import type { Order } from "@root/apiGateway";
-import { FaEye } from "react-icons/fa6";
-import { getStatusDisplay, getBondType, getIssuerCode } from "../_utils";
+import {
+  getStatusDisplay,
+  formatOrderHistoryDate,
+  formatOrderYieldPercent,
+  getOrderSettlementDateInput,
+} from "../_utils";
+import { OrderPdfDownloads } from "./OrderPdfDownloads";
+import { SecurityNameCell } from "./SecurityNameCell";
 import { OrdersEmptyState } from "@/components/ui/empty";
 import { Spinner } from "@/components/ui/spinner";
 
@@ -60,15 +65,17 @@ function OrdersTable({ orders, isLoading }: OrdersTableProps) {
                 <TableHead className="w-[100px] rounded-md bg-[#F5F5F5] rounded-r-none py-4 px-6">
                   Order ID
                 </TableHead>
-                <TableHead className="bg-[#F5F5F5] py-4 px-6">Bond Type</TableHead>
-                <TableHead className="bg-[#F5F5F5] py-4 px-6">
+                <TableHead className="min-w-48 max-w-md bg-[#F5F5F5] py-4 px-6 lg:max-w-lg">
                   Security Name
                 </TableHead>
                 <TableHead className="bg-[#F5F5F5] py-4 px-6">Face Value</TableHead>
                 <TableHead className="bg-[#F5F5F5] py-4 px-6">Quantity</TableHead>
                 <TableHead className="bg-[#F5F5F5] py-4 px-6">Value</TableHead>
-                <TableHead className="bg-[#F5F5F5] py-4 px-6">
-                  Request Date
+                <TableHead className="whitespace-nowrap bg-[#F5F5F5] py-4 px-6">
+                  Yield
+                </TableHead>
+                <TableHead className="bg-[#F5F5F5] py-4 px-6 min-w-[148px]">
+                  Dates
                 </TableHead>
                 <TableHead className="bg-[#F5F5F5] py-4 px-6">Status</TableHead>
                 <TableHead className="bg-[#F5F5F5] rounded-r-md text-center py-4 px-6">
@@ -78,36 +85,23 @@ function OrdersTable({ orders, isLoading }: OrdersTableProps) {
             </TableHeader>
             <TableBody className="border-b border-gray-100">
               {orders.map((order) => {
-                const statusDisplay = getStatusDisplay(order.status);
-                const bondType = getBondType(order.bondDetails);
-                const issuerCode = getIssuerCode(order.bondDetails);
-                const formattedDate = dateTimeUtils.formatDateTime(
-                  order.createdAt,
-                  "DD MMM YYYY"
+                const statusDisplay = getStatusDisplay(
+                  order.status,
+                  order.paymentStatus,
+                  order.settleStatus,
                 );
-                const requestDate =
-                  !formattedDate || formattedDate === "Invalid Date"
-                    ? "-"
-                    : formattedDate;
+                const tradeDate = formatOrderHistoryDate(order.createdAt);
+                const settlementDate = formatOrderHistoryDate(
+                  getOrderSettlementDateInput(order),
+                );
                 const faceValue = formatAmount(parseFloat(order.faceValue));
                 const totalValue = formatAmount(parseFloat(order.totalAmount));
 
                 return (
                   <TableRow key={order.id} className="hover:bg-gray-50">
                     <TableCell className="py-4 px-6">{order.orderNumber}</TableCell>
-                    <TableCell className="py-4 px-6">{bondType}</TableCell>
-                    <TableCell className="py-4 px-6">
-                      <div className="leading-relaxed">
-                        {order.bondName}
-                        {issuerCode && (
-                          <>
-                            <br />
-                            <span className="text-sm text-gray-500">
-                              Issuer: {issuerCode}
-                            </span>
-                          </>
-                        )}
-                      </div>
+                    <TableCell className="min-w-48 max-w-md overflow-hidden py-4 px-6 align-top lg:max-w-lg">
+                      <SecurityNameCell order={order} />
                     </TableCell>
                     <TableCell className="py-4 px-6">
                       <div className="flex items-center">
@@ -120,13 +114,30 @@ function OrdersTable({ orders, isLoading }: OrdersTableProps) {
                         <PiCurrencyInrBold /> {totalValue}
                       </div>
                     </TableCell>
-                    <TableCell className="py-4 px-6">{requestDate}</TableCell>
+                    <TableCell className="whitespace-nowrap py-4 px-6 text-sm text-gray-900">
+                      {formatOrderYieldPercent(order)}
+                    </TableCell>
+                    <TableCell className="py-4 px-6 align-top">
+                      <div className="text-sm leading-relaxed text-gray-900">
+                        <div>
+                          <span className="text-gray-500">Trade:</span>{" "}
+                          {tradeDate}
+                        </div>
+                        <div className="mt-0.5">
+                          <span className="text-gray-500">Settlement:</span>{" "}
+                          {settlementDate}
+                        </div>
+                      </div>
+                    </TableCell>
                     <TableCell className={`py-4 px-6 ${statusDisplay.className}`}>
                       {statusDisplay.text}
                     </TableCell>
                     <TableCell className="py-4 px-6">
-                      <div className="flex cursor-pointer items-center justify-center text-center text-primary">
-                        <FaEye size={18} />
+                      <div className="flex items-center justify-center text-center">
+                        <OrderPdfDownloads
+                          orderNumber={order.orderNumber}
+                          variant="table"
+                        />
                       </div>
                     </TableCell>
                   </TableRow>

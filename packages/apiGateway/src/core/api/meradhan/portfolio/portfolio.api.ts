@@ -102,6 +102,7 @@ export class CustomerPortfolioApi {
     startDate?: string,
     endDate?: string,
     types?: string[],
+    isins?: string[],
     config?: AxiosRequestConfig
   ): Promise<GetCashflowTimelineResponse> {
     const { data } = await this.apiClient.get<GetCashflowTimelineResponse>(
@@ -113,6 +114,7 @@ export class CustomerPortfolioApi {
           ...(startDate && { startDate }),
           ...(endDate && { endDate }),
           ...(types && types.length > 0 && { bondType: types.join(",") }),
+          ...(isins && isins.length > 0 && { isin: isins.join(",") }),
         },
       }
     );

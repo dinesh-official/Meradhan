@@ -253,7 +253,8 @@ export interface SettleOrderData {
   buyBrokerLoginId?: string;
   sellBrokerLoginId?: string;
   source: 1 | 4 | 5; // 1=NSE CBRICS, 4=FTRAC, 5=NSE RFQ
-  modSettleDate: string;
+  /** Settlement / pay-in date from NSE (often DD-MM-YYYY); may be empty until populated. */
+  modSettleDate?: string | null;
   modQuantity: number;
   modAccrInt: number;
   modConsideration?: number;

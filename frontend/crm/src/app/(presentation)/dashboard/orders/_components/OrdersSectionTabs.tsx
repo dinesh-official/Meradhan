@@ -10,6 +10,7 @@ export default function OrdersSectionTabs() {
   const isLogs = pathname?.includes("/payment-process-logs");
   const isInv = pathname?.includes("/inventory-stock");
   const isReports = pathname?.includes("/orders/reports");
+  const isDraftOrders = pathname?.includes("/draft-orders");
 
   return (
     <div className="flex gap-6 border-b border-border mb-5">
@@ -17,7 +18,7 @@ export default function OrdersSectionTabs() {
         href="/dashboard/orders"
         className={cn(
           "pb-3 text-sm font-medium transition-colors border-b-2 -mb-px",
-          !isPg && !isLogs && !isInv && !isReports
+          !isPg && !isLogs && !isInv && !isReports && !isDraftOrders
             ? "border-primary text-foreground"
             : "border-transparent text-muted-foreground hover:text-foreground"
         )}
@@ -45,6 +46,17 @@ export default function OrdersSectionTabs() {
         )}
       >
         Payment Process Logs
+      </Link>
+      <Link
+        href="/dashboard/orders/draft-orders"
+        className={cn(
+          "pb-3 text-sm font-medium transition-colors border-b-2 -mb-px",
+          isDraftOrders
+            ? "border-primary text-foreground"
+            : "border-transparent text-muted-foreground hover:text-foreground"
+        )}
+      >
+        Draft orders
       </Link>
       <Link
         href="/dashboard/orders/inventory-stock"

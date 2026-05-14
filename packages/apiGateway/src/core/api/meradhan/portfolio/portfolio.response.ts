@@ -17,6 +17,8 @@ export interface PortfolioSummaryResponse {
   averageMaturity: PortfolioAverageMaturity;
   numberOfBonds: number;
   averageYield: PortfolioAverageYield;
+  /** Coupon interest accrued / recognised to date (IST calendar day); see portfolio interest service. */
+  interestEarnedToDate: number;
 }
 
 export type GetPortfolioSummaryResponse =
@@ -151,9 +153,16 @@ export interface CashflowToMaturityResponse {
 export type GetCashflowToMaturityResponse =
   BaseResponseData<CashflowToMaturityResponse>;
   
+export interface PortfolioIsinOption {
+  isin: string;
+  bondName: string;
+}
+
 export interface PortfolioFilterOptions {
   bondTypes: string[];
   bondRatings: string[];
   couponRanges: string[];
   paymentFrequencies: string[];
+  /** Unique ISINs from the customer's settled orders (for cashflow timeline, etc.). */
+  isins: PortfolioIsinOption[];
 }

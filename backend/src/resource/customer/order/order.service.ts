@@ -19,6 +19,7 @@ import type z from "zod";
 import { BondService } from "@resource/bonds/bond.service";
 import { AppConfigService } from "@resource/app-config/app-config.service";
 import { CrmInventoryStockService } from "@resource/crm/orders/inventory_stock.service";
+import type { computeBondOrderPricingData } from "@services/order/order-pricing-helper";
 
 // PaymentStatus enum values (matches Prisma schema orders.prisma)
 const PaymentStatus = {
@@ -66,6 +67,24 @@ export class OrderService {
     return bond;
   }
 
+
+  async createDraftOrder(userId: number, item: OrderPreviewItem) {
+    const bondService = new BondService();
+    const bond = await bondService.getBondOrderPricing(item.isin, item.quantity);
+    if (bond.ok != true) {
+      throw new Error("Failed to create draft order")
+    }
+    return await db.dataBase.draftOrders.create({
+      data: {
+        isin: item.isin,
+        quantity: item.quantity,
+        sellPrice: item.sellPrice || bond.pricing.cleanPrice,
+        userId,
+        pricingData: bond.pricing
+      }
+    })
+  }
+
   async previewOrder(item: OrderPreviewItem) {
     const bondService = new BondService();
     const bondDetails = await bondService.getBondDetails(item.isin);
@@ -93,6 +112,46 @@ export class OrderService {
       interestPaymentFrequency: bondDetails?.interestPaymentFrequency ?? "",
       pricing: bond.ok ? bond.pricing : null,
     };
+  }
+
+  /** RFQ / deal reference sometimes stored on `metadata` (e.g. assisted onboarding). */
+  private rfqFromMetadata(metadata: unknown): string | undefined {
+    const v = (metadata as { rfqNumber?: unknown } | null)?.rfqNumber;
+    return typeof v === "string" && v.trim().length > 0 ? v.trim() : undefined;
+  }
+
+  /**
+   * Key into `settle_order.orderNumber` (NSE MOD trade id). Prefer explicit metadata;
+   * direct-checkout orders often only have `reqOrderNumber` after deal proposal.
+   */
+  private settleOrderLinkKey(order: {
+    metadata: unknown;
+    reqOrderNumber: string | null;
+  }): string | undefined {
+    return this.rfqFromMetadata(order.metadata) ?? this.normalizeReqOrderNumber(order.reqOrderNumber);
+  }
+
+  private normalizeReqOrderNumber(reqOrderNumber: string | null): string | undefined {
+    if (typeof reqOrderNumber === "string" && reqOrderNumber.trim().length > 0) {
+      return reqOrderNumber.trim();
+    }
+    return undefined;
+  }
+
+  /**
+   * Expected settlement from bond order pricing snapshot (stored at checkout) when
+   * there is no NSE `settle_order` row or `modSettleDate` yet.
+   */
+  private settlementDateFromBondDetailsSnapshot(bondDetails: unknown): string | null {
+    if (!bondDetails || typeof bondDetails !== "object" || Array.isArray(bondDetails)) {
+      return null;
+    }
+    const b = bondDetails as Record<string, unknown>;
+    const p = b.pricing;
+    if (!p || typeof p !== "object" || Array.isArray(p)) return null;
+    const sd = (p as Record<string, unknown>).settlementDate;
+    if (typeof sd === "string" && sd.trim()) return sd.trim();
+    return null;
   }
 
   private async assertCrmInventoryForOrder(
@@ -123,13 +182,16 @@ export class OrderService {
     customerId: number,
     item: OrderPreviewItem,
     _legacyClientOrderId?: string,
+    _skipPgMode?: boolean
   ) {
     const pgMode = await this.appConfig.getPaymentGatewayMode();
-    if (pgMode === "INQUIRY") {
-      throw new AppError(
-        "Payment gateway is in inquiry-only mode. Please submit your order as an inquiry.",
-        { code: "PAYMENT_GATEWAY_DISABLED" },
-      );
+    if (_skipPgMode != true) {
+      if (pgMode === "INQUIRY") {
+        throw new AppError(
+          "Payment gateway is in inquiry-only mode. Please submit your order as an inquiry.",
+          { code: "PAYMENT_GATEWAY_DISABLED" },
+        );
+      }
     }
 
     const preview = await this.previewOrder(item);
@@ -194,30 +256,32 @@ export class OrderService {
         metadata: { dealId } as Prisma.InputJsonValue,
       },
     });
+    let razorpayOrder;
+    if (_skipPgMode != true) {
+      razorpayOrder = await this.payment.createOrder(
+        preview.totalAmount,
+        "INR",
+        orderNumber,
+        customerId,
+        {
+          account_number: customerBank.accountNumber,
+          ifsc: customerBank.ifscCode,
+          name: customerBank.accountHolderName,
+        },
+      );
+      await db.dataBase.order.update({
+        where: { id: order.id },
+        data: {
+          paymentOrderId: razorpayOrder.id,
 
-    const razorpayOrder = await this.payment.createOrder(
-      preview.totalAmount,
-      "INR",
-      orderNumber,
-      customerId,
-      {
-        account_number: customerBank.accountNumber,
-        ifsc: customerBank.ifscCode,
-        name: customerBank.accountHolderName,
-      },
-    );
-    await db.dataBase.order.update({
-      where: { id: order.id },
-      data: {
-        paymentOrderId: razorpayOrder.id,
-
-      },
-    });
+        },
+      });
+    }
 
     return {
       orderId: order.id,
       orderNumber,
-      paymentOrderId: razorpayOrder.id,
+      paymentOrderId: razorpayOrder?.id,
       amount: preview.totalAmount,
       currency: "INR",
       key: env.RAZORPAY_KEY_ID,
@@ -343,7 +407,7 @@ export class OrderService {
 
   async updateOrderStatus(
     orderId: number,
-    status: "PENDING" | "SETTLED" | "APPLIED" | "REJECTED",
+    status: "PENDING" | "SETTLED" | "APPLIED" | "REJECTED" | "IN_PROGRESS",
   ): Promise<void> {
     await db.dataBase.order.update({
       where: { id: orderId },
@@ -426,19 +490,36 @@ export class OrderService {
     };
 
     if (status) {
-      // Status filter is for order status, not payment status
-      const validOrderStatuses = ["PENDING", "SETTLED", "APPLIED", "REJECTED"];
-      if (validOrderStatuses.includes(status)) {
-        whereClause.status = status as
-          | "PENDING"
-          | "SETTLED"
-          | "APPLIED"
-          | "REJECTED";
-        countWhereClause.status = status as
-          | "PENDING"
-          | "SETTLED"
-          | "APPLIED"
-          | "REJECTED";
+      const u = status.trim().toUpperCase();
+      /** Matches Prisma `OrderStatus` + synthetic `NOT_COMPLETED` (checkout / payment abandoned). */
+      if (u === "NOT_COMPLETED") {
+        const notCompleted = {
+          OR: [
+            { paymentStatus: "CANCELLED" as const },
+            {
+              AND: [
+                { status: "REJECTED" as const },
+                { paymentStatus: { notIn: ["COMPLETED" as const, "REFUNDED" as const] } },
+              ],
+            },
+          ],
+        };
+        Object.assign(whereClause, notCompleted);
+        Object.assign(countWhereClause, notCompleted);
+      } else {
+        const validOrderStatuses = [
+          "PENDING",
+          "SETTLED",
+          "APPLIED",
+          "REJECTED",
+          "EXPIRED",
+          "CANCELLED",
+          "IN_PROGRESS",
+        ] as const;
+        if ((validOrderStatuses as readonly string[]).includes(u)) {
+          whereClause.status = u as (typeof validOrderStatuses)[number];
+          countWhereClause.status = u as (typeof validOrderStatuses)[number];
+        }
       }
     }
 
@@ -470,8 +551,48 @@ export class OrderService {
       }),
     ]);
 
+    const rfqKeys = [
+      ...new Set(
+        orders
+          .map((o) => this.settleOrderLinkKey(o))
+          .filter((v): v is string => v != null && v.length > 0),
+      ),
+    ];
+
+    const settleByRfq = new Map<
+      string,
+      { settleStatus: number; modSettleDate: string | null }
+    >();
+    if (rfqKeys.length > 0) {
+      const settleRows = await db.dataBase.settleOrderModel.findMany({
+        where: { orderNumber: { in: rfqKeys } },
+        select: { orderNumber: true, settleStatus: true, modSettleDate: true },
+      });
+      for (const row of settleRows) {
+        if (!settleByRfq.has(row.orderNumber)) {
+          settleByRfq.set(row.orderNumber, {
+            settleStatus: row.settleStatus,
+            modSettleDate: row.modSettleDate ?? null,
+          });
+        }
+      }
+    }
+
+    const data = orders.map((order) => {
+      const linkKey = this.settleOrderLinkKey(order);
+      const info = linkKey != null ? settleByRfq.get(linkKey) : undefined;
+      const settleStatus = info?.settleStatus ?? null;
+      const nseSettle =
+        info?.modSettleDate != null && String(info.modSettleDate).trim() !== ""
+          ? String(info.modSettleDate).trim()
+          : null;
+      const snapshotSettle = this.settlementDateFromBondDetailsSnapshot(order.bondDetails);
+      const settlementDate = nseSettle ?? snapshotSettle;
+      return { ...order, settleStatus, settlementDate };
+    });
+
     return {
-      data: orders,
+      data,
       meta: {
         total,
         page,

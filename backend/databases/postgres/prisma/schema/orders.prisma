@@ -164,4 +164,22 @@ enum OrderStatus {
     SETTLED
     APPLIED
     REJECTED
+    // new added - 13 May 2026
+    EXPIRED
+    CANCELLED
+    IN_PROGRESS
+}
+
+model DraftOrders {
+    id          Int         @id @default(autoincrement())
+    isin        String
+    quantity    Float
+    sellPrice   Float
+    userId      Int
+    pricingData Json?
+    status      OrderStatus @default(PENDING)
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
+
+    @@map("draft_orders")
 }

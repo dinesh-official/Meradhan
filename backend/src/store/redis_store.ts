@@ -19,6 +19,8 @@ export enum QueueNames {
   orderSettlement = "orderOrderSettlementMD",
   submitProfileCompleat = "submitProfileMD",
   rekycOtpSend = "rekycOtpSendMD",
+  maturityReminderEmail = "maturityReminderEmailMD",
+  couponReminderEmail = "couponReminderEmailMD",
 }
 
 // 🔹 Create a shared Redis connection using QueueStore (recommended)

@@ -1,4 +1,5 @@
 import { db } from "@core/database/database";
+import { OrderStatus } from "@databases/generated/prisma/postgres";
 import {
   isNA,
   formatDateStr,
@@ -7,14 +8,77 @@ import {
   getCouponBucket,
   enumerateBondPortfolioCashflows,
 } from "./portfolio.utils";
+import { computePortfolioInterestEarned } from "./portfolio_interest_earned.service";
 
-/** Paid lifecycle after successful payment — portfolio may exist before RFQ settles. */
-const PAID_PORTFOLIO_ORDER_STATUSES = ["APPLIED", "SETTLED"] as const;
+/** Portfolio summary, details, and charts use only fully settled orders (no date cutoff). */
+const PORTFOLIO_ORDER_STATUS = OrderStatus.SETTLED;
+
+function toPositiveYieldPercent(v: unknown): number | undefined {
+  if (typeof v === "number" && Number.isFinite(v) && v > 0) return v;
+  if (typeof v === "string" && v.trim()) {
+    const n = Number(v.replace(/,/g, ""));
+    if (Number.isFinite(n) && n > 0) return n;
+  }
+  return undefined;
+}
+
+const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+const MS_PER_DAY = 86_400_000;
+/** Same convention as `getInvestmentByMaturityBucket` (actuarial year length). */
+const DAYS_PER_YEAR = 365.25;
+
+/** IST calendar "today" as a UTC midnight anchor (matches bond IST date columns). */
+function istTodayUtcCalendarDate(now = new Date()): Date {
+  const ist = new Date(now.getTime() + IST_OFFSET_MS);
+  return new Date(Date.UTC(ist.getUTCFullYear(), ist.getUTCMonth(), ist.getUTCDate()));
+}
+
+function toUtcCalendarDate(d: Date): Date {
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+}
+
+function calendarMaturityFromBond(bond: {
+  maturityDateIst: Date | null;
+  maturityDate: Date | null;
+}): Date | null {
+  const src = bond.maturityDateIst ?? bond.maturityDate;
+  if (!src) return null;
+  const t = src instanceof Date ? src.getTime() : new Date(src).getTime();
+  if (!Number.isFinite(t)) return null;
+  return toUtcCalendarDate(src instanceof Date ? src : new Date(src));
+}
 
 export class PortfolioService {
   private rfqFromMetadata(metadata: unknown): string | undefined {
     const v = (metadata as { rfqNumber?: unknown } | null)?.rfqNumber;
     return typeof v === "string" && v.trim().length > 0 ? v.trim() : undefined;
+  }
+
+  /** Same as customer order history: `settle_order.orderNumber` ← metadata.rfqNumber or reqOrderNumber. */
+  private settleOrderLinkKey(o: {
+    metadata: unknown;
+    reqOrderNumber: string | null;
+  }): string | undefined {
+    const fromMeta = this.rfqFromMetadata(o.metadata);
+    if (fromMeta) return fromMeta;
+    if (typeof o.reqOrderNumber === "string" && o.reqOrderNumber.trim().length > 0) {
+      return o.reqOrderNumber.trim();
+    }
+    return undefined;
+  }
+
+  /**
+   * Yields stored on `Order.bondDetails` (snapshot of the bond row at checkout).
+   * Prefer buy/trade notion over stale listing `yield` when present.
+   */
+  private snapshotYieldFromBondDetails(bondDetails: unknown): number | undefined {
+    if (!bondDetails || typeof bondDetails !== "object") return undefined;
+    const b = bondDetails as Record<string, unknown>;
+    return (
+      toPositiveYieldPercent(b.buyYield) ??
+      toPositiveYieldPercent(b.yield) ??
+      toPositiveYieldPercent(b.lastTradeYield)
+    );
   }
 
   private async loadSettlementRollups(rfqNumbers: string[]) {
@@ -100,16 +164,19 @@ export class PortfolioService {
   }
 
   /**
-   * One row per paid order with a positive invested amount.
-   * Invested amount: NSE settle (consideration + stamp) when linked; otherwise
+   * One row per **settled bond order** (payment completed + `OrderStatus.SETTLED`),
+   * with positive invested amount. Single source for summary cards, portfolio details,
+   * allocation charts, and cashflow so all figures match.
+   *
+   * Invested amount: NSE settle (consideration + stamp) when RFQ-linked; otherwise
    * `order.totalAmount` when `CustomerBonds` exists for that order.
+   * No date window: every qualifying settled order is included.
    */
   private async paidOrderPortfolioRows(customerId: number) {
     const orders = await db.dataBase.order.findMany({
       where: {
         customerProfileId: customerId,
-        paymentStatus: "COMPLETED",
-        status: { in: [...PAID_PORTFOLIO_ORDER_STATUSES] },
+        status: PORTFOLIO_ORDER_STATUS,
       },
       select: {
         id: true,
@@ -117,6 +184,8 @@ export class PortfolioService {
         quantity: true,
         totalAmount: true,
         metadata: true,
+        reqOrderNumber: true,
+        bondDetails: true,
         createdAt: true,
       },
     });
@@ -133,7 +202,7 @@ export class PortfolioService {
     const rfqNumbers = [
       ...new Set(
         orders
-          .map((o) => this.rfqFromMetadata(o.metadata))
+          .map((o) => this.settleOrderLinkKey(o))
           .filter((v): v is string => !!v),
       ),
     ];
@@ -150,11 +219,14 @@ export class PortfolioService {
       maturityWeight: number;
       settleYtm?: number | undefined;
       settleMv?: number | undefined;
+      /** YTM/yield captured on the order at purchase (from bond snapshot). */
+      snapshotYield?: number | undefined;
       cashflowAnchorDate: Date | null;
     }> = [];
 
     for (const o of orders) {
-      const rfq = this.rfqFromMetadata(o.metadata) ?? null;
+      const rfq = this.settleOrderLinkKey(o) ?? null;
+      const snapshotYield = this.snapshotYieldFromBondDetails(o.bondDetails);
       let invested = rfq ? (considerationByRfq.get(rfq) ?? 0) : 0;
       if (invested <= 0 && bondOrderIds.has(o.id)) {
         invested = Number(o.totalAmount ?? 0);
@@ -179,11 +251,48 @@ export class PortfolioService {
         maturityWeight,
         settleYtm: yw?.weightedYield,
         settleMv: mv > 0 ? mv : undefined,
+        snapshotYield,
         cashflowAnchorDate,
       });
     }
 
     return rows;
+  }
+
+  /** Interest accrued / coupon amounts recognised to IST calendar today (see `portfolio_interest_earned.service`). */
+  private async getInterestEarnedToDate(customerId: number): Promise<number> {
+    const holdings = await this.paidOrderPortfolioRows(customerId);
+    const valid = holdings.filter(
+      (h) => h.investedAmount > 0 && h.cashflowAnchorDate != null,
+    );
+    if (!valid.length) return 0;
+
+    const bonds = await db.dataBase.bonds.findMany({
+      where: { isin: { in: this.uniqueIsins(valid) } },
+      select: {
+        isin: true,
+        faceValue: true,
+        couponRate: true,
+        interestPaymentMode: true,
+        interestPaymentFrequency: true,
+        dateOfAllotment: true,
+        maturityDate: true,
+        maturityDateIst: true,
+        allCouponDates: true,
+      },
+    });
+    const bondByIsin = new Map(bonds.map((b) => [b.isin, b]));
+
+    const rows = valid.map((h) => ({
+      isin: h.isin,
+      quantity: h.quantity,
+      settleDate:
+        h.cashflowAnchorDate instanceof Date
+          ? h.cashflowAnchorDate
+          : new Date(h.cashflowAnchorDate!),
+    }));
+
+    return computePortfolioInterestEarned(rows, bondByIsin, istTodayUtcCalendarDate());
   }
 
   private async getSettledOrdersWithAmount(customerId: number) {
@@ -239,31 +348,36 @@ export class PortfolioService {
 
     const bonds = await db.dataBase.bonds.findMany({
       where: { isin: { in: this.uniqueIsins(rows) } },
-      select: { isin: true, maturityDate: true },
+      select: { isin: true, maturityDate: true, maturityDateIst: true },
     });
 
-    const maturityByIsin = new Map(bonds.map((b) => [b.isin, b.maturityDate]));
+    const maturityCalByIsin = new Map<string, Date>();
+    for (const b of bonds) {
+      const cal = calendarMaturityFromBond(b);
+      if (cal) maturityCalByIsin.set(b.isin, cal);
+    }
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = istTodayUtcCalendarDate();
 
     let weightedTTM = 0;
     let totalWeight = 0;
     let count = 0;
 
     for (const order of rows) {
-      const matRaw = maturityByIsin.get(order.isin);
-      if (!matRaw) continue;
+      const maturityCal = maturityCalByIsin.get(order.isin);
+      if (!maturityCal) continue;
 
-      const maturity = new Date(matRaw);
-      maturity.setHours(0, 0, 0, 0);
-      if (maturity <= today) continue;
+      if (maturityCal.getTime() <= today.getTime()) continue;
 
-      const ttmYears = (maturity.getTime() - today.getTime()) / (365 * 24 * 60 * 60 * 1000);
+      const ttmYears =
+        (maturityCal.getTime() - today.getTime()) / (DAYS_PER_YEAR * MS_PER_DAY);
       if (ttmYears <= 0) continue;
 
-      weightedTTM += order.maturityWeight * ttmYears;
-      totalWeight += order.maturityWeight;
+      const w = order.investedAmount;
+      if (!(w > 0)) continue;
+
+      weightedTTM += w * ttmYears;
+      totalWeight += w;
       count += 1;
     }
 
@@ -292,21 +406,41 @@ export class PortfolioService {
 
     const bonds = await db.dataBase.bonds.findMany({
       where: { isin: { in: this.uniqueIsins(rows) } },
-      select: { isin: true, yield: true },
+      select: { isin: true, yield: true, buyYield: true, lastTradeYield: true },
     });
-    const bondYieldByIsin = new Map(bonds.map((b) => [b.isin, Number(b.yield ?? 0)]));
+    const bondFallbackYieldByIsin = new Map<string, number>();
+    for (const b of bonds) {
+      const y =
+        toPositiveYieldPercent(b.buyYield) ??
+        toPositiveYieldPercent(b.lastTradeYield) ??
+        toPositiveYieldPercent(b.yield);
+      if (y !== undefined) bondFallbackYieldByIsin.set(b.isin, y);
+    }
 
     let weightedYield = 0;
     let totalWeight = 0;
     let count = 0;
 
     for (const order of rows) {
-      const ytm =
-        typeof order.settleYtm === "number" && Number.isFinite(order.settleYtm)
+      const settle =
+        typeof order.settleYtm === "number" && Number.isFinite(order.settleYtm) && order.settleYtm > 0
           ? order.settleYtm
-          : (bondYieldByIsin.get(order.isin) ?? 0);
-      const w = order.maturityWeight > 0 ? order.maturityWeight : order.investedAmount;
-      if (w <= 0) continue;
+          : undefined;
+      const snap =
+        typeof order.snapshotYield === "number" &&
+          Number.isFinite(order.snapshotYield) &&
+          order.snapshotYield > 0
+          ? order.snapshotYield
+          : undefined;
+      const live = bondFallbackYieldByIsin.get(order.isin);
+
+      const ytm = settle ?? snap ?? live;
+      if (ytm === undefined || !Number.isFinite(ytm) || ytm <= 0) continue;
+
+      // Weight by invested capital so the headline matches "Invested Amount" semantics
+      // (MV-weighting skews the average vs what customers expect from their fills).
+      const w = order.investedAmount;
+      if (!(w > 0)) continue;
 
       weightedYield += w * ytm;
       totalWeight += w;
@@ -479,7 +613,10 @@ export class PortfolioService {
     const investByOrderId = new Map(holdings.map((h) => [h.orderId, h.investedAmount]));
 
     const orders = await db.dataBase.order.findMany({
-      where: { id: { in: holdings.map((h) => h.orderId) } },
+      where: {
+        id: { in: holdings.map((h) => h.orderId) },
+        status: PORTFOLIO_ORDER_STATUS,
+      },
       select: {
         id: true,
         isin: true,
@@ -578,9 +715,20 @@ export class PortfolioService {
   }
 
   async getPortfolioFilterOptions(customerId: number) {
-    const empty = { bondTypes: [] as string[], bondRatings: [] as string[], couponRanges: [] as string[], paymentFrequencies: [] as string[] };
+    const empty = {
+      bondTypes: [] as string[],
+      bondRatings: [] as string[],
+      couponRanges: [] as string[],
+      paymentFrequencies: [] as string[],
+      isins: [] as { isin: string; bondName: string }[],
+    };
 
-    const ordersWithAmount = await this.getSettledOrdersWithAmount(customerId);
+    const rows = await this.paidOrderPortfolioRows(customerId);
+    const ordersWithAmount = rows.map((r) => ({
+      isin: r.isin,
+      rfqNumber: r.rfq ?? "",
+      investedAmount: r.investedAmount,
+    }));
     if (!ordersWithAmount.length) return empty;
 
     const bonds = await db.dataBase.bonds.findMany({
@@ -606,11 +754,28 @@ export class PortfolioService {
       if (bond.interestPaymentMode) paymentFrequencies.add(bond.interestPaymentMode);
     }
 
+    const uniqueIsins = [
+      ...new Set(
+        ordersWithAmount.map((o) => o.isin).filter((x): x is string => typeof x === "string" && x.length > 0),
+      ),
+    ];
+    const bondsForIsinLabels = await db.dataBase.bonds.findMany({
+      where: { isin: { in: uniqueIsins } },
+      select: { isin: true, bondName: true },
+    });
+    const bondNameByIsin = new Map(
+      bondsForIsinLabels.map((b) => [b.isin, ((b.bondName ?? "").trim() || b.isin) as string]),
+    );
+    const isins = uniqueIsins
+      .map((isin) => ({ isin, bondName: bondNameByIsin.get(isin) ?? isin }))
+      .sort((a, b) => a.bondName.localeCompare(b.bondName, undefined, { sensitivity: "base" }));
+
     return {
       bondTypes: Array.from(bondTypes),
       bondRatings: Array.from(bondRatings),
       couponRanges: Array.from(couponRanges),
       paymentFrequencies: Array.from(paymentFrequencies),
+      isins,
     };
   }
 
@@ -621,8 +786,13 @@ export class PortfolioService {
     return holdings.reduce((total, h) => total + Number(h.quantity ?? 0), 0);
   }
 
-  async getCashflowTimeline(customerId: number,  startDate?: Date,
-  endDate?: Date,  bondTypes?: string[]) {
+  async getCashflowTimeline(
+    customerId: number,
+    startDate?: Date,
+    endDate?: Date,
+    bondTypes?: string[],
+    isins?: string[],
+  ) {
     const holdings = await this.paidOrderPortfolioRows(customerId);
     if (!holdings.length) return { years: [] };
 
@@ -640,8 +810,15 @@ export class PortfolioService {
       }));
     if (!validOrders.length) return { years: [] };
 
+    const isinFilter =
+      isins?.length ? new Set(isins.map((i) => i.trim()).filter(Boolean)) : null;
+    const ordersInScope = isinFilter
+      ? validOrders.filter((o) => isinFilter!.has(o.isin))
+      : validOrders;
+    if (!ordersInScope.length) return { years: [] };
+
     const bonds = await db.dataBase.bonds.findMany({
-      where: { isin: { in: Array.from(new Set(validOrders.map((o) => o.isin))) } },
+      where: { isin: { in: Array.from(new Set(ordersInScope.map((o) => o.isin))) } },
       select: {
         isin: true,
         bondName: true,
@@ -657,13 +834,13 @@ export class PortfolioService {
     });
 
     const bondByIsin = new Map(bonds.map((b) => [b.isin, b]));
-  
-const filteredByType = bondTypes?.length
-  ? validOrders.filter((o) => {
-      const bond = bondByIsin.get(o.isin);
-      return bondTypes.includes((bond?.sectorName ?? "").trim());
-    })
-  : validOrders;
+
+    const filteredByType = bondTypes?.length
+      ? ordersInScope.filter((o) => {
+        const bond = bondByIsin.get(o.isin);
+        return bondTypes.includes((bond?.sectorName ?? "").trim());
+      })
+      : ordersInScope;
 
     type TimelineEvent = {
       type: "INTEREST" | "MATURITY";
@@ -707,11 +884,11 @@ const filteredByType = bondTypes?.length
         });
       }
     }
-const filteredEvents = events.filter((ev) => {
-  if (startDate && ev.date < startDate) return false;
-  if (endDate   && ev.date > endDate)   return false;
-  return true;
-});
+    const filteredEvents = events.filter((ev) => {
+      if (startDate && ev.date < startDate) return false;
+      if (endDate && ev.date > endDate) return false;
+      return true;
+    });
     // Group by year → date
     filteredEvents.sort((a, b) => a.date.getTime() - b.date.getTime());
 
@@ -752,11 +929,12 @@ const filteredEvents = events.filter((ev) => {
   }
 
   async getPortfolioSummary(customerId: number) {
-    const [invested, maturity, yieldResult, totalBonds] = await Promise.all([
+    const [invested, maturity, yieldResult, totalBonds, interestEarnedToDate] = await Promise.all([
       this.getTotalInvestedAmount(customerId),
       this.getAverageMaturity(customerId),
       this.getAveragePortfolioYield(customerId),
       this.getTotalNumberOfBonds(customerId),
+      this.getInterestEarnedToDate(customerId),
     ]);
 
     return {
@@ -772,6 +950,7 @@ const filteredEvents = events.filter((ev) => {
         value: yieldResult.averageYield,
         formatted: `${yieldResult.formatted} per annum`,
       },
+      interestEarnedToDate,
     };
   }
 
@@ -813,7 +992,7 @@ const filteredEvents = events.filter((ev) => {
     const bondByIsin = new Map(bonds.map((b) => [b.isin, b]));
     type CashflowEvent = {
       type: "INTEREST" | "MATURITY";
-      month: string;   
+      month: string;
       amount: number;
       date: Date;
     };
@@ -894,27 +1073,27 @@ const filteredEvents = events.filter((ev) => {
       );
     });
 
-   const futureMonths = startIdx === -1 ? [] : sortedMonths.slice(startIdx);
+    const futureMonths = startIdx === -1 ? [] : sortedMonths.slice(startIdx);
 
-const oneYear = new Date(today);
-oneYear.setUTCFullYear(oneYear.getUTCFullYear() + 1);
+    const oneYear = new Date(today);
+    oneYear.setUTCFullYear(oneYear.getUTCFullYear() + 1);
 
-const twoYear = new Date(today);
-twoYear.setUTCFullYear(twoYear.getUTCFullYear() + 2);
+    const twoYear = new Date(today);
+    twoYear.setUTCFullYear(twoYear.getUTCFullYear() + 2);
 
-const fiveYear = new Date(today);
-fiveYear.setUTCFullYear(fiveYear.getUTCFullYear() + 5);
+    const fiveYear = new Date(today);
+    fiveYear.setUTCFullYear(fiveYear.getUTCFullYear() + 5);
 
-const filterByDate = (limit: Date) =>
-  futureMonths.filter((m) => {
-    const entry = monthData.get(m.month)!;
-    return entry.date <= limit;
-  });
+    const filterByDate = (limit: Date) =>
+      futureMonths.filter((m) => {
+        const entry = monthData.get(m.month)!;
+        return entry.date <= limit;
+      });
 
-return {
-  "1yr": filterByDate(oneYear),
-  "2yrs": filterByDate(twoYear),
-  "5yrs": filterByDate(fiveYear),
-};
+    return {
+      "1yr": filterByDate(oneYear),
+      "2yrs": filterByDate(twoYear),
+      "5yrs": filterByDate(fiveYear),
+    };
   }
 }

@@ -3,6 +3,9 @@ import type { AxiosRequestConfig } from "axios";
 import type z from "zod";
 import type {
   GetCrmOrdersResponse,
+  GetCrmDraftOrdersResponse,
+  CrmProceedDraftOrderResponse,
+  CancelCrmDraftOrderResponse,
   GetCrmOrderDetailsResponse,
   GetRfqByOrderNumberResponse,
   GetCustomerFullOrderResponse,
@@ -55,6 +58,40 @@ export class CrmOrdersApi {
     const { data } = await this.apiClient.get<GetCrmOrdersResponse>(
       "/crm/orders/all",
       mergedConfig
+    );
+    return data;
+  }
+
+  async getDraftOrders(
+    config?: AxiosRequestConfig
+  ): Promise<GetCrmDraftOrdersResponse> {
+    const { data } = await this.apiClient.get<GetCrmDraftOrdersResponse>(
+      "/crm/orders/draft-orders",
+      config
+    );
+    return data;
+  }
+
+  async proceedDraftOrder(
+    draftId: number,
+    config?: AxiosRequestConfig
+  ): Promise<CrmProceedDraftOrderResponse> {
+    const { data } = await this.apiClient.post<CrmProceedDraftOrderResponse>(
+      `/crm/orders/draft-orders/${encodeURIComponent(String(draftId))}/proceed`,
+      {},
+      config
+    );
+    return data;
+  }
+
+  async cancelDraftOrder(
+    draftId: number,
+    config?: AxiosRequestConfig
+  ): Promise<CancelCrmDraftOrderResponse> {
+    const { data } = await this.apiClient.patch<CancelCrmDraftOrderResponse>(
+      `/crm/orders/draft-orders/${encodeURIComponent(String(draftId))}/cancel`,
+      {},
+      config
     );
     return data;
   }
@@ -261,6 +298,10 @@ export class CrmOrdersApi {
       totalConsideration?: number | null;
       stampDuty?: number | null;
       settlementAmount?: number | null;
+      maturityDate?: string | null;
+      faceValue?: number | null;
+      cleanPrice?: number | null;
+      couponRate?: number | null;
     },
     config?: AxiosRequestConfig
   ): Promise<SendOrderPdfEmailResponse> {
