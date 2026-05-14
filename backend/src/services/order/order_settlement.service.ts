@@ -410,7 +410,7 @@ export class OrderSettlementService {
           orderId: order.id,
           unitPrice: order.unitPrice,
           paymentId,
-          status: OrderStatus.SETTLED
+          status: OrderStatus.IN_PROGRESS
         },
         fn: () => this.updateOrderStatus(orderId),
       });
@@ -956,7 +956,7 @@ export class OrderSettlementService {
     orderId: number,
   ): Promise<{ status: OrderStatus; settledAt: string }> {
     try {
-      await this.orderService.updateOrderStatus(orderId, OrderStatus.SETTLED);
+      await this.orderService.updateOrderStatus(orderId, OrderStatus.IN_PROGRESS);
       const settledAt = new Date().toISOString();
 
       // Log final settlement completion
@@ -968,8 +968,8 @@ export class OrderSettlementService {
         { settlementStatus: "COMPLETED" }
       );
 
-      logger.logInfo(`Order ${orderId} status updated to SETTLED`);
-      return { status: OrderStatus.SETTLED, settledAt };
+      logger.logInfo(`Order ${orderId} status updated to IN_PROGRESS`);
+      return { status: OrderStatus.IN_PROGRESS, settledAt };
     } catch (error) {
       logger.logError(`Failed to update order status:`, error);
       throw new AppError("Failed to update order status", {

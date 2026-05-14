@@ -32,6 +32,51 @@ export interface GetCrmOrdersResponse {
   };
 }
 
+/** `draft_orders.pricingData` — bond order pricing snapshot when draft was saved. */
+export interface CrmDraftOrderRow {
+  id: number;
+  isin: string;
+  quantity: number;
+  sellPrice: number;
+  userId: number;
+  /** Display name from `CustomerProfileDataModel` (entity or personal name). */
+  customerName: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  pricingData: Record<string, unknown> | null;
+}
+
+export interface GetCrmDraftOrdersResponse {
+  responseData: {
+    data: CrmDraftOrderRow[];
+  };
+}
+
+/** CRM proceed-from-draft: order create + NSE add-ISIN (RFQ) + `metadata.rfqNumber`. */
+export interface CrmProceedDraftOrderData {
+  orderId: number;
+  orderNumber: string;
+  paymentOrderId?: string;
+  amount: number;
+  currency: string;
+  key: string;
+  rfqNumber?: string;
+}
+
+export interface CrmProceedDraftOrderResponse {
+  responseData: CrmProceedDraftOrderData;
+}
+
+export interface CancelCrmDraftOrderData {
+  id: number;
+  status: string;
+}
+
+export interface CancelCrmDraftOrderResponse {
+  responseData: CancelCrmDraftOrderData;
+}
+
 export interface OrderLog {
   id: number;
   orderId: number;
