@@ -69,3 +69,15 @@
 [2026-05-14 20:15:52 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
 [2026-05-14 20:15:56 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
 [2026-05-14 20:15:57 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-14 21:05:00 IST] [INFO] Payment reconciliation run started {"service":"payment-reconciliation","lookbackHours":72,"maxOrders":75,"minOrderAgeMinutes":60,"since":"2026-05-11T15:35:00.043Z","olderThan":"2026-05-14T14:35:00.043Z","recentReconcileCutoff":"2026-05-14T14:40:00.043Z"}
+[2026-05-14 21:05:01 IST] [INFO] Payment reconciliation candidates fetched {"service":"payment-reconciliation","candidates":0}
+[2026-05-14 21:05:01 IST] [INFO] Payment reconciliation run completed {"service":"payment-reconciliation","checked":0,"updated":0,"queuedSettlement":0,"skipped":0}
+[2026-05-14 21:11:28 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-14 21:12:02 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-14 21:12:07 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-14 21:12:09 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-14 21:13:27 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-14 21:13:28 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-14 21:13:29 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-14 21:13:30 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-14 21:22:12 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
