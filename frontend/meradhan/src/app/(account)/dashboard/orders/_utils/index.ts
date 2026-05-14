@@ -181,7 +181,7 @@ function sanitizeBondTitleBody(raw: string): {
   const trimmed = raw.trim();
   if (!trimmed) return { body: "" };
 
-  let s = trimmed.replace(COUPON_LEADING_REPEAT_RE, "").trim();
+  const s = trimmed.replace(COUPON_LEADING_REPEAT_RE, "").trim();
   const { rest, maturityFromText } = stripDateOfMaturitySuffix(s);
   let body = rest.trim();
   if (!body && maturityFromText) body = "—";
