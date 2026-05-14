@@ -17,6 +17,8 @@ export interface PortfolioSummaryResponse {
   averageMaturity: PortfolioAverageMaturity;
   numberOfBonds: number;
   averageYield: PortfolioAverageYield;
+  /** Coupon interest accrued / recognised to date (IST calendar day); see portfolio interest service. */
+  interestEarnedToDate: number;
 }
 
 export type GetPortfolioSummaryResponse =

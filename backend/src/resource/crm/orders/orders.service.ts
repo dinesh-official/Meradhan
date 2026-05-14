@@ -12,6 +12,7 @@ import {
   generateOrderPdfBuffer,
   getInterestPaymentSchedule,
 } from "kyc-providers";
+
 import { fetchBankNameFromIfsc } from "@utils/razorpayIfsc";
 import { getDpName } from "dp-id-lookup";
 import { AppError, HttpStatus } from "@utils/error/AppError";
@@ -25,6 +26,22 @@ import {
 } from "@utils/dobPdfPassword";
 import { encryptPdfBufferWithPassword } from "@utils/encryptPdfBuffer";
 import { getBondInfoCalcData } from "@resource/bonds/fill-bonds-auto";
+import { OrderService } from "@resource/customer/order/order.service";
+import { orderSettlementQueue } from "@jobs/queue/worker_queues";
+
+function formatDraftOrderCustomerName(profile: {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  legalEntityName: string | null;
+}): string {
+  const entity = profile.legalEntityName?.trim();
+  if (entity) return entity;
+  const parts = [profile.firstName, profile.middleName, profile.lastName]
+    .map((s) => s?.trim())
+    .filter((s) => s.length > 0);
+  return parts.length > 0 ? parts.join(" ") : "—";
+}
 
 function toYyyyMmDd(d: Date): string {
   const y = d.getFullYear();
@@ -158,6 +175,8 @@ function parseRfqMasterDateTime(
 }
 
 export class CrmOrdersService {
+  private readonly customerOrderService = new OrderService();
+
   /**
    * NSE `settle_order.orderNumber` is the trade id; customer-facing `order.orderNumber` is usually MD-*.
    */
@@ -1446,4 +1465,223 @@ export class CrmOrdersService {
     return { messageId };
   }
 
+  /** Meradhan checkout drafts (`draft_orders`) for CRM inspection of stored pricing JSON. */
+  async listDraftOrdersForCrm(): Promise<{
+    data: Array<{
+      id: number;
+      isin: string;
+      quantity: number;
+      sellPrice: number;
+      userId: number;
+      customerName: string;
+      status: OrderStatus;
+      createdAt: string;
+      updatedAt: string;
+      pricingData: Record<string, unknown> | null;
+    }>;
+  }> {
+    const rows = (await db.dataBase.draftOrders.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 500,
+    })) as Array<{
+      id: number;
+      isin: string;
+      quantity: number;
+      sellPrice: number;
+      userId: number;
+      pricingData: Prisma.JsonValue;
+      status: OrderStatus;
+      createdAt: Date;
+      updatedAt: Date;
+    }>;
+    const userIds = [...new Set(rows.map((r) => r.userId))];
+    const profiles =
+      userIds.length === 0
+        ? []
+        : await db.dataBase.customerProfileDataModel.findMany({
+          where: { id: { in: userIds } },
+          select: {
+            id: true,
+            firstName: true,
+            middleName: true,
+            lastName: true,
+            legalEntityName: true,
+          },
+        });
+    const customerNameByUserId = new Map<number, string>();
+    for (const p of profiles) {
+      customerNameByUserId.set(p.id, formatDraftOrderCustomerName(p));
+    }
+
+    return {
+      data: rows.map((r) => ({
+        id: r.id,
+        isin: r.isin,
+        quantity: Number(r.quantity),
+        sellPrice: Number(r.sellPrice),
+        userId: r.userId,
+        customerName: customerNameByUserId.get(r.userId) ?? "—",
+        status: r.status,
+        createdAt: r.createdAt.toISOString(),
+        updatedAt: r.updatedAt.toISOString(),
+        pricingData:
+          r.pricingData == null ||
+            typeof r.pricingData !== "object" ||
+            Array.isArray(r.pricingData)
+            ? null
+            : (r.pricingData as Record<string, unknown>),
+      })),
+    };
+  }
+
+  /**
+   * CRM: create a Meradhan `order` for the draft owner (PG mode skipped), delete the draft,
+   * then run NSE **add ISIN** (`OrderSettlementService.addIsinToSettlement`) to open the RFQ
+   * and persist `metadata.rfqNumber` on the order (same first step as automated settlement).
+   */
+  async createOrderFromDraftForCrm(draftId: number): Promise<{
+    orderId: number;
+    orderNumber: string;
+    paymentOrderId?: string;
+    amount: number;
+    currency: string;
+    key: string;
+    /** NSE RFQ master number after add-ISIN (same step as post-payment settlement). */
+    rfqNumber?: string;
+  }> {
+    if (!Number.isFinite(draftId) || draftId < 1) {
+      throw new AppError("Invalid draft id", {
+        statusCode: HttpStatus.BAD_REQUEST,
+        code: "INVALID_DRAFT_ID",
+      });
+    }
+
+    const draft = await db.dataBase.draftOrders.findUnique({
+      where: { id: draftId },
+    });
+    if (!draft) {
+      throw new AppError("Draft order not found", {
+        statusCode: HttpStatus.NOT_FOUND,
+        code: "DRAFT_ORDER_NOT_FOUND",
+      });
+    }
+
+    const draftRow = draft as typeof draft & { status: OrderStatus };
+    if (draftRow.status !== OrderStatus.PENDING) {
+      throw new AppError(
+        `This draft cannot be converted (status: ${String(draftRow.status)}).`,
+        {
+          statusCode: HttpStatus.BAD_REQUEST,
+          code: "DRAFT_ORDER_NOT_PENDING",
+        },
+      );
+    }
+
+    const qty = Math.round(Number(draft.quantity));
+    if (!Number.isFinite(qty) || qty < 1) {
+      throw new AppError("Invalid draft quantity", {
+        statusCode: HttpStatus.BAD_REQUEST,
+        code: "INVALID_DRAFT_QUANTITY",
+      });
+    }
+
+    const item: { isin: string; quantity: number; sellPrice?: number } = {
+      isin: draft.isin,
+      quantity: qty,
+    };
+    const sell = Number(draft.sellPrice);
+    if (Number.isFinite(sell)) {
+      item.sellPrice = sell;
+    }
+
+    const result = await this.customerOrderService.createOrder(
+      draft.userId,
+      item,
+      undefined,
+      true,
+    );
+
+    try {
+      await db.dataBase.draftOrders.delete({ where: { id: draftId } });
+    } catch (err) {
+      console.error(
+        "[createOrderFromDraftForCrm] Order created but failed to delete draft",
+        draftId,
+        err,
+      );
+    }
+
+    const order = await this.customerOrderService.getOrderWithNSEData(
+      result.orderId,
+    );
+    if (!order) {
+      throw new AppError("Order not found after create", {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        code: "ORDER_NOT_FOUND_AFTER_CREATE",
+      });
+    }
+
+    // const paymentId = (result.paymentOrderId && String(result.paymentOrderId)) || `order-${result.orderId}`;
+    const orderService = new OrderService();
+
+    await orderService.updateOrderStatus(order.id, "APPLIED");
+    const job = await orderSettlementQueue.add(
+      {
+        type: "orderSettlement",
+        id: order.id,
+        isNetBanking: false,
+      }
+    );
+    return result;
+  }
+
+  /** CRM: mark a checkout draft as cancelled (no new order). */
+  async cancelDraftOrderForCrm(draftId: number): Promise<{
+    id: number;
+    status: OrderStatus;
+  }> {
+    if (!Number.isFinite(draftId) || draftId < 1) {
+      throw new AppError("Invalid draft id", {
+        statusCode: HttpStatus.BAD_REQUEST,
+        code: "INVALID_DRAFT_ID",
+      });
+    }
+
+    const draft = await db.dataBase.draftOrders.findUnique({
+      where: { id: draftId },
+    });
+    if (!draft) {
+      throw new AppError("Draft order not found", {
+        statusCode: HttpStatus.NOT_FOUND,
+        code: "DRAFT_ORDER_NOT_FOUND",
+      });
+    }
+
+    const draftRow = draft as typeof draft & { status: OrderStatus };
+    if (draftRow.status === OrderStatus.CANCELLED) {
+      return { id: draft.id, status: OrderStatus.CANCELLED };
+    }
+    if (
+      draftRow.status !== OrderStatus.PENDING &&
+      draftRow.status !== OrderStatus.IN_PROGRESS
+    ) {
+      throw new AppError(
+        "Only pending or in-progress drafts can be cancelled.",
+        {
+          statusCode: HttpStatus.BAD_REQUEST,
+          code: "DRAFT_NOT_CANCELLABLE",
+        },
+      );
+    }
+
+    const updated = await db.dataBase.draftOrders.update({
+      where: { id: draftId },
+      data: { status: OrderStatus.CANCELLED },
+    });
+
+    return {
+      id: updated.id,
+      status: (updated as { status: OrderStatus }).status,
+    };
+  }
 }

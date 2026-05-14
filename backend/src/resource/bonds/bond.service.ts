@@ -13,6 +13,7 @@ import { AppConfigService } from "@resource/app-config/app-config.service";
 import { AppError } from "@utils/error/AppError";
 import { env } from "@packages/config/src/env";
 import { OrderPdfService } from "@resource/customer/order/order-pdf.service";
+import { OrderService } from "@resource/customer/order/order.service";
 
 export type GetBondOrderPricingResult =
   | { ok: true; pricing: ReturnType<typeof computeBondOrderPricingData> }
@@ -92,7 +93,7 @@ export class BondService {
   ): Promise<GetBondOrderPricingResult> {
     const bond = await this.getBondDetails(isin);
     if (!bond) {
-      return { ok: false, reason: "not_found" };
+      throw new Error("No Bond Found")
     }
 
     const cleanPrice = sellPrice || bond.sellPrice;
@@ -538,6 +539,9 @@ export class BondService {
 
   async placeOrder(orderData: z.infer<typeof appSchema.bonds.orderPlaceSchema>) {
     const appConfig = new AppConfigService();
+    const order = new OrderService();
+    const bondService = new BondService();
+
     const pgMode = await appConfig.getPaymentGatewayMode();
     if (pgMode === "PAYMENT") {
       throw new AppError(
@@ -551,6 +555,15 @@ export class BondService {
     });
     if (!customer) {
       throw new Error(`Customer with ID ${orderData.customerProfileId} not found`);
+    }
+    const bond = await bondService.getBondOrderPricing(orderData.isin, orderData.quantity);
+
+    if (bond.ok) {
+      await order.createDraftOrder(customer.id, {
+        isin: orderData.isin,
+        quantity: orderData.quantity,
+        sellPrice: bond.pricing.cleanPrice,
+      })
     }
     const data = await db.dataBase.leadsModel.create({
       data: {

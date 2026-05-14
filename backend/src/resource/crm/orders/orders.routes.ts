@@ -33,6 +33,24 @@ router.get(
 );
 
 router.get(
+  "/api/crm/orders/draft-orders",
+  allowAccessMiddleware("CRM"),
+  crmOrdersController.getDraftOrders
+);
+
+router.post(
+  "/api/crm/orders/draft-orders/:draftId/proceed",
+  allowAccessMiddleware("CRM"),
+  crmOrdersController.proceedDraftOrder
+);
+
+router.patch(
+  "/api/crm/orders/draft-orders/:draftId/cancel",
+  allowAccessMiddleware("CRM"),
+  crmOrdersController.cancelDraftOrder
+);
+
+router.get(
   "/api/crm/orders/payment-process-logs",
   allowAccessMiddleware("CRM"),
   crmOrdersController.getPaymentProcessLogs

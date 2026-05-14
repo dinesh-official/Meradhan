@@ -256,6 +256,66 @@ export class CrmOrdersController {
     });
   };
 
+  getDraftOrders = async (_req: Request, res: Response) => {
+    const result = await this.ordersService.listDraftOrdersForCrm();
+    return res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: result,
+    });
+  };
+
+  proceedDraftOrder = async (req: Request, res: Response) => {
+    const draftId = Number(req.params.draftId);
+    if (!draftId || Number.isNaN(draftId)) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Valid draft id is required",
+      });
+    }
+    try {
+      const result = await this.ordersService.createOrderFromDraftForCrm(draftId);
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        responseData: result,
+      });
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Failed to create order from draft";
+      const statusCode =
+        error instanceof AppError ? error.statusCode : HttpStatus.INTERNAL_SERVER_ERROR;
+      return res.sendResponse({
+        statusCode,
+        message,
+      });
+    }
+  };
+
+  cancelDraftOrder = async (req: Request, res: Response) => {
+    const draftId = Number(req.params.draftId);
+    if (!draftId || Number.isNaN(draftId)) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Valid draft id is required",
+      });
+    }
+    try {
+      const result = await this.ordersService.cancelDraftOrderForCrm(draftId);
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        responseData: result,
+      });
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Failed to cancel draft order";
+      const statusCode =
+        error instanceof AppError ? error.statusCode : HttpStatus.INTERNAL_SERVER_ERROR;
+      return res.sendResponse({
+        statusCode,
+        message,
+      });
+    }
+  };
+
   getPaymentProcessLogs = async (req: Request, res: Response) => {
     const search =
       typeof req.query.search === "string" ? req.query.search : undefined;

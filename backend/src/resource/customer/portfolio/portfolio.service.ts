@@ -8,6 +8,7 @@ import {
   getCouponBucket,
   enumerateBondPortfolioCashflows,
 } from "./portfolio.utils";
+import { computePortfolioInterestEarned } from "./portfolio_interest_earned.service";
 
 /** Portfolio summary, details, and charts use only fully settled orders (no date cutoff). */
 const PORTFOLIO_ORDER_STATUS = OrderStatus.SETTLED;
@@ -256,6 +257,42 @@ export class PortfolioService {
     }
 
     return rows;
+  }
+
+  /** Interest accrued / coupon amounts recognised to IST calendar today (see `portfolio_interest_earned.service`). */
+  private async getInterestEarnedToDate(customerId: number): Promise<number> {
+    const holdings = await this.paidOrderPortfolioRows(customerId);
+    const valid = holdings.filter(
+      (h) => h.investedAmount > 0 && h.cashflowAnchorDate != null,
+    );
+    if (!valid.length) return 0;
+
+    const bonds = await db.dataBase.bonds.findMany({
+      where: { isin: { in: this.uniqueIsins(valid) } },
+      select: {
+        isin: true,
+        faceValue: true,
+        couponRate: true,
+        interestPaymentMode: true,
+        interestPaymentFrequency: true,
+        dateOfAllotment: true,
+        maturityDate: true,
+        maturityDateIst: true,
+        allCouponDates: true,
+      },
+    });
+    const bondByIsin = new Map(bonds.map((b) => [b.isin, b]));
+
+    const rows = valid.map((h) => ({
+      isin: h.isin,
+      quantity: h.quantity,
+      settleDate:
+        h.cashflowAnchorDate instanceof Date
+          ? h.cashflowAnchorDate
+          : new Date(h.cashflowAnchorDate!),
+    }));
+
+    return computePortfolioInterestEarned(rows, bondByIsin, istTodayUtcCalendarDate());
   }
 
   private async getSettledOrdersWithAmount(customerId: number) {
@@ -892,11 +929,12 @@ export class PortfolioService {
   }
 
   async getPortfolioSummary(customerId: number) {
-    const [invested, maturity, yieldResult, totalBonds] = await Promise.all([
+    const [invested, maturity, yieldResult, totalBonds, interestEarnedToDate] = await Promise.all([
       this.getTotalInvestedAmount(customerId),
       this.getAverageMaturity(customerId),
       this.getAveragePortfolioYield(customerId),
       this.getTotalNumberOfBonds(customerId),
+      this.getInterestEarnedToDate(customerId),
     ]);
 
     return {
@@ -912,6 +950,7 @@ export class PortfolioService {
         value: yieldResult.averageYield,
         formatted: `${yieldResult.formatted} per annum`,
       },
+      interestEarnedToDate,
     };
   }
 

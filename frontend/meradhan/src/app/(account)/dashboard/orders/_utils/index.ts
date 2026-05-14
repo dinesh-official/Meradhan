@@ -21,16 +21,6 @@ const getBondDetailString = (
   return String(value);
 };
 
-const getBondDetailBoolean = (
-  bondDetails: Record<string, unknown>,
-  key: string
-): boolean | undefined => {
-  const value = bondDetails[key];
-  if (value === null || value === undefined) return undefined;
-  if (typeof value === "boolean") return value;
-  return undefined;
-};
-
 const getBondDetailObject = (
   bondDetails: Record<string, unknown>,
   key: string
@@ -167,23 +157,161 @@ export function getStatusDisplay(
   return { text: String(status), className: "text-gray-600" };
 }
 
-export function getBondType(bondDetails: Order["bondDetails"]): string {
-  // Try to extract bond type from bondDetails
-  if (bondDetails && typeof bondDetails === "object") {
-    const bondType = getBondDetailString(bondDetails, "bondType");
-    if (bondType) return bondType;
+/** Strip every leading coupon token (e.g. `10.00% ` then `10% `) from NSE-style instrument text. */
+const COUPON_LEADING_REPEAT_RE = /^(?:\s*[\d.,]+%\s*)+/i;
 
-    const type = getBondDetailString(bondDetails, "type");
-    if (type) return type;
+function stripDateOfMaturitySuffix(s: string): {
+  rest: string;
+  maturityFromText?: string;
+} {
+  const re = /\s*DATE OF MATURITY\s+(\d{1,2}[/-]\d{1,2}[/-]\d{4})\s*$/i;
+  const m = re.exec(s);
+  if (!m) return { rest: s };
+  return { rest: s.slice(0, m.index).trimEnd(), maturityFromText: m[1] };
+}
 
-    // Check if it's a primary market bond (usually new issues)
-    const isPrimary = getBondDetailBoolean(bondDetails, "isPrimary");
-    if (isPrimary !== undefined) {
-      return isPrimary ? "Primary" : "Secondary";
-    }
+/**
+ * Normalizes long instrument / bondName strings: duplicate leading coupons and
+ * trailing `DATE OF MATURITY DD/MM/YYYY` (common in NSE descriptions).
+ */
+function sanitizeBondTitleBody(raw: string): {
+  body: string;
+  embeddedMaturityDdMmYyyy?: string;
+} {
+  const trimmed = raw.trim();
+  if (!trimmed) return { body: "" };
+
+  let s = trimmed.replace(COUPON_LEADING_REPEAT_RE, "").trim();
+  const { rest, maturityFromText } = stripDateOfMaturitySuffix(s);
+  let body = rest.trim();
+  if (!body && maturityFromText) body = "—";
+  if (!body) body = trimmed;
+
+  return { body, embeddedMaturityDdMmYyyy: maturityFromText };
+}
+
+function parseNumericUnknown(v: unknown): number | null {
+  if (typeof v === "number" && Number.isFinite(v)) return v;
+  if (typeof v === "string") {
+    const t = v.trim().replace(/,/g, "");
+    if (t === "") return null;
+    const n = Number(t);
+    return Number.isFinite(n) ? n : null;
   }
-  // Default to Secondary as most bonds are secondary market
-  return "Secondary";
+  return null;
+}
+
+function bondDetailsRecord(order: Order): Record<string, unknown> {
+  if (order.bondDetails && typeof order.bondDetails === "object" && !Array.isArray(order.bondDetails)) {
+    return order.bondDetails as Record<string, unknown>;
+  }
+  return {};
+}
+
+/**
+ * Settlement date for display: NSE-linked `order.settlementDate` when present, otherwise
+ * checkout snapshot `bondDetails.pricing.settlementDate` (orders not yet linked to `settle_order`).
+ */
+export function getOrderSettlementDateInput(order: Order): string | undefined {
+  const top = order.settlementDate;
+  if (top != null && String(top).trim() !== "") return String(top).trim();
+  const b = bondDetailsRecord(order);
+  const p = b.pricing;
+  if (p && typeof p === "object" && !Array.isArray(p)) {
+    const sd = (p as Record<string, unknown>).settlementDate;
+    if (typeof sd === "string" && sd.trim()) return sd.trim();
+  }
+  return undefined;
+}
+
+function getBondIssuerDisplayName(b: Record<string, unknown>): string {
+  const issuerName = getBondDetailString(b, "issuerName");
+  if (issuerName?.trim()) return issuerName.trim();
+
+  const issuer = getBondDetailObject(b, "issuer");
+  if (issuer) {
+    const longName = getBondDetailString(issuer, "longName");
+    if (longName?.trim()) return longName.trim();
+    const shortName = getBondDetailString(issuer, "shortName");
+    if (shortName?.trim()) return shortName.trim();
+  }
+
+  const inst = getBondDetailString(b, "instrumentName");
+  if (inst?.trim()) return inst.trim();
+
+  return "";
+}
+
+/** Maturity as DD/MM/YYYY (bond snapshot / API JSON). */
+export function formatMaturityDdMmYyyy(raw: string | undefined): string {
+  if (raw == null || String(raw).trim() === "") return "—";
+  const s = String(raw).trim();
+  const d = new Date(s);
+  if (!Number.isNaN(d.getTime())) {
+    const dd = String(d.getUTCDate()).padStart(2, "0");
+    const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+    const yyyy = d.getUTCFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+  }
+  const m = /^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/.exec(s);
+  if (m) {
+    return `${m[1].padStart(2, "0")}/${m[2].padStart(2, "0")}/${m[3]}`;
+  }
+  return "—";
+}
+
+/** Offered / snapshot yield from order `bondDetails` (`buyYield` preferred, else listing `yield`). */
+export function formatOrderYieldPercent(order: Order): string {
+  const b = bondDetailsRecord(order);
+  const y =
+    parseNumericUnknown(b.buyYield) ??
+    parseNumericUnknown(b.yield) ??
+    parseNumericUnknown(b.lastTradeYield);
+  if (y == null || !Number.isFinite(y) || y < 0) return "—";
+  return `${y.toFixed(2)}%`;
+}
+
+/**
+ * Three-line security column: ISIN (muted), coupon% + issuer/name (bold), maturity DD/MM/YYYY (muted).
+ */
+export function getSecurityNameColumnLines(order: Order): {
+  isin: string;
+  titleLine: string;
+  maturityLine: string;
+} {
+  const b = bondDetailsRecord(order);
+  const isin = (order.isin && String(order.isin).trim()) || "—";
+
+  const couponRaw =
+    parseNumericUnknown(b.couponRate) ??
+    parseNumericUnknown(b.coupon) ??
+    parseNumericUnknown(b.interestRate);
+  const couponStr =
+    couponRaw != null && couponRaw >= 0 ? `${couponRaw.toFixed(2)}%` : "";
+
+  let namePart = getBondIssuerDisplayName(b);
+  if (!namePart) namePart = String(order.bondName || "").trim();
+  if (!namePart) namePart = "—";
+
+  const { body: cleanedName, embeddedMaturityDdMmYyyy } = sanitizeBondTitleBody(
+    namePart === "—" ? "" : namePart,
+  );
+  if (namePart !== "—") {
+    namePart = cleanedName.trim() || "—";
+  }
+
+  const titleLine = couponStr ? `${couponStr} ${namePart}`.trim() : namePart;
+
+  const matRaw =
+    getBondDetailString(b, "maturityDateIst") ??
+    getBondDetailString(b, "maturityDate") ??
+    getBondDetailString(b, "maturityDateOnly");
+  let maturityLine = formatMaturityDdMmYyyy(matRaw);
+  if (maturityLine === "—" && embeddedMaturityDdMmYyyy) {
+    maturityLine = formatMaturityDdMmYyyy(embeddedMaturityDdMmYyyy);
+  }
+
+  return { isin, titleLine, maturityLine };
 }
 
 export function getIssuerCode(bondDetails: Order["bondDetails"]): string {
