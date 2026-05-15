@@ -1513,24 +1513,56 @@ export class CrmOrdersService {
       customerNameByUserId.set(p.id, formatDraftOrderCustomerName(p));
     }
 
+    const isins = [...new Set(rows.map((r) => r.isin))];
+    const bondRows =
+      isins.length === 0
+        ? []
+        : await db.dataBase.bonds.findMany({
+          where: { isin: { in: isins } },
+          select: { isin: true, buyYield: true, yield: true },
+        });
+    const yieldByIsin = new Map<string, number>();
+    for (const b of bondRows) {
+      const raw = b.yield ?? b.buyYield;
+      if (raw != null && Number.isFinite(Number(raw))) {
+        yieldByIsin.set(b.isin, Number(raw));
+      }
+    }
+
     return {
-      data: rows.map((r) => ({
-        id: r.id,
-        isin: r.isin,
-        quantity: Number(r.quantity),
-        sellPrice: Number(r.sellPrice),
-        userId: r.userId,
-        customerName: customerNameByUserId.get(r.userId) ?? "—",
-        status: r.status,
-        createdAt: r.createdAt.toISOString(),
-        updatedAt: r.updatedAt.toISOString(),
-        pricingData:
+      data: rows.map((r) => {
+        let pricingData: Record<string, unknown> | null =
           r.pricingData == null ||
             typeof r.pricingData !== "object" ||
             Array.isArray(r.pricingData)
             ? null
-            : (r.pricingData as Record<string, unknown>),
-      })),
+            : { ...(r.pricingData as Record<string, unknown>) };
+
+        const snapshotYield = pricingData?.yield;
+        const hasYield =
+          snapshotYield != null &&
+          snapshotYield !== "" &&
+          Number.isFinite(Number(snapshotYield));
+        if (!hasYield) {
+          const bondYield = yieldByIsin.get(r.isin);
+          if (bondYield != null) {
+            pricingData = { ...(pricingData ?? {}), yield: bondYield };
+          }
+        }
+
+        return {
+          id: r.id,
+          isin: r.isin,
+          quantity: Number(r.quantity),
+          sellPrice: Number(r.sellPrice),
+          userId: r.userId,
+          customerName: customerNameByUserId.get(r.userId) ?? "—",
+          status: r.status,
+          createdAt: r.createdAt.toISOString(),
+          updatedAt: r.updatedAt.toISOString(),
+          pricingData,
+        };
+      }),
     };
   }
 

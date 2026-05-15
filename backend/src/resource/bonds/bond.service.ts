@@ -138,7 +138,17 @@ export class BondService {
       { settlementType },
     );
 
-    return { ok: true, pricing };
+    const yieldRaw = bond.yield ?? bond.buyYield;
+    const yieldNum =
+      yieldRaw != null && Number.isFinite(Number(yieldRaw)) ? Number(yieldRaw) : null;
+
+    return {
+      ok: true,
+      pricing: {
+        ...pricing,
+        ...(yieldNum != null ? { yield: yieldNum } : {}),
+      },
+    };
   }
 
   async filterBonds(

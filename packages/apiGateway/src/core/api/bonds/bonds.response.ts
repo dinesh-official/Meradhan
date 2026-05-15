@@ -97,6 +97,8 @@ export interface BondOrderPricingData {
   isUnderShutPeriod: boolean;
   recordDate: string;
   settlementAmount: number;
+  /** Indicative yield at checkout (`buyYield` preferred, else listing `yield`). */
+  yield?: number;
 }
 
 export type BondOrderPricingResponse = BaseResponseData<BondOrderPricingData>;
