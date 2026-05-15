@@ -154,31 +154,31 @@ export class PortfolioController {
     });
   };
   getCashflowTimeline = async (req: Request, res: Response) => {
-  const customerId = req.customer?.id;
-  if (!customerId) throw new AppError("Unauthorized");
+    const customerId = req.customer?.id;
+    if (!customerId) throw new AppError("Unauthorized");
 
-  const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
-  const endDate   = req.query.endDate   ? new Date(req.query.endDate   as string) : undefined;
-   const bondTypes = req.query.bondType
-    ? (req.query.bondType as string).split(",").map((t) => t.trim()).filter(Boolean)
-    : undefined;
-  const isins = req.query.isin
-    ? (req.query.isin as string).split(",").map((t) => t.trim()).filter(Boolean)
-    : undefined;
+    const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
+    const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined;
+    const bondTypes = req.query.bondType
+      ? (req.query.bondType as string).split(",").map((t) => t.trim()).filter(Boolean)
+      : undefined;
+    const isins = req.query.isin
+      ? (req.query.isin as string).split(",").map((t) => t.trim()).filter(Boolean)
+      : undefined;
 
-  const result = await this.portfolioService.getCashflowTimeline(
-    customerId,
-    startDate,
-    endDate,
-    bondTypes,
-    isins,
-  );
+    const result = await this.portfolioService.getCashflowTimeline(
+      customerId,
+      startDate,
+      endDate,
+      bondTypes,
+      isins,
+    );
 
-  return res.sendResponse({
-    statusCode: HttpStatus.OK,
-    responseData: result,
-  });
-};
+    return res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: result,
+    });
+  };
   getCashflowToMaturity = async (req: Request, res: Response) => {
     const customerId = req.customer?.id;
     if (!customerId) throw new AppError("Unauthorized");

@@ -103,6 +103,31 @@ function formatDisplayDate(value: string | null | undefined) {
   }).format(parsed);
 }
 
+/** Match proposal email subject: DD-MMM-YYYY (full year, hyphenated). */
+function formatDealDateForEmailSubject(value: string | null | undefined) {
+  if (!value) return "—";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  const d = String(parsed.getDate()).padStart(2, "0");
+  const m = months[parsed.getMonth()] ?? "—";
+  const y = parsed.getFullYear();
+  return `${d}-${m}-${y}`;
+}
+
 function toNumber(value: number | string | null | undefined) {
   const numeric = Number(value);
   return Number.isFinite(numeric) ? numeric : null;
@@ -145,45 +170,77 @@ type SendProposalEmailPayload = {
   totalConsideration?: number | null;
   stampDuty?: number | null;
   settlementAmount?: number | null;
+  maturityDate?: string | null;
+  faceValue?: number | null;
+  cleanPrice?: number | null;
+  couponRate?: number | null;
 };
 
 function formatEmailSubject(isin: string, dealDate: string | undefined) {
-  const formatted = dealDate ? formatDisplayDate(dealDate) : "—";
+  const formatted = dealDate ? formatDealDateForEmailSubject(dealDate) : "—";
   return `RFQ Order Confirmation Required – ${isin} Deal Date ${formatted}`;
 }
 
 function buildEmailPreviewHtml(params: SendProposalEmailPayload) {
-  const sideText = params.side.toLowerCase();
+  const orderSideWord = params.side === "SELL" ? "sell" : "buy";
+  const cleanPx = params.cleanPrice ?? params.rate;
+  const cleanPriceDisplay =
+    cleanPx != null && Number.isFinite(Number(cleanPx))
+      ? `INR ${formatNumber(Number(cleanPx), 4)}`
+      : "—";
+  const couponDisplay =
+    params.couponRate != null && Number.isFinite(Number(params.couponRate))
+      ? `${formatNumber(Number(params.couponRate), 2)}%`
+      : "—";
+  const accruedDisplay =
+    params.accruedInterest != null && Number.isFinite(Number(params.accruedInterest))
+      ? `${formatCurrency(params.accruedInterest)}${
+          params.noOfDays != null ? ` (No. of Days: ${params.noOfDays})` : ""
+        }`
+      : "—";
+  const faceVal =
+    params.faceValue != null && Number.isFinite(params.faceValue)
+      ? formatCurrency(params.faceValue)
+      : "—";
+
   const rows: Array<[string, string]> = [
-    ["Name of Security", params.bondName],
+    ["Security Name", params.bondName],
     ["ISIN", params.isin],
-    ["Deal Date", formatDisplayDate(params.dealDate)],
-    ["Settlement Date", formatDisplayDate(params.settlementDate)],
-    ["Quantum", formatCurrency(params.quantum)],
+    ["Deal Date", formatDealDateForEmailSubject(params.dealDate)],
+    ["Settlement Date", formatDealDateForEmailSubject(params.settlementDate)],
+    ["Maturity", formatDealDateForEmailSubject(params.maturityDate ?? undefined)],
+    ["Coupon Rate", couponDisplay],
+    ["Face Value", faceVal],
     ["Quantity", formatInteger(params.quantity)],
-    ["Rate", params.rate != null ? formatNumber(params.rate, 4) : "—"],
-    ["YTM Ann", params.ytmAnn != null ? `${formatNumber(params.ytmAnn, 4)}%` : "—"],
-    ["Last IP Date", formatDisplayDate(params.lastIpDate ?? undefined)],
-    ["No of Days", params.noOfDays != null ? formatInteger(params.noOfDays) : "—"],
+    ["Quantum", formatCurrency(params.quantum)],
+    ["Clean Price", cleanPriceDisplay],
+    ["YTM Ann", params.ytmAnn != null ? `${formatNumber(params.ytmAnn, 2)}%` : "—"],
+    ["Last IP Date", formatDealDateForEmailSubject(params.lastIpDate ?? undefined)],
     ["Principal Amount", formatCurrency(params.principalAmount)],
-    ["Accrued Interest", formatCurrency(params.accruedInterest)],
+    ["Accrued / Ex Interest", accruedDisplay],
     ["Total Consideration", formatCurrency(params.totalConsideration)],
     ["Stamp Duty", formatCurrency(params.stampDuty)],
     ["Settlement Amount", formatCurrency(params.settlementAmount)],
   ];
 
+  const confirmationQuote =
+    "I confirm the above order details and authorize BondNest Capital India Securities Private Limited (MeraDhan) to proceed with the order placement on the RFQ Platform.";
+
   const tableRows = rows
     .map(
       ([k, v]) =>
-        `<tr><td style="padding:6px 8px;border:1px solid #e5e7eb;"><strong>${k}</strong></td><td style="padding:6px 8px;border:1px solid #e5e7eb;text-align:right;">${v}</td></tr>`,
+        `<tr><td style="padding:6px 8px;border:1px solid #e5e7eb;"><strong>${k}</strong></td><td style="padding:6px 8px;border:1px solid #e5e7eb;">${v}</td></tr>`,
     )
     .join("");
 
   return `
-    <p>Dear ${params.customerName},</p>
-    <p>Thank you for placing your ${sideText} order through BondNest Capital India Securities Private Limited. Based on your authorization, we propose to initiate a non-negotiable order (One-to-One Mode) on the RFQ Platform of the Stock Exchanges.</p>
-    <p>The proposed order details are provided below for your reference and confirmation. Kindly confirm the same to enable us to proceed with placing the order.</p>
+    <p>Dear Mr. / Ms. ${params.customerName},</p>
+    <p>Thank you for placing your ${orderSideWord} order on BondNest Capital India Securities Private Limited (MeraDhan). Your order request has been recorded successfully and is currently pending confirmation.</p>
+    <p>To proceed with the order placement, kindly reply to this email with the following confirmation text:</p>
+    <p style="margin:10px 0;padding:10px 14px;border-left:4px solid #2563eb;background:#f8fafc;font-style:italic;">&ldquo;${confirmationQuote}&rdquo;</p>
+    <p>The transaction details are provided below for your review:</p>
     <table style="border-collapse:collapse;width:100%;margin:12px 0;">${tableRows}</table>
+    <p style="margin-top:12px;font-size:12px;color:#64748b;">Preview only. Sent email includes full legal notes, disclaimer, and SEBI / exchange member IDs.</p>
     <p style="margin-top:12px;">Best regards,<br/>MeraDhan Team</p>
   `;
 }
@@ -634,6 +691,10 @@ function ProposalManagementView() {
       totalConsideration,
       stampDuty,
       settlementAmount,
+      maturityDate: currentBond?.maturityDate ?? undefined,
+      faceValue: faceValue ?? undefined,
+      cleanPrice: rate ?? undefined,
+      couponRate: toNumber(currentBond?.couponRate),
     };
 
     setEmailPreview({

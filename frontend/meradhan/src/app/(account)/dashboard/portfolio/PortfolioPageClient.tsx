@@ -70,12 +70,20 @@ export default function PortfolioPageClient() {
         title: "Average Portfolio Yield",
         value: `${Number(summary.averageYield?.value ?? 0).toFixed(4)}%`,
       },
+      {
+        title: "Interest earned (to date)",
+        value: formatInrAmount(
+          summary.currency,
+          summary.interestEarnedToDate ?? 0,
+        ),
+      },
     ]
     : [
       { title: "Invested Amount", value: "-" },
       { title: "Average Portfolio Maturity", value: "-" },
       { title: "Number of Bonds Held", value: "-" },
       { title: "Average Portfolio Yield", value: "-" },
+      { title: "Interest earned (to date)", value: "-" },
     ];
 
   const summaryFailed = summaryError && !summaryLoading;

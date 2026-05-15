@@ -19,6 +19,7 @@ import type z from "zod";
 import { BondService } from "@resource/bonds/bond.service";
 import { AppConfigService } from "@resource/app-config/app-config.service";
 import { CrmInventoryStockService } from "@resource/crm/orders/inventory_stock.service";
+import type { computeBondOrderPricingData } from "@services/order/order-pricing-helper";
 
 // PaymentStatus enum values (matches Prisma schema orders.prisma)
 const PaymentStatus = {
@@ -64,6 +65,24 @@ export class OrderService {
     }
 
     return bond;
+  }
+
+
+  async createDraftOrder(userId: number, item: OrderPreviewItem) {
+    const bondService = new BondService();
+    const bond = await bondService.getBondOrderPricing(item.isin, item.quantity);
+    if (bond.ok != true) {
+      throw new Error("Failed to create draft order")
+    }
+    return await db.dataBase.draftOrders.create({
+      data: {
+        isin: item.isin,
+        quantity: item.quantity,
+        sellPrice: item.sellPrice || bond.pricing.cleanPrice,
+        userId,
+        pricingData: bond.pricing
+      }
+    })
   }
 
   async previewOrder(item: OrderPreviewItem) {
@@ -119,6 +138,22 @@ export class OrderService {
     return undefined;
   }
 
+  /**
+   * Expected settlement from bond order pricing snapshot (stored at checkout) when
+   * there is no NSE `settle_order` row or `modSettleDate` yet.
+   */
+  private settlementDateFromBondDetailsSnapshot(bondDetails: unknown): string | null {
+    if (!bondDetails || typeof bondDetails !== "object" || Array.isArray(bondDetails)) {
+      return null;
+    }
+    const b = bondDetails as Record<string, unknown>;
+    const p = b.pricing;
+    if (!p || typeof p !== "object" || Array.isArray(p)) return null;
+    const sd = (p as Record<string, unknown>).settlementDate;
+    if (typeof sd === "string" && sd.trim()) return sd.trim();
+    return null;
+  }
+
   private async assertCrmInventoryForOrder(
     bondService: BondService,
     isin: string,
@@ -147,13 +182,16 @@ export class OrderService {
     customerId: number,
     item: OrderPreviewItem,
     _legacyClientOrderId?: string,
+    _skipPgMode?: boolean
   ) {
     const pgMode = await this.appConfig.getPaymentGatewayMode();
-    if (pgMode === "INQUIRY") {
-      throw new AppError(
-        "Payment gateway is in inquiry-only mode. Please submit your order as an inquiry.",
-        { code: "PAYMENT_GATEWAY_DISABLED" },
-      );
+    if (_skipPgMode != true) {
+      if (pgMode === "INQUIRY") {
+        throw new AppError(
+          "Payment gateway is in inquiry-only mode. Please submit your order as an inquiry.",
+          { code: "PAYMENT_GATEWAY_DISABLED" },
+        );
+      }
     }
 
     const preview = await this.previewOrder(item);
@@ -218,30 +256,32 @@ export class OrderService {
         metadata: { dealId } as Prisma.InputJsonValue,
       },
     });
+    let razorpayOrder;
+    if (_skipPgMode != true) {
+      razorpayOrder = await this.payment.createOrder(
+        preview.totalAmount,
+        "INR",
+        orderNumber,
+        customerId,
+        {
+          account_number: customerBank.accountNumber,
+          ifsc: customerBank.ifscCode,
+          name: customerBank.accountHolderName,
+        },
+      );
+      await db.dataBase.order.update({
+        where: { id: order.id },
+        data: {
+          paymentOrderId: razorpayOrder.id,
 
-    const razorpayOrder = await this.payment.createOrder(
-      preview.totalAmount,
-      "INR",
-      orderNumber,
-      customerId,
-      {
-        account_number: customerBank.accountNumber,
-        ifsc: customerBank.ifscCode,
-        name: customerBank.accountHolderName,
-      },
-    );
-    await db.dataBase.order.update({
-      where: { id: order.id },
-      data: {
-        paymentOrderId: razorpayOrder.id,
-
-      },
-    });
+        },
+      });
+    }
 
     return {
       orderId: order.id,
       orderNumber,
-      paymentOrderId: razorpayOrder.id,
+      paymentOrderId: razorpayOrder?.id,
       amount: preview.totalAmount,
       currency: "INR",
       key: env.RAZORPAY_KEY_ID,
@@ -367,7 +407,7 @@ export class OrderService {
 
   async updateOrderStatus(
     orderId: number,
-    status: "PENDING" | "SETTLED" | "APPLIED" | "REJECTED",
+    status: "PENDING" | "SETTLED" | "APPLIED" | "REJECTED" | "IN_PROGRESS",
   ): Promise<void> {
     await db.dataBase.order.update({
       where: { id: orderId },
@@ -542,7 +582,12 @@ export class OrderService {
       const linkKey = this.settleOrderLinkKey(order);
       const info = linkKey != null ? settleByRfq.get(linkKey) : undefined;
       const settleStatus = info?.settleStatus ?? null;
-      const settlementDate = info?.modSettleDate ?? null;
+      const nseSettle =
+        info?.modSettleDate != null && String(info.modSettleDate).trim() !== ""
+          ? String(info.modSettleDate).trim()
+          : null;
+      const snapshotSettle = this.settlementDateFromBondDetailsSnapshot(order.bondDetails);
+      const settlementDate = nseSettle ?? snapshotSettle;
       return { ...order, settleStatus, settlementDate };
     });
 
