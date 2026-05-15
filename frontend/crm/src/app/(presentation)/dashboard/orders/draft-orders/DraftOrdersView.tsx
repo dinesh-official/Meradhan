@@ -53,6 +53,7 @@ const PRICING_KEY_ORDER = [
   "stampDuty",
   "allowTrade",
   "cleanPrice",
+  "yield",
   "couponRate",
   "recordDate",
   "recordDays",
@@ -76,6 +77,7 @@ const PRICING_LABELS: Record<string, string> = {
   stampDuty: "Stamp duty",
   allowTrade: "Allow trade",
   cleanPrice: "Clean price",
+  yield: "Yield (%)",
   couponRate: "Coupon rate (%)",
   recordDate: "Record date",
   recordDays: "Record days",
@@ -112,8 +114,13 @@ function formatIsoDateOnlyUtc(value: unknown): string | null {
   return `${y}-${m}-${day}`;
 }
 
-/** Money-like fields: show exactly 4 digits after the decimal (en-IN grouping). */
-const FOUR_DECIMAL_AMOUNT_KEYS = new Set(["settlementAmount", "accruedInterest"]);
+/** Money-like fields: show exactly 2 digits after the decimal (en-IN grouping). */
+const TWO_DECIMAL_AMOUNT_KEYS = new Set(["settlementAmount", "accruedInterest"]);
+
+const YIELD_KEYS = new Set(["yield", "buyYield"]);
+
+/** Percent fields shown with 4 decimal places, e.g. `10.0000 %`. */
+const FOUR_DECIMAL_PERCENT_KEYS = new Set(["couponRate"]);
 
 function parseNumericUnknown(value: unknown): number | null {
   if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -124,17 +131,46 @@ function parseNumericUnknown(value: unknown): number | null {
   return null;
 }
 
+function draftYieldFromPricing(pricing: Record<string, unknown> | null): string {
+  const n = parseNumericUnknown(pricing?.yield ?? pricing?.buyYield);
+  if (n == null) return "—";
+  return `${n.toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 4,
+  })}%`;
+}
+
 function formatPricingValue(key: string, value: unknown): string {
   if (value === null || value === undefined) return "—";
   if (typeof value === "boolean") return value ? "Yes" : "No";
 
-  if (FOUR_DECIMAL_AMOUNT_KEYS.has(key)) {
+  if (TWO_DECIMAL_AMOUNT_KEYS.has(key)) {
     const n = parseNumericUnknown(value);
     if (n != null) {
       return n.toLocaleString("en-IN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+    }
+  }
+
+  if (YIELD_KEYS.has(key)) {
+    const n = parseNumericUnknown(value);
+    if (n != null) {
+      return `${n.toLocaleString("en-IN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 4,
+      })}%`;
+    }
+  }
+
+  if (FOUR_DECIMAL_PERCENT_KEYS.has(key)) {
+    const n = parseNumericUnknown(value);
+    if (n != null) {
+      return `${n.toLocaleString("en-IN", {
         minimumFractionDigits: 4,
         maximumFractionDigits: 4,
-      });
+      })} %`;
     }
   }
 
@@ -360,6 +396,7 @@ export default function DraftOrdersView() {
                   <TableHead>Customer</TableHead>
                   <TableHead className="text-right">Qty</TableHead>
                   <TableHead className="text-right">Sell price</TableHead>
+                  <TableHead className="text-right">Yield</TableHead>
                   <TableHead>User ID</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Created</TableHead>
@@ -410,6 +447,9 @@ export default function DraftOrdersView() {
                             maximumFractionDigits: 6,
                           })}
                         </TableCell>
+                        <TableCell className="text-right tabular-nums text-sm">
+                          {draftYieldFromPricing(row.pricingData)}
+                        </TableCell>
                         <TableCell className="tabular-nums">{row.userId}</TableCell>
                         <TableCell>
                           <Badge
@@ -425,7 +465,7 @@ export default function DraftOrdersView() {
                       </TableRow>
                       {open && (
                         <TableRow key={`${row.id}-detail`} className="hover:bg-transparent">
-                          <TableCell colSpan={9} className="bg-muted/20 p-4">
+                          <TableCell colSpan={10} className="bg-muted/20 p-4">
                             <PricingDataSection
                               row={row}
                               canProceed={row.status === "PENDING"}

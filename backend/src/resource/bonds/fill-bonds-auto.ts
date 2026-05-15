@@ -120,7 +120,7 @@ export const getBondInfoCalcData = async (isin: string, { yeild }: { yeild?: str
             lastCouponDate: String(payload.Last_IP_Date ?? ""),
             nextCouponDate: String(payload.Next_IP_Date ?? ""),
             recordDate: toYyyyMmDd(pricing.recordDate),
-            recordDays: response.data.accrued_days,
+            recordDays: couponDate.recordDays,
             dueDate: dueDateYmd ?? null,
             dayConvention: bond?.dayConvention ?? null,
             interestPaymentFrequency: paymentFrequencyToDbEnum(payload.Payment_Frequency),
