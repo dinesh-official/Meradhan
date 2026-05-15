@@ -12,11 +12,12 @@ import { formatAmount } from "@/global/utils/formate";
 import type { Order } from "@root/apiGateway";
 import {
   getStatusDisplay,
-  getBondType,
-  getIssuerCode,
   formatOrderHistoryDate,
+  formatOrderYieldPercent,
+  getOrderSettlementDateInput,
 } from "../_utils";
 import { OrderPdfDownloads } from "./OrderPdfDownloads";
+import { SecurityNameCell } from "./SecurityNameCell";
 import { OrdersEmptyState } from "@/components/ui/empty";
 import { Spinner } from "@/components/ui/spinner";
 
@@ -64,13 +65,15 @@ function OrdersTable({ orders, isLoading }: OrdersTableProps) {
                 <TableHead className="w-[100px] rounded-md bg-[#F5F5F5] rounded-r-none py-4 px-6">
                   Order ID
                 </TableHead>
-                <TableHead className="bg-[#F5F5F5] py-4 px-6">Bond Type</TableHead>
-                <TableHead className="bg-[#F5F5F5] py-4 px-6">
+                <TableHead className="min-w-48 max-w-md bg-[#F5F5F5] py-4 px-6 lg:max-w-lg">
                   Security Name
                 </TableHead>
                 <TableHead className="bg-[#F5F5F5] py-4 px-6">Face Value</TableHead>
                 <TableHead className="bg-[#F5F5F5] py-4 px-6">Quantity</TableHead>
                 <TableHead className="bg-[#F5F5F5] py-4 px-6">Value</TableHead>
+                <TableHead className="whitespace-nowrap bg-[#F5F5F5] py-4 px-6">
+                  Yield
+                </TableHead>
                 <TableHead className="bg-[#F5F5F5] py-4 px-6 min-w-[148px]">
                   Dates
                 </TableHead>
@@ -87,11 +90,9 @@ function OrdersTable({ orders, isLoading }: OrdersTableProps) {
                   order.paymentStatus,
                   order.settleStatus,
                 );
-                const bondType = getBondType(order.bondDetails);
-                const issuerCode = getIssuerCode(order.bondDetails);
                 const tradeDate = formatOrderHistoryDate(order.createdAt);
                 const settlementDate = formatOrderHistoryDate(
-                  order.settlementDate,
+                  getOrderSettlementDateInput(order),
                 );
                 const faceValue = formatAmount(parseFloat(order.faceValue));
                 const totalValue = formatAmount(parseFloat(order.totalAmount));
@@ -99,19 +100,8 @@ function OrdersTable({ orders, isLoading }: OrdersTableProps) {
                 return (
                   <TableRow key={order.id} className="hover:bg-gray-50">
                     <TableCell className="py-4 px-6">{order.orderNumber}</TableCell>
-                    <TableCell className="py-4 px-6">{bondType}</TableCell>
-                    <TableCell className="py-4 px-6">
-                      <div className="leading-relaxed">
-                        {order.bondName}
-                        {issuerCode && (
-                          <>
-                            <br />
-                            <span className="text-sm text-gray-500">
-                              Issuer: {issuerCode}
-                            </span>
-                          </>
-                        )}
-                      </div>
+                    <TableCell className="min-w-48 max-w-md overflow-hidden py-4 px-6 align-top lg:max-w-lg">
+                      <SecurityNameCell order={order} />
                     </TableCell>
                     <TableCell className="py-4 px-6">
                       <div className="flex items-center">
@@ -123,6 +113,9 @@ function OrdersTable({ orders, isLoading }: OrdersTableProps) {
                       <div className="flex items-center">
                         <PiCurrencyInrBold /> {totalValue}
                       </div>
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap py-4 px-6 text-sm text-gray-900">
+                      {formatOrderYieldPercent(order)}
                     </TableCell>
                     <TableCell className="py-4 px-6 align-top">
                       <div className="text-sm leading-relaxed text-gray-900">

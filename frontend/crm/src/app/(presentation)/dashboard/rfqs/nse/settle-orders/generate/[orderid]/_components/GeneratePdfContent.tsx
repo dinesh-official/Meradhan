@@ -29,6 +29,7 @@ import {
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import apiGateway, {
   ApiError,
+  type BondDetailsResponse,
   type RfqByOrderNumberSettleOrder,
   type CustomerFullOrder,
   type CustomerProfile,
@@ -759,6 +760,18 @@ BSE Member ID: 6963`
         ? Number(totalConsideration) + Number(stampDuty)
         : undefined;
 
+    const bondDetails = (customerOrder as unknown as { bondDetails?: BondDetailsResponse | null })
+      ?.bondDetails;
+    const pricingSnap =
+      bondDetails &&
+      typeof (bondDetails as { pricing?: Record<string, unknown> }).pricing === "object"
+        ? (bondDetails as { pricing?: Record<string, unknown> }).pricing
+        : undefined;
+    const principalFromBond =
+      pricingSnap?.principalAmount != null ? Number(pricingSnap.principalAmount) : null;
+    const noOfDaysFromBond =
+      pricingSnap?.noOfAccrualDays != null ? Number(pricingSnap.noOfAccrualDays) : null;
+
     const payload = {
       toEmail: emailTo.trim(),
       customerName:
@@ -777,13 +790,22 @@ BSE Member ID: 6963`
         (rfq as unknown as { yield?: number | string | null })?.yield != null
           ? Number((rfq as unknown as { yield?: number | string | null }).yield)
           : null,
-      lastIpDate: null,
-      noOfDays: null,
-      principalAmount: null,
+      lastIpDate: bondDetails?.lastCouponDate ?? null,
+      noOfDays:
+        noOfDaysFromBond != null && Number.isFinite(noOfDaysFromBond) ? noOfDaysFromBond : null,
+      principalAmount:
+        principalFromBond != null && Number.isFinite(principalFromBond) ? principalFromBond : null,
       accruedInterest: accruedInterest != null ? Number(accruedInterest) : null,
       totalConsideration: totalConsideration != null ? Number(totalConsideration) : null,
       stampDuty: stampDuty != null ? Number(stampDuty) : null,
       settlementAmount: settlementAmount != null ? Number(settlementAmount) : null,
+      maturityDate: bondDetails?.maturityDate ?? null,
+      faceValue: faceValue != null ? Number(faceValue) : null,
+      cleanPrice: rate != null ? Number(rate) : null,
+      couponRate:
+        bondDetails?.couponRate != null && Number.isFinite(Number(bondDetails.couponRate))
+          ? Number(bondDetails.couponRate)
+          : null,
     };
 
     setSendingProposalEmail(true);
