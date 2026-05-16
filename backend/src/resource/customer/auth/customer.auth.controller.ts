@@ -31,7 +31,7 @@ export class CustomerAuthController {
     );
     const response = await this.optManager.generateOtp(
       "CUSTOMER_SIGNUP:" + email,
-      4,
+      6,
     );
     await sendCustomerSignupOtpEmail({
       email,
@@ -83,7 +83,38 @@ export class CustomerAuthController {
     });
   }
 
-  // ✅ Signup with Credentials
+  private async sendPostSignupCompletionEmails(customerId: number, email: string) {
+    const userData = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { id: customerId },
+      select: { firstName: true, lastName: true, gender: true },
+    });
+    await sendCustomerWelcomeEmail({
+      email,
+      userName: `${userData?.firstName ?? ""} ${userData?.lastName ?? ""}`.trim(),
+    });
+    try {
+      const fullName =
+        `${userData?.firstName ?? ""} ${userData?.lastName ?? ""}`.trim() || "Customer";
+      const title =
+        userData?.gender === "MALE"
+          ? ("Mr." as const)
+          : userData?.gender === "FEMALE"
+            ? ("Ms." as const)
+            : undefined;
+      await sendKycReminderNotStartedEmail({
+        customerId,
+        email,
+        customerFullName: fullName,
+        title,
+        startKycLink: "https://www.meradhan.co/dashboard/kyc",
+        delayMs: 24 * 60 * 60 * 1000,
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  // ✅ Signup with Credentials (legacy single-channel verify)
   async verifyOtpForSignup(req: Request, res: Response) {
     const { otp, token, verifyBy, id } =
       appSchema.customer.signUpWithCredentialsQuerySchema.parse(req.query);
@@ -98,40 +129,8 @@ export class CustomerAuthController {
       Number(id!),
       verifyBy as "email" | "mobile",
     );
-    // send welcome email
-    const userData = await db.dataBase.customerProfileDataModel.findUnique({
-      where: { id: user.id },
-      select: { firstName: true, lastName: true },
-    });
-    await sendCustomerWelcomeEmail({
-      email: user.email,
-      userName: userData?.firstName + " " + userData?.lastName,
-    });
-
-    // KYC reminder (not started) — 24 hours after signup verification.
-    // Will be skipped at send-time if KYC has already started/completed.
-    try {
-      const fullName = `${userData?.firstName ?? ""} ${userData?.lastName ?? ""}`.trim() || "Customer";
-      const profile = await db.dataBase.customerProfileDataModel.findUnique({
-        where: { id: user.id },
-        select: { gender: true },
-      });
-      const title =
-        profile?.gender === "MALE"
-          ? ("Mr." as const)
-          : profile?.gender === "FEMALE"
-            ? ("Ms." as const)
-            : undefined;
-      await sendKycReminderNotStartedEmail({
-        customerId: user.id,
-        email: user.email,
-        customerFullName: fullName,
-        title,
-        startKycLink: "https://www.meradhan.co/dashboard/kyc",
-        delayMs: 24 * 60 * 60 * 1000,
-      });
-    } catch (e) {
-      console.log(e);
+    if (user.isEmailVerified && user.isPhoneVerified) {
+      await this.sendPostSignupCompletionEmails(user.id, user.email);
     }
     await addMeradhanLoginBasedAuditLog(req, {
       userId: user.id,
@@ -140,10 +139,58 @@ export class CustomerAuthController {
       entityType: "Auth",
       email: user.email,
     });
-    // Server Sent Events (SSE)
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: user,
+    });
+  }
+
+  async updateSignupEmail(req: Request, res: Response) {
+    const { customerId, newEmail } = appSchema.customer.signupUpdateEmailSchema.parse(
+      req.body,
+    );
+    const result = await this.customerAuthService.updateSignupEmail(
+      customerId,
+      newEmail,
+    );
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: result,
+      message: "Email updated successfully.",
+    });
+  }
+
+  async updateSignupPhone(req: Request, res: Response) {
+    const { customerId, newPhone } = appSchema.customer.signupUpdatePhoneSchema.parse(
+      req.body,
+    );
+    const result = await this.customerAuthService.updateSignupPhone(
+      customerId,
+      newPhone,
+    );
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: result,
+      message: "Phone number updated successfully.",
+    });
+  }
+
+  async verifyOtpForSignupBoth(req: Request, res: Response) {
+    const payload = appSchema.customer.signUpVerifyBothSchema.parse(req.body);
+    const user = await this.customerAuthService.verifyOtpForSignupBoth(payload);
+    await this.sendPostSignupCompletionEmails(user.id, user.email);
+    await addMeradhanLoginBasedAuditLog(req, {
+      userId: user.id,
+      sessionType: "SIGNUP_VERIFIED",
+      success: true,
+      entityType: "Auth",
+      email: user.email,
+    });
+    await trackRateLimitSuccess(req, "otp-verify");
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: { id: user.id, email: user.email },
+      message: "Account verified successfully.",
     });
   }
 

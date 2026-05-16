@@ -55,6 +55,26 @@ export const signUpWithCredentialsQuerySchema = z.object({
   id: z.string(),
 });
 
+export const signupUpdateEmailSchema = z.object({
+  customerId: z.coerce.number().int().positive(),
+  newEmail: z.email("Invalid email format."),
+});
+
+export const signupUpdatePhoneSchema = z.object({
+  customerId: z.coerce.number().int().positive(),
+  newPhone: z
+    .string()
+    .regex(/^[5-9][0-9]{9}$/, "Mobile number must be exactly 10 digits."),
+});
+
+export const signUpVerifyBothSchema = z.object({
+  id: z.coerce.number().int().positive(),
+  emailOtp: z.string().length(6, "Email OTP must be 6 digits."),
+  emailToken: z.string().min(1),
+  mobileOtp: z.string().length(4, "Mobile OTP must be 4 digits."),
+  mobileToken: z.string().min(1),
+});
+
 // Sign In Schemas
 export const signInWithEmailPhoneRequestSchema = z.object({
   identity: z.enum(["email", "phoneNo"]),

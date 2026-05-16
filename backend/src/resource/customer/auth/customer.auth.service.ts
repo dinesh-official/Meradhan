@@ -42,11 +42,12 @@ export class CustomerAuthService {
       data: {
         utility: {
           update: {
-            isEmailVerified: verifyBy === "email",
-            isPhoneVerified: verifyBy === "mobile",
+            ...(verifyBy === "email" ? { isEmailVerified: true } : {}),
+            ...(verifyBy === "mobile" ? { isPhoneVerified: true } : {}),
           },
         },
       },
+      include: { utility: true },
     });
     const authToken = tokenUtils.generateToken(
       {
@@ -63,6 +64,98 @@ export class CustomerAuthService {
       email: user.emailAddress,
       avatar: user.avatar,
       token: authToken,
+      isEmailVerified: user.utility.isEmailVerified,
+      isPhoneVerified: user.utility.isPhoneVerified,
+    };
+  }
+
+  async updateSignupEmail(customerId: number, newEmail: string) {
+    const user = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { id: customerId, isDeleted: false },
+      include: { utility: true },
+    });
+    if (!user) {
+      throw new AppError("Customer not found.", { code: "CUSTOMER_NOT_FOUND" });
+    }
+    if (user.utility.isEmailVerified) {
+      throw new AppError("Email is already verified and cannot be changed during signup.", {
+        code: "EMAIL_ALREADY_VERIFIED",
+      });
+    }
+    await this.assertEmailNotUsedByOtherCustomer(newEmail, customerId);
+    const updated = await db.dataBase.customerProfileDataModel.update({
+      where: { id: customerId },
+      data: { emailAddress: newEmail },
+      select: { id: true, emailAddress: true },
+    });
+    return { id: updated.id, email: updated.emailAddress };
+  }
+
+  async updateSignupPhone(customerId: number, newPhone: string) {
+    const user = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { id: customerId, isDeleted: false },
+      include: { utility: true },
+    });
+    if (!user) {
+      throw new AppError("Customer not found.", { code: "CUSTOMER_NOT_FOUND" });
+    }
+    if (user.utility.isPhoneVerified) {
+      throw new AppError(
+        "Phone number is already verified and cannot be changed during signup.",
+        { code: "PHONE_ALREADY_VERIFIED" },
+      );
+    }
+    const normalizedPhone = "+91" + removeCountryCode(newPhone);
+    await this.assertPhoneNotUsedByOtherCustomer(normalizedPhone, customerId);
+    const updated = await db.dataBase.customerProfileDataModel.update({
+      where: { id: customerId },
+      data: {
+        phoneNo: normalizedPhone,
+        whatsAppNo: normalizedPhone,
+      },
+      select: { id: true, phoneNo: true },
+    });
+    return {
+      id: updated.id,
+      phone: removeCountryCode(updated.phoneNo ?? newPhone),
+    };
+  }
+
+  async verifyOtpForSignupBoth(
+    data: z.infer<typeof appSchema.customer.signUpVerifyBothSchema>,
+  ) {
+    const user = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { id: data.id, isDeleted: false },
+      include: { utility: true },
+    });
+    if (!user) {
+      throw new AppError("Customer not found.", { code: "CUSTOMER_NOT_FOUND" });
+    }
+
+    await this.optManager.verifyOtpsAtomically([
+      { token: data.emailToken, otp: data.emailOtp },
+      { token: data.mobileToken, otp: data.mobileOtp },
+    ]);
+
+    const updated = await db.dataBase.customerProfileDataModel.update({
+      where: { id: data.id },
+      data: {
+        utility: {
+          update: {
+            isEmailVerified: true,
+            isPhoneVerified: true,
+          },
+        },
+      },
+      include: { utility: true },
+    });
+
+    return {
+      id: updated.id,
+      email: updated.emailAddress,
+      avatar: updated.avatar,
+      isEmailVerified: updated.utility.isEmailVerified,
+      isPhoneVerified: updated.utility.isPhoneVerified,
     };
   }
 
@@ -472,6 +565,45 @@ export class CustomerAuthService {
     } catch (error) {
       console.error("Email verification failed:", error);
       throw new AppError("Invalid or expired token.");
+    }
+  }
+
+  private async assertEmailNotUsedByOtherCustomer(
+    email: string,
+    excludeCustomerId: number,
+  ) {
+    const existing = await db.dataBase.customerProfileDataModel.findFirst({
+      where: {
+        emailAddress: email,
+        id: { not: excludeCustomerId },
+        isDeleted: false,
+      },
+      select: { id: true },
+    });
+    if (existing) {
+      throw new AppError("This email is already registered to another account.", {
+        code: "EMAIL_ALREADY_IN_USE",
+      });
+    }
+  }
+
+  private async assertPhoneNotUsedByOtherCustomer(
+    phoneNo: string,
+    excludeCustomerId: number,
+  ) {
+    const existing = await db.dataBase.customerProfileDataModel.findFirst({
+      where: {
+        phoneNo,
+        id: { not: excludeCustomerId },
+        isDeleted: false,
+      },
+      select: { id: true },
+    });
+    if (existing) {
+      throw new AppError(
+        "This phone number is already registered to another account.",
+        { code: "PHONE_ALREADY_IN_USE" },
+      );
     }
   }
 

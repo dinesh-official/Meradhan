@@ -34,6 +34,24 @@ customerAuthRoutes.post(
 );
 
 customerAuthRoutes.post(
+  "/api/auth/customer/verify-signup-otp-both",
+  withRateLimit({ max: 5 }),
+  (req, res) => controller.verifyOtpForSignupBoth(req, res)
+);
+
+customerAuthRoutes.post(
+  "/api/auth/customer/signup/update-email",
+  withRateLimit({ max: 5 }),
+  (req, res) => controller.updateSignupEmail(req, res)
+);
+
+customerAuthRoutes.post(
+  "/api/auth/customer/signup/update-phone",
+  withRateLimit({ max: 5 }),
+  (req, res) => controller.updateSignupPhone(req, res)
+);
+
+customerAuthRoutes.post(
   "/api/auth/customer/signup-with-credentials",
   withRateLimit({ max: 10 }),
   (req, res) => controller.signUpWithCredentials(req, res)

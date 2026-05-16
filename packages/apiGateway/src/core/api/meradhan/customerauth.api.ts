@@ -56,6 +56,36 @@ export class CustomerAuthApi {
     return data;
   }
 
+  async updateSignupEmail(
+    payload: z.infer<typeof this.schema.signupUpdateEmailSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<
+      BaseResponseData<{ id: number; email: string }>
+    >("/auth/customer/signup/update-email", payload, config);
+    return data;
+  }
+
+  async updateSignupPhone(
+    payload: z.infer<typeof this.schema.signupUpdatePhoneSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<
+      BaseResponseData<{ id: number; phone: string }>
+    >("/auth/customer/signup/update-phone", payload, config);
+    return data;
+  }
+
+  async verifySignupOtpBoth(
+    payload: z.infer<typeof this.schema.signUpVerifyBothSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<
+      BaseResponseData<{ id: number; email: string }>
+    >("/auth/customer/verify-signup-otp-both", payload, config);
+    return data;
+  }
+
   async singUpWithCredentials(
     payload: z.infer<typeof this.schema.createNewCustomerSchema>,
     config?: AxiosRequestConfig
