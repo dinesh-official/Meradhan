@@ -10,12 +10,14 @@ import type {
   OrderReportsLifecycleResponse,
   OrderReportsLogFailuresResponse,
   OrderReportsRegisterResponse,
+  OrderReportsRevenueResponse,
   OrderReportsSettlementResponse,
   OrderReportsSummaryResponse,
 } from "./order_reports.response";
 
 type ReportsQuery = z.infer<typeof appSchema.crm.orderReports.OrderReportsQuerySchema>;
 type ByIsinQuery = z.infer<typeof appSchema.crm.orderReports.OrderReportsByIsinQuerySchema>;
+type RevenueQuery = z.infer<typeof appSchema.crm.orderReports.OrderReportsRevenueQuerySchema>;
 type ByCustomerQuery = z.infer<typeof appSchema.crm.orderReports.OrderReportsByCustomerQuerySchema>;
 type LogFailuresQuery = z.infer<typeof appSchema.crm.orderReports.OrderReportsLogFailuresQuerySchema>;
 type SettlementQuery = z.infer<typeof appSchema.crm.orderReports.OrderReportsSettlementQuerySchema>;
@@ -87,6 +89,17 @@ export class CrmOrderReportsApi {
   ): Promise<OrderReportsByIsinResponse> {
     const { data } = await this.apiClient.get<OrderReportsByIsinResponse>(
       "/crm/reports/orders/by-isin",
+      mergeParams(config, query as Record<string, unknown>),
+    );
+    return data;
+  }
+
+  async getRevenue(
+    query: RevenueQuery,
+    config?: AxiosRequestConfig,
+  ): Promise<OrderReportsRevenueResponse> {
+    const { data } = await this.apiClient.get<OrderReportsRevenueResponse>(
+      "/crm/reports/orders/revenue",
       mergeParams(config, query as Record<string, unknown>),
     );
     return data;

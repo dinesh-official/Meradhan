@@ -34,6 +34,7 @@ export interface OrderReportRegisterRow {
   bondName: string;
   quantity: number;
   unitPrice: string;
+  bondDetails?: Record<string, unknown> | null;
   customerProfileId: number;
   customerProfile: {
     id: number;
@@ -144,6 +145,30 @@ export interface OrderReportsSettlementResponse {
       completedAt: string | null;
       createdAt: string;
     }[];
+  };
+}
+
+export interface OrderReportsRevenueRow {
+  isin: string;
+  bondName: string;
+  buyPrice: number | null;
+  sellPrice: number | null;
+  spreadBps: number | null;
+  revenue: string;
+  orderCount: number;
+}
+
+export interface OrderReportsRevenueResponse {
+  responseData: {
+    kpis: {
+      totalRevenue: string;
+      avgSpreadBps: number | null;
+      fyRevenue: string;
+      mtdRevenue: string;
+      fyLabel: string;
+      mtdLabel: string;
+    };
+    rows: OrderReportsRevenueRow[];
   };
 }
 
