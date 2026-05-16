@@ -1,99 +1,225 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
+import { z } from "zod";
+import { ApiError } from "@root/apiGateway";
 import { ISignUpAuthFlow } from "../_hooks/useSignUpAuthFlow";
 import { SignUPFormDataHook } from "../_hooks/useSignUpFormDataState";
 import { useTrackUserVerifyFlowStore } from "../_hooks/useTrackUserVerifyFlowStore";
 import CaptchaInput from "./CaptchaInput";
-import SignUpOtpInput from "./SignUpOtpInput";
 import { makeFullname } from "@/global/utils/formate";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+
+const EMAIL_OTP_LEN = 6;
+const MOBILE_OTP_LEN = 4;
+
+/** Matches SignUpForm input styling */
+const SIGNUP_INPUT_CLASS =
+  "bg-muted py-4.5 border-none placeholder:text-[#7fabd2]";
+const SIGNUP_MOBILE_INPUT_CLASS =
+  "peer bg-muted py-5 ps-11 pe-12 border-none placeholder:text-[#7fabd2]";
+
+function OtpField({
+  label,
+  value,
+  onChange,
+  maxLength,
+  disabled,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  maxLength: number;
+  disabled?: boolean;
+  placeholder?: string;
+}) {
+  return (
+    <Box className="flex flex-col gap-2">
+      <label className="font-medium text-[#1e3a5f] text-sm">{label}</label>
+      <Input
+        type="text"
+        inputMode="numeric"
+        autoComplete="one-time-code"
+        maxLength={maxLength}
+        placeholder={placeholder}
+        value={value}
+        disabled={disabled}
+        onChange={(e) =>
+          onChange(e.target.value.replace(/\D/g, "").slice(0, maxLength))
+        }
+        className={SIGNUP_INPUT_CLASS}
+      />
+    </Box>
+  );
+}
+
+function Box({
+  className,
+  children,
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return <div className={className}>{children}</div>;
+}
 
 function VerifyOtpPopUp({
   formData,
   signUpFlowKyc,
+  onEmailUpdated,
+  onPhoneUpdated,
 }: {
   formData: SignUPFormDataHook["signUpFormData"];
   signUpFlowKyc: ISignUpAuthFlow;
+  onEmailUpdated: (email: string) => void;
+  onPhoneUpdated: (phone: string) => void;
 }) {
   const {
-    currentStep,
+    mode,
     email,
     mobile,
-    otp,
-    setOtp,
-    showCaptcha,
+    emailOtp,
+    mobileOtp,
+    setEmailOtp,
+    setMobileOtp,
     openOtpPopup,
     reset,
   } = useTrackUserVerifyFlowStore();
   const router = useRouter();
   const flowManager = signUpFlowKyc;
 
-  const [VerifyCaptcha, setVerifyCaptcha] = useState(false);
+  const [showEmailEdit, setShowEmailEdit] = useState(false);
+  const [showPhoneEdit, setShowPhoneEdit] = useState(false);
+  const [editEmail, setEditEmail] = useState(formData.email);
+  const [editPhone, setEditPhone] = useState(formData.mobile);
+  const [emailEditError, setEmailEditError] = useState("");
+  const [phoneEditError, setPhoneEditError] = useState("");
+  const [emailCaptchaOk, setEmailCaptchaOk] = useState(false);
+  const [mobileCaptchaOk, setMobileCaptchaOk] = useState(false);
 
   useEffect(() => {
-    setVerifyCaptcha(false);
-  }, [showCaptcha, setVerifyCaptcha]);
+    setEditEmail(formData.email);
+  }, [formData.email]);
 
-  const genContent = useCallback(() => {
-    if (showCaptcha) {
-      if (email.try == email.max && mobile.try == 0) {
-        return {
-          title: "Email verification limit reached.",
-          text: "You’ve exceeded 3 attempts to verify your email. Please continue to verify your mobile number to complete the signup.",
-          errorMessage: "",
-          successMessage: "",
-        };
-      }
-      return {
-        title: "OTP Expired",
-        text: "Oops! OTP expired. Please complete the CAPTCHA and click ‘Resend OTP’ to get a new one",
-      };
+  useEffect(() => {
+    setEditPhone(formData.mobile);
+  }, [formData.mobile]);
+
+  useEffect(() => {
+    setEmailCaptchaOk(false);
+  }, [email.showCaptcha]);
+
+  useEffect(() => {
+    setMobileCaptchaOk(false);
+  }, [mobile.showCaptcha]);
+
+  const fullName = useMemo(
+    () =>
+      makeFullname({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+      }),
+    [formData.firstName, formData.lastName],
+  );
+
+  const handleUpdateEmail = async () => {
+    const parsed = z.email().safeParse(editEmail.trim());
+    if (!parsed.success) {
+      setEmailEditError("Please enter a valid email address");
+      return;
     }
-    if (currentStep == "email") {
-      return {
-        title: "Verify Email",
-        text: "We’ve sent a One-Time Password (OTP) to your email address. Please check your email and enter the OTP to verify your account.",
-        errorMessage: email.errorMessage,
-        successMessage: email.successMessage,
-      };
-    } else if (currentStep == "mobile") {
-      return {
-        title: "Verify Mobile",
-        text: "We’ve sent a One-Time Password (OTP) to your mobile number. Please check your phone and enter the OTP to verify your account.",
-        errorMessage: mobile.errorMessage,
-        successMessage: mobile.successMessage,
-      };
+    if (parsed.data === formData.email) {
+      setEmailEditError("This is already your registered email");
+      return;
     }
+    setEmailEditError("");
+    if (!formData.id) {
+      setEmailEditError("Account is not ready yet. Please submit the signup form again.");
+      return;
+    }
+    try {
+      const updated = await flowManager.updateSignupEmail({
+        customerId: formData.id,
+        newEmail: parsed.data,
+        name: fullName,
+      });
+      onEmailUpdated(updated);
+      setEditEmail(updated);
+      setShowEmailEdit(false);
+    } catch (error) {
+      const msg =
+        error instanceof ApiError
+          ? error.response?.data?.message || error.message
+          : error instanceof Error
+            ? error.message
+            : "Could not update email. Please try again.";
+      setEmailEditError(msg);
+      toast.error(msg);
+    }
+  };
 
-    return {
-      title: "Verification limit reached.",
-      text: "We’re here to help. You’ve used all email and mobile OTP attempts. Please <a href='/contact-us'  class='text-primary' >contact us</a> to verify your account safely.",
-    };
-  }, [
-    currentStep,
-    email.errorMessage,
-    mobile.errorMessage,
-    mobile.successMessage,
-    email.successMessage,
-    showCaptcha,
-  ]);
+  const handleUpdatePhone = async () => {
+    const parsed = z
+      .string()
+      .regex(/^[5-9][0-9]{9}$/, "Enter a valid 10-digit mobile number")
+      .safeParse(editPhone.trim());
+    if (!parsed.success) {
+      setPhoneEditError(
+        parsed.error.issues[0]?.message ?? "Invalid phone number",
+      );
+      return;
+    }
+    if (parsed.data === formData.mobile) {
+      setPhoneEditError("This is already your registered phone number");
+      return;
+    }
+    setPhoneEditError("");
+    if (!formData.id) {
+      setPhoneEditError("Account is not ready yet. Please submit the signup form again.");
+      return;
+    }
+    try {
+      const updated = await flowManager.updateSignupPhone({
+        customerId: formData.id,
+        newPhone: parsed.data,
+      });
+      onPhoneUpdated(updated);
+      setEditPhone(updated);
+      setShowPhoneEdit(false);
+    } catch (error) {
+      const msg =
+        error instanceof ApiError
+          ? error.response?.data?.message || error.message
+          : error instanceof Error
+            ? error.message
+            : "Could not update phone number. Please try again.";
+      setPhoneEditError(msg);
+      toast.error(msg);
+    }
+  };
 
-  const content = useMemo(() => genContent(), [genContent]);
+  const canVerify =
+    emailOtp.length === EMAIL_OTP_LEN &&
+    mobileOtp.length === MOBILE_OTP_LEN &&
+    !flowManager.isPending &&
+    formData.id != null;
 
   return (
     <Dialog
       open={openOtpPopup}
-      onOpenChange={(e) => {
-        if (!e) {
+      onOpenChange={(open) => {
+        if (!open) {
           const confirm = window.confirm(
-            "Are you sure you want to close this? If you close now, you won't be able to login on MeraDhan. To log in later, you will still need verify your account."
+            "Are you sure you want to close this? If you close now, you won't be able to login on MeraDhan. To log in later, you will still need verify your account.",
           );
           if (confirm) {
             reset();
@@ -101,83 +227,225 @@ function VerifyOtpPopUp({
         }
       }}
     >
-      <DialogContent className="p-0">
-        <DialogHeader className="p-4 px-5 border-gray-200 border-b">
-          <p className="font-medium text-lg">{content.title}</p>
+      <DialogContent className="gap-0 overflow-hidden rounded-2xl border-[#c5d4e8] p-0 sm:max-w-md">
+        <DialogHeader className="space-y-0 border-[#dce6f2] border-b px-6 py-5 text-left">
+          <DialogTitle className="font-semibold text-[#1e3a5f] text-lg">
+            Verify Email and Phone Number
+          </DialogTitle>
         </DialogHeader>
-        <div className="flex flex-col gap-3.5 px-5">
-          <p className="text-green-600">{content.successMessage}</p>
-          <p
-            className="text-sm"
-            dangerouslySetInnerHTML={{ __html: content.text }}
-          ></p>
-          {currentStep != "support" &&
-            (showCaptcha ? (
-              <CaptchaInput onVerify={(e) => setVerifyCaptcha(e)} />
-            ) : (
-              <SignUpOtpInput otp={otp} setOtp={setOtp} />
-            ))}
 
-          <div>
-            {flowManager.timer.isActive && <p>{flowManager.timer.time}</p>}
-            {content.errorMessage && (
-              <p className="text-red-600 text-sm">{content.errorMessage}</p>
-            )}
-          </div>
-        </div>
-        {currentStep != "support" ? (
-          <DialogFooter className="p-5 border-gray-200 border-t">
-            {!showCaptcha ? (
-              <Button
-                className="w-full"
-                disabled={otp.length < 4 || flowManager.isPending}
-                onClick={() =>
-                  flowManager.verifySignupOtp({
-                    emailId: formData.email,
-                    firstName: formData.firstName,
-                    lastName: formData.lastName,
-                    password: formData.password,
-                    phoneNo: "+91" + formData.mobile,
-                    termsAccepted: formData.isAcceptedTerms,
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    userType: formData.userType as any,
-                    whatsAppNo: "+91" + formData.mobile,
-                    whatsAppNotificationAllow: formData.isAcceptedWhatsapp,
-                    id: formData.id!,
-                  })
-                }
-              >
-                {currentStep == "email" ? "Verify Email" : "Verify Mobile"}
-              </Button>
-            ) : (
-              <Button
-                disabled={!VerifyCaptcha}
-                className="w-full"
-                onClick={() =>
-                  flowManager.sendVerifyOtp({
-                    emailId: formData.email,
-                    mobile: formData.mobile,
-                    id: formData.id!,
-                    name: makeFullname({
-                      firstName: formData.firstName,
-                      lastName: formData.lastName,
-                    }),
-                  })
-                }
-              >
-                Resend OTP
-              </Button>
-            )}
-          </DialogFooter>
-        ) : (
-          <DialogFooter className="p-5 border-gray-200 border-t">
-            <Button
-              className="w-full"
-              onClick={() => router.push("/contact-us")}
-            >
+        {mode === "support" ? (
+          <Box className="space-y-5 px-6 py-6">
+            <p className="text-[#1e3a5f] text-sm">
+              We&apos;re here to help. You&apos;ve used all email and mobile OTP
+              attempts. Please{" "}
+              <a href="/contact-us" className="text-primary underline">
+                contact us
+              </a>{" "}
+              to verify your account safely.
+            </p>
+            <Button className="w-full" onClick={() => router.push("/contact-us")}>
               Contact MeraDhan
             </Button>
-          </DialogFooter>
+          </Box>
+        ) : (
+          <Box className="flex flex-col px-6 py-6">
+            <Box className="flex flex-col gap-5">
+              {email.showCaptcha ? (
+                <Box className="flex flex-col gap-2">
+                  <p className="text-[#1e3a5f] text-sm">Email OTP expired</p>
+                  <CaptchaInput onVerify={setEmailCaptchaOk} />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={!emailCaptchaOk || flowManager.isPending}
+                    onClick={() =>
+                      flowManager.resendEmailOtp(formData.email, fullName)
+                    }
+                  >
+                    Resend email OTP
+                  </Button>
+                </Box>
+              ) : (
+                <OtpField
+                  label="Enter 6-digit OTP sent to your Email"
+                  placeholder="Enter 6-digit OTP"
+                  value={emailOtp}
+                  onChange={setEmailOtp}
+                  maxLength={EMAIL_OTP_LEN}
+                  disabled={flowManager.isPending}
+                />
+              )}
+              {email.successMessage && (
+                <p className="text-green-600 text-xs">{email.successMessage}</p>
+              )}
+              {email.errorMessage && (
+                <p className="text-red-600 text-xs">{email.errorMessage}</p>
+              )}
+
+              {mobile.showCaptcha ? (
+                <Box className="flex flex-col gap-2">
+                  <p className="text-[#1e3a5f] text-sm">Mobile OTP expired</p>
+                  <CaptchaInput onVerify={setMobileCaptchaOk} />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={!mobileCaptchaOk || flowManager.isPending}
+                    onClick={() => flowManager.resendMobileOtp(formData.mobile)}
+                  >
+                    Resend mobile OTP
+                  </Button>
+                </Box>
+              ) : (
+                <OtpField
+                  label="Enter 4-digit OTP sent to your Phone"
+                  placeholder="Enter 4-digit OTP"
+                  value={mobileOtp}
+                  onChange={setMobileOtp}
+                  maxLength={MOBILE_OTP_LEN}
+                  disabled={flowManager.isPending}
+                />
+              )}
+              {mobile.successMessage && (
+                <p className="text-green-600 text-xs">{mobile.successMessage}</p>
+              )}
+              {mobile.errorMessage && (
+                <p className="text-red-600 text-xs">{mobile.errorMessage}</p>
+              )}
+
+              {flowManager.timer.isActive && (
+                <p className="text-center text-[#5a7a9a] text-xs">
+                  OTP expires in {flowManager.timer.time}
+                </p>
+              )}
+            </Box>
+
+            <Button
+              type="button"
+              className="mt-6 h-11 w-full rounded-lg bg-[#0b2d5c] font-medium text-white hover:bg-[#0b2d5c]/90"
+              disabled={!canVerify}
+              onClick={() => flowManager.verifyBothSignupOtps(formData.id!)}
+            >
+              Verify
+            </Button>
+
+            <Box className="mt-5 space-y-2 text-center text-[#1e3a5f] text-sm">
+              {!showEmailEdit ? (
+                <p>
+                  Incorrect Email ID?{" "}
+                  <button
+                    type="button"
+                    className="text-primary underline"
+                    onClick={() => {
+                      setShowEmailEdit(true);
+                      setShowPhoneEdit(false);
+                      setEmailEditError("");
+                    }}
+                  >
+                    Click here
+                  </button>{" "}
+                  to change it
+                </p>
+              ) : (
+                <Box className="space-y-2 rounded-lg border border-[#dce6f2] bg-[#f7fafc] p-3 text-left">
+                  <p className="font-medium text-xs">Update email address</p>
+                  <Input
+                    type="email"
+                    placeholder="Email ID*"
+                    value={editEmail}
+                    onChange={(e) => setEditEmail(e.target.value.toLowerCase())}
+                    className={SIGNUP_INPUT_CLASS}
+                  />
+                  {emailEditError && (
+                    <p className="text-red-600 text-xs">{emailEditError}</p>
+                  )}
+                  <Box className="flex gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="flex-1 bg-[#0b2d5c]"
+                      disabled={flowManager.isPending}
+                      onClick={handleUpdateEmail}
+                    >
+                      Save &amp; resend OTP
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setShowEmailEdit(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </Box>
+                </Box>
+              )}
+
+              {!showPhoneEdit ? (
+                <p>
+                  Incorrect Phone Number?{" "}
+                  <button
+                    type="button"
+                    className="text-primary underline"
+                    onClick={() => {
+                      setShowPhoneEdit(true);
+                      setShowEmailEdit(false);
+                      setPhoneEditError("");
+                    }}
+                  >
+                    Click here
+                  </button>{" "}
+                  to change it
+                </p>
+              ) : (
+                <Box className="space-y-2 rounded-lg border border-[#dce6f2] bg-[#f7fafc] p-3 text-left">
+                  <p className="font-medium text-xs">Update phone number</p>
+                  <Box className="relative">
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="Mobile No*"
+                      maxLength={10}
+                      value={editPhone}
+                      onChange={(e) =>
+                        setEditPhone(
+                          e.target.value.replace(/\D/g, "").slice(0, 10),
+                        )
+                      }
+                      className={SIGNUP_MOBILE_INPUT_CLASS}
+                    />
+                    <span className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3 text-gray-800 text-sm">
+                      +91
+                    </span>
+                  </Box>
+                  {phoneEditError && (
+                    <p className="text-red-600 text-xs">{phoneEditError}</p>
+                  )}
+                  <Box className="flex gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="flex-1 bg-[#0b2d5c]"
+                      disabled={flowManager.isPending}
+                      onClick={handleUpdatePhone}
+                    >
+                      Save &amp; resend OTP
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setShowPhoneEdit(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          </Box>
         )}
       </DialogContent>
     </Dialog>

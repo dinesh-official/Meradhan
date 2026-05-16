@@ -1,6 +1,5 @@
 import { useUserTracking } from "@/analytics/UserTrackingProvider";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
-import useAppCookie from "@/hooks/useAppCookie.hook";
 import { useTimer } from "@/hooks/useTimer";
 import apiGateway, { ApiError } from "@root/apiGateway";
 import { appSchema } from "@root/schema";
@@ -19,13 +18,18 @@ export const useSignUpAuthFlow = () => {
     email,
     mobile,
     setErrorMessage,
-    setStep,
+    setMode,
     setSuccessMessage,
     incrementTry,
-    setShowCaptcha,
-    setOtp,
-    currentStep,
-    otp,
+    setChannelCaptcha,
+    setEmailOtp,
+    setMobileOtp,
+    setEmailToken,
+    setMobileToken,
+    emailOtp,
+    mobileOtp,
+    emailToken,
+    mobileToken,
     openOtpPopup,
     setOpenOtpPopup,
   } = useTrackUserVerifyFlowStore();
@@ -35,25 +39,26 @@ export const useSignUpAuthFlow = () => {
   const timer = useTimer({
     duration: 180,
     isCountdown: true,
-
     onFinish: () => {
-      setOtp("");
+      setEmailOtp("");
+      setMobileOtp("");
       if (email.try >= email.max && mobile.try >= mobile.max) {
-        setStep("support");
+        setMode("support");
       } else {
-        setShowCaptcha(true);
+        if (email.try < email.max) setChannelCaptcha("email", true);
+        if (mobile.try < mobile.max) setChannelCaptcha("mobile", true);
       }
     },
   });
-  // Reset messages after 5s
+
   useEffect(() => {
-    const timer = setTimeout(() => {
-      ["email", "mobile"].forEach((type) => {
-        setErrorMessage(type as "email" | "mobile", "");
-        setSuccessMessage(type as "email" | "mobile", "");
+    const t = setTimeout(() => {
+      (["email", "mobile"] as const).forEach((type) => {
+        setErrorMessage(type, "");
+        setSuccessMessage(type, "");
       });
     }, 5000);
-    return () => clearTimeout(timer);
+    return () => clearTimeout(t);
   }, [
     setErrorMessage,
     setSuccessMessage,
@@ -70,18 +75,16 @@ export const useSignUpAuthFlow = () => {
 
   const sendAuthMobileOtpMutation = useMutation({
     mutationKey: ["sendAuthMobileOtp"],
-    mutationFn: (data: { mobile: string; id: number }) =>
-      signupApi.sendSignupMobileVerify({
-        mobile: data.mobile,
-      }),
-    onSuccess() {
+    mutationFn: (data: { mobile: string }) =>
+      signupApi.sendSignupMobileVerify({ mobile: data.mobile }),
+    onSuccess(data) {
       setSuccessMessage("mobile", "OTP sent successfully");
+      setMobileToken(data.responseData?.token ?? "");
       trackActivity("session", {
-        method: "Send email OTP : Attempt " + mobile.try,
+        method: "Send mobile OTP : Attempt " + (mobile.try + 1),
       });
       incrementTry("mobile");
-      timer.reset();
-      setShowCaptcha(false);
+      setChannelCaptcha("mobile", false);
     },
     onError(error) {
       if (error instanceof ApiError) {
@@ -99,120 +102,265 @@ export const useSignUpAuthFlow = () => {
     mutationKey: ["sendAuthEmailOtp"],
     mutationFn: (payload: z.infer<schema["sendEmailOtpSchema"]>) =>
       signupApi.sendSignupEmailVerify(payload),
-    onSuccess() {
+    onSuccess(data) {
       if (!openOtpPopup) {
         setOpenOtpPopup(true);
       }
       setSuccessMessage("email", "OTP sent successfully");
+      setEmailToken(data.responseData?.token ?? "");
       trackActivity("session", {
-        method: "Send email OTP : Attempt " + email.try,
+        method: "Send email OTP : Attempt " + (email.try + 1),
       });
       incrementTry("email");
-      timer.reset();
-      setShowCaptcha(false);
+      setChannelCaptcha("email", false);
     },
     onError(error) {
       if (error instanceof ApiError) {
-        setErrorMessage(
-          "email",
+        const msg =
           error.response?.data.message ||
-            error.response?.data?.error ||
-            error.message,
-        );
-        toast.error(
-          error.response?.data.message ||
-            error.response?.data?.error ||
-            error.message,
-        );
+          error.response?.data?.error ||
+          error.message;
+        setErrorMessage("email", msg);
+        toast.error(msg);
         return;
       }
       if (error instanceof AxiosError) {
-        setErrorMessage("email", error.response?.data?.error || error.message);
-        toast.error(error.response?.data?.error || error.message);
-      }
-      toast.error(error.message);
-    },
-  });
-
-  const singUpWithCredentialsMutation = useMutation({
-    mutationKey: ["singUpWithCredentials"],
-    mutationFn: (data: {
-      params: z.infer<schema["signUpWithCredentialsQuerySchema"]>;
-      payload: z.infer<schema["createNewCustomerSchema"]>;
-    }) => signupApi.verifySignupOtp(data.params),
-    onError(error) {
-      if (error instanceof ApiError) {
-        setErrorMessage(
-          currentStep == "email" ? "email" : "mobile",
-          error.response?.data.message || error.message,
-        );
-        toast.error(error.response?.data.message || error.message);
+        const msg = error.response?.data?.error || error.message;
+        setErrorMessage("email", msg);
+        toast.error(msg);
         return;
       }
       toast.error(error.message);
     },
-    onSuccess(data) {
-      // setAuthCookiesAndRedirect({
-      //   token: data.responseData.token,
-      //   id: data.responseData.id.toString(),
-      // });
+  });
 
-      router.replace("/login");
-
-      trackActivity("session", { method: "Sign up with credentials" });
+  const updateSignupEmailMutation = useMutation({
+    mutationKey: ["updateSignupEmail"],
+    mutationFn: (payload: z.infer<schema["signupUpdateEmailSchema"]>) =>
+      signupApi.updateSignupEmail(payload),
+    onError(error) {
+      if (error instanceof ApiError) {
+        setErrorMessage("email", error.response?.data.message || error.message);
+      }
     },
   });
 
-  const sendVerifyOtp = (data: {
+  const updateSignupPhoneMutation = useMutation({
+    mutationKey: ["updateSignupPhone"],
+    mutationFn: (payload: z.infer<schema["signupUpdatePhoneSchema"]>) =>
+      signupApi.updateSignupPhone(payload),
+    onError(error) {
+      if (error instanceof ApiError) {
+        setErrorMessage("mobile", error.response?.data.message || error.message);
+      }
+    },
+  });
+
+  const verifyBothMutation = useMutation({
+    mutationKey: ["verifySignupOtpBoth"],
+    mutationFn: (payload: z.infer<schema["signUpVerifyBothSchema"]>) =>
+      signupApi.verifySignupOtpBoth(payload),
+    onSuccess() {
+      toast.success("Account verified successfully. Please sign in.");
+      trackActivity("session", { method: "Sign up verified (email + mobile)" });
+      router.replace("/login");
+    },
+    onError(error) {
+      if (error instanceof ApiError) {
+        const msg = error.response?.data.message || error.message;
+        const code = error.response?.data?.code as string | undefined;
+        toast.error(msg);
+
+        if (code === "OTP_EXPIRED" || code === "INVALID_BOTH_OTP") {
+          setErrorMessage("email", msg);
+          setErrorMessage("mobile", msg);
+          setChannelCaptcha("email", true);
+          setChannelCaptcha("mobile", true);
+          return;
+        }
+        if (code === "INVALID_EMAIL_OTP" || msg.toLowerCase().includes("email")) {
+          setErrorMessage("email", msg);
+          return;
+        }
+        if (code === "INVALID_MOBILE_OTP" || msg.toLowerCase().includes("mobile")) {
+          setErrorMessage("mobile", msg);
+          return;
+        }
+        setErrorMessage("email", msg);
+        setErrorMessage("mobile", msg);
+      } else {
+        toast.error(error.message);
+      }
+    },
+  });
+
+  const sendEmailOtp = (emailId: string, name: string) => {
+    if (email.try >= email.max) return;
+    sendAuthEmailOtpMutation.mutate({ email: emailId, name });
+  };
+
+  const sendMobileOtp = (mobileNo: string) => {
+    if (mobile.try >= mobile.max) return;
+    sendAuthMobileOtpMutation.mutate({ mobile: mobileNo });
+  };
+
+  const sendBothSignupOtps = (data: {
     emailId: string;
     mobile: string;
     name: string;
-    id: number;
   }) => {
+    setOpenOtpPopup(true);
+    setMode("verify");
+    timer.reset();
+    timer.start();
+
+    const tasks: Promise<void>[] = [];
+
     if (email.try < email.max) {
-      sendAuthEmailOtpMutation.mutate({
-        email: data.emailId,
-        name: data.name,
-      });
-      setStep("email");
-    } else if (mobile.try < mobile.max) {
-      sendAuthMobileOtpMutation.mutate({
-        mobile: data.mobile,
-        id: data.id,
-      });
-      setStep("mobile");
-    } else {
-      setStep("support");
+      tasks.push(
+        signupApi
+          .sendSignupEmailVerify({ email: data.emailId, name: data.name })
+          .then((res) => {
+            setEmailToken(res.responseData?.token ?? "");
+            setSuccessMessage("email", "OTP sent successfully");
+            incrementTry("email");
+            setChannelCaptcha("email", false);
+          })
+          .catch((error) => {
+            const msg =
+              error instanceof ApiError
+                ? error.response?.data.message || error.message
+                : error?.message ?? "Failed to send email OTP";
+            setErrorMessage("email", msg);
+            throw error;
+          }),
+      );
     }
+
+    if (mobile.try < mobile.max) {
+      tasks.push(
+        signupApi
+          .sendSignupMobileVerify({ mobile: data.mobile })
+          .then((res) => {
+            setMobileToken(res.responseData?.token ?? "");
+            setSuccessMessage("mobile", "OTP sent successfully");
+            incrementTry("mobile");
+            setChannelCaptcha("mobile", false);
+          })
+          .catch((error) => {
+            const msg =
+              error instanceof ApiError
+                ? error.response?.data.message || error.message
+                : error?.message ?? "Failed to send mobile OTP";
+            setErrorMessage("mobile", msg);
+            throw error;
+          }),
+      );
+    }
+
+    if (tasks.length === 0) {
+      setMode("support");
+      return;
+    }
+
+    Promise.all(tasks).catch(() => {
+      toast.error("Could not send one or more OTPs. Use Resend to try again.");
+    });
   };
 
-  const verifySignupOtp = (
-    payload: z.infer<schema["createNewCustomerSchema"]> & { id: number },
-  ) => {
-    const token =
-      currentStep == "email"
-        ? sendAuthEmailOtpMutation.data?.responseData?.token
-        : sendAuthMobileOtpMutation.data?.responseData?.token;
+  const resendEmailOtp = (emailId: string, name: string) => {
+    sendEmailOtp(emailId, name);
+    timer.reset();
+    timer.start();
+  };
 
-    singUpWithCredentialsMutation.mutate({
-      params: {
-        otp,
-        token,
-        verifyBy: currentStep == "email" ? "email" : "mobile",
-        id: payload.id.toString(),
-      },
-      payload,
+  const resendMobileOtp = (mobileNo: string) => {
+    sendMobileOtp(mobileNo);
+    timer.reset();
+    timer.start();
+  };
+
+  const sendEmailOtpToAddress = async (emailId: string, name: string) => {
+    const res = await signupApi.sendSignupEmailVerify({ email: emailId, name });
+    setEmailToken(res.responseData?.token ?? "");
+    setSuccessMessage("email", "OTP sent to your email address");
+    setErrorMessage("email", "");
+    setChannelCaptcha("email", false);
+    return res;
+  };
+
+  const sendMobileOtpToNumber = async (mobile: string) => {
+    const res = await signupApi.sendSignupMobileVerify({ mobile });
+    setMobileToken(res.responseData?.token ?? "");
+    setSuccessMessage("mobile", "OTP sent to your mobile number");
+    setErrorMessage("mobile", "");
+    setChannelCaptcha("mobile", false);
+    return res;
+  };
+
+  const updateSignupEmail = async (params: {
+    customerId: number;
+    newEmail: string;
+    name: string;
+  }) => {
+    const result = await updateSignupEmailMutation.mutateAsync({
+      customerId: params.customerId,
+      newEmail: params.newEmail,
+    });
+    const updatedEmail = result.responseData?.email ?? params.newEmail;
+    setEmailOtp("");
+    setEmailToken("");
+    await sendEmailOtpToAddress(updatedEmail, params.name);
+    toast.success("Email updated. A new OTP has been sent.");
+    return updatedEmail;
+  };
+
+  const updateSignupPhone = async (params: {
+    customerId: number;
+    newPhone: string;
+  }) => {
+    const result = await updateSignupPhoneMutation.mutateAsync({
+      customerId: params.customerId,
+      newPhone: params.newPhone,
+    });
+    const updatedPhone = result.responseData?.phone ?? params.newPhone;
+    setMobileOtp("");
+    setMobileToken("");
+    await sendMobileOtpToNumber(updatedPhone);
+    toast.success("Phone number updated. A new OTP has been sent.");
+    return updatedPhone;
+  };
+
+  const verifyBothSignupOtps = (customerId: number) => {
+    if (!emailToken || !mobileToken) {
+      toast.error("Please request OTPs before verifying.");
+      return;
+    }
+    verifyBothMutation.mutate({
+      id: customerId,
+      emailOtp,
+      emailToken,
+      mobileOtp,
+      mobileToken,
     });
   };
 
   return {
-    sendVerifyOtp,
+    sendBothSignupOtps,
+    sendEmailOtp,
+    sendMobileOtp,
+    resendEmailOtp,
+    resendMobileOtp,
+    updateSignupEmail,
+    updateSignupPhone,
+    verifyBothSignupOtps,
     isPending:
       sendAuthMobileOtpMutation.isPending ||
       sendAuthEmailOtpMutation.isPending ||
-      singUpWithCredentialsMutation.isPending,
+      updateSignupEmailMutation.isPending ||
+      updateSignupPhoneMutation.isPending ||
+      verifyBothMutation.isPending,
     timer,
-    verifySignupOtp,
   };
 };
 

@@ -52,7 +52,7 @@ function SignUpForm() {
   );
 
   const signUpFlow = useSignUpAuthFlow();
-  const { sendVerifyOtp, isPending } = signUpFlow;
+  const { sendBothSignupOtps, isPending } = signUpFlow;
 
   const createCustomerMutation = useMutation({
     mutationKey: ["signUpWithCredentials"],
@@ -63,11 +63,10 @@ function SignUpForm() {
       // get the id from the response data to use.
       toast.success("Account created successfully");
       form.handleSignUpFormChange("id", data.responseData!.id);
-      sendVerifyOtp({
+      sendBothSignupOtps({
         emailId: signUpFormData.email,
         mobile: signUpFormData.mobile,
         name: `${signUpFormData.firstName} ${signUpFormData.lastName}`,
-        id: data.responseData!.id,
       });
     },
     onError(error) {
@@ -318,7 +317,12 @@ function SignUpForm() {
        * 🔹 Main Component : SignUpForm
        * -------------------------------
        *  */}
-      <VerifyOtpPopUp formData={signUpFormData} signUpFlowKyc={signUpFlow} />
+      <VerifyOtpPopUp
+        formData={signUpFormData}
+        signUpFlowKyc={signUpFlow}
+        onEmailUpdated={(email) => handleSignUpFormChange("email", email)}
+        onPhoneUpdated={(phone) => handleSignUpFormChange("mobile", phone)}
+      />
       {/* ------------------------------- */}
     </>
   );
