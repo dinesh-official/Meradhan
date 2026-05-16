@@ -7,8 +7,6 @@ import { useTimer } from "@/hooks/useTimer";
 import apiGateway, { ApiError } from "@root/apiGateway";
 import { useLoginDataStore } from "./useLoginDataStore";
 import useAppCookie from "@/hooks/useAppCookie.hook";
-import { useRouter } from "nextjs-toploader/app";
-import { COOKIE_OPTIONS } from "@/core/config/cookies.config";
 import { getSessionId } from "@/analytics/analytics";
 import { useUserTracking } from "@/analytics/UserTrackingProvider";
 
@@ -86,7 +84,6 @@ export const useLoginFormHook = () => {
   const signinApi = new apiGateway.meradhan.customerAuthApi.CustomerAuthApi(
     apiClientCaller,
   );
-  const router = useRouter();
   const { setCookie } = useAppCookie();
 
   // Access store state and actions
@@ -127,18 +124,45 @@ export const useLoginFormHook = () => {
         identity,
         value: state.emailOrPhoneNo,
       }),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      const response = data.responseData;
+      if (response.requiresAccountActivation && response.channel) {
+        dataStore.setMode("account_activation");
+        dataStore.setActivationChannel(response.channel);
+        dataStore.setActivationMaskedTarget(response.maskedTarget ?? "");
+        dataStore.setOtp("");
+        dataStore.setErrorMessage("");
+        dataStore.setSuccessMessage("");
+
+        if (response.token && response.activationOtpSent !== false) {
+          dataStore.setActivationToken(response.token);
+          dataStore.setActivationStep("otp");
+          dataStore.setSuccessMessage("OTP sent successfully");
+          timer.reset();
+          timer.start();
+          dataStore.setAllowedResend(false);
+          trackActivity("login", { reason: "Account activation OTP sent" });
+        } else {
+          dataStore.setActivationToken("");
+          dataStore.setActivationStep("prompt");
+          trackActivity("login", { reason: "Account activation prompt shown" });
+        }
+        return;
+      }
+
       dataStore.setMode("verify");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (isNaN(state.emailOrPhoneNo as any)) {
         dataStore.setType("password");
       } else {
         dataStore.setType("otp");
-        // handleSendOtp();
       }
       trackActivity("login", { reason: "Create login request" });
     },
     onError: (error) => {
+      dataStore.setMode("pending");
+      dataStore.setActivationStep("prompt");
+      dataStore.setActivationChannel(null);
       if (error instanceof ApiError) {
         dataStore.setErrorMessage(
           error.response?.data?.message ||
@@ -206,9 +230,9 @@ export const useLoginFormHook = () => {
         value: state.emailOrPhoneNo,
         password: state.password,
       }),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       trackActivity("login", { reason: "Sign in with password" });
-      setAuthCookiesAndRedirect({
+      await completeLoginAndRedirect({
         token: data.responseData.token,
         id: data.responseData.id.toString(),
       });
@@ -239,8 +263,8 @@ export const useLoginFormHook = () => {
         token: sendOtpMutation.data?.responseData?.token || requestLoginMutation.data?.responseData.token || "",
         value: state.emailOrPhoneNo,
       }),
-    onSuccess: (data) => {
-      setAuthCookiesAndRedirect({
+    onSuccess: async (data) => {
+      await completeLoginAndRedirect({
         token: data.responseData.token,
         id: data.responseData.id.toString(),
       });
@@ -259,7 +283,123 @@ export const useLoginFormHook = () => {
   });
 
   // -------------------------------
-  // 🔹 5. Resend Email Verification for Unverified Users
+  // 🔹 5. Verify account activation OTP at login
+  // -------------------------------
+  const verifyAccountActivationMutation = useMutation({
+    mutationKey: ["verifyAccountActivationLogin"],
+    retry: false,
+    mutationFn: () =>
+      signinApi.verifyAccountActivationAtLogin({
+        identity,
+        value: state.emailOrPhoneNo,
+        otp: state.otp,
+        token: state.activationToken,
+      }),
+    onSuccess: async (data) => {
+      trackActivity("login", { reason: "Account activation verified" });
+      try {
+        await completeLoginAndRedirect({
+          token: data.responseData.token,
+          id: data.responseData.id.toString(),
+        });
+      } catch {
+        dataStore.setErrorMessage(
+          "Verification succeeded but sign-in failed. Please try logging in again.",
+        );
+        toast.error("Could not complete sign-in. Please try again.");
+      }
+    },
+    onError: (error) => {
+      if (error instanceof ApiError) {
+        dataStore.setErrorMessage(
+          error.response?.data?.message ||
+            error.message ||
+            "Something went wrong",
+        );
+      } else {
+        toast.error(error.message);
+      }
+    },
+  });
+
+  const sendActivationOtpMutation = useMutation({
+    mutationKey: ["sendActivationOtpLogin"],
+    mutationFn: () =>
+      signinApi.signInRequest({
+        identity,
+        value: state.emailOrPhoneNo,
+        sendActivationOtp: true,
+      }),
+    onSuccess: (data) => {
+      const response = data.responseData;
+      if (!response.requiresAccountActivation || !response.token) {
+        dataStore.setErrorMessage("Could not send OTP. Please try again.");
+        return;
+      }
+      dataStore.setActivationToken(response.token);
+      dataStore.setActivationStep("otp");
+      if (response.maskedTarget) {
+        dataStore.setActivationMaskedTarget(response.maskedTarget);
+      }
+      dataStore.setOtp("");
+      dataStore.setSuccessMessage("OTP sent successfully");
+      dataStore.setErrorMessage("");
+      timer.reset();
+      timer.start();
+      dataStore.setAllowedResend(false);
+      trackActivity("login", { reason: "Account activation OTP sent" });
+    },
+    onError: (error) => {
+      if (error instanceof ApiError) {
+        dataStore.setErrorMessage(
+          error.response?.data?.message ||
+            error.message ||
+            "Something went wrong",
+        );
+      }
+    },
+  });
+
+  const resendActivationOtpMutation = useMutation({
+    mutationKey: ["resendActivationOtpLogin"],
+    mutationFn: () =>
+      signinApi.signInRequest({
+        identity,
+        value: state.emailOrPhoneNo,
+        sendActivationOtp: true,
+      }),
+    onSuccess: (data) => {
+      const response = data.responseData;
+      if (!response.requiresAccountActivation || !response.token) {
+        dataStore.setErrorMessage("Could not resend OTP. Please try again.");
+        return;
+      }
+      dataStore.setActivationToken(response.token);
+      dataStore.setActivationStep("otp");
+      if (response.maskedTarget) {
+        dataStore.setActivationMaskedTarget(response.maskedTarget);
+      }
+      dataStore.setOtp("");
+      dataStore.setSuccessMessage("OTP sent successfully");
+      dataStore.setErrorMessage("");
+      timer.reset();
+      timer.start();
+      dataStore.setAllowedResend(false);
+      dataStore.setCurrentOtpTry(state.currentOtpTry + 1);
+    },
+    onError: (error) => {
+      if (error instanceof ApiError) {
+        dataStore.setErrorMessage(
+          error.response?.data?.message ||
+            error.message ||
+            "Something went wrong",
+        );
+      }
+    },
+  });
+
+  // -------------------------------
+  // 🔹 6. Resend Email Verification for Unverified Users
   // -------------------------------
   const resendEmailVerificationMutation = useMutation({
     mutationKey: ["resendEmailVerification"],
@@ -354,36 +494,50 @@ export const useLoginFormHook = () => {
     signInWithPasswordMutation.mutate();
   };
 
-  // set user access tokens in cookieStore
-  const setAuthCookiesAndRedirect = ({
+  const persistAppSessionCookies = async (token: string, userId: string) => {
+    const res = await fetch("/api/auth/set-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ token, userId }),
+    });
+    if (!res.ok) {
+      throw new Error("Failed to persist session cookies");
+    }
+  };
+
+  const completeLoginAndRedirect = async ({
     id,
     token,
   }: {
     token: string;
     id: string;
   }) => {
+    if (!token) {
+      throw new Error("Missing auth token");
+    }
 
-    // // Use longer expiry (30 days) if remember me is checked, otherwise use default (1 day)
-    // const cookieOptions = state.rememberMe
-    //   ? {
-    //       ...COOKIE_OPTIONS,
-    //       expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-    //     }
-    //   : COOKIE_OPTIONS;
+    await persistAppSessionCookies(token, id);
+
     const sessionId = getSessionId();
     const auditApi = new apiGateway.auditlog.AuditLogsApiV2(apiClientCaller);
     setCookie("userId", id);
-    auditApi.createNewTrackingSessionMeradhan({
-      sessionId: sessionId,
-      userId: parseInt(id),
-    });
+    try {
+      await auditApi.createNewTrackingSessionMeradhan({
+        sessionId,
+        userId: parseInt(id, 10),
+      });
+    } catch (error) {
+      console.log(error);
+    }
+
+    dataStore.reset();
+
     const redirectPath = resolvePostLoginRedirect();
     if (redirectPath) {
       localStorage.removeItem("redirect");
-      router.replace(redirectPath);
-    } else {
-      router.replace("/dashboard");
     }
+    window.location.assign(redirectPath ?? "/dashboard");
   };
 
   /**
@@ -395,6 +549,41 @@ export const useLoginFormHook = () => {
     dataStore.setErrorMessage("");
     dataStore.setSuccessMessage("");
     resendEmailVerificationMutation.mutate();
+  };
+
+  const handleVerifyAccountActivation = () => {
+    const otpLength = state.activationChannel === "email" ? 6 : 4;
+    if (state.otp.length !== otpLength) {
+      dataStore.setErrorMessage(`Please enter a valid ${otpLength}-digit OTP`);
+      return;
+    }
+    if (!state.activationToken) {
+      dataStore.setErrorMessage("Session expired. Please continue again.");
+      return;
+    }
+    dataStore.setErrorMessage("");
+    dataStore.setSuccessMessage("");
+    verifyAccountActivationMutation.mutate();
+  };
+
+  const handleStartAccountActivation = () => {
+    if (sendActivationOtpMutation.isPending) return;
+    dataStore.setErrorMessage("");
+    dataStore.setSuccessMessage("");
+    sendActivationOtpMutation.mutate();
+  };
+
+  const handleResendActivationOtp = () => {
+    if (resendActivationOtpMutation.isPending || !state.allowedResend) return;
+    if (state.currentOtpTry >= state.maxOtpTry) {
+      dataStore.setErrorMessage(
+        "You have reached the maximum number of attempts. Please try again later.",
+      );
+      return;
+    }
+    dataStore.setErrorMessage("");
+    dataStore.setSuccessMessage("");
+    resendActivationOtpMutation.mutate();
   };
 
   // ---------------------------------
@@ -409,6 +598,9 @@ export const useLoginFormHook = () => {
     sendOtpMutation,
     signInWithPasswordMutation,
     verifyOtpMutation,
+    verifyAccountActivationMutation,
+    sendActivationOtpMutation,
+    resendActivationOtpMutation,
     resendEmailVerificationMutation,
 
     // Handlers
@@ -417,6 +609,9 @@ export const useLoginFormHook = () => {
     handleVerifyOtp,
     handleSignInWithPassword,
     handleResendEmailVerification,
+    handleStartAccountActivation,
+    handleVerifyAccountActivation,
+    handleResendActivationOtp,
   };
 };
 

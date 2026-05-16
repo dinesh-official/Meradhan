@@ -1,6 +1,7 @@
 import { db, type DataBaseSchema } from "@core/database/database";
 import {
   sendCustomerSigninOtpEmail,
+  sendCustomerSignupOtpEmail,
   sendEmailVerificationLink,
   sendKycReminderNotStartedEmail,
 } from "@jobs/helper/send_emails";
@@ -159,7 +160,11 @@ export class CustomerAuthService {
     };
   }
 
-  async signinRequest(data: { identifier: I_IDENTIFIED; value: string }) {
+  async signinRequest(data: {
+    identifier: I_IDENTIFIED;
+    value: string;
+    sendActivationOtp?: boolean;
+  }) {
     const query: DataBaseSchema.CustomerProfileDataModelWhereUniqueInput =
       data.identifier == "email"
         ? {
@@ -190,6 +195,13 @@ export class CustomerAuthService {
       });
     }
 
+    if (this.shouldUseActivationAtLogin(user, data.identifier)) {
+      if (data.sendActivationOtp === true) {
+        return this.sendAccountActivationOtpAtLogin(user, data.identifier);
+      }
+      return this.getAccountActivationPromptAtLogin(user, data.identifier);
+    }
+
     this.checkUserSigninWith(user, data.identifier);
     if (data.identifier == "phoneNo") {
       return await this.sendSigninWithOtp({ identifier: data.identifier, value: data.value });
@@ -200,6 +212,60 @@ export class CustomerAuthService {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.emailAddress,
+    };
+  }
+
+  async verifyAccountActivationAtLogin(
+    data: z.infer<typeof appSchema.customer.accountActivationVerifySchema>,
+  ) {
+    const user = await this.findCustomerBySigninIdentifier(data.identity, data.value);
+    if (!user) {
+      throw new AppError("Invalid email or mobile number", { code: "USER_NOT_FOUND" });
+    }
+
+    if (!this.canActivateAtLogin(user)) {
+      throw new AppError("Account activation is not available for this sign-in method.", {
+        code: "ACTIVATION_NOT_ALLOWED",
+      });
+    }
+
+    const channel = data.identity === "phoneNo" ? "phone" : "email";
+    if (channel === "phone" && user.utility.isPhoneVerified) {
+      throw new AppError("Phone number is already verified.", { code: "PHONE_ALREADY_VERIFIED" });
+    }
+    if (channel === "email" && user.utility.isEmailVerified) {
+      throw new AppError("Email is already verified.", { code: "EMAIL_ALREADY_VERIFIED" });
+    }
+
+    await this.optManager.verifyOtp(data.token, data.otp);
+
+    const updated = await db.dataBase.customerProfileDataModel.update({
+      where: { id: user.id },
+      data: {
+        utility: {
+          update:
+            channel === "phone"
+              ? { isPhoneVerified: true }
+              : { isEmailVerified: true },
+        },
+      },
+    });
+
+    const authToken = tokenUtils.generateToken(
+      {
+        email: updated.emailAddress,
+        mobile: updated.phoneNo,
+        id: updated.id,
+        role: "USER",
+      },
+      "1d",
+    );
+    await this.customerProfileService.setLatestLoginTime(updated.id);
+    return {
+      id: updated.id,
+      email: updated.emailAddress,
+      avatar: updated.avatar,
+      token: authToken,
     };
   }
 
@@ -468,6 +534,157 @@ export class CustomerAuthService {
     };
   }
 
+  private async findCustomerBySigninIdentifier(identifier: I_IDENTIFIED, value: string) {
+    const query: DataBaseSchema.CustomerProfileDataModelWhereUniqueInput =
+      identifier == "email"
+        ? { emailAddress: value }
+        : { phoneNo: "+91" + removeCountryCode(value) };
+
+    return db.dataBase.customerProfileDataModel.findUnique({
+      where: { ...query, isDeleted: false },
+      include: { utility: true },
+    });
+  }
+
+  private canActivateAtLogin(
+    user: DataBaseSchema.CustomerProfileDataModelGetPayload<{
+      include: { utility: true };
+    }>,
+  ) {
+    return user.utility.signinWith === "CREDENTIALS";
+  }
+
+  private needsPhoneActivation(
+    user: DataBaseSchema.CustomerProfileDataModelGetPayload<{
+      include: { utility: true };
+    }>,
+    identifier: I_IDENTIFIED,
+  ) {
+    return identifier === "phoneNo" && !user.utility.isPhoneVerified;
+  }
+
+  private needsEmailActivation(
+    user: DataBaseSchema.CustomerProfileDataModelGetPayload<{
+      include: { utility: true };
+    }>,
+    identifier: I_IDENTIFIED,
+  ) {
+    return identifier === "email" && !user.utility.isEmailVerified;
+  }
+
+  /** Login activation OTP only when both email and phone are unverified. */
+  private shouldUseActivationAtLogin(
+    user: DataBaseSchema.CustomerProfileDataModelGetPayload<{
+      include: { utility: true };
+    }>,
+    identifier: I_IDENTIFIED,
+  ) {
+    if (!this.canActivateAtLogin(user)) {
+      return false;
+    }
+    if (user.utility.isEmailVerified || user.utility.isPhoneVerified) {
+      return false;
+    }
+    return (
+      this.needsPhoneActivation(user, identifier) ||
+      this.needsEmailActivation(user, identifier)
+    );
+  }
+
+  private maskPhoneForDisplay(phoneNo: string | null): string {
+    const digits = removeCountryCode(phoneNo ?? "");
+    if (digits.length < 4) return phoneNo ?? "";
+    return `+91 XXXXXX${digits.slice(-4)}`;
+  }
+
+  private maskEmailForDisplay(email: string): string {
+    const at = email.indexOf("@");
+    if (at <= 0) return email;
+    const local = email.slice(0, at);
+    const domain = email.slice(at + 1);
+    if (local.length <= 2) return `***@${domain}`;
+    return `${local.slice(0, 2)}***@${domain}`;
+  }
+
+  private getAccountActivationPromptAtLogin(
+    user: DataBaseSchema.CustomerProfileDataModelGetPayload<{
+      include: { utility: true };
+    }>,
+    identifier: I_IDENTIFIED,
+  ) {
+    if (!this.canActivateAtLogin(user)) {
+      throw new AppError("Account activation is not available for this sign-in method.", {
+        code: "ACTIVATION_NOT_ALLOWED",
+      });
+    }
+
+    const channel = identifier === "phoneNo" ? "phone" : "email";
+
+    return {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.emailAddress,
+      requiresAccountActivation: true as const,
+      channel,
+      activationOtpSent: false as const,
+      maskedTarget:
+        channel === "phone"
+          ? this.maskPhoneForDisplay(user.phoneNo)
+          : this.maskEmailForDisplay(user.emailAddress),
+    };
+  }
+
+  private async sendAccountActivationOtpAtLogin(
+    user: DataBaseSchema.CustomerProfileDataModelGetPayload<{
+      include: { utility: true };
+    }>,
+    identifier: I_IDENTIFIED,
+  ) {
+    if (!this.canActivateAtLogin(user)) {
+      throw new AppError("Account activation is not available for this sign-in method.", {
+        code: "ACTIVATION_NOT_ALLOWED",
+      });
+    }
+
+    const channel = identifier === "phoneNo" ? "phone" : "email";
+    const otpKey = `CUSTOMER_LOGIN_ACTIVATE:${channel}:${user.id}`;
+    const otpLength = channel === "phone" ? 4 : 6;
+    const { token, otp } = await this.optManager.generateOtp(otpKey, otpLength);
+
+    if (channel === "phone") {
+      if (!user.phoneNo) {
+        throw new AppError("No mobile number on file.", { code: "PHONE_NOT_FOUND" });
+      }
+      await sendMobileOtp({
+        mobile: removeCountryCode(user.phoneNo),
+        otp,
+        template: "login",
+      });
+    } else {
+      await sendCustomerSignupOtpEmail({
+        email: user.emailAddress,
+        userName: `${user.firstName} ${user.lastName}`.trim(),
+        otp,
+      });
+    }
+
+    return {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.emailAddress,
+      requiresAccountActivation: true as const,
+      channel,
+      activationOtpSent: true as const,
+      token,
+      maskedTarget:
+        channel === "phone"
+          ? this.maskPhoneForDisplay(user.phoneNo)
+          : this.maskEmailForDisplay(user.emailAddress),
+    };
+  }
+
   private checkUserSigninWith(
     user: DataBaseSchema.CustomerProfileDataModelGetPayload<{
       include: {
@@ -501,21 +718,22 @@ export class CustomerAuthService {
       );
     }
     if (identifier == "email" && !user.utility.isEmailVerified) {
-      if (!user.utility.isPhoneVerified && !user.utility.isEmailVerified) {
-        throw new AppError(
-          "This account hasn’t been verified yet. <a class='underline text-primary cursor-pointer' role='button' id='resend-email-verification'  >Click here</a> to send a verification link to your email to activate your account.",
-          { code: "EMAIL_NOT_VERIFIED" }
-        );
-      }
       throw new AppError(
-        `Your email is not verified. Please login using your verified phone number. Or, <a class='underline text-primary cursor-pointer' role='button' id='resend-email-verification'   >Click here</a> to send the email verification link. Once verified, you can login using your email ID as well.`,
-        { code: "EMAIL_NOT_VERIFIED" }
+        `Your email is not verified. Please login using your verified phone number. Or, <a class='underline text-primary cursor-pointer' role='button' id='resend-email-verification'>Click here</a> to send the email verification link. Once verified, you can login using your email ID as well.`,
+        { code: "EMAIL_NOT_VERIFIED" },
       );
     }
     if (identifier == "phoneNo" && !user.utility.isPhoneVerified) {
+      if (user.utility.isEmailVerified) {
+        const maskedEmail = this.maskEmailForDisplay(user.emailAddress);
+        throw new AppError(
+          `Your mobile number is not verified yet. Your email address <span class="font-medium">${maskedEmail}</span> is verified. Please sign in using your verified email address.`,
+          { code: "PHONE_NOT_VERIFIED" },
+        );
+      }
       throw new AppError(
-        "This mobile number is not verified. Please login using your email ID and verify your phone number from the My Profile section.",
-        { code: "PHONE_NOT_VERIFIED" }
+        "Your mobile number is not verified yet. Please verify your account to continue.",
+        { code: "PHONE_NOT_VERIFIED" },
       );
     }
   }

@@ -1,18 +1,26 @@
 import { create } from "zustand";
 
+export type LoginMode = "pending" | "verify" | "account_activation";
+export type ActivationChannel = "phone" | "email" | null;
+export type ActivationStep = "prompt" | "otp";
+
 export type LoginDataStoreType = {
   state: {
     emailOrPhoneNo: string;
     password: string;
     otp: string;
     allowedResend: boolean;
-    mode: "pending" | "verify";
+    mode: LoginMode;
     type: "password" | "otp";
     errorMessage: string;
     successMessage: string;
     maxOtpTry: number;
     currentOtpTry: number;
     rememberMe: boolean;
+    activationChannel: ActivationChannel;
+    activationStep: ActivationStep;
+    activationToken: string;
+    activationMaskedTarget: string;
   };
 
   reset: () => void;
@@ -24,9 +32,13 @@ export type LoginDataStoreType = {
   setMaxOtpTry: (maxOtpTry: number) => void;
   setCurrentOtpTry: (currentOtpTry: number) => void;
   setType: (type: "password" | "otp") => void;
-  setMode: (mode: "pending" | "verify") => void;
+  setMode: (mode: LoginMode) => void;
   setAllowedResend: (allowedResend: boolean) => void;
   setRememberMe: (rememberMe: boolean) => void;
+  setActivationChannel: (channel: ActivationChannel) => void;
+  setActivationStep: (step: ActivationStep) => void;
+  setActivationToken: (token: string) => void;
+  setActivationMaskedTarget: (maskedTarget: string) => void;
 };
 
 const initialState: LoginDataStoreType["state"] = {
@@ -41,6 +53,10 @@ const initialState: LoginDataStoreType["state"] = {
   currentOtpTry: 0,
   maxOtpTry: 3,
   rememberMe: false,
+  activationChannel: null,
+  activationStep: "prompt",
+  activationToken: "",
+  activationMaskedTarget: "",
 };
 
 export const useLoginDataStore = create<LoginDataStoreType>((set) => ({
@@ -90,7 +106,7 @@ export const useLoginDataStore = create<LoginDataStoreType>((set) => ({
       state: { ...store.state, type },
     })),
 
-  setMode: (mode: "pending" | "verify") =>
+  setMode: (mode: LoginMode) =>
     set((store) => ({
       state: { ...store.state, mode },
     })),
@@ -103,5 +119,25 @@ export const useLoginDataStore = create<LoginDataStoreType>((set) => ({
   setRememberMe: (rememberMe: boolean) =>
     set((store) => ({
       state: { ...store.state, rememberMe },
+    })),
+
+  setActivationChannel: (activationChannel: ActivationChannel) =>
+    set((store) => ({
+      state: { ...store.state, activationChannel },
+    })),
+
+  setActivationStep: (activationStep: ActivationStep) =>
+    set((store) => ({
+      state: { ...store.state, activationStep },
+    })),
+
+  setActivationToken: (activationToken: string) =>
+    set((store) => ({
+      state: { ...store.state, activationToken },
+    })),
+
+  setActivationMaskedTarget: (activationMaskedTarget: string) =>
+    set((store) => ({
+      state: { ...store.state, activationMaskedTarget },
     })),
 }));

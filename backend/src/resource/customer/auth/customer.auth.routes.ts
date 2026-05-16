@@ -78,6 +78,11 @@ customerAuthRoutes.post(
   withRateLimit({ max: 5 }),
   (req, res) => controller.signInWithOtpVerify(req, res)
 );
+customerAuthRoutes.post(
+  "/api/auth/customer/signin/account-activation/verify",
+  withRateLimit({ max: 5 }),
+  (req, res) => controller.verifyAccountActivationAtLogin(req, res)
+);
 
 // logout
 customerAuthRoutes.all("/api/auth/customer/logout", (req, res) =>

@@ -79,6 +79,8 @@ export const signUpVerifyBothSchema = z.object({
 export const signInWithEmailPhoneRequestSchema = z.object({
   identity: z.enum(["email", "phoneNo"]),
   value: z.string().min(1, "Enter email or phone number."),
+  /** When true and channel needs activation, sends OTP. Omit or false: prompt only. */
+  sendActivationOtp: z.boolean().optional(),
 });
 
 export const signInWithCredentialsSchema = z.object({
@@ -96,6 +98,13 @@ export const signInWithOtpSchema = z.object({
   identity: z.enum(["email", "phoneNo"]),
   value: z.string().min(1, "Enter email or phone number."),
   otp: z.string().min(4, "OTP is required."),
+  token: z.string().min(1, "Token is required."),
+});
+
+export const accountActivationVerifySchema = z.object({
+  identity: z.enum(["email", "phoneNo"]),
+  value: z.string().min(1, "Enter email or phone number."),
+  otp: z.string().min(4, "OTP is required.").max(6, "OTP is too long."),
   token: z.string().min(1, "Token is required."),
 });
 

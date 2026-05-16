@@ -15,7 +15,12 @@ export type ISignInRequestResponse = BaseResponseData<{
   id: number;
   firstName: string;
   lastName: string;
-  token: string;
+  email?: string;
+  token?: string;
+  requiresAccountActivation?: boolean;
+  channel?: "phone" | "email";
+  activationOtpSent?: boolean;
+  maskedTarget?: string;
 }>;
 
 export type ISignInSendOtpResponse = BaseResponseData<{

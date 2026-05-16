@@ -202,6 +202,7 @@ export class CustomerAuthController {
     const response = await this.customerAuthService.signinRequest({
       identifier: payload.identity,
       value: payload.value,
+      sendActivationOtp: payload.sendActivationOtp,
     });
 
     console.log("signin request response", response);
@@ -277,6 +278,33 @@ export class CustomerAuthController {
       sessionId: req.cookies["meradhan_tracking_session"],
     });
     // Track successful OTP verification for rate limiting
+    await trackRateLimitSuccess(req, "otp-verify");
+    res.cookie("token", data.token, cookieOptions);
+    res.cookie("userId", data.id.toString(), cookieOptions);
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: data,
+    });
+  }
+
+  async verifyAccountActivationAtLogin(req: Request, res: Response) {
+    const payload = appSchema.customer.accountActivationVerifySchema.parse(
+      req.body,
+    );
+    const data = await this.customerAuthService.verifyAccountActivationAtLogin(
+      payload,
+    );
+    await addMeradhanLoginBasedAuditLog(req, {
+      userId: data.id,
+      sessionType: "SIGNIN_ACCOUNT_ACTIVATED",
+      success: true,
+      entityType: "Auth",
+      email: data.email,
+    });
+    await revalidateMeradhanTrackingSession(req, {
+      userId: data.id,
+      sessionId: req.cookies["meradhan_tracking_session"],
+    });
     await trackRateLimitSuccess(req, "otp-verify");
     res.cookie("token", data.token, cookieOptions);
     res.cookie("userId", data.id.toString(), cookieOptions);

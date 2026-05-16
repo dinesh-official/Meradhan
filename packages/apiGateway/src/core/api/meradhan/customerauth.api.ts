@@ -149,6 +149,18 @@ export class CustomerAuthApi {
     return data;
   }
 
+  async verifyAccountActivationAtLogin(
+    payload: z.infer<typeof this.schema.accountActivationVerifySchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<IAuthCompleteResponse>(
+      "/auth/customer/signin/account-activation/verify",
+      payload,
+      config
+    );
+    return data;
+  }
+
   async sendForgetPasswordLink(
     payload: z.infer<typeof this.schema.sendForgetPasswordSchema>,
     config?: AxiosRequestConfig
