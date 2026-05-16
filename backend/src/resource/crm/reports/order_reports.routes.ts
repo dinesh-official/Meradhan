@@ -30,6 +30,12 @@ router.get(
 );
 
 router.get(
+  "/api/crm/reports/orders/revenue",
+  allowAccessMiddleware("CRM"),
+  ctrl.getRevenue,
+);
+
+router.get(
   "/api/crm/reports/orders/funnel",
   allowAccessMiddleware("CRM"),
   ctrl.getFunnel,
