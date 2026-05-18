@@ -92,6 +92,8 @@ jobs:
           BACKOFFICE_SMTP_PORT: ${{ vars.BACKOFFICE_SMTP_PORT }}
           BACKOFFICE_SMTP_EMAIL: ${{ vars.BACKOFFICE_SMTP_EMAIL }}
           BACKOFFICE_SMTP_PASS: ${{ vars.BACKOFFICE_SMTP_PASS }}
+          ABSOLUTE_DATA_API_KEY: ${{ vars.ABSOLUTE_DATA_API_KEY }}
+    
 
 
         run: |
@@ -197,6 +199,8 @@ jobs:
           echo "BACKOFFICE_SMTP_PORT=${BACKOFFICE_SMTP_PORT}" >> .env
           echo "BACKOFFICE_SMTP_EMAIL=${BACKOFFICE_SMTP_EMAIL}" >> .env
           echo "BACKOFFICE_SMTP_PASS=${BACKOFFICE_SMTP_PASS}" >> .env
+
+          echo "ABSOLUTE_DATA_API_KEY=${ABSOLUTE_DATA_API_KEY}" >> .env
 
           echo "----------- FINAL .env -----------"
           cat .env
