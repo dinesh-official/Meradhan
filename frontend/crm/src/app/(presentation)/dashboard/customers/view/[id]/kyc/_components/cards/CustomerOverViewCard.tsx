@@ -109,7 +109,7 @@ function CustomerOverViewCard(
           <CardTitle className="text-sm">Customer Overview</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="gap-5 grid grid-cols-2 md:grid-cols-4">
+          <div className="gap-5 grid grid-cols-2 md:grid-cols-3 mb-4">
             <LabelView title="Customer Name">
               <p className="text-sm">{customerOverViewCardData.name}</p>
             </LabelView>
@@ -133,11 +133,7 @@ function CustomerOverViewCard(
                   )}
               </div>
             </LabelView>
-            <LabelView title="Current KRA Status">
-              <StatusBadge
-                value={customerOverViewCardData?.kraStatus || "Not Started"}
-              />
-            </LabelView>
+
             {customerOverViewCardData.usedExistingKra && (
               <LabelView title="KYC Source">
                 <StatusBadge value="Used Existing KRA" />
@@ -147,6 +143,11 @@ function CustomerOverViewCard(
               <p className="text-sm">{customerOverViewCardData.customerSince}</p>
             </LabelView>
           </div>
+          <LabelView title="Current KRA Status">
+            <StatusBadge
+              value={customerOverViewCardData?.kraStatus || "Not Started"}
+            />
+          </LabelView>
         </CardContent>
       </Card>
 

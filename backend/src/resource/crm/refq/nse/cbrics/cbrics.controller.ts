@@ -1,6 +1,7 @@
 import { appSchema } from "@root/schema";
 import { HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
+import { CbricsKraResyncService } from "./cbrics.kra_resync.service";
 import { CbricsParticipantService } from "./cbrics.service";
 import { NseCBRICS } from "@modules/RFQ/nse/nse_CBRICS";
 import { NseRfq } from "@modules/RFQ/nse/nse_RFQ";
@@ -15,6 +16,7 @@ export class CbricsParticipantController {
   private participantService = new CbricsParticipantService();
   private nseCbrics = new NseCBRICS();
   private nseRfq = new NseRfq();
+  private cbricsKraResync = new CbricsKraResyncService();
 
   async handleGetParticipants(req: Request, res: Response) {
     // safeParse gives you non-throwing validation
@@ -91,6 +93,34 @@ export class CbricsParticipantController {
       },
     });
   }
+
+  /**
+   * CRM: resync `customerProfile.kraStatus` from selected CBRICS participants
+   * (`loginId` → `userName`, KYC must be VERIFIED). Separate from webhooks.
+   */
+  handleResyncKraFromCbricsParticipants = async (req: Request, res: Response) => {
+    const parsed =
+      appSchema.crm.rfq.nse.getParticipants.ResyncKraFromCbricsParticipantsBodyZ.safeParse(
+        req.body,
+      );
+    if (!parsed.success) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        success: false,
+        message: "Invalid request body",
+        responseData: parsed.error.flatten(),
+      });
+    }
+
+    const data = await this.cbricsKraResync.resyncFromParticipantItems(
+      parsed.data,
+    );
+
+    return res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: data,
+    });
+  };
 
   async handleGetParticipantsRfq(req: Request, res: Response) {
     // safeParse gives you non-throwing validation

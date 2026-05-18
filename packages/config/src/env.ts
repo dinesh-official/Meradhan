@@ -111,6 +111,13 @@ const EnvSchema = z.object(
     STRAPI_API_TOKEN: z.string().min(1, { message: "STRAPI_API_TOKEN is required", }),
     STRAPI_API_URL: z.url({ message: "STRAPI_API_URL must be a valid URL", }).default("https://spyder.meradhan.co/api"),
 
+    // Absolute Data (bonds reference API) — optional; required only when calling that integration
+    ABSOLUTE_DATA_API_KEY: z.string().min(1).optional(),
+    ABSOLUTE_DATA_API_BASE_URL: z
+      .url()
+      .optional()
+      .default("https://api.absolutedata.ai"),
+
     // ✅ Password hashing pepper - (optional, but recommended for production)
     PASSWORD_PEPPER: z.string().min(16, { message: "PASSWORD_PEPPER must be at least 16 characters", }).optional(),
   },

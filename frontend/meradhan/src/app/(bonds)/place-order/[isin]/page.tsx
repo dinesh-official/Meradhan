@@ -7,6 +7,10 @@ import {
   getBondPurchaseEligibility,
   hasCrmInventoryAvailable,
 } from "@/global/utils/bondPurchaseEligibility";
+import {
+  isKraVerified,
+  isKycVerified,
+} from "@/global/utils/customerVerification";
 import { generateBondInfoPageMetaData } from "@/graphql/pagesMetaDataGql_Action";
 import apiGateway, { BondOrderPricingData } from "@root/apiGateway";
 import Image from "next/image";
@@ -87,7 +91,10 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
     customerPayload = null;
   }
 
-  if (session?.kycStatus !== "VERIFIED") {
+  const kycOk = isKycVerified(session.kycStatus);
+  const kraOk = isKraVerified(session.kraStatus);
+
+  if (!kycOk || !kraOk) {
     return (
       <ViewPort>
         <div className="mb-4 container">
@@ -100,14 +107,33 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
                 height={60}
               />
               <h2 className="text-2xl font-semibold mt-4">
-                KYC Verification Required
+                {!kycOk && !kraOk
+                  ? "KYC & KRA Verification Required"
+                  : !kycOk
+                    ? "KYC Verification Required"
+                    : "KRA Verification Pending"}
               </h2>
-              <p className="text-gray-600">
-                Please complete your KYC verification to place an order.
+              <p className="text-gray-600 max-w-md">
+                {!kycOk && !kraOk
+                  ? "Please complete your KYC and wait for KRA verification before placing an order."
+                  : !kycOk
+                    ? "Please complete your KYC verification to place an order."
+                    : "Your KRA registration is still pending. You can check the status on your profile."}
               </p>
-              <Link href="/dashboard/kyc" className="mt-6 inline-block">
-                <Button>Process KYC Now</Button>
-              </Link>
+              <div className="flex flex-wrap gap-3 justify-center mt-2">
+                {!kycOk ? (
+                  <Link href="/dashboard/kyc">
+                    <Button>Complete KYC</Button>
+                  </Link>
+                ) : null}
+                {!kraOk ? (
+                  <Link href="/dashboard/profile">
+                    <Button variant={kycOk ? "default" : "outlineSecondary"}>
+                      View profile
+                    </Button>
+                  </Link>
+                ) : null}
+              </div>
             </div>
           </SectionWrapper>
         </div>

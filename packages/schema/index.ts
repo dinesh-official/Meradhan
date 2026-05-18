@@ -27,7 +27,10 @@ export type {
   GetParticipantsParams,
   CbricsUnregisteredWorkflowStatus,
   CbricsUnregAllQuery,
+  ResyncKraFromCbricsParticipantsBody,
 } from "./lib/crm/req/nse/isin/getParticipants.schema";
+
+export { ResyncKraFromCbricsParticipantsBodyZ } from "./lib/crm/req/nse/isin/getParticipants.schema";
 
 import * as nseIsinSchema from "./lib/crm/req/nse/isin/filterIsin.schema";
 import * as getParticipants from "./lib/crm/req/nse/isin/getParticipants.schema";

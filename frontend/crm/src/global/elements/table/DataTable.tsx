@@ -176,7 +176,15 @@ export function DataTable<TData, TValue>({
                   )}
                   onClick={
                     onRowClickAction
-                      ? () => onRowClickAction(row.original)
+                      ? (e) => {
+                          const el = e.target as HTMLElement | null;
+                          if (
+                            el?.closest?.("[data-table-row-click-ignore]")
+                          ) {
+                            return;
+                          }
+                          onRowClickAction(row.original);
+                        }
                       : undefined
                   }
                 >
