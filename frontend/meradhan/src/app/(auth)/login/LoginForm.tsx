@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import ErrorBox from "../_components/ErrorBox";
 import PasswordInput from "../_components/PasswordInput";
 import SignInOtpInput from "./_components/SignInOtpInput";
+import LoginAccountActivationPopUp from "./_components/LoginAccountActivationPopUp";
 
 import { useLoginDataStore } from "./_hooks/useLoginDataStore";
 import { ILoginFormHook, useLoginFormHook } from "./_hooks/useLoginFormHook";
@@ -194,6 +195,7 @@ function LoginForm() {
 
   // Derived state
   const isVerifyMode = state.mode === "verify";
+  const isActivationMode = state.mode === "account_activation";
   const isPasswordLogin = state.type === "password";
   const isOtpLogin = state.type === "otp";
 
@@ -250,7 +252,7 @@ function LoginForm() {
           <EmailOrPhoneInput
             value={state.emailOrPhoneNo}
             onChange={(e) => setEmailOrPhoneNo(e.target.value.toLowerCase())}
-            readOnly={isVerifyMode}
+            readOnly={isVerifyMode || isActivationMode}
             error={errors?.emailOrPhone}
             onEnter={handleContinue}
           />
@@ -261,7 +263,7 @@ function LoginForm() {
           {/* ---------------------------------------------------
            * Action Buttons
            * --------------------------------------------------- */}
-          {isVerifyMode ? (
+          {isActivationMode ? null : isVerifyMode ? (
             <>
               {/* OTP Login */}
               {isOtpLogin && (
@@ -304,7 +306,7 @@ function LoginForm() {
           {/* ---------------------------------------------------
            * Status Messages
            * --------------------------------------------------- */}
-          {state.errorMessage && (
+          {!isActivationMode && state.errorMessage && (
             <p
               className="text-red-600 text-sm"
               dangerouslySetInnerHTML={{
@@ -312,7 +314,7 @@ function LoginForm() {
               }}
             />
           )}
-          {state.successMessage && (
+          {!isActivationMode && state.successMessage && (
             <p
               className="text-green-600 text-sm"
               dangerouslySetInnerHTML={{
@@ -347,6 +349,8 @@ function LoginForm() {
        * Social Login Buttons
        * --------------------------------------------------- */}
       {/* <SocialLoginButtons /> */}
+
+      <LoginAccountActivationPopUp formManager={formManager} />
     </div>
   );
 }

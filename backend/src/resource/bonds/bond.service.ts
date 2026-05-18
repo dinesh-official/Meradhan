@@ -8,7 +8,11 @@ import {
   getLastNextCouponDateBasedOnSettlementDate,
 } from "@services/order/order-pricing-helper";
 import { sendBackOfficeEmail } from "@communication/email_communication";
-import { placeOrderEmailCustomer, sendPlaceOrderEmail } from "./place-order-email";
+import {
+  placeOrderEmailCustomer,
+  placeOrderEmailCustomerSubject,
+  sendPlaceOrderEmail,
+} from "./place-order-email";
 import { AppConfigService } from "@resource/app-config/app-config.service";
 import { AppError } from "@utils/error/AppError";
 import { env } from "@packages/config/src/env";
@@ -566,7 +570,11 @@ export class BondService {
     if (!customer) {
       throw new Error(`Customer with ID ${orderData.customerProfileId} not found`);
     }
-    const bond = await bondService.getBondOrderPricing(orderData.isin, orderData.quantity);
+    const bond = await bondService.getBondOrderPricing(
+      orderData.isin,
+      orderData.quantity,
+      orderData.settlementType,
+    );
 
     if (bond.ok) {
       await order.createDraftOrder(customer.id, {
@@ -629,7 +637,7 @@ export class BondService {
     await Promise.all([
       sendBackOfficeEmail({
         to: customer.emailAddress ?? "",
-        subject: "Order Request Received – ISIN: " + orderData.isin + " | Request Date: " + requestDate,
+        subject: placeOrderEmailCustomerSubject(orderData),
         text: await placeOrderEmailCustomer(orderData),
         // attachments: orderPdfAttachments,
       }),

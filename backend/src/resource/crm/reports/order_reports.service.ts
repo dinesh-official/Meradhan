@@ -212,6 +212,7 @@ export class OrderReportsService {
           bondName: true,
           quantity: true,
           unitPrice: true,
+          bondDetails: true,
           customerProfileId: true,
           customerProfile: {
             select: {
@@ -280,6 +281,181 @@ export class OrderReportsService {
     );
 
     return { data: withDistinct };
+  }
+
+  private spreadBps(buy: number, sell: number): number | null {
+    if (!Number.isFinite(buy) || !Number.isFinite(sell) || buy <= 0) return null;
+    return Math.round(((sell - buy) / buy) * 10_000);
+  }
+
+  private spreadRevenuePerOrder(
+    buy: number,
+    sell: number,
+    faceValue: number,
+    quantity: number,
+  ): number {
+    if (!Number.isFinite(buy) || !Number.isFinite(sell) || quantity <= 0) return 0;
+    return ((sell - buy) / 100) * faceValue * quantity;
+  }
+
+  private fyBoundsIst(): { from: string; to: string; label: string } {
+    const now = moment().tz(TZ);
+    const fyStartYear = now.month() >= 3 ? now.year() : now.year() - 1;
+    const from = moment.tz(`${fyStartYear}-04-01`, "YYYY-MM-DD", TZ);
+    return {
+      from: from.format("YYYY-MM-DD"),
+      to: now.format("YYYY-MM-DD"),
+      label: `Apr ${fyStartYear} – today`,
+    };
+  }
+
+  private mtdBoundsIst(): { from: string; to: string; label: string } {
+    const now = moment().tz(TZ);
+    return {
+      from: now.clone().startOf("month").format("YYYY-MM-DD"),
+      to: now.format("YYYY-MM-DD"),
+      label: now.format("MMM YYYY"),
+    };
+  }
+
+  private async aggregateSpreadRevenue(
+    filters: OrderReportFilters,
+  ): Promise<{
+    rows: {
+      isin: string;
+      bondName: string;
+      buyPrice: number | null;
+      sellPrice: number | null;
+      spreadBps: number | null;
+      revenue: number;
+      orderCount: number;
+    }[];
+    totalRevenue: number;
+    avgSpreadBps: number | null;
+  }> {
+    const where = buildOrderWhere(filters);
+    where.paymentStatus = PaymentStatus.COMPLETED;
+
+    const orders = await db.dataBase.order.findMany({
+      where,
+      select: {
+        isin: true,
+        bondName: true,
+        quantity: true,
+        unitPrice: true,
+        faceValue: true,
+      },
+    });
+
+    if (orders.length === 0) {
+      return { rows: [], totalRevenue: 0, avgSpreadBps: null };
+    }
+
+    const isins = [...new Set(orders.map((o) => o.isin))];
+    const bonds = await db.dataBase.bonds.findMany({
+      where: { isin: { in: isins } },
+      select: { isin: true, buyPrice: true, sellPrice: true },
+    });
+    const bondByIsin = new Map(bonds.map((b) => [b.isin, b]));
+
+    type Agg = {
+      isin: string;
+      bondName: string;
+      buyPrice: number | null;
+      sellPrice: number | null;
+      spreadBps: number | null;
+      revenue: number;
+      orderCount: number;
+    };
+
+    const byIsin = new Map<string, Agg>();
+
+    for (const o of orders) {
+      const bond = bondByIsin.get(o.isin);
+      const unitSell = Number(o.unitPrice);
+      const buy =
+        bond?.buyPrice != null && Number.isFinite(bond.buyPrice)
+          ? bond.buyPrice
+          : unitSell * 0.985;
+      const sell =
+        bond?.sellPrice != null && Number.isFinite(bond.sellPrice)
+          ? bond.sellPrice
+          : unitSell;
+      const rev = this.spreadRevenuePerOrder(
+        buy,
+        unitSell,
+        Number(o.faceValue),
+        o.quantity,
+      );
+
+      const existing = byIsin.get(o.isin);
+      if (existing) {
+        existing.orderCount += 1;
+        existing.revenue += rev;
+      } else {
+        byIsin.set(o.isin, {
+          isin: o.isin,
+          bondName: o.bondName,
+          buyPrice: bond?.buyPrice ?? buy,
+          sellPrice: bond?.sellPrice ?? sell,
+          spreadBps: this.spreadBps(buy, sell),
+          revenue: rev,
+          orderCount: 1,
+        });
+      }
+    }
+
+    const rows = [...byIsin.values()].sort((a, b) => b.revenue - a.revenue);
+    const totalRevenue = rows.reduce((s, r) => s + r.revenue, 0);
+
+    let spreadWeighted = 0;
+    let spreadWeight = 0;
+    for (const r of rows) {
+      if (r.spreadBps == null || r.revenue <= 0) continue;
+      spreadWeighted += r.spreadBps * r.revenue;
+      spreadWeight += r.revenue;
+    }
+    const avgSpreadBps =
+      spreadWeight > 0 ? Math.round(spreadWeighted / spreadWeight) : null;
+
+    return { rows, totalRevenue, avgSpreadBps };
+  }
+
+  async getRevenue(filters: OrderReportFilters) {
+    const period = await this.aggregateSpreadRevenue(filters);
+    const fy = this.fyBoundsIst();
+    const mtd = this.mtdBoundsIst();
+
+    const fyAgg = await this.aggregateSpreadRevenue({
+      ...filters,
+      from: fy.from,
+      to: fy.to,
+    });
+    const mtdAgg = await this.aggregateSpreadRevenue({
+      ...filters,
+      from: mtd.from,
+      to: mtd.to,
+    });
+
+    return {
+      kpis: {
+        totalRevenue: period.totalRevenue.toFixed(2),
+        avgSpreadBps: period.avgSpreadBps,
+        fyRevenue: fyAgg.totalRevenue.toFixed(2),
+        mtdRevenue: mtdAgg.totalRevenue.toFixed(2),
+        fyLabel: fy.label,
+        mtdLabel: mtd.label,
+      },
+      rows: period.rows.map((r) => ({
+        isin: r.isin,
+        bondName: r.bondName,
+        buyPrice: r.buyPrice,
+        sellPrice: r.sellPrice,
+        spreadBps: r.spreadBps,
+        revenue: r.revenue.toFixed(2),
+        orderCount: r.orderCount,
+      })),
+    };
   }
 
   async getFunnel(filters: OrderReportFilters) {
