@@ -42,7 +42,7 @@ function ParticipantsTableList({
             return (
               <div
                 data-table-row-click-ignore
-                className="flex items-center justify-center pt-0.5"
+                className="flex items-center justify-center pt-0.5 pr-4"
                 onClick={(e) => e.stopPropagation()}
                 onPointerDown={(e) => e.stopPropagation()}
                 role="presentation"
@@ -122,9 +122,9 @@ function ParticipantsTableList({
             };
             return data.createdAt
               ? dateTimeUtils.formatDateTime(
-                  data.createdAt,
-                  "DD MMM YYYY hh:mm AA"
-                )
+                data.createdAt,
+                "DD MMM YYYY hh:mm AA"
+              )
               : "--";
           },
         },
@@ -138,9 +138,9 @@ function ParticipantsTableList({
             };
             return data.updatedAt
               ? dateTimeUtils.formatDateTime(
-                  data.updatedAt,
-                  "DD MMM YYYY hh:mm AA"
-                )
+                data.updatedAt,
+                "DD MMM YYYY hh:mm AA"
+              )
               : "--";
           },
         },
