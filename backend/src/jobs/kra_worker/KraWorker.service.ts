@@ -23,6 +23,7 @@ import {
 import { getKraCountry, getKraState, kraMobNo, occCode } from "./constent";
 import { addKraWorkerJob, type KraWorkerJobData } from "./kraWroker.helper";
 import type { AxiosError } from "axios";
+import { CBRICS_WORKFLOW_STATUS_TO_KRA } from "@modules/RFQ/nse/webhook_notification.controller";
 
 const cbricsManager = new ParticipantManager();
 
@@ -352,13 +353,14 @@ export class KraWorkerService {
                   id: true,
                   loginId: true,
                   userId: true,
+                  workflowStatus: true
                 },
               },
             },
           },
         },
       });
-      if (user?.nseDataSet?.participant.loginId && user?.nseDataSet?.participant.userId === customerId) {
+      if (user?.nseDataSet?.participant.loginId && user?.nseDataSet?.participant.userId === customerId && user?.nseDataSet?.participant.workflowStatus == 1) {
         await db.dataBase.customerProfileDataModel.update({
           where: { id: customerId },
           data: {
@@ -395,7 +397,7 @@ export class KraWorkerService {
         where: { id: customerId },
         data: {
           kycStatus: "VERIFIED",
-          kraStatus: "VERIFIED",
+          kraStatus: CBRICS_WORKFLOW_STATUS_TO_KRA[cbUser.workflowStatus.toString()] || "CBRICS STATUS PENDING",
           verifyDate: new Date(),
         },
       });

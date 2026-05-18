@@ -5,6 +5,21 @@ import { type Request, type Response } from "express";
 import { sendKycApprovedEmail } from "@jobs/helper/send_emails";
 import { sendDealSheetPdfByOrderId } from "@services/notifications/send_deal_sheet_nyOrderId";
 
+/** CBRICS workflowStatus → customer.kraStatus label */
+export const CBRICS_WORKFLOW_STATUS_TO_KRA: Record<string, string> = {
+  "0": "CBRICS Pending with exchange",
+  "1": "VERIFIED",
+  "5": "CBRICS Rejected",
+  "6": "CBRICS Returned",
+  "10": "CBRICS Pending with exchange",
+  "15": "CBRICS Rejected by checker",
+  "16": "CBRICS Returned by checker",
+  "100": "CBRICS Pending With Checker",
+};
+
+const kraStatusFromWorkflowStatus = (workflowStatus: unknown): string =>
+  CBRICS_WORKFLOW_STATUS_TO_KRA[String(workflowStatus ?? "")] ?? "PENDING";
+
 export class NseWebhookController {
   /**
    * Handle CBRICS notification webhook
@@ -48,6 +63,7 @@ export class NseWebhookController {
       },
     });
 
+
     // KYC approved hook: CBRICS can notify unregistered participant approval via `unregList`.
     // Only treat actualStatus == 4 as approved and transition customer KYC to VERIFIED (once).
     try {
@@ -55,8 +71,8 @@ export class NseWebhookController {
       if (Array.isArray(unregList) && unregList.length) {
         for (const item of unregList) {
           const loginId = typeof item.loginId === "string" ? item.loginId : undefined;
-          const actualStatus = item.actualStatus;
-          const approved = actualStatus === 4 || String(actualStatus ?? "") === "4";
+          const actualStatus = item.workflowStatus;
+          const approved = actualStatus === 1 || String(actualStatus ?? "") === "1";
 
           if (!approved || !loginId) continue;
 
@@ -69,16 +85,16 @@ export class NseWebhookController {
               firstName: true,
               lastName: true,
               gender: true,
+              kraStatus: true
             },
           });
           if (!customer) continue;
-          if (customer.kycStatus === "VERIFIED") continue;
+          if (customer.kraStatus === "VERIFIED") continue;
 
           await db.dataBase.customerProfileDataModel.update({
             where: { id: customer.id },
             data: {
-              kycStatus: "VERIFIED",
-              kraStatus: "VERIFIED",
+              kraStatus: kraStatusFromWorkflowStatus(actualStatus),
               verifyDate: new Date(),
             },
           });
