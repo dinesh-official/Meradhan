@@ -72,3 +72,8 @@ export const GetParticipantsZ = z.object({
 });
 
 export type GetParticipantsParams = z.infer<typeof GetParticipantsZ>;
+
+export {
+  ResyncKraFromCbricsParticipantsBodyZ,
+  type ResyncKraFromCbricsParticipantsBody,
+} from "./resyncKraFromCbricsParticipants.schema";

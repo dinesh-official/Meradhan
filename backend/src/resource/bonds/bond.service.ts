@@ -18,6 +18,7 @@ import { AppError } from "@utils/error/AppError";
 import { env } from "@packages/config/src/env";
 import { OrderPdfService } from "@resource/customer/order/order-pdf.service";
 import { OrderService } from "@resource/customer/order/order.service";
+import { CustomerProfileManager } from "@services/customer/customer_manager.service";
 
 export type GetBondOrderPricingResult =
   | { ok: true; pricing: ReturnType<typeof computeBondOrderPricingData> }
@@ -563,6 +564,11 @@ export class BondService {
         { code: "ORDER_FLOW_REQUIRES_PAYMENT" },
       );
     }
+
+    const customerProfileManager = new CustomerProfileManager();
+    await customerProfileManager.assertCustomerCanPlaceOrder(
+      orderData.customerProfileId,
+    );
 
     const customer = await db.dataBase.customerProfileDataModel.findUnique({
       where: { id: orderData.customerProfileId },

@@ -8,7 +8,10 @@ import type { AxiosRequestConfig } from "axios";
 import type z from "zod";
 import type { BaseResponseData } from "../../../../../types/base";
 import type { IApiCaller } from "../../../../connection/apiCaller.interface";
-import { type ParticipantData } from "./participants.response";
+import {
+  type CbricsKraResyncResponseData,
+  type ParticipantData,
+} from "./participants.response";
 
 type CbricsWorkflowCatalogRow =
   (typeof CBRICS_UNREG_WORKFLOW_STATUS_OPTIONS)[number];
@@ -61,6 +64,19 @@ export class RfqParticipantsApi {
     >("/crm/rfq/nse/rfq/participants", {
       ...config,
     });
+    return data;
+  }
+
+  async resyncKraFromCbricsParticipants(
+    body: z.infer<
+      typeof appSchema.crm.rfq.nse.getParticipants.ResyncKraFromCbricsParticipantsBodyZ
+    >,
+    config?: AxiosRequestConfig,
+  ) {
+    const data = await this.apiClient.post<
+      BaseResponseData<CbricsKraResyncResponseData>,
+      typeof body
+    >("/crm/rfq/nse/cbrics/participants/resync-kra-status", body, config);
     return data;
   }
 }

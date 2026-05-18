@@ -23,7 +23,7 @@ import {
 import { getKraCountry, getKraState, kraMobNo, occCode } from "./constent";
 import { addKraWorkerJob, type KraWorkerJobData } from "./kraWroker.helper";
 import type { AxiosError } from "axios";
-import { CBRICS_WORKFLOW_STATUS_TO_KRA } from "@modules/RFQ/nse/webhook_notification.controller";
+import { CBRICS_WORKFLOW_STATUS_TO_KRA } from "@modules/RFQ/nse/cbrics_workflow_kra_map";
 
 const cbricsManager = new ParticipantManager();
 

@@ -172,6 +172,35 @@ export class CustomerProfileManager {
     return deleteCustomer; // we can change this
   }
 
+  /** KYC and KRA must both be VERIFIED before bond purchase / place-order flows. */
+  async assertCustomerCanPlaceOrder(customerProfileId: number): Promise<void> {
+    const customer = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { id: customerProfileId },
+      select: { kycStatus: true, kraStatus: true },
+    });
+
+    if (!customer) {
+      throw new AppError(`Customer with ID ${customerProfileId} not found`, {
+        statusCode: 404,
+        code: "CUSTOMER_NOT_FOUND",
+      });
+    }
+
+    if (customer.kycStatus !== "VERIFIED") {
+      throw new AppError(
+        "Please complete your KYC verification before placing an order.",
+        { statusCode: 403, code: "KYC_NOT_VERIFIED" },
+      );
+    }
+
+    if (String(customer.kraStatus ?? "").trim().toUpperCase() !== "VERIFIED") {
+      throw new AppError(
+        "Your KRA registration must be verified before placing an order.",
+        { statusCode: 403, code: "KRA_NOT_VERIFIED" },
+      );
+    }
+  }
+
   async removeCustomerProfile(customerProfileId: number) {
     const existing = await db.dataBase.customerProfileDataModel.findUnique({
       where: { id: customerProfileId },

@@ -4,21 +4,9 @@ import logger from "@utils/logger/logger";
 import { type Request, type Response } from "express";
 import { sendKycApprovedEmail } from "@jobs/helper/send_emails";
 import { sendDealSheetPdfByOrderId } from "@services/notifications/send_deal_sheet_nyOrderId";
+import { kraStatusFromCbricsWorkflowStatus } from "./cbrics_workflow_kra_map";
 
-/** CBRICS workflowStatus → customer.kraStatus label */
-export const CBRICS_WORKFLOW_STATUS_TO_KRA: Record<string, string> = {
-  "0": "CBRICS Pending with exchange",
-  "1": "VERIFIED",
-  "5": "CBRICS Rejected",
-  "6": "CBRICS Returned",
-  "10": "CBRICS Pending with exchange",
-  "15": "CBRICS Rejected by checker",
-  "16": "CBRICS Returned by checker",
-  "100": "CBRICS Pending With Checker",
-};
-
-const kraStatusFromWorkflowStatus = (workflowStatus: unknown): string =>
-  CBRICS_WORKFLOW_STATUS_TO_KRA[String(workflowStatus ?? "")] ?? "PENDING";
+const kraStatusFromWorkflowStatus = kraStatusFromCbricsWorkflowStatus;
 
 export class NseWebhookController {
   /**

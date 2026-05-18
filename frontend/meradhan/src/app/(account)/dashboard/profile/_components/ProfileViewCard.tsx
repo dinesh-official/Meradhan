@@ -11,6 +11,14 @@ import { BiSolidFileFind } from "react-icons/bi";
 import { FaCheckSquare } from "react-icons/fa";
 import { IoWarning } from "react-icons/io5";
 import { RiArrowRightSFill } from "react-icons/ri";
+
+/** Display-only: map any non-verified backend kraStatus to "Pending". */
+const isKraVerified = (kraStatus?: string | null) =>
+  String(kraStatus ?? "").trim().toUpperCase() === "VERIFIED";
+
+const formatKraStatusLabel = (kraStatus?: string | null) =>
+  isKraVerified(kraStatus) ? "Verified" : "Pending";
+
 function ProfileViewCard({
   profile,
 }: {
@@ -78,15 +86,15 @@ function ProfileViewCard({
                 {profile.verifyDate && (
                   <p className="text-[#666666] text-xs">
                     Last KYC Verified On:{" "}
-                      {dateTimeUtils.formatDateTime(
+                    {dateTimeUtils.formatDateTime(
+                      profile.verifyDate,
+                      "DD MMM YYYY"
+                    ) +
+                      " | " +
+                      dateTimeUtils.formatDateTime(
                         profile.verifyDate,
-                        "DD MMM YYYY"
-                      ) +
-                        " | " +
-                        dateTimeUtils.formatDateTime(
-                          profile.verifyDate,
-                          "hh:mm aa"
-                        )}
+                        "hh:mm aa"
+                      )}
                   </p>
                 )}
               </>
@@ -153,9 +161,16 @@ function ProfileViewCard({
                       )}
                   </p>
                 )}
-                {profile.kraStatus && (
-                  <p className="text-[#666666] text-xs font-medium">
-                    KRA: {String(profile.kraStatus).replace(/_/g, " ")}
+                {profile.kraStatus != null && profile.kraStatus !== "" && (
+                  <p
+                    className={cn(
+                      "text-xs font-medium",
+                      isKraVerified(profile.kraStatus)
+                        ? "text-green-600"
+                        : "text-yellow-600",
+                    )}
+                  >
+                    KRA: {formatKraStatusLabel(profile.kraStatus)}
                   </p>
                 )}
               </>
@@ -168,18 +183,18 @@ function ProfileViewCard({
               profile.personalInformation?.signPdfUrl) ||
             (profile.kycStatus == "UNDER_REVIEW" &&
               profile.personalInformation?.signPdfUrl)) && (
-            <Link
-              href={genMediaUrl(profile.personalInformation?.signPdfUrl || "#")}
-              target="_blank"
-            >
-              <Button variant={`defaultLight`}>
-                KYC Copy
-                <div className="w-3 text-3xl">
-                  <Download className="w-4 h-5" size={33} />
-                </div>
-              </Button>
-            </Link>
-          )}
+              <Link
+                href={genMediaUrl(profile.personalInformation?.signPdfUrl || "#")}
+                target="_blank"
+              >
+                <Button variant={`defaultLight`}>
+                  KYC Copy
+                  <div className="w-3 text-3xl">
+                    <Download className="w-4 h-5" size={33} />
+                  </div>
+                </Button>
+              </Link>
+            )}
           {profile.kycStatus == "PENDING" && (
             <Link href={`/dashboard/kyc`} className="block w-full md:w-auto [&>button]:w-full md:[&>button]:w-auto">
               <Button variant={`secondary`}>
