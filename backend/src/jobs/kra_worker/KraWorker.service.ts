@@ -425,7 +425,7 @@ export class KraWorkerService {
       await db.dataBase.customerProfileDataModel.update({
         where: { id: customerId },
         data: {
-          kraStatus: "CBRICS PENDING",
+          kraStatus: err.message || "CBRICS STATUS PENDING",
         },
       });
       await db.dataBase.kraDataLogs.create({
