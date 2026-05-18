@@ -94,6 +94,8 @@ jobs:
           BACKOFFICE_SMTP_EMAIL: ${{ vars.BACKOFFICE_SMTP_EMAIL }}
           BACKOFFICE_SMTP_PASS: ${{ vars.BACKOFFICE_SMTP_PASS }}
 
+          ABSOLUTE_DATA_API_KEY: ${{ vars.ABSOLUTE_DATA_API_KEY }}
+
         run: |
           echo "NEXT_PUBLIC_HOST_URL=https://aws.meradhan.co" > .env
           echo "NEXT_PUBLIC_CRM_HOST_URL=https://awscrm.meradhan.co" >> .env
@@ -186,6 +188,7 @@ jobs:
           echo "BACKOFFICE_SMTP_EMAIL=${BACKOFFICE_SMTP_EMAIL}" >> .env
           echo "BACKOFFICE_SMTP_PASS=${BACKOFFICE_SMTP_PASS}" >> .env
 
+          echo "ABSOLUTE_DATA_API_KEY=${ABSOLUTE_DATA_API_KEY}" >> .env
 
           echo "----------- FINAL .env -----------"
           cat .env
