@@ -1,5 +1,12 @@
 import z from "zod";
+import { isCrmLoginEmailDomainAllowed } from "../auth/crm_login_email";
 import { AccountStatusEnum, CrmUserROLEEnum } from "../enums";
+
+const crmUserEmailSchema = z
+  .email("Invalid email format")
+  .refine(isCrmLoginEmailDomainAllowed, {
+    message: "Email must be @meradhan.co or @absolutedata.ai",
+  });
 
 
 
@@ -16,7 +23,7 @@ export const createCRMUserSchema = z.object({
         .string()
         .min(2, "Name must be at least 2 characters long")
         .max(100, "Name must be less than 100 characters"),
-    email: z.email("Invalid email format"),
+    email: crmUserEmailSchema,
     phoneNo: z
         .string()
         .min(8, "Phone number must be at least 8 digits")

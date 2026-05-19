@@ -43,15 +43,25 @@ export class OtpVerificationService implements IOtpVerificationService {
     this.store = QueueStore.getStore();
     this.storeKey = useOf;
   }
+  private generateSecureOTP(length: number = 6): string {
+    if (length <= 0) {
+      throw new Error("OTP length must be greater than 0");
+    }
 
+    let otp = "";
+
+    for (let i = 0; i < length; i++) {
+      otp += Math.floor(Math.random() * 10).toString();
+    }
+
+    return otp;
+  }
   async generateOtp(
     identifier: string,
     length: number = 6,
     expirySeconds: number = 300
   ): ReturnType<IOtpVerificationService["generateOtp"]> {
-    const otp = Array.from({ length }, () =>
-      Math.floor(Math.random() * 10)
-    ).join("");
+    const otp = this.generateSecureOTP(length);
     if (process.env.NODE_ENV !== "production") {
       console.log("====================");
       console.log("OTP SEND - ", otp);

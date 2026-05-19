@@ -411,6 +411,21 @@ export const customerWhatsAppPreferenceSchema = z.object({
   }),
 });
 
+export const customerEmailVerifySendOtpSchema = z.object({
+  email: z.email("Please enter a valid email address"),
+});
+
+export const customerEmailVerifyConfirmSchema = z.object({
+  email: z.email("Please enter a valid email address"),
+  otp: z
+    .string({ error: "OTP is required" })
+    .min(6, { message: "OTP must be 6 digits" })
+    .max(6, { message: "OTP must be 6 digits" }),
+  token: z.string({ error: "Token is required" }).min(1, {
+    message: "Token is required",
+  }),
+});
+
 export const customerEmailChangeSendOtpSchema = z.object({
   newEmail: z.email("Please enter a valid email address"),
 });

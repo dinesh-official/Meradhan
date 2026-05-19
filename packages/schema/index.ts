@@ -1,4 +1,11 @@
 import * as authSchema from "./lib/auth/auth.schema";
+
+export {
+  CRM_LOGIN_ALLOWED_EMAIL_DOMAINS,
+  getCrmLoginEmailDomain,
+  isCrmLoginEmailDomainAllowed,
+  type CrmLoginAllowedEmailDomain,
+} from "./lib/auth/crm_login_email";
 import * as userSchema from "./lib/crm/users.schema";
 import * as leadSchema from "./lib/crm/leads.schema";
 import * as partnershipSchema from "./lib/crm/partnership.schema";
@@ -27,7 +34,10 @@ export type {
   GetParticipantsParams,
   CbricsUnregisteredWorkflowStatus,
   CbricsUnregAllQuery,
+  ResyncKraFromCbricsParticipantsBody,
 } from "./lib/crm/req/nse/isin/getParticipants.schema";
+
+export { ResyncKraFromCbricsParticipantsBodyZ } from "./lib/crm/req/nse/isin/getParticipants.schema";
 
 import * as nseIsinSchema from "./lib/crm/req/nse/isin/filterIsin.schema";
 import * as getParticipants from "./lib/crm/req/nse/isin/getParticipants.schema";

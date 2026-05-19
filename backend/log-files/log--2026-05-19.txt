@@ -1,0 +1,30 @@
+[2026-05-19 00:05:00 IST] [INFO] Payment reconciliation run started {"service":"payment-reconciliation","lookbackHours":72,"maxOrders":75,"minOrderAgeMinutes":60,"since":"2026-05-15T18:35:00.057Z","olderThan":"2026-05-18T17:35:00.057Z","recentReconcileCutoff":"2026-05-18T17:40:00.057Z"}
+[2026-05-19 00:05:01 IST] [INFO] Payment reconciliation candidates fetched {"service":"payment-reconciliation","candidates":0}
+[2026-05-19 00:05:01 IST] [INFO] Payment reconciliation run completed {"service":"payment-reconciliation","checked":0,"updated":0,"queuedSettlement":0,"skipped":0}
+[2026-05-19 11:43:48 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-19 11:47:40 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-19 11:58:29 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-19 12:09:33 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-19 12:09:34 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-19 12:09:37 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-19 12:09:39 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-19 12:09:41 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-19 12:09:51 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-19 12:09:57 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-19 12:10:00 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-19 12:32:30 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-19 12:32:52 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-19 12:33:19 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-19 12:34:00 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-19 12:34:16 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-19 12:34:33 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-19 12:35:04 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-19 12:35:08 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-19 12:36:08 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-19 12:36:47 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-19 14:57:55 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-19 15:09:48 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-19 15:10:09 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-19 15:10:30 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-19 15:10:40 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000
+[2026-05-19 15:10:46 IST] [INFO] ✅ Server is running in DEVELOPMENT mode at http://localhost:4000

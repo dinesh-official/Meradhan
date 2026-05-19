@@ -124,7 +124,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
     onError: (err: { response?: { data?: { message?: string } } }) => {
       toast.error(
         err?.response?.data?.message ??
-          (err instanceof Error ? err.message : "Failed to set primary bank"),
+        (err instanceof Error ? err.message : "Failed to set primary bank"),
       );
     },
   });
@@ -141,7 +141,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
     onError: (err: { response?: { data?: { message?: string } } }) => {
       toast.error(
         err?.response?.data?.message ??
-          (err instanceof Error ? err.message : "Failed to set primary demat"),
+        (err instanceof Error ? err.message : "Failed to set primary demat"),
       );
     },
   });
@@ -546,7 +546,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
                           className="h-8"
                         >
                           {setPrimaryBankMutation.isPending &&
-                          setPrimaryBankMutation.variables === e.id ? (
+                            setPrimaryBankMutation.variables === e.id ? (
                             <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
                           ) : null}
                           Set as default bank
@@ -624,7 +624,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
                           className="h-8"
                         >
                           {setPrimaryDematMutation.isPending &&
-                          setPrimaryDematMutation.variables === e.id ? (
+                            setPrimaryDematMutation.variables === e.id ? (
                             <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
                           ) : null}
                           Set as default demat
@@ -659,7 +659,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
             <div className="flex flex-col gap-5 mt-4">
               {(data?.riskProfile?.data || riskProfileData.data)?.map((e) => (
                 <RiskProfileQuestion
-                  question="How many years of investment experience do you have?"
+                  question={e.qus}
                   key={e.index}
                 >
                   {e.opt.map((option, idx) => (
@@ -712,8 +712,8 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
                 </>
               ) : null}
               {defaultAccountConfirm &&
-              !pendingBankRow &&
-              !pendingDematRow ? (
+                !pendingBankRow &&
+                !pendingDematRow ? (
                 <>Confirm to set this account as the new default.</>
               ) : null}
             </AlertDialogDescription>

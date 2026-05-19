@@ -64,3 +64,17 @@ interface DpAccountList {
   updatedAt: string;
   nseCbricsParticipantModelId: number;
 }
+
+export type CbricsKraResyncResultRow = {
+  loginId: string;
+  workflowStatus: number;
+  outcome: "updated" | "skipped";
+  reason?: "NO_CUSTOMER_MATCH" | "KYC_NOT_VERIFIED" | "UNCHANGED";
+  customerId?: number;
+  previousKraStatus?: string | null;
+  newKraStatus?: string;
+};
+
+export type CbricsKraResyncResponseData = {
+  results: CbricsKraResyncResultRow[];
+};

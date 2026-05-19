@@ -1,4 +1,5 @@
 "use client";
+import { Checkbox } from "@/components/ui/checkbox";
 import { UniversalTable } from "@/global/elements/table/UniversalTable";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import WorkflowStatusBadge from "@/global/elements/wrapper/badges/WrokflowStatusBadge";
@@ -10,9 +11,13 @@ import { ParticipantRowActions } from "./ParticipantRowActions";
 function ParticipantsTableList({
   data,
   isLoading,
+  selectedIds,
+  onToggleRow,
 }: {
   data: ParticipantData[];
   isLoading?: boolean;
+  selectedIds: Set<string>;
+  onToggleRow: (participantId: string, selected: boolean) => void;
 }) {
   const router = useRouter();
 
@@ -27,6 +32,31 @@ function ParticipantsTableList({
         router.push(href);
       }}
       fields={[
+        {
+          key: "__select__",
+          label: " ",
+          sortable: false,
+          cell: (row) => {
+            const id = String(row.id);
+            const checked = selectedIds.has(id);
+            return (
+              <div
+                data-table-row-click-ignore
+                className="flex items-center justify-center pt-0.5 pr-4"
+                onClick={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
+                role="presentation"
+              >
+                <Checkbox
+                  checked={checked}
+                  onCheckedChange={(v) =>
+                    onToggleRow(id, v === true)
+                  }
+                />
+              </div>
+            );
+          },
+        },
         {
           key: "loginId",
           label: "ID",
@@ -92,9 +122,9 @@ function ParticipantsTableList({
             };
             return data.createdAt
               ? dateTimeUtils.formatDateTime(
-                  data.createdAt,
-                  "DD MMM YYYY hh:mm AA"
-                )
+                data.createdAt,
+                "DD MMM YYYY hh:mm AA"
+              )
               : "--";
           },
         },
@@ -108,9 +138,9 @@ function ParticipantsTableList({
             };
             return data.updatedAt
               ? dateTimeUtils.formatDateTime(
-                  data.updatedAt,
-                  "DD MMM YYYY hh:mm AA"
-                )
+                data.updatedAt,
+                "DD MMM YYYY hh:mm AA"
+              )
               : "--";
           },
         },

@@ -111,6 +111,8 @@ jobs:
             echo "BACKOFFICE_SMTP_PORT=${{vars.BACKOFFICE_SMTP_PORT}}" 
             echo "BACKOFFICE_SMTP_EMAIL=${{vars.BACKOFFICE_SMTP_EMAIL}}"
             echo "BACKOFFICE_SMTP_PASS=${{vars.BACKOFFICE_SMTP_PASS}}"
+            echo "ABSOLUTE_DATA_API_KEY=${{vars.ABSOLUTE_DATA_API_KEY}}"
+            echo "ABSOLUTE_DATA_API_KEY=${ABSOLUTE_DATA_API_KEY}"
           } >> .env
 
       - name: Configure AWS Credentials

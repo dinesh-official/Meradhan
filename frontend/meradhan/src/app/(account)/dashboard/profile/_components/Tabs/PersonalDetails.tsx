@@ -26,14 +26,22 @@ function PersonalDetails({
 }: {
   profile: GetCustomerResponseById["responseData"];
 }) {
-  const showAddress =
+  /** Show the communication-address block (heading + fields). */
+  const showAddressSection =
     profile.kycStatus == "VERIFIED" ||
     profile.kycStatus == "RE_KYC" ||
     profile.kycStatus == "UNDER_REVIEW";
+  /** Only after KYC is verified (or re-KYC) do we show real address from profile. */
+  const showAddressValues =
+    profile.kycStatus == "VERIFIED" || profile.kycStatus == "RE_KYC";
+  const communicationAddressLabel = profile.useKraKyc
+    ? "Communication Address (as per KYC)"
+    : "Communication Address (as per Aadhar)";
   const getAddressNotes = (value?: string | null) => {
-    if (!showAddress) return "--";
+    if (!showAddressValues) return "--";
     return value || "--";
   };
+  const countryDisplay = showAddressValues ? "India" : "--";
 
   return (
     <>
@@ -57,12 +65,11 @@ function PersonalDetails({
         <FullKycInfo profile={profile} />
       </div>
       <div className="gap-5 grid md:grid-cols-3 mt-6 pt-6 border-gray-200 border-t">
-        {showAddress && (
+        {showAddressSection && (
           <div className="md:col-span-3">
             <h4 className="flex items-center gap-2">
-              Communication Address (as per Aadhar){" "}
-              {(profile.kycStatus == "VERIFIED" ||
-                profile.kycStatus == "RE_KYC") && (
+              {communicationAddressLabel}{" "}
+              {showAddressValues && (
                 <FaCheckSquare className="text-green-600" />
               )}
             </h4>
@@ -106,7 +113,7 @@ function PersonalDetails({
           </p>
         </DataInfoLabel>
         <DataInfoLabel title="Country ">
-          <p className="font-medium text-sm">India</p>
+          <p className="font-medium text-sm">{countryDisplay}</p>
         </DataInfoLabel>
       </div>
     </>
@@ -120,21 +127,77 @@ function EmailVerification({
 }: {
   profile: GetCustomerResponseById["responseData"];
 }) {
+  const [openOtpPopup, setOpenOtpPopup] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [allowResend, setAllowResend] = useState(false);
+  const [resendCount, setResendCount] = useState(0);
+  const { isActive, reset, start, time } = useTimer({
+    duration: 180,
+    onFinish() {
+      setAllowResend(true);
+    },
+  });
+
   const customerApi = new apiGateway.meradhan.customerAuthApi.CustomerAuthApi(
     apiClientCaller
   );
-  const verifyEmailMutation = useMutation({
-    mutationKey: ["profile-email-verify", profile.id],
+
+  const sendEmailOtpMutation = useMutation({
+    mutationKey: ["profile-email-verify-send-otp", profile.id, profile.emailAddress],
     mutationFn: async () => {
-      return await customerApi.sendEmailVerifyLink();
+      return await customerApi.sendEmailVerifyOtp({
+        email: profile.emailAddress?.trim() || "",
+      });
     },
     onSuccess: () => {
-      toast.success("Email Send Successfully");
+      toast.success("OTP sent to your email");
+      setResendCount((c) => c + 1);
+      setAllowResend(false);
+      setOpenOtpPopup(true);
+      reset();
+      start();
     },
-    onError: () => {
-      toast.error("Verification Email Send Failed");
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { message?: string } } };
+      toast.error(
+        err?.response?.data?.message || "Could not send OTP. Try again.",
+      );
     },
   });
+
+  const verifyEmailOtpMutation = useMutation({
+    mutationKey: ["profile-email-verify-otp", profile.id, profile.emailAddress],
+    mutationFn: async () => {
+      return await customerApi.verifyEmailVerifyOtp({
+        email: profile.emailAddress?.trim() || "",
+        otp,
+        token: sendEmailOtpMutation.data?.otpToken || "",
+      });
+    },
+    onSuccess: () => {
+      toast.success("Email verified successfully");
+      setOpenOtpPopup(false);
+      setOtp("");
+      queryClient.invalidateQueries({
+        queryKey: ["profile-page", profile.id],
+      });
+    },
+    onError: (error: unknown) => {
+      const err = error as { response?: { data?: { message?: string } } };
+      toast.error(
+        err?.response?.data?.message || "OTP verification failed",
+      );
+    },
+  });
+
+  const handleSubmitOtp = () => {
+    if (otp.length !== 6) {
+      toast.error("Please enter a valid 6-digit OTP");
+      return;
+    }
+    verifyEmailOtpMutation.mutate();
+  };
+
   return (
     <DataInfoLabel
       title="Email"
@@ -144,9 +207,9 @@ function EmailVerification({
         !profile.utility.isEmailVerified ? (
           <span
             className="text-secondary underline cursor-pointer"
-            onClick={() => verifyEmailMutation.mutate()}
+            onClick={() => sendEmailOtpMutation.mutate()}
           >
-            {verifyEmailMutation.isPending ? "Sending.." : "Verify"}
+            {sendEmailOtpMutation.isPending ? "Sending.." : "Verify"}
           </span>
         ) : (
           ""
@@ -161,6 +224,54 @@ function EmailVerification({
           </EmailChangeUpdate>
         )}
       </p>
+
+      <Dialog open={openOtpPopup} onOpenChange={setOpenOtpPopup}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-medium">Enter OTP</DialogTitle>
+            <DialogDescription className="text-gray-600">
+              Please enter the OTP sent to {profile.emailAddress || "your email"}.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex flex-col gap-3 py-5">
+            <SignInOtpInput otp={otp} setOtp={setOtp} length={6} />
+          </div>
+
+          <DialogFooter>
+            <Button
+              className="w-full"
+              onClick={handleSubmitOtp}
+              disabled={verifyEmailOtpMutation.isPending}
+            >
+              {verifyEmailOtpMutation.isPending ? "Verifying…" : "Verify OTP"}
+            </Button>
+          </DialogFooter>
+          <Button
+            variant="link"
+            disabled={
+              sendEmailOtpMutation.isPending ||
+              isActive ||
+              resendCount >= 3 ||
+              !allowResend
+            }
+            onClick={() => {
+              if (resendCount >= 3) {
+                toast.error("Maximum resend attempts reached");
+                return;
+              }
+              if (isActive) return;
+              sendEmailOtpMutation.mutate();
+            }}
+          >
+            {sendEmailOtpMutation.isPending
+              ? "Sending..."
+              : isActive
+                ? `Resend OTP (${time})`
+                : "Resend OTP"}
+          </Button>
+        </DialogContent>
+      </Dialog>
     </DataInfoLabel>
   );
 }

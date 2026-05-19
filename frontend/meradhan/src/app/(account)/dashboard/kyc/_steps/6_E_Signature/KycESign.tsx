@@ -9,21 +9,49 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { API_LOCAL_URL, API_SERVER_URL } from "@/global/constants/domains";
+import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import useAppCookie from "@/hooks/useAppCookie.hook";
-import Link from "next/link";
+import { Loader2 } from "lucide-react";
 import { FaDownload } from "react-icons/fa";
 import { IoMdArrowDropright } from "react-icons/io";
-import { useKycDataStorage } from "../../_store/useKycDataStorage";
-import { useHandelEsignKyc } from "./_hooks/useHandelEsignKyc";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { useKycDataStorage } from "../../_store/useKycDataStorage";
+import { useHandelEsignKyc } from "./_hooks/useHandelEsignKyc";
 
 function KycESign() {
   const { handleEsignKyc, isPending } = useHandelEsignKyc();
   const { state, setStep6Data } = useKycDataStorage();
   const { cookies } = useAppCookie();
   const [clicks, setClicks] = useState(0);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownloadKycForm = async () => {
+    const userId = cookies?.userId;
+    if (!userId || clicks >= 3 || isDownloading) return;
+
+    setIsDownloading(true);
+    try {
+      const response = await apiClientCaller.get<Blob>(
+        `/customer/kyc/download-pdf/${userId}`,
+        { responseType: "blob" },
+      );
+      const blob = response.data;
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `MeraDhan-KYC-UnsignedForm.pdf`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+      setClicks((c) => c + 1);
+    } catch {
+      toast.error("Failed to download KYC form. Please try again.");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   return (
     <Card accountMode className="gap-0 text-black">
@@ -37,25 +65,26 @@ function KycESign() {
       <CardContent accountMode className="pt-0">
         <div className="flex flex-col">
           <div className="my-6">
-            <Link
-              href={
-                clicks <= 3
-                  ? `${API_LOCAL_URL}/customer/kyc/download-pdf/${cookies?.userId}`
-                  : "#"
-              }
-              target="_blank"
-              onClick={() => setClicks(clicks + 1)}
-              download
+            <Button
+              type="button"
+              size="lg"
+              variant="defaultLight"
+              className="gap-3 w-56 font-medium"
+              disabled={clicks >= 3 || isDownloading || !cookies?.userId}
+              onClick={() => void handleDownloadKycForm()}
             >
-              <Button
-                size={`lg`}
-                variant={`defaultLight`}
-                className="gap-5 w-56 font-medium"
-                disabled={clicks >= 3}
-              >
-                Download KYC Form <FaDownload />{" "}
-              </Button>
-            </Link>
+              {isDownloading ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" aria-hidden />
+                  Generating…
+                </>
+              ) : (
+                <>
+                  Download KYC Form
+                  <FaDownload aria-hidden />
+                </>
+              )}
+            </Button>
           </div>
           <p className="font-medium text-lg">Final Step - Proceed to e-Sign</p>
           <div className="flex flex-col gap-4 mt-4 text-sm">

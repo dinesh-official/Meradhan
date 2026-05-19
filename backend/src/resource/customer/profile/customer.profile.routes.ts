@@ -22,6 +22,18 @@ customerProfileRoutes.post(
   (req, res) => controller.verifyAndUpdateMobile(req, res),
 );
 customerProfileRoutes.post(
+  "/api/auth/customer/profile/email-verification/send-otp",
+  allowAccessMiddleware("USER"),
+  withRateLimit({ max: 5 }),
+  (req, res) => controller.sendEmailVerifyOtp(req, res),
+);
+customerProfileRoutes.post(
+  "/api/auth/customer/profile/email-verification/verify",
+  allowAccessMiddleware("USER"),
+  withRateLimit({ max: 5 }),
+  (req, res) => controller.verifyEmailVerifyOtp(req, res),
+);
+customerProfileRoutes.post(
   "/api/auth/customer/profile/email/send-otp",
   allowAccessMiddleware("USER"),
   withRateLimit({ max: 5 }),
