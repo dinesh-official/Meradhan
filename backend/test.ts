@@ -1,10 +1,3 @@
-import { PaymentReconciliationService } from "@services/payment/payment_reconciliation.service";
+import { revalidateBonds } from "@jobs/cron/scrap_bonds/revalidate_bonds";
 
-const svc = new PaymentReconciliationService();
-
-const result = await svc.reconcilePendingRazorpayOrders({
-    lookbackHours: 72,
-    maxOrders: 75,
-});
-
-console.log(result);
+await revalidateBonds();

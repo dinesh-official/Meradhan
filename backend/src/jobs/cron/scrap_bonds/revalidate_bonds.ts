@@ -71,29 +71,33 @@ export const revalidateBonds = async () => {
     );
   };
 
-  // Map raw rows -> parsed rows with error handling
-  const parsedRows = raw
-    .map((r, idx) => {
-      try {
-        const parsed = new NsdlBondProcessor(r).parse();
-        return {
-          ...parsed,
-          _index: idx,
-          _raw: {
-            dateOfAllotment: r.DATE_OF_ALLOTMENT,
-            redemption: r.REDEMPTION,
-          },
-        };
-      } catch (error) {
-        console.error(
-          `Error processing bond at index ${idx} (ISIN: ${r.ISIN || "unknown"}):`,
-          error
-        );
-        // Return null for failed parsing, will be filtered out later₹
-        return null;
-      }
-    })
-    .filter((r): r is NonNullable<typeof r> => r !== null);
+  // Map raw rows -> parsed rows with error handling (includes Absolute Data when configured)
+  const parsedRows: Array<
+    Awaited<ReturnType<NsdlBondProcessor["parse"]>> & {
+      _index: number;
+      _raw: { dateOfAllotment: unknown; redemption: unknown };
+    }
+  > = [];
+
+  for (let idx = 0; idx < raw.length; idx++) {
+    const r = raw[idx]!;
+    try {
+      const parsed = await new NsdlBondProcessor(r).parse();
+      parsedRows.push({
+        ...parsed,
+        _index: idx,
+        _raw: {
+          dateOfAllotment: r.DATE_OF_ALLOTMENT,
+          redemption: r.REDEMPTION,
+        },
+      });
+    } catch (error) {
+      console.error(
+        `Error processing bond at index ${idx} (ISIN: ${r.ISIN || "unknown"}):`,
+        error,
+      );
+    }
+  }
 
   const badDateSuspects = parsedRows.filter(
     (e) =>
