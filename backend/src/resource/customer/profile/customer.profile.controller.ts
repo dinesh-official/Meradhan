@@ -150,6 +150,38 @@ export class CustomerProfileController {
     });
   }
 
+  async sendEmailVerifyOtp(req: Request, res: Response) {
+    const { email } = appSchema.customer.customerEmailVerifySendOtpSchema.parse(
+      req.body,
+    );
+    const { token } = await this.profileService.sendEmailVerifyOtp({
+      customerId: req.customer!.id,
+      email,
+    });
+    await trackRateLimitSuccess(req, "otp-send");
+    res.status(200).json({ success: true, otpToken: token });
+  }
+
+  async verifyEmailVerifyOtp(req: Request, res: Response) {
+    const { email, otp, token } =
+      appSchema.customer.customerEmailVerifyConfirmSchema.parse(req.body);
+    const isVerified = await this.profileService.verifyEmailVerifyOtp({
+      customerId: req.customer!.id,
+      email,
+      token,
+      otp,
+    });
+    await trackRateLimitSuccess(req, "otp-verify");
+    if (isVerified) {
+      res.status(200).json({
+        success: true,
+        message: "Email verified successfully.",
+      });
+    } else {
+      res.status(400).json({ success: false, message: "OTP verification failed." });
+    }
+  }
+
   async sendEmailChangeOtp(req: Request, res: Response) {
     const { newEmail } = appSchema.customer.customerEmailChangeSendOtpSchema.parse(
       req.body,

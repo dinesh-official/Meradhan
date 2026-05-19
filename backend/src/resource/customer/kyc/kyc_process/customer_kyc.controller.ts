@@ -77,6 +77,8 @@ export class CustomerKycKycController {
       },
       include: { panCard: true },
     });
+    console.log(pan?.panCard);
+
     if (pan?.panCard) {
       if (pan.panCard.panCardNo !== data.panCardNo) {
         throw new AppError(
