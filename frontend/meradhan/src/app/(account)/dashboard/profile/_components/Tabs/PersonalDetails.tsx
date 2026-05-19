@@ -26,17 +26,22 @@ function PersonalDetails({
 }: {
   profile: GetCustomerResponseById["responseData"];
 }) {
-  const showAddress =
+  /** Show the communication-address block (heading + fields). */
+  const showAddressSection =
     profile.kycStatus == "VERIFIED" ||
     profile.kycStatus == "RE_KYC" ||
     profile.kycStatus == "UNDER_REVIEW";
+  /** Only after KYC is verified (or re-KYC) do we show real address from profile. */
+  const showAddressValues =
+    profile.kycStatus == "VERIFIED" || profile.kycStatus == "RE_KYC";
   const communicationAddressLabel = profile.useKraKyc
     ? "Communication Address (as per KYC)"
     : "Communication Address (as per Aadhar)";
   const getAddressNotes = (value?: string | null) => {
-    if (!showAddress) return "--";
+    if (!showAddressValues) return "--";
     return value || "--";
   };
+  const countryDisplay = showAddressValues ? "India" : "--";
 
   return (
     <>
@@ -60,12 +65,11 @@ function PersonalDetails({
         <FullKycInfo profile={profile} />
       </div>
       <div className="gap-5 grid md:grid-cols-3 mt-6 pt-6 border-gray-200 border-t">
-        {showAddress && (
+        {showAddressSection && (
           <div className="md:col-span-3">
             <h4 className="flex items-center gap-2">
               {communicationAddressLabel}{" "}
-              {(profile.kycStatus == "VERIFIED" ||
-                profile.kycStatus == "RE_KYC") && (
+              {showAddressValues && (
                 <FaCheckSquare className="text-green-600" />
               )}
             </h4>
@@ -109,7 +113,7 @@ function PersonalDetails({
           </p>
         </DataInfoLabel>
         <DataInfoLabel title="Country ">
-          <p className="font-medium text-sm">India</p>
+          <p className="font-medium text-sm">{countryDisplay}</p>
         </DataInfoLabel>
       </div>
     </>
