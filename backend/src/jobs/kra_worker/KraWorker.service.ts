@@ -364,6 +364,7 @@ export class KraWorkerService {
         await db.dataBase.customerProfileDataModel.update({
           where: { id: customerId },
           data: {
+            kycStatus: "VERIFIED",
             kraStatus: "VERIFIED",
             verifyDate: new Date(),
           },
@@ -395,6 +396,7 @@ export class KraWorkerService {
       await db.dataBase.customerProfileDataModel.update({
         where: { id: customerId },
         data: {
+          kycStatus: "VERIFIED",
           kraStatus: CBRICS_WORKFLOW_STATUS_TO_KRA[cbUser.workflowStatus.toString()] || "CBRICS STATUS PENDING - SUBMIT REGISTER",
           verifyDate: new Date(),
         },
