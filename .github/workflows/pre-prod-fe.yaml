@@ -97,7 +97,7 @@ jobs:
 
         run: |
           echo "NEXT_PUBLIC_HOST_URL=https://preprodfe.meradhan.co" > .env
-          echo "NEXT_PUBLIC_CRM_HOST_URL=https://awscrm.meradhan.co" >> .env
+          echo "NEXT_PUBLIC_CRM_HOST_URL=https://preprod-crm.meradhan.co" >> .env
           echo "NEXT_PUBLIC_BACKEND_HOST_URL=https://preprod.meradhan.co" >> .env
           echo "NEXT_PUBLIC_BACKEND_IP_URL=http://pre-prod-be.prod-namespace:4000" >> .env
           echo "NEXT_PUBLIC_STRAPI_HOST_URL=https://awsstrapi.meradhan.co" >> .env
