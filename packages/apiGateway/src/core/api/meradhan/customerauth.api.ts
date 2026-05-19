@@ -15,7 +15,7 @@ import type {
 export class CustomerAuthApi {
   private schema = appSchema.customer;
 
-  constructor(private apiClient: IApiCaller) {}
+  constructor(private apiClient: IApiCaller) { }
 
   async sendSignupMobileVerify(
     payload: z.infer<typeof this.schema.sendMobileOtpSchema>,
@@ -251,6 +251,29 @@ export class CustomerAuthApi {
       success: boolean;
       message: string;
     }>("/auth/customer/profile/mobile/verify", payload, config);
+    return data;
+  }
+
+  async sendEmailVerifyOtp(
+    payload: z.infer<typeof this.schema.customerEmailVerifySendOtpSchema>,
+    config?: AxiosRequestConfig,
+  ) {
+    const { data } = await this.apiClient.post<{ otpToken: string }>(
+      "/auth/customer/profile/email-verification/send-otp",
+      payload,
+      config,
+    );
+    return data;
+  }
+
+  async verifyEmailVerifyOtp(
+    payload: z.infer<typeof this.schema.customerEmailVerifyConfirmSchema>,
+    config?: AxiosRequestConfig,
+  ) {
+    const { data } = await this.apiClient.post<{
+      success: boolean;
+      message: string;
+    }>("/auth/customer/profile/email-verification/verify", payload, config);
     return data;
   }
 

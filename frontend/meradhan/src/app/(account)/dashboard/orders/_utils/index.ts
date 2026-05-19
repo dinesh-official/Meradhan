@@ -157,6 +157,15 @@ export function getStatusDisplay(
   return { text: String(status), className: "text-gray-600" };
 }
 
+/** True when the dashboard Status column shows "Settled" (deal sheet is available). */
+export function isOrderSettled(
+  status: OrderStatusInput,
+  paymentStatus?: PaymentStatusInput,
+  settleStatus?: number | null,
+): boolean {
+  return getStatusDisplay(status, paymentStatus, settleStatus).text === "Settled";
+}
+
 /** Strip every leading coupon token (e.g. `10.00% ` then `10% `) from NSE-style instrument text. */
 const COUPON_LEADING_REPEAT_RE = /^(?:\s*[\d.,]+%\s*)+/i;
 

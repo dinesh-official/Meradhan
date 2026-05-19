@@ -1,5 +1,8 @@
 import { db } from "@core/database/database";
-import { sendCustomerEmailChangeOtpEmail } from "@jobs/helper/send_emails";
+import {
+  sendCustomerEmailChangeOtpEmail,
+  sendCustomerEmailVerifyOtpEmail,
+} from "@jobs/helper/send_emails";
 import { sendMobileOtp } from "@jobs/helper/send_sms";
 import { CustomerProfileManager } from "@services/customer/customer_manager.service";
 import { OtpVerificationService } from "@services/otp_verification.service";
@@ -8,6 +11,18 @@ import { AppError } from "@utils/error/AppError";
 import { tokenUtils } from "@utils/token/JwtToken_utils";
 
 const EMAIL_CHANGE_PREFIX = "CUSTOMER_EMAIL_CHANGE|";
+const EMAIL_VERIFY_PREFIX = "CUSTOMER_EMAIL_VERIFY|";
+
+function buildEmailVerifyIdentifier(customerId: number) {
+  return `${EMAIL_VERIFY_PREFIX}${customerId}`;
+}
+
+function parseEmailVerifyIdentifier(identifier: string): number | null {
+  if (!identifier.startsWith(EMAIL_VERIFY_PREFIX)) return null;
+  const idStr = identifier.slice(EMAIL_VERIFY_PREFIX.length);
+  const customerId = Number(idStr);
+  return Number.isFinite(customerId) ? customerId : null;
+}
 
 function normalizeCustomerEmail(email: string) {
   return email.trim().toLowerCase();
@@ -34,6 +49,7 @@ function parseEmailChangeIdentifier(identifier: string): {
 
 export class CustomerProfileService {
   private optManager = new OtpVerificationService("MOBILE_VERIFY");
+  private emailVerifyOtpManager = new OtpVerificationService("EMAIL_VERIFY");
   private emailChangeOtpManager = new OtpVerificationService("EMAIL_CHANGE");
   private participantManager = new ParticipantManager();
   private customerProfileManager = new CustomerProfileManager();
@@ -157,6 +173,118 @@ export class CustomerProfileService {
       },
       where: {
         id: customerId,
+      },
+    });
+
+    return true;
+  }
+
+  async sendEmailVerifyOtp({
+    customerId,
+    email: rawEmail,
+  }: {
+    customerId: number;
+    email: string;
+  }): Promise<{ token: string }> {
+    const email = normalizeCustomerEmail(rawEmail);
+
+    const user = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { id: customerId },
+      select: {
+        id: true,
+        emailAddress: true,
+        firstName: true,
+        lastName: true,
+        utility: { select: { isEmailVerified: true } },
+      },
+    });
+    if (!user) {
+      throw new AppError("Customer not found", { code: "CUSTOMER_NOT_FOUND" });
+    }
+    if (user.utility?.isEmailVerified) {
+      throw new AppError("Email is already verified.", {
+        code: "EMAIL_ALREADY_VERIFIED",
+      });
+    }
+    if (normalizeCustomerEmail(user.emailAddress || "") !== email) {
+      throw new AppError("Email does not match your registered address.", {
+        code: "EMAIL_MISMATCH",
+      });
+    }
+
+    const identifier = buildEmailVerifyIdentifier(customerId);
+    const { token, otp } = await this.emailVerifyOtpManager.generateOtp(
+      identifier,
+      6,
+      300,
+    );
+
+    const displayName =
+      [user.firstName, user.lastName].filter(Boolean).join(" ").trim() || "User";
+    await sendCustomerEmailVerifyOtpEmail({
+      email,
+      userName: displayName,
+      otp,
+    });
+
+    return { token };
+  }
+
+  async verifyEmailVerifyOtp({
+    customerId,
+    email: rawEmail,
+    token,
+    otp,
+  }: {
+    customerId: number;
+    email: string;
+    token: string;
+    otp: string;
+  }): Promise<boolean> {
+    const email = normalizeCustomerEmail(rawEmail);
+
+    let tokenData: { identifier: string };
+    try {
+      tokenData = tokenUtils.verifyToken<{ identifier: string }>(token);
+    } catch {
+      throw new AppError("The provided OTP session is invalid or has expired.", {
+        code: "INVALID_OTP_TOKEN",
+      });
+    }
+
+    const parsedCustomerId = parseEmailVerifyIdentifier(tokenData.identifier);
+    if (parsedCustomerId !== customerId) {
+      throw new AppError("Invalid OTP session.", { code: "INVALID_OTP_SESSION" });
+    }
+
+    const user = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { id: customerId },
+      select: { emailAddress: true, utility: { select: { isEmailVerified: true } } },
+    });
+    if (!user) {
+      throw new AppError("Customer not found", { code: "CUSTOMER_NOT_FOUND" });
+    }
+    if (user.utility?.isEmailVerified) {
+      throw new AppError("Email is already verified.", {
+        code: "EMAIL_ALREADY_VERIFIED",
+      });
+    }
+    if (normalizeCustomerEmail(user.emailAddress || "") !== email) {
+      throw new AppError("Email does not match your registered address.", {
+        code: "EMAIL_MISMATCH",
+      });
+    }
+
+    await this.emailVerifyOtpManager.verifyOtp(token, otp);
+
+    await db.dataBase.customerProfileDataModel.update({
+      where: { id: customerId },
+      data: {
+        utility: {
+          update: {
+            isEmailVerified: true,
+          },
+        },
       },
     });
 

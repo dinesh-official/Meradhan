@@ -32,6 +32,7 @@ export class DigioSDK {
       status: string;
       date_of_birth_match: boolean;
     }>("/v3/client/kyc/fetch_id_data/PAN", data);
+
     return response.data;
   }
 

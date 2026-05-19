@@ -1,3 +1,3 @@
-import { revalidateBonds } from "@jobs/cron/scrap_bonds/revalidate_bonds";
+import { forceDeleteUser } from "./scripts/force-delete.users";
 
-await revalidateBonds();
+forceDeleteUser("MD37BXOCNx").then((e) => console.log("done"))

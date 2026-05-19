@@ -33,11 +33,14 @@ type OrderPdfDownloadsProps = {
   orderNumber: string;
   /** Table: icon-only centered trigger. Card: labeled control in expanded details. */
   variant: "table" | "card";
+  /** Deal sheet is only available after settlement. */
+  showDealSheet?: boolean;
 };
 
 export function OrderPdfDownloads({
   orderNumber,
   variant,
+  showDealSheet = false,
 }: OrderPdfDownloadsProps) {
   const { toast } = useToast();
   const [busy, setBusy] = useState<null | "receipt" | "deal">(null);
@@ -114,15 +117,17 @@ export function OrderPdfDownloads({
         >
           {busy === "receipt" ? "Preparing…" : "Order receipt"}
         </DropdownMenuItem>
-        <DropdownMenuItem
-          disabled={busy !== null}
-          onSelect={(e) => {
-            e.preventDefault();
-            void downloadDeal();
-          }}
-        >
-          {busy === "deal" ? "Preparing…" : "Deal sheet"}
-        </DropdownMenuItem>
+        {showDealSheet ? (
+          <DropdownMenuItem
+            disabled={busy !== null}
+            onSelect={(e) => {
+              e.preventDefault();
+              void downloadDeal();
+            }}
+          >
+            {busy === "deal" ? "Preparing…" : "Deal sheet"}
+          </DropdownMenuItem>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );

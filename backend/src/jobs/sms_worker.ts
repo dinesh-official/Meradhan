@@ -51,6 +51,14 @@ startQueueWorker(emailOtpSenderQueue, async (job: Job) => {
     });
     return;
   }
+  if (type == "email_verify") {
+    await emailSend.sendEmail({
+      to: email,
+      subject: subject,
+      text: meraDhanOtpEmailText({ userName, otpCode: otp }),
+    });
+    return;
+  }
 
   await emailSend.sendEmail({
     to: email,

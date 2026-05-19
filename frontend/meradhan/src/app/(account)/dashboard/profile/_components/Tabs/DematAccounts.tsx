@@ -13,6 +13,7 @@ import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { queryClient } from "@/core/config/service-clients";
 import Swal from "sweetalert2";
+import { Spinner } from "@/components/ui/spinner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -70,10 +71,9 @@ function DematAccounts({
     mutationFn: async (id: number) => {
       return await apiModel.setPrimaryDematAccount(id);
     },
-    onSuccess: (data) => {
-      console.log("Default demat account set successfully", data);
+    onSuccess: async () => {
       toast.success("Default demat account set successfully");
-      queryClient.invalidateQueries({ queryKey: ["profile-page"] });
+      await queryClient.invalidateQueries({ queryKey: ["profile-page"] });
     },
     onError: (error: unknown) => {
       console.error("Error setting default demat account", error);
@@ -89,8 +89,19 @@ function DematAccounts({
     },
   });
 
+  const isUpdatingDefault = setDefaultDematAccountMutation.isPending;
+
   return (
-    <div className="mt-5">
+    <div className="relative mt-5 min-h-[120px]">
+      {isUpdatingDefault && (
+        <div
+          className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-white/80"
+          aria-busy="true"
+          aria-label="Updating default demat account"
+        >
+          <Spinner className="size-8 text-primary" />
+        </div>
+      )}
       {profile.dematAccounts.map((dematAccount, index) => (
         <DematAccountView
           readOnly={readOnly}
