@@ -1,3 +1,3 @@
 import { forceDeleteUser } from "./scripts/force-delete.users";
 
-forceDeleteUser("MD37BXOCNx").then((e) => console.log("done"))
+forceDeleteUser("MDADRP6GN").then((e) => console.log("done"))
