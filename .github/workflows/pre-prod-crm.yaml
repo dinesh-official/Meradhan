@@ -103,7 +103,7 @@ jobs:
           echo "NEXT_PUBLIC_BACKEND_HOST_URL=https://preprod.meradhan.co" >> .env
           echo "NEXT_PUBLIC_BACKEND_IP_URL=http://pre-prod-be.prod-namespace:4000" >> .env
           echo "NEXT_PUBLIC_STRAPI_HOST_URL=https://spyder.meradhan.co" >> .env
-          echo "NEXT_PUBLIC_DIGIO=production" >> .env
+          echo "NEXT_PUBLIC_DIGIO=sandbox" >> .env
           echo "STRAPI_API_URL=https://spyder.meradhan.co/api" >> .env
           echo "PORT=4000" >> .env
     
