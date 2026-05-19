@@ -386,6 +386,25 @@ function BondForm({ initialData, isin }: BondFormProps) {
 
   const applyDealAutofillResult = (data: BondDealAutofillResponse) => {
     const s = data.suggested;
+    if (s.bondName?.trim()) form.setValue("bondName", s.bondName.trim());
+    if (s.creditRating?.trim()) form.setValue("creditRating", s.creditRating.trim());
+    if (s.allCouponDates?.length) {
+      const dates = s.allCouponDates
+        .map((ymd) => {
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(ymd.trim())) return null;
+          const [y, m, d] = ymd.trim().split("-").map(Number);
+          const dt = new Date(y, m - 1, d);
+          return Number.isNaN(dt.getTime()) ? null : dt;
+        })
+        .filter((d): d is Date => d != null);
+      if (dates.length) form.setValue("allCouponDates", dates);
+    }
+    if (s.natureOfInstrument) {
+      form.setValue(
+        "natureOfInstrument",
+        s.natureOfInstrument as BondFormData["natureOfInstrument"],
+      );
+    }
     /** Parse `YYYY-MM-DD` as local calendar date (avoids UTC off-by-one in some timezones). */
     const toDate = (ymd: string | null | undefined) => {
       if (!ymd?.trim()) return undefined;

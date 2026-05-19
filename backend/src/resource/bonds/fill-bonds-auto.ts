@@ -1,6 +1,7 @@
 import { db } from "@core/database/database";
 import { accruedInterest, DEFAULT_BOND_MARKET_HOLIDAYS, firstWorkingDayAfter, getLastNextCouponDateBasedOnSettlementDate } from "@services/order/order-pricing-helper";
 import axios from "axios";
+import moment from "moment";
 // Matches `enum INTEREST_MODE` in `bonds.prisma`
 export type InterestMode =
     | "MONTHLY"
@@ -40,14 +41,75 @@ function parseCalcMoneyString(s: string | null | undefined): number | null {
     return Number.isFinite(n) ? n : null;
 }
 
+function parseInterestPaymentDatesString(raw: string | null | undefined): Date[] {
+    if (!raw?.trim()) return [];
+    const formats = [
+        "DD-MMM-YYYY",
+        "DD-MMM-YY",
+        "YYYY-MM-DD",
+        "DD-MM-YYYY",
+        "DD/MM/YYYY",
+    ];
+    const out: Date[] = [];
+    for (const part of raw.split(/[,;\n\r|]+/)) {
+        const s = part.trim();
+        if (!s) continue;
+        const m = moment(s, formats, true);
+        if (m.isValid()) out.push(m.toDate());
+    }
+    return out;
+}
+
+function mapNatureOfInstrument(
+    raw: string | null | undefined,
+): "SECURED" | "UNSECURED" | "UNKNOWN" | null {
+    const s = String(raw ?? "").trim().toUpperCase();
+    if (!s) return null;
+    if (s.includes("UNSECURED")) return "UNSECURED";
+    if (s.includes("SECURED")) return "SECURED";
+    if (s === "SECURED" || s === "UNSECURED") return s;
+    return "UNKNOWN";
+}
+
+function collectAllCouponDatesYmd(
+    couponRows: Array<{
+        dueDate?: Date | null;
+        dueDateIst?: Date | null;
+        interestPaymentDates?: string | null;
+    }>,
+    cfRows: Array<{ date: string }> | undefined,
+    existingBondDates: Date[] | undefined,
+): string[] {
+    const set = new Set<string>();
+    const add = (d: Date | string | null | undefined) => {
+        const ymd = toYyyyMmDd(d);
+        if (ymd) set.add(ymd);
+    };
+    for (const row of couponRows) {
+        add(row.dueDateIst);
+        add(row.dueDate);
+        for (const d of parseInterestPaymentDatesString(row.interestPaymentDates)) {
+            add(d);
+        }
+    }
+    for (const row of cfRows ?? []) {
+        if (row.date?.trim()) add(row.date.trim());
+    }
+    for (const d of existingBondDates ?? []) {
+        add(d);
+    }
+    return [...set].sort();
+}
+
 export const getBondInfoCalcData = async (isin: string, { yeild }: { yeild?: string } = {}) => {
 
     const bond = await db.dataBase.bondReferenceMetadata.findFirst({ where: { isin: isin } });
     const bondData = await db.dataBase.bonds.findFirst({ where: { isin: isin } });
-    const couponPayRow = await db.dataBase.bondReferenceCouponPaymentDate.findFirst({
+    const couponRows = await db.dataBase.bondReferenceCouponPaymentDate.findMany({
         where: { isin },
         orderBy: { id: "asc" },
     });
+    const couponPayRow = couponRows[0] ?? null;
     const dueDateYmd =
         couponPayRow?.dueDateIst instanceof Date && !Number.isNaN(couponPayRow.dueDateIst.getTime())
             ? toYyyyMmDd(couponPayRow.dueDateIst)
@@ -110,11 +172,27 @@ export const getBondInfoCalcData = async (isin: string, { yeild }: { yeild?: str
         total_consideration: string
     }
     >("https://calc.meradhan.co/api/calculate", payload);
-    console.log(response.data);
+    const allCouponDates = collectAllCouponDatesYmd(
+        couponRows,
+        response.data.cf_rows,
+        bondData?.allCouponDates,
+    );
+
+    const bondName =
+        (bondData?.bondName?.trim() || bond?.issuerName?.trim() || "").trim() || null;
+    const creditRating = bondData?.creditRating?.trim() || "UnRated";
+    const natureOfInstrument =
+        mapNatureOfInstrument(bondData?.natureOfInstrument ?? bond?.natureOfInstrument) ??
+        null;
 
     return {
         payload,
         suggested: {
+            bondName,
+            creditRating,
+            allCouponDates,
+            allCouponDatesIst: allCouponDates,
+            natureOfInstrument,
             maturityDate: toYyyyMmDd(bond?.maturityDate),
             dateOfAllotment: toYyyyMmDd(bond?.issueDateIst),
             lastCouponDate: String(payload.Last_IP_Date ?? ""),

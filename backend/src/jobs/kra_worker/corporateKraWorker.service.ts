@@ -610,7 +610,7 @@ export class CorporateKraWorkerService {
                 await db.dataBase.customerProfileDataModel.update({
                     where: { id: customerId },
                     data: {
-                        kycStatus: "VERIFIED",
+
                         kraStatus: "VERIFIED",
                         verifyDate: new Date(),
                     },
@@ -638,7 +638,6 @@ export class CorporateKraWorkerService {
             await db.dataBase.customerProfileDataModel.update({
                 where: { id: customerId },
                 data: {
-                    kycStatus: "VERIFIED",
                     kraStatus: "VERIFIED",
                     verifyDate: new Date(),
                 },

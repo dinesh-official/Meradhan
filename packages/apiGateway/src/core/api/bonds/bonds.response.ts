@@ -118,6 +118,12 @@ export interface BondCalcServiceSnapshot {
 }
 
 export interface BondDealAutofillSuggestions {
+  bondName?: string | null;
+  creditRating?: string | null;
+  /** Coupon schedule as `YYYY-MM-DD` (IST calendar days). */
+  allCouponDates?: string[];
+  allCouponDatesIst?: string[];
+  natureOfInstrument?: "SECURED" | "UNSECURED" | "UNKNOWN" | null;
   maturityDate: string | null;
   dateOfAllotment: string | null;
   lastCouponDate: string;

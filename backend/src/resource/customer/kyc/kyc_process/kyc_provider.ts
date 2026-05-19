@@ -176,7 +176,10 @@ export class KycProvider extends DigioKycFileHelper {
       });
       return panDetails;
     } catch (error) {
-      console.log(error?.response?.data);
+
+      console.log({
+        NEXT_PUBLIC_DIGIO: env.NEXT_PUBLIC_DIGIO,
+      });
 
       console.log((error as AxiosError<{ message: string }>)?.response?.data);
       throw new AppError("We couldn’t verify the PAN details. Please check the PAN number and try again.", {

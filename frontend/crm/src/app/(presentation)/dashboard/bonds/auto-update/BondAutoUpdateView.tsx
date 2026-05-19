@@ -28,6 +28,7 @@ import {
   formatDecimalWithMinFractionDigits,
 } from "@/components/ui/decimal-input";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Table,
   TableBody,
@@ -56,6 +57,7 @@ import {
   mergeAutofillIntoForm,
   type AutofillMergeKey,
 } from "./mergeAutofillIntoForm";
+import { formatCouponDatesDisplay } from "./couponDatesText";
 
 /** Fields whose calculator values depend on which yield feed was used (non-consolidated vs consolidated). */
 const YIELD_SOURCE_AFFECTED_KEYS: readonly AutofillMergeKey[] = [
@@ -85,6 +87,13 @@ function autofillParamsFromCustomYieldDraft(draft: string | undefined):
 function formatDisplayValue(v: unknown): string {
   if (v == null || v === "") return "—";
   if (v instanceof Date) return formatDateForDateInput(v);
+  if (Array.isArray(v)) {
+    if (v.length === 0) return "—";
+    if (v[0] instanceof Date || typeof v[0] === "string") {
+      return formatCouponDatesDisplay(v as Date[]);
+    }
+    return v.map(String).join(", ");
+  }
   if (typeof v === "number") return Number.isFinite(v) ? String(v) : "—";
   return String(v);
 }
@@ -880,7 +889,12 @@ export default function BondAutoUpdateView() {
                                         ) : null}
                                       </span>
                                     </TableCell>
-                                    <TableCell className="text-muted-foreground text-sm max-w-[180px] break-all">
+                                    <TableCell
+                                      className={cn(
+                                        "text-muted-foreground text-sm max-w-[180px] break-all",
+                                        key === "allCouponDates" && "max-h-28 overflow-y-auto align-top",
+                                      )}
+                                    >
                                       {key === "sellPrice" &&
                                         typeof curVal === "number" &&
                                         Number.isFinite(curVal)
@@ -888,7 +902,49 @@ export default function BondAutoUpdateView() {
                                         : formatDisplayValue(curVal)}
                                     </TableCell>
                                     <TableCell>
-                                      {key === "recordDays" ? (
+                                      {key === "bondName" || key === "creditRating" ? (
+                                        <Input
+                                          className="h-9 text-sm"
+                                          value={typeof sug === "string" ? sug : ""}
+                                          onChange={(e) =>
+                                            updateDraft(b.isin, {
+                                              [key]: e.target.value,
+                                            } as Partial<DraftSuggestions>)
+                                          }
+                                        />
+                                      ) : key === "natureOfInstrument" ? (
+                                        <Input
+                                          className="h-9 font-mono text-sm"
+                                          placeholder="SECURED | UNSECURED | UNKNOWN"
+                                          value={typeof sug === "string" ? sug : ""}
+                                          onChange={(e) =>
+                                            updateDraft(b.isin, {
+                                              natureOfInstrument: e.target.value as DraftSuggestions["natureOfInstrument"],
+                                            })
+                                          }
+                                        />
+                                      ) : key === "allCouponDates" ? (
+                                        <Textarea
+                                          rows={4}
+                                          className="font-mono text-xs min-w-[220px] max-h-28 resize-none overflow-y-auto"
+                                          placeholder="YYYY-MM-DD per line"
+                                          value={
+                                            Array.isArray(sug)
+                                              ? sug.map(String).join("\n")
+                                              : ""
+                                          }
+                                          onChange={(e) => {
+                                            const ymds = e.target.value
+                                              .split(/[\n,]+/)
+                                              .map((s) => s.trim())
+                                              .filter(Boolean);
+                                            updateDraft(b.isin, {
+                                              allCouponDates: ymds,
+                                              allCouponDatesIst: ymds,
+                                            });
+                                          }}
+                                        />
+                                      ) : key === "recordDays" ? (
                                         <Input
                                           type="number"
                                           className="h-9 font-mono text-sm"
