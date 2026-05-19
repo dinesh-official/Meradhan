@@ -19,6 +19,7 @@ import type z from "zod";
 import { BondService } from "@resource/bonds/bond.service";
 import { AppConfigService } from "@resource/app-config/app-config.service";
 import { CrmInventoryStockService } from "@resource/crm/orders/inventory_stock.service";
+import { CustomerProfileManager } from "@services/customer/customer_manager.service";
 import type { computeBondOrderPricingData } from "@services/order/order-pricing-helper";
 
 // PaymentStatus enum values (matches Prisma schema orders.prisma)
@@ -46,6 +47,7 @@ export class OrderService {
   private payment = new PaymentService();
   private appConfig = new AppConfigService();
   private crmInventoryStock = new CrmInventoryStockService();
+  private customerProfileManager = new CustomerProfileManager();
 
   private async getBondDetails(isin: string) {
     const bond = await db.dataBase.bonds.findFirst({
@@ -184,6 +186,8 @@ export class OrderService {
     _legacyClientOrderId?: string,
     _skipPgMode?: boolean
   ) {
+    await this.customerProfileManager.assertCustomerCanPlaceOrder(customerId);
+
     const pgMode = await this.appConfig.getPaymentGatewayMode();
     if (_skipPgMode != true) {
       if (pgMode === "INQUIRY") {

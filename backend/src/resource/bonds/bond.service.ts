@@ -8,12 +8,17 @@ import {
   getLastNextCouponDateBasedOnSettlementDate,
 } from "@services/order/order-pricing-helper";
 import { sendBackOfficeEmail } from "@communication/email_communication";
-import { placeOrderEmailCustomer, sendPlaceOrderEmail } from "./place-order-email";
+import {
+  placeOrderEmailCustomer,
+  placeOrderEmailCustomerSubject,
+  sendPlaceOrderEmail,
+} from "./place-order-email";
 import { AppConfigService } from "@resource/app-config/app-config.service";
 import { AppError } from "@utils/error/AppError";
 import { env } from "@packages/config/src/env";
 import { OrderPdfService } from "@resource/customer/order/order-pdf.service";
 import { OrderService } from "@resource/customer/order/order.service";
+import { CustomerProfileManager } from "@services/customer/customer_manager.service";
 
 export type GetBondOrderPricingResult =
   | { ok: true; pricing: ReturnType<typeof computeBondOrderPricingData> }
@@ -437,6 +442,13 @@ export class BondService {
         providerPrice: bondData.providerPrice || null,
         ignoreAutoUpdate: bondData.ignoreAutoUpdate ?? false,
         allCouponDates: bondData.allCouponDates ?? [],
+        allCouponDatesIst: (bondData.allCouponDates ?? []).map((d) => {
+          const dt = d instanceof Date ? d : new Date(d);
+          if (Number.isNaN(dt.getTime())) return dt;
+          return new Date(
+            Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate()),
+          );
+        }),
         dayConvention: bondData.dayConvention || null,
         recordDate: bondData.recordDate || null,
         recordDays: bondData.recordDays ?? null,
@@ -519,6 +531,13 @@ export class BondService {
         providerPrice: bondData.providerPrice || null,
         ignoreAutoUpdate: bondData.ignoreAutoUpdate ?? false,
         allCouponDates: bondData.allCouponDates ?? [],
+        allCouponDatesIst: (bondData.allCouponDates ?? []).map((d) => {
+          const dt = d instanceof Date ? d : new Date(d);
+          if (Number.isNaN(dt.getTime())) return dt;
+          return new Date(
+            Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate()),
+          );
+        }),
         dayConvention: bondData.dayConvention || null,
         recordDate: bondData.recordDate || null,
         recordDays: bondData.recordDays ?? null,
@@ -560,13 +579,22 @@ export class BondService {
       );
     }
 
+    const customerProfileManager = new CustomerProfileManager();
+    await customerProfileManager.assertCustomerCanPlaceOrder(
+      orderData.customerProfileId,
+    );
+
     const customer = await db.dataBase.customerProfileDataModel.findUnique({
       where: { id: orderData.customerProfileId },
     });
     if (!customer) {
       throw new Error(`Customer with ID ${orderData.customerProfileId} not found`);
     }
-    const bond = await bondService.getBondOrderPricing(orderData.isin, orderData.quantity);
+    const bond = await bondService.getBondOrderPricing(
+      orderData.isin,
+      orderData.quantity,
+      orderData.settlementType,
+    );
 
     if (bond.ok) {
       await order.createDraftOrder(customer.id, {
@@ -629,7 +657,7 @@ export class BondService {
     await Promise.all([
       sendBackOfficeEmail({
         to: customer.emailAddress ?? "",
-        subject: "Order Request Received – ISIN: " + orderData.isin + " | Request Date: " + requestDate,
+        subject: placeOrderEmailCustomerSubject(orderData),
         text: await placeOrderEmailCustomer(orderData),
         // attachments: orderPdfAttachments,
       }),

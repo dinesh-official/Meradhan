@@ -1,10 +1,3 @@
-import { PaymentReconciliationService } from "@services/payment/payment_reconciliation.service";
+import { forceDeleteUser } from "./scripts/force-delete.users";
 
-const svc = new PaymentReconciliationService();
-
-const result = await svc.reconcilePendingRazorpayOrders({
-    lookbackHours: 72,
-    maxOrders: 75,
-});
-
-console.log(result);
+forceDeleteUser("MDL9I14MN").then((e) => console.log("done"))

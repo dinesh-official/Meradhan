@@ -21,6 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Spinner } from "@/components/ui/spinner";
 import BankViewCard from "../../../kyc/_steps/3_BankAccount/_elements/BankViewCard";
 import AddNewBankAccount from "./accounts/bank/AddNewBankAccount";
 
@@ -70,10 +71,9 @@ function BankAccounts({
     mutationFn: async (id: number) => {
       return await apiModel.setPrimaryBankAccount(id);
     },
-    onSuccess: (data) => {
-      console.log("Default bank account set successfully", data);
+    onSuccess: async () => {
       toast.success("Default bank account set successfully");
-      queryClient.invalidateQueries({ queryKey: ["profile-page"] });
+      await queryClient.invalidateQueries({ queryKey: ["profile-page"] });
     },
     onError: (error: unknown) => {
       console.error("Error setting default bank account", error);
@@ -89,8 +89,19 @@ function BankAccounts({
     },
   });
 
+  const isUpdatingDefault = setDefaultBankAccountMutation.isPending;
+
   return (
-    <div className="pt-5">
+    <div className="relative pt-5 min-h-[120px]">
+      {isUpdatingDefault && (
+        <div
+          className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-white/80"
+          aria-busy="true"
+          aria-label="Updating default bank account"
+        >
+          <Spinner className="size-8 text-primary" />
+        </div>
+      )}
       {profile.bankAccounts.map((bankAccount, index) => (
         <BankViewCard
           readOnly={readOnly}

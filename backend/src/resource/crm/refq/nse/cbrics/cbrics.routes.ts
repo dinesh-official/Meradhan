@@ -4,6 +4,11 @@ import { allowAccessMiddleware } from "@middlewares/auth_middleware";
 const participantsRouter = Router();
 
 const controller = new CbricsParticipantController();
+participantsRouter.post(
+  "/api/crm/rfq/nse/cbrics/participants/resync-kra-status",
+  allowAccessMiddleware("CRM"),
+  (req, res) => controller.handleResyncKraFromCbricsParticipants(req, res)
+);
 participantsRouter.get(
   "/api/crm/rfq/nse/cbrics/workflow-statuses",
   allowAccessMiddleware("CRM"),

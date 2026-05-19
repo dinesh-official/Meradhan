@@ -12,6 +12,7 @@ import { formatAmount } from "@/global/utils/formate";
 import type { Order } from "@root/apiGateway";
 import {
   getStatusDisplay,
+  isOrderSettled,
   formatOrderHistoryDate,
   formatOrderYieldPercent,
   getOrderSettlementDateInput,
@@ -137,6 +138,11 @@ function OrdersTable({ orders, isLoading }: OrdersTableProps) {
                         <OrderPdfDownloads
                           orderNumber={order.orderNumber}
                           variant="table"
+                          showDealSheet={isOrderSettled(
+                            order.status,
+                            order.paymentStatus,
+                            order.settleStatus,
+                          )}
                         />
                       </div>
                     </TableCell>

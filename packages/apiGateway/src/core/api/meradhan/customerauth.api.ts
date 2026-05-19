@@ -15,7 +15,7 @@ import type {
 export class CustomerAuthApi {
   private schema = appSchema.customer;
 
-  constructor(private apiClient: IApiCaller) {}
+  constructor(private apiClient: IApiCaller) { }
 
   async sendSignupMobileVerify(
     payload: z.infer<typeof this.schema.sendMobileOtpSchema>,
@@ -53,6 +53,36 @@ export class CustomerAuthApi {
         params: params,
       }
     );
+    return data;
+  }
+
+  async updateSignupEmail(
+    payload: z.infer<typeof this.schema.signupUpdateEmailSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<
+      BaseResponseData<{ id: number; email: string }>
+    >("/auth/customer/signup/update-email", payload, config);
+    return data;
+  }
+
+  async updateSignupPhone(
+    payload: z.infer<typeof this.schema.signupUpdatePhoneSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<
+      BaseResponseData<{ id: number; phone: string }>
+    >("/auth/customer/signup/update-phone", payload, config);
+    return data;
+  }
+
+  async verifySignupOtpBoth(
+    payload: z.infer<typeof this.schema.signUpVerifyBothSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<
+      BaseResponseData<{ id: number; email: string }>
+    >("/auth/customer/verify-signup-otp-both", payload, config);
     return data;
   }
 
@@ -113,6 +143,18 @@ export class CustomerAuthApi {
   ) {
     const { data } = await this.apiClient.post<IAuthCompleteResponse>(
       "/auth/customer/signin/with-otp",
+      payload,
+      config
+    );
+    return data;
+  }
+
+  async verifyAccountActivationAtLogin(
+    payload: z.infer<typeof this.schema.accountActivationVerifySchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<IAuthCompleteResponse>(
+      "/auth/customer/signin/account-activation/verify",
       payload,
       config
     );
@@ -209,6 +251,29 @@ export class CustomerAuthApi {
       success: boolean;
       message: string;
     }>("/auth/customer/profile/mobile/verify", payload, config);
+    return data;
+  }
+
+  async sendEmailVerifyOtp(
+    payload: z.infer<typeof this.schema.customerEmailVerifySendOtpSchema>,
+    config?: AxiosRequestConfig,
+  ) {
+    const { data } = await this.apiClient.post<{ otpToken: string }>(
+      "/auth/customer/profile/email-verification/send-otp",
+      payload,
+      config,
+    );
+    return data;
+  }
+
+  async verifyEmailVerifyOtp(
+    payload: z.infer<typeof this.schema.customerEmailVerifyConfirmSchema>,
+    config?: AxiosRequestConfig,
+  ) {
+    const { data } = await this.apiClient.post<{
+      success: boolean;
+      message: string;
+    }>("/auth/customer/profile/email-verification/verify", payload, config);
     return data;
   }
 

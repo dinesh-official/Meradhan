@@ -3,6 +3,10 @@ import dayjs from "dayjs";
 import { allCompanyNameOrTyes } from "./all_company_data";
 import { type BondDataSet } from "./nsdl_bond_service";
 import fs from "fs";
+import { absoluteDataApiFromEnv } from "@modules/absolutedata/absolutedata.api";
+import { mergeAbsoluteDataIntoBond } from "@modules/absolutedata/absolutedata.bonds.mapper";
+import type { AbsoluteDataGetBondByIsinResult } from "@modules/absolutedata/absolutedata.types";
+import { env } from "@packages/config/src/env";
 
 export class NsdlBondProcessor {
   constructor(private bond: BondDataSet) { }
@@ -582,8 +586,7 @@ export class NsdlBondProcessor {
     return category.map((c) => c.toLowerCase());
   }
 
-  // Main parse function to extract and structure bond data
-  public parse(): DataBaseSchema.BondsCreateInput {
+  public parseData(): DataBaseSchema.BondsCreateInput {
     const redemptionDate = this.getRedemptionDate(true);
     console.log(this.bond.ISIN, redemptionDate);
 
@@ -632,4 +635,39 @@ export class NsdlBondProcessor {
       ratingDateIst: this.extractRatingCompanyAndDate()?.date ? this.toIstDateOnly(this.extractRatingCompanyAndDate()!.date?.toISOString()) : undefined,
     };
   }
+
+
+  public async getAbsoluteData(
+    isin: string,
+  ): Promise<AbsoluteDataGetBondByIsinResult | null> {
+    if (!env.ABSOLUTE_DATA_API_KEY?.trim()) {
+      return null;
+    }
+    try {
+      const api = absoluteDataApiFromEnv();
+      return await api.getBondByIsin(isin);
+    } catch {
+      return null;
+    }
+  }
+
+  /** NSDL scrape + Absolute Data enrichment when API key is configured. */
+  public async parse(): Promise<DataBaseSchema.BondsCreateInput> {
+    const data = this.parseData();
+    const isin = pickStr(data.isin);
+    if (!isin) return data;
+
+    const abResult = await this.getAbsoluteData(isin);
+    if (!abResult?.ok || !abResult.data.items.length) {
+      return data;
+    }
+
+    return mergeAbsoluteDataIntoBond(data, abResult.data.items[0]!);
+  }
+}
+
+function pickStr(v: unknown): string | undefined {
+  if (v == null) return undefined;
+  const s = String(v).trim();
+  return s.length ? s : undefined;
 }

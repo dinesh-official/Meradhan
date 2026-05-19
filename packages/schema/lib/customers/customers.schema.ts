@@ -55,10 +55,32 @@ export const signUpWithCredentialsQuerySchema = z.object({
   id: z.string(),
 });
 
+export const signupUpdateEmailSchema = z.object({
+  customerId: z.coerce.number().int().positive(),
+  newEmail: z.email("Invalid email format."),
+});
+
+export const signupUpdatePhoneSchema = z.object({
+  customerId: z.coerce.number().int().positive(),
+  newPhone: z
+    .string()
+    .regex(/^[5-9][0-9]{9}$/, "Mobile number must be exactly 10 digits."),
+});
+
+export const signUpVerifyBothSchema = z.object({
+  id: z.coerce.number().int().positive(),
+  emailOtp: z.string().length(6, "Email OTP must be 6 digits."),
+  emailToken: z.string().min(1),
+  mobileOtp: z.string().length(4, "Mobile OTP must be 4 digits."),
+  mobileToken: z.string().min(1),
+});
+
 // Sign In Schemas
 export const signInWithEmailPhoneRequestSchema = z.object({
   identity: z.enum(["email", "phoneNo"]),
   value: z.string().min(1, "Enter email or phone number."),
+  /** When true and channel needs activation, sends OTP. Omit or false: prompt only. */
+  sendActivationOtp: z.boolean().optional(),
 });
 
 export const signInWithCredentialsSchema = z.object({
@@ -76,6 +98,13 @@ export const signInWithOtpSchema = z.object({
   identity: z.enum(["email", "phoneNo"]),
   value: z.string().min(1, "Enter email or phone number."),
   otp: z.string().min(4, "OTP is required."),
+  token: z.string().min(1, "Token is required."),
+});
+
+export const accountActivationVerifySchema = z.object({
+  identity: z.enum(["email", "phoneNo"]),
+  value: z.string().min(1, "Enter email or phone number."),
+  otp: z.string().min(4, "OTP is required.").max(6, "OTP is too long."),
   token: z.string().min(1, "Token is required."),
 });
 
@@ -379,6 +408,21 @@ export const customerMobileVerifyRequestSchema = z.object({
 export const customerWhatsAppPreferenceSchema = z.object({
   enableWhatsApp: z.boolean({
     error: "WhatsApp preference is required",
+  }),
+});
+
+export const customerEmailVerifySendOtpSchema = z.object({
+  email: z.email("Please enter a valid email address"),
+});
+
+export const customerEmailVerifyConfirmSchema = z.object({
+  email: z.email("Please enter a valid email address"),
+  otp: z
+    .string({ error: "OTP is required" })
+    .min(6, { message: "OTP must be 6 digits" })
+    .max(6, { message: "OTP must be 6 digits" }),
+  token: z.string({ error: "Token is required" }).min(1, {
+    message: "Token is required",
   }),
 });
 

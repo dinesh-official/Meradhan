@@ -17,6 +17,7 @@ export const fullCustomerProfileSelect: DataBaseSchema.CustomerProfileDataModelS
     createdBy: true,
     kycStatus: true,
     kraStatus: true,
+    useKraKyc: true,
     middleName: true,
     emailAddress: true,
     phoneNo: true,

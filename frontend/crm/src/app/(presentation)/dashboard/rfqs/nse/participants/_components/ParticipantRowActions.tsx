@@ -59,6 +59,7 @@ export function ParticipantRowActions({ row }: { row: ParticipantData }) {
 
   return (
     <div
+      data-table-row-click-ignore
       className="flex flex-wrap items-center justify-end gap-1.5"
       role="presentation"
       onClick={(e) => e.stopPropagation()}

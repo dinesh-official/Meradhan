@@ -6,6 +6,7 @@ import type { Order } from "@root/apiGateway";
 import { useState } from "react";
 import {
   getStatusDisplay,
+  isOrderSettled,
   formatOrderHistoryDate,
   formatOrderYieldPercent,
   getOrderSettlementDateInput,
@@ -99,6 +100,11 @@ function OrderCard({ order, showSeparator = false }: OrderCardProps) {
                   <OrderPdfDownloads
                     orderNumber={order.orderNumber}
                     variant="card"
+                    showDealSheet={isOrderSettled(
+                      order.status,
+                      order.paymentStatus,
+                      order.settleStatus,
+                    )}
                   />
                 </div>
               </div>
