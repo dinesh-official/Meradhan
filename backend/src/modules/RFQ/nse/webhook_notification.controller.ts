@@ -60,7 +60,7 @@ export class NseWebhookController {
         for (const item of unregList) {
           const loginId = typeof item.loginId === "string" ? item.loginId : undefined;
           const actualStatus = item.workflowStatus;
-          const approved = actualStatus === 1 || String(actualStatus ?? "") === "1";
+          const approved = actualStatus == 1;
 
           if (!approved || !loginId) continue;
 

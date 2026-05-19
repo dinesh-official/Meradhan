@@ -1,8 +1,11 @@
 import type { BondDealAutofillSuggestions } from "@root/apiGateway";
 import { parseApiDateStringToLocalDate } from "../_utils/bondCalendarDates";
 import type { BondFormData } from "../_utils/bondDetailsToFormData";
-
 export const AUTOFILL_MERGE_KEYS = [
+  "bondName",
+  "creditRating",
+  "allCouponDates",
+  "natureOfInstrument",
   "maturityDate",
   "dateOfAllotment",
   "lastCouponDate",
@@ -32,6 +35,13 @@ function ymdToDate(s: string | null | undefined): Date | undefined {
   return parseApiDateStringToLocalDate(s.trim());
 }
 
+function ymdListToDates(ymds: string[] | null | undefined): Date[] {
+  if (!ymds?.length) return [];
+  return ymds
+    .map((s) => parseApiDateStringToLocalDate(s.trim()))
+    .filter((d) => !Number.isNaN(d.getTime()));
+}
+
 /**
  * Applies selected autofill suggestions onto a full bond form payload (typically current DB snapshot).
  */
@@ -41,6 +51,23 @@ export function mergeAutofillIntoForm(
   include: Record<AutofillMergeKey, boolean>,
 ): BondFormData {
   const out: BondFormData = { ...base };
+
+  if (include.bondName && suggested.bondName?.trim()) {
+    out.bondName = suggested.bondName.trim();
+  }
+  if (include.creditRating && suggested.creditRating?.trim()) {
+    out.creditRating = suggested.creditRating.trim();
+  }
+  if (include.allCouponDates) {
+    const dates = ymdListToDates(
+      suggested.allCouponDates ?? suggested.allCouponDatesIst,
+    );
+    if (dates.length) out.allCouponDates = dates;
+  }
+  if (include.natureOfInstrument && suggested.natureOfInstrument) {
+    out.natureOfInstrument =
+      suggested.natureOfInstrument as BondFormData["natureOfInstrument"];
+  }
 
   if (include.maturityDate) {
     const d = ymdToDate(suggested.maturityDate);

@@ -442,6 +442,13 @@ export class BondService {
         providerPrice: bondData.providerPrice || null,
         ignoreAutoUpdate: bondData.ignoreAutoUpdate ?? false,
         allCouponDates: bondData.allCouponDates ?? [],
+        allCouponDatesIst: (bondData.allCouponDates ?? []).map((d) => {
+          const dt = d instanceof Date ? d : new Date(d);
+          if (Number.isNaN(dt.getTime())) return dt;
+          return new Date(
+            Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate()),
+          );
+        }),
         dayConvention: bondData.dayConvention || null,
         recordDate: bondData.recordDate || null,
         recordDays: bondData.recordDays ?? null,
@@ -524,6 +531,13 @@ export class BondService {
         providerPrice: bondData.providerPrice || null,
         ignoreAutoUpdate: bondData.ignoreAutoUpdate ?? false,
         allCouponDates: bondData.allCouponDates ?? [],
+        allCouponDatesIst: (bondData.allCouponDates ?? []).map((d) => {
+          const dt = d instanceof Date ? d : new Date(d);
+          if (Number.isNaN(dt.getTime())) return dt;
+          return new Date(
+            Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate()),
+          );
+        }),
         dayConvention: bondData.dayConvention || null,
         recordDate: bondData.recordDate || null,
         recordDays: bondData.recordDays ?? null,
