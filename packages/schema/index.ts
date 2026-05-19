@@ -1,4 +1,11 @@
 import * as authSchema from "./lib/auth/auth.schema";
+
+export {
+  CRM_LOGIN_ALLOWED_EMAIL_DOMAINS,
+  getCrmLoginEmailDomain,
+  isCrmLoginEmailDomainAllowed,
+  type CrmLoginAllowedEmailDomain,
+} from "./lib/auth/crm_login_email";
 import * as userSchema from "./lib/crm/users.schema";
 import * as leadSchema from "./lib/crm/leads.schema";
 import * as partnershipSchema from "./lib/crm/partnership.schema";

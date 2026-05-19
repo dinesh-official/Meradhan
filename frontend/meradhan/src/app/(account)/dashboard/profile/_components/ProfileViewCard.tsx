@@ -12,13 +12,6 @@ import { FaCheckSquare } from "react-icons/fa";
 import { IoWarning } from "react-icons/io5";
 import { RiArrowRightSFill } from "react-icons/ri";
 
-/** Display-only: map any non-verified backend kraStatus to "Pending". */
-const isKraVerified = (kraStatus?: string | null) =>
-  String(kraStatus ?? "").trim().toUpperCase() === "VERIFIED";
-
-const formatKraStatusLabel = (kraStatus?: string | null) =>
-  isKraVerified(kraStatus) ? "Verified" : "Pending";
-
 function ProfileViewCard({
   profile,
 }: {
@@ -159,18 +152,6 @@ function ProfileViewCard({
                         profile?.kycSubmitDate,
                         "hh:mm aa"
                       )}
-                  </p>
-                )}
-                {profile.kraStatus != null && profile.kraStatus !== "" && (
-                  <p
-                    className={cn(
-                      "text-xs font-medium",
-                      isKraVerified(profile.kraStatus)
-                        ? "text-green-600"
-                        : "text-yellow-600",
-                    )}
-                  >
-                    KRA: {formatKraStatusLabel(profile.kraStatus)}
                   </p>
                 )}
               </>

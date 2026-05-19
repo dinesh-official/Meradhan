@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { isCrmLoginEmailDomainAllowed } from "@root/schema";
 import { Mail } from "lucide-react";
 
 function EmailInputStep({
@@ -18,6 +19,9 @@ function EmailInputStep({
     <div className="flex flex-col gap-4 mt-5 px-3">
       <div>
         <p className="mb-1 text-gray-800 text-xs">Email Address</p>
+        <p className="mb-2 text-muted-foreground text-xs">
+          Use your @meradhan.co or @absolutedata.ai work email
+        </p>
         <div className="relative">
           <Input
             className="peer ps-9"
@@ -35,7 +39,9 @@ function EmailInputStep({
       <Button
         className="w-full"
         onClick={onSubmit}
-        disabled={isLoading || !value?.includes("@meradhan.co")}
+        disabled={
+          isLoading || !isCrmLoginEmailDomainAllowed(value?.trim() ?? "")
+        }
       >
         Send OTP
       </Button>
