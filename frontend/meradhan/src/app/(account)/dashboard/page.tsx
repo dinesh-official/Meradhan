@@ -143,8 +143,19 @@ async function DashBoardPage() {
           </DashBoardSatsCard>
           <DashBoardSatsCard
             title="My KYC"
-            icon={<FaUser size={19} className="text-secondary" />}
-            className="bg-accent text-secondary"
+            icon={
+              <FaUser
+                size={19}
+                className={
+                  kycStatus == "VERIFIED" ? "text-primary" : "text-secondary"
+                }
+              />
+            }
+            className={
+              kycStatus == "VERIFIED"
+                ? undefined
+                : "bg-accent text-secondary"
+            }
           >
             {kycStatus == "PENDING" && (
               <div className="flex items-end flex-row justify-between gap-2">
@@ -167,7 +178,7 @@ async function DashBoardPage() {
               </div>
             )}
             {kycStatus == "VERIFIED" && <div className="flex items-end flex-row justify-between gap-2">
-              <p className="text-3xl font-medium">Done</p>
+              <p className="text-3xl font-medium text-primary">Healthy</p>
             </div>}
             {kycStatus == "UNDER_REVIEW" && <div className="flex items-end flex-row justify-between gap-2">
               <p className="text-3xl font-medium">Under Review</p>

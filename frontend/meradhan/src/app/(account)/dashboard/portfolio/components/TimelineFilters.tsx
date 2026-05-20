@@ -131,7 +131,7 @@ const TimelineFilters = ({ activeFilters, onFilterChange }: TimelineFiltersProps
 
         <div className={`${filterFieldClass} md:w-[220px] md:shrink-0`}>
           <span className={filterLabelClass} title="Filter by ISIN from your orders">
-            ISIN (my orders)
+            ISIN
           </span>
           <Select
             value={selectedIsin ? selectedIsin : ISIN_ALL_VALUE}
@@ -143,10 +143,10 @@ const TimelineFilters = ({ activeFilters, onFilterChange }: TimelineFiltersProps
             }
           >
             <SelectTrigger className={controlTriggerClass}>
-              <SelectValue placeholder="All holdings" />
+              <SelectValue placeholder="All ISIN" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={ISIN_ALL_VALUE}>All holdings</SelectItem>
+              <SelectItem value={ISIN_ALL_VALUE}>All ISIN</SelectItem>
               {isinOptions.map((row) => (
                 <SelectItem key={row.isin} value={row.isin}>
                   <span className="block truncate" title={`${row.bondName} — ${row.isin}`}>
