@@ -92,6 +92,8 @@ export interface PortfolioDetailsBond {
   dateOfAllotment: string | null;
   redemptionDate: string | null;
   ratingAgencyName: string | null;
+  natureOfInstrument: string | null;
+  nextCouponDate: string | null;
 }
 
 export interface PortfolioDetailsMeta {

@@ -25,6 +25,29 @@ interface PortfolioFilterOptions {
   isins: { isin: string; bondName: string }[];
 }
 
+function formatPortfolioDate(value: string | Date | null | undefined): string | null {
+  if (!value) return null;
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function extractAgencyName(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const cleaned = value
+    .replace(/[\[\]()\/,]/g, " ")
+    .replace(/\b[A-D]\d[+\-]?(?=\s|$|\W)/gi, " ")
+    .replace(/\b[A-D]{1,3}[+\-]?(?=\s|$|\W)/gi, " ")
+    .replace(/\b(stable|negative|positive|outlook|watch|developing|reaffirmed|assigned)\b/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return cleaned.length > 0 ? cleaned : null;
+}
+
 export default function PortfolioDetails() {
   const [filters, setFilters] = useState({
     bondType: [] as string[],
@@ -213,6 +236,7 @@ export default function PortfolioDetails() {
                 <col style={{ width: "170px" }} />
                 <col style={{ width: "150px" }} />
                 <col style={{ width: "90px" }} />
+                <col style={{ width: "90px" }} />
                 <col style={{ width: "160px" }} />
                 <col style={{ width: "130px" }} />
               </colgroup>
@@ -226,6 +250,7 @@ export default function PortfolioDetails() {
                   <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Investment Amount</th>
                   <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Face Value</th>
                   <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Quantity</th>
+                  <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Yield</th>
                   <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Interest Frequency</th>
                   <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Maturity Date</th>
                 </tr>
@@ -252,15 +277,14 @@ export default function PortfolioDetails() {
 
                         <td className="px-4 py-4">
                           <span
-                            className={`px-3 py-3 rounded-[5px] text-[12px] font-semibold whitespace-nowrap capitalize ${
-                              bond.bondType === "corporate"
-                                ? "bg-[#775DD0] text-white"
-                                : bond.bondType === "PSU"
+                            className={`px-3 py-3 rounded-[5px] text-[12px] font-semibold whitespace-nowrap capitalize ${bond.bondType === "corporate"
+                              ? "bg-[#775DD0] text-white"
+                              : bond.bondType === "PSU"
                                 ? "bg-[#FF4560] text-white"
                                 : bond.bondType === "Government"
-                                ? "bg-[#0C4580] text-white"
-                                : "bg-[#4ecdc4] text-white"
-                            }`}
+                                  ? "bg-[#0C4580] text-white"
+                                  : "bg-[#4ecdc4] text-white"
+                              }`}
                           >
                             {bond.bondType || "N/A"}
                           </span>
@@ -288,51 +312,46 @@ export default function PortfolioDetails() {
 
                         <td className="px-4 py-4 text-black">{bond.quantity}</td>
 
+                        <td className="px-4 py-4 text-black whitespace-nowrap">
+                          {bond.yield !== null && bond.yield !== undefined
+                            ? `${Number(bond.yield).toFixed(2)}%`
+                            : "N/A"}
+                        </td>
+
                         <td className="px-4 py-4 text-black">
                           {bond.interestFrequency || "N/A"}
                         </td>
 
                         <td className="px-4 py-4 text-black whitespace-nowrap">
-                          {bond.maturityDate
-                            ? new Date(bond.maturityDate).toLocaleDateString("en-IN", {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric",
-                              })
-                            : "N/A"}
+                          {formatPortfolioDate(bond.maturityDate) ?? "N/A"}
                         </td>
                       </tr>
 
                       {expandedRow === bond.id && (
                         <tr className="border-b border-gray-200 bg-gray-50">
-                          <td colSpan={9} className="px-4 py-4">
+                          <td colSpan={10} className="px-4 py-4">
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
                               <Detail label="Description" value={bond.description} />
                               <Detail label="Credit Rating" value={bond.creditRating} />
                               <Detail label="Sector Name" value={bond.sectorName} />
                               <Detail label="Tax Status" value={bond.taxStatus} />
-                              <Detail label="Yield" value={bond.yield} />
+                              <Detail label="Nature of Instrument" value={bond.natureOfInstrument} />
                               <Detail label="Last Trade Yield" value={bond.lastTradeYield} />
                               <Detail label="Last Trade Price" value={bond.lastTradePrice} />
                               <Detail label="Mode Of Issuance" value={bond.modeOfIssuance} />
                               <Detail label="Coupon Type" value={bond.couponType} />
                               <Detail
                                 label="Date Of Allotment"
-                                value={
-                                  bond.dateOfAllotment
-                                    ? new Date(bond.dateOfAllotment).toLocaleDateString("en-IN")
-                                    : null
-                                }
+                                value={formatPortfolioDate(bond.dateOfAllotment)}
                               />
                               <Detail
-                                label="Redemption Date"
-                                value={
-                                  bond.redemptionDate
-                                    ? new Date(bond.redemptionDate).toLocaleDateString("en-IN")
-                                    : null
-                                }
+                                label="Next Coupon Date"
+                                value={formatPortfolioDate(bond.nextCouponDate)}
                               />
-                              <Detail label="Rating Agency" value={bond.ratingAgencyName} />
+                              <Detail
+                                label="Rating Agency"
+                                value={bond.ratingAgencyName == "N/A" ? "Coming soon" : extractAgencyName(bond.ratingAgencyName)}
+                              />
                             </div>
                           </td>
                         </tr>
@@ -341,7 +360,7 @@ export default function PortfolioDetails() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={9} className="px-4 py-8 text-center text-gray-500">
+                    <td colSpan={10} className="px-4 py-8 text-center text-gray-500">
                       No bonds found matching your filters.
                     </td>
                   </tr>
@@ -359,7 +378,7 @@ export default function PortfolioDetails() {
               >
                 <ChevronLeft className="w-5 h-5 text-gray-600" />
               </button>
-                {currentPage} of {totalPages}
+              {currentPage} of {totalPages}
               <button
                 onClick={handleNextPage}
                 disabled={currentPage === totalPages}
@@ -389,10 +408,16 @@ export default function PortfolioDetails() {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function Detail({ label, value }: { label: string; value: any }) {
+  const isMissing =
+    value === null ||
+    value === undefined ||
+    (typeof value === "string" &&
+      (value.trim() === "" ||
+        ["N/A", "NA", "UNKNOWN", "NULL"].includes(value.trim().toUpperCase())));
   return (
     <div>
       <p className="text-xs text-gray-500">{label}</p>
-      <p className="font-medium text-black">{value ?? "N/A"}</p>
+      <p className="font-medium text-black">{isMissing ? "Coming soon" : value}</p>
     </div>
   );
 }
