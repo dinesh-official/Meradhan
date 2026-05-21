@@ -270,7 +270,8 @@ export default function BondAutoUpdateView() {
     { isin: string; payload: BondFormData }
   >({
     mutationFn: async ({ isin, payload }) => {
-      await api.updateBond(isin, payload);
+      // Pass autofillSave: true so the backend stamps autofillSavedAt on this bond.
+      await api.updateBond(isin, payload, { autofillSave: true });
       const detail = await api.getBondDetailsByIsin(isin);
       if (!detail.responseData) {
         throw new Error("Bond details missing after update");
@@ -433,7 +434,8 @@ export default function BondAutoUpdateView() {
       }
       try {
         const payload = mergeAutofillIntoForm(row.formBase, row.draft, row.include);
-        await api.updateBond(isin, payload);
+        // Pass autofillSave: true so the backend stamps autofillSavedAt on this bond.
+        await api.updateBond(isin, payload, { autofillSave: true });
         const detail = await api.getBondDetailsByIsin(isin);
         if (!detail.responseData) throw new Error("Bond details missing after update");
         const fresh = detail.responseData;
@@ -697,7 +699,18 @@ export default function BondAutoUpdateView() {
                     />
                     <div>
                       <div className="font-medium">{b.bondName}</div>
-                      <div className="text-muted-foreground text-xs font-mono">{b.isin}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground text-xs font-mono whitespace-nowrap">{b.isin}</span>
+                        {model.bond.autofillSavedAt && (
+                          <span className="text-muted-foreground text-xs font-mono whitespace-nowrap">
+                            · Last updated&nbsp;
+                            {new Date(model.bond.autofillSavedAt).toLocaleString("en-IN", {
+                              dateStyle: "medium",
+                              timeStyle: "short",
+                            })}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </CollapsibleTrigger>
                   <div className="flex flex-wrap items-center gap-2 pl-7 sm:pl-0">

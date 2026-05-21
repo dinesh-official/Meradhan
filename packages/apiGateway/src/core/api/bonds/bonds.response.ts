@@ -65,6 +65,8 @@ export interface BondDetailsResponse {
   redemptionType?: string | null
   startDate?: string | null
   endDate?: string | null
+  /** ISO timestamp — set when the bond was last saved via the CRM Auto-Update autofill flow. Null if never autofill-saved. */
+  autofillSavedAt?: string | null
   /** Units available from the latest CRM inventory upload (0 if none / not in file). */
   crmAvailableQuantity?: number
 }
