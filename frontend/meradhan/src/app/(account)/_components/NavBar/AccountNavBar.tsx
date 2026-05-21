@@ -90,8 +90,8 @@ function AccountNavBar({
                 >
                   <BiSolidFileFind />{" "}
                   {session?.isRekycUnderReview || session?.hasRekycExpiredFlow
-                    ? "Rekyc: In Review"
-                    : "KYC: In Review"}
+                    ? "Rekyc: Under Review"
+                    : "KYC: Under Review"}
                 </Button>
               </Link>
             )}

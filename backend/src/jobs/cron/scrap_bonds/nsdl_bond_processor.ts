@@ -8,6 +8,77 @@ import { mergeAbsoluteDataIntoBond } from "@modules/absolutedata/absolutedata.bo
 import type { AbsoluteDataGetBondByIsinResult } from "@modules/absolutedata/absolutedata.types";
 import { env } from "@packages/config/src/env";
 
+const NSDL_RATING_TOKENS = [
+  "AAA",
+  "AA+",
+  "AA",
+  "AA-",
+  "A+",
+  "A",
+  "A-",
+  "BBB+",
+  "BBB",
+  "BBB-",
+  "BB+",
+  "BB",
+  "BB-",
+  "B+",
+  "B",
+  "B-",
+  "C+",
+  "C",
+  "C-",
+  "D",
+  "PP-MLD",
+  "PP-MLD?",
+  "A+(CE)",
+  "A-(CE)",
+  "AAA(CE)",
+  "A(CE)",
+  "AA(CE)",
+  "BB+(CE)",
+  "BBB-(CE)",
+  "BB-(CE)",
+  "B(CE)",
+  "AA-(CE)",
+  "BB-(SO)",
+  "A1+(SO)",
+  "AA+r",
+  "AA-r",
+  "AAAr",
+  "A++",
+  "A2",
+].sort((a, b) => b.length - a.length);
+
+function escapeRatingRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function findFirstNsdlRatingToken(
+  normalized: string,
+): { token: string; index: number } | null {
+  for (const token of NSDL_RATING_TOKENS) {
+    const escaped = escapeRatingRegExp(token);
+    const re = new RegExp(`(^|[^A-Z0-9])(${escaped})(?=[^A-Z0-9]|$)`, "i");
+    const match = re.exec(normalized);
+    if (match && match.index !== undefined) {
+      const index = match.index + (match[1]?.length ?? 0);
+      return { token, index };
+    }
+  }
+  return null;
+}
+
+function removeNsdlRatingTokens(normalized: string): string {
+  let remainder = normalized;
+  for (const token of NSDL_RATING_TOKENS) {
+    const escaped = escapeRatingRegExp(token);
+    const re = new RegExp(`(^|[^A-Z0-9])${escaped}(?=[^A-Z0-9]|$)`, "gi");
+    remainder = remainder.replace(re, " ");
+  }
+  return remainder.replace(/\s+/g, " ").trim();
+}
+
 export class NsdlBondProcessor {
   constructor(private bond: BondDataSet) { }
 
@@ -305,84 +376,42 @@ export class NsdlBondProcessor {
   // Extract rating company and date from bond data
   private extractRatingCompanyAndDate() {
     const str = this.bond.CREDIT_RATING_CREDIT_RATING_AGENCY;
-    const ratings = [
-      "AAA",
-      "AA+",
-      "AA",
-      "AA-",
-      "A+",
-      "A",
-      "A-",
-      "BBB+",
-      "BBB",
-      "BBB-",
-      "BB+",
-      "BB",
-      "BB-",
-      "B+",
-      "B",
-      "B-",
-      "C+",
-      "C",
-      "C-",
-      "D",
-      "PP-MLD",
-      "PP-MLD?",
-      "A+(CE)",
-      "A-(CE)",
-      "AAA(CE)",
-      "A(CE)",
-      "AA(CE)",
-      "BB+(CE)",
-      "BBB-(CE)",
-      "BB-(CE)",
-      "B(CE)",
-      "AA-(CE)",
-      "BB-(SO)",
-      "A1+(SO)",
-      "AA+r",
-      "AA-r",
-      "AAAr",
-      "A++",
-      "A2",
-    ];
-
     if (!str) return null;
 
-    const normalized = str.trim().toUpperCase();
+    let normalized = str.trim().toUpperCase();
 
-    // Extract date in DD-MM-YYYY format
     const dateMatch = normalized.match(/\b\d{2}-\d{2}-\d{4}\b/);
-    const date = dateMatch ? dateMatch[0] : null;
+    const dateRaw = dateMatch ? dateMatch[0] : null;
 
-    // Find the first matching rating token
-    const ratingMatch = ratings.find((rating) => normalized.includes(rating));
+    normalized = normalized.replace(/\b\d{2}-\d{2}-\d{4}\b/g, " ");
+    normalized = normalized.replace(/\b\d{4}-\d{2}-\d{2}\b/g, " ");
+    normalized = normalized.replace(/\bDT\b/g, " ");
+    normalized = normalized.replace(/\s+/g, " ").trim();
 
-    if (!ratingMatch) return null;
+    const ratingHit = findFirstNsdlRatingToken(normalized);
+    if (!ratingHit) return null;
 
-    // Split around the rating to isolate the possible company part
-    const beforeRating = normalized.split(ratingMatch)[0]?.trim();
-    if (!beforeRating) {
-      return null;
+    let companyName = normalized.slice(0, ratingHit.index).trim();
+
+    if (!companyName) {
+      companyName = removeNsdlRatingTokens(normalized);
+    } else if (companyName.includes("DT")) {
+      companyName = companyName.split("DT")[0]?.trim() || "";
     }
 
-    // If "DT" is present (e.g., "HDFC LTD AA+ DT 15-08-2025")
-    let companyName = beforeRating;
-    if (beforeRating.includes("DT")) {
-      companyName = beforeRating.split("DT")[0]?.trim() || "N/A";
-    }
-
-    // Clean up redundant symbols
     companyName = companyName
       .replace(/\s+/g, " ")
       .replace(/[^A-Z0-9&\s.-]/g, "")
       .trim();
 
-    if (!companyName || !date) return null;
+    if (!companyName || !dateRaw) return null;
+
+    const date = this.extractDatesFromText(dateRaw);
+    if (!date) return null;
 
     return {
       companyName,
-      date: this.extractDatesFromText(date),
+      date,
     };
   }
 

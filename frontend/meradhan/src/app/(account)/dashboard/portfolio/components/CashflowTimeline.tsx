@@ -105,7 +105,7 @@ export default function CashflowTimelinePage() {
               </>
             ) : (
               <div className="py-20 text-center text-gray-500">
-                No cashflow events in the selected period.
+                No data available
               </div>
             )}
           </div>
