@@ -1032,6 +1032,61 @@ export default function BondAutoUpdateView() {
                                             } as Partial<DraftSuggestions>)
                                           }
                                         />
+                                      ) : key === "bondType" ? (
+                                        <Input
+                                          className="h-9 font-mono text-sm"
+                                          placeholder="GOVERNMENT | CORPORATE | TAX_FREE | PSU | OTHER"
+                                          value={typeof sug === "string" ? sug : ""}
+                                          onChange={(e) =>
+                                            updateDraft(b.isin, {
+                                              bondType: e.target.value as DraftSuggestions["bondType"],
+                                            })
+                                          }
+                                        />
+                                      ) : key === "seniority" ? (
+                                        <Input
+                                          className="h-9 font-mono text-sm"
+                                          placeholder="SENIOR | TIER_2_SUBORDINATED | UNKNOWN"
+                                          value={typeof sug === "string" ? sug : ""}
+                                          onChange={(e) =>
+                                            updateDraft(b.isin, {
+                                              seniority: e.target.value as DraftSuggestions["seniority"],
+                                            })
+                                          }
+                                        />
+                                      ) : key === "redemptionType" ? (
+                                        <Input
+                                          className="h-9 font-mono text-sm"
+                                          placeholder="e.g. BULLET, AMORTISING"
+                                          value={typeof sug === "string" ? sug : ""}
+                                          onChange={(e) =>
+                                            updateDraft(b.isin, {
+                                              redemptionType: e.target.value,
+                                            })
+                                          }
+                                        />
+                                      ) : key === "taxStatus" ? (
+                                        <Input
+                                          className="h-9 font-mono text-sm"
+                                          placeholder="TAXABLE | TAX_FREE | TAX_SAVING | UNKNOWN"
+                                          value={typeof sug === "string" ? sug : ""}
+                                          onChange={(e) =>
+                                            updateDraft(b.isin, {
+                                              taxStatus: e.target.value as DraftSuggestions["taxStatus"],
+                                            })
+                                          }
+                                        />
+                                      ) : key === "isListed" ? (
+                                        <Input
+                                          className="h-9 font-mono text-sm"
+                                          placeholder="YES | NO | UNKNOWN"
+                                          value={typeof sug === "string" ? sug : ""}
+                                          onChange={(e) =>
+                                            updateDraft(b.isin, {
+                                              isListed: e.target.value as DraftSuggestions["isListed"],
+                                            })
+                                          }
+                                        />
                                       ) : (
                                         <Input
                                           type="date"

@@ -144,6 +144,16 @@ export interface BondDealAutofillSuggestions {
   sellPrice: number | null;
   /** Set by deal-autofill-calc (`getBondInfoCalcData`); omitted by legacy deal-autofill. */
   isUnderShutPeriod?: boolean;
+  /** Bond classification — sourced from the bonds table via deal-autofill-calc. */
+  bondType?: string | null;
+  /** Debt seniority level — sourced from the bonds table via deal-autofill-calc. */
+  seniority?: string | null;
+  /** Redemption type string — sourced from the bonds table via deal-autofill-calc. */
+  redemptionType?: string | null;
+  /** Tax status enum value (e.g. TAXABLE, TAX_FREE) — sourced from the bonds table. */
+  taxStatus?: string | null;
+  /** Whether the bond is exchange-listed (YES / NO / UNKNOWN) — sourced from the bonds table. */
+  isListed?: string | null;
 }
 
 export interface BondDealAutofillResponse {
