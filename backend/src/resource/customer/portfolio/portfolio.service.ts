@@ -645,7 +645,8 @@ export class PortfolioService {
         interestPaymentMode: true, maturityDate: true, sectorName: true,
         taxStatus: true, yield: true, lastTradeYield: true, lastTradePrice: true,
         modeOfIssuance: true, couponType: true, dateOfAllotment: true,
-        redemptionDate: true, ratingAgencyName: true,
+        redemptionDate: true, ratingAgencyName: true, natureOfInstrument: true,
+        nextCouponDate: true,
       },
     });
 
@@ -708,6 +709,8 @@ export class PortfolioService {
         dateOfAllotment: bond?.dateOfAllotment ?? null,
         redemptionDate: bond?.redemptionDate ?? null,
         ratingAgencyName: bond?.ratingAgencyName ?? null,
+        natureOfInstrument: bond?.natureOfInstrument ?? null,
+        nextCouponDate: bond?.nextCouponDate ?? null,
       };
     });
 
