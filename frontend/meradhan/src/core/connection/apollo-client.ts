@@ -3,6 +3,25 @@ import { CMS_URL, HOST_URL } from "@/global/constants/domains";
 import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
 import { SetContextLink } from "@apollo/client/link/context";
 import axios from "axios";
+
+// Apollo Client v4.2+ requires global type declaration for `defaultOptions`
+// properties that influence result types (e.g. `errorPolicy`).
+// See: https://www.apollographql.com/docs/react/data/typescript#declaring-default-options-for-type-safety
+declare module "@apollo/client" {
+  namespace ApolloClient {
+    namespace DeclareDefaultOptions {
+      interface WatchQuery {
+        errorPolicy: "all";
+      }
+      interface Query {
+        errorPolicy: "all";
+      }
+      interface Mutate {
+        errorPolicy: "all";
+      }
+    }
+  }
+}
 export const strApi = HOST_URL;
 export const strAssets = HOST_URL + "/assets/cms/media";
 
