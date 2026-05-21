@@ -13,3 +13,6 @@
 [2026-05-20 19:05:00 IST] [INFO] Payment reconciliation run started {"service":"payment-reconciliation","lookbackHours":72,"maxOrders":75,"minOrderAgeMinutes":60,"since":"2026-05-17T13:35:00.054Z","olderThan":"2026-05-20T12:35:00.054Z","recentReconcileCutoff":"2026-05-20T12:40:00.054Z"}
 [2026-05-20 19:05:01 IST] [INFO] Payment reconciliation candidates fetched {"service":"payment-reconciliation","candidates":0}
 [2026-05-20 19:05:01 IST] [INFO] Payment reconciliation run completed {"service":"payment-reconciliation","checked":0,"updated":0,"queuedSettlement":0,"skipped":0}
+[2026-05-20 20:05:00 IST] [INFO] Payment reconciliation run started {"service":"payment-reconciliation","lookbackHours":72,"maxOrders":75,"minOrderAgeMinutes":60,"since":"2026-05-17T14:35:00.029Z","olderThan":"2026-05-20T13:35:00.029Z","recentReconcileCutoff":"2026-05-20T13:40:00.029Z"}
+[2026-05-20 20:05:01 IST] [INFO] Payment reconciliation candidates fetched {"service":"payment-reconciliation","candidates":0}
+[2026-05-20 20:05:01 IST] [INFO] Payment reconciliation run completed {"service":"payment-reconciliation","checked":0,"updated":0,"queuedSettlement":0,"skipped":0}
