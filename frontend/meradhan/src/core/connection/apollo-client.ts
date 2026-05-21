@@ -6,7 +6,10 @@ import axios from "axios";
 
 // Apollo Client v4.2+ requires global type declaration for `defaultOptions`
 // properties that influence result types (e.g. `errorPolicy`).
+// Namespaces are required here because Apollo's `DeclareDefaultOptions` is
+// itself a nested namespace, so module augmentation must mirror that shape.
 // See: https://www.apollographql.com/docs/react/data/typescript#declaring-default-options-for-type-safety
+/* eslint-disable @typescript-eslint/no-namespace */
 declare module "@apollo/client" {
   namespace ApolloClient {
     namespace DeclareDefaultOptions {
@@ -22,6 +25,7 @@ declare module "@apollo/client" {
     }
   }
 }
+/* eslint-enable @typescript-eslint/no-namespace */
 export const strApi = HOST_URL;
 export const strAssets = HOST_URL + "/assets/cms/media";
 
