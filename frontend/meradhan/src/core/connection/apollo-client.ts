@@ -3,6 +3,38 @@ import { CMS_URL, HOST_URL } from "@/global/constants/domains";
 import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
 import { SetContextLink } from "@apollo/client/link/context";
 import axios from "axios";
+
+// Apollo Client v4.2+ requires global type declaration for `defaultOptions`
+// properties that influence result types (e.g. `errorPolicy`).
+// Namespaces are required here because Apollo's `DeclareDefaultOptions` is
+// itself a nested namespace, so module augmentation must mirror that shape.
+//
+// We also pin `signatureStyle: "classic"` so existing call-sites that pass an
+// explicit generic to `gqlClient.query<TData>(...)` keep compiling. Declaring
+// `DeclareDefaultOptions` would otherwise switch the client globally to
+// "modern" signatures whose generics expect 3 type arguments.
+//
+// See: https://www.apollographql.com/docs/react/data/typescript#declaring-default-options-for-type-safety
+/* eslint-disable @typescript-eslint/no-namespace */
+declare module "@apollo/client" {
+  export interface TypeOverrides {
+    signatureStyle: "classic";
+  }
+  namespace ApolloClient {
+    namespace DeclareDefaultOptions {
+      interface WatchQuery {
+        errorPolicy: "all";
+      }
+      interface Query {
+        errorPolicy: "all";
+      }
+      interface Mutate {
+        errorPolicy: "all";
+      }
+    }
+  }
+}
+/* eslint-enable @typescript-eslint/no-namespace */
 export const strApi = HOST_URL;
 export const strAssets = HOST_URL + "/assets/cms/media";
 

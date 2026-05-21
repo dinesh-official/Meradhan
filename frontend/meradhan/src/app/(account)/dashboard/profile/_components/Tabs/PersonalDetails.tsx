@@ -35,7 +35,7 @@ function PersonalDetails({
   const showAddressValues =
     profile.kycStatus == "VERIFIED" || profile.kycStatus == "RE_KYC";
   const communicationAddressLabel = profile.useKraKyc
-    ? "Communication Address (as per KYC)"
+    ? "Communication Address (as per KRA)"
     : "Communication Address (as per Aadhar)";
   const getAddressNotes = (value?: string | null) => {
     if (!showAddressValues) return "--";
