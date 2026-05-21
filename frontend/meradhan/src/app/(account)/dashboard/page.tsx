@@ -110,7 +110,18 @@ async function DashBoardPage() {
   const ordersEmpty = ordersPreview.length === 0;
 
   return (
-    <AccountViewPort title={<NameTitleView />}>
+    <AccountViewPort
+      title={<NameTitleView />}
+      navActions={
+        portfolioEmpty ? (
+          <Link href="/bonds">
+            <Button variant="outline" size="sm">
+              Explore All Bonds
+            </Button>
+          </Link>
+        ) : undefined
+      }
+    >
       <div className="flex flex-col gap-5">
         <div className="bg-gray-100 p-4 px-5 rounded">
           <p>Explore your portfolio, offers, and deals — all in one place.</p>

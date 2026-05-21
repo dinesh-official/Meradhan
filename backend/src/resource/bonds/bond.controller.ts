@@ -328,12 +328,20 @@ export class BondController {
   async updateBond(req: Request, res: Response) {
     try {
       const isin = req.params.isin!.toString();
+
+      // Read the autofill-save flag from raw body BEFORE Zod strips unknown keys.
+      // The underscore prefix signals this is a meta-flag, not a bond field.
+      const autofillSave =
+        typeof req.body === "object" &&
+        req.body !== null &&
+        (req.body as Record<string, unknown>)._autofillSave === true;
+
       const bondData = appSchema.bonds.bondCreateUpdateSchema.parse(req.body);
 
       // Get existing bond data for comparison in activity log
       const existingBond = await this.bondService.getBondDetails(isin);
 
-      const data = await this.bondService.updateBond(isin, bondData);
+      const data = await this.bondService.updateBond(isin, bondData, { autofillSave });
 
       // Create CRM activity log
       const userId = Number(req.session?.id);
