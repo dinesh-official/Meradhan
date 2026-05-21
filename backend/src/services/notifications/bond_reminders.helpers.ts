@@ -5,6 +5,7 @@
  */
 
 import type { INTEREST_MODE } from "@databases/generated/prisma/postgres";
+import { isSettlementUnderShutPeriodForCouponDue } from "@services/order/order-pricing-helper";
 
 const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
 const MONTH_LABELS = [
@@ -75,6 +76,106 @@ export function fullCustomerName(p: {
     .filter((s): s is string => Boolean(s && s.trim()))
     .join(" ")
     .trim();
+}
+
+/** Expected settlement from order pricing snapshot (`bondDetails.pricing.settlementDate`). */
+export function settlementDateFromBondDetails(bondDetails: unknown): Date | null {
+  if (!bondDetails || typeof bondDetails !== "object" || Array.isArray(bondDetails)) {
+    return null;
+  }
+  const pricing = (bondDetails as Record<string, unknown>).pricing;
+  if (!pricing || typeof pricing !== "object" || Array.isArray(pricing)) {
+    return null;
+  }
+  const sd = (pricing as Record<string, unknown>).settlementDate;
+  if (typeof sd !== "string" || !sd.trim()) return null;
+
+  const trimmed = sd.trim();
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmed);
+  if (m) {
+    return istYmdToUtcMidnight(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  }
+
+  const parsed = new Date(trimmed);
+  if (Number.isNaN(parsed.getTime())) return null;
+  const { y, m: month, d } = istCalendarParts(parsed);
+  return istYmdToUtcMidnight(y, month, d);
+}
+
+/** Normalize `CustomerBonds.purchaseDate` to IST calendar UTC-midnight. */
+export function purchaseDateToSettlementAnchor(purchaseDate: Date): Date {
+  const { y, m, d } = istCalendarParts(purchaseDate);
+  return istYmdToUtcMidnight(y, m, d);
+}
+
+/**
+ * True when settlement falls in shut period for the coupon anchored at `dueDate`.
+ * Delegates to `isSettlementUnderShutPeriodForCouponDue` in order-pricing-helper.
+ */
+export function isSettlementUnderShutPeriodForCoupon(input: {
+  settlement: Date;
+  dueDate: Date;
+  recordDateIst: Date | null;
+  recordDays: number | null | undefined;
+}): boolean {
+  return isSettlementUnderShutPeriodForCouponDue(
+    input.settlement,
+    input.dueDate,
+    input.recordDateIst,
+    input.recordDays,
+  );
+}
+
+/** NSE `settle_order.modSettleDate` (YYYY-MM-DD or DD-MM-YYYY) → IST UTC-midnight anchor. */
+export function settlementDateFromNseModSettleDate(raw: string): Date | null {
+  const t = raw.trim();
+  if (!t) return null;
+
+  const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(t);
+  if (iso) {
+    return istYmdToUtcMidnight(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
+  }
+
+  const dmy = /^(\d{2})-(\d{2})-(\d{4})$/.exec(t);
+  if (dmy) {
+    return istYmdToUtcMidnight(Number(dmy[3]), Number(dmy[2]) - 1, Number(dmy[1]));
+  }
+
+  const parsed = new Date(t);
+  if (Number.isNaN(parsed.getTime())) return null;
+  const { y, m, d } = istCalendarParts(parsed);
+  return istYmdToUtcMidnight(y, m, d);
+}
+
+/** Key for `settleOrderModel.orderNumber` (metadata.rfqNumber or reqOrderNumber). */
+export function settleOrderLinkKeyFromOrder(order: {
+  metadata: unknown;
+  reqOrderNumber: string | null;
+}): string | undefined {
+  const rfq = (order.metadata as { rfqNumber?: unknown } | null)?.rfqNumber;
+  if (typeof rfq === "string" && rfq.trim().length > 0) {
+    return rfq.trim();
+  }
+  if (typeof order.reqOrderNumber === "string" && order.reqOrderNumber.trim().length > 0) {
+    return order.reqOrderNumber.trim();
+  }
+  return undefined;
+}
+
+/** NSE settle date → bondDetails snapshot → purchaseDate (IST). */
+export function resolveSettlementDateForHolding(input: {
+  modSettleDate: string | null | undefined;
+  bondDetails: unknown;
+  purchaseDate: Date;
+}): Date {
+  if (input.modSettleDate) {
+    const fromNse = settlementDateFromNseModSettleDate(input.modSettleDate);
+    if (fromNse) return fromNse;
+  }
+  return (
+    settlementDateFromBondDetails(input.bondDetails) ??
+    purchaseDateToSettlementAnchor(input.purchaseDate)
+  );
 }
 
 /**

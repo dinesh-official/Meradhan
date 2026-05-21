@@ -100,7 +100,9 @@ function ProfileViewCard({
                       ? "text-black"
                       : profile.kycStatus == "UNDER_REVIEW"
                         ? "text-yellow-600"
-                        : "text-red-600"
+                        : profile.kycStatus == "PENDING"
+                          ? "text-yellow-600"
+                          : "text-red-600"
                   )}
                 >
                   {profile.kycStatus == "VERIFIED" ? (
@@ -117,6 +119,15 @@ function ProfileViewCard({
                         Under Review
                       </span>
                       <span className="sm:hidden">Under Review</span>{" "}
+                      <BiSolidFileFind size={20} className="text-yellow-600" />
+                    </>
+                  ) : profile.kycStatus == "PENDING" ? (
+                    <>
+                      <span className="text-black">KYC:</span>{" "}
+                      <span className="hidden sm:inline-block">
+                        Under Progress (Under Review)
+                      </span>
+                      <span className="sm:hidden">Under Progress</span>{" "}
                       <BiSolidFileFind size={20} className="text-yellow-600" />
                     </>
                   ) : (

@@ -10,6 +10,27 @@ export const REPORT_CHART_COLORS = [
   "#ea580c",
 ];
 
+export const STATUS_COLOR_MAP: Record<string, string> = {
+  SETTLED:   "#16a34a",
+  APPLIED:   "#2563eb",
+  PENDING:   "#ca8a04",
+  REJECTED:  "#dc2626",
+  CANCELLED: "#94a3b8",
+  CREATED:   "#7c3aed",
+  EXPIRED:   "#64748b",
+};
+
+export function formatBucketLabel(bucket: string, groupBy: "day" | "week" | "month"): string {
+  // bucket may be a full ISO string (2026-04-30T00:00:00.000Z) or plain yyyy-MM-dd / yyyy-MM
+  const d = new Date(bucket);
+  if (Number.isNaN(d.getTime())) return bucket;
+  if (groupBy === "month") {
+    return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+  }
+  // day or week
+  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+}
+
 export function formatIndianCurrencyCompact(value: number): string {
   const n = Number(value);
   if (!Number.isFinite(n)) return "—";
@@ -94,6 +115,8 @@ export function buildStatusSlices(
     name: r.status,
     count: r.count,
     pct: (r.count / total) * 100,
-    color: REPORT_CHART_COLORS[i % REPORT_CHART_COLORS.length],
+    color:
+      STATUS_COLOR_MAP[r.status.toUpperCase()] ??
+      REPORT_CHART_COLORS[i % REPORT_CHART_COLORS.length],
   }));
 }
