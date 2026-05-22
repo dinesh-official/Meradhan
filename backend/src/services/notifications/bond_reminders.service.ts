@@ -15,8 +15,11 @@ import {
   formatIstDateLabel,
   formatRupees,
   fullCustomerName,
+  isSettlementUnderShutPeriodForCoupon,
   istCalendarParts,
   istYmdToUtcMidnight,
+  resolveSettlementDateForHolding,
+  settleOrderLinkKeyFromOrder,
 } from "./bond_reminders.helpers";
 
 const SUPPORT_EMAIL = "support@meradhan.co";
@@ -34,7 +37,14 @@ export type BondRemindersScanSummary = {
   skippedNotVerified: number;
   skippedAlreadySent: number;
   skippedNoPeriodicCoupon: number;
+  skippedUnderShutPeriod: number;
   errors: number;
+};
+
+type CouponAnchorMeta = {
+  dueDate: Date;
+  recordDateIst: Date | null;
+  recordDays: number | null;
 };
 
 function maturityTypeFor(offsetDays: MaturityOffsetDays): BondReminderType {
@@ -99,6 +109,7 @@ export class BondRemindersService {
       skippedNotVerified: 0,
       skippedAlreadySent: 0,
       skippedNoPeriodicCoupon: 0,
+      skippedUnderShutPeriod: 0,
       errors: 0,
     };
 
@@ -234,6 +245,7 @@ export class BondRemindersService {
       skippedNotVerified: 0,
       skippedAlreadySent: 0,
       skippedNoPeriodicCoupon: 0,
+      skippedUnderShutPeriod: 0,
       errors: 0,
     };
 
@@ -244,7 +256,12 @@ export class BondRemindersService {
 
     const couponRows = await db.dataBase.bondReferenceCouponPaymentDate.findMany({
       where: { dueDateIst: targetIst },
-      select: { isin: true, dueDateIst: true },
+      select: {
+        isin: true,
+        dueDateIst: true,
+        recordDateIst: true,
+        recordDays: true,
+      },
     });
 
     if (couponRows.length === 0) {
@@ -255,16 +272,23 @@ export class BondRemindersService {
       return summary;
     }
 
-    // Collapse duplicate (isin, dueDate) entries.
-    const isinToDueDate = new Map<string, Date>();
+    // Collapse duplicate (isin, dueDate) entries; keep shut-period fields for skip logic.
+    const isinToCouponAnchor = new Map<string, CouponAnchorMeta>();
     for (const row of couponRows) {
       if (!row.dueDateIst) continue;
-      if (!isinToDueDate.has(row.isin)) {
-        isinToDueDate.set(row.isin, row.dueDateIst);
+      if (!isinToCouponAnchor.has(row.isin)) {
+        isinToCouponAnchor.set(row.isin, {
+          dueDate: row.dueDateIst,
+          recordDateIst: row.recordDateIst ?? null,
+          recordDays:
+            typeof row.recordDays === "number" && Number.isFinite(row.recordDays)
+              ? row.recordDays
+              : null,
+        });
       }
     }
 
-    const isins = [...isinToDueDate.keys()];
+    const isins = [...isinToCouponAnchor.keys()];
     if (isins.length === 0) {
       return summary;
     }
@@ -292,7 +316,11 @@ export class BondRemindersService {
         isin: true,
         bondName: true,
         quantity: true,
+        purchaseDate: true,
         customerProfileId: true,
+        order: {
+          select: { bondDetails: true, reqOrderNumber: true, metadata: true },
+        },
         customerProfile: {
           select: {
             id: true,
@@ -308,12 +336,37 @@ export class BondRemindersService {
       },
     });
 
+    const settleLinkKeys = [
+      ...new Set(
+        holdings
+          .map((h) => (h.order ? settleOrderLinkKeyFromOrder(h.order) : undefined))
+          .filter((k): k is string => k != null && k.length > 0),
+      ),
+    ];
+    const modSettleDateByLinkKey = new Map<string, string>();
+    if (settleLinkKeys.length > 0) {
+      const settleRows = await db.dataBase.settleOrderModel.findMany({
+        where: { orderNumber: { in: settleLinkKeys } },
+        select: { orderNumber: true, modSettleDate: true },
+      });
+      for (const row of settleRows) {
+        if (
+          row.modSettleDate &&
+          String(row.modSettleDate).trim() !== "" &&
+          !modSettleDateByLinkKey.has(row.orderNumber)
+        ) {
+          modSettleDateByLinkKey.set(row.orderNumber, String(row.modSettleDate).trim());
+        }
+      }
+    }
+
     summary.checked = holdings.length;
 
     for (const holding of holdings) {
       try {
-        const dueDate = isinToDueDate.get(holding.isin);
-        if (!dueDate) continue;
+        const couponAnchor = isinToCouponAnchor.get(holding.isin);
+        if (!couponAnchor) continue;
+        const dueDate = couponAnchor.dueDate;
 
         const bond = isinToBond.get(holding.isin);
         const couponAmount = bond
@@ -322,6 +375,37 @@ export class BondRemindersService {
 
         const profile = holding.customerProfile;
         if (!profile) continue;
+
+        const linkKey = holding.order ? settleOrderLinkKeyFromOrder(holding.order) : undefined;
+        const modSettleDate =
+          linkKey != null ? modSettleDateByLinkKey.get(linkKey) : undefined;
+
+        const settlementDate = resolveSettlementDateForHolding({
+          modSettleDate,
+          bondDetails: holding.order?.bondDetails,
+          purchaseDate: holding.purchaseDate,
+        });
+
+        if (
+          isSettlementUnderShutPeriodForCoupon({
+            settlement: settlementDate,
+            dueDate,
+            recordDateIst: couponAnchor.recordDateIst,
+            recordDays: couponAnchor.recordDays,
+          })
+        ) {
+          await this.recordSkipped({
+            customerProfileId: profile.id,
+            isin: holding.isin,
+            reminderType,
+            anchorDateIst: dueDate,
+            scheduledForIst: todayIstUtcMidnight,
+            reason:
+              "purchase settled during shut period for this coupon (no coupon due to buyer)",
+          });
+          summary.skippedUnderShutPeriod += 1;
+          continue;
+        }
 
         if (couponAmount === null) {
           await this.recordSkipped({

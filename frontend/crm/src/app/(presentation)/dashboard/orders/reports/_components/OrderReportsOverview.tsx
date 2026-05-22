@@ -19,6 +19,7 @@ import {
   AreaChart,
   CartesianGrid,
   Cell,
+  Legend,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -30,10 +31,12 @@ import {
   buildLifecycleFunnel,
   buildStatusSlices,
   countByOrderStatus,
+  formatBucketLabel,
   formatIndianCurrencyCompact,
 } from "./orderReportFormatters";
 import {
   CheckCircle2,
+  ChevronRight,
   Clock,
   IndianRupee,
   ShoppingCart,
@@ -57,91 +60,87 @@ function MetricCard({
   icon: ComponentType<{ className?: string }>;
   accent?: "default" | "success" | "warning" | "danger" | "primary";
 }) {
-  const accentClass = {
-    default: "bg-muted/50 text-muted-foreground",
-    success: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-    warning: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-    danger: "bg-red-500/10 text-red-600 dark:text-red-400",
-    primary: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+  const iconClass = {
+    default: "text-muted-foreground",
+    success: "text-emerald-600 dark:text-emerald-400",
+    warning: "text-amber-600 dark:text-amber-400",
+    danger:  "text-red-600 dark:text-red-400",
+    primary: "text-blue-600 dark:text-blue-400",
+  }[accent];
+
+  const valueClass = {
+    default: "text-foreground",
+    success: "text-emerald-700 dark:text-emerald-300",
+    warning: "text-amber-700 dark:text-amber-300",
+    danger:  "text-red-700 dark:text-red-300",
+    primary: "text-blue-700 dark:text-blue-300",
+  }[accent];
+
+  const borderClass = {
+    default: "border-l-border",
+    success: "border-l-emerald-500",
+    warning: "border-l-amber-400",
+    danger:  "border-l-red-500",
+    primary: "border-l-blue-500",
   }[accent];
 
   return (
-    <Card className="border-border/80 shadow-sm transition-shadow hover:shadow-md">
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              {label}
-            </p>
-            <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight text-foreground">
-              {value}
-            </p>
-            {sub ? (
-              <p className="mt-0.5 text-[11px] text-muted-foreground">{sub}</p>
-            ) : null}
-          </div>
-          <div
-            className={cn(
-              "flex size-10 shrink-0 items-center justify-center rounded-lg",
-              accentClass,
-            )}
-          >
-            <Icon className="size-5" aria-hidden />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <div className={cn("rounded-lg border border-border border-l-[3px] bg-card p-4", borderClass)}>
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          {label}
+        </p>
+        <Icon className={cn("size-4 shrink-0 opacity-70", iconClass)} aria-hidden />
+      </div>
+      <p className={cn("mt-2 text-2xl font-bold tabular-nums tracking-tight", valueClass)}>
+        {value}
+      </p>
+      {sub ? <p className="mt-0.5 text-[11px] text-muted-foreground">{sub}</p> : null}
+    </div>
   );
 }
 
 function FunnelChart({ steps }: { steps: ReturnType<typeof buildLifecycleFunnel> }) {
-  const max = Math.max(steps[0]?.count ?? 1, 1);
   return (
-    <div className="space-y-4 py-1">
-      {steps.map((step, i) => {
-        const widthPct = Math.max(28, Math.round((step.count / max) * 100));
-        return (
-          <div key={step.label}>
-            <div className="mb-1.5 flex items-baseline justify-between gap-2">
-              <span className="text-sm font-medium text-foreground">{step.label}</span>
-              <div className="flex items-center gap-2 tabular-nums">
-                <span className="text-sm font-semibold">
-                  {step.count.toLocaleString("en-IN")}
-                </span>
-                {step.dropPct != null && step.dropPct < 0 ? (
-                  <span className="text-xs font-medium text-red-600 dark:text-red-400">
-                    {step.dropPct.toFixed(1)}%
-                  </span>
-                ) : null}
-              </div>
-            </div>
-            <div
-              className="h-9 rounded-md bg-gradient-to-r from-blue-600 to-blue-500 shadow-sm"
-              style={{ width: `${widthPct}%` }}
-            />
-            {i < steps.length - 1 ? (
-              <div className="ml-[14%] mt-1 h-3 w-px bg-border" aria-hidden />
-            ) : null}
+    <div className="flex items-stretch gap-0 overflow-x-auto">
+      {steps.map((step, i) => (
+        <div key={step.label} className="flex flex-1 items-center">
+          <div
+            className={cn(
+              "flex w-full flex-col justify-between rounded-xl border px-4 py-3",
+              i === 0 ? "bg-muted/60" : "bg-card",
+            )}
+          >
+            <p className="text-xs text-muted-foreground">{step.label}</p>
+            <p className="mt-1.5 text-2xl font-bold tabular-nums text-foreground">
+              {step.count.toLocaleString("en-IN")}
+            </p>
+            <p className={cn("mt-0.5 text-xs font-medium", step.dropPct != null ? "text-red-500" : "invisible")}>
+              {step.dropPct != null ? `${step.dropPct.toFixed(1)}%` : "0%"}
+            </p>
           </div>
-        );
-      })}
+          {i < steps.length - 1 && (
+            <ChevronRight className="mx-1.5 size-4 shrink-0 text-muted-foreground/50" aria-hidden />
+          )}
+        </div>
+      ))}
     </div>
   );
 }
 
 function StatusLegend({ slices }: { slices: StatusSlice[] }) {
   return (
-    <ul className="space-y-2.5">
+    <ul className="space-y-2">
       {slices.map((s) => (
-        <li key={s.name} className="flex items-center justify-between gap-3 text-sm">
-          <span className="flex min-w-0 items-center gap-2">
-            <span
-              className="size-2.5 shrink-0 rounded-full"
-              style={{ backgroundColor: s.color }}
-            />
-            <span className="truncate text-muted-foreground">{s.name}</span>
+        <li key={s.name} className="flex items-center justify-between gap-2 text-xs">
+          <span className="flex min-w-0 items-center gap-1.5">
+            <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: s.color }} />
+            <span className="truncate font-medium text-foreground">{s.name}</span>
           </span>
-          <span className="shrink-0 tabular-nums font-medium">{s.pct.toFixed(0)}%</span>
+          <span className="shrink-0 tabular-nums text-muted-foreground">
+            {s.count.toLocaleString("en-IN")}
+            <span className="ml-1 opacity-60">({s.pct.toFixed(0)}%)</span>
+          </span>
         </li>
       ))}
     </ul>
@@ -286,12 +285,13 @@ export function OrderReportsOverview({
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="border-border/80 shadow-sm lg:col-span-2">
+        <Card className="border-border lg:col-span-2">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">Daily order trend</CardTitle>
+            <CardTitle className="text-base font-semibold">
+              {groupBy === "day" ? "Daily" : groupBy === "week" ? "Weekly" : "Monthly"} order trend
+            </CardTitle>
             <CardDescription className="text-xs">
-              Orders and GMV by{" "}
-              {groupBy === "day" ? "day" : groupBy === "week" ? "week" : "month"} (IST)
+              Orders (left axis) vs GMV ₹ (right axis) — IST
             </CardDescription>
           </CardHeader>
           <CardContent className="h-[300px] pb-4">
@@ -301,32 +301,58 @@ export function OrderReportsOverview({
               </p>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={trendData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                <AreaChart
+                  data={trendData}
+                  margin={{ top: 8, right: 12, left: 0, bottom: 0 }}
+                >
                   <defs>
                     <linearGradient id="gmvFill" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#2563eb" stopOpacity={0.35} />
+                      <stop offset="0%" stopColor="#2563eb" stopOpacity={0.2} />
                       <stop offset="100%" stopColor="#2563eb" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="ordersFill" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#16a34a" stopOpacity={0.25} />
+                      <stop offset="0%" stopColor="#16a34a" stopOpacity={0.18} />
                       <stop offset="100%" stopColor="#16a34a" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-border/60" />
-                  <XAxis dataKey="bucket" tick={{ fontSize: 10 }} tickMargin={8} />
-                  <YAxis yAxisId="left" tick={{ fontSize: 10 }} width={48} />
-                  <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10 }} width={56} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" />
+                  <XAxis
+                    dataKey="bucket"
+                    tick={{ fontSize: 10 }}
+                    tickMargin={6}
+                    tickFormatter={(v) => formatBucketLabel(v, groupBy)}
+                    interval="preserveStartEnd"
+                  />
+                  <YAxis
+                    yAxisId="left"
+                    tick={{ fontSize: 10 }}
+                    width={36}
+                    tickFormatter={(v: number) => v.toLocaleString("en-IN")}
+                  />
+                  <YAxis
+                    yAxisId="right"
+                    orientation="right"
+                    tick={{ fontSize: 10 }}
+                    width={56}
+                    tickFormatter={(v: number) => formatIndianCurrencyCompact(v)}
+                  />
                   <Tooltip
                     contentStyle={{
                       borderRadius: 8,
                       border: "1px solid hsl(var(--border))",
                       fontSize: 12,
                     }}
+                    labelFormatter={(v) => formatBucketLabel(String(v), groupBy)}
                     formatter={(value: number, name: string) =>
-                      name === "gmv"
-                        ? [`₹${formatNumberTS(value)}`, "GMV"]
-                        : [value, "Orders"]
+                      name === "GMV"
+                        ? [formatIndianCurrencyCompact(value), "GMV"]
+                        : [value.toLocaleString("en-IN"), "Orders"]
                     }
+                  />
+                  <Legend
+                    iconType="circle"
+                    iconSize={8}
+                    wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
                   />
                   <Area
                     yAxisId="left"
@@ -336,6 +362,8 @@ export function OrderReportsOverview({
                     stroke="#16a34a"
                     fill="url(#ordersFill)"
                     strokeWidth={2}
+                    dot={false}
+                    activeDot={{ r: 4 }}
                   />
                   <Area
                     yAxisId="right"
@@ -345,6 +373,8 @@ export function OrderReportsOverview({
                     stroke="#2563eb"
                     fill="url(#gmvFill)"
                     strokeWidth={2}
+                    dot={false}
+                    activeDot={{ r: 4 }}
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -352,17 +382,19 @@ export function OrderReportsOverview({
           </CardContent>
         </Card>
 
-        <Card className="border-border/80 shadow-sm">
+        <Card className="border-border">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold">Status breakdown</CardTitle>
-            <CardDescription className="text-xs">Order workflow states</CardDescription>
+            <CardDescription className="text-xs">
+              Order workflow states · {orderCount.toLocaleString("en-IN")} total
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {statusSlices.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">No orders</p>
             ) : (
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                <div className="h-[180px] w-full sm:w-[55%]">
+              <div className="flex flex-col items-center gap-4">
+                <div className="relative h-[180px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
@@ -371,43 +403,54 @@ export function OrderReportsOverview({
                         nameKey="name"
                         cx="50%"
                         cy="50%"
-                        innerRadius={48}
-                        outerRadius={72}
+                        innerRadius={52}
+                        outerRadius={76}
                         paddingAngle={2}
+                        strokeWidth={0}
                       >
                         {statusSlices.map((s) => (
                           <Cell key={s.name} fill={s.color} />
                         ))}
                       </Pie>
                       <Tooltip
+                        contentStyle={{
+                          borderRadius: 8,
+                          border: "1px solid hsl(var(--border))",
+                          fontSize: 12,
+                        }}
                         formatter={(value: number, _name: string, item) => {
                           const payload = item?.payload as StatusSlice | undefined;
                           return [
-                            `${value} (${payload?.pct.toFixed(1) ?? 0}%)`,
+                            `${value.toLocaleString("en-IN")} (${payload?.pct.toFixed(1) ?? 0}%)`,
                             payload?.name ?? "",
                           ];
                         }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
+                  {/* center label */}
+                  <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-xl font-bold tabular-nums leading-none">
+                      {orderCount.toLocaleString("en-IN")}
+                    </span>
+                    <span className="mt-0.5 text-[10px] text-muted-foreground">orders</span>
+                  </div>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <StatusLegend slices={statusSlices} />
-                </div>
+                <StatusLegend slices={statusSlices} />
               </div>
             )}
           </CardContent>
         </Card>
       </div>
 
-      <Card className="border-border/80 shadow-sm">
+      <Card className="border-border">
         <CardHeader className="pb-2">
           <CardTitle className="text-base font-semibold">Order lifecycle funnel</CardTitle>
           <CardDescription className="text-xs">
             Placed → payment → applied → settled (drop % vs previous stage)
           </CardDescription>
         </CardHeader>
-        <CardContent className="max-w-2xl">
+        <CardContent>
           <FunnelChart steps={funnelSteps} />
         </CardContent>
       </Card>

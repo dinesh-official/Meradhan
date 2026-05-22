@@ -49,7 +49,7 @@ export function mapOrderWorkflowStatus(
   if (p === "CANCELLED" || p === "REFUNDED") return "Expired";
   if (o === "PENDING" && p === "COMPLETED") return "In Settlement";
   if (p === "COMPLETED") return "Deals Confirmed";
-  if (p === "PENDING") return "RFQ Created";
+  if (p === "PENDING") return "Order Initiated";
   return orderStatus;
 }
 
@@ -60,6 +60,13 @@ export function parseYieldFromBondDetails(bondDetails: unknown): string | null {
   const n = Number(y);
   if (!Number.isFinite(n) || n <= 0) return null;
   return `${n.toFixed(2)}%`;
+}
+
+export function parseRatingFromBondDetails(bondDetails: unknown): string | null {
+  if (!bondDetails || typeof bondDetails !== "object") return null;
+  const bd = bondDetails as Record<string, unknown>;
+  const r = bd.rating ?? bd.creditRating ?? bd.bondRating ?? bd.moodyRating ?? bd.spRating;
+  return typeof r === "string" && r.trim() ? r.trim() : null;
 }
 
 export function formatOrderDate(iso: string): string {

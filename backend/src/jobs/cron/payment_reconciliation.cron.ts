@@ -10,13 +10,13 @@ cron.schedule(
     async () => {
         const svc = new PaymentReconciliationService();
         try {
-            if (env.KRA_ENV == "UAT") {
-                const result = await svc.reconcilePendingRazorpayOrders({
-                    lookbackHours: 72,
-                    maxOrders: 75,
-                });
-                logger.logInfo("Payment reconciliation cron completed", result as any);
-            }
+            // if (env.KRA_ENV == "UAT") {
+            const result = await svc.reconcilePendingRazorpayOrders({
+                lookbackHours: 72,
+                maxOrders: 75,
+            });
+            logger.logInfo("Payment reconciliation cron completed", result as any);
+            // }
         } catch (error) {
             logger.logError("Payment reconciliation cron failed", error);
         }

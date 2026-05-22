@@ -473,6 +473,13 @@ export class BondService {
   async updateBond(
     isin: string,
     bondData: z.infer<typeof appSchema.bonds.bondCreateUpdateSchema>,
+    options?: {
+      /**
+       * When true, stamps `autofillSavedAt` with the current time.
+       * Only the CRM Auto-Update "Accept & Save" path should pass this.
+       */
+      autofillSave?: boolean;
+    },
   ) {
     // Check if bond exists
     const existingBond = await db.dataBase.bonds.findUnique({
@@ -486,6 +493,7 @@ export class BondService {
     const data = await db.dataBase.bonds.update({
       where: { isin },
       data: {
+        ...(options?.autofillSave ? { autofillSavedAt: new Date() } : {}),
         bondName: bondData.bondName,
         instrumentName: bondData.instrumentName,
         description: bondData.description,

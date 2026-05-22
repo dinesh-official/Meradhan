@@ -211,7 +211,12 @@ export const getBondInfoCalcData = async (isin: string, { yeild }: { yeild?: str
                 const sp = parseCalcMoneyString(response.data.final_price);
                 return sp != null && Number.isFinite(sp) ? Number(sp.toFixed(4)) : null;
             })(),
-            isUnderShutPeriod: pricing.isUnderShutPeriod
+            isUnderShutPeriod: pricing.isUnderShutPeriod,
+            bondType: bondData?.bondType ?? null,
+            seniority: bondData?.seniority ?? null,
+            redemptionType: bondData?.redemptionType ?? null,
+            taxStatus: bondData?.taxStatus ?? null,
+            isListed: bondData?.isListed ?? null,
         },
         calc: response.data,
     }

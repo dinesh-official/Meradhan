@@ -1,15 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -19,11 +10,19 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
-import { cn } from "@/lib/utils";
 import apiGateway from "@root/apiGateway";
 import { useQuery } from "@tanstack/react-query";
-import { format, parse, subDays } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { format, subDays } from "date-fns";
+import {
+  AlertTriangle,
+  BarChart3,
+  CreditCard,
+  LayoutDashboard,
+  ShieldCheck,
+  ShoppingCart,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import OrdersSectionTabs from "../_components/OrdersSectionTabs";
 import { CompliancePanel } from "./_components/CompliancePanel";
@@ -42,11 +41,6 @@ function defaultFromTo() {
   return { from: format(from, "yyyy-MM-dd"), to: format(to, "yyyy-MM-dd") };
 }
 
-function parseReportDay(value: string): Date | undefined {
-  const d = parse(value, "yyyy-MM-dd", new Date());
-  return Number.isNaN(d.getTime()) ? undefined : d;
-}
-
 function ReportDateField({
   id,
   label,
@@ -58,39 +52,18 @@ function ReportDateField({
   value: string;
   onChange: (isoDate: string) => void;
 }) {
-  const selected = parseReportDay(value);
   return (
-    <div className="flex min-w-0 flex-col gap-1.5">
-      <Label htmlFor={id} className="text-xs">
-        {label}
-      </Label>
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            id={id}
-            type="button"
-            variant="outline"
-            className={cn(
-              "h-9 w-full min-w-0 justify-start text-left font-normal",
-              !selected && "text-muted-foreground",
-            )}
-          >
-            <CalendarIcon className="mr-2 h-4 w-4 shrink-0 opacity-70" aria-hidden />
-            <span className="truncate">{selected ? format(selected, "yyyy-MM-dd") : "Pick date"}</span>
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={selected}
-            defaultMonth={selected}
-            onSelect={(d) => {
-              if (d) onChange(format(d, "yyyy-MM-dd"));
-            }}
-            initialFocus
-          />
-        </PopoverContent>
-      </Popover>
+    <div className="flex items-center gap-1.5">
+      <label htmlFor={id} className="shrink-0 text-xs text-muted-foreground">
+        {label}:
+      </label>
+      <input
+        id={id}
+        type="date"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-8 rounded-md border border-input bg-white px-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring dark:bg-background"
+      />
     </div>
   );
 }
@@ -205,104 +178,84 @@ export default function OrderReportsView() {
 
       <OrdersSectionTabs />
 
-      <Card className="mb-6 border-border/80 shadow-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold">Filters</CardTitle>
-          <CardDescription className="text-xs">
-            Narrow all tabs by date, payment, order status, ISIN, or customer email.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <ReportDateField id="rep-from" label="From (IST calendar day)" value={from} onChange={setFrom} />
-          <ReportDateField id="rep-to" label="To (IST calendar day)" value={to} onChange={setTo} />
-          <div className="flex min-w-0 flex-col gap-1.5">
-            <Label className="text-xs">Payment status</Label>
-            <Select
-              value={paymentStatus || "__all__"}
-              onValueChange={(v) => setPaymentStatus(v === "__all__" ? "" : v)}
-            >
-              <SelectTrigger className="h-9 w-full min-w-0">
-                <SelectValue placeholder="All" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__all__">All</SelectItem>
-                <SelectItem value="PENDING">PENDING</SelectItem>
-                <SelectItem value="COMPLETED">COMPLETED</SelectItem>
-                <SelectItem value="REFUNDED">REFUNDED</SelectItem>
-                <SelectItem value="CANCELLED">CANCELLED</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex min-w-0 flex-col gap-1.5">
-            <Label className="text-xs">Order status</Label>
-            <Select value={status || "__all__"} onValueChange={(v) => setStatus(v === "__all__" ? "" : v)}>
-              <SelectTrigger className="h-9 w-full min-w-0">
-                <SelectValue placeholder="All" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__all__">All</SelectItem>
-                <SelectItem value="PENDING">PENDING</SelectItem>
-                <SelectItem value="SETTLED">SETTLED</SelectItem>
-                <SelectItem value="APPLIED">APPLIED</SelectItem>
-                <SelectItem value="REJECTED">REJECTED</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex min-w-0 flex-col gap-1.5">
-            <Label htmlFor="rep-isin" className="text-xs">
-              ISIN contains
-            </Label>
-            <Input
-              id="rep-isin"
-              className="h-9 w-full min-w-0"
-              value={isin}
-              onChange={(e) => setIsin(e.target.value)}
-            />
-          </div>
-          <div className="flex min-w-0 flex-col gap-1.5 sm:col-span-2 lg:col-span-1">
-            <Label htmlFor="rep-email" className="text-xs">
-              Customer email contains
-            </Label>
-            <Input
-              id="rep-email"
-              className="h-9 w-full min-w-0"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="mb-5 flex flex-wrap items-center gap-2 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
+        <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          Filters
+        </span>
+        <div className="h-4 w-px shrink-0 bg-border/60" />
+        <ReportDateField id="rep-from" label="From" value={from} onChange={setFrom} />
+        <ReportDateField id="rep-to" label="To" value={to} onChange={setTo} />
+        <div className="h-4 w-px shrink-0 bg-border/60" />
+        <Select
+          value={paymentStatus || "__all__"}
+          onValueChange={(v) => setPaymentStatus(v === "__all__" ? "" : v)}
+        >
+          <SelectTrigger className="h-8 w-auto min-w-[148px] bg-white text-xs dark:bg-background">
+            <SelectValue placeholder="Payment: All" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all__">Payment: All</SelectItem>
+            <SelectItem value="PENDING">PENDING</SelectItem>
+            <SelectItem value="COMPLETED">COMPLETED</SelectItem>
+            <SelectItem value="REFUNDED">REFUNDED</SelectItem>
+            <SelectItem value="CANCELLED">CANCELLED</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select
+          value={status || "__all__"}
+          onValueChange={(v) => setStatus(v === "__all__" ? "" : v)}
+        >
+          <SelectTrigger className="h-8 w-auto min-w-[130px] bg-white text-xs dark:bg-background">
+            <SelectValue placeholder="Status: All" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all__">Status: All</SelectItem>
+            <SelectItem value="PENDING">PENDING</SelectItem>
+            <SelectItem value="SETTLED">SETTLED</SelectItem>
+            <SelectItem value="APPLIED">APPLIED</SelectItem>
+            <SelectItem value="REJECTED">REJECTED</SelectItem>
+          </SelectContent>
+        </Select>
+        <div className="h-4 w-px shrink-0 bg-border/60" />
+        <Input
+          id="rep-isin"
+          placeholder="ISIN contains"
+          className="h-8 w-[140px] bg-white text-xs dark:bg-background"
+          value={isin}
+          onChange={(e) => setIsin(e.target.value)}
+        />
+        <Input
+          id="rep-email"
+          placeholder="Email contains"
+          className="h-8 w-[180px] bg-white text-xs dark:bg-background"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+      </div>
 
       <Tabs defaultValue="overview" className="space-y-5">
-        <TabsList className="flex h-auto flex-wrap gap-1 rounded-lg bg-muted/50 p-1">
-          <TabsTrigger
-            value="overview"
-            className="rounded-md data-[state=active]:shadow-sm"
-            title={REPORT_TAB_META.overview.purpose}
-          >
-            Overview
-          </TabsTrigger>
-          <TabsTrigger value="register" title={REPORT_TAB_META.register.purpose}>
-            Orders
-          </TabsTrigger>
-          <TabsTrigger value="settlement" title={REPORT_TAB_META.settlement.purpose}>
-            Settlement
-          </TabsTrigger>
-          <TabsTrigger value="revenue" title={REPORT_TAB_META.revenue.purpose}>
-            Revenue
-          </TabsTrigger>
-          <TabsTrigger value="customers" title={REPORT_TAB_META.customers.purpose}>
-            Customers
-          </TabsTrigger>
-          <TabsTrigger value="rm-performance" title={REPORT_TAB_META["rm-performance"].purpose}>
-            RM Performance
-          </TabsTrigger>
-          <TabsTrigger value="compliance" title={REPORT_TAB_META.compliance.purpose}>
-            Compliance
-          </TabsTrigger>
-          <TabsTrigger value="exceptions" title={REPORT_TAB_META.exceptions.purpose}>
-            Exceptions
-          </TabsTrigger>
+        <TabsList className="h-auto w-full justify-start gap-0 overflow-x-auto rounded-none border-b border-border bg-transparent p-0">
+          {(
+            [
+              { value: "overview",       label: "Overview" },
+              { value: "register",       label: "Orders" },
+              { value: "settlement",     label: "Settlement" },
+              { value: "revenue",        label: "Revenue" },
+              { value: "customers",      label: "Customers" },
+              { value: "rm-performance", label: "RM Performance" },
+              { value: "compliance",     label: "Compliance" },
+              { value: "exceptions",     label: "Exceptions" },
+            ] as const
+          ).map(({ value, label }) => (
+            <TabsTrigger
+              key={value}
+              value={value}
+              title={REPORT_TAB_META[value].purpose}
+              className="relative shrink-0 rounded-none border-b-2 border-transparent bg-transparent px-4 py-2.5 text-sm font-medium text-muted-foreground shadow-none transition-colors hover:text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
+            >
+              {label}
+            </TabsTrigger>
+          ))}
         </TabsList>
 
         <TabsContent value="overview" className="mt-0">
