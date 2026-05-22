@@ -66,6 +66,18 @@ const YIELD_SOURCE_AFFECTED_KEYS: readonly AutofillMergeKey[] = [
   "sellPrice",
 ];
 
+/** Slugs must match the MeraDhan public site listing filters (same list as BondForm). */
+const BOND_LISTING_CATEGORY_OPTIONS = [
+  { value: "corporate", label: "Corporate" },
+  { value: "banks", label: "Bank bonds" },
+  { value: "nbfc", label: "NBFC" },
+  { value: "psu", label: "PSU" },
+  { value: "tax-free", label: "Tax free" },
+  { value: "zero-coupon", label: "Zero coupon" },
+  { value: "perpetual", label: "Perpetual" },
+  { value: "latest-release", label: "Latest release" },
+] as const;
+
 const api = new apiGateway.bondsApi.BondsApi(apiClientCaller);
 
 /** Empty draft → default autofill; non-empty → must parse as % or fail. */
@@ -270,7 +282,8 @@ export default function BondAutoUpdateView() {
     { isin: string; payload: BondFormData }
   >({
     mutationFn: async ({ isin, payload }) => {
-      await api.updateBond(isin, payload);
+      // Pass autofillSave: true so the backend stamps autofillSavedAt on this bond.
+      await api.updateBond(isin, payload, { autofillSave: true });
       const detail = await api.getBondDetailsByIsin(isin);
       if (!detail.responseData) {
         throw new Error("Bond details missing after update");
@@ -433,7 +446,8 @@ export default function BondAutoUpdateView() {
       }
       try {
         const payload = mergeAutofillIntoForm(row.formBase, row.draft, row.include);
-        await api.updateBond(isin, payload);
+        // Pass autofillSave: true so the backend stamps autofillSavedAt on this bond.
+        await api.updateBond(isin, payload, { autofillSave: true });
         const detail = await api.getBondDetailsByIsin(isin);
         if (!detail.responseData) throw new Error("Bond details missing after update");
         const fresh = detail.responseData;
@@ -697,7 +711,18 @@ export default function BondAutoUpdateView() {
                     />
                     <div>
                       <div className="font-medium">{b.bondName}</div>
-                      <div className="text-muted-foreground text-xs font-mono">{b.isin}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground text-xs font-mono whitespace-nowrap">{b.isin}</span>
+                        {model.bond.autofillSavedAt && (
+                          <span className="text-muted-foreground text-xs font-mono whitespace-nowrap">
+                            · Last updated&nbsp;
+                            {new Date(model.bond.autofillSavedAt).toLocaleString("en-IN", {
+                              dateStyle: "medium",
+                              timeStyle: "short",
+                            })}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </CollapsibleTrigger>
                   <div className="flex flex-wrap items-center gap-2 pl-7 sm:pl-0">
@@ -878,7 +903,7 @@ export default function BondAutoUpdateView() {
                                     </TableCell>
                                     <TableCell className="font-mono text-xs whitespace-nowrap">
                                       <span className="inline-flex items-center gap-2">
-                                        {key}
+                                        {key === "categories" ? "bondCategories" : key}
                                         {yieldSourceAffected ? (
                                           <Badge
                                             variant="secondary"
@@ -895,9 +920,15 @@ export default function BondAutoUpdateView() {
                                         key === "allCouponDates" && "max-h-28 overflow-y-auto align-top",
                                       )}
                                     >
-                                      {key === "sellPrice" &&
-                                        typeof curVal === "number" &&
-                                        Number.isFinite(curVal)
+                                      {key === "categories" && Array.isArray(curVal)
+                                        ? (curVal as string[]).join(", ") || "—"
+                                        : (key === "couponRate" || key === "buyYield" || key === "yield") &&
+                                          typeof curVal === "number" &&
+                                          Number.isFinite(curVal)
+                                        ? formatDecimalWithMinFractionDigits(curVal, 2)
+                                        : key === "sellPrice" &&
+                                          typeof curVal === "number" &&
+                                          Number.isFinite(curVal)
                                         ? formatDecimalWithMinFractionDigits(curVal, 4)
                                         : formatDisplayValue(curVal)}
                                     </TableCell>
@@ -957,10 +988,33 @@ export default function BondAutoUpdateView() {
                                             });
                                           }}
                                         />
-                                      ) : key === "faceValue" ||
-                                        key === "couponRate" ||
+                                      ) : key === "couponRate" ||
                                         key === "buyYield" ||
                                         key === "yield" ? (
+                                        <DecimalInput
+                                          className="h-9 font-mono text-sm"
+                                          minFractionDigits={2}
+                                          maxFractionDigits={2}
+                                          value={
+                                            sug == null
+                                              ? undefined
+                                              : (() => {
+                                                const n =
+                                                  typeof sug === "number"
+                                                    ? sug
+                                                    : Number(sug);
+                                                return Number.isFinite(n)
+                                                  ? n
+                                                  : undefined;
+                                              })()
+                                          }
+                                          onChange={(n) =>
+                                            updateDraft(b.isin, {
+                                              [key]: n ?? null,
+                                            } as Partial<DraftSuggestions>)
+                                          }
+                                        />
+                                      ) : key === "faceValue" ? (
                                         <DecimalInput
                                           className="h-9 font-mono text-sm"
                                           value={
@@ -1019,6 +1073,97 @@ export default function BondAutoUpdateView() {
                                             } as Partial<DraftSuggestions>)
                                           }
                                         />
+                                      ) : key === "bondType" ? (
+                                        <Input
+                                          className="h-9 font-mono text-sm"
+                                          placeholder="GOVERNMENT | CORPORATE | TAX_FREE | PSU | OTHER"
+                                          value={typeof sug === "string" ? sug : ""}
+                                          onChange={(e) =>
+                                            updateDraft(b.isin, {
+                                              bondType: e.target.value as DraftSuggestions["bondType"],
+                                            })
+                                          }
+                                        />
+                                      ) : key === "seniority" ? (
+                                        <Input
+                                          className="h-9 font-mono text-sm"
+                                          placeholder="SENIOR | TIER_2_SUBORDINATED | UNKNOWN"
+                                          value={typeof sug === "string" ? sug : ""}
+                                          onChange={(e) =>
+                                            updateDraft(b.isin, {
+                                              seniority: e.target.value as DraftSuggestions["seniority"],
+                                            })
+                                          }
+                                        />
+                                      ) : key === "redemptionType" ? (
+                                        <Input
+                                          className="h-9 font-mono text-sm"
+                                          placeholder="e.g. BULLET, AMORTISING"
+                                          value={typeof sug === "string" ? sug : ""}
+                                          onChange={(e) =>
+                                            updateDraft(b.isin, {
+                                              redemptionType: e.target.value,
+                                            })
+                                          }
+                                        />
+                                      ) : key === "taxStatus" ? (
+                                        <Input
+                                          className="h-9 font-mono text-sm"
+                                          placeholder="TAXABLE | TAX_FREE | TAX_SAVING | UNKNOWN"
+                                          value={typeof sug === "string" ? sug : ""}
+                                          onChange={(e) =>
+                                            updateDraft(b.isin, {
+                                              taxStatus: e.target.value as DraftSuggestions["taxStatus"],
+                                            })
+                                          }
+                                        />
+                                      ) : key === "isListed" ? (
+                                        <Input
+                                          className="h-9 font-mono text-sm"
+                                          placeholder="YES | NO | UNKNOWN"
+                                          value={typeof sug === "string" ? sug : ""}
+                                          onChange={(e) =>
+                                            updateDraft(b.isin, {
+                                              isListed: e.target.value as DraftSuggestions["isListed"],
+                                            })
+                                          }
+                                        />
+                                      ) : key === "couponType" ? (
+                                        <Input
+                                          className="h-9 font-mono text-sm"
+                                          placeholder="e.g. Fixed, Floating, Step-Up"
+                                          value={typeof sug === "string" ? sug : ""}
+                                          onChange={(e) =>
+                                            updateDraft(b.isin, {
+                                              couponType: e.target.value,
+                                            })
+                                          }
+                                        />
+                                      ) : key === "categories" ? (
+                                        <div className="grid grid-cols-2 gap-x-6 gap-y-2 py-1 max-w-[300px]">
+                                          {BOND_LISTING_CATEGORY_OPTIONS.map((opt) => {
+                                            const current = Array.isArray(sug) ? (sug as string[]) : [];
+                                            const checked = current.includes(opt.value);
+                                            return (
+                                              <label
+                                                key={opt.value}
+                                                className="flex items-center gap-1.5 text-sm font-normal cursor-pointer whitespace-nowrap"
+                                              >
+                                                <Checkbox
+                                                  checked={checked}
+                                                  onCheckedChange={(v) => {
+                                                    const on = v === true;
+                                                    const next = on
+                                                      ? [...current, opt.value]
+                                                      : current.filter((c) => c !== opt.value);
+                                                    updateDraft(b.isin, { categories: next });
+                                                  }}
+                                                />
+                                                {opt.label}
+                                              </label>
+                                            );
+                                          })}
+                                        </div>
                                       ) : (
                                         <Input
                                           type="date"

@@ -92,16 +92,18 @@ jobs:
           BACKOFFICE_SMTP_PORT: ${{ vars.BACKOFFICE_SMTP_PORT }}
           BACKOFFICE_SMTP_EMAIL: ${{ vars.BACKOFFICE_SMTP_EMAIL }}
           BACKOFFICE_SMTP_PASS: ${{ vars.BACKOFFICE_SMTP_PASS }}
+          ABSOLUTE_DATA_API_KEY: ${{ vars.ABSOLUTE_DATA_API_KEY }}
+    
 
 
         run: |
           # Static Public values
-          echo "NEXT_PUBLIC_HOST_URL=https://www.preprodfe.meradhan.co" > .env
+          echo "NEXT_PUBLIC_HOST_URL=https://preprodfe.meradhan.co" > .env
           echo "NEXT_PUBLIC_CRM_HOST_URL=https://preprod-crm.meradhan.co" >> .env
           echo "NEXT_PUBLIC_BACKEND_HOST_URL=https://preprod.meradhan.co" >> .env
           echo "NEXT_PUBLIC_BACKEND_IP_URL=http://pre-prod-be.prod-namespace:4000" >> .env
           echo "NEXT_PUBLIC_STRAPI_HOST_URL=https://spyder.meradhan.co" >> .env
-          echo "NEXT_PUBLIC_DIGIO=production" >> .env
+          echo "NEXT_PUBLIC_DIGIO=sandbox" >> .env
           echo "STRAPI_API_URL=https://spyder.meradhan.co/api" >> .env
           echo "PORT=4000" >> .env
     
@@ -197,6 +199,8 @@ jobs:
           echo "BACKOFFICE_SMTP_PORT=${BACKOFFICE_SMTP_PORT}" >> .env
           echo "BACKOFFICE_SMTP_EMAIL=${BACKOFFICE_SMTP_EMAIL}" >> .env
           echo "BACKOFFICE_SMTP_PASS=${BACKOFFICE_SMTP_PASS}" >> .env
+
+          echo "ABSOLUTE_DATA_API_KEY=${ABSOLUTE_DATA_API_KEY}" >> .env
 
           echo "----------- FINAL .env -----------"
           cat .env

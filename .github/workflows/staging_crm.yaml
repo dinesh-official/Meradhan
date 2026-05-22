@@ -1,0 +1,96 @@
+name: stage-crm-deploy
+
+on:
+  push:
+    branches:
+      - staging---
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+
+    env:
+      REGISTRY: 450321244603.dkr.ecr.ap-south-1.amazonaws.com
+      REPOSITORY: stage-crm-ui
+      IMAGE_TAG: latest
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Export GitHub Environment
+        shell: bash
+        env:
+          ALL_SECRETS: ${{ toJSON(secrets) }}
+          ALL_VARS: ${{ toJSON(vars) }}
+
+        run: |
+
+          echo "$ALL_VARS" \
+          | jq -r 'to_entries[] | "\(.key)=\(.value)"' \
+          >> $GITHUB_ENV
+
+          echo "$ALL_SECRETS" \
+          | jq -r 'to_entries[] | "\(.key)=\(.value)"' \
+          >> $GITHUB_ENV
+
+      - name: Generate .env
+        shell: bash
+
+        run: |
+
+          printenv \
+          | grep -v '^GITHUB_' \
+          | grep -v '^RUNNER_' \
+          | grep -v '^ACTIONS_' \
+          | grep -v '^CI=' \
+          | grep -v '^HOME=' \
+          | grep -v '^PATH=' \
+          | grep -v '^PWD=' \
+          | grep -v '^SHLVL=' \
+          | grep -v '^OLDPWD=' \
+          > .env
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker Image
+        run: |
+
+          docker build \
+            --no-cache \
+            -f crmdockerfile \
+            -t $REGISTRY/$REPOSITORY:$IMAGE_TAG \
+            .
+
+      - name: Push Docker Image
+        run: |
+
+          docker push \
+            $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+      - name: Deploy ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+
+        with:
+          task-definition: stage-crm-ui-revision.json
+          cluster: stage-cluster
+          service: stage-crm-ui-service-2drpd2xj
+          force-new-deployment: true
+
+      - name: Cleanup
+        if: always()
+
+        run: |
+
+          rm -f .env

@@ -63,8 +63,9 @@ export class CustomerProfileService extends CustomerProfileManager {
       };
     }
 
-    if (payload.search) {
-      const words = payload.search.trim().split(/\s+/).filter(Boolean);
+    const searchTrimmed = payload.search?.trim();
+    if (searchTrimmed) {
+      const words = searchTrimmed.split(/\s+/);
       if (words.length > 1) {
         // Multi-word: each word must match at least one name/contact field (AND across words)
         filters.AND = words.map((word) => ({
@@ -80,15 +81,15 @@ export class CustomerProfileService extends CustomerProfileManager {
         }));
       } else {
         filters.OR = [
-          { firstName: { contains: payload.search, mode: "insensitive" } },
-          { middleName: { contains: payload.search, mode: "insensitive" } },
-          { lastName: { contains: payload.search, mode: "insensitive" } },
-          { emailAddress: { contains: payload.search, mode: "insensitive" } },
-          { userName: { contains: payload.search, mode: "insensitive" } },
-          { phoneNo: { contains: payload.search, mode: "insensitive" } },
+          { firstName: { contains: searchTrimmed, mode: "insensitive" } },
+          { middleName: { contains: searchTrimmed, mode: "insensitive" } },
+          { lastName: { contains: searchTrimmed, mode: "insensitive" } },
+          { emailAddress: { contains: searchTrimmed, mode: "insensitive" } },
+          { userName: { contains: searchTrimmed, mode: "insensitive" } },
+          { phoneNo: { contains: searchTrimmed, mode: "insensitive" } },
           {
             panCard: {
-              panCardNo: { contains: payload.search, mode: "insensitive" },
+              panCardNo: { contains: searchTrimmed, mode: "insensitive" },
             },
           },
         ];

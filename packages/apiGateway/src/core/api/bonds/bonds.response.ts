@@ -65,6 +65,8 @@ export interface BondDetailsResponse {
   redemptionType?: string | null
   startDate?: string | null
   endDate?: string | null
+  /** ISO timestamp — set when the bond was last saved via the CRM Auto-Update autofill flow. Null if never autofill-saved. */
+  autofillSavedAt?: string | null
   /** Units available from the latest CRM inventory upload (0 if none / not in file). */
   crmAvailableQuantity?: number
 }
@@ -142,6 +144,20 @@ export interface BondDealAutofillSuggestions {
   sellPrice: number | null;
   /** Set by deal-autofill-calc (`getBondInfoCalcData`); omitted by legacy deal-autofill. */
   isUnderShutPeriod?: boolean;
+  /** Bond classification — sourced from the bonds table via deal-autofill-calc. */
+  bondType?: string | null;
+  /** Debt seniority level — sourced from the bonds table via deal-autofill-calc. */
+  seniority?: string | null;
+  /** Redemption type string — sourced from the bonds table via deal-autofill-calc. */
+  redemptionType?: string | null;
+  /** Tax status enum value (e.g. TAXABLE, TAX_FREE) — sourced from the bonds table. */
+  taxStatus?: string | null;
+  /** Whether the bond is exchange-listed (YES / NO / UNKNOWN) — sourced from the bonds table. */
+  isListed?: string | null;
+  /** Coupon type string (e.g. Fixed, Floating) — sourced from the bonds table. */
+  couponType?: string | null;
+  /** Listing category slugs (e.g. ["tax-free", "banks"]) — controls MeraDhan bond listing filters. */
+  categories?: string[];
 }
 
 export interface BondDealAutofillResponse {

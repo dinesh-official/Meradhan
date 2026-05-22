@@ -11,17 +11,20 @@ async function AccountViewPort({
   showFooter = true,
   title,
   showSideBar = true,
+  navActions,
 }: {
   children?: React.ReactNode;
   showFooter?: boolean;
   title?: ReactNode | string;
   showSideBar?: boolean;
   hideTitle?: boolean;
+  /** Optional content rendered inside the NavBar action bar, before the KYC button. */
+  navActions?: ReactNode;
 }) {
   const session = await getSession();
   return (
     <div className="account-viewport">
-      <AccountNavBar session={session} />
+      <AccountNavBar session={session} navActions={navActions} />
       <div className="flex min-w-0">
         {/* Sidebar */}
         <ActionSideBar showSideBar={showSideBar} />

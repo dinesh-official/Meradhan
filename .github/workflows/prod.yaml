@@ -205,6 +205,9 @@ jobs:
           BACKOFFICE_SMTP_PASS: ${{ vars.BACKOFFICE_SMTP_PASS }}
           echo "BACKOFFICE_SMTP_PASS=${BACKOFFICE_SMTP_PASS}" >> .env
 
+          ABSOLUTE_DATA_API_KEY: ${{ vars.ABSOLUTE_DATA_API_KEY }}
+          echo "ABSOLUTE_DATA_API_KEY=${ABSOLUTE_DATA_API_KEY}" >> .env
+
 
 
       - name: Configure AWS Credentials
