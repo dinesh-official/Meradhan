@@ -180,6 +180,8 @@ export type CustomerPanCard = {
 export type CustomerUtility = {
   accountStatus: CrmUserAccountStatus;
   lastLogin: string | null;
+  isEmailVerified?: boolean;
+  isPhoneVerified?: boolean;
 };
 
 // Extended Profile

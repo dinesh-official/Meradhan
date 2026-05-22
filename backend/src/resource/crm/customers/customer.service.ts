@@ -128,6 +128,8 @@ export class CustomerProfileService extends CustomerProfileManager {
           select: {
             accountStatus: true,
             lastLogin: true,
+            isEmailVerified: true,
+            isPhoneVerified: true,
           },
         },
         createdAt: true,
