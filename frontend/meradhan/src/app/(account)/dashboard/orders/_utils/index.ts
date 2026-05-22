@@ -281,7 +281,8 @@ export function formatOrderYieldPercent(order: Order): string {
 }
 
 /**
- * Three-line security column: ISIN (muted), coupon% + issuer/name (bold), maturity DD/MM/YYYY (muted).
+ * Security column lines: ISIN (muted), coupon% + bondName + issuer/name (bold), maturity DD/MM/YYYY (muted).
+ * titleLine format: `{coupon%} {bondName} {namePart}` — any absent segment is omitted.
  */
 export function getSecurityNameColumnLines(order: Order): {
   isin: string;
@@ -309,7 +310,10 @@ export function getSecurityNameColumnLines(order: Order): {
     namePart = cleanedName.trim() || "—";
   }
 
-  const titleLine = couponStr ? `${couponStr} ${namePart}`.trim() : namePart;
+  // bondName sits between coupon and the issuer-derived namePart: "9.00% <bondName> <namePart>"
+  const bondName = String(order.bondName || "").trim();
+  const titleParts = [couponStr, bondName, namePart !== "—" ? namePart : ""].filter(Boolean);
+  const titleLine = titleParts.join(" ").trim() || "—";
 
   const matRaw =
     getBondDetailString(b, "maturityDateIst") ??

@@ -86,13 +86,13 @@ function CustomerTable({ data, pageSize = 10, isLoading }: UsersTableProps) {
           cell: (row) => (
             <div className="">
               <p>
-                
+
                 {dateTimeUtils.formatDateTime(
                   row.updatedAt,
                   "DD MMM YYYY hh:mm AA"
                 )}
               </p>
-              <p  className="text-gray-500 text-xs" >
+              <p className="text-gray-500 text-xs" >
                 {dateTimeUtils.formatDateTime(
                   row.createdAt,
                   "DD MMM YYYY hh:mm AA"
