@@ -179,11 +179,20 @@ export class BondsApi {
   public async updateBond(
     isin: string,
     payload: z.infer<typeof appSchema.bonds.bondCreateUpdateSchema>,
+    options?: {
+      /**
+       * When true, the backend will stamp `autofillSavedAt` with the current
+       * server time. Only pass this from the Auto-Update "Accept & Save" path.
+       */
+      autofillSave?: boolean;
+    },
     config?: AxiosRequestConfig
   ) {
     const response = await this.apiClient.put<BondDetailResponse>(
       `/bonds/${isin}`,
-      payload,
+      // Inject the meta-flag alongside the bond payload.
+      // The backend reads it from raw body before Zod strips unknown keys.
+      { ...payload, ...(options?.autofillSave ? { _autofillSave: true } : {}) },
       config
     );
     return response.data;

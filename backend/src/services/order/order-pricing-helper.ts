@@ -251,6 +251,47 @@ function isUnderShutPeriod(
     return { isUnderShutPeriod: isUnder, recordDate, noOfAccrualDays: days };
 }
 
+/**
+ * Whether settlement falls in shut period for a specific coupon due date.
+ * Same rule as `getPayoutDates` (skip next coupon) and
+ * `getLastNextCouponDateBasedOnSettlementDate` (`isUnderShutPeriod` for the next coupon).
+ */
+export function isSettlementUnderShutPeriodForCouponDue(
+    settlement: Date,
+    dueDate: Date,
+    recordDate: Date | null,
+    recordDays: number | null | undefined,
+): boolean {
+    const settlementDtRaw = new Date(settlement);
+    if (Number.isNaN(settlementDtRaw.getTime())) return false;
+
+    const istYmd = settlementDtRaw.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+    const settlementDt = new Date(`${istYmd}`);
+
+    let recordDateResolved =
+        recordDate instanceof Date && !Number.isNaN(recordDate.getTime()) ? recordDate : null;
+
+    if (!recordDateResolved) {
+        const daysRaw = recordDays;
+        const days =
+            typeof daysRaw === "number" && Number.isFinite(daysRaw)
+                ? Math.floor(daysRaw)
+                : null;
+        if (days != null && days > 0) {
+            recordDateResolved = utcMidnightForISODate(
+                addUTCCalendarDays(toUTCISODate(dueDate), -days),
+            );
+        }
+    }
+
+    if (!recordDateResolved) return false;
+
+    return (
+        settlementDt.getTime() >= recordDateResolved.getTime() &&
+        settlementDt.getTime() < dueDate.getTime()
+    );
+}
+
 /* =========================
    ACCRUED INTEREST
 ========================= */

@@ -16,6 +16,7 @@ import {
   MultiSelectValue,
 } from "@/components/ui/multi-select";
 import { PortfolioDetailsTabShimmer } from "./PortfolioTabShimmers";
+import { extractRatingAgencyName } from "@/global/utils/ratingAgency";
 
 interface PortfolioFilterOptions {
   bondTypes: string[];
@@ -34,18 +35,6 @@ function formatPortfolioDate(value: string | Date | null | undefined): string | 
     month: "short",
     year: "numeric",
   });
-}
-
-function extractAgencyName(value: string | null | undefined): string | null {
-  if (!value) return null;
-  const cleaned = value
-    .replace(/[\[\]()\/,]/g, " ")
-    .replace(/\b[A-D]\d[+\-]?(?=\s|$|\W)/gi, " ")
-    .replace(/\b[A-D]{1,3}[+\-]?(?=\s|$|\W)/gi, " ")
-    .replace(/\b(stable|negative|positive|outlook|watch|developing|reaffirmed|assigned)\b/gi, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-  return cleaned.length > 0 ? cleaned : null;
 }
 
 export default function PortfolioDetails() {
@@ -350,7 +339,11 @@ export default function PortfolioDetails() {
                               />
                               <Detail
                                 label="Rating Agency"
-                                value={bond.ratingAgencyName == "N/A" ? "Coming soon" : extractAgencyName(bond.ratingAgencyName)}
+                                value={
+                                  bond.ratingAgencyName === "N/A"
+                                    ? "Coming soon"
+                                    : extractRatingAgencyName(bond.ratingAgencyName)
+                                }
                               />
                             </div>
                           </td>

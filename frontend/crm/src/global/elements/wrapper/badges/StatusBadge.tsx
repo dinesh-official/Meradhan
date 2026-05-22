@@ -29,6 +29,7 @@ function getStatusClass(value: string) {
     case "waiting":
     case "under process":
     case "underprocess":
+    case "under review":
     case "on hold":
     case "onhold":
     case "cbrics pending":

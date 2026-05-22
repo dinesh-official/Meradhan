@@ -2,7 +2,6 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -48,20 +47,15 @@ export function ReportKpiCard({
   valueClassName?: string;
 }) {
   return (
-    <Card className="min-w-[140px] flex-1 border-border/80 shadow-sm">
-      <CardContent className="p-4">
-        <p className="text-xs font-medium text-muted-foreground">{label}</p>
-        <p
-          className={cn(
-            "mt-1 text-xl font-semibold tabular-nums tracking-tight text-foreground",
-            valueClassName,
-          )}
-        >
-          {value}
-        </p>
-        {sub ? <p className="mt-0.5 text-xs text-muted-foreground">{sub}</p> : null}
-      </CardContent>
-    </Card>
+    <div className="rounded-lg border border-border border-l-[3px] border-l-blue-500 bg-card p-4">
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {label}
+      </p>
+      <p className={cn("mt-2 text-2xl font-bold tabular-nums tracking-tight text-foreground", valueClassName)}>
+        {value}
+      </p>
+      {sub ? <p className="mt-0.5 text-[11px] text-muted-foreground">{sub}</p> : null}
+    </div>
   );
 }
 
@@ -97,71 +91,76 @@ export function ReportDataTable({
   isLoading?: boolean;
   emptyMessage?: string;
 }) {
+  const hasHeader = title || toolbar || recordCount != null;
   return (
-    <Card className="border-border/80 shadow-sm">
-      {(title || toolbar || recordCount != null) && (
-        <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3 space-y-0 pb-3">
+    <div className="overflow-hidden rounded-xl border border-border bg-white">
+      {hasHeader && (
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-white px-4 py-3">
           <div>
-            {title ? <CardTitle className="text-base font-semibold">{title}</CardTitle> : null}
+            {title ? <p className="text-sm font-semibold text-foreground">{title}</p> : null}
             {description ? (
-              <CardDescription className="mt-1 text-xs">{description}</CardDescription>
+              <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
             ) : null}
           </div>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2">
             {toolbar}
             {recordCount != null ? (
-              <span className="text-xs tabular-nums text-muted-foreground">{recordCount}</span>
+              <span className="rounded-full border border-border px-2.5 py-0.5 text-[11px] font-medium tabular-nums text-muted-foreground">
+                {recordCount}
+              </span>
             ) : null}
           </div>
-        </CardHeader>
+        </div>
       )}
-      <CardContent className={cn(title || toolbar ? "pt-0" : "pt-4")}>
-        {isLoading ? (
-          <p className="py-12 text-center text-sm text-muted-foreground">Loading…</p>
-        ) : rows.length === 0 ? (
-          <p className="py-12 text-center text-sm text-muted-foreground">{emptyMessage}</p>
-        ) : (
-          <div className="overflow-x-auto rounded-md border border-border/80">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/40 hover:bg-muted/40">
-                  {columns.map((col) => (
-                    <TableHead
-                      key={col.key}
+      {isLoading ? (
+        <p className="py-14 text-center text-sm text-muted-foreground">Loading…</p>
+      ) : rows.length === 0 ? (
+        <p className="py-14 text-center text-sm text-muted-foreground">{emptyMessage}</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b border-border bg-slate-50 hover:bg-slate-50">
+                {columns.map((col) => (
+                  <TableHead
+                    key={col.key}
+                    className={cn(
+                      "h-10 whitespace-nowrap text-xs font-semibold text-slate-500",
+                      col.align === "right" && "text-right",
+                      col.className,
+                    )}
+                  >
+                    {col.label}
+                  </TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((row) => (
+                <TableRow
+                  key={row.key}
+                  className="border-b border-slate-100 bg-white transition-colors last:border-0 hover:bg-slate-50/70"
+                >
+                  {row.cells.map((cell, i) => (
+                    <TableCell
+                      key={`${row.key}-${columns[i]?.key ?? i}`}
                       className={cn(
-                        "whitespace-nowrap text-xs font-semibold uppercase tracking-wide text-muted-foreground",
-                        col.align === "right" && "text-right",
-                        col.className,
+                        "py-3 text-sm text-slate-700",
+                        columns[i]?.align === "right" && "text-right tabular-nums",
+                        columns[i]?.className,
                       )}
                     >
-                      {col.label}
-                    </TableHead>
+                      {cell}
+                    </TableCell>
                   ))}
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rows.map((row) => (
-                  <TableRow key={row.key} className="hover:bg-muted/30">
-                    {row.cells.map((cell, i) => (
-                      <TableCell
-                        key={`${row.key}-${columns[i]?.key ?? i}`}
-                        className={cn(
-                          columns[i]?.align === "right" && "text-right tabular-nums",
-                          columns[i]?.className,
-                        )}
-                      >
-                        {cell}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-        {footer}
-      </CardContent>
-    </Card>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+      {footer ? <div className="border-t border-border/60 bg-white px-4 pb-3 pt-2">{footer}</div> : null}
+    </div>
   );
 }
 
@@ -177,15 +176,22 @@ export function ReportPagination({
   onPageChange: (page: number) => void;
 }) {
   return (
-    <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border/80 pt-4 text-sm">
+    <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-3 text-xs">
       <p className="text-muted-foreground">
-        Page {page} of {Math.max(1, totalPages)} · {total.toLocaleString("en-IN")} results
+        Page <span className="font-medium text-foreground">{page}</span> of{" "}
+        <span className="font-medium text-foreground">{Math.max(1, totalPages)}</span>
+        <span className="mx-1.5 text-border">·</span>
+        <span className="font-medium tabular-nums text-foreground">
+          {total.toLocaleString("en-IN")}
+        </span>{" "}
+        results
       </p>
-      <div className="flex gap-2">
+      <div className="flex gap-1.5">
         <Button
           type="button"
           variant="outline"
           size="sm"
+          className="h-7 px-3 text-xs"
           disabled={page <= 1}
           onClick={() => onPageChange(page - 1)}
         >
@@ -195,6 +201,7 @@ export function ReportPagination({
           type="button"
           variant="outline"
           size="sm"
+          className="h-7 px-3 text-xs"
           disabled={page >= totalPages}
           onClick={() => onPageChange(page + 1)}
         >
@@ -209,18 +216,22 @@ export function WorkflowStatusBadge({ label }: { label: string }) {
   const u = label.toLowerCase();
   const className =
     u.includes("settled")
-      ? "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300"
-      : u.includes("settlement") || u.includes("confirmed") || u.includes("approved")
-        ? "border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-300"
+      ? "bg-emerald-100 text-emerald-700"
+      : u.includes("settlement") || u.includes("confirmed") || u.includes("approved") || u.includes("applied")
+        ? "bg-blue-100 text-blue-700"
         : u.includes("expired") || u.includes("cancel")
-          ? "border-border bg-muted/60 text-muted-foreground"
-          : u.includes("rfq") || u.includes("proposed") || u.includes("created")
-            ? "border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200"
-            : "border-border bg-background text-foreground";
+          ? "bg-slate-100 text-slate-500"
+          : u.includes("pending")
+            ? "bg-amber-100 text-amber-700"
+            : u.includes("rfq") || u.includes("proposed") || u.includes("created")
+              ? "bg-violet-100 text-violet-700"
+              : u.includes("reject")
+                ? "bg-red-100 text-red-600"
+                : "bg-slate-100 text-slate-600";
   return (
-    <Badge variant="outline" className={cn("font-normal", className)}>
+    <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium", className)}>
       {label}
-    </Badge>
+    </span>
   );
 }
 
@@ -233,7 +244,7 @@ export function KycStatusBadge({ status }: { status: string }) {
         ? "border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200"
         : "border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-300";
   return (
-    <Badge variant="outline" className={cn("font-normal", className)}>
+    <Badge variant="outline" className={cn("text-[11px] font-medium", className)}>
       {status}
     </Badge>
   );
@@ -250,7 +261,7 @@ export function SeverityBadge({ severity }: { severity: string }) {
           ? "border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200"
           : "border-border bg-muted/60 text-muted-foreground";
   return (
-    <Badge variant="outline" className={cn("font-normal", className)}>
+    <Badge variant="outline" className={cn("text-[11px] font-medium", className)}>
       {severity}
     </Badge>
   );
@@ -271,12 +282,12 @@ export function ReportFilterSelect({
 }) {
   return (
     <Select value={value} onValueChange={onValueChange}>
-      <SelectTrigger className={cn("h-9 w-[160px]", className)}>
+      <SelectTrigger className={cn("h-8 w-auto min-w-[130px] bg-white text-xs dark:bg-background", className)}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
         {options.map((o) => (
-          <SelectItem key={o.value} value={o.value}>
+          <SelectItem key={o.value} value={o.value} className="text-xs">
             {o.label}
           </SelectItem>
         ))}

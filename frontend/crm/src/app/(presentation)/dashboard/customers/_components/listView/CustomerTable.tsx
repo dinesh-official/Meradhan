@@ -61,6 +61,13 @@ function CustomerTable({ data, pageSize = 10, isLoading }: UsersTableProps) {
           cell: (row) => <StatusBadge value={row.kycStatus} />,
         },
         {
+          key: "kraStatus",
+          label: "KRA",
+          cell: (row) => (
+            <StatusBadge value={row.kraStatus || "Not Started"} />
+          ),
+        },
+        {
           key: "status",
           label: "Status",
           cell: (row) => (

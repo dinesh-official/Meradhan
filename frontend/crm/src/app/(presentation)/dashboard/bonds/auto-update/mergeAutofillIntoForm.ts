@@ -20,6 +20,11 @@ export const AUTOFILL_MERGE_KEYS = [
   "buyYield",
   "yield",
   "sellPrice",
+  "bondType",
+  "seniority",
+  "redemptionType",
+  "taxStatus",
+  "isListed",
 ] as const;
 
 export type AutofillMergeKey = (typeof AUTOFILL_MERGE_KEYS)[number];
@@ -117,6 +122,21 @@ export function mergeAutofillIntoForm(
   }
   if (include.sellPrice && suggested.sellPrice != null && Number.isFinite(suggested.sellPrice)) {
     out.sellPrice = suggested.sellPrice;
+  }
+  if (include.bondType && suggested.bondType != null) {
+    out.bondType = suggested.bondType as BondFormData["bondType"];
+  }
+  if (include.seniority && suggested.seniority != null) {
+    out.seniority = suggested.seniority as BondFormData["seniority"];
+  }
+  if (include.redemptionType && suggested.redemptionType != null) {
+    out.redemptionType = suggested.redemptionType;
+  }
+  if (include.taxStatus && suggested.taxStatus != null) {
+    out.taxStatus = suggested.taxStatus as BondFormData["taxStatus"];
+  }
+  if (include.isListed && suggested.isListed != null) {
+    out.isListed = suggested.isListed as BondFormData["isListed"];
   }
 
   return out;
