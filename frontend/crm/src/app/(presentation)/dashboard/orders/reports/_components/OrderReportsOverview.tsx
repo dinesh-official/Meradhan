@@ -115,6 +115,9 @@ function FunnelChart({ steps }: { steps: ReturnType<typeof buildLifecycleFunnel>
             <p className="mt-1.5 text-2xl font-bold tabular-nums text-foreground">
               {step.count.toLocaleString("en-IN")}
             </p>
+            {step.subLabel ? (
+              <p className="mt-0.5 text-[11px] text-muted-foreground">{step.subLabel}</p>
+            ) : null}
             <p className={cn("mt-0.5 text-xs font-medium", step.dropPct != null ? "text-red-500" : "invisible")}>
               {step.dropPct != null ? `${step.dropPct.toFixed(1)}%` : "0%"}
             </p>

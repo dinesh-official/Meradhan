@@ -297,6 +297,7 @@ export default function OrderReportsView() {
           <CustomersPanel
             data={byCustomerQuery.data?.data ?? []}
             meta={byCustomerQuery.data?.meta}
+            orders={registerBulkQuery.data?.data ?? []}
             isLoading={byCustomerQuery.isLoading}
           />
         </TabsContent>
@@ -313,6 +314,7 @@ export default function OrderReportsView() {
         <TabsContent value="compliance" className="space-y-4">
           <CompliancePanel
             byIsin={byIsinQuery.data?.data ?? []}
+            orders={registerBulkQuery.data?.data ?? []}
             summary={summaryForPanels}
             isLoading={byIsinQuery.isLoading || summaryQuery.isLoading}
           />
