@@ -204,9 +204,12 @@ export const getBondInfoCalcData = async (isin: string, { yeild }: { yeild?: str
             interestPaymentFrequency: paymentFrequencyToDbEnum(payload.Payment_Frequency),
             interestPaymentMode: paymentFrequencyToDbEnum(payload.Payment_Frequency),
             faceValue: Number(bond?.faceValue ?? 0),
-            couponRate: Number(bond?.couponRate ?? 0),
-            buyYield: bondData?.buyYield ?? bondData?.yield ?? (Number(response.data.final_yield) || null),
-            yield: Number(response.data.final_yield_raw ?? 0),
+            couponRate: Number(Number(bond?.couponRate ?? 0).toFixed(2)),
+            buyYield: (() => {
+                const raw = bondData?.buyYield ?? bondData?.yield ?? (Number(response.data.final_yield) || null);
+                return raw != null && Number.isFinite(raw) ? Number(Number(raw).toFixed(2)) : null;
+            })(),
+            yield: Number(Number(response.data.final_yield_raw ?? 0).toFixed(2)),
             sellPrice: (() => {
                 const sp = parseCalcMoneyString(response.data.final_price);
                 return sp != null && Number.isFinite(sp) ? Number(sp.toFixed(4)) : null;
@@ -217,6 +220,8 @@ export const getBondInfoCalcData = async (isin: string, { yeild }: { yeild?: str
             redemptionType: bondData?.redemptionType ?? null,
             taxStatus: bondData?.taxStatus ?? null,
             isListed: bondData?.isListed ?? null,
+            couponType: bondData?.couponType ?? null,
+            categories: bondData?.categories ?? [],
         },
         calc: response.data,
     }
