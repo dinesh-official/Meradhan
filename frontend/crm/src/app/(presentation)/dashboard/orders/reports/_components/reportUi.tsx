@@ -84,7 +84,7 @@ export function ReportDataTable({
   title?: string;
   description?: string;
   columns: ReportTableColumn[];
-  rows: { key: string | number; cells: ReactNode[] }[];
+  rows: { key: string | number; cells: ReactNode[]; onClick?: () => void }[];
   toolbar?: ReactNode;
   recordCount?: ReactNode;
   footer?: ReactNode;
@@ -139,7 +139,11 @@ export function ReportDataTable({
               {rows.map((row) => (
                 <TableRow
                   key={row.key}
-                  className="border-b border-slate-100 bg-white transition-colors last:border-0 hover:bg-slate-50/70"
+                  onClick={row.onClick}
+                  className={cn(
+                    "border-b border-slate-100 bg-white transition-colors last:border-0 hover:bg-slate-50/70",
+                    row.onClick && "cursor-pointer",
+                  )}
                 >
                   {row.cells.map((cell, i) => (
                     <TableCell

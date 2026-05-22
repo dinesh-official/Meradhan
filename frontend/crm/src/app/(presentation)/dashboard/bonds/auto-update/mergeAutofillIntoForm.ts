@@ -16,6 +16,7 @@ export const AUTOFILL_MERGE_KEYS = [
   "interestPaymentFrequency",
   "interestPaymentMode",
   "faceValue",
+  "couponType",
   "couponRate",
   "buyYield",
   "yield",
@@ -25,6 +26,7 @@ export const AUTOFILL_MERGE_KEYS = [
   "redemptionType",
   "taxStatus",
   "isListed",
+  "categories",
 ] as const;
 
 export type AutofillMergeKey = (typeof AUTOFILL_MERGE_KEYS)[number];
@@ -111,14 +113,17 @@ export function mergeAutofillIntoForm(
   if (include.faceValue && Number.isFinite(suggested.faceValue)) {
     out.faceValue = suggested.faceValue;
   }
+  if (include.couponType && suggested.couponType != null) {
+    out.couponType = suggested.couponType;
+  }
   if (include.couponRate && Number.isFinite(suggested.couponRate)) {
-    out.couponRate = suggested.couponRate;
+    out.couponRate = Number(suggested.couponRate.toFixed(2));
   }
   if (include.buyYield && suggested.buyYield != null && Number.isFinite(suggested.buyYield)) {
-    out.buyYield = suggested.buyYield;
+    out.buyYield = Number(suggested.buyYield.toFixed(2));
   }
   if (include.yield && Number.isFinite(suggested.yield)) {
-    out.yield = suggested.yield;
+    out.yield = Number(suggested.yield.toFixed(2));
   }
   if (include.sellPrice && suggested.sellPrice != null && Number.isFinite(suggested.sellPrice)) {
     out.sellPrice = suggested.sellPrice;
@@ -137,6 +142,11 @@ export function mergeAutofillIntoForm(
   }
   if (include.isListed && suggested.isListed != null) {
     out.isListed = suggested.isListed as BondFormData["isListed"];
+  }
+  // Only overwrite categories when the API returns a non-empty array — an empty
+  // array would silently clear all listing filters, which is never the intent.
+  if (include.categories && suggested.categories && suggested.categories.length > 0) {
+    out.categories = suggested.categories;
   }
 
   return out;

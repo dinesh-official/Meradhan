@@ -19,6 +19,8 @@ model CrmSavedProposal {
   /// Snapshot payload (bond/pricing/autofill/customer display fields)
   data Json
 
+  status ProposalStatus @default(PENDING)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -28,3 +30,9 @@ model CrmSavedProposal {
   @@map("crm_saved_proposals")
 }
 
+enum ProposalStatus {
+  PENDING
+  WAITING_FOR_APPROVAL
+  REJECTED
+  CONVERTED
+}

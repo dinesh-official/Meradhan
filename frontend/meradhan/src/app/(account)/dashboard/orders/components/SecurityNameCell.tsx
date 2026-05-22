@@ -22,8 +22,11 @@ export function SecurityNameCell({ order }: { order: Order }) {
       </p>
       <p
         className="mt-0.5 truncate text-sm font-normal text-gray-500"
-        title={maturityLine !== "—" ? maturityLine : undefined}
+        title={maturityLine !== "—" ? `Maturity Date: ${maturityLine}` : undefined}
       >
+        {maturityLine !== "—" && (
+          <span className="font-medium text-gray-400">Maturity Date: </span>
+        )}
         {maturityLine}
       </p>
     </div>

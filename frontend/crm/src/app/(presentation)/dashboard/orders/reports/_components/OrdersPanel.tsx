@@ -4,6 +4,10 @@ import type { OrderReportsRegisterResponse } from "@root/apiGateway";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import {
+  Bar, BarChart, CartesianGrid, Cell,
+  ResponsiveContainer, Tooltip, XAxis, YAxis,
+} from "recharts";
 import { formatIndianCurrencyCompact } from "./orderReportFormatters";
 import {
   customerFullName,
@@ -74,7 +78,7 @@ function BondTypeCards({ cards, isLoading }: { cards: BondTypeCard[]; isLoading?
           </div>
 
           <p className="mt-3 text-2xl font-bold tabular-nums text-slate-900">
-            ₹{(card.value / 1e7).toFixed(1)} Cr
+            {formatIndianCurrencyCompact(card.value)}
           </p>
           <p className="mt-0.5 text-[11px] text-slate-400">Total value</p>
 
@@ -148,15 +152,20 @@ export function OrdersPanel({
     return { total, totalValue, settled, active, rate };
   }, [meta, summary, data.length]);
 
-  const filtered = useMemo(() => {
-    return data.filter((r) => {
+  // Status-only filter — used by Bond Type cards so all types always appear
+  const filteredByStatus = useMemo(() =>
+    data.filter((r) => {
       const wf = mapOrderWorkflowStatus(r.status, r.paymentStatus);
-      if (statusFilter !== "__all__" && wf !== statusFilter) return false;
+      return statusFilter === "__all__" || wf === statusFilter;
+    }),
+  [data, statusFilter]);
+
+  const filtered = useMemo(() => {
+    return filteredByStatus.filter((r) => {
       const type = deriveBondCategory(r.bondName, r.isin);
-      if (typeFilter !== "__all__" && type !== typeFilter) return false;
-      return true;
+      return typeFilter === "__all__" || type === typeFilter;
     });
-  }, [data, statusFilter, typeFilter]);
+  }, [filteredByStatus, typeFilter]);
 
   const bookRows = useMemo(() => {
     return filtered.map((r) => {
@@ -226,9 +235,27 @@ export function OrdersPanel({
     });
   }, [view, filtered]);
 
+  const top5IsinData = useMemo(() => {
+    const groups = new Map<string, { isin: string; value: number; orders: number }>();
+    for (const r of filtered) {
+      const g = groups.get(r.isin) ?? { isin: r.isin, value: 0, orders: 0 };
+      g.value += Number(r.totalAmount);
+      g.orders += 1;
+      groups.set(r.isin, g);
+    }
+    return [...groups.values()]
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5)
+      .map((g) => ({
+        isin:   g.isin.length > 12 ? `${g.isin.slice(0, 12)}…` : g.isin,
+        value:  parseFloat((g.value / 1e7).toFixed(2)),
+        orders: g.orders,
+      }));
+  }, [filtered]);
+
   const typeCards = useMemo<BondTypeCard[]>(() => {
     const groups = new Map<string, Row[]>();
-    for (const r of filtered) {
+    for (const r of filteredByStatus) {
       const t = deriveBondCategory(r.bondName, r.isin);
       const g = groups.get(t) ?? [];
       g.push(r);
@@ -249,7 +276,7 @@ export function OrdersPanel({
       const pending = orders.filter((o) => o.status.toUpperCase() === "PENDING").length;
       return { type, orders: orders.length, qty, value, avgYield, investors, settled, pending };
     });
-  }, [filtered]);
+  }, [filteredByStatus]);
 
   const groupedRows = useMemo(() => {
     const groups = new Map<string, Row[]>();
@@ -369,40 +396,82 @@ export function OrdersPanel({
           <BondTypeCards cards={typeCards} isLoading={isLoading} />
         </TabsContent>
 
-        {(["book", "isin", "date"] as const).map((v) => (
+        {/* ISIN tab — with Top 5 chart */}
+        <TabsContent value="isin" className="mt-0 space-y-4">
+          {top5IsinData.length > 0 && (
+            <div className="overflow-hidden rounded-xl border border-border bg-white">
+              <div className="px-4 pb-1 pt-3">
+                <p className="text-sm font-semibold">Top 5 ISINs by Value (₹ Cr)</p>
+                <p className="text-xs text-slate-400">Ranked by total order value in the selected period</p>
+              </div>
+              <div className="h-[200px] px-2 pb-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={top5IsinData} layout="vertical" margin={{ left: 8, right: 24, top: 4, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border) / 0.5)" />
+                    <XAxis
+                      type="number"
+                      tick={{ fontSize: 10 }}
+                      tickLine={false}
+                      axisLine={false}
+                      tickFormatter={(v) => `₹${v}Cr`}
+                    />
+                    <YAxis
+                      type="category"
+                      dataKey="isin"
+                      width={108}
+                      tick={{ fontSize: 9 }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: "#fff", borderColor: "hsl(var(--border))", fontSize: 12 }}
+                      formatter={(v: number, name: string) =>
+                        name === "value" ? [`₹${v} Cr`, "Value"] : [v, "Orders"]
+                      }
+                    />
+                    <Bar dataKey="value" name="value" radius={[0, 4, 4, 0]}>
+                      {top5IsinData.map((_, i) => (
+                        <Cell key={i} fill="#22c55e" fillOpacity={1 - i * 0.12} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
+          <ReportDataTable
+            columns={isinColumns}
+            rows={isinRows}
+            isLoading={isLoading}
+            toolbar={
+              <>
+                <ReportFilterSelect value={statusFilter} onValueChange={setStatusFilter} placeholder="All Statuses" options={statusOptions} />
+                <ReportFilterSelect value={typeFilter}   onValueChange={setTypeFilter}   placeholder="All Types"    options={typeOptions} />
+                <Button variant="outline" size="sm" onClick={onExportCsv}>Export CSV</Button>
+              </>
+            }
+            recordCount={`${isinRows.length} ISINs`}
+          />
+        </TabsContent>
+
+        {/* Book & Date tabs */}
+        {(["book", "date"] as const).map((v) => (
           <TabsContent key={v} value={v} className="mt-0">
             <ReportDataTable
-              columns={v === "book" ? bookColumns : v === "isin" ? isinColumns : groupColumns}
-              rows={v === "book" ? bookRows : v === "isin" ? isinRows : groupedRows}
+              columns={v === "book" ? bookColumns : groupColumns}
+              rows={v === "book" ? bookRows : groupedRows}
               isLoading={isLoading}
               toolbar={
                 <>
-                  <ReportFilterSelect
-                    value={statusFilter}
-                    onValueChange={setStatusFilter}
-                    placeholder="All Statuses"
-                    options={statusOptions}
-                  />
-                  <ReportFilterSelect
-                    value={typeFilter}
-                    onValueChange={setTypeFilter}
-                    placeholder="All Types"
-                    options={typeOptions}
-                  />
-                  <Button variant="outline" size="sm" onClick={onExportCsv}>
-                    Export CSV
-                  </Button>
+                  <ReportFilterSelect value={statusFilter} onValueChange={setStatusFilter} placeholder="All Statuses" options={statusOptions} />
+                  <ReportFilterSelect value={typeFilter}   onValueChange={setTypeFilter}   placeholder="All Types"    options={typeOptions} />
+                  <Button variant="outline" size="sm" onClick={onExportCsv}>Export CSV</Button>
                 </>
               }
               recordCount={`${filtered.length} orders`}
               footer={
                 v === "book" ? (
-                  <ReportPagination
-                    page={page}
-                    totalPages={totalPages}
-                    total={total}
-                    onPageChange={onPageChange}
-                  />
+                  <ReportPagination page={page} totalPages={totalPages} total={total} onPageChange={onPageChange} />
                 ) : null
               }
             />
