@@ -60,15 +60,13 @@ function CustomerTable({ data, pageSize = 10, isLoading }: UsersTableProps) {
           label: "KYC",
           cell: (row) => <StatusBadge value={row.kycStatus} />,
         },
-        // Commented temporarily to hide the KRA status column for Users.
-        // TODO: Uncomment when KRA status need 
-        // {
-        //   key: "kraStatus",
-        //   label: "KRA",
-        //   cell: (row) => (
-        //     <StatusBadge value={row.kraStatus || "Not Started"} />
-        //   ),
-        // },
+        {
+          key: "kraStatus",
+          label: "KRA",
+          cell: (row) => (
+            <StatusBadge value={row.kraStatus || "Not Started"} />
+          ),
+        },
         {
           key: "status",
           label: "Status",
