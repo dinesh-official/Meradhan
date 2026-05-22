@@ -10,6 +10,8 @@ export type CrmSavedProposalRow = {
   quantity: number;
   notes: string | null;
   data: unknown;
+  status: string;
+  failedNote: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -33,5 +35,14 @@ export type DeleteCrmSavedProposalResponse = BaseResponseData<{
 export type AutoCreateRfqFromProposalResponse = BaseResponseData<{
   rfq: unknown;
   redirectTo: string;
+}>;
+
+export type QueueProposalProcessingResponse = BaseResponseData<{
+  queued: boolean;
+  id: number;
+}>;
+
+export type MarkWaitingForApprovalResponse = BaseResponseData<{
+  success: boolean;
 }>;
 

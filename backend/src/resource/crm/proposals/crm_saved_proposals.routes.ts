@@ -41,5 +41,17 @@ router.post(
   controller.autoCreateRfqAndSync
 );
 
+router.post(
+  "/api/crm/proposals/:id/process",
+  allowAccessMiddleware("CRM"),
+  controller.queueProcessing
+);
+
+router.post(
+  "/api/crm/proposals/:id/waiting-for-approval",
+  allowAccessMiddleware("CRM"),
+  controller.markWaitingForApproval
+);
+
 export default router;
 

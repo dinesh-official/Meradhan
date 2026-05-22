@@ -6,6 +6,141 @@ import logger from "@utils/logger/logger";
 import { getLastCouponDate } from "@services/order/order-pricing-helper";
 import { formatDateIstDdMmmYyyy } from "@resource/customer/order/order.utils";
 
+type OrderEmailParams = {
+    orderId: number | string;
+    toEmail?: string;
+};
+
+export async function sendOrderReceiptPdfByOrderId(params: OrderEmailParams) {
+    const orderIdRaw = typeof params.orderId === "string" ? params.orderId.trim() : params.orderId;
+    const orderIdAsNumber = typeof orderIdRaw === "number" ? orderIdRaw : Number(orderIdRaw);
+    const canQueryById = Number.isInteger(orderIdAsNumber) && orderIdAsNumber > 0 && orderIdAsNumber <= 2_147_483_647;
+
+    const order = await db.dataBase.order.findFirst({
+        where: {
+            OR: [
+                ...(canQueryById ? [{ id: orderIdAsNumber }] : []),
+                { reqOrderNumber: String(orderIdRaw) },
+            ],
+        },
+        select: {
+            id: true,
+            reqOrderNumber: true,
+            orderNumber: true,
+            isin: true,
+            bondName: true,
+            metadata: true,
+            customerProfileId: true,
+            createdAt: true,
+            bondDetails: true,
+            customerProfile: { select: { emailAddress: true } },
+        },
+    });
+
+    if (!order) {
+        throw new AppError(`Order not found for orderId ${orderIdRaw}`, {
+            statusCode: 404,
+            code: "ORDER_NOT_FOUND",
+        });
+    }
+
+    const orderNumber = order.reqOrderNumber?.trim() || order.orderNumber?.trim();
+    if (!orderNumber) {
+        throw new AppError(`orderNumber missing for order ${orderIdRaw}`, {
+            statusCode: 400,
+            code: "BAD_REQUEST",
+        });
+    }
+
+    const crmOrdersService = new CrmOrdersService();
+    const user = await new CustomerProfileRepo().getFullCustomerProfile(order.customerProfileId);
+    const customerName = [user.firstName, user.middleName, user.lastName].filter(Boolean).join(" ").trim() || "CUSTOMER";
+    const gender = String((user as unknown as { gender?: string | null }).gender ?? "").trim().toUpperCase();
+    const salutation = gender === "FEMALE" ? "Ms." : gender === "MALE" ? "Mr." : "Mr. / Ms.";
+
+    const metadata = (order.metadata as Record<string, unknown> | null) ?? {};
+    const dealId = typeof metadata.dealId === "string" ? metadata.dealId : "—";
+    const clientOrderSide = metadata.clientOrderSide as "BUY" | "SELL" | undefined;
+    const side = clientOrderSide === "BUY" || clientOrderSide === "SELL" ? clientOrderSide : "BUY";
+    const buySellLower = side === "SELL" ? "sell" : "buy";
+    const buySellYour = side === "SELL" ? "Sell" : "Buy";
+
+    const subject = `Order Confirmation & Receipt – Order ID ${orderNumber}`;
+    const messageBody = `Dear ${salutation} ${customerName},
+
+Your ${buySellLower} order has been successfully placed through MeraDhan and has been executed on the exchange.
+
+Bond Name: ${order.bondName ?? "—"}
+
+ISIN: ${order.isin}
+
+Deal ID: ${dealId}
+
+Order Type: ${buySellYour}
+
+Please find the Order Receipt attached for your reference. The order receipt is password protected. You may open it using your date of birth as the password. For example, if your date of birth is 3 April 1996, the password will be 03041996.
+
+To proceed with settlement, please transfer the required amount from your bank account verified on MeraDhan to the designated NCL account, maintained with HDFC Bank or RBI as applicable, via NEFT / RTGS, in accordance with the instructions provided at the time of placing your order.
+
+Kindly ensure that the payment is completed within the stipulated time to avoid cancellation of the order.
+
+Important Notes:
+
+This Order Receipt indicates the intention to transact and is not a Deal Confirmation.
+
+A Deal Sheet will be shared with you once the transaction is settled.
+
+Please ensure that the Demat Account listed in the receipt is active and ready to receive the bonds/securities.
+
+If you require any assistance, please contact us at backoffice@meradhan.co.
+
+Warm regards,
+
+MeraDhan Team`;
+
+    const pricing = (order.bondDetails as any)?.pricing ?? {};
+    const settleRow = await crmOrdersService.getRfqByOrderNumber(orderNumber);
+    const settlementDateInput =
+        typeof (settleRow as any)?.modSettleDate === "string" && String((settleRow as any).modSettleDate).trim()
+            ? String((settleRow as any).modSettleDate).trim()
+            : new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+
+    let accruedInterestDays: number = pricing?.noOfAccrualDays != null ? Number(pricing.noOfAccrualDays) : 7;
+    let settlementNumber: string | undefined;
+    let lastInterestPaymentDate: string | undefined;
+    let interestPaymentDates: string | undefined;
+
+    try {
+        const autofill = await crmOrdersService.autofillReceiptPdfOptions(orderNumber, { settlementDate: settlementDateInput });
+        if (autofill?.settlementNumber) settlementNumber = autofill.settlementNumber;
+        const lastCoupon = await getLastCouponDate(order.isin, new Date());
+        if (lastCoupon) lastInterestPaymentDate = lastCoupon;
+        if (autofill?.interestPaymentDates?.length) interestPaymentDates = autofill.interestPaymentDates.join(", ");
+    } catch (err) {
+        logger.logError(`Order receipt PDF autofill failed for ${orderNumber}`, err);
+    }
+
+    const recipientEmail =
+        String(params.toEmail ?? "").trim() ||
+        String(order.customerProfile?.emailAddress ?? "").trim() ||
+        undefined;
+
+    const result = await crmOrdersService.sendPdfEmailToClient(orderNumber, {
+        pdfType: "order",
+        subject,
+        messageBody,
+        ...(recipientEmail ? { toEmail: recipientEmail } : {}),
+        accruedInterestDays,
+        settlementNumber,
+        settlementDateTime: pricing?.settlementDate ? new Date(pricing.settlementDate).toISOString() : undefined,
+        lastInterestPaymentDate,
+        interestPaymentDates,
+        nonAmortizedBond: true,
+    });
+
+    return { orderNumber, messageId: result.messageId };
+}
+
 type DealSheetEmailParams = {
     orderId: number | string;
     toEmail?: string;
