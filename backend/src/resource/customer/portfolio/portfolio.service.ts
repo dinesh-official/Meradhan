@@ -643,6 +643,7 @@ export class PortfolioService {
         isin: true, bondName: true, description: true, faceValue: true,
         creditRating: true, couponRate: true, interestPaymentFrequency: true,
         interestPaymentMode: true, maturityDate: true, sectorName: true,
+        bondType: true,
         taxStatus: true, yield: true, lastTradeYield: true, lastTradePrice: true,
         modeOfIssuance: true, couponType: true, dateOfAllotment: true,
         redemptionDate: true, ratingAgencyName: true, natureOfInstrument: true,
@@ -657,8 +658,8 @@ export class PortfolioService {
       if (!bond) return false;
 
       if (bondTypes?.length) {
-        const sector = (bond.sectorName ?? "").trim();
-        if (!sector || !bondTypes.includes(sector)) return false;
+        const type = bond.bondType ?? "";
+        if (!type || !bondTypes.includes(type)) return false;
       }
       if (bondRatings?.length) {
         const rating = (bond.creditRating ?? "").trim();
@@ -687,7 +688,7 @@ export class PortfolioService {
         id: order.id,
         securityName: order.bondName,
         isin: order.isin,
-        bondType: bond?.sectorName ?? null,
+        bondType: bond?.bondType ?? null,
         coupon: bond?.couponRate ?? 0,
         investmentAmount: Number(order.investedAmount.toFixed(2)),
         quantity: order.quantity,
@@ -736,7 +737,7 @@ export class PortfolioService {
 
     const bonds = await db.dataBase.bonds.findMany({
       where: { isin: { in: this.uniqueIsins(ordersWithAmount) } },
-      select: { sectorName: true, creditRating: true, couponRate: true, interestPaymentMode: true },
+      select: { bondType: true, creditRating: true, couponRate: true, interestPaymentMode: true },
     });
 
     const bondTypes = new Set<string>();
@@ -745,8 +746,8 @@ export class PortfolioService {
     const paymentFrequencies = new Set<string>();
 
     for (const bond of bonds) {
-      const sector = (bond.sectorName ?? "").trim();
-      if (sector) bondTypes.add(sector);
+      const type = bond.bondType ?? "";
+      if (type) bondTypes.add(type);
 
       const rating = (bond.creditRating ?? "").trim();
       if (rating) bondRatings.add(rating);
@@ -831,7 +832,7 @@ export class PortfolioService {
         interestPaymentFrequency: true,
         dateOfAllotment: true,
         maturityDate: true,
-        sectorName: true,
+        bondType: true,
         allCouponDates: true,
       },
     });
@@ -841,7 +842,7 @@ export class PortfolioService {
     const filteredByType = bondTypes?.length
       ? ordersInScope.filter((o) => {
         const bond = bondByIsin.get(o.isin);
-        return bondTypes.includes((bond?.sectorName ?? "").trim());
+        return bondTypes.includes(bond?.bondType ?? "");
       })
       : ordersInScope;
 

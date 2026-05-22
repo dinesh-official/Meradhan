@@ -8,7 +8,7 @@ import Squares from "./elements/Squares";
 const FEATURE_BADGES = [
   "Listed Bonds",
   "8 - 12% Fixed Returns",
-  "Sell Anytime",
+  // "Sell Anytime",
 ] as const;
 
 function HomeHeroSection() {

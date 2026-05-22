@@ -60,13 +60,15 @@ function CustomerTable({ data, pageSize = 10, isLoading }: UsersTableProps) {
           label: "KYC",
           cell: (row) => <StatusBadge value={row.kycStatus} />,
         },
-        {
-          key: "kraStatus",
-          label: "KRA",
-          cell: (row) => (
-            <StatusBadge value={row.kraStatus || "Not Started"} />
-          ),
-        },
+        // Commented temporarily to hide the KRA status column for Users.
+        // TODO: Uncomment when KRA status need 
+        // {
+        //   key: "kraStatus",
+        //   label: "KRA",
+        //   cell: (row) => (
+        //     <StatusBadge value={row.kraStatus || "Not Started"} />
+        //   ),
+        // },
         {
           key: "status",
           label: "Status",
@@ -86,13 +88,13 @@ function CustomerTable({ data, pageSize = 10, isLoading }: UsersTableProps) {
           cell: (row) => (
             <div className="">
               <p>
-                
+
                 {dateTimeUtils.formatDateTime(
                   row.updatedAt,
                   "DD MMM YYYY hh:mm AA"
                 )}
               </p>
-              <p  className="text-gray-500 text-xs" >
+              <p className="text-gray-500 text-xs" >
                 {dateTimeUtils.formatDateTime(
                   row.createdAt,
                   "DD MMM YYYY hh:mm AA"

@@ -194,9 +194,8 @@ function buildEmailPreviewHtml(params: SendProposalEmailPayload) {
       : "—";
   const accruedDisplay =
     params.accruedInterest != null && Number.isFinite(Number(params.accruedInterest))
-      ? `${formatCurrency(params.accruedInterest)}${
-          params.noOfDays != null ? ` (No. of Days: ${params.noOfDays})` : ""
-        }`
+      ? `${formatCurrency(params.accruedInterest)}${params.noOfDays != null ? ` (No. of Days: ${params.noOfDays})` : ""
+      }`
       : "—";
   const faceVal =
     params.faceValue != null && Number.isFinite(params.faceValue)
@@ -520,8 +519,19 @@ function ProposalManagementView() {
       toast.error("Create a proposal first");
       return;
     }
+    if (saveMutation.isPending) return;
 
-    void saveMutation.mutateAsync(proposalDraft);
+    // Sync latest form values into the draft before saving so edits to
+    // notes or customer made after "Create Proposal" are captured.
+    const updatedDraft: ProposalDraft = {
+      ...proposalDraft,
+      notes: notes.trim(),
+      customer: selectedCustomer ?? proposalDraft.customer,
+      manualYieldEnabled,
+      manualYield,
+    };
+    setProposalDraft(updatedDraft);
+    void saveMutation.mutateAsync(updatedDraft);
   };
 
   const handleOpenSavedProposal = (item: ProposalDraft) => {
@@ -807,7 +817,7 @@ function ProposalManagementView() {
       <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_400px]">
         <Card className="border-gray-200">
           <CardHeader>
-            <CardTitle>Create Proposal</CardTitle>
+            <CardTitle>Generate Proposal</CardTitle>
             <CardDescription>
               Enter the ISIN, customer, and quantity to fetch pricing and proposal-ready bond data.
             </CardDescription>
@@ -981,17 +991,26 @@ function ProposalManagementView() {
                 ) : (
                   <>
                     <FileText className="h-4 w-4" />
-                    Create Proposal
+                    Generate Proposal
                   </>
                 )}
               </Button>
               <Button
                 variant="secondary"
                 onClick={handleSaveProposal}
-                disabled={!proposalDraft || fetchProposalMutation.isPending}
+                disabled={!proposalDraft || fetchProposalMutation.isPending || saveMutation.isPending}
               >
-                <FileText className="h-4 w-4" />
-                Save Proposal
+                {saveMutation.isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Saving…
+                  </>
+                ) : (
+                  <>
+                    <FileText className="h-4 w-4" />
+                    Save Proposal
+                  </>
+                )}
               </Button>
               <Button variant="outline" onClick={handleReset} disabled={fetchProposalMutation.isPending}>
                 <RefreshCw className="h-4 w-4" />
@@ -1652,15 +1671,34 @@ function ProposalManagementView() {
             <Button
               onClick={async () => {
                 if (!emailPreview) return;
+
+                // Auto-save the proposal if it hasn't been saved to DB yet
+                // (UUID id = unsaved; numeric id = already in DB)
+                if (proposalDraft && !Number.isFinite(Number(proposalDraft.id))) {
+                  try {
+                    const updatedDraft: ProposalDraft = {
+                      ...proposalDraft,
+                      notes: notes.trim(),
+                      customer: selectedCustomer ?? proposalDraft.customer,
+                      manualYieldEnabled,
+                      manualYield,
+                    };
+                    setProposalDraft(updatedDraft);
+                    await saveMutation.mutateAsync(updatedDraft);
+                  } catch {
+                    // save failed — still attempt to send the email
+                  }
+                }
+
                 await sendProposalEmailMutation.mutateAsync(emailPreview.payload);
                 setIsEmailPreviewOpen(false);
               }}
-              disabled={!emailPreview || sendProposalEmailMutation.isPending}
+              disabled={!emailPreview || sendProposalEmailMutation.isPending || saveMutation.isPending}
             >
-              {sendProposalEmailMutation.isPending ? (
+              {sendProposalEmailMutation.isPending || saveMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Sending
+                  {saveMutation.isPending ? "Saving…" : "Sending…"}
                 </>
               ) : (
                 "Send Email"
