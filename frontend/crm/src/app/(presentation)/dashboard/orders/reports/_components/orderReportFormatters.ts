@@ -70,6 +70,7 @@ export type FunnelStep = {
   label: string;
   count: number;
   dropPct: number | null;
+  subLabel?: string;
 };
 
 export function buildLifecycleFunnel(params: {
@@ -77,23 +78,30 @@ export function buildLifecycleFunnel(params: {
   byPaymentStatus: { paymentStatus: string; count: number }[];
   byOrderStatus: { status: string; count: number }[];
 }): FunnelStep[] {
-  const placed = params.orderCount;
-  const paymentDone = countByPaymentStatus(params.byPaymentStatus, ["COMPLETED"]);
-  const applied = countByOrderStatus(params.byOrderStatus, ["APPLIED"]);
-  const settled = countByOrderStatus(params.byOrderStatus, ["SETTLED"]);
+  const placed          = params.orderCount;
+  const razorpayDone    = countByPaymentStatus(params.byPaymentStatus, ["COMPLETED"]);
+  const applied         = countByOrderStatus(params.byOrderStatus, ["APPLIED"]);
+  const settled         = countByOrderStatus(params.byOrderStatus, ["SETTLED"]);
+
+  // Orders that progressed to APPLIED/SETTLED via any payment method (including non-PG)
+  const progressedOrders = applied + settled;
+  // Total payment received = Razorpay completions + non-PG orders that already progressed
+  const paymentDone = Math.max(razorpayDone, progressedOrders);
+
+  // In progress = payment received but not yet applied or settled
+  const inProgress = Math.max(0, paymentDone - progressedOrders);
 
   const raw = [
-    { label: "Orders placed", count: placed },
-    { label: "Payment completed", count: paymentDone },
-    { label: "Applied", count: applied },
-    { label: "Settled", count: settled },
+    { label: "Orders placed",        count: placed,               subLabel: undefined },
+    { label: "Payment received",     count: paymentDone,          subLabel: razorpayDone < progressedOrders ? `${razorpayDone} via PG · ${progressedOrders - razorpayDone} other` : undefined },
+    { label: "Applied + In Progress", count: applied + inProgress, subLabel: `${applied} applied · ${inProgress} in progress` },
+    { label: "Settled",              count: settled,              subLabel: undefined },
   ];
 
   return raw.map((step, i) => {
     if (i === 0) return { ...step, dropPct: null };
     const prev = raw[i - 1].count;
-    const dropPct =
-      prev > 0 ? -((prev - step.count) / prev) * 100 : null;
+    const dropPct = prev > 0 ? -((prev - step.count) / prev) * 100 : null;
     return { ...step, dropPct };
   });
 }
