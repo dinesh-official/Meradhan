@@ -154,6 +154,10 @@ export interface BondDealAutofillSuggestions {
   taxStatus?: string | null;
   /** Whether the bond is exchange-listed (YES / NO / UNKNOWN) — sourced from the bonds table. */
   isListed?: string | null;
+  /** Coupon type string (e.g. Fixed, Floating) — sourced from the bonds table. */
+  couponType?: string | null;
+  /** Listing category slugs (e.g. ["tax-free", "banks"]) — controls MeraDhan bond listing filters. */
+  categories?: string[];
 }
 
 export interface BondDealAutofillResponse {

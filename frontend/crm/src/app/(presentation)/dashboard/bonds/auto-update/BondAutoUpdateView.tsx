@@ -66,6 +66,18 @@ const YIELD_SOURCE_AFFECTED_KEYS: readonly AutofillMergeKey[] = [
   "sellPrice",
 ];
 
+/** Slugs must match the MeraDhan public site listing filters (same list as BondForm). */
+const BOND_LISTING_CATEGORY_OPTIONS = [
+  { value: "corporate", label: "Corporate" },
+  { value: "banks", label: "Bank bonds" },
+  { value: "nbfc", label: "NBFC" },
+  { value: "psu", label: "PSU" },
+  { value: "tax-free", label: "Tax free" },
+  { value: "zero-coupon", label: "Zero coupon" },
+  { value: "perpetual", label: "Perpetual" },
+  { value: "latest-release", label: "Latest release" },
+] as const;
+
 const api = new apiGateway.bondsApi.BondsApi(apiClientCaller);
 
 /** Empty draft → default autofill; non-empty → must parse as % or fail. */
@@ -891,7 +903,7 @@ export default function BondAutoUpdateView() {
                                     </TableCell>
                                     <TableCell className="font-mono text-xs whitespace-nowrap">
                                       <span className="inline-flex items-center gap-2">
-                                        {key}
+                                        {key === "categories" ? "bondCategories" : key}
                                         {yieldSourceAffected ? (
                                           <Badge
                                             variant="secondary"
@@ -908,9 +920,15 @@ export default function BondAutoUpdateView() {
                                         key === "allCouponDates" && "max-h-28 overflow-y-auto align-top",
                                       )}
                                     >
-                                      {key === "sellPrice" &&
-                                        typeof curVal === "number" &&
-                                        Number.isFinite(curVal)
+                                      {key === "categories" && Array.isArray(curVal)
+                                        ? (curVal as string[]).join(", ") || "—"
+                                        : (key === "couponRate" || key === "buyYield" || key === "yield") &&
+                                          typeof curVal === "number" &&
+                                          Number.isFinite(curVal)
+                                        ? formatDecimalWithMinFractionDigits(curVal, 2)
+                                        : key === "sellPrice" &&
+                                          typeof curVal === "number" &&
+                                          Number.isFinite(curVal)
                                         ? formatDecimalWithMinFractionDigits(curVal, 4)
                                         : formatDisplayValue(curVal)}
                                     </TableCell>
@@ -970,10 +988,33 @@ export default function BondAutoUpdateView() {
                                             });
                                           }}
                                         />
-                                      ) : key === "faceValue" ||
-                                        key === "couponRate" ||
+                                      ) : key === "couponRate" ||
                                         key === "buyYield" ||
                                         key === "yield" ? (
+                                        <DecimalInput
+                                          className="h-9 font-mono text-sm"
+                                          minFractionDigits={2}
+                                          maxFractionDigits={2}
+                                          value={
+                                            sug == null
+                                              ? undefined
+                                              : (() => {
+                                                const n =
+                                                  typeof sug === "number"
+                                                    ? sug
+                                                    : Number(sug);
+                                                return Number.isFinite(n)
+                                                  ? n
+                                                  : undefined;
+                                              })()
+                                          }
+                                          onChange={(n) =>
+                                            updateDraft(b.isin, {
+                                              [key]: n ?? null,
+                                            } as Partial<DraftSuggestions>)
+                                          }
+                                        />
+                                      ) : key === "faceValue" ? (
                                         <DecimalInput
                                           className="h-9 font-mono text-sm"
                                           value={
@@ -1087,6 +1128,42 @@ export default function BondAutoUpdateView() {
                                             })
                                           }
                                         />
+                                      ) : key === "couponType" ? (
+                                        <Input
+                                          className="h-9 font-mono text-sm"
+                                          placeholder="e.g. Fixed, Floating, Step-Up"
+                                          value={typeof sug === "string" ? sug : ""}
+                                          onChange={(e) =>
+                                            updateDraft(b.isin, {
+                                              couponType: e.target.value,
+                                            })
+                                          }
+                                        />
+                                      ) : key === "categories" ? (
+                                        <div className="grid grid-cols-2 gap-x-6 gap-y-2 py-1 max-w-[300px]">
+                                          {BOND_LISTING_CATEGORY_OPTIONS.map((opt) => {
+                                            const current = Array.isArray(sug) ? (sug as string[]) : [];
+                                            const checked = current.includes(opt.value);
+                                            return (
+                                              <label
+                                                key={opt.value}
+                                                className="flex items-center gap-1.5 text-sm font-normal cursor-pointer whitespace-nowrap"
+                                              >
+                                                <Checkbox
+                                                  checked={checked}
+                                                  onCheckedChange={(v) => {
+                                                    const on = v === true;
+                                                    const next = on
+                                                      ? [...current, opt.value]
+                                                      : current.filter((c) => c !== opt.value);
+                                                    updateDraft(b.isin, { categories: next });
+                                                  }}
+                                                />
+                                                {opt.label}
+                                              </label>
+                                            );
+                                          })}
+                                        </div>
                                       ) : (
                                         <Input
                                           type="date"
