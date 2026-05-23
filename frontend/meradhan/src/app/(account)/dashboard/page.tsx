@@ -45,6 +45,9 @@ async function DashBoardPage() {
   const id = cookie.get("userId")?.value || "";
   const profileData = await customerApi.customerInfoById(Number(id));
   const kycStatus = profileData.data.responseData.kycStatus;
+  const hasKycStarted =
+    kycStatus == "PENDING" &&
+    profileData.data.responseData.kycProgress?.hasStarted;
 
   const userIdNum = Number(id);
   const hasSession = Number.isFinite(userIdNum) && userIdNum > 0;
@@ -170,10 +173,12 @@ async function DashBoardPage() {
           >
             {kycStatus == "PENDING" && (
               <div className="flex items-end flex-row justify-between gap-2">
-                <p className="text-3xl font-medium">Not Done</p>
+                <p className="text-3xl font-medium">
+                  {hasKycStarted ? "In Progress" : "Not Stated"}
+                </p>
                 <Link href={`/dashboard/kyc`}>
                   <Button variant="secondary">
-                    Start KYC
+                    {hasKycStarted ? "Complete KYC" : "Start KYC"}
                   </Button>
                 </Link>
               </div>

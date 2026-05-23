@@ -256,6 +256,11 @@ export type CustomerByIdPayload = {
   userType: CustomerUserType;
   kycStatus: KycStatus;
   kraStatus: string;
+  kycProgress?: {
+    hasStarted: boolean;
+    step: number;
+    complete: boolean;
+  };
   /** True when KYC was completed using existing KRA records (not full Aadhaar flow). */
   useKraKyc?: boolean;
 
