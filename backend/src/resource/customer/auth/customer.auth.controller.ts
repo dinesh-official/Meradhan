@@ -371,12 +371,26 @@ export class CustomerAuthController {
         select: { id: true },
       }).then((row) => !!row)
       : false;
+    const kycFlow = session
+      ? await db.dataBase.kYC_FLOW.findFirst({
+        where: { userID: id },
+        select: { step: true, complete: true },
+      })
+      : null;
 
     res.sendResponse({
       statusCode: HttpStatus.OK,
       message: "session",
       responseData: session
-        ? { ...session, hasRekycExpiredFlow }
+        ? {
+          ...session,
+          hasRekycExpiredFlow,
+          kycProgress: {
+            hasStarted: Boolean(kycFlow && !kycFlow.complete),
+            step: kycFlow?.step ?? 0,
+            complete: kycFlow?.complete ?? false,
+          },
+        }
         : undefined,
     });
   }

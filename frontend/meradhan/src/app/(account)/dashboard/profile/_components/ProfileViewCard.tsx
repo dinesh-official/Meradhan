@@ -17,6 +17,9 @@ function ProfileViewCard({
 }: {
   profile: GetCustomerResponseById["responseData"];
 }) {
+  const hasKycStarted =
+    profile.kycStatus == "PENDING" && profile.kycProgress?.hasStarted;
+
   return (
     <div>
       <div className="flex md:flex-row flex-col md:justify-between items-center gap-5">
@@ -125,9 +128,11 @@ function ProfileViewCard({
                     <>
                       <span className="text-black">KYC:</span>{" "}
                       <span className="hidden sm:inline-block">
-                        Under Progress (Under Review)
+                        {hasKycStarted ? "In Progress" : "Not Stated"}
                       </span>
-                      <span className="sm:hidden">Under Progress</span>{" "}
+                      <span className="sm:hidden">
+                        {hasKycStarted ? "In Progress" : "Not Stated"}
+                      </span>{" "}
                       <BiSolidFileFind size={20} className="text-yellow-600" />
                     </>
                   ) : (
@@ -190,8 +195,8 @@ function ProfileViewCard({
           {profile.kycStatus == "PENDING" && (
             <Link href={`/dashboard/kyc`} className="block w-full md:w-auto [&>button]:w-full md:[&>button]:w-auto">
               <Button variant={`secondary`}>
-                Complete <span className="hidden md:inline-block">Your</span>{" "}
-                KYC
+                {hasKycStarted ? "Complete" : "Start"}{" "}
+                <span className="hidden md:inline-block">Your</span> KYC
                 <div className="w-3 text-3xl">
                   <RiArrowRightSFill className="w-4 h-5" size={33} />
                 </div>
