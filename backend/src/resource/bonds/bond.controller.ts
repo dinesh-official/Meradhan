@@ -276,6 +276,24 @@ export class BondController {
     });
   }
 
+  async getHighYieldListedBonds(req: Request, res: Response) {
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 3;
+    const data = await this.bondService.getHighYieldBonds(limit);
+    return res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: data,
+    });
+  }
+
+  async getZeroCouponListedBonds(req: Request, res: Response) {
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 3;
+    const data = await this.bondService.getZeroCouponBonds(limit);
+    return res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: data,
+    });
+  }
+
   async createBond(req: Request, res: Response) {
     try {
       const bondData = appSchema.bonds.bondCreateUpdateSchema.parse(req.body);
