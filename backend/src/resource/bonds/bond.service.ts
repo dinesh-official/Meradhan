@@ -221,26 +221,101 @@ export class BondService {
     console.log(orderBy);
 
 
-    const [data, total] = await Promise.all([
-      db.dataBase.bonds.findMany({
-        where: whereQuery,
-        orderBy:
-          options?.all == "YES"
-            ? [
-              {
-                allowForPurchase: "desc",
-              },
-              {
-                sortedAt: "asc",
-              },
-            ]
-            : orderBy,
-        ...paginationOptions,
-      }),
-      db.dataBase.bonds.count({
-        where: whereQuery,
-      }),
-    ]);
+    const latestBatch = await db.dataBase.crmInventoryStockBatch.findFirst({
+      orderBy: { uploadedAt: "desc" },
+      select: { id: true },
+    });
+    let validIsins: string[] = [];
+    if (latestBatch) {
+      const activeStockLines = await db.dataBase.crmInventoryStockLine.findMany({
+        where: {
+          batchId: latestBatch.id,
+          quantity: { gt: 0 },
+        },
+        select: { isin: true },
+      });
+      validIsins = activeStockLines.map((line) => line.isin.trim().toUpperCase());
+    }
+
+    const isClientDirectory = options?.all !== "YES";
+    let data: any[] = [];
+    let total = 0;
+
+    if (isClientDirectory && validIsins.length > 0) {
+      const whereStock = {
+        ...whereQuery,
+        isin: { in: validIsins },
+      };
+      const whereNoStock = {
+        ...whereQuery,
+        isin: { notIn: validIsins },
+      };
+
+      const [countStock, countNoStock] = await Promise.all([
+        db.dataBase.bonds.count({ where: whereStock }),
+        db.dataBase.bonds.count({ where: whereNoStock }),
+      ]);
+      total = countStock + countNoStock;
+
+      const skip = paginationOptions.skip;
+      const take = paginationOptions.take;
+
+      if (skip < countStock) {
+        // Offset starts within stock bonds
+        const stockBonds = await db.dataBase.bonds.findMany({
+          where: whereStock,
+          orderBy,
+          skip,
+          take,
+        });
+        data.push(...stockBonds);
+
+        if (data.length < take) {
+          // Fill the remaining spots with no-stock bonds (starting from index 0)
+          const remaining = take - data.length;
+          const noStockBonds = await db.dataBase.bonds.findMany({
+            where: whereNoStock,
+            orderBy,
+            skip: 0,
+            take: remaining,
+          });
+          data.push(...noStockBonds);
+        }
+      } else {
+        // Offset is entirely within no-stock bonds
+        const noStockOffset = skip - countStock;
+        const noStockBonds = await db.dataBase.bonds.findMany({
+          where: whereNoStock,
+          orderBy,
+          skip: noStockOffset,
+          take,
+        });
+        data.push(...noStockBonds);
+      }
+    } else {
+      const [rawBonds, countAll] = await Promise.all([
+        db.dataBase.bonds.findMany({
+          where: whereQuery,
+          orderBy:
+            options?.all == "YES"
+              ? [
+                  {
+                    allowForPurchase: "desc",
+                  },
+                  {
+                    sortedAt: "asc",
+                  },
+                ]
+              : orderBy,
+          ...paginationOptions,
+        }),
+        db.dataBase.bonds.count({
+          where: whereQuery,
+        }),
+      ]);
+      data = rawBonds;
+      total = countAll;
+    }
 
     const enriched = await this.enrichBondsWithCrmInventory(data);
 
