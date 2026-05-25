@@ -23,6 +23,7 @@ export default async function HomePage() {
   return (
     <ViewPort>
       <HomeHeroSection />
+      <LatestBondReleases bonds={responseData || []} />
       <WhyMeraDhanSection />
       <ToolsOfferedByMeraDhan />
       <div className="container">
@@ -30,7 +31,6 @@ export default async function HomePage() {
           <BondsByCategories />
         </SectionWrapper>
       </div>
-      <LatestBondReleases bonds={responseData || []} />
       {/* <ReturnsCalculationSection /> */}
       {/* <XirrCalculator
         showTitle={true}

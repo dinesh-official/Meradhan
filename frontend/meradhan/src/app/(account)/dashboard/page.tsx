@@ -174,7 +174,7 @@ async function DashBoardPage() {
             {kycStatus == "PENDING" && (
               <div className="flex items-end flex-row justify-between gap-2">
                 <p className="text-3xl font-medium">
-                  {hasKycStarted ? "In Progress" : "Not Stated"}
+                  {hasKycStarted ? "Pending" : "Not Started"}
                 </p>
                 <Link href={`/dashboard/kyc`}>
                   <Button variant="secondary">
@@ -185,7 +185,7 @@ async function DashBoardPage() {
             )}
             {kycStatus == "RE_KYC" && (
               <div className="flex items-end flex-row justify-between gap-2">
-                <p className="text-3xl font-medium">Not Done</p>
+                <p className="text-3xl font-medium">Update Required</p>
                 <Link href={`/dashboard/kyc`}>
                   <Button variant="secondary">
                     Re KYC
@@ -194,7 +194,7 @@ async function DashBoardPage() {
               </div>
             )}
             {kycStatus == "VERIFIED" && <div className="flex items-end flex-row justify-between gap-2">
-              <p className="text-3xl font-medium text-primary">Healthy</p>
+              <p className="text-3xl font-medium text-primary">Verified</p>
             </div>}
             {kycStatus == "UNDER_REVIEW" && <div className="flex items-end flex-row justify-between gap-2">
               <p className="text-3xl font-medium">Under Review</p>

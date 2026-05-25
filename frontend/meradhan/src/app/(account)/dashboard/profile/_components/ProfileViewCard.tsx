@@ -110,36 +110,24 @@ function ProfileViewCard({
                 >
                   {profile.kycStatus == "VERIFIED" ? (
                     <>
-                      KYC:{" "}
-                      <span className="hidden sm:inline-block">Completed</span>
-                      <span className="sm:hidden">Done</span>{" "}
+                      KYC: <span>Verified</span>{" "}
                       <FaCheckSquare className="text-green-600" />
                     </>
                   ) : profile.kycStatus == "UNDER_REVIEW" ? (
                     <>
                       <span className="text-black">KYC:</span>{" "}
-                      <span className="hidden sm:inline-block">
-                        Under Review
-                      </span>
-                      <span className="sm:hidden">Under Review</span>{" "}
+                      <span>Under Review</span>{" "}
                       <BiSolidFileFind size={20} className="text-yellow-600" />
                     </>
                   ) : profile.kycStatus == "PENDING" ? (
                     <>
                       <span className="text-black">KYC:</span>{" "}
-                      <span className="hidden sm:inline-block">
-                        {hasKycStarted ? "In Progress" : "Not Stated"}
-                      </span>
-                      <span className="sm:hidden">
-                        {hasKycStarted ? "In Progress" : "Not Stated"}
-                      </span>{" "}
+                      <span>{hasKycStarted ? "Pending" : "Not Started"}</span>{" "}
                       <BiSolidFileFind size={20} className="text-yellow-600" />
                     </>
                   ) : (
                     <>
-                      KYC: Not{" "}
-                      <span className="hidden sm:inline-block">Completed</span>
-                      <span className="sm:hidden">Done</span>
+                      KYC: <span>Not Started</span>
                       <IoWarning size={18} />
                     </>
                   )}
