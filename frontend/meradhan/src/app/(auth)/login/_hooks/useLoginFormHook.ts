@@ -537,7 +537,7 @@ export const useLoginFormHook = () => {
     if (redirectPath) {
       localStorage.removeItem("redirect");
     }
-    window.location.assign(redirectPath ?? "/");
+    window.location.assign(redirectPath ?? "/dashboard");
   };
 
   /**

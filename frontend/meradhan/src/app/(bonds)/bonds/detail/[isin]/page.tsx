@@ -13,7 +13,6 @@ import apiGateway from "@root/apiGateway";
 import apiServerCaller from "@/core/connection/apiServerCaller";
 import { redirect } from "next/navigation";
 import { generateBondInfoPageMetaData } from "@/graphql/pagesMetaDataGql_Action";
-import { getSession } from "@/core/auth/_server/getSession";
 
 export const revalidate = 0;
 
@@ -36,8 +35,6 @@ async function page({ params }: { params: Promise<{ isin: string }> }) {
     redirect("/404");
   }
 
-  const session = await getSession();
-
   return (
     <ViewPort>
       <div className="container">
@@ -56,7 +53,7 @@ async function page({ params }: { params: Promise<{ isin: string }> }) {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <BondIsinView bond={responseData} session={session} />
+        <BondIsinView bond={responseData} />
       </div>
     </ViewPort>
   );

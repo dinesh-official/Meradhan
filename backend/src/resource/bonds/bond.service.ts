@@ -242,83 +242,55 @@ export class BondService {
     let total = 0;
 
     if (isClientDirectory && validIsins.length > 0) {
-      const eligibleCondition = {
-        allowForPurchase: { equals: true },
-        sellPrice: { gt: 0 },
-        faceValue: { gt: 0 },
-        nextCouponDate: { not: null },
-        recordDays: { not: null },
-        recordDate: { not: null },
-        lastCouponDate: { not: null },
-        natureOfInstrument: { not: null },
-        dateOfAllotment: { not: null },
-        OR: [
-          { buyYield: { not: null } },
-          { yield: { not: null } },
-        ],
-        AND: [
-          {
-            OR: [
-              { isPerpetual: { equals: true } },
-              { maturityDate: { not: null } },
-            ],
-          },
-        ],
-      };
-
-      const whereBuyNow = {
+      const whereStock = {
         ...whereQuery,
-        ...eligibleCondition,
         isin: { in: validIsins },
       };
-      const whereOther = {
+      const whereNoStock = {
         ...whereQuery,
-        NOT: {
-          ...eligibleCondition,
-          isin: { in: validIsins },
-        },
+        isin: { notIn: validIsins },
       };
 
-      const [countBuyNow, countOther] = await Promise.all([
-        db.dataBase.bonds.count({ where: whereBuyNow }),
-        db.dataBase.bonds.count({ where: whereOther }),
+      const [countStock, countNoStock] = await Promise.all([
+        db.dataBase.bonds.count({ where: whereStock }),
+        db.dataBase.bonds.count({ where: whereNoStock }),
       ]);
-      total = countBuyNow + countOther;
+      total = countStock + countNoStock;
 
       const skip = paginationOptions.skip;
       const take = paginationOptions.take;
 
-      if (skip < countBuyNow) {
-        // Offset starts within buy now bonds
-        const buyNowBonds = await db.dataBase.bonds.findMany({
-          where: whereBuyNow,
+      if (skip < countStock) {
+        // Offset starts within stock bonds
+        const stockBonds = await db.dataBase.bonds.findMany({
+          where: whereStock,
           orderBy,
           skip,
           take,
         });
-        data.push(...buyNowBonds);
+        data.push(...stockBonds);
 
         if (data.length < take) {
-          // Fill the remaining spots with other bonds (starting from index 0)
+          // Fill the remaining spots with no-stock bonds (starting from index 0)
           const remaining = take - data.length;
-          const otherBonds = await db.dataBase.bonds.findMany({
-            where: whereOther,
+          const noStockBonds = await db.dataBase.bonds.findMany({
+            where: whereNoStock,
             orderBy,
             skip: 0,
             take: remaining,
           });
-          data.push(...otherBonds);
+          data.push(...noStockBonds);
         }
       } else {
-        // Offset is entirely within other bonds
-        const otherOffset = skip - countBuyNow;
-        const otherBonds = await db.dataBase.bonds.findMany({
-          where: whereOther,
+        // Offset is entirely within no-stock bonds
+        const noStockOffset = skip - countStock;
+        const noStockBonds = await db.dataBase.bonds.findMany({
+          where: whereNoStock,
           orderBy,
-          skip: otherOffset,
+          skip: noStockOffset,
           take,
         });
-        data.push(...otherBonds);
+        data.push(...noStockBonds);
       }
     } else {
       const [rawBonds, countAll] = await Promise.all([
@@ -327,13 +299,13 @@ export class BondService {
           orderBy:
             options?.all == "YES"
               ? [
-                {
-                  allowForPurchase: "desc",
-                },
-                {
-                  sortedAt: "asc",
-                },
-              ]
+                  {
+                    allowForPurchase: "desc",
+                  },
+                  {
+                    sortedAt: "asc",
+                  },
+                ]
               : orderBy,
           ...paginationOptions,
         }),

@@ -8,21 +8,15 @@ import BondsByCategories from "@/global/components/Bond/BondsByCategories";
 import { SortInfoBox } from "@/global/components/wrapper/cards/SortInfoBox";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { formatNumberTS } from "@/global/utils/formate";
-import { BondDetailResponse, ISessionResponse } from "@root/apiGateway";
+import { BondDetailResponse } from "@root/apiGateway";
 import { FaInfoCircle } from "react-icons/fa";
 import { PiCurrencyInrBold } from "react-icons/pi";
 import BondInfoHeader from "./BondInfoHeader";
-import { isKycVerified, isKraVerified } from "@/global/utils/customerVerification";
-import { canShowBuyNow } from "@/global/utils/bondPurchaseEligibility";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 
 export default function BondIsinView({
   bond,
-  session,
 }: {
   bond: BondDetailResponse["responseData"];
-  session?: ISessionResponse["responseData"] | null;
 }) {
   const putText =
     bond.putCallOptionDetails
@@ -74,9 +68,9 @@ export default function BondIsinView({
             <SortInfoBox title="Face Value">
               <PiCurrencyInrBold /> {formatNumberTS(bond.faceValue)}
             </SortInfoBox>
-            <SortInfoBox title="Coupon Rate">{bond.couponRate !== null && bond.couponRate !== undefined ? `${Number(bond.couponRate).toFixed(2)}%` : "Coming Soon"}</SortInfoBox>
-            <SortInfoBox title="Yield">{bond.yield !== null && bond.yield !== undefined ? `${Number(bond.yield).toFixed(2)}%` : "Coming Soon"}</SortInfoBox>
-            <SortInfoBox title="Last Traded Yield">{bond.lastTradeYield !== null && bond.lastTradeYield !== undefined ? `${Number(bond.lastTradeYield).toFixed(2)}%` : "Coming Soon"}</SortInfoBox>
+            <SortInfoBox title="Coupon Rate">{bond.couponRate}%</SortInfoBox>
+            <SortInfoBox title="Yield">{bond.yield !== null && bond.yield !== undefined ? `${bond.yield}%` : "Coming Soon"}</SortInfoBox>
+            <SortInfoBox title="Last Traded Yield">{bond.lastTradeYield !== null && bond.lastTradeYield !== undefined ? `${bond.lastTradeYield}%` : "Coming Soon"}</SortInfoBox>
             <SortInfoBox title="Last Traded Price">
               {bond.lastTradePrice !== null && bond.lastTradePrice !== undefined ? (
                 <>
@@ -103,7 +97,7 @@ export default function BondIsinView({
               {bond.interestPaymentMode?.replaceAll("_", " ") || "Coming Soon"}
             </SortInfoBox>
             <SortInfoBox title="Coupon Type">{bond.couponType !== null && bond.couponType !== undefined ? bond.couponType : "Coming Soon"}</SortInfoBox>
-            <SortInfoBox title="Taxable">
+            <SortInfoBox title="Taxable"> 
               {bond.taxStatus !== null && bond.taxStatus !== undefined && bond.taxStatus == "TAXABLE"
                 ? "Yes"
                 : bond.taxStatus !== null && bond.taxStatus !== undefined && bond.taxStatus == "TAX_FREE"
@@ -119,17 +113,17 @@ export default function BondIsinView({
                 )}
 
                 {putText.length > 15 && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <FaInfoCircle className="cursor-pointer" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="text-wrap max-w-48">
-                        {putText}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <FaInfoCircle className="cursor-pointer" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-wrap max-w-48">
+                          {putText}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
               </p>
             </SortInfoBox>
             <SortInfoBox title="Call">
@@ -140,17 +134,17 @@ export default function BondIsinView({
                 )}
 
                 {callText.length > 15 && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <FaInfoCircle className="cursor-pointer" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="text-wrap max-w-48">
-                        {callText}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <FaInfoCircle className="cursor-pointer" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-wrap max-w-48">
+                          {callText}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
               </p>
             </SortInfoBox>
             <SortInfoBox title="Mode of issuance">{bond.modeOfIssuance !== null && bond.modeOfIssuance !== undefined ? bond.modeOfIssuance : "Coming Soon"}</SortInfoBox>
@@ -162,38 +156,6 @@ export default function BondIsinView({
               {bond.nextCouponDate !== null && bond.nextCouponDate !== undefined ? dateTimeUtils.formatDateTime(bond.nextCouponDate, "DD MMM YYYY") : "Coming Soon"}
             </SortInfoBox>
           </div>
-
-          {bond && canShowBuyNow(bond) && (
-            (() => {
-              const kycOk = session ? isKycVerified(session.kycStatus) : false;
-              const kraOk = session ? isKraVerified(session.kraStatus) : false;
-
-              if (session && kycOk && kraOk) {
-                return (
-                  <div className="flex justify-center mt-8">
-                    <Link href={`/place-order/${bond.isin}`}>
-                      <Button className="px-8 py-2.5 bg-[#002a54] text-white hover:bg-[#001e3d] text-base font-semibold rounded-md transition-all shadow-sm hover:shadow active:scale-95 duration-200">
-                        Buy This Bond
-                      </Button>
-                    </Link>
-                  </div>
-                );
-              }
-
-              return (
-                <div className="border border-[#FDE047] rounded-xl py-6 px-8 bg-[#FFFBEB] text-center mx-auto mt-8 flex flex-col items-center justify-center gap-4 transition-all shadow-sm">
-                  <p className="text-[#1F2937] text-sm md:text-[15px] font-medium leading-relaxed">
-                    You&apos;re just one step away from investing in this bond. Complete your KYC to proceed with order placement.
-                  </p>
-                  <Link href="/dashboard/kyc">
-                    <Button className="px-8 py-2.5 bg-[#E14F26] text-white hover:bg-[#C93F1B] text-base font-semibold rounded-md transition-all shadow-sm hover:shadow active:scale-95 duration-200">
-                      Complete KYC
-                    </Button>
-                  </Link>
-                </div>
-              );
-            })()
-          )}
         </div>
         {/* <div className="lg:col-span-2">
           <BondBuyNowCalc />
