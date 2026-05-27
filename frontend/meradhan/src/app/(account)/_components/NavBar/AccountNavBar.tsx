@@ -84,7 +84,7 @@ function AccountNavBar({
                   aria-label="KYC Verification"
                 >
                   <FaUser aria-hidden="true" />{" "}
-                  {hasKycStarted ? "Complete KYC" : "KYC"}
+                  {hasKycStarted ? "KYC: Pending" : "KYC: Not Started"}
                 </Button>
               </Link>
             )}

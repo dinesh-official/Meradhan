@@ -408,12 +408,83 @@ export class BondService {
         },
       },
       orderBy: [
-        {
-          dateOfAllotment: "desc",
+        { allowForPurchase: "desc" },
+        { dateOfAllotment: "desc" },
+        { creditRating: "asc" },
+      ],
+      take: limit,
+    });
+
+    return this.enrichBondsWithCrmInventory(data);
+  }
+
+  async getHighYieldBonds(limit: number = 3) {
+    const data = await db.dataBase.bonds.findMany({
+      where: {
+        isListed: { equals: "YES" },
+        dateOfAllotment: { lte: new Date() },
+        yield: { gte: 11 },
+        creditRating: {
+          in: [
+            "AAA",
+            "AA",
+            "AA+",
+            "AAA(CE)",
+            "AA+(CE)",
+            "AA(CE)",
+            "A+(CE)",
+            "AAA",
+            "AA+",
+            "AA",
+            "A+",
+            "A",
+            "A-",
+            "BBB+",
+            "BBB",
+          ],
         },
-        {
-          creditRating: "asc",
+      },
+      orderBy: [
+        { allowForPurchase: "desc" },
+        { yield: "desc" },
+        { dateOfAllotment: "desc" },
+      ],
+      take: limit,
+    });
+
+    return this.enrichBondsWithCrmInventory(data);
+  }
+
+  async getZeroCouponBonds(limit: number = 3) {
+    const data = await db.dataBase.bonds.findMany({
+      where: {
+        isListed: { equals: "YES" },
+        dateOfAllotment: { lte: new Date() },
+        categories: { has: "zero-coupon" },
+        creditRating: {
+          in: [
+            "AAA",
+            "AA",
+            "AA+",
+            "AAA(CE)",
+            "AA+(CE)",
+            "AA(CE)",
+            "A+(CE)",
+            "AAA",
+            "AA+",
+            "AA",
+            "A+",
+            "A",
+            "A-",
+            "BBB+",
+            "BBB",
+          ],
         },
+      },
+      orderBy: [
+        { allowForPurchase: "desc" },
+        { dateOfAllotment: "desc" },
+        { creditRating: "asc" },
       ],
       take: limit,
     });
