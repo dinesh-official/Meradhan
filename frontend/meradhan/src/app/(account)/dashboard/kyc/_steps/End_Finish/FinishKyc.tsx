@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import {
   Card,
   CardContent
@@ -53,11 +54,13 @@ function FinishKyc() {
             upon completion of the verification.
           </p>
           <div className="mt-3">
-            <Button size={`lg`}>
-              Explore Products  <div className="flex justify-center items-center p-0 h-full">
-                <IoMdArrowDropright className="p-0 text-4xl" />
-              </div>
-            </Button>
+            <Link href="/bonds">
+              <Button size={`lg`}>
+                Explore Products  <div className="flex justify-center items-center p-0 h-full">
+                  <IoMdArrowDropright className="p-0 text-4xl" />
+                </div>
+              </Button>
+            </Link>
           </div>
         </div>}
 

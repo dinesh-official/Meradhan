@@ -852,6 +852,7 @@ export class PortfolioService {
       maturityDateStr: string;
       amount: number;
       date: Date;
+      isin: string;
     };
 
     const events: TimelineEvent[] = [];
@@ -878,6 +879,7 @@ export class PortfolioService {
 
       const maturityDateStr = formatDateStr(maturity);
       const bondName = bond.bondName;
+      const isin = order.isin;
       for (const ev of schedule) {
         events.push({
           type: ev.type,
@@ -885,6 +887,7 @@ export class PortfolioService {
           maturityDateStr,
           amount: ev.amount,
           date: ev.date,
+          isin,
         });
       }
     }
@@ -922,6 +925,7 @@ export class PortfolioService {
         bondName: ev.bondName,
         maturityDate: ev.maturityDateStr,
         amount: ev.amount,
+        isin: ev.isin,
       });
     }
 

@@ -117,6 +117,7 @@ export interface CashflowTimelineEvent {
   bondName: string;
   maturityDate: string;
   amount: number;
+  isin?: string;
 }
 
 export interface CashflowTimelineDate {
