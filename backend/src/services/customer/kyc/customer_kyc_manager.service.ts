@@ -524,7 +524,16 @@ export class CustomerKycManager {
 
     // Remove sensitive information
 
-    if (!kycFlow) return user;
+    if (!kycFlow) {
+      return {
+        ...user,
+        kycProgress: {
+          hasStarted: false,
+          step: 0,
+          complete: false,
+        },
+      };
+    }
 
     const kycData = kycFlow.data as KycDataStorage;
 
@@ -569,7 +578,13 @@ export class CustomerKycManager {
       kycStatus: user?.kycStatus || "PENDING",
       kraStatus: user?.kraStatus,
       verifyDate: user?.verifyDate,
+      kycSubmitDate: user?.kycSubmitDate,
       VerifiedBy: user?.VerifiedBy || null,
+      kycProgress: {
+        hasStarted: !kycFlow.complete,
+        step: kycFlow.step,
+        complete: kycFlow.complete,
+      },
 
       avatar: step1?.face?.url || user?.avatar || "------",
       isAFatcaCustomer: step1?.pan?.isFatca || user?.isAFatcaCustomer || false,

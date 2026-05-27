@@ -164,6 +164,28 @@ export class BondsApi {
     return response.data;
   }
 
+  public async getHighYieldBonds(
+    count: number = 3,
+    config?: AxiosRequestConfig
+  ) {
+    const response = await this.apiClient.get<LatestBondsResponse>(
+      `/bonds/high-yield`,
+      { ...config, params: { limit: count } }
+    );
+    return response.data;
+  }
+
+  public async getZeroCouponBonds(
+    count: number = 3,
+    config?: AxiosRequestConfig
+  ) {
+    const response = await this.apiClient.get<LatestBondsResponse>(
+      `/bonds/zero-coupon`,
+      { ...config, params: { limit: count } }
+    );
+    return response.data;
+  }
+
   public async createBond(
     payload: z.infer<typeof appSchema.bonds.bondCreateUpdateSchema>,
     config?: AxiosRequestConfig

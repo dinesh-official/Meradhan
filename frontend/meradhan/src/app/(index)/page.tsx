@@ -18,11 +18,20 @@ export const generateMetadata = async () => {
 export default async function HomePage() {
   const apiCaller = new apiGateway.bondsApi.BondsApi(apiServerCaller);
 
-  const { responseData } = await apiCaller.getLatestBonds(3);
+  const [latestRes, highYieldRes, zeroCouponRes] = await Promise.all([
+    apiCaller.getLatestBonds(9),
+    apiCaller.getHighYieldBonds(9),
+    apiCaller.getZeroCouponBonds(9),
+  ]);
 
   return (
     <ViewPort>
       <HomeHeroSection />
+      <LatestBondReleases
+        latest={latestRes.responseData || []}
+        highYield={highYieldRes.responseData || []}
+        zeroCoupon={zeroCouponRes.responseData || []}
+      />
       <WhyMeraDhanSection />
       <ToolsOfferedByMeraDhan />
       <div className="container">
@@ -30,7 +39,6 @@ export default async function HomePage() {
           <BondsByCategories />
         </SectionWrapper>
       </div>
-      <LatestBondReleases bonds={responseData || []} />
       {/* <ReturnsCalculationSection /> */}
       {/* <XirrCalculator
         showTitle={true}

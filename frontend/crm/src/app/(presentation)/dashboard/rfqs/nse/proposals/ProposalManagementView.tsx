@@ -5,6 +5,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   Check,
+  ChevronDown,
+  ChevronRight,
   ChevronsUpDown,
   FileText,
   History,
@@ -248,6 +250,9 @@ type ProposalDraft = {
   id: string;
   /** When this draft was created by editing an earlier saved proposal. */
   editOfId?: string | null;
+  /** DB status: PENDING | PROCESSING | WAITING_FOR_APPROVAL | FAILED | REJECTED | CONVERTED */
+  status?: string;
+  failedNote?: string | null;
   isin: string;
   quantity: number;
   notes: string;
@@ -311,6 +316,19 @@ function ProposalManagementView() {
   const [editSourceId, setEditSourceId] = useState<string | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyRootId, setHistoryRootId] = useState<string | null>(null);
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+
+  // Inline edit dialog
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editDialogSource, setEditDialogSource] = useState<ProposalDraft | null>(null);
+  const [editQty, setEditQty] = useState("1");
+  const [editSide, setEditSide] = useState<"BUY" | "SELL">("BUY");
+  const [editSettlement, setEditSettlement] = useState<"T+0" | "T+1">("T+0");
+  const [editManualYieldEnabled, setEditManualYieldEnabled] = useState(false);
+  const [editManualYield, setEditManualYield] = useState("");
+  const [editCustomer, setEditCustomer] = useState<CustomerProfile | null>(null);
+  const [editNotes, setEditNotes] = useState("");
+
   const { fetchProposalMutation } = useProposalFetcher();
 
   const Pill = ({
@@ -324,13 +342,41 @@ function ProposalManagementView() {
       {label}
     </Badge>
   );
+
+  function ProposalStatusBadge({ status }: { status?: string }) {
+    const s = (status ?? "PENDING").toUpperCase();
+    const cls =
+      s === "CONVERTED"
+        ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+        : s === "WAITING_FOR_APPROVAL"
+          ? "bg-blue-100 text-blue-700 border-blue-200"
+          : s === "REJECTED" || s === "FAILED"
+            ? "bg-red-100 text-red-600 border-red-200"
+            : "bg-amber-100 text-amber-700 border-amber-200";
+    const label =
+      s === "WAITING_FOR_APPROVAL" ? "Awaiting" :
+        s.charAt(0) + s.slice(1).toLowerCase();
+    return (
+      <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium", cls)}>
+        {label}
+      </span>
+    );
+  }
+  const [emailDraftId, setEmailDraftId] = useState<string | null>(null);
+
   const sendProposalEmailMutation = useMutation({
     mutationFn: async (payload: SendProposalEmailPayload) => ordersApi.sendProposalEmail(payload),
     onSuccess: () => {
       toast.success("Proposal email sent successfully");
+      const idNum = Number(emailDraftId);
+      if (Number.isFinite(idNum) && idNum > 0) {
+        markWaitingMutation.mutate(idNum);
+      }
+      setEmailDraftId(null);
     },
     onError: (error: unknown) => {
       toast.error(getApiErrorMessage(error, "Failed to send proposal email"));
+      setEmailDraftId(null);
     },
   });
 
@@ -380,6 +426,8 @@ function ProposalManagementView() {
           ...data,
           id: String(row.id),
           createdAt: row.createdAt,
+          status: row.status ?? "PENDING",
+          failedNote: row.failedNote ?? null,
         } as ProposalDraft;
       })
       .filter((x): x is ProposalDraft => Boolean(x));
@@ -445,6 +493,43 @@ function ProposalManagementView() {
       );
     });
   }, [savedCustomerFilter?.id, savedDrafts, savedSearch]);
+
+  // Groups proposals by their edit chain root. Each group is sorted latest-first.
+  const proposalGroups = useMemo(() => {
+    const memo = new Map<string, string>();
+    const rootOf = (id: string): string => {
+      if (memo.has(id)) return memo.get(id)!;
+      const row = savedDraftById.get(id);
+      const parent = row?.editOfId ? String(row.editOfId) : null;
+      const root = parent ? rootOf(parent) : id;
+      memo.set(id, root);
+      return root;
+    };
+    const groups = new Map<string, ProposalDraft[]>();
+    for (const item of savedProposalsToRender) {
+      const root = rootOf(String(item.id));
+      const existing = groups.get(root) ?? [];
+      existing.push(item);
+      groups.set(root, existing);
+    }
+    // Sort each group latest-first
+    for (const [, list] of groups) {
+      list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+    // Return as array of [rootId, items] sorted by latest item's date
+    return [...groups.entries()].sort(
+      ([, a], [, b]) => new Date(b[0]!.createdAt).getTime() - new Date(a[0]!.createdAt).getTime()
+    );
+  }, [savedDraftById, savedProposalsToRender]);
+
+  const toggleGroup = (rootId: string) => {
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(rootId)) next.delete(rootId);
+      else next.add(rootId);
+      return next;
+    });
+  };
 
   const handleReset = () => {
     setIsin("");
@@ -609,6 +694,29 @@ function ProposalManagementView() {
     },
   });
 
+  const queueProcessingMutation = useMutation({
+    mutationFn: async (proposalId: number) => savedProposalsApi.queueProcessing(proposalId),
+    onSuccess: () => {
+      toast.success("Proposal queued for processing");
+      void queryClient.invalidateQueries({ queryKey: ["crm-saved-proposals"] });
+    },
+    onError: (error: unknown) => {
+      toast.error(getApiErrorMessage(error, "Failed to queue proposal processing"));
+    },
+  });
+
+  const markWaitingMutation = useMutation({
+    mutationFn: async (proposalId: number) => savedProposalsApi.markWaitingForApproval(proposalId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["crm-saved-proposals"] });
+    },
+    onError: () => undefined,
+  });
+
+  // Confirmation dialog for queueing RFQ processing
+  const [confirmProcessOpen, setConfirmProcessOpen] = useState(false);
+  const [confirmProcessItem, setConfirmProcessItem] = useState<ProposalDraft | null>(null);
+
   const handleAutoCreateRfqAndGoDealbook = async () => {
     if (!proposalDraft) {
       toast.error("Create a proposal first");
@@ -625,6 +733,7 @@ function ProposalManagementView() {
   };
 
   const openEmailPreviewForDraft = (draft: ProposalDraft) => {
+    setEmailDraftId(Number.isFinite(Number(draft.id)) ? draft.id : null);
     if (!draft.customer.emailAddress) {
       toast.error("Selected customer does not have an email address");
       return;
@@ -739,6 +848,63 @@ function ProposalManagementView() {
     router.push(redirectTo);
   };
 
+  const openEditDialog = (item: ProposalDraft) => {
+    setEditDialogSource(item);
+    setEditQty(String(item.quantity));
+    setEditSide(item.side);
+    setEditSettlement(item.settlementType ?? "T+0");
+    setEditManualYieldEnabled(Boolean(item.manualYieldEnabled));
+    setEditManualYield(item.manualYield ?? "");
+    setEditCustomer(item.customer);
+    setEditNotes(item.notes ?? "");
+    setEditDialogOpen(true);
+  };
+
+  const handleEditDialogSave = async () => {
+    if (!editDialogSource) return;
+    const qtyNum = Number(editQty);
+    if (!Number.isFinite(qtyNum) || qtyNum <= 0 || !Number.isInteger(qtyNum)) {
+      toast.error("Quantity must be a positive whole number");
+      return;
+    }
+    if (editManualYieldEnabled) {
+      const y = Number(editManualYield);
+      if (!Number.isFinite(y) || y <= 0) {
+        toast.error("Enter a valid YTM %");
+        return;
+      }
+    }
+    try {
+      const fetched = await fetchProposalMutation.mutateAsync({
+        isin: editDialogSource.isin,
+        quantity: qtyNum,
+        side: editSide,
+        settlementType: editSettlement,
+        pricingYield: editManualYieldEnabled ? Number(editManualYield) : null,
+      });
+      const updatedDraft: ProposalDraft = {
+        ...editDialogSource,
+        id: crypto.randomUUID(),
+        editOfId: editDialogSource.id,
+        quantity: qtyNum,
+        side: editSide,
+        settlementType: editSettlement,
+        manualYieldEnabled: editManualYieldEnabled,
+        manualYield: editManualYield,
+        customer: editCustomer ?? editDialogSource.customer,
+        notes: editNotes.trim(),
+        fetched,
+        createdAt: new Date().toISOString(),
+      };
+      setEditSourceId(editDialogSource.id);
+      await saveMutation.mutateAsync(updatedDraft);
+      setEditDialogOpen(false);
+      toast.success("Saved as new version");
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Failed to save edited proposal"));
+    }
+  };
+
   const handleCreateRfqFromProposal = () => {
     if (!proposalDraft) {
       toast.error("Create a proposal first");
@@ -814,153 +980,121 @@ function ProposalManagementView() {
 
   return (
     <>
-      <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_400px]">
-        <Card className="border-gray-200">
-          <CardHeader>
-            <CardTitle>Generate Proposal</CardTitle>
-            <CardDescription>
-              Enter the ISIN, customer, and quantity to fetch pricing and proposal-ready bond data.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            <div className="grid gap-5 md:grid-cols-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">ISIN</label>
-                <Popover open={isinOpen} onOpenChange={setIsinOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={isinOpen}
-                      className="w-full justify-between font-normal shadow-none"
-                    >
-                      <span className="truncate text-left">{selectedBondLabel}</span>
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[420px] p-0" align="start">
-                    <Command shouldFilter={false}>
-                      <CommandInput
-                        placeholder="Search by ISIN or bond name..."
-                        value={isinSearch}
-                        onValueChange={setIsinSearch}
-                      />
-                      <CommandList>
-                        {isinQuery.isLoading ? (
-                          <div className="flex items-center justify-center py-6 text-sm text-muted-foreground">
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Searching bonds...
-                          </div>
-                        ) : null}
-                        {!isinQuery.isLoading && isinOptions.length === 0 ? (
-                          <CommandEmpty>No bonds found.</CommandEmpty>
-                        ) : null}
-                        {!isinQuery.isLoading && isinOptions.length > 0 ? (
-                          <CommandGroup>
-                            {isinOptions.map((bondOption) => (
-                              <CommandItem
-                                key={bondOption.id}
-                                value={bondOption.isin}
-                                onSelect={() => {
-                                  setIsin(bondOption.isin);
-                                  setIsinSearch(bondOption.isin);
-                                  setIsinOpen(false);
-                                }}
-                                className="items-start py-3"
-                              >
-                                <div className="flex min-w-0 flex-1 flex-col">
-                                  <span className="font-medium">{bondOption.isin}</span>
-                                  <span className="truncate text-xs text-muted-foreground">
-                                    {bondOption.bondName || bondOption.instrumentName || "Unnamed Bond"}
-                                  </span>
-                                </div>
-                                <Check
-                                  className={cn(
-                                    "ml-auto h-4 w-4 shrink-0",
-                                    isin === bondOption.isin ? "opacity-100" : "opacity-0"
-                                  )}
-                                />
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        ) : null}
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-              </div>
+      <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+        {/* ── Generate Proposal ── */}
+        <div className="overflow-hidden rounded-xl border border-border bg-white">
+          <div className="border-b border-border px-6 py-4">
+            <h2 className="text-base font-semibold text-foreground">Generate Proposal</h2>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              Fill in the details below to fetch live pricing and generate a proposal.
+            </p>
+          </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Quantity</label>
-                <Input
-                  type="number"
-                  min="1"
-                  step="1"
-                  value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
-                  placeholder="1"
-                />
-              </div>
+          <div className="divide-y divide-border">
+            {/* Bond + params row */}
+            <div className="px-6 py-5">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Bond Details</p>
+              <div className="grid gap-4 sm:grid-cols-[1fr_120px_140px_140px]">
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-slate-700">ISIN</label>
+                  <Popover open={isinOpen} onOpenChange={setIsinOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={isinOpen}
+                        className="w-full justify-between font-normal shadow-none"
+                      >
+                        <span className="truncate text-left">{selectedBondLabel}</span>
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[420px] p-0" align="start">
+                      <Command shouldFilter={false}>
+                        <CommandInput
+                          placeholder="Search by ISIN or bond name..."
+                          value={isinSearch}
+                          onValueChange={setIsinSearch}
+                        />
+                        <CommandList>
+                          {isinQuery.isLoading ? (
+                            <div className="flex items-center justify-center py-6 text-sm text-muted-foreground">
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Searching bonds...
+                            </div>
+                          ) : null}
+                          {!isinQuery.isLoading && isinOptions.length === 0 ? (
+                            <CommandEmpty>No bonds found.</CommandEmpty>
+                          ) : null}
+                          {!isinQuery.isLoading && isinOptions.length > 0 ? (
+                            <CommandGroup>
+                              {isinOptions.map((bondOption) => (
+                                <CommandItem
+                                  key={bondOption.id}
+                                  value={bondOption.isin}
+                                  onSelect={() => {
+                                    setIsin(bondOption.isin);
+                                    setIsinSearch(bondOption.isin);
+                                    setIsinOpen(false);
+                                  }}
+                                  className="items-start py-3"
+                                >
+                                  <div className="flex min-w-0 flex-1 flex-col">
+                                    <span className="font-medium">{bondOption.isin}</span>
+                                    <span className="truncate text-xs text-muted-foreground">
+                                      {bondOption.bondName || bondOption.instrumentName || "Unnamed Bond"}
+                                    </span>
+                                  </div>
+                                  <Check className={cn("ml-auto h-4 w-4 shrink-0", isin === bondOption.isin ? "opacity-100" : "opacity-0")} />
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          ) : null}
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Proposal Side</label>
-                <Select value={side} onValueChange={(value) => setSide(value as "BUY" | "SELL")}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select side" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="BUY">BUY</SelectItem>
-                    <SelectItem value="SELL">SELL</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-slate-700">Quantity</label>
+                  <Input type="number" min="1" step="1" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="1" />
+                </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Settlement Date</label>
-                <Select
-                  value={settlementType}
-                  onValueChange={(value) => setSettlementType(value as "T+0" | "T+1")}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select settlement" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="T+0">T+0</SelectItem>
-                    <SelectItem value="T+1">T+1</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-slate-700">Side</label>
+                  <Select value={side} onValueChange={(value) => setSide(value as "BUY" | "SELL")}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Side" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="BUY">BUY</SelectItem>
+                      <SelectItem value="SELL" disabled className="text-muted-foreground">
+                        SELL
+                        <span className="ml-2 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium">Coming soon</span>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-slate-700">Settlement</label>
+                  <Select value={settlementType} onValueChange={(value) => setSettlementType(value as "T+0" | "T+1")}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Settlement" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="T+0">T+0</SelectItem>
+                      <SelectItem value="T+1">T+1</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Manual yield based pricing</label>
-              <div className="flex items-start gap-3 rounded-lg border border-gray-200 p-3">
-                <Checkbox
-                  checked={manualYieldEnabled}
-                  onCheckedChange={(value) => setManualYieldEnabled(Boolean(value))}
-                />
-                <div className="min-w-0 space-y-1">
-                  <p className="text-sm font-medium">Use manual YTM for calc</p>
-                  <p className="text-xs text-muted-foreground">
-                    Optional. If enabled and YTM is provided, pricing is calculated using this yield.
-                  </p>
-                </div>
-              </div>
-              {manualYieldEnabled ? (
-                <div className="flex flex-col gap-2 md:max-w-[240px]">
-                  <Input
-                    type="number"
-                    step="0.0001"
-                    value={manualYield}
-                    onChange={(e) => setManualYield(e.target.value)}
-                    placeholder="Enter YTM % (e.g. 13.7500)"
-                  />
-                </div>
-              ) : null}
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Customer</label>
+            {/* Customer */}
+            <div className="px-6 py-5">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Customer</p>
               <SelectCustomerUser
                 value={selectedCustomer ?? undefined}
                 onSelect={setSelectedCustomer}
@@ -968,115 +1102,148 @@ function ProposalManagementView() {
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Internal Notes</label>
+            {/* Manual yield */}
+            <div className="px-6 py-5">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Pricing</p>
+              <label className="flex cursor-pointer items-start gap-3">
+                <Checkbox
+                  checked={manualYieldEnabled}
+                  onCheckedChange={(value) => setManualYieldEnabled(Boolean(value))}
+                  className="mt-0.5"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-slate-700">Use manual YTM for pricing</p>
+                  <p className="text-xs text-muted-foreground">Override auto-pricing with a specific YTM %</p>
+                </div>
+                {manualYieldEnabled && (
+                  <Input
+                    type="number"
+                    step="0.0001"
+                    value={manualYield}
+                    onChange={(e) => setManualYield(e.target.value)}
+                    placeholder="e.g. 13.7500"
+                    className="w-36"
+                  />
+                )}
+              </label>
+            </div>
+
+            {/* Notes */}
+            <div className="px-6 py-5">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Internal Notes</p>
               <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Optional context for the proposal..."
-                rows={4}
+                placeholder="Optional context visible only to your team…"
+                rows={3}
+                className="resize-none"
               />
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              <Button
-                onClick={handleCreateProposal}
-                disabled={fetchProposalMutation.isPending}
-              >
-                {fetchProposalMutation.isPending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Fetching proposal
-                  </>
-                ) : (
-                  <>
-                    <FileText className="h-4 w-4" />
-                    Generate Proposal
-                  </>
-                )}
+            {/* Actions */}
+            <div className="flex flex-wrap items-center gap-2 bg-slate-50 px-6 py-4">
+              <Button onClick={handleCreateProposal} disabled={fetchProposalMutation.isPending} className="gap-2">
+                {fetchProposalMutation.isPending
+                  ? <><Loader2 className="h-4 w-4 animate-spin" />Fetching…</>
+                  : <><FileText className="h-4 w-4" />Generate Proposal</>}
               </Button>
               <Button
                 variant="secondary"
                 onClick={handleSaveProposal}
                 disabled={!proposalDraft || fetchProposalMutation.isPending || saveMutation.isPending}
+                className="gap-2"
               >
-                {saveMutation.isPending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Saving…
-                  </>
-                ) : (
-                  <>
-                    <FileText className="h-4 w-4" />
-                    Save Proposal
-                  </>
-                )}
+                {saveMutation.isPending
+                  ? <><Loader2 className="h-4 w-4 animate-spin" />Saving…</>
+                  : <><FileText className="h-4 w-4" />Save Proposal</>}
               </Button>
-              <Button variant="outline" onClick={handleReset} disabled={fetchProposalMutation.isPending}>
-                <RefreshCw className="h-4 w-4" />
-                Reset
+              <Button variant="ghost" size="sm" onClick={handleReset} disabled={fetchProposalMutation.isPending} className="ml-auto text-muted-foreground">
+                <RefreshCw className="mr-1.5 h-3.5 w-3.5" />Reset
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card className="border-dashed border-gray-200">
-          <CardHeader>
-            <CardTitle>Proposal Preview</CardTitle>
-            <CardDescription>
-              The latest fetched proposal summary appears here and opens in the right sidebar.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {proposalDraft ? (
-              <>
-                <div className="rounded-lg bg-muted/40 p-4 space-y-2">
-                  <div className="flex items-center gap-2 text-sm font-medium">
+        {/* ── Proposal Preview ── */}
+        <div className={cn(
+          "overflow-hidden rounded-xl border bg-white",
+          proposalDraft ? "border-border" : "border-dashed border-border",
+        )}>
+          <div className="border-b border-border px-5 py-4">
+            <h2 className="text-base font-semibold text-foreground">Proposal Preview</h2>
+            <p className="mt-0.5 text-sm text-muted-foreground">Summary of the latest generated proposal.</p>
+          </div>
+
+          {proposalDraft ? (
+            <div className="divide-y divide-border">
+              {/* Customer chip */}
+              <div className="px-5 py-4">
+                <div className="flex items-center gap-3 rounded-lg bg-slate-50 p-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-600">
                     <UserRound className="h-4 w-4" />
-                    {customerFullName(proposalDraft.customer)}
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {proposalDraft.customer.emailAddress || "No email available"}
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-slate-800">{customerFullName(proposalDraft.customer)}</p>
+                    <p className="truncate text-xs text-muted-foreground">{proposalDraft.customer.emailAddress || "—"}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bond info */}
+              <div className="px-5 py-4 space-y-1">
+                <p className="truncate text-sm font-semibold text-slate-800">{bond?.bondName || "—"}</p>
+                <p className="font-mono text-xs text-slate-400">{proposalDraft.isin}</p>
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-semibold text-blue-700">{proposalDraft.side}</span>
+                  <span className="rounded-full border border-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-600">{proposalDraft.settlementType}</span>
+                  <span className="text-xs text-slate-500">× {proposalDraft.quantity}</span>
+                </div>
+              </div>
+
+              {/* Key metrics */}
+              <div className="grid grid-cols-2 divide-x divide-border">
+                <div className="px-5 py-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Clean Price</p>
+                  <p className="mt-1 text-base font-semibold tabular-nums text-slate-800">
+                    {formatNumber(dealAutofill?.pricing.finalPrice ?? pricing?.cleanPrice, 4)}
                   </p>
                 </div>
-
-                <InfoRow label="ISIN" value={proposalDraft.isin} />
-                <InfoRow label="Side" value={proposalDraft.side} />
-                <InfoRow label="Settlement" value={proposalDraft.settlementType} />
-                <InfoRow label="Bond" value={bond?.bondName || "—"} />
-                <InfoRow label="Quantity" value={String(proposalDraft.quantity)} />
-                <InfoRow
-                  label="Calc Price"
-                  value={
-                    formatCurrency(
-                      dealAutofill?.pricing.finalPrice ??
-                      pricing?.cleanPrice ??
-                      dealAutofill?.suggested.sellPrice,
-                    )
-                  }
-                />
-                <InfoRow
-                  label="Calc Settlement Amount"
-                  value={formatCurrency(dealAutofill?.pricing.settlementAmount ?? pricing?.settlementAmount)}
-                />
-                {pricingError ? (
-                  <p className="text-xs text-amber-600">
-                    {pricingError}
+                <div className="px-5 py-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">YTM</p>
+                  <p className="mt-1 text-base font-semibold tabular-nums text-slate-800">
+                    {dealAutofill?.pricing.finalYieldRaw != null ? `${formatNumber(dealAutofill.pricing.finalYieldRaw, 4)}%` : "—"}
                   </p>
-                ) : null}
-                <InfoRow label="Created" value={formatDisplayDate(proposalDraft.createdAt)} />
-
-                <Button variant="outline" className="w-full" onClick={() => setIsSheetOpen(true)}>
-                  Open sidebar preview
-                </Button>
-              </>
-            ) : (
-              <div className="rounded-lg border border-dashed border-gray-200 p-6 text-sm text-muted-foreground">
-                Create a proposal to preview the fetched pricing, customer information, and bond details.
+                </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
+
+              {/* Settlement amount hero */}
+              <div className="px-5 py-4">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Settlement Amount</p>
+                <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900">
+                  {formatCurrency(dealAutofill?.pricing.settlementAmount ?? pricing?.settlementAmount)}
+                </p>
+                {pricingError ? (
+                  <p className="mt-1.5 text-xs text-amber-600">{pricingError}</p>
+                ) : null}
+              </div>
+
+              {/* Footer */}
+              <div className="px-5 py-4">
+                <p className="mb-3 text-[11px] text-slate-400">Created {formatDisplayDate(proposalDraft.createdAt)}</p>
+                <Button variant="outline" className="w-full" onClick={() => setIsSheetOpen(true)}>
+                  View full details
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
+                <FileText className="h-5 w-5 text-slate-400" />
+              </div>
+              <p className="text-sm text-muted-foreground">Generate a proposal to see the pricing summary here.</p>
+            </div>
+          )}
+        </div>
       </div>
 
       <Card className="mt-5 border-gray-200">
@@ -1132,182 +1299,242 @@ function ProposalManagementView() {
           </div>
 
           {savedQuery.isLoading ? (
-            <div className="rounded-lg border border-dashed border-gray-200 p-6 text-sm text-muted-foreground">
-              Loading saved proposals...
+            <div className="flex items-center gap-2 rounded-xl border border-dashed border-gray-200 p-8 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" /> Loading proposals…
             </div>
-          ) : savedProposalsToRender.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-gray-200 p-6 text-sm text-muted-foreground">
-              No saved proposals yet.
+          ) : proposalGroups.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-gray-200 p-10 text-center text-sm text-muted-foreground">
+              No saved proposals yet. Generate and save a proposal above.
             </div>
           ) : (
-            <div className="rounded-xl border border-gray-200">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>ISIN</TableHead>
-                    <TableHead>Bond</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Side</TableHead>
-                    <TableHead className="text-right">Qty</TableHead>
-                    <TableHead>Settle</TableHead>
-                    <TableHead className="text-right">Calc Px</TableHead>
-                    <TableHead className="text-right">Settle Amt</TableHead>
-                    <TableHead className="text-right">YTM</TableHead>
-                    <TableHead>Version</TableHead>
-                    <TableHead>Saved</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {savedProposalsToRender.map((item) => {
-                    const deal = item.fetched?.dealAutofill;
-                    const manual =
-                      item.manualYieldEnabled && item.manualYield?.trim()
-                        ? Number(item.manualYield)
-                        : null;
-                    const calcYtm = deal?.pricing?.finalYieldRaw;
-                    const fallbackYtm =
-                      deal?.suggested?.yield ??
-                      deal?.suggested?.buyYield ??
-                      (item.fetched?.bond?.buyYield as unknown as number | null | undefined);
-                    const ytm =
-                      manual != null && Number.isFinite(manual) && manual > 0
-                        ? manual
-                        : calcYtm != null && Number.isFinite(Number(calcYtm)) && Number(calcYtm) > 0
-                          ? Number(calcYtm)
-                          : fallbackYtm != null && Number.isFinite(Number(fallbackYtm)) && Number(fallbackYtm) > 0
-                            ? Number(fallbackYtm)
-                            : null;
+            <div className="overflow-hidden rounded-xl border border-border bg-white">
+              <div className="overflow-x-auto">
+              <table className="w-full min-w-[1000px] text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-slate-50">
+                    <th className="w-9 px-3 py-3" />
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Bond / ISIN</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Customer</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Side</th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Qty</th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Clean Px</th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Settle Amt</th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">YTM</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Saved</th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {proposalGroups.map(([rootId, items]) => {
+                    const primary = items[0]!;
+                    const hasChildren = items.length > 1;
+                    const isExpanded = expandedGroups.has(rootId);
 
-                    const bondName =
-                      item.fetched?.bond?.bondName ||
-                      item.fetched?.bond?.instrumentName ||
-                      "—";
+                    const renderItemCells = (item: ProposalDraft, isChild = false) => {
+                      const deal = item.fetched?.dealAutofill;
+                      const manual = item.manualYieldEnabled && item.manualYield?.trim() ? Number(item.manualYield) : null;
+                      const calcYtm = deal?.pricing?.finalYieldRaw;
+                      const fallbackYtm = deal?.suggested?.yield ?? deal?.suggested?.buyYield ?? (item.fetched?.bond?.buyYield as unknown as number | null | undefined);
+                      const ytm =
+                        manual != null && Number.isFinite(manual) && manual > 0 ? manual
+                          : calcYtm != null && Number.isFinite(Number(calcYtm)) && Number(calcYtm) > 0 ? Number(calcYtm)
+                            : fallbackYtm != null && Number.isFinite(Number(fallbackYtm)) && Number(fallbackYtm) > 0 ? Number(fallbackYtm)
+                              : null;
+                      const bondName = item.fetched?.bond?.bondName || item.fetched?.bond?.instrumentName || "—";
+                      const settleAmt = item.fetched?.dealAutofill?.pricing?.settlementAmount ?? item.fetched?.pricing?.settlementAmount;
+                      const calcPx = item.fetched?.dealAutofill?.pricing?.finalPrice ?? item.fetched?.pricing?.cleanPrice;
 
-                    const settleAmt =
-                      item.fetched?.dealAutofill?.pricing?.settlementAmount ??
-                      item.fetched?.pricing?.settlementAmount;
+                      return (
+                        <>
+                          {/* Expand toggle */}
+                          <td className="w-9 px-3 py-3.5">
+                            {!isChild && hasChildren ? (
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); toggleGroup(rootId); }}
+                                className="flex h-6 w-6 items-center justify-center rounded-md border border-border bg-white text-slate-400 shadow-sm transition-colors hover:border-slate-300 hover:text-slate-600"
+                              >
+                                {isExpanded
+                                  ? <ChevronDown className="h-3.5 w-3.5" />
+                                  : <ChevronRight className="h-3.5 w-3.5" />}
+                              </button>
+                            ) : isChild ? (
+                              <span className="pl-2 text-slate-300">└</span>
+                            ) : null}
+                          </td>
 
-                    const calcPx =
-                      item.fetched?.dealAutofill?.pricing?.finalPrice ??
-                      item.fetched?.pricing?.cleanPrice;
+                          {/* Bond / ISIN */}
+                          <td className={cn("max-w-[240px] px-4 py-3.5", isChild && "pl-6")}>
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-semibold text-slate-800">{bondName}</p>
+                              <div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+                                <span className="font-mono text-[11px] text-slate-400">{item.isin}</span>
+                                {!isChild && hasChildren && (
+                                  <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">
+                                    {items.length} versions
+                                  </span>
+                                )}
+                                {isChild && item.editOfId && (
+                                  <span className="font-mono text-[10px] text-slate-400">edit of #{item.editOfId}</span>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Customer */}
+                          <td className="max-w-[200px] px-4 py-3.5">
+                            <p className="truncate text-sm font-medium text-slate-700">{customerFullName(item.customer)}</p>
+                            {item.customer?.emailAddress ? (
+                              <p className="truncate text-[11px] text-slate-400">{item.customer.emailAddress}</p>
+                            ) : null}
+                          </td>
+
+                          {/* Side */}
+                          <td className="px-4 py-3.5">
+                            <span className={cn(
+                              "text-sm font-semibold",
+                              item.side === "SELL" ? "text-red-600" : "text-blue-600",
+                            )}>
+                              {item.side}
+                            </span>
+                            <span className="text-slate-400"> · </span>
+                            <span className="text-sm text-slate-500">{item.settlementType ?? "T+0"}</span>
+                            {item.manualYieldEnabled && (
+                              <>
+                                <span className="text-slate-400"> · </span>
+                                <span className="text-sm text-violet-600">{item.manualYield || "—"}%</span>
+                              </>
+                            )}
+                          </td>
+
+                          {/* Qty */}
+                          <td className="px-4 py-3.5 text-right font-mono text-sm tabular-nums text-slate-700">
+                            {formatInteger(item.quantity)}
+                          </td>
+
+                          {/* Clean Price */}
+                          <td className="px-4 py-3.5 text-right font-mono text-sm tabular-nums text-slate-700">
+                            {formatNumber(calcPx, 4)}
+                          </td>
+
+                          {/* Settle Amount */}
+                          <td className="px-4 py-3.5 text-right font-mono text-sm tabular-nums text-slate-800 font-medium">
+                            {formatCurrency(settleAmt)}
+                          </td>
+
+                          {/* YTM */}
+                          <td className="px-4 py-3.5 text-right font-mono text-sm tabular-nums text-slate-700">
+                            {ytm != null ? `${formatNumber(ytm, 4)}%` : "—"}
+                          </td>
+
+                          {/* Status */}
+                          <td className="px-4 py-3.5">
+                            {item.status === "FAILED" && item.failedNote ? (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="cursor-help space-y-0.5">
+                                    <ProposalStatusBadge status={item.status} />
+                                    <p className="max-w-[160px] truncate text-[10px] text-red-500">
+                                      {item.failedNote}
+                                    </p>
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-xs whitespace-pre-wrap text-xs">
+                                  {item.failedNote}
+                                </TooltipContent>
+                              </Tooltip>
+                            ) : (
+                              <ProposalStatusBadge status={item.status} />
+                            )}
+                          </td>
+
+                          {/* Saved date */}
+                          <td className="whitespace-nowrap px-4 py-3.5 text-[11px] text-slate-400">
+                            {formatDisplayDate(item.createdAt)}
+                          </td>
+
+                          {/* Actions */}
+                          <td className="px-4 py-3.5 text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); openEditDialog(item); }}
+                                    className="flex h-7 w-7 items-center justify-center rounded-md border border-border bg-white text-slate-500 shadow-sm transition-colors hover:border-slate-300 hover:text-slate-800"
+                                  >
+                                    <Pencil className="h-3.5 w-3.5" />
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent>Edit (new version)</TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); void sendEmailForDraft(item); }}
+                                    disabled={sendProposalEmailMutation.isPending}
+                                    className="flex h-7 w-7 items-center justify-center rounded-md border border-blue-200 bg-blue-50 text-blue-600 shadow-sm transition-colors hover:bg-blue-100 disabled:opacity-50"
+                                  >
+                                    <Mail className="h-3.5 w-3.5" />
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent>Send proposal email</TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setConfirmProcessItem(item);
+                                      setConfirmProcessOpen(true);
+                                    }}
+                                    disabled={item.status === "PROCESSING" || item.status === "CONVERTED"}
+                                    className="flex h-7 w-7 items-center justify-center rounded-md border border-amber-200 bg-amber-50 text-amber-600 shadow-sm transition-colors hover:bg-amber-100 disabled:opacity-40"
+                                  >
+                                    <Zap className="h-3.5 w-3.5" />
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent>Trigger RFQ processing</TooltipContent>
+                              </Tooltip>
+                            </div>
+                          </td>
+                        </>
+                      );
+                    };
 
                     return (
-                      <TableRow
-                        key={item.id}
-                        className="cursor-pointer"
-                        onClick={() => handleOpenSavedProposal(item)}
-                      >
-                        <TableCell className="font-mono text-xs">{item.isin}</TableCell>
-                        <TableCell className="max-w-[260px] truncate">{bondName}</TableCell>
-                        <TableCell className="max-w-[220px] truncate">
-                          <div className="min-w-0">
-                            <div className="truncate">{customerFullName(item.customer)}</div>
-                            {item.customer?.emailAddress ? (
-                              <div className="truncate text-xs text-muted-foreground">
-                                {item.customer.emailAddress}
-                              </div>
-                            ) : null}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Pill
-                              label={item.side}
-                              variant={item.side === "SELL" ? "destructive" : "secondary"}
-                            />
-                            <Pill label={item.settlementType ?? "T+0"} variant="outline" />
-                            {item.manualYieldEnabled ? (
-                              <Pill label={`Manual ${item.manualYield || "—"}%`} />
-                            ) : null}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right tabular-nums">
-                          {formatInteger(item.quantity)}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="rounded-full">
-                            {item.settlementType ?? "T+0"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right tabular-nums">
-                          {formatNumber(calcPx, 4)}
-                        </TableCell>
-                        <TableCell className="text-right tabular-nums">
-                          {formatCurrency(settleAmt)}
-                        </TableCell>
-                        <TableCell className="text-right tabular-nums">
-                          {ytm != null ? `${formatNumber(ytm, 4)}%` : "—"}
-                        </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {(item as ProposalDraft).editOfId ? (
-                            <span className="font-mono">edit of #{(item as ProposalDraft).editOfId}</span>
-                          ) : (
-                            "—"
+                      <>
+                        <tr
+                          key={`group-${rootId}`}
+                          onClick={() => handleOpenSavedProposal(primary)}
+                          className={cn(
+                            "cursor-pointer transition-colors hover:bg-slate-50/80",
+                            isExpanded && "bg-slate-50/60",
+                            primary.status === "CONVERTED" && "bg-emerald-50/30 hover:bg-emerald-50/60",
+                            primary.status === "PROCESSING" && "bg-amber-50/30 hover:bg-amber-50/60",
+                            primary.status === "FAILED" && "bg-red-50/20 hover:bg-red-50/40",
                           )}
-                        </TableCell>
-                        <TableCell className="tabular-nums">{formatDisplayDate(item.createdAt)}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleOpenSavedProposal(item);
-                              }}
-                            >
-                              Open
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleEditSavedProposal(item);
-                              }}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openHistory(item);
-                              }}
-                            >
-                              <History className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="default"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                void sendEmailForDraft(item);
-                              }}
-                              disabled={sendProposalEmailMutation.isPending}
-                            >
-                              <Mail className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                void handleAutoCreateRfqFromSaved(item);
-                              }}
-                              disabled={autoCreateRfqMutation.isPending}
-                            >
-                              <Zap className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
+                        >
+                          {renderItemCells(primary, false)}
+                        </tr>
+                        {isExpanded && items.slice(1).map((child) => (
+                          <tr
+                            key={`child-${child.id}`}
+                            onClick={() => handleOpenSavedProposal(child)}
+                            className="cursor-pointer bg-indigo-50/40 transition-colors hover:bg-indigo-50/70"
+                          >
+                            {renderItemCells(child, true)}
+                          </tr>
+                        ))}
+                      </>
                     );
                   })}
-                </TableBody>
-              </Table>
+                </tbody>
+              </table>
+              </div>
             </div>
           )}
         </CardContent>
@@ -1794,6 +2021,228 @@ function ProposalManagementView() {
           <DialogFooter>
             <Button variant="secondary" onClick={() => setHistoryOpen(false)}>
               Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Inline Edit Dialog ── */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Proposal</DialogTitle>
+            <DialogDescription>
+              Adjust the parameters and save — this creates a new version linked to the original.
+            </DialogDescription>
+          </DialogHeader>
+
+          {editDialogSource && (
+            <div className="space-y-4 py-1">
+              {/* Bond info (read-only) */}
+              <div className="rounded-lg bg-slate-50 px-4 py-3">
+                <p className="text-sm font-semibold text-slate-800">
+                  {editDialogSource.fetched?.bond?.bondName || editDialogSource.fetched?.bond?.instrumentName || "—"}
+                </p>
+                <p className="mt-0.5 font-mono text-xs text-slate-400">{editDialogSource.isin}</p>
+              </div>
+
+              {/* Quantity · Side · Settlement in one row */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Quantity</label>
+                  <Input
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={editQty}
+                    onChange={(e) => setEditQty(e.target.value)}
+                    placeholder="1"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Side</label>
+                  <Select value={editSide} onValueChange={(v) => setEditSide(v as "BUY" | "SELL")}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="BUY">BUY</SelectItem>
+                      <SelectItem value="SELL" disabled className="text-muted-foreground">
+                        SELL <span className="ml-1 text-[10px]">Coming soon</span>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Settlement</label>
+                  <Select value={editSettlement} onValueChange={(v) => setEditSettlement(v as "T+0" | "T+1")}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="T+0">T+0</SelectItem>
+                      <SelectItem value="T+1">T+1</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Manual yield */}
+              <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border p-3">
+                <Checkbox
+                  checked={editManualYieldEnabled}
+                  onCheckedChange={(v) => setEditManualYieldEnabled(Boolean(v))}
+                />
+                <span className="flex-1 text-sm font-medium">Manual YTM pricing</span>
+                {editManualYieldEnabled && (
+                  <Input
+                    type="number"
+                    step="0.0001"
+                    value={editManualYield}
+                    onChange={(e) => setEditManualYield(e.target.value)}
+                    placeholder="e.g. 13.7500"
+                    className="w-32"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                )}
+              </label>
+
+              {/* Customer */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Customer</label>
+                <SelectCustomerUser
+                  value={editCustomer ?? undefined}
+                  onSelect={setEditCustomer}
+                  placeholder="Search customer..."
+                />
+              </div>
+
+              {/* Notes */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">Internal Notes</label>
+                <Textarea
+                  value={editNotes}
+                  onChange={(e) => setEditNotes(e.target.value)}
+                  placeholder="Optional notes…"
+                  rows={3}
+                  className="resize-none"
+                />
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)} disabled={fetchProposalMutation.isPending || saveMutation.isPending}>
+              Cancel
+            </Button>
+            <Button onClick={handleEditDialogSave} disabled={fetchProposalMutation.isPending || saveMutation.isPending}>
+              {fetchProposalMutation.isPending || saveMutation.isPending
+                ? <><Loader2 className="h-4 w-4 animate-spin" />{saveMutation.isPending ? "Saving…" : "Fetching…"}</>
+                : "Save new version"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Confirm RFQ Processing Dialog ── */}
+      <Dialog open={confirmProcessOpen} onOpenChange={setConfirmProcessOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Zap className="h-4 w-4 text-amber-500" />
+              Confirm RFQ Processing
+            </DialogTitle>
+            <DialogDescription>
+              Review the proposal details below. Confirming will queue this proposal for automated NSE RFQ execution.
+            </DialogDescription>
+          </DialogHeader>
+
+          {confirmProcessItem && (() => {
+            const item = confirmProcessItem;
+            const bond = item.fetched?.bond;
+            const pricing = item.fetched?.pricing;
+            const deal = item.fetched?.dealAutofill;
+            const calcPx = deal?.pricing?.finalPrice ?? pricing?.cleanPrice;
+            const settleAmt = deal?.pricing?.settlementAmount ?? pricing?.settlementAmount;
+            const ytmRaw = deal?.pricing?.finalYieldRaw;
+            const idNum = Number(item.id);
+            return (
+              <div className="space-y-4 py-1">
+                {/* Bond block */}
+                <div className="rounded-lg bg-slate-50 px-4 py-3">
+                  <p className="text-sm font-semibold text-slate-800">
+                    {bond?.bondName || bond?.instrumentName || "—"}
+                  </p>
+                  <p className="mt-0.5 font-mono text-xs text-slate-400">{item.isin}</p>
+                </div>
+
+                {/* Info grid */}
+                <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                  <div className="text-muted-foreground">Customer</div>
+                  <div className="font-medium text-slate-800">{customerFullName(item.customer)}</div>
+
+                  <div className="text-muted-foreground">Email</div>
+                  <div className="truncate text-slate-600">{item.customer?.emailAddress || "—"}</div>
+
+                  <div className="text-muted-foreground">Side</div>
+                  <div className={cn("font-semibold", item.side === "SELL" ? "text-red-600" : "text-blue-600")}>
+                    {item.side}
+                  </div>
+
+                  <div className="text-muted-foreground">Settlement</div>
+                  <div className="text-slate-700">{item.settlementType ?? "T+0"}</div>
+
+                  <div className="text-muted-foreground">Quantity</div>
+                  <div className="tabular-nums text-slate-700">{formatInteger(item.quantity)}</div>
+
+                  <div className="text-muted-foreground">Clean Price</div>
+                  <div className="tabular-nums text-slate-700">{formatNumber(calcPx, 4)}</div>
+
+                  <div className="text-muted-foreground">YTM</div>
+                  <div className="tabular-nums text-slate-700">
+                    {ytmRaw != null ? `${formatNumber(ytmRaw, 4)}%` : item.manualYieldEnabled ? `${item.manualYield}% (manual)` : "—"}
+                  </div>
+
+                  <div className="text-muted-foreground">Settlement Amt</div>
+                  <div className="font-semibold tabular-nums text-slate-900">{formatCurrency(settleAmt)}</div>
+
+                  <div className="text-muted-foreground">Status</div>
+                  <div><ProposalStatusBadge status={item.status} /></div>
+
+                  <div className="text-muted-foreground">Saved</div>
+                  <div className="text-slate-600">{formatDisplayDate(item.createdAt)}</div>
+                </div>
+
+                {!Number.isFinite(idNum) && (
+                  <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
+                    This proposal has not been saved to the database yet. Please save it first.
+                  </p>
+                )}
+              </div>
+            );
+          })()}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setConfirmProcessOpen(false)}
+              disabled={queueProcessingMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="bg-amber-500 hover:bg-amber-600 text-white"
+              disabled={
+                queueProcessingMutation.isPending ||
+                !Number.isFinite(Number(confirmProcessItem?.id))
+              }
+              onClick={async () => {
+                if (!confirmProcessItem) return;
+                const idNum = Number(confirmProcessItem.id);
+                if (!Number.isFinite(idNum)) return;
+                await queueProcessingMutation.mutateAsync(idNum);
+                setConfirmProcessOpen(false);
+              }}
+            >
+              {queueProcessingMutation.isPending
+                ? <><Loader2 className="h-4 w-4 animate-spin" />Queuing…</>
+                : <><Zap className="h-4 w-4" />Confirm & Queue</>}
             </Button>
           </DialogFooter>
         </DialogContent>

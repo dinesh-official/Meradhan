@@ -17,7 +17,8 @@ model CrmSavedProposal {
   notes String?
 
   /// Snapshot payload (bond/pricing/autofill/customer display fields)
-  data Json
+  data       Json
+  failedNote String?
 
   status ProposalStatus @default(PENDING)
 
@@ -32,7 +33,9 @@ model CrmSavedProposal {
 
 enum ProposalStatus {
   PENDING
+  PROCESSING
   WAITING_FOR_APPROVAL
+  FAILED
   REJECTED
   CONVERTED
 }

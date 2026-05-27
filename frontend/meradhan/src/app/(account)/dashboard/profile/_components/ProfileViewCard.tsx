@@ -17,6 +17,9 @@ function ProfileViewCard({
 }: {
   profile: GetCustomerResponseById["responseData"];
 }) {
+  const hasKycStarted =
+    profile.kycStatus == "PENDING" && profile.kycProgress?.hasStarted;
+
   return (
     <div>
       <div className="flex md:flex-row flex-col md:justify-between items-center gap-5">
@@ -107,34 +110,24 @@ function ProfileViewCard({
                 >
                   {profile.kycStatus == "VERIFIED" ? (
                     <>
-                      KYC:{" "}
-                      <span className="hidden sm:inline-block">Completed</span>
-                      <span className="sm:hidden">Done</span>{" "}
+                      KYC: <span>Verified</span>{" "}
                       <FaCheckSquare className="text-green-600" />
                     </>
                   ) : profile.kycStatus == "UNDER_REVIEW" ? (
                     <>
                       <span className="text-black">KYC:</span>{" "}
-                      <span className="hidden sm:inline-block">
-                        Under Review
-                      </span>
-                      <span className="sm:hidden">Under Review</span>{" "}
+                      <span>Under Review</span>{" "}
                       <BiSolidFileFind size={20} className="text-yellow-600" />
                     </>
                   ) : profile.kycStatus == "PENDING" ? (
                     <>
                       <span className="text-black">KYC:</span>{" "}
-                      <span className="hidden sm:inline-block">
-                        Under Progress (Under Review)
-                      </span>
-                      <span className="sm:hidden">Under Progress</span>{" "}
+                      <span>{hasKycStarted ? "Pending" : "Not Started"}</span>{" "}
                       <BiSolidFileFind size={20} className="text-yellow-600" />
                     </>
                   ) : (
                     <>
-                      KYC: Not{" "}
-                      <span className="hidden sm:inline-block">Completed</span>
-                      <span className="sm:hidden">Done</span>
+                      KYC: <span>Not Started</span>
                       <IoWarning size={18} />
                     </>
                   )}
@@ -190,8 +183,8 @@ function ProfileViewCard({
           {profile.kycStatus == "PENDING" && (
             <Link href={`/dashboard/kyc`} className="block w-full md:w-auto [&>button]:w-full md:[&>button]:w-auto">
               <Button variant={`secondary`}>
-                Complete <span className="hidden md:inline-block">Your</span>{" "}
-                KYC
+                {hasKycStarted ? "Complete" : "Start"}{" "}
+                <span className="hidden md:inline-block">Your</span> KYC
                 <div className="w-3 text-3xl">
                   <RiArrowRightSFill className="w-4 h-5" size={33} />
                 </div>

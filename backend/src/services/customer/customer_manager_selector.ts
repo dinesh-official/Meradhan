@@ -25,6 +25,7 @@ export const fullCustomerProfileSelect: DataBaseSchema.CustomerProfileDataModelS
     whatsAppNo: true,
     VerifiedBy: true,
     verifyDate: true,
+    kycSubmitDate: true,
     id: true,
     isAPep: true,
     allowSEBITerms: true,

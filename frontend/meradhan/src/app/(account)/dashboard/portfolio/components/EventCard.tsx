@@ -46,7 +46,12 @@ export default function EventCard({ event }: Props) {
               <div className="flex justify-between gap-3">
                 <dt className="text-gray-500">Bond</dt>
                 <dd className="text-right font-medium text-black wrap-break-word">
-                  {event.bondName}
+                  <div>{event.bondName}</div>
+                  {event.isin && (
+                    <div className="text-[11px] text-gray-400 font-normal mt-0.5">
+                      {event.isin}
+                    </div>
+                  )}
                 </dd>
               </div>
               <div className="flex justify-between gap-3">
@@ -77,6 +82,11 @@ export default function EventCard({ event }: Props) {
       <div className="text-[14px] font-semibold text-black leading-snug pr-6">
         {event.bondName}
       </div>
+      {event.isin && (
+        <div className="text-[12px] text-gray-500 font-medium leading-none mt-1">
+          {event.isin}
+        </div>
+      )}
 
       <div className="text-[14px] mt-2">
         <strong>Amount: ₹ </strong>

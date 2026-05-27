@@ -22,6 +22,14 @@ bondRoute.get("/api/bonds/upcoming", (req, res) =>
   bondController.getUpcomingListedBonds(req, res)
 );
 
+bondRoute.get("/api/bonds/high-yield", (req, res) =>
+  bondController.getHighYieldListedBonds(req, res)
+);
+
+bondRoute.get("/api/bonds/zero-coupon", (req, res) =>
+  bondController.getZeroCouponListedBonds(req, res)
+);
+
 bondRoute.post("/api/bonds/listed/filter", (req, res) =>
   bondController.filterListedBonds(req, res)
 );

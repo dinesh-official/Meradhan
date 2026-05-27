@@ -92,7 +92,6 @@ export class PaymentService {
       receipt,
       method: "netbanking",
       bank_account: bank,
-
       notes: {
         "Member_ID": env.CBRICS_DOMAIN, //Member_ID 
         "Client_ID": customer?.panCard?.panCardNo || "", //Client_PAN 

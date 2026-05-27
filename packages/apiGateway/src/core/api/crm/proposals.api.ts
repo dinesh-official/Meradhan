@@ -6,6 +6,8 @@ import type {
   DeleteCrmSavedProposalResponse,
   GetCrmSavedProposalResponse,
   ListCrmSavedProposalsResponse,
+  MarkWaitingForApprovalResponse,
+  QueueProposalProcessingResponse,
 } from "./proposals.response";
 
 export class CrmSavedProposalsApi {
@@ -72,6 +74,30 @@ export class CrmSavedProposalsApi {
   ): Promise<AutoCreateRfqFromProposalResponse> {
     const { data } = await this.apiClient.post<AutoCreateRfqFromProposalResponse>(
       `/crm/proposals/${encodeURIComponent(String(id))}/auto-create-rfq`,
+      {},
+      config
+    );
+    return data;
+  }
+
+  async queueProcessing(
+    id: number,
+    config?: AxiosRequestConfig
+  ): Promise<QueueProposalProcessingResponse> {
+    const { data } = await this.apiClient.post<QueueProposalProcessingResponse>(
+      `/crm/proposals/${encodeURIComponent(String(id))}/process`,
+      {},
+      config
+    );
+    return data;
+  }
+
+  async markWaitingForApproval(
+    id: number,
+    config?: AxiosRequestConfig
+  ): Promise<MarkWaitingForApprovalResponse> {
+    const { data } = await this.apiClient.post<MarkWaitingForApprovalResponse>(
+      `/crm/proposals/${encodeURIComponent(String(id))}/waiting-for-approval`,
       {},
       config
     );
