@@ -3,6 +3,7 @@ import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import apiGateway, { BondDetailResponse } from "@root/apiGateway";
 import { redirect } from "next/navigation";
 import { BsInfoCircleFill } from "react-icons/bs";
+import { PiCurrencyInrBold } from "react-icons/pi";
 import CopyIsin from "./_comparison/CopyIsin";
 import DeleteCompare from "./_comparison/DeleteCampare";
 import ViewPort from "@/global/components/wrapper/ViewPort";
@@ -59,9 +60,8 @@ async function page({
     noBorder?: boolean;
   }) => (
     <div
-      className={`w-full flex items-center h-full ${
-        noBorder ? "" : "border-t border-gray-200"
-      }`}
+      className={`w-full flex items-center h-full ${noBorder ? "" : "border-t border-gray-200"
+        }`}
     >
       <div className="p-3 w-2/12">
         <span className="flex items-center gap-3">
@@ -156,9 +156,12 @@ async function page({
               <BondRow
                 label="Yield Offered"
                 hasInfoIcon
-                values={bondsData.map((bond) => (
-                  // <b>{parseFloat(bond?.coupon + '') + 1.37 /* example math */} %</b>
-                  <p key={bond.isin}>Coming Soon</p>
+                values={bondsData.map((bond, i) => (
+                  <span key={"yield" + i} className="font-medium">
+                    {bond?.yield !== null && bond?.yield !== undefined
+                      ? `${Number(bond?.yield).toFixed(2)}%`
+                      : "Coming Soon"}
+                  </span>
                 ))}
               />
               {/* Price Offered */}
@@ -169,7 +172,7 @@ async function page({
                   (val: BondDetailResponse["responseData"], i) => (
                     <span key={"price" + i}>
                       <i className="text-base fa-solid fa-indian-rupee-sign"></i>{" "}
-                      {val?.issuePrice?.toFixed(2)}
+                      {val?.issuePrice?.toFixed(4)}
                     </span>
                   )
                 )}
@@ -194,7 +197,7 @@ async function page({
                 label="Coupon"
                 values={bondsData.map((bond, i) => (
                   <span key={"coupon" + i}>
-                    {bond?.couponRate.toFixed(4)} % P.A
+                    {bond?.couponRate.toFixed(2)} % P.A
                   </span>
                 ))}
               />
@@ -203,8 +206,8 @@ async function page({
               <BondRow
                 label="Face Value"
                 values={bondsData.map((bond) => (
-                  <span key={bond?.isin}>
-                    <i className="text-base fa-solid fa-indian-rupee-sign"></i>{" "}
+                  <span key={bond?.isin} className="flex items-center">
+                    <PiCurrencyInrBold size={16} className="mr-[2px]" />
                     {bond?.faceValue?.toLocaleString("en-IN", {
                       minimumFractionDigits: 2,
                     })}
@@ -241,7 +244,7 @@ async function page({
                   <span key={"maturityDate" + i}>
                     {dateTimeUtils.formatDateTime(
                       bond?.redemptionDate,
-                      "DD/MM/YYYY"
+                      "DD MMM YYYY"
                     )}
                   </span>
                 ))}
@@ -302,7 +305,7 @@ async function page({
                   <span key={"issueDate" + i}>
                     {dateTimeUtils.formatDateTime(
                       bond?.dateOfAllotment,
-                      "DD/MM/YYYY"
+                      "DD MMM YYYY"
                     )}
                   </span>
                 ))}

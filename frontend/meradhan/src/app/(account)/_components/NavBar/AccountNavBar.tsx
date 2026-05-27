@@ -30,6 +30,8 @@ function AccountNavBar({
   navActions?: ReactNode;
 }) {
   const { setSession } = userSessionStore();
+  const hasKycStarted =
+    session?.kycStatus == "PENDING" && session.kycProgress?.hasStarted;
 
   useEffect(() => {
     setSession(session);
@@ -78,10 +80,11 @@ function AccountNavBar({
               <Link href={`/dashboard/kyc`}>
                 <Button
                   variant="secondaryLight"
-                  className="gap-3 w-24"
+                  className="gap-3"
                   aria-label="KYC Verification"
                 >
-                  <FaUser aria-hidden="true" /> KYC
+                  <FaUser aria-hidden="true" />{" "}
+                  {hasKycStarted ? "KYC: Pending" : "KYC: Not Started"}
                 </Button>
               </Link>
             )}

@@ -45,6 +45,9 @@ async function DashBoardPage() {
   const id = cookie.get("userId")?.value || "";
   const profileData = await customerApi.customerInfoById(Number(id));
   const kycStatus = profileData.data.responseData.kycStatus;
+  const hasKycStarted =
+    kycStatus == "PENDING" &&
+    profileData.data.responseData.kycProgress?.hasStarted;
 
   const userIdNum = Number(id);
   const hasSession = Number.isFinite(userIdNum) && userIdNum > 0;
@@ -113,13 +116,11 @@ async function DashBoardPage() {
     <AccountViewPort
       title={<NameTitleView />}
       navActions={
-        portfolioEmpty ? (
-          <Link href="/bonds">
-            <Button variant="outline" size="sm">
-              Explore All Bonds
-            </Button>
-          </Link>
-        ) : undefined
+        <Link href="/bonds">
+          <Button variant="outline" size="sm">
+            Explore All Bonds
+          </Button>
+        </Link>
       }
     >
       <div className="flex flex-col gap-5">
@@ -170,17 +171,19 @@ async function DashBoardPage() {
           >
             {kycStatus == "PENDING" && (
               <div className="flex items-end flex-row justify-between gap-2">
-                <p className="text-3xl font-medium">Not Done</p>
+                <p className="text-3xl font-medium">
+                  {hasKycStarted ? "Pending" : "Not Started"}
+                </p>
                 <Link href={`/dashboard/kyc`}>
                   <Button variant="secondary">
-                    Start KYC
+                    {hasKycStarted ? "Complete KYC" : "Start KYC"}
                   </Button>
                 </Link>
               </div>
             )}
             {kycStatus == "RE_KYC" && (
               <div className="flex items-end flex-row justify-between gap-2">
-                <p className="text-3xl font-medium">Not Done</p>
+                <p className="text-3xl font-medium">Update Required</p>
                 <Link href={`/dashboard/kyc`}>
                   <Button variant="secondary">
                     Re KYC
@@ -189,7 +192,7 @@ async function DashBoardPage() {
               </div>
             )}
             {kycStatus == "VERIFIED" && <div className="flex items-end flex-row justify-between gap-2">
-              <p className="text-3xl font-medium text-primary">Healthy</p>
+              <p className="text-3xl font-medium text-primary">Verified</p>
             </div>}
             {kycStatus == "UNDER_REVIEW" && <div className="flex items-end flex-row justify-between gap-2">
               <p className="text-3xl font-medium">Under Review</p>

@@ -68,6 +68,24 @@ export class CrmSavedProposalsController {
     });
   };
 
+  queueProcessing = async (req: Request, res: Response) => {
+    const params = z.object({ id: z.string().min(1) }).parse(req.params);
+    const result = await this.service.queueProcessing(Number(params.id));
+    return res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: result,
+    });
+  };
+
+  markWaitingForApproval = async (req: Request, res: Response) => {
+    const params = z.object({ id: z.string().min(1) }).parse(req.params);
+    const result = await this.service.markWaitingForApproval(Number(params.id));
+    return res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: result,
+    });
+  };
+
   autoCreateRfqAndSync = async (req: Request, res: Response) => {
     try {
       const userId = Number(req.session?.id);

@@ -45,12 +45,22 @@ export class CustomerProfileRepo {
         if (!user) {
             throw new AppError("User Not Found", { code: "USER_NOT_FOUND", statusCode: 404 })
         }
+        const kycFlow = await db.dataBase.kYC_FLOW.findFirst({
+            where: { userID: customerId },
+            select: { step: true, complete: true },
+        });
+        const kycProgress = {
+            hasStarted: Boolean(kycFlow && !kycFlow.complete),
+            step: kycFlow?.step ?? 0,
+            complete: kycFlow?.complete ?? false,
+        };
         // RE_KYC: show last completed KYC data (saved profile); VERIFIED: same
         if (user.kycStatus === "VERIFIED" || user.kycStatus === "RE_KYC") {
-            return user;
+            return { ...user, kycProgress };
         }
         const kycData = new CustomerKycManager();
-        return await kycData.getUserKycFlowDataWithFormattedFullProfile(user.id);
+        const profile = await kycData.getUserKycFlowDataWithFormattedFullProfile(user.id);
+        return { ...profile, kycProgress: profile.kycProgress ?? kycProgress };
     }
 
     async getCustomerByParticipantCode(participantCode: string) {

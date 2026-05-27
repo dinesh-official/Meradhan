@@ -5,6 +5,8 @@ import { UniversalTable } from "@/global/elements/table/UniversalTable";
 import { CustomerProfile } from "@root/apiGateway";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import CustomerTableActions from "./actions/CustomerTableActions";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { CheckCircle2 } from "lucide-react";
 
 interface UsersTableProps {
   data: CustomerProfile[];
@@ -22,34 +24,50 @@ function CustomerTable({ data, pageSize = 10, isLoading }: UsersTableProps) {
         {
           key: "name",
           label: "Name",
-          cell: (row) => (
-            <div className="flex flex-col">
-              <span className="font-medium">
-                {[
-                  row.firstName?.trim(),
-                  row.middleName?.trim(),
-                  row.lastName?.trim(),
-                ]
-                  .filter(Boolean) // remove undefined or empty names
-                  .join(" ")}
-              </span>
-
-              {row.userName && (
-                <span className="text-muted-foreground text-xs">
-                  @{row.userName}
-                </span>
-              )}
-            </div>
-          ),
+          cell: (row) => {
+            const isActive = row.utility?.accountStatus === "ACTIVE";
+            return (
+              <div className="flex items-center gap-2">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span
+                      className={`mt-0.5 h-2 w-2 shrink-0 rounded-full ${isActive ? "bg-emerald-500" : "bg-red-500"}`}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent className="text-xs">
+                    {row.utility?.accountStatus ?? "Unknown"}
+                  </TooltipContent>
+                </Tooltip>
+                <div className="flex flex-col">
+                  <span className="font-medium">
+                    {[row.firstName?.trim(), row.middleName?.trim(), row.lastName?.trim()]
+                      .filter(Boolean)
+                      .join(" ")}
+                  </span>
+                  {row.userName && (
+                    <span className="text-muted-foreground text-xs">@{row.userName}</span>
+                  )}
+                </div>
+              </div>
+            );
+          },
         },
         {
           key: "email",
           label: "Email & Phone",
           cell: (row) => (
-            <div className="flex flex-col">
-              <span className="lowercase">{row.emailAddress}</span>
-              <span className="text-muted-foreground text-xs">
-                {row.phoneNo ?? "-"}
+            <div className="flex flex-col gap-0.5">
+              <span className="flex items-center gap-1 text-sm lowercase">
+                {row.emailAddress}
+                {row.utility?.isEmailVerified && (
+                  <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                )}
+              </span>
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                {row.phoneNo ?? "—"}
+                {row.phoneNo && row.utility?.isPhoneVerified && (
+                  <CheckCircle2 className="h-3 w-3 shrink-0 text-emerald-500" />
+                )}
               </span>
             </div>
           ),
@@ -73,7 +91,23 @@ function CustomerTable({ data, pageSize = 10, isLoading }: UsersTableProps) {
           key: "status",
           label: "Status",
           cell: (row) => (
-            <StatusBadge value={row.utility?.accountStatus ?? "UNKNOWN"} />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="cursor-default">
+                  <StatusBadge value={row.kycStatus} />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent className="space-y-1 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground">KYC</span>
+                  <span className="font-medium">{row.kycStatus || "—"}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground">KRA</span>
+                  <span className="font-medium">{row.kraStatus || "Not Started"}</span>
+                </div>
+              </TooltipContent>
+            </Tooltip>
           ),
         },
         // {

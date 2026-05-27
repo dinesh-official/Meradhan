@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import React from "react";
+import { PiCurrencyInrBold } from "react-icons/pi";
 import { useCompareSelectStore } from "../_hooks/useCompareSelectStore";
 
 interface CompareItem {
@@ -100,14 +101,17 @@ const CompareViewCard: React.FC<CompareViewCardProps> = ({
       </h2>
 
       {/* Info Grid */}
-      <div className="grid grid-cols-3 text-gray-700 text-sm">
+      <div className="grid grid-cols-3 text-gray-700 text-xs">
         <div>
           <p className="text-gray-600">Issue Price</p>
           <p className="font-medium">{issuePrice}</p>
         </div>
         <div>
-          <p className="text-gray-600">Face Value</p>
-          <p className="font-medium">{faceValue}</p>
+          <p className="text-gray-500">Face Value</p>
+          <p className="flex items-center font-semibold text-gray-800">
+            <PiCurrencyInrBold size={13} className="mr-[2px]" />
+            {Number(faceValue).toLocaleString("en-IN")}
+          </p>
         </div>
         <div>
           <p className="text-gray-600">Coupon</p>
