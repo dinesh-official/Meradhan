@@ -34,10 +34,8 @@ const TAB_DEFS: Array<{ value: TabValue; label: string }> = [
   { value: "min-10000", label: "Minimum ₹10,000" },
 ];
 
-function sortBuyNowFirst(bonds: BondDetailsResponse[]): BondDetailsResponse[] {
-  return bonds
-    .slice()
-    .sort((a, b) => (canShowBuyNow(b) ? 1 : 0) - (canShowBuyNow(a) ? 1 : 0));
+function onlySellable(bonds: BondDetailsResponse[]): BondDetailsResponse[] {
+  return bonds.filter(canShowBuyNow);
 }
 
 const responsive = {
@@ -88,27 +86,25 @@ function LatestBondReleases({
   highYield,
   zeroCoupon,
 }: LatestBondReleasesProps) {
-  const allBonds = [...latest, ...highYield, ...zeroCoupon].filter(
-    (bond, index, self) =>
-      self.findIndex((b) => b.isin === bond.isin) === index,
+  const sellableAll = onlySellable(
+    [...latest, ...highYield, ...zeroCoupon].filter(
+      (bond, index, self) =>
+        self.findIndex((b) => b.isin === bond.isin) === index,
+    ),
   );
 
   const bondsByTab: Record<TabValue, BondDetailsResponse[]> = {
-    latest: sortBuyNowFirst(latest),
-    "high-yield": sortBuyNowFirst(highYield),
-    "zero-coupon": sortBuyNowFirst(zeroCoupon),
-    aaa: sortBuyNowFirst(
-      allBonds.filter((b) => b.creditRating?.includes("AAA")),
+    latest: onlySellable(latest),
+    "high-yield": onlySellable(highYield),
+    "zero-coupon": onlySellable(zeroCoupon),
+    aaa: sellableAll.filter((b) => b.creditRating?.includes("AAA")),
+    secured: sellableAll.filter((b) =>
+      b.natureOfInstrument?.toLowerCase().includes("secured"),
     ),
-    secured: sortBuyNowFirst(
-      allBonds.filter((b) =>
-        b.natureOfInstrument?.toLowerCase().includes("secured"),
-      ),
+    "monthly-income": sellableAll.filter(
+      (b) => b.interestPaymentFrequency === "MONTHLY",
     ),
-    "monthly-income": sortBuyNowFirst(
-      allBonds.filter((b) => b.interestPaymentFrequency === "MONTHLY"),
-    ),
-    "min-10000": sortBuyNowFirst(allBonds.filter((b) => b.faceValue >= 10000)),
+    "min-10000": sellableAll.filter((b) => b.faceValue === 10000),
   };
 
   const visibleTabs = TAB_DEFS.filter(
