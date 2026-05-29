@@ -18,6 +18,7 @@ export const generateMetadata = async () => {
 export default async function HomePage() {
   const apiCaller = new apiGateway.bondsApi.BondsApi(apiServerCaller);
 
+
   const [latestRes, highYieldRes, zeroCouponRes] = await Promise.all([
     apiCaller.getLatestBonds(100),
     apiCaller.getHighYieldBonds(100),
