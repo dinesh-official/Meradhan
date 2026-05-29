@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BondDetailsResponse } from "@root/apiGateway";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
+import { canShowBuyNow } from "@/global/utils/bondPurchaseEligibility";
 
 type LatestBondReleasesProps = {
   latest: BondDetailsResponse[];
@@ -104,7 +105,9 @@ function LatestBondReleases({
     "monthly-income": allBonds.filter(
       (b) => b.interestPaymentFrequency === "MONTHLY",
     ),
-    "min-10000": allBonds.filter((b) => b.faceValue === 10000),
+    "min-10000": allBonds.filter(
+      (b) => b.faceValue == 10000.00
+    ),
   };
 
   const visibleTabs = TAB_DEFS.filter(

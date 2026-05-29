@@ -94,7 +94,6 @@ export function getBondPurchaseEligibility(
   if (!isPresentDateLike(bond.dateOfAllotment)) {
     missing.push("Issue / allotment date");
   }
-  console.log(missing);
 
   return {
     eligible: missing.length === 0,
