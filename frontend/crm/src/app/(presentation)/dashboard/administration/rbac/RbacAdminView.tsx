@@ -12,11 +12,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
@@ -119,48 +114,57 @@ function ActionPolicyEditor({
   };
 
   return (
-    <Popover open={open} onOpenChange={handleOpenChange}>
-      <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8">
-          <Pencil className="h-4 w-4" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-80 p-4" align="end" side="left">
-        <p className="font-medium text-sm mb-3">{action.label}</p>
-        <div className="space-y-2 max-h-64 overflow-y-auto">
-          {roles.map((role) => (
-            <label
-              key={role.key}
-              className="flex items-center gap-2 text-sm cursor-pointer"
-            >
-              <Checkbox
-                checked={role.isSuperAdmin ? true : draft[role.key] ?? false}
-                disabled={role.isSuperAdmin}
-                onCheckedChange={(checked) => {
-                  if (role.isSuperAdmin) return;
-                  setDraft((prev) => ({
-                    ...prev,
-                    [role.key]: checked === true,
-                  }));
-                }}
-              />
-              <span className={role.isSuperAdmin ? "text-muted-foreground" : ""}>
-                {role.label}
-                {role.isSuperAdmin ? " (always on)" : ""}
-              </span>
-            </label>
-          ))}
-        </div>
-        <div className="flex justify-end gap-2 mt-4">
-          <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
-            Cancel
-          </Button>
-          <Button size="sm" onClick={save} disabled={saving}>
-            {saving ? "Saving…" : "Save"}
-          </Button>
-        </div>
-      </PopoverContent>
-    </Popover>
+    <>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8"
+        onClick={() => handleOpenChange(true)}
+        aria-label={`Edit permissions for ${action.label}`}
+      >
+        <Pencil className="h-4 w-4" />
+      </Button>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{action.label}</DialogTitle>
+          </DialogHeader>
+          <p className="font-mono text-xs text-muted-foreground">{action.key}</p>
+          <div className="space-y-2 max-h-64 overflow-y-auto py-1">
+            {roles.map((role) => (
+              <label
+                key={role.key}
+                className="flex items-center gap-2 text-sm cursor-pointer"
+              >
+                <Checkbox
+                  checked={role.isSuperAdmin ? true : draft[role.key] ?? false}
+                  disabled={role.isSuperAdmin}
+                  onCheckedChange={(checked) => {
+                    if (role.isSuperAdmin) return;
+                    setDraft((prev) => ({
+                      ...prev,
+                      [role.key]: checked === true,
+                    }));
+                  }}
+                />
+                <span className={role.isSuperAdmin ? "text-muted-foreground" : ""}>
+                  {role.label}
+                  {role.isSuperAdmin ? " (always on)" : ""}
+                </span>
+              </label>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={save} disabled={saving}>
+              {saving ? "Saving…" : "Save"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
@@ -239,7 +243,7 @@ function PermissionsPanel() {
       {actionsQuery.isLoading ? (
         <Skeleton className="h-48 w-full" />
       ) : (
-        <div className="border rounded-lg overflow-hidden">
+        <div className="border rounded-lg overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-muted/50">
               <tr>
@@ -380,7 +384,7 @@ function RolesPanel() {
       {rolesQuery.isLoading ? (
         <Skeleton className="h-48 w-full" />
       ) : (
-        <div className="border rounded-lg overflow-hidden">
+        <div className="border rounded-lg overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-muted/50">
               <tr>
