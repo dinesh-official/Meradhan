@@ -10,7 +10,7 @@ import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import { encodeId, genMediaUrl } from "@/global/utils/url.utils";
 import apiGateway from "@root/apiGateway";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Building2, IdCardIcon, NotebookPen, Loader2, Paperclip, Pencil, Trash2 } from "lucide-react";
+import { Building2, FileDown, IdCardIcon, NotebookPen, Loader2, Paperclip, Pencil, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -48,6 +48,17 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useCorporateKycFileUpload } from "../../../[id]/corporate-kyc/_hooks/useCorporateKycFileUpload";
+
+/** Mirrors backend `corporateKycPdfFilename` in customer.service.ts so the saved file matches a direct API download. */
+function buildCorporateKycPdfFilename(customerId: number, entityName: string | undefined): string {
+  const base = (entityName ?? "corporate")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .slice(0, 80);
+  return `corporate-kyc-${customerId}-${base || "entity"}.pdf`;
+}
 
 export default function CorporateProfileAndKycView({
   profileId,
@@ -373,7 +384,35 @@ export default function CorporateProfileAndKycView({
     );
   }
 
-  // Print / download actions intentionally hidden for now.
+  const handleGeneratePdf = async () => {
+    if (!isCorporate) {
+      toast.error("PDF is only available for corporate customers.");
+      return;
+    }
+    if (!corporateKyc) {
+      toast.error("Corporate KYC data does not exist. Please save corporate KYC first.");
+      return;
+    }
+    setKycPdfLoading(true);
+    try {
+      const blob = await api.getCorporateKycPdf(profileId);
+      const filename = buildCorporateKycPdfFilename(profileId, corporateKyc?.entityName);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast.success("Corporate KYC PDF downloaded.");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to generate corporate KYC PDF";
+      toast.error(message);
+    } finally {
+      setKycPdfLoading(false);
+    }
+  };
 
   const printDate = new Date().toLocaleDateString("en-IN", {
     day: "2-digit",
@@ -472,6 +511,23 @@ export default function CorporateProfileAndKycView({
                   </Button>
                 </AllowOnlyView>
               )}
+
+              {isCorporate && corporateKyc ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => void handleGeneratePdf()}
+                  disabled={kycPdfLoading}
+                  title="Generate the corporate KYC PDF"
+                >
+                  {kycPdfLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <FileDown className="h-4 w-4" />
+                  )}
+                  {kycPdfLoading ? "Generating..." : "Generate PDF"}
+                </Button>
+              ) : null}
 
               {isCorporate && (
                 <AllowOnlyView permissions={["edit:customer"]}>
