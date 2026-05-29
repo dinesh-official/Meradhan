@@ -33,9 +33,9 @@ function CorporateKycPdfPage6Content({ data = {} }: { data?: CorporateKycPdfData
 
       <Text style={{ fontSize: 8, fontWeight: 600, marginTop: 8 }}>Details of Applicant</Text>
       <View style={{ marginTop: 3 }}>
-        <InputField title="PAN:*" value={pdfStr(data.pan)} className="" />
+        <InputField title="PAN:*" value={pdfStr(data.pan)} className="w-[12%]" />
         <View style={{ marginTop: 2 }}>
-          <InputField title="Name (same as per PAN):*" value={pdfStr(data.entityName)} className="" />
+          <InputField title="Name (same as per PAN):*" value={pdfStr(data.entityName)} className="w-[35%]" />
         </View>
       </View>
 
@@ -46,52 +46,52 @@ function CorporateKycPdfPage6Content({ data = {} }: { data?: CorporateKycPdfData
         const b = banks[idx];
         const primary = b?.isPrimary;
         return (
-        <View key={n} style={{ marginTop: n === 1 ? 4 : 6 }}>
-          <View style={tw("flex flex-row flex-wrap items-end gap-2")}>
-            <Text style={{ fontSize: 8, fontWeight: 600 }}>{n}. Is it a Primary account?:</Text>
-            <CheckBoxRow label="Yes" checked={primary === true} />
-            <CheckBoxRow label="No" checked={primary === false} />
-          </View>
-          <View style={{ marginTop: 2 }}>
-            <InputField title="IFSC Code:" value={pdfStr(b?.ifsc)} className="" />
-          </View>
-          <View style={tw("flex flex-row gap-2 mt-1 flex-wrap")}>
-            <View style={tw("w-[48%]")}>
-              <InputField title="Name as per Bank:" value={pdfStr(b?.nameAsPerBank)} className="" />
+          <View key={n} style={{ marginTop: n === 1 ? 4 : 6 }}>
+            <View style={tw("flex flex-row flex-wrap items-end gap-2")}>
+              <Text style={{ fontSize: 8, fontWeight: 600 }}>{n}. Is it a Primary account?:</Text>
+              <CheckBoxRow label="Yes" checked={primary === true} />
+              <CheckBoxRow label="No" checked={primary === false} />
             </View>
-            <View style={tw("w-[48%]")}>
-              <InputField title="Name as per PAN:" value={pdfStr(b?.nameAsPerPan)} className="" />
+            <View style={{ marginTop: 2 }}>
+              <InputField title="IFSC Code:" value={pdfStr(b?.ifsc)} className="w-[12%]" />
+            </View>
+            <View style={tw("flex flex-row gap-2 mt-1 flex-wrap")}>
+              <View style={tw("w-[48%]")}>
+                <InputField title="Name as per Bank:" value={pdfStr(b?.nameAsPerBank)} className="w-[55%]" />
+              </View>
+              <View style={tw("w-[48%]")}>
+                <InputField title="Name as per PAN:" value={pdfStr(b?.nameAsPerPan)} className="w-[52%]" />
+              </View>
+            </View>
+            <View style={{ marginTop: 2 }}>
+              <InputField title="Branch:" value={pdfStr(b?.branch)} className="w-[10%]" />
+            </View>
+            <View style={tw("flex flex-row gap-2 mt-1 flex-wrap")}>
+              <View style={tw("w-[48%]")}>
+                <InputField title="Account Type:" value={pdfStr(b?.accountType)} className="w-[40%]" />
+              </View>
+              <View style={tw("w-[48%]")}>
+                <InputField title="Account Number:" value={pdfStr(b?.accountNumber)} className="w-[50%]" />
+              </View>
+            </View>
+            <View style={tw("flex flex-row gap-2 mt-1 flex-wrap")}>
+              <View style={tw("w-[48%]")}>
+                <InputField title="Bank Name:" value={pdfStr(b?.bankName)} className="w-[35%]" />
+              </View>
+              <View style={tw("w-[48%]")}>
+                <InputField title="MICR Code:" value={pdfStr(b?.micr)} className="w-[35%]" />
+              </View>
             </View>
           </View>
-          <View style={{ marginTop: 2 }}>
-            <InputField title="Branch:" value={pdfStr(b?.branch)} className="" />
-          </View>
-          <View style={tw("flex flex-row gap-2 mt-1 flex-wrap")}>
-            <View style={tw("w-[48%]")}>
-              <InputField title="Account Type:" value={pdfStr(b?.accountType)} className="" />
-            </View>
-            <View style={tw("w-[48%]")}>
-              <InputField title="Account Number:" value={pdfStr(b?.accountNumber)} className="" />
-            </View>
-          </View>
-          <View style={tw("flex flex-row gap-2 mt-1 flex-wrap")}>
-            <View style={tw("w-[48%]")}>
-              <InputField title="Bank Name:" value={pdfStr(b?.bankName)} className="" />
-            </View>
-            <View style={tw("w-[48%]")}>
-              <InputField title="MICR Code:" value={pdfStr(b?.micr)} className="" />
-            </View>
-          </View>
-        </View>
         );
       })}
 
       <View style={tw("flex flex-row gap-3 mt-3 flex-wrap")}>
         <View style={tw("w-[45%]")}>
-          <InputField title="Place:" value={pdfStr(data.declarationPlace)} className="" />
+          <InputField title="Place:" value={pdfStr(data.declarationPlace)} className="w-[18%]" />
         </View>
         <View style={tw("w-[45%]")}>
-          <InputField title="Date: DD / MM / YYYY" value={pdfStr(data.declarationDate)} className="" />
+          <InputField title="Date: DD / MM / YYYY" value={pdfStr(data.declarationDate)} className="w-[68%]" />
         </View>
       </View>
 

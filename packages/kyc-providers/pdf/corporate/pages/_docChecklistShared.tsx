@@ -3,21 +3,22 @@ import { Fragment, type ReactNode } from "react";
 
 const navy = "#002C59";
 
-// Tight sizing so each entire doc-checklist fits on a single A4 page.
-const FONT_BODY = 7.2;
-const FONT_SECTION = 8;
+// Tight sizing so each entire doc-checklist (including the densest one — Corporate)
+// fits on a single A4 page.
+const FONT_BODY = 7;
+const FONT_SECTION = 7.8;
 const FONT_HEADER = 9;
-const LH = 1.25;
+const LH = 1.15;
 
 export function ChecklistHeader({ title }: { title: string }) {
   return (
     <View
       style={{
         backgroundColor: navy,
-        paddingVertical: 5,
+        paddingVertical: 4,
         paddingHorizontal: 10,
         borderRadius: 3,
-        marginBottom: 5,
+        marginBottom: 4,
       }}
     >
       <Text style={{ fontSize: FONT_HEADER, color: "#ffffff", fontWeight: 700 }}>{title}</Text>
@@ -187,7 +188,7 @@ export function CommonRelatedPersonBlock() {
 
 export function CommonOtherEntityBlock() {
   return (
-    <View style={{ marginTop: 5 }}>
+    <View style={{ marginTop: 3 }}>
       <Text style={{ fontSize: FONT_SECTION, fontWeight: 700, color: navy }}>Unincorporated Association or a Body of Individuals</Text>
       <BulletList
         items={[
@@ -195,7 +196,7 @@ export function CommonOtherEntityBlock() {
           "Resolution of managing Body and power of Attorney granted to transact business on its behalf.",
         ]}
       />
-      <Text style={{ fontSize: FONT_SECTION, fontWeight: 700, color: navy, marginTop: 3 }}>Registered Society</Text>
+      <Text style={{ fontSize: FONT_SECTION, fontWeight: 700, color: navy, marginTop: 2 }}>Registered Society</Text>
       <BulletList
         items={[
           "Copy of Registration Certificate under Society Registration Act.",

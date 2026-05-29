@@ -106,7 +106,7 @@ function LatestBondReleases({
       (b) => b.interestPaymentFrequency === "MONTHLY",
     ),
     "min-10000": allBonds.filter(
-      (b) => b.faceValue == 10000.00
+      (b) => b.faceValue == 10000
     ),
   };
 
