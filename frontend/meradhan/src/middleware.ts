@@ -46,6 +46,7 @@ export async function middleware(request: NextRequest) {
     const userId = cookieStore.get("userId")?.value;
     if (token && userId) {
       try {
+
         // Attempt session restore via API
         await fetchUserSession(token, userId);
         const response = NextResponse.redirect(new URL("/", origin), {
