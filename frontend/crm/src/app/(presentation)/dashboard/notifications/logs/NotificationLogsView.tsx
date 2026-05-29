@@ -20,8 +20,7 @@ import {
 } from "@/components/ui/tooltip";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
-import useAppCookie from "@/hooks/useAppCookie.hook";
-import { canAccessNotifications } from "@/global/utils/role.utils";
+import { useNotificationAccess } from "@/global/elements/permissions/AllowOnlyView";
 import apiGateway from "@root/apiGateway";
 import { format } from "date-fns";
 import {
@@ -206,7 +205,7 @@ function ExpandedRecipients({ logId }: { logId: number }) {
 const PAGE_SIZE = 20;
 
 export default function NotificationLogsView() {
-  const { cookies } = useAppCookie();
+  const notify = useNotificationAccess();
   const [mounted, setMounted] = useState(false);
 
   const [logs, setLogs] = useState<BatchLog[]>([]);
@@ -256,7 +255,7 @@ export default function NotificationLogsView() {
   };
 
   if (!mounted) return null;
-  if (!canAccessNotifications(cookies.role)) {
+  if (!notify.canViewLogs()) {
     return (
       <div className="p-8 text-center text-destructive">
         You do not have access to notifications.

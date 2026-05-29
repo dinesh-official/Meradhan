@@ -449,7 +449,7 @@ export default function CorporateProfileAndKycView({
           actions={
             <div className="flex w-full flex-wrap items-center justify-start gap-2 md:w-auto md:justify-end">
               {!isCorporate && (
-                <AllowOnlyView permissions={["view:customerkyc"]}>
+                <AllowOnlyView actionKey="customers.kyc.view">
                   <Button variant="outline" asChild>
                     <Link href={`/dashboard/customers/view/${encodedId}/kyc`}>
                       <IdCardIcon className="h-4 w-4" /> View KYC Data
@@ -463,7 +463,7 @@ export default function CorporateProfileAndKycView({
                 </Link>
               </Button>
               {isCorporate && (
-                <AllowOnlyView permissions={["edit:customer"]}>
+                <AllowOnlyView actionKey="customers.edit">
                   <Button variant="outline" asChild>
                     <Link href={`/dashboard/customers/${encodedId}/corporate-kyc`}>
                       <Pencil className="h-4 w-4" />
@@ -474,7 +474,7 @@ export default function CorporateProfileAndKycView({
               )}
 
               {isCorporate && (
-                <AllowOnlyView permissions={["edit:customer"]}>
+                <AllowOnlyView actionKey="customers.edit">
                   <Sheet open={attachmentsOpen} onOpenChange={setAttachmentsOpen}>
                     <SheetTrigger asChild>
                       <Button
@@ -601,7 +601,7 @@ export default function CorporateProfileAndKycView({
               )}
 
               {isCorporate && (
-                <AllowOnlyView permissions={["edit:customer"]}>
+                <AllowOnlyView actionKey="customers.edit">
                   <AlertDialog open={triggerKraOpen} onOpenChange={setTriggerKraOpen}>
                     <AlertDialogTrigger asChild>
                       <Button
@@ -699,7 +699,7 @@ export default function CorporateProfileAndKycView({
             <Card>
               <CardContent className="py-8 text-center text-muted-foreground">
                 <p>No corporate KYC data has been added for this customer yet.</p>
-                <AllowOnlyView permissions={["edit:customer"]}>
+                <AllowOnlyView actionKey="customers.edit">
                   <Button asChild variant="link" className="mt-2">
                     <Link href={`/dashboard/customers/${encodedId}/corporate-kyc`}>
                       Add Corporate KYC

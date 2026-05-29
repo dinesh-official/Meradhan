@@ -11,6 +11,7 @@ declare global {
         email: string;
         token: string;
         role: "ADMIN" | "SUPER_ADMIN" | "VIEWER" | "SALES" | "SUPPORT" | "RELATIONSHIP_MANAGER";
+        impersonatedBy?: number;
       };
       customer?: {
         id: number;

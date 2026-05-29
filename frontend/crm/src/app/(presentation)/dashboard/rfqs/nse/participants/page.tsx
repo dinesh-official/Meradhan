@@ -5,13 +5,14 @@ import ParticipantsView from "./ParticipantsView";
 
 function page() {
   return (
-    <Workspace>
-      <PageInfoBar
-        title="Rfq Participants"
-        description="manage rfq participants"
-      />
-      <ParticipantsView />
-    </Workspace>
+    <Workspace actionKey="rfqs.participants.view">
+      
+        <PageInfoBar
+          title="Rfq Participants"
+          description="manage rfq participants"
+        />
+        <ParticipantsView />
+      </Workspace>
   );
 }
 

@@ -4,9 +4,10 @@ import DealAmendView from "./DealAmendView";
 
 function page() {
   return (
-    <Workspace>
-      <DealAmendView />
-    </Workspace>
+    <Workspace actionKey="rfqs.deals.view">
+      
+        <DealAmendView />
+      </Workspace>
   );
 }
 

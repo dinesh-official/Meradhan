@@ -4,9 +4,10 @@ import SendNotificationView from "./SendNotificationView";
 
 function Page() {
   return (
-    <Workspace>
-      <SendNotificationView />
-    </Workspace>
+    <Workspace actionKey="notifications.send">
+      
+        <SendNotificationView />
+      </Workspace>
   );
 }
 

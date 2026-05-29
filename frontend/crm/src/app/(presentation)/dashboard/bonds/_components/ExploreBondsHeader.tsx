@@ -70,7 +70,7 @@ function ExploreBondsHeader({
               )}
               {desc && <p>{desc}</p>}
             </div>
-            <AllowOnlyView permissions={['create:bonds']} >
+            <AllowOnlyView actionKey="bonds.create" >
               <Link href="/dashboard/bonds/create">
                 <Button className="gap-2">
                   <Plus size={16} />

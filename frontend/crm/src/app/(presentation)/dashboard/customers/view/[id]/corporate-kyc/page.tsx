@@ -1,4 +1,3 @@
-import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 import Workspace from "@/global/elements/nav-sidebar/WorkSpace";
 import { decodeId } from "@/global/utils/url.utils";
 import CorporateProfileAndKycView from "./CorporateProfileAndKycView";
@@ -14,11 +13,10 @@ async function CorporateViewPage({
   const id = decodeId(encodedId);
 
   return (
-    <AllowOnlyView permissions={["view:customerkyc"]}>
-      <Workspace>
+    <Workspace actionKey="customers.kyc.view">
+      
         <CorporateProfileAndKycView profileId={id} />
       </Workspace>
-    </AllowOnlyView>
   );
 }
 

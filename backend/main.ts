@@ -31,6 +31,7 @@ import rfqMasterRouter from "@resource/crm/refq/nse/rfq_master/rfq_master.routes
 import trashRoutes from "@resource/crm/trash/trash.routes";
 import crmUsersRoutes from "@resource/crm/users/crmusers.routes";
 import notificationRoutes from "@resource/crm/notifications/notification.routes";
+import rbacRoutes from "@resource/crm/rbac/rbac.routes";
 import razorpayRouteAccountsRoutes from "@resource/crm/razorpay-route-accounts/razorpay_route_accounts.routes";
 import razorpayRouteStakeholdersRoutes from "@resource/crm/razorpay-route-stakeholders/razorpay_route_stakeholders.routes";
 import razorpayRouteSettlementAccountsRoutes from "@resource/crm/razorpay-route-settlement-accounts/razorpay_route_settlement_accounts.routes";
@@ -80,6 +81,7 @@ server.addRoutes([
   crmOrderReportsRoutes,
   crmSavedProposalsRoutes,
   notificationRoutes,
+  rbacRoutes,
   razorpayRouteAccountsRoutes,
   razorpayRouteStakeholdersRoutes,
   razorpayRouteSettlementAccountsRoutes,

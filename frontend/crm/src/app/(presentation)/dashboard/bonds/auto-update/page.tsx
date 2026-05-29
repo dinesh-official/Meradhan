@@ -1,5 +1,4 @@
 import Workspace from "@/global/elements/nav-sidebar/WorkSpace";
-import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import BondAutoUpdateView from "./BondAutoUpdateView";
 
@@ -7,8 +6,8 @@ export const revalidate = 0;
 
 export default function BondAutoUpdatePage() {
   return (
-    <AllowOnlyView permissions={["view:bonds"]}>
-      <Workspace>
+    <Workspace actionKey="bonds.auto_update.view">
+      
         <PageInfoBar
           title="Bond auto-update (sale-ready)"
           description="Bonds with “Allow for purchase” enabled. Load deal autofill from the calculator API, review and edit suggested fields, then accept or reject per bond."
@@ -18,6 +17,5 @@ export default function BondAutoUpdatePage() {
           <BondAutoUpdateView />
         </div>
       </Workspace>
-    </AllowOnlyView>
   );
 }

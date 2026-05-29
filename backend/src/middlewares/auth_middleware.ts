@@ -49,10 +49,13 @@ export const allowAccessMiddleware =
           id: number;
           email: string;
           role: Exclude<Role, "PUBLIC">;
+          impersonatedBy?: number;
         }>(token!);
 
-        // SUPER_ADMIN: allow all actions (bypass role check)
-        if (data.role === "SUPER_ADMIN") {
+        const impersonatedBy = data.impersonatedBy;
+
+        // SUPER_ADMIN: allow all actions (bypass role check) — unless impersonating
+        if (data.role === "SUPER_ADMIN" && !impersonatedBy) {
           req.session = {
             id: data.id,
             email: data.email,
@@ -78,6 +81,7 @@ export const allowAccessMiddleware =
             email: data.email,
             token: token!,
             role: data.role as (typeof crmRoles)[number],
+            ...(impersonatedBy ? { impersonatedBy } : {}),
           };
         } else {
           req.customer = {
