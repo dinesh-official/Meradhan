@@ -348,7 +348,12 @@ export class CustomerAuthController {
     if (!id) {
       throw new AppError("Session not found");
     }
-
+    const sessionCheck = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { id }
+    });
+    if (!sessionCheck) {
+      throw new AppError("User not found");
+    }
     const session = await db.dataBase.customerProfileDataModel.findUnique({
       where: { id, isDeleted: false, utility: { accountStatus: "ACTIVE" } },
       select: {

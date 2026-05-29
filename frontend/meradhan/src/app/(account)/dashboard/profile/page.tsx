@@ -19,7 +19,7 @@ async function page() {
 
   // Fetch customer data
   const id = cookie.get("userId")?.value || "";
-  console.log(id);
+  console.log({ id });
   const userData = await customerApi.customerInfoById(Number(id));
 
   return (

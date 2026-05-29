@@ -44,13 +44,6 @@ export class NseWebhookController {
         type: "CBRICS",
       },
     });
-    await db.dataBase.nseCbricsNotification.create({
-      data: {
-        payload,
-        type: "CBRICS",
-      },
-    });
-
 
     // KYC approved hook: CBRICS can notify unregistered participant approval via `unregList`.
     // Only treat actualStatus == 4 as approved and transition customer KYC to VERIFIED (once).
@@ -127,6 +120,13 @@ export class NseWebhookController {
           })
           if (!order) {
             console.warn("No Order from our system " + orderNumber);
+            res.sendResponse({
+              statusCode: HttpStatus.OK,
+              responseData: {
+                status: "ok",
+                message: "Order not found",
+              },
+            });
             return;
           }
           await db.dataBase.order.updateMany({

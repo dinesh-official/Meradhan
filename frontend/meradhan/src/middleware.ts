@@ -2,7 +2,7 @@ import { UserSessionDataResponse } from "@root/apiGateway";
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 
-const fetchUserSession = async (token: string) => {
+const fetchUserSession = async (token: string, userId: string) => {
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_HOST_URL}/api/customer/session`,
@@ -14,7 +14,17 @@ const fetchUserSession = async (token: string) => {
         },
       },
     );
-    if (res.status != 200) {
+    const customerRes = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_HOST_URL}/api/crm/customer/${userId}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+    if (res.status != 200 || customerRes.status != 200) {
       throw new Error("Session expired");
     }
     const sessionResponse = await res.json();
@@ -33,7 +43,8 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith("/login")) {
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
-    if (token) {
+    const userId = cookieStore.get("userId")?.value;
+    if (token && userId) {
       try {
         // Attempt session restore via API
         await fetchUserSession(token);
@@ -54,12 +65,12 @@ export async function middleware(request: NextRequest) {
     const cookieStore = await cookies();
 
     const token = cookieStore.get("token")?.value;
-
+    const userId = cookieStore.get("userId")?.value;
     // No token? Try to restore session
-    if (token) {
+    if (token && userId) {
       try {
         // Attempt session restore via API
-        await fetchUserSession(token);
+        await fetchUserSession(token, userId);
         return NextResponse.next({ headers: requestHeaders });
       } catch (error) {
         console.log(error);
