@@ -7,7 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BondDetailsResponse } from "@root/apiGateway";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
-import { canShowBuyNow } from "@/global/utils/bondPurchaseEligibility";
 
 type LatestBondReleasesProps = {
   latest: BondDetailsResponse[];
@@ -16,6 +15,7 @@ type LatestBondReleasesProps = {
 };
 
 type TabValue =
+  | "all"
   | "latest"
   | "high-yield"
   | "zero-coupon"
@@ -25,6 +25,7 @@ type TabValue =
   | "min-10000";
 
 const TAB_DEFS: Array<{ value: TabValue; label: string }> = [
+  { value: "all", label: "All Bonds" },
   { value: "latest", label: "Latest Release" },
   { value: "high-yield", label: "11+ Yield" },
   { value: "zero-coupon", label: "Zero Coupon" },
@@ -34,8 +35,11 @@ const TAB_DEFS: Array<{ value: TabValue; label: string }> = [
   { value: "min-10000", label: "Minimum ₹10,000" },
 ];
 
-function onlySellable(bonds: BondDetailsResponse[]): BondDetailsResponse[] {
-  return bonds.filter(canShowBuyNow);
+function dedupe(bonds: BondDetailsResponse[]): BondDetailsResponse[] {
+  return bonds.filter(
+    (bond, index, self) =>
+      self.findIndex((b) => b.isin === bond.isin) === index,
+  );
 }
 
 const responsive = {
@@ -86,25 +90,21 @@ function LatestBondReleases({
   highYield,
   zeroCoupon,
 }: LatestBondReleasesProps) {
-  const sellableAll = onlySellable(
-    [...latest, ...highYield, ...zeroCoupon].filter(
-      (bond, index, self) =>
-        self.findIndex((b) => b.isin === bond.isin) === index,
-    ),
-  );
+  const allBonds = dedupe([...latest, ...highYield, ...zeroCoupon]);
 
   const bondsByTab: Record<TabValue, BondDetailsResponse[]> = {
-    latest: onlySellable(latest),
-    "high-yield": onlySellable(highYield),
-    "zero-coupon": onlySellable(zeroCoupon),
-    aaa: sellableAll.filter((b) => b.creditRating?.includes("AAA")),
-    secured: sellableAll.filter((b) =>
+    all: allBonds,
+    latest: latest,
+    "high-yield": highYield,
+    "zero-coupon": zeroCoupon,
+    aaa: allBonds.filter((b) => b.creditRating?.includes("AAA")),
+    secured: allBonds.filter((b) =>
       b.natureOfInstrument?.toLowerCase().includes("secured"),
     ),
-    "monthly-income": sellableAll.filter(
+    "monthly-income": allBonds.filter(
       (b) => b.interestPaymentFrequency === "MONTHLY",
     ),
-    "min-10000": sellableAll.filter((b) => b.faceValue === 10000),
+    "min-10000": allBonds.filter((b) => b.faceValue === 10000),
   };
 
   const visibleTabs = TAB_DEFS.filter(
