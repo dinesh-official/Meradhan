@@ -57,6 +57,7 @@ function BondsWatchList() {
         key={4}
         title={`No Bonds In WatchList`}
         buttonText="Explore Bonds"
+        href="/bonds"
       />
     );
   }

@@ -251,20 +251,25 @@ function getBondIssuerDisplayName(b: Record<string, unknown>): string {
   return "";
 }
 
-/** Maturity as DD/MM/YYYY (bond snapshot / API JSON). */
+const MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/** Maturity as DD MMM YYYY (e.g. 31 Dec 2026). */
 export function formatMaturityDdMmYyyy(raw: string | undefined): string {
   if (raw == null || String(raw).trim() === "") return "—";
   const s = String(raw).trim();
   const d = new Date(s);
   if (!Number.isNaN(d.getTime())) {
     const dd = String(d.getUTCDate()).padStart(2, "0");
-    const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+    const mon = MONTH_ABBR[d.getUTCMonth()];
     const yyyy = d.getUTCFullYear();
-    return `${dd}/${mm}/${yyyy}`;
+    return `${dd} ${mon} ${yyyy}`;
   }
+  // Handle DD/MM/YYYY or DD-MM-YYYY strings
   const m = /^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/.exec(s);
   if (m) {
-    return `${m[1].padStart(2, "0")}/${m[2].padStart(2, "0")}/${m[3]}`;
+    const dd = m[1].padStart(2, "0");
+    const mon = MONTH_ABBR[parseInt(m[2], 10) - 1] ?? m[2];
+    return `${dd} ${mon} ${m[3]}`;
   }
   return "—";
 }
@@ -310,9 +315,8 @@ export function getSecurityNameColumnLines(order: Order): {
     namePart = cleanedName.trim() || "—";
   }
 
-  // bondName sits between coupon and the issuer-derived namePart: "9.00% <bondName> <namePart>"
   const bondName = String(order.bondName || "").trim();
-  const titleParts = [couponStr, bondName, namePart !== "—" ? namePart : ""].filter(Boolean);
+  const titleParts = [couponStr, bondName].filter(Boolean);
   const titleLine = titleParts.join(" ").trim() || "—";
 
   const matRaw =
