@@ -116,13 +116,11 @@ async function DashBoardPage() {
     <AccountViewPort
       title={<NameTitleView />}
       navActions={
-        portfolioEmpty ? (
-          <Link href="/bonds">
-            <Button variant="outline" size="sm">
-              Explore All Bonds
-            </Button>
-          </Link>
-        ) : undefined
+        <Link href="/bonds">
+          <Button variant="outline" size="sm">
+            Explore All Bonds
+          </Button>
+        </Link>
       }
     >
       <div className="flex flex-col gap-5">

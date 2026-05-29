@@ -3,6 +3,7 @@ export interface CashflowEvent {
   bondName: string;
   maturityDate: string;
   amount: number;
+  isin?: string;
 }
 
 export interface CashflowDate {

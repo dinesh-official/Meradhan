@@ -47,8 +47,8 @@ export async function middleware(request: NextRequest) {
     if (token && userId) {
       try {
         // Attempt session restore via API
-        await fetchUserSession(token, userId);
-        const response = NextResponse.redirect(new URL("/dashboard", origin), {
+        await fetchUserSession(token);
+        const response = NextResponse.redirect(new URL("/", origin), {
           headers: requestHeaders,
         });
         return response;

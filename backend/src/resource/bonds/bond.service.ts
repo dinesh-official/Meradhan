@@ -221,26 +221,129 @@ export class BondService {
     console.log(orderBy);
 
 
-    const [data, total] = await Promise.all([
-      db.dataBase.bonds.findMany({
-        where: whereQuery,
-        orderBy:
-          options?.all == "YES"
-            ? [
-              {
-                allowForPurchase: "desc",
-              },
-              {
-                sortedAt: "asc",
-              },
-            ]
-            : orderBy,
-        ...paginationOptions,
-      }),
-      db.dataBase.bonds.count({
-        where: whereQuery,
-      }),
-    ]);
+    const latestBatch = await db.dataBase.crmInventoryStockBatch.findFirst({
+      orderBy: { uploadedAt: "desc" },
+      select: { id: true },
+    });
+    let validIsins: string[] = [];
+    if (latestBatch) {
+      const activeStockLines = await db.dataBase.crmInventoryStockLine.findMany({
+        where: {
+          batchId: latestBatch.id,
+          quantity: { gt: 0 },
+        },
+        select: { isin: true },
+      });
+      validIsins = activeStockLines.map((line) => line.isin.trim().toUpperCase());
+    }
+
+    const isClientDirectory = options?.all !== "YES";
+    let data: any[] = [];
+    let total = 0;
+
+    if (isClientDirectory && validIsins.length > 0) {
+      const eligibleCondition = {
+        allowForPurchase: { equals: true },
+        sellPrice: { gt: 0 },
+        faceValue: { gt: 0 },
+        nextCouponDate: { not: null },
+        recordDays: { not: null },
+        recordDate: { not: null },
+        lastCouponDate: { not: null },
+        natureOfInstrument: { not: null },
+        dateOfAllotment: { not: null },
+        OR: [
+          { buyYield: { not: null } },
+          { yield: { not: null } },
+        ],
+        AND: [
+          {
+            OR: [
+              { isPerpetual: { equals: true } },
+              { maturityDate: { not: null } },
+            ],
+          },
+        ],
+      };
+
+      const whereBuyNow = {
+        ...whereQuery,
+        ...eligibleCondition,
+        isin: { in: validIsins },
+      };
+      const whereOther = {
+        ...whereQuery,
+        NOT: {
+          ...eligibleCondition,
+          isin: { in: validIsins },
+        },
+      };
+
+      const [countBuyNow, countOther] = await Promise.all([
+        db.dataBase.bonds.count({ where: whereBuyNow }),
+        db.dataBase.bonds.count({ where: whereOther }),
+      ]);
+      total = countBuyNow + countOther;
+
+      const skip = paginationOptions.skip;
+      const take = paginationOptions.take;
+
+      if (skip < countBuyNow) {
+        // Offset starts within buy now bonds
+        const buyNowBonds = await db.dataBase.bonds.findMany({
+          where: whereBuyNow,
+          orderBy,
+          skip,
+          take,
+        });
+        data.push(...buyNowBonds);
+
+        if (data.length < take) {
+          // Fill the remaining spots with other bonds (starting from index 0)
+          const remaining = take - data.length;
+          const otherBonds = await db.dataBase.bonds.findMany({
+            where: whereOther,
+            orderBy,
+            skip: 0,
+            take: remaining,
+          });
+          data.push(...otherBonds);
+        }
+      } else {
+        // Offset is entirely within other bonds
+        const otherOffset = skip - countBuyNow;
+        const otherBonds = await db.dataBase.bonds.findMany({
+          where: whereOther,
+          orderBy,
+          skip: otherOffset,
+          take,
+        });
+        data.push(...otherBonds);
+      }
+    } else {
+      const [rawBonds, countAll] = await Promise.all([
+        db.dataBase.bonds.findMany({
+          where: whereQuery,
+          orderBy:
+            options?.all == "YES"
+              ? [
+                {
+                  allowForPurchase: "desc",
+                },
+                {
+                  sortedAt: "asc",
+                },
+              ]
+              : orderBy,
+          ...paginationOptions,
+        }),
+        db.dataBase.bonds.count({
+          where: whereQuery,
+        }),
+      ]);
+      data = rawBonds;
+      total = countAll;
+    }
 
     const enriched = await this.enrichBondsWithCrmInventory(data);
 
