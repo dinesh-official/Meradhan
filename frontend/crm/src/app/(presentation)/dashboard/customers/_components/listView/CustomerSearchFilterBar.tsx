@@ -18,8 +18,11 @@ interface CustomerSearchFilterBarProps {
   onStatusChange?: (value: string) => void;
   kycValue?: string;
   onKycChange?: (value: string) => void;
+  userTypeValue?: string;
+  onUserTypeChange?: (value: string) => void;
   statusOptions?: typeof filterStatusOptions;
   kycOptions?: typeof filterKycStatus;
+  userTypeOptions?: typeof filterUserTypeOptions;
   placeholder?: string;
 }
 const filterKycStatus: SelectOption[] = [
@@ -34,6 +37,17 @@ const filterStatusOptions: SelectOption[] = [
   { label: "Active", value: "ACTIVE" },
   { label: "Suspended", value: "SUSPENDED" },
 ];
+
+const filterUserTypeOptions: SelectOption[] = [
+  { label: "All Types", value: "ALL" },
+  { label: "Individual", value: "INDIVIDUAL" },
+  { label: "NRI / NRO", value: "INDIVIDUAL_NRI_NRO" },
+  { label: "Corporate", value: "CORPORATE" },
+  { label: "Trust", value: "TRUST" },
+  { label: "HUF", value: "HUF" },
+  { label: "LLP", value: "LLP" },
+  { label: "Partnership Firm", value: "PARTNERSHIP_FIRM" },
+];
 const CustomerSearchFilterBar: React.FC<CustomerSearchFilterBarProps> = ({
   searchValue,
   onSearchChange,
@@ -41,8 +55,11 @@ const CustomerSearchFilterBar: React.FC<CustomerSearchFilterBarProps> = ({
   onStatusChange,
   kycValue,
   onKycChange,
-  statusOptions =filterStatusOptions,
-  kycOptions =filterKycStatus,
+  userTypeValue,
+  onUserTypeChange,
+  statusOptions = filterStatusOptions,
+  kycOptions = filterKycStatus,
+  userTypeOptions = filterUserTypeOptions,
   placeholder = "Search...",
 }) => {
   return (
@@ -53,7 +70,7 @@ const CustomerSearchFilterBar: React.FC<CustomerSearchFilterBarProps> = ({
           placeholder={placeholder}
           type="search"
           value={searchValue}
-          onChange={(e)=>{
+          onChange={(e) => {
             onSearchChange?.(e.target.value)
           }}
         />
@@ -62,6 +79,18 @@ const CustomerSearchFilterBar: React.FC<CustomerSearchFilterBarProps> = ({
         </div>
       </div>
       <CardAction className="flex flex-row gap-3">
+        <Select value={userTypeValue} onValueChange={onUserTypeChange}>
+          <SelectTrigger className="bg-secondary border-none w-[160px]">
+            <SelectValue placeholder="Customer Type" />
+          </SelectTrigger>
+          <SelectContent>
+            {userTypeOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Select value={statusValue} onValueChange={onStatusChange}>
           <SelectTrigger className="bg-secondary border-none w-[160px]">
             <SelectValue placeholder="Apply Status" />

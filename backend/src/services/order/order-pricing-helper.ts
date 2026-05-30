@@ -360,6 +360,15 @@ export const computeBondOrderPricingData = (
         params.quantity,
         params.cleanPrice
     );
+    console.log({
+        faceValue: params.faceValue,
+        quantity: params.quantity,
+        couponRate: params.couponRate,
+        lastCouponDate: utcMidnightForISODate(params.lastCouponDate),
+        nextCouponDate: utcMidnightForISODate(params.nextCouponDate),
+        settlementDate: utcMidnightForISODate(settlement.settlementDate),
+        recordDays: params.recordDays,
+    });
 
     const accrued = accruedInterest({
         faceValue: params.faceValue,
@@ -501,6 +510,9 @@ export const getLastNextCouponDateBasedOnSettlementDate = async (isin: string, s
         orderBy: { dueDate: "asc" },
     });
 
+
+
+
     const couponRows = rows
         .map((row) => {
             const dueDate =
@@ -563,11 +575,16 @@ export const getLastNextCouponDateBasedOnSettlementDate = async (isin: string, s
         // Treat a coupon date equal to settlement as "already paid" for last payment date.
         if (row.dueDate.getTime() <= settlementDt.getTime()) {
             lastCouponDate = row.dueDate;
+
+        } else {
             continue;
         }
+
         nextCouponRow = row;
         break;
     }
+    console.log({ nextCouponRow });
+
 
     if (!lastCouponDate && nextCouponRow) {
         const nextIdx = couponRows.findIndex((row) => row.dueDate.getTime() === nextCouponRow?.dueDate.getTime());
@@ -588,6 +605,7 @@ export const getLastNextCouponDateBasedOnSettlementDate = async (isin: string, s
     } else if (nextCouponDate && recordDays != null) {
         underShutPeriod = isUnderShutPeriod(settlementDt, nextCouponDate, recordDays).isUnderShutPeriod;
     }
+
 
     return {
         lastCouponDate: lastCouponDate ? toUTCISODate(lastCouponDate) : null,

@@ -1,7 +1,7 @@
 import { db } from "@core/database/database";
 import { env } from "@packages/config/env";
 import { cacheStorage } from "@store/redis_store";
-import type { AxiosError } from "axios";
+import { isAxiosError, type AxiosError } from "axios";
 import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 import type {
     KraNonIndAppReqRoot,
@@ -113,6 +113,17 @@ export class CorporateKraWorkerService {
         });
         await cacheStorage.delete(this.runnerKey(args.customerId, args.kycDataStoreId));
         await this.clearRetry(args.customerId, args.kycDataStoreId);
+
+        // Don't downgrade a terminal status that was set deliberately
+        // (CRM "Finish KRA process" sets MANUAL_FINISHED; CBRICS success sets VERIFIED).
+        // A late-firing stale job must not overwrite either of those.
+        const current = await db.dataBase.customerProfileDataModel.findUnique({
+            where: { id: args.customerId },
+            select: { kraStatus: true },
+        });
+        const cur = String(current?.kraStatus ?? "").trim().toUpperCase();
+        if (cur === "VERIFIED" || cur === "MANUAL_FINISHED") return;
+
         await db.dataBase.customerProfileDataModel.update({
             where: { id: args.customerId },
             data: { kraStatus: args.reason },
@@ -376,6 +387,11 @@ export class CorporateKraWorkerService {
             await addKraWorkerJob(data, RESCHEDULE_4H_MS);
         } catch (err) {
             const e = err as AxiosError;
+            if (isAxiosError(e)) {
+                console.log(e.response?.data);
+            } else {
+                console.log(e);
+            }
             await db.dataBase.kraDataLogs.create({
                 data: {
                     userId: customerId,

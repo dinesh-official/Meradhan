@@ -2,13 +2,12 @@
 
 import React from "react";
 import Image from "next/image";
-import { marked } from "marked";
 import { cn } from "@/lib/utils";
 import { sanitizeStrapiHTML } from "@/global/utils/html-sanitizer";
+import type { ChatMessage } from "../_hook/useDhanGPT";
 
 interface ChatMessagesProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  chat: any[];
+  chat: ChatMessage[];
   loading?: boolean;
   bottomRef?: React.RefObject<HTMLDivElement>;
 }
@@ -46,25 +45,25 @@ export default function ChatMessages({
               {message.person === "USER" ? "You" : "MeraDhan-GPT"}
             </p>
 
-            {message.response.trim().length !== 0 && (
-              <div
-                className={cn(
-                  `p-3 rounded-2xl`,
-                  message.person === "USER"
-                    ? "bg-muted text-gray-800 text-sm ml-auto"
-                    : "bg-gray-100 text-gray-900 article"
-                )}
-                dangerouslySetInnerHTML={{
-                  __html: (() => {
-                    const markdown = message.response || "";
-                    const html = marked.parse(markdown);
-                    // Ensure html is a string (not a Promise)
-                    const htmlString = typeof html === "string" ? html : "";
-                    return sanitizeStrapiHTML(htmlString);
-                  })(),
-                }}
-              />
-            )}
+            {message.response.trim().length !== 0 &&
+              (message.person === "USER" ? (
+                <div
+                  className={cn(
+                    "p-3 rounded-2xl bg-muted text-gray-800 text-sm ml-auto whitespace-pre-wrap break-words",
+                  )}
+                >
+                  {message.response}
+                </div>
+              ) : (
+                <div
+                  className={cn(
+                    "p-3 rounded-2xl bg-gray-100 text-gray-900 article",
+                  )}
+                  dangerouslySetInnerHTML={{
+                    __html: sanitizeStrapiHTML(message.response),
+                  }}
+                />
+              ))}
           </div>
         </div>
       ))}

@@ -63,6 +63,10 @@ export class CustomerProfileService extends CustomerProfileManager {
       };
     }
 
+    if (payload.userType) {
+      filters.userType = { equals: payload.userType };
+    }
+
     const searchTrimmed = payload.search?.trim();
     if (searchTrimmed) {
       const words = searchTrimmed.split(/\s+/);

@@ -1,128 +1,146 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import { BASES_URLS } from "@/core/config/base.urls";
+
+export type ChatRole = "USER" | "BOT";
+
+export interface ChatMessage {
+  person: ChatRole;
+  response: string;
+  time: string;
+  metadata?: Array<Record<string, unknown>>;
+}
+
+interface AskResponse {
+  ai?: {
+    response?: string;
+    history?: string;
+    input?: string;
+  };
+  response?: string;
+  metadata?: Array<Record<string, unknown>>;
+}
+
+const SESSION_KEY = "GPT-Session-ID";
+const CHAT_KEY = "dhanGPT";
+
+const ensureSessionId = (): string => {
+  if (typeof window === "undefined") return "Demo-Session";
+  const existing = localStorage.getItem(SESSION_KEY);
+  if (existing) return existing;
+  const fresh =
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `sess-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  localStorage.setItem(SESSION_KEY, fresh);
+  return fresh;
+};
 
 export const useDhanGPT = () => {
-  const [chat, setChat] = useState<any[]>([]);
+  const [chat, setChat] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Save chat to localStorage
   useEffect(() => {
-    if (chat.length) localStorage.setItem("dhanGPT", JSON.stringify(chat));
+    if (chat.length) localStorage.setItem(CHAT_KEY, JSON.stringify(chat));
   }, [chat]);
 
-  // Load chat from localStorage
   useEffect(() => {
-    const stored = localStorage.getItem("dhanGPT");
-    if (stored) setChat(JSON.parse(stored));
+    const stored = localStorage.getItem(CHAT_KEY);
+    if (!stored) return;
+    try {
+      setChat(JSON.parse(stored));
+    } catch {
+      localStorage.removeItem(CHAT_KEY);
+    }
   }, []);
 
-  // Clear chat
   const clearChat = () => {
     setChat([]);
-    localStorage.removeItem("dhanGPT");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(CHAT_KEY);
+      localStorage.removeItem(SESSION_KEY);
+    }
   };
 
-  // --- FIXED STREAM HANDLER ---
-  const loadChatLLM = async (
-    message: string,
-    sessionId?: string,
-    botIndex?: number
+  const askBackend = async (
+    text: string,
+    sessionId: string,
+    botIndex: number,
   ) => {
     setLoading(true);
     try {
-      const dhangptUrl = "/api/dhangpt";
-      const res = await fetch(`${dhangptUrl}/ask`, {
+      const sid = encodeURIComponent(sessionId || "Demo-Session");
+      const res = await fetch(`/api/dhangpt/ask/${sid}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: message, sessionId }),
+        body: JSON.stringify({ text }),
       });
 
-      if (!res.body) throw new Error("No response body.");
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder("utf-8");
-      let buffer = ""; // ← buffer handles partial UTF-8 characters
-      let done = false;
-
-      while (!done) {
-        const { value, done: doneReading } = await reader.read();
-        done = doneReading;
-
-        if (value) {
-          // Decode current chunk safely
-          buffer += decoder.decode(value, { stream: true });
-
-          // Update chat progressively
-          setChat((prev) => {
-            const updated = [...prev];
-            if (botIndex !== undefined && updated[botIndex]) {
-              updated[botIndex].response = buffer;
-            }
-            return updated;
-          });
-        }
+      // dhanGpt returns 404 with a friendly payload when `text` is empty —
+      // accept that body too, but bail on real failures.
+      if (!res.ok && res.status !== 404) {
+        throw new Error(`dhanGpt ${res.status}`);
       }
 
-      // Flush any remaining text after streaming finishes
-      buffer += decoder.decode();
+      const data = (await res.json().catch(() => ({}))) as AskResponse;
+
+      const responseHtml =
+        (typeof data?.ai?.response === "string" && data.ai.response) ||
+        (typeof data?.response === "string" && data.response) ||
+        "";
+      const metadata = Array.isArray(data?.metadata) ? data.metadata : [];
+
       setChat((prev) => {
-        const updated = [...prev];
-        if (botIndex !== undefined && updated[botIndex]) {
-          updated[botIndex].response = buffer;
+        const next = [...prev];
+        const target = next[botIndex];
+        if (target) {
+          next[botIndex] = { ...target, response: responseHtml, metadata };
         }
-        return updated;
+        return next;
       });
-    } catch {
+    } catch (err) {
+      console.error("dhanGpt ask failed:", err);
       setChat((prev) => {
-        const updated = [...prev];
-        if (botIndex !== undefined && updated[botIndex]) {
-          updated[botIndex].response += "\nSorry, something went wrong.";
+        const next = [...prev];
+        const target = next[botIndex];
+        if (target) {
+          next[botIndex] = {
+            ...target,
+            response:
+              (target.response || "") +
+              (target.response ? "\n" : "") +
+              "Sorry, something went wrong.",
+          };
         }
-        return updated;
+        return next;
       });
     } finally {
       setLoading(false);
     }
   };
 
-  // Send a message
   const sendMessage = (text: string) => {
-    if (!text.trim()) return;
+    const trimmed = text.trim();
+    if (!trimmed) return;
+
+    const sessionId = ensureSessionId();
+    const now = new Date();
+    const timeIst = now.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "Asia/Kolkata",
+    });
 
     setChat((prev) => {
-      const newChat = [
+      const next: ChatMessage[] = [
         ...prev,
-        {
-          person: "USER",
-          response: text,
-          time: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-            timeZone: "Asia/Kolkata",
-          }),
-        },
+        { person: "USER", response: trimmed, time: timeIst },
+        { person: "BOT", response: "", time: timeIst },
       ];
-
-      const botMessage = {
-        person: "BOT",
-        response: "",
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      };
-
-      const updatedChat = [...newChat, botMessage];
-
-      // Start streaming
-      const sessionId =
-        localStorage.getItem("GPT-Session-ID") || "Demo-Session";
-      loadChatLLM(text, sessionId, updatedChat.length - 1);
-
-      return updatedChat;
+      void askBackend(trimmed, sessionId, next.length - 1);
+      return next;
     });
   };
 
   return { chat, loading, sendMessage, clearChat };
 };
+
+export default useDhanGPT;
