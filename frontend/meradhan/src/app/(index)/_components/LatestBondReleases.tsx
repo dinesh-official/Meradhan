@@ -16,6 +16,7 @@ type LatestBondReleasesProps = {
 };
 
 type TabValue =
+  | "all"
   | "latest"
   | "high-yield"
   | "zero-coupon"
@@ -25,6 +26,7 @@ type TabValue =
   | "min-10000";
 
 const TAB_DEFS: Array<{ value: TabValue; label: string }> = [
+  { value: "all", label: "All Bonds" },
   { value: "latest", label: "Latest Release" },
   { value: "high-yield", label: "11+ Yield" },
   { value: "zero-coupon", label: "Zero Coupon" },
@@ -34,10 +36,11 @@ const TAB_DEFS: Array<{ value: TabValue; label: string }> = [
   { value: "min-10000", label: "Minimum ₹10,000" },
 ];
 
-function sortBuyNowFirst(bonds: BondDetailsResponse[]): BondDetailsResponse[] {
-  return bonds
-    .slice()
-    .sort((a, b) => (canShowBuyNow(b) ? 1 : 0) - (canShowBuyNow(a) ? 1 : 0));
+function dedupe(bonds: BondDetailsResponse[]): BondDetailsResponse[] {
+  return bonds.filter(
+    (bond, index, self) =>
+      self.findIndex((b) => b.isin === bond.isin) === index,
+  );
 }
 
 const responsive = {
@@ -88,27 +91,23 @@ function LatestBondReleases({
   highYield,
   zeroCoupon,
 }: LatestBondReleasesProps) {
-  const allBonds = [...latest, ...highYield, ...zeroCoupon].filter(
-    (bond, index, self) =>
-      self.findIndex((b) => b.isin === bond.isin) === index,
-  );
+  const allBonds = dedupe([...latest, ...highYield, ...zeroCoupon]);
 
   const bondsByTab: Record<TabValue, BondDetailsResponse[]> = {
-    latest: sortBuyNowFirst(latest),
-    "high-yield": sortBuyNowFirst(highYield),
-    "zero-coupon": sortBuyNowFirst(zeroCoupon),
-    aaa: sortBuyNowFirst(
-      allBonds.filter((b) => b.creditRating?.includes("AAA")),
+    all: allBonds,
+    latest: latest,
+    "high-yield": highYield,
+    "zero-coupon": zeroCoupon,
+    aaa: allBonds.filter((b) => b.creditRating?.includes("AAA")),
+    secured: allBonds.filter((b) =>
+      b.natureOfInstrument?.toLowerCase().includes("secured"),
     ),
-    secured: sortBuyNowFirst(
-      allBonds.filter((b) =>
-        b.natureOfInstrument?.toLowerCase().includes("secured"),
-      ),
+    "monthly-income": allBonds.filter(
+      (b) => b.interestPaymentFrequency === "MONTHLY",
     ),
-    "monthly-income": sortBuyNowFirst(
-      allBonds.filter((b) => b.interestPaymentFrequency === "MONTHLY"),
+    "min-10000": allBonds.filter(
+      (b) => b.faceValue == 10000
     ),
-    "min-10000": sortBuyNowFirst(allBonds.filter((b) => b.faceValue >= 10000)),
   };
 
   const visibleTabs = TAB_DEFS.filter(

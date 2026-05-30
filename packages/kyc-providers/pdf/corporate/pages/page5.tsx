@@ -13,7 +13,7 @@ function CorporateKycPdfPage5Content({ data = {} }: { data?: CorporateKycPdfData
 
   return (
     <View style={[{ fontFamily: "Poppins" }, pad]}>
-      <InputField title="Name of Applicant:" value={pdfStr(data.nameOfApplicantPart3 ?? data.entityName)} className="" />
+      <InputField title="Name of Applicant:" value={pdfStr(data.nameOfApplicantPart3 ?? data.entityName)} className="w-52" />
 
       <Text style={{ fontSize: 8, fontWeight: 600, marginTop: 8 }}>1. Settlement Agency*</Text>
       <View style={tw("flex flex-row flex-wrap gap-x-6 gap-y-2 mt-2 items-end")}>
@@ -93,7 +93,7 @@ function CorporateKycPdfPage5Content({ data = {} }: { data?: CorporateKycPdfData
       </View>
 
       <View style={{ marginTop: 8 }}>
-        <InputField title="PAN of the Applicant:" value={pdfStr(data.part3Pan ?? data.pan)} className="" />
+        <InputField title="PAN of the Applicant:" value={pdfStr(data.part3Pan ?? data.pan)} className="w-52" />
         <View style={tw("flex flex-row gap-2 mt-2 items-end flex-wrap")}>
           <View style={tw("w-[48%]")}>
             <InputField title="(Direct Code if any) SGL" value={pdfStr(data.part3SglDirectCode)} className="" />

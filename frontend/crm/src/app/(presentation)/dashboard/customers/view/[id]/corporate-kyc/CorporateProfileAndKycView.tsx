@@ -10,8 +10,7 @@ import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import { encodeId, genMediaUrl } from "@/global/utils/url.utils";
 import apiGateway from "@root/apiGateway";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Building2, IdCardIcon, NotebookPen, Loader2, Paperclip, Pencil, Trash2 } from "lucide-react";
-import Image from "next/image";
+import { Building2, FileDown, IdCardIcon, NotebookPen, Loader2, Paperclip, Pencil, Trash2, OctagonX } from "lucide-react";
 import Link from "next/link";
 import {
   AddressSection,
@@ -48,6 +47,17 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useCorporateKycFileUpload } from "../../../[id]/corporate-kyc/_hooks/useCorporateKycFileUpload";
+
+/** Mirrors backend `corporateKycPdfFilename` in customer.service.ts so the saved file matches a direct API download. */
+function buildCorporateKycPdfFilename(customerId: number, entityName: string | undefined): string {
+  const base = (entityName ?? "corporate")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .slice(0, 80);
+  return `corporate-kyc-${customerId}-${base || "entity"}.pdf`;
+}
 
 export default function CorporateProfileAndKycView({
   profileId,
@@ -147,6 +157,7 @@ export default function CorporateProfileAndKycView({
   const isCorporate = customer?.userType === "CORPORATE";
   const [kycPdfLoading, setKycPdfLoading] = useState(false);
   const [triggerKraOpen, setTriggerKraOpen] = useState(false);
+  const [finishKraOpen, setFinishKraOpen] = useState(false);
   const [attachmentsOpen, setAttachmentsOpen] = useState(false);
   const [attachmentLabel, setAttachmentLabel] = useState("");
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
@@ -365,6 +376,31 @@ export default function CorporateProfileAndKycView({
     },
   });
 
+  const finishCorporateKraMutation = useMutation({
+    mutationFn: async () => {
+      const res = await api.finishCorporateKra(profileId);
+      return res.data.responseData;
+    },
+    onSuccess: (data) => {
+      const removed = Array.isArray(data?.removedJobIds) ? data.removedJobIds.length : 0;
+      toast.success(
+        removed > 0
+          ? `KRA process finished. Cancelled ${removed} pending job${removed === 1 ? "" : "s"}.`
+          : "KRA process finished. You can trigger KRA again now.",
+      );
+      setFinishKraOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["CorporateKraStatus", profileId] });
+      queryClient.invalidateQueries({ queryKey: ["corporateKycKraLogs", profileId] });
+      queryClient.invalidateQueries({ queryKey: ["fetchCustomer", profileId] });
+    },
+    onError: (err: { response?: { data?: { message?: string } } }) => {
+      const message =
+        err?.response?.data?.message ??
+        (err instanceof Error ? err.message : "Failed to finish KRA");
+      toast.error(message);
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="flex w-full items-center justify-center py-24">
@@ -373,37 +409,39 @@ export default function CorporateProfileAndKycView({
     );
   }
 
-  // Print / download actions intentionally hidden for now.
-
-  const printDate = new Date().toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
-  const fmt = (v: string | undefined | null) =>
-    v != null && v !== "" ? String(v) : "—";
+  const handleGeneratePdf = async () => {
+    if (!isCorporate) {
+      toast.error("PDF is only available for corporate customers.");
+      return;
+    }
+    if (!corporateKyc) {
+      toast.error("Corporate KYC data does not exist. Please save corporate KYC first.");
+      return;
+    }
+    setKycPdfLoading(true);
+    try {
+      const blob = await api.getCorporateKycPdf(profileId);
+      const filename = buildCorporateKycPdfFilename(profileId, corporateKyc?.entityName);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast.success("Corporate KYC PDF downloaded.");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to generate corporate KYC PDF";
+      toast.error(message);
+    } finally {
+      setKycPdfLoading(false);
+    }
+  };
 
   return (
-    <div
-      className="flex flex-col gap-6 corporate-kyc-print-view"
-      id="corporate-kyc-print-content"
-    >
-      {/* Clean print-only header: logo + date */}
-      <div className="hidden corporate-kyc-print-header print:block print:pb-4  print:border-gray-300">
-        <Image
-          src="/images/pdfheader.png"
-          alt="MeraDhan"
-          width={800}
-          height={120}
-          className="w-full max-w-full h-auto object-contain print:block"
-        />
-        <p className="print:block text-sm text-muted-foreground mt-2">Printed on: {printDate}</p>
-      </div>
-
-      <div className="print:hidden pt-3">
+    <div className="flex flex-col gap-6">
+      <div className="pt-3">
         {isCorporate && corpKraRunning ? (
           <div className="flex flex-col gap-0 overflow-hidden rounded-lg border border-blue-200 bg-blue-50/90 text-blue-950 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-50">
             <Alert className="rounded-none border-0 bg-transparent py-3 text-inherit [&>svg]:text-blue-600 dark:[&>svg]:text-blue-400">
@@ -472,6 +510,23 @@ export default function CorporateProfileAndKycView({
                   </Button>
                 </AllowOnlyView>
               )}
+
+              {isCorporate && corporateKyc ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => void handleGeneratePdf()}
+                  disabled={kycPdfLoading}
+                  title="Generate the corporate KYC PDF"
+                >
+                  {kycPdfLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <FileDown className="h-4 w-4" />
+                  )}
+                  {kycPdfLoading ? "Generating..." : "Generate PDF"}
+                </Button>
+              ) : null}
 
               {isCorporate && (
                 <AllowOnlyView permissions={["edit:customer"]}>
@@ -602,6 +657,66 @@ export default function CorporateProfileAndKycView({
 
               {isCorporate && (
                 <AllowOnlyView permissions={["edit:customer"]}>
+                  <AlertDialog open={finishKraOpen} onOpenChange={setFinishKraOpen}>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={
+                          finishCorporateKraMutation.isPending ||
+                          !corpKraRunning ||
+                          !corporateKyc ||
+                          corpKycDataStoreId == null
+                        }
+                        title={
+                          !corpKraRunning
+                            ? "No KRA process is currently running"
+                            : "Manually finish the running KRA process so you can trigger again"
+                        }
+                        onClick={() => {
+                          if (!corpKraRunning) {
+                            toast.error("No KRA process is currently running.");
+                            return;
+                          }
+                          setFinishKraOpen(true);
+                        }}
+                      >
+                        {finishCorporateKraMutation.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <OctagonX className="h-4 w-4" />
+                        )}
+                        Finish KRA process
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Finish corporate KRA process?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will cancel any pending retries for this corporate customer,
+                          stop the persistent KRA loop, and re-enable the Trigger KRA button.
+                          A <span className="font-medium">MANUAL_FINISHED_BY_CRM</span> entry
+                          will be recorded in the KRA logs and the KRA status will be set to{" "}
+                          <span className="font-medium">MANUAL_FINISHED</span> (unless the
+                          customer is already verified).
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel disabled={finishCorporateKraMutation.isPending}>
+                          Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => finishCorporateKraMutation.mutate()}
+                          disabled={finishCorporateKraMutation.isPending || !corpKraRunning}
+                        >
+                          {finishCorporateKraMutation.isPending ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : null}
+                          Finish KRA
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                   <AlertDialog open={triggerKraOpen} onOpenChange={setTriggerKraOpen}>
                     <AlertDialogTrigger asChild>
                       <Button
@@ -763,124 +878,6 @@ export default function CorporateProfileAndKycView({
         </div>
       </div>
 
-      {/* Print only: table layout (hidden on screen) */}
-      <div className="hidden print-table-only print:block">
-        <table className="corporate-kyc-print-table">
-          <tbody>
-            <tr><td className="corporate-kyc-print-label">Name</td><td>{fmt([customer?.firstName, customer?.middleName, customer?.lastName].filter(Boolean).join(" "))}</td></tr>
-            <tr><td className="corporate-kyc-print-label">Username</td><td>{fmt(customer?.userName)}</td></tr>
-            <tr><td className="corporate-kyc-print-label">Email</td><td>{fmt(customer?.emailAddress)}</td></tr>
-            <tr><td className="corporate-kyc-print-label">Phone</td><td>{fmt(customer?.phoneNo)}</td></tr>
-            <tr><td className="corporate-kyc-print-label">Company</td><td>{fmt(corporateKyc?.entityName)}</td></tr>
-            <tr><td className="corporate-kyc-print-label">PAN Number</td><td>{fmt(corporateKyc?.panNumber)}</td></tr>
-          </tbody>
-        </table>
-
-        {corporateKyc && (
-          <>
-            <h2 className="corporate-kyc-print-section-title">Correspondence address</h2>
-            <table className="corporate-kyc-print-table">
-              <tbody>
-                <tr><td className="corporate-kyc-print-label">Full address</td><td>{fmt(corporateKyc.correspondenceFullAddress)}</td></tr>
-                <tr><td className="corporate-kyc-print-label">Line 1</td><td>{fmt(corporateKyc.correspondenceLine1)}</td></tr>
-                <tr><td className="corporate-kyc-print-label">Line 2</td><td>{fmt(corporateKyc.correspondenceLine2)}</td></tr>
-                <tr><td className="corporate-kyc-print-label">City</td><td>{fmt(corporateKyc.correspondenceCity)}</td></tr>
-                <tr><td className="corporate-kyc-print-label">District</td><td>{fmt(corporateKyc.correspondenceDistrict)}</td></tr>
-                <tr><td className="corporate-kyc-print-label">State</td><td>{fmt(corporateKyc.correspondenceState)}</td></tr>
-                <tr><td className="corporate-kyc-print-label">PIN code</td><td>{fmt(corporateKyc.correspondencePinCode)}</td></tr>
-              </tbody>
-            </table>
-
-            {(corporateKyc.bankAccounts?.length ?? 0) > 0 && (
-              <>
-                <h2 className="corporate-kyc-print-section-title">Bank accounts</h2>
-                {corporateKyc.bankAccounts.map((acc, i) => (
-                  <table key={acc.id ?? i} className="corporate-kyc-print-table">
-                    <tbody>
-                      <tr><td className="corporate-kyc-print-label">Account holder name</td><td>{fmt(acc.accountHolderName)}</td></tr>
-                      <tr><td className="corporate-kyc-print-label">Account number</td><td>{fmt(acc.accountNumber)}</td></tr>
-                      <tr><td className="corporate-kyc-print-label">Bank name</td><td>{fmt(acc.bankName)}</td></tr>
-                      <tr><td className="corporate-kyc-print-label">IFSC code</td><td>{fmt(acc.ifscCode)}</td></tr>
-                      <tr><td className="corporate-kyc-print-label">Branch</td><td>{fmt(acc.branch)}</td></tr>
-                      <tr><td className="corporate-kyc-print-label">Primary account</td><td>{acc.isPrimaryAccount ? "Yes" : "No"}</td></tr>
-                    </tbody>
-                  </table>
-                ))}
-              </>
-            )}
-
-            {(corporateKyc.dematAccounts?.length ?? 0) > 0 && (
-              <>
-                <h2 className="corporate-kyc-print-section-title">Demat accounts</h2>
-                {corporateKyc.dematAccounts.map((acc, i) => (
-                  <table key={acc.id ?? i} className="corporate-kyc-print-table">
-                    <tbody>
-                      <tr><td className="corporate-kyc-print-label">Depository</td><td>{fmt(acc.depository)}</td></tr>
-                      <tr><td className="corporate-kyc-print-label">Account holder name</td><td>{fmt(acc.accountHolderName)}</td></tr>
-                      <tr><td className="corporate-kyc-print-label">DP ID</td><td>{fmt(acc.dpId)}</td></tr>
-                      <tr><td className="corporate-kyc-print-label">Client ID</td><td>{fmt(acc.clientId)}</td></tr>
-                      <tr><td className="corporate-kyc-print-label">Account type</td><td>{fmt(acc.accountType)}</td></tr>
-                      <tr><td className="corporate-kyc-print-label">Primary</td><td>{acc.isPrimary ? "Yes" : "No"}</td></tr>
-                    </tbody>
-                  </table>
-                ))}
-              </>
-            )}
-
-            {(corporateKyc.directors?.length ?? 0) > 0 && (
-              <>
-                <h2 className="corporate-kyc-print-section-title">Directors</h2>
-                {corporateKyc.directors.map((dir, i) => (
-                  <table key={dir.id ?? i} className="corporate-kyc-print-table">
-                    <tbody>
-                      <tr><td className="corporate-kyc-print-label">Full name</td><td>{fmt(dir.fullName)}</td></tr>
-                      <tr><td className="corporate-kyc-print-label">PAN</td><td>{fmt(dir.pan)}</td></tr>
-                      <tr><td className="corporate-kyc-print-label">Designation</td><td>{fmt(dir.designation)}</td></tr>
-                      <tr><td className="corporate-kyc-print-label">DIN</td><td>{fmt(dir.din)}</td></tr>
-                      <tr><td className="corporate-kyc-print-label">Email</td><td>{fmt(dir.email)}</td></tr>
-                      <tr><td className="corporate-kyc-print-label">Mobile</td><td>{fmt(dir.mobile)}</td></tr>
-                    </tbody>
-                  </table>
-                ))}
-              </>
-            )}
-
-            {(corporateKyc.promoters?.length ?? 0) > 0 && (
-              <>
-                <h2 className="corporate-kyc-print-section-title">Promoters</h2>
-                {corporateKyc.promoters.map((p, i) => (
-                  <table key={p.id ?? i} className="corporate-kyc-print-table">
-                    <tbody>
-                      <tr><td className="corporate-kyc-print-label">Full name</td><td>{fmt(p.fullName)}</td></tr>
-                      <tr><td className="corporate-kyc-print-label">PAN</td><td>{fmt(p.pan)}</td></tr>
-                      <tr><td className="corporate-kyc-print-label">Designation</td><td>{fmt(p.designation)}</td></tr>
-                      <tr><td className="corporate-kyc-print-label">Email</td><td>{fmt(p.email)}</td></tr>
-                      <tr><td className="corporate-kyc-print-label">Mobile</td><td>{fmt(p.mobile)}</td></tr>
-                    </tbody>
-                  </table>
-                ))}
-              </>
-            )}
-
-            {(corporateKyc.authorisedSignatories?.length ?? 0) > 0 && (
-              <>
-                <h2 className="corporate-kyc-print-section-title">Authorised signatories</h2>
-                {corporateKyc.authorisedSignatories.map((s, i) => (
-                  <table key={s.id ?? i} className="corporate-kyc-print-table">
-                    <tbody>
-                      <tr><td className="corporate-kyc-print-label">Full name</td><td>{fmt(s.fullName)}</td></tr>
-                      <tr><td className="corporate-kyc-print-label">PAN</td><td>{fmt(s.pan)}</td></tr>
-                      <tr><td className="corporate-kyc-print-label">Designation</td><td>{fmt(s.designation)}</td></tr>
-                      <tr><td className="corporate-kyc-print-label">Email</td><td>{fmt(s.email)}</td></tr>
-                      <tr><td className="corporate-kyc-print-label">Mobile</td><td>{fmt(s.mobile)}</td></tr>
-                    </tbody>
-                  </table>
-                ))}
-              </>
-            )}
-          </>
-        )}
-      </div>
     </div>
   );
 }

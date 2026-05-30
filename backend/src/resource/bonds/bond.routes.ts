@@ -50,6 +50,7 @@ bondRoute.post("/api/bonds/:isin/deal-autofill", (req, res) =>
 bondRoute.get("/api/bonds/:isin/deal-autofill-calc", (req, res) =>
   bondController.getBondDealAutofillCalc(req, res),
 );
+
 bondRoute.post("/api/bonds/:isin/deal-autofill-calc", (req, res) =>
   bondController.getBondDealAutofillCalc(req, res),
 );

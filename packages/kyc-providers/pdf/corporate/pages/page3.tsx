@@ -208,7 +208,7 @@ function CorporateKycPdfPage3Content({ data = {} }: { data?: CorporateKycPdfData
         </Text>
         <View style={tw("flex flex-row flex-wrap gap-x-2 gap-y-1")}>
           <View style={tw("w-[31%]")}>
-            <CheckBoxRow label="Aadhar Card" checked={pdfChk(rpoi.aadhar)} />
+            <CheckBoxRow label="AAadhaarCard" checked={pdfChk(rpoi.aadhar)} />
           </View>
           <View style={tw("w-[31%]")}>
             <CheckBoxRow label="Driving License" checked={pdfChk(rpoi.drivingLicense)} />

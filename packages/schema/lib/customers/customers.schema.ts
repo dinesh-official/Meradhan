@@ -35,6 +35,7 @@ export const findManyCustomerSchema = z.object({
   search: z.string().optional(),
   accountStatus: AccountStatusEnum.optional(),
   kycStatus: z.enum([...kycStatus]).optional(),
+  userType: z.enum([...UserAccountType]).optional(),
 });
 
 export const sendEmailOtpSchema = z.object({

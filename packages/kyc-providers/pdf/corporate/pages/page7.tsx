@@ -29,9 +29,9 @@ function CorporateKycPdfPage7Content({ data = {} }: { data?: CorporateKycPdfData
 
       <Text style={{ fontSize: 8, fontWeight: 600, marginTop: 10 }}>Details of Applicant</Text>
       <View style={{ marginTop: 3 }}>
-        <InputField title="PAN:*" value={pdfStr(data.pan)} className="" />
+        <InputField title="PAN:*" value={pdfStr(data.pan)} className="w-[12%]" />
         <View style={{ marginTop: 2 }}>
-          <InputField title="Name (same as per PAN):*" value={pdfStr(data.entityName)} className="" />
+          <InputField title="Name (same as per PAN):*" value={pdfStr(data.entityName)} className="w-[35%]" />
         </View>
       </View>
 
@@ -49,10 +49,10 @@ function CorporateKycPdfPage7Content({ data = {} }: { data?: CorporateKycPdfData
             <CheckBoxRow label="No" checked={primary === false} />
           </View>
           <View style={{ marginTop: 2 }}>
-            <InputField title="DP Name:" value={pdfStr(d?.dpName)} className="" />
+            <InputField title="DP Name:" value={pdfStr(d?.dpName)} className="w-[12%]" />
           </View>
           <View style={{ marginTop: 2 }}>
-            <InputField title="DP ID:" value={pdfStr(d?.dpId)} className="" />
+            <InputField title="DP ID:" value={pdfStr(d?.dpId)} className="w-[10%]" />
           </View>
           <Text style={{ fontSize: 8, fontWeight: 600, marginTop: 4 }}>Depository:</Text>
           <View style={tw("flex flex-row gap-8 mt-1")}>
@@ -60,7 +60,7 @@ function CorporateKycPdfPage7Content({ data = {} }: { data?: CorporateKycPdfData
             <CheckBoxRow label="NSDL" checked={pdfChk(d?.depositoryNsdl)} />
           </View>
           <View style={{ marginTop: 2 }}>
-            <InputField title="Beneficiary ID:" value={pdfStr(d?.beneficiaryId)} className="" />
+            <InputField title="Beneficiary ID:" value={pdfStr(d?.beneficiaryId)} className="w-[16%]" />
           </View>
         </View>
         );
@@ -68,10 +68,10 @@ function CorporateKycPdfPage7Content({ data = {} }: { data?: CorporateKycPdfData
 
       <View style={tw("flex flex-row gap-3 mt-3 flex-wrap")}>
         <View style={tw("w-[45%]")}>
-          <InputField title="Place:" value={pdfStr(data.declarationPlace)} className="" />
+          <InputField title="Place:" value={pdfStr(data.declarationPlace)} className="w-[18%]" />
         </View>
         <View style={tw("w-[45%]")}>
-          <InputField title="Date: DD / MM / YYYY" value={pdfStr(data.declarationDate)} className="" />
+          <InputField title="Date: DD / MM / YYYY" value={pdfStr(data.declarationDate)} className="w-[68%]" />
         </View>
       </View>
 
