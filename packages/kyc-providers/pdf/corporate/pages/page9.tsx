@@ -18,7 +18,7 @@ function CorporateKycPdfPage9Content({ data = {} }: { data?: CorporateKycPdfData
 
   return (
     <View style={{ fontFamily: "Poppins" }}>
-      <LogoSvg showAll={true} />
+      <LogoSvg showAll={true} nonIndiv={true} />
 
 
 
