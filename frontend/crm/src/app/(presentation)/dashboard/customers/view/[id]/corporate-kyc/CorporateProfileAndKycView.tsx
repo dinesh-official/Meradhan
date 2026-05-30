@@ -10,7 +10,7 @@ import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import { encodeId, genMediaUrl } from "@/global/utils/url.utils";
 import apiGateway from "@root/apiGateway";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Building2, FileDown, IdCardIcon, NotebookPen, Loader2, Paperclip, Pencil, Trash2 } from "lucide-react";
+import { Building2, FileDown, IdCardIcon, NotebookPen, Loader2, Paperclip, Pencil, Trash2, OctagonX } from "lucide-react";
 import Link from "next/link";
 import {
   AddressSection,
@@ -157,6 +157,7 @@ export default function CorporateProfileAndKycView({
   const isCorporate = customer?.userType === "CORPORATE";
   const [kycPdfLoading, setKycPdfLoading] = useState(false);
   const [triggerKraOpen, setTriggerKraOpen] = useState(false);
+  const [finishKraOpen, setFinishKraOpen] = useState(false);
   const [attachmentsOpen, setAttachmentsOpen] = useState(false);
   const [attachmentLabel, setAttachmentLabel] = useState("");
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
@@ -371,6 +372,31 @@ export default function CorporateProfileAndKycView({
       const message =
         err?.response?.data?.message ??
         (err instanceof Error ? err.message : "Failed to trigger KRA");
+      toast.error(message);
+    },
+  });
+
+  const finishCorporateKraMutation = useMutation({
+    mutationFn: async () => {
+      const res = await api.finishCorporateKra(profileId);
+      return res.data.responseData;
+    },
+    onSuccess: (data) => {
+      const removed = Array.isArray(data?.removedJobIds) ? data.removedJobIds.length : 0;
+      toast.success(
+        removed > 0
+          ? `KRA process finished. Cancelled ${removed} pending job${removed === 1 ? "" : "s"}.`
+          : "KRA process finished. You can trigger KRA again now.",
+      );
+      setFinishKraOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["CorporateKraStatus", profileId] });
+      queryClient.invalidateQueries({ queryKey: ["corporateKycKraLogs", profileId] });
+      queryClient.invalidateQueries({ queryKey: ["fetchCustomer", profileId] });
+    },
+    onError: (err: { response?: { data?: { message?: string } } }) => {
+      const message =
+        err?.response?.data?.message ??
+        (err instanceof Error ? err.message : "Failed to finish KRA");
       toast.error(message);
     },
   });
@@ -631,6 +657,66 @@ export default function CorporateProfileAndKycView({
 
               {isCorporate && (
                 <AllowOnlyView permissions={["edit:customer"]}>
+                  <AlertDialog open={finishKraOpen} onOpenChange={setFinishKraOpen}>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={
+                          finishCorporateKraMutation.isPending ||
+                          !corpKraRunning ||
+                          !corporateKyc ||
+                          corpKycDataStoreId == null
+                        }
+                        title={
+                          !corpKraRunning
+                            ? "No KRA process is currently running"
+                            : "Manually finish the running KRA process so you can trigger again"
+                        }
+                        onClick={() => {
+                          if (!corpKraRunning) {
+                            toast.error("No KRA process is currently running.");
+                            return;
+                          }
+                          setFinishKraOpen(true);
+                        }}
+                      >
+                        {finishCorporateKraMutation.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <OctagonX className="h-4 w-4" />
+                        )}
+                        Finish KRA process
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Finish corporate KRA process?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will cancel any pending retries for this corporate customer,
+                          stop the persistent KRA loop, and re-enable the Trigger KRA button.
+                          A <span className="font-medium">MANUAL_FINISHED_BY_CRM</span> entry
+                          will be recorded in the KRA logs and the KRA status will be set to{" "}
+                          <span className="font-medium">MANUAL_FINISHED</span> (unless the
+                          customer is already verified).
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel disabled={finishCorporateKraMutation.isPending}>
+                          Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => finishCorporateKraMutation.mutate()}
+                          disabled={finishCorporateKraMutation.isPending || !corpKraRunning}
+                        >
+                          {finishCorporateKraMutation.isPending ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : null}
+                          Finish KRA
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                   <AlertDialog open={triggerKraOpen} onOpenChange={setTriggerKraOpen}>
                     <AlertDialogTrigger asChild>
                       <Button

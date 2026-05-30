@@ -1,7 +1,6 @@
 "use client";
 import { Input } from "@/components/ui/input";
 import { SendHorizonal, User } from "lucide-react";
-import { marked } from "marked";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useDhanGPT } from "../_hook/useDhanGPT";
@@ -92,23 +91,18 @@ function DhanGptPopup() {
                   0 === message.response.length &&
                   message.person === "BOT" ? (
                     <div className="animate-pulse text-lg ">Thinking...</div>
-                  ) : null}
-                  <div
-                    className="article text-lg"
-                    dangerouslySetInnerHTML={{
-                      __html:
-                        message.person === "BOT"
-                          ? (() => {
-                              const markdown = message.response || "";
-                              const html = marked.parse(markdown);
-                              // Ensure html is a string (not a Promise)
-                              const htmlString =
-                                typeof html === "string" ? html : "";
-                              return sanitizeStrapiHTML(htmlString);
-                            })()
-                          : sanitizeStrapiHTML(message.response),
-                    }}
-                  />
+                  ) : message.person === "BOT" ? (
+                    <div
+                      className="article text-lg"
+                      dangerouslySetInnerHTML={{
+                        __html: sanitizeStrapiHTML(message.response),
+                      }}
+                    />
+                  ) : (
+                    <div className="text-lg whitespace-pre-wrap break-words">
+                      {message.response}
+                    </div>
+                  )}
                 </div>
               ))}
               <div ref={bottomRef} />

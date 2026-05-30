@@ -492,6 +492,8 @@ ${summaryXML}
   // Parse SOAP XML response and extract inner return XML as JSON
   static async parseSoapReturn(xmlString: string) {
     // Parse SOAP XML
+    console.log("xmlString", xmlString);
+
     const parser = new xml2js.Parser({ explicitArray: false });
     const soapJson = await parser.parseStringPromise(xmlString);
 

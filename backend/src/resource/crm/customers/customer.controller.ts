@@ -11,6 +11,7 @@ import { kraWorkerQueue } from "@jobs/queue/worker_queues";
 import { CorporateKycAttachmentsRepo } from "./corporatekyc_attachments.repo";
 import z from "zod";
 import { CustomerManageAccountsService } from "@resource/customer/profile/customer.manage_accounts.service";
+import { db } from "@core/database/database";
 
 export class CustomerProfileController {
   private profileService: CustomerProfileService;
@@ -213,6 +214,128 @@ export class CustomerProfileController {
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: response,
+    });
+  }
+
+  /**
+   * CRM action: forcibly finish a running corporate KRA process.
+   *
+   * Cleans up the persistence (Redis runner + retry counter), drains any
+   * pending Bull jobs scheduled for this `(customerId, kycDataStoreId)`,
+   * appends a `MANUAL_FINISHED` log entry, and (if not already VERIFIED)
+   * updates `kraStatus = "MANUAL_FINISHED"` so the operator can
+   * re-trigger KRA. The button on the CRM page becomes enabled again
+   * because `corporateKraStatus.isRunning` flips to false on the next poll.
+   */
+  async finishCorporateKra(req: Request, res: Response): Promise<void> {
+    const customerId = Number(req.params.customerId);
+    if (Number.isNaN(customerId)) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid customer id",
+      });
+      return;
+    }
+
+    const corporateKyc = await this.corporateKycService.getByCustomerId(customerId);
+    if (!corporateKyc) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Corporate KYC data not found.",
+      });
+      return;
+    }
+
+    const kycDataStoreId = corporateKyc.id;
+    const runnerKey = `KRA_CORP:${customerId}-${kycDataStoreId}-RUNNER`;
+    const retryKey = `KRA_CORP:${customerId}-${kycDataStoreId}-RETRY`;
+
+    // Drain any pending Bull jobs targeting this customer/kyc.
+    // We can only safely remove delayed + waiting; active jobs are mid-processing
+    // and the worker's runnerKey check (cleared below) will short-circuit them.
+    let removedJobIds: Array<string | number> = [];
+    try {
+      const [delayed, waiting] = await Promise.all([
+        kraWorkerQueue.getDelayed(),
+        kraWorkerQueue.getWaiting(),
+      ]);
+      const targets = [...delayed, ...waiting].filter((job) => {
+        const d = (job?.data ?? {}) as {
+          kraType?: string;
+          customerId?: number;
+          kycDataStoreId?: number;
+        };
+        return (
+          d.kraType === "CORPORATE" &&
+          Number(d.customerId) === customerId &&
+          Number(d.kycDataStoreId) === kycDataStoreId
+        );
+      });
+      for (const job of targets) {
+        try {
+          await job.remove();
+          removedJobIds.push(job.id as string | number);
+        } catch {
+          // best-effort drain — keep going
+        }
+      }
+    } catch (err) {
+      console.error("finishCorporateKra: failed to drain queue", err);
+    }
+
+    await cacheStorage.delete(runnerKey);
+    await cacheStorage.delete(retryKey);
+
+    const crmUserId =
+      typeof (req.session as { id?: unknown } | undefined)?.id === "number"
+        ? ((req.session as { id: number }).id as number)
+        : null;
+
+    const nowIso = new Date().toISOString();
+    await db.dataBase.kraDataLogs.create({
+      data: {
+        userId: customerId,
+        kycId: kycDataStoreId,
+        stage: "MANUAL_FINISHED_BY_CRM",
+        requestData: { customerId, kycDataStoreId, crmUserId } as object,
+        responseData: {
+          message: "Corporate KRA process manually finished by CRM.",
+          removedJobIds,
+        } as object,
+        reqTime: nowIso,
+        resTime: nowIso,
+      },
+    });
+
+    // Only flip kraStatus if it isn't already VERIFIED — we don't want to
+    // downgrade a successfully verified customer.
+    const customer = await this.profileService.getCustomerProfile(customerId);
+    const currentStatus = String(customer?.kraStatus ?? "").trim().toUpperCase();
+    if (currentStatus !== "VERIFIED") {
+      await db.dataBase.customerProfileDataModel.update({
+        where: { id: customerId },
+        data: { kraStatus: "MANUAL_FINISHED" },
+      });
+    }
+
+    await createCrmActivityLog(req, {
+      action: "update",
+      details: {
+        Reason: "CORPORATE_KRA_MANUAL_FINISH",
+        customerId,
+        kycDataStoreId,
+        removedJobIds,
+        priorStatus: customer?.kraStatus ?? null,
+      },
+      entityType: "CUSTOMER",
+      entityId: customerId,
+      userId: Number(req.session?.id),
+    });
+
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: { isFinished: true, removedJobIds },
+      message: "Corporate KRA process finished.",
     });
   }
 

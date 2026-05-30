@@ -69,6 +69,17 @@ export interface TCrmCustomerInterface {
     config?: AxiosRequestConfig,
   ): Promise<AxiosResponse<BaseResponseData<{ isTriggered: boolean }>>>;
 
+  /**
+   * CRM action: forcibly finish a running corporate KRA process so the
+   * Trigger KRA button becomes enabled again. Drains pending Bull jobs,
+   * clears Redis runner/retry keys, sets `kraStatus = MANUAL_FINISHED`
+   * (unless already VERIFIED), and writes a `MANUAL_FINISHED_BY_CRM` log.
+   */
+  finishCorporateKra(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<BaseResponseData<{ isFinished: boolean; removedJobIds: Array<string | number> }>>>;
+
   listCorporateKycAttachments(
     customerId: number,
     config?: AxiosRequestConfig,
@@ -257,6 +268,19 @@ export class CrmCustomerApi implements TCrmCustomerInterface {
   ): ReturnType<TCrmCustomerInterface["triggerCorporateKra"]> {
     return this.apiClient.post<BaseResponseData<{ isTriggered: boolean }>>(
       `/crm/customer/${customerId}/corporate-kyc/kra/trigger`,
+      {},
+      config,
+    );
+  }
+
+  async finishCorporateKra(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["finishCorporateKra"]> {
+    return this.apiClient.post<
+      BaseResponseData<{ isFinished: boolean; removedJobIds: Array<string | number> }>
+    >(
+      `/crm/customer/${customerId}/corporate-kyc/kra/finish`,
       {},
       config,
     );
