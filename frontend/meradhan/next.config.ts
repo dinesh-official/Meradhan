@@ -52,7 +52,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/dhangpt/:path*",
-        destination: `http://localhost:6003/:path*`,
+        destination: `http://150.242.201.184:8008/:path*`,
       },
       {
         source: "/api/server/:path*",
