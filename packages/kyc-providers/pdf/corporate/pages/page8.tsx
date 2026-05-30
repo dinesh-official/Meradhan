@@ -12,7 +12,7 @@ const COLS = [
   { key: "name", header: "Name", width: "13%" },
   { key: "dinAadhaar", header: "DIN (For Directors)\nAadhaar\n(for others)", width: "11%" },
   { key: "address", header: "Residential /\nRegistered Address", width: "14%" },
-  { key: "relationship", header: "Relationship with\nApplicant (i.e. promoters,\nwhole me directors etc.)", width: "17%" },
+  { key: "relationship", header: "Relationship with\nApplicant (i.e. promoters,\nwhole time directors etc.)", width: "17%" },
   { key: "pep", header: "Whether\nPolitically\nExposed?", width: "12%" },
   { key: "photo", header: "Photograph", width: "17%" },
 ] as const;
