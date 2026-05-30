@@ -16,6 +16,7 @@ export const useFilterListApiHook = (filterStatus: TCustomerFilterListHook) => {
       "searchCustomersList",
       state.accountKycStatus,
       state.accountStatus,
+      state.userType,
       state.paginationIndex,
       state.search,
     ],
@@ -35,6 +36,12 @@ export const useFilterListApiHook = (filterStatus: TCustomerFilterListHook) => {
             : (state.accountKycStatus as z.infer<
                 typeof appSchema.customer.findManyCustomerSchema
               >["kycStatus"]),
+        userType:
+          state.userType === "ALL"
+            ? undefined
+            : (state.userType as z.infer<
+                typeof appSchema.customer.findManyCustomerSchema
+              >["userType"]),
       };
       const response = await customerApi.getCustomer(params);
       return response.data

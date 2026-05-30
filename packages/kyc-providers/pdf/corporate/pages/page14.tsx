@@ -24,7 +24,7 @@ function CorporateKycPdfPage14Content() {
         certified copy of the requisite KYC documents as stated below:
       </Para>
 
-      <SectionTitle mt={5}>Non-Individual KYC Form: The form consist of:</SectionTitle>
+      <SectionTitle mt={5}>Non-Individual KYC Form: The form consists of:</SectionTitle>
       <OrderedList
         items={[
           "Part 1: Non-Individual KYC form,",
