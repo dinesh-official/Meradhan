@@ -62,7 +62,7 @@ function CorporateKycPdfPage4Content({ data = {} }: { data?: CorporateKycPdfData
       </Text>
       <View style={tw("flex flex-row flex-wrap gap-x-2 gap-y-1 mt-1")}>
         <View style={tw("w-[31%]")}>
-          <CheckBoxRow label="Aadhar Card XXXX XXXX" checked={pdfChk(poi.aadhar)} />
+          <CheckBoxRow label="AAadhaarCard XXXX XXXX" checked={pdfChk(poi.aadhar)} />
         </View>
         <View style={tw("w-[31%]")}>
           <CheckBoxRow label="Voter-ID Card" checked={pdfChk(poi.voterId)} />

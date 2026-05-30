@@ -13,7 +13,7 @@ function CorporateKycPdfPage1Content({ data = {} }: { data?: CorporateKycPdfData
 
     return (
         <View style={{ fontFamily: "Poppins" }}>
-            <LogoSvg showAll={true} />
+            <LogoSvg showAll={true} nonIndiv={true} />
             <View style={{ display: "flex", flexDirection: "row", justifyContent: "flex-start", gap: 60, paddingHorizontal: 32 }} >
                 <View style={{ display: "flex", flexDirection: "row", justifyContent: "flex-start", gap: 10 }}>
                     <Text style={{ fontSize: 7, fontWeight: "bold" }}>For Office Use Only</Text>
