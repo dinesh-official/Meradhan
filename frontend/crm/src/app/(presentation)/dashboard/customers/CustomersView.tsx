@@ -84,10 +84,12 @@ function CustomersView() {
           placeholder="Search Customer..."
           kycValue={filterManager.state.accountKycStatus}
           statusValue={filterManager.state.accountStatus}
+          userTypeValue={filterManager.state.userType}
           searchValue={filterManager.state.search}
           onKycChange={filterManager.state.setAccountKycStatus}
           onSearchChange={filterManager.state.setSearch}
           onStatusChange={filterManager.state.setAccountStatus}
+          onUserTypeChange={filterManager.state.setUserType}
         />
         <CardContent>
           <CustomerTable

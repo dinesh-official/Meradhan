@@ -9,6 +9,8 @@ export interface TCustomerFilterListHook {
     setAccountStatus: Dispatch<SetStateAction<string>>;
     accountKycStatus: string;
     setAccountKycStatus: Dispatch<SetStateAction<string>>;
+    userType: string;
+    setUserType: Dispatch<SetStateAction<string>>;
     search: string;
     setSearch: Dispatch<SetStateAction<string>>;
   };
@@ -17,6 +19,7 @@ export const useCustomerFilterListHook = (): TCustomerFilterListHook => {
   const [paginationIndex, setPaginationIndex] = useState<number>(1);
   const [accountStatus, setAccountStatus] = useState<string>("ALL");
   const [accountKycStatus, setAccountKycStatus] = useState<string>("ALL");
+  const [userType, setUserType] = useState<string>("ALL");
   const [search, setSearch] = useState<string>("");
 
   function resetAll() {
@@ -24,6 +27,7 @@ export const useCustomerFilterListHook = (): TCustomerFilterListHook => {
     setSearch("");
     setAccountKycStatus("");
     setAccountStatus("");
+    setUserType("ALL");
   }
 
   useEffect(() => {
@@ -32,7 +36,7 @@ export const useCustomerFilterListHook = (): TCustomerFilterListHook => {
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, accountStatus, accountKycStatus]);
+  }, [search, accountStatus, accountKycStatus, userType]);
   return {
     state: {
       resetAll,
@@ -42,6 +46,8 @@ export const useCustomerFilterListHook = (): TCustomerFilterListHook => {
       setAccountStatus,
       accountKycStatus,
       setAccountKycStatus,
+      userType,
+      setUserType,
       search,
       setSearch,
     },
