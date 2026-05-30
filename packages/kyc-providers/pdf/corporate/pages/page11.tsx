@@ -18,7 +18,7 @@ function CorporateKycPdfPage11Content({ data = {} }: { data?: CorporateKycPdfDat
 
   return (
     <View style={{ fontFamily: "Poppins" }}>
-      <LogoSvg showAll={true} />
+      <LogoSvg showAll={true} nonIndiv={true} />
 
       <View style={{ paddingHorizontal: hx, paddingTop: 8 }}>
         <Text style={{ fontSize: 9, fontWeight: 700, color: "#002C59", marginBottom: 6 }}>
