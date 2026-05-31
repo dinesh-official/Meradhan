@@ -66,14 +66,14 @@ function HomeHeroSection() {
           </div>
 
           {/* 4. Supporting line */}
-          <p className="text-white text-lg font-normal">
+          {/* <p className="text-white text-lg font-normal">
             Bonds sound confusing? MeraDhan-GPT&apos;s got your back!
-          </p>
+          </p> */}
 
           {/* 5. DhanGPT input – wide, prominently rounded */}
-          <div className="w-full mt-1">
+          {/* <div className="w-full mt-1">
             <DhanGptHeroInput />
-          </div>
+          </div> */}
         </div>
       </div>
 
