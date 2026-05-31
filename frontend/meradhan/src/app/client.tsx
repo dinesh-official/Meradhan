@@ -22,7 +22,7 @@ function Client({ children }: { children: ReactNode }) {
             <QueryClientProvider client={queryClient}>
               <ApolloProvider client={gqlClient}>
                 {children}
-                <DhanGptPopup />
+                {/* <DhanGptPopup /> */}
                 <Toaster position="top-center" reverseOrder={false} />
                 <ReactQueryDevtools
                   initialIsOpen={false}
