@@ -189,9 +189,7 @@ export class BondService {
       ? sortingOptions[options.sortBy]
       : sortingOptions.default;
 
-    // const extendedQuery = { ...whereQuery };
     const extendedQuery = whereQuery;
-
 
     if
       (options?.all != "YES") {
