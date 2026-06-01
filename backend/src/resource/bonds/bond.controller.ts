@@ -6,6 +6,9 @@ import { appSchema } from "@root/schema";
 import { createCrmActivityLog } from "@resource/crm/auditlogs/auditlog.repo";
 import { getBondDealAutofill } from "./bond_clac";
 import { getBondInfoCalcData } from "./fill-bonds-auto";
+import logger from "@utils/logger/logger";
+import e from "express";
+import { isAxiosError } from "axios";
 
 export class BondController {
   private bondService = new BondService();
@@ -225,8 +228,18 @@ export class BondController {
         },
       });
     } catch (err: unknown) {
+
       const msg =
         err instanceof Error ? err.message : "Failed to build calc autofill";
+      if (isAxiosError(err)) {
+        if (err.response?.data.error) {
+          return res.sendResponse({
+            statusCode: HttpStatus.BAD_REQUEST,
+            success: false,
+            message: err.response?.data.error,
+          });
+        }
+      }
       if (msg.includes("not found")) {
         return res.sendResponse({
           statusCode: HttpStatus.NOT_FOUND,
