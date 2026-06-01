@@ -1199,14 +1199,19 @@ BSE Member ID: 6963`
               )}
 
               {!participantCode && (
-                <div className="rounded-lg border bg-muted/30 p-4 mt-2">
-                  <p className="text-xs font-medium text-muted-foreground mb-1">Participant code not found.</p>
-                  <p className="text-sm text-red-500">Please verify the order and try again.</p>
+                <div className="rounded-lg border border-amber-200 bg-amber-50/70 dark:border-amber-900 dark:bg-amber-950/40 p-4 mt-2">
+                  <p className="text-xs font-medium text-amber-900 dark:text-amber-100 mb-1">
+                    Participant code not found.
+                  </p>
+                  <p className="text-sm text-amber-900/90 dark:text-amber-100/90">
+                    Please verify the order before proceeding. You can still manually select a Customer
+                    below and assign this order to them — only Customers with verified KYC can be assigned.
+                  </p>
                 </div>
               )}
 
 
-              {participantCode && <div className="flex flex-wrap items-end gap-4">
+              <div className="flex flex-wrap items-end gap-4">
                 <p className="text-sm text-muted-foreground pb-2">
                   Order side:{" "}
                   <span className="font-medium text-foreground">
@@ -1216,7 +1221,11 @@ BSE Member ID: 6963`
                 </p>
                 <div className="min-w-[220px]">
                   <SelectCustomerUser
-                    placeholder="Search and select Customer..."
+                    placeholder={
+                      participantCode
+                        ? "Search and select Customer..."
+                        : "Optional — search and select a Customer to assign manually..."
+                    }
                     value={selectedCustomer ?? undefined}
                     onSelect={(customer) => {
                       setSelectedCustomer(customer);
@@ -1237,7 +1246,7 @@ BSE Member ID: 6963`
                   <UserPlus className="mr-2 h-4 w-4" />
                   {assignOrderMutation.isPending ? "Assigning..." : "Assign order to Customer"}
                 </Button>
-              </div>}
+              </div>
               {selectedCustomer && !isAutoFetchedCustomer && (
                 <div className="rounded-lg border bg-muted/30 p-4 mt-2">
                   <p className="text-xs font-medium text-muted-foreground mb-3">Selected customer</p>
