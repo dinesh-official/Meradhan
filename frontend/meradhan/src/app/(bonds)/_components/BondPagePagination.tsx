@@ -27,7 +27,7 @@ function BondPagePagination({
       getPageLink={(pageIndex) =>
         generatePageUrl({
           basePath: pathname + "/page/" + pageIndex,
-        })
+        }) + "#bonds-list"
       }
     />
   );
