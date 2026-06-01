@@ -29,8 +29,8 @@ function ToolsOfferedByMeraDhan() {
                   helps you understand bonds at your own pace—in simple Indian
                   English.
                 </p>
-                <Link href={`/dhangpt`}>
-                  <Button variant={"outline"}>Explore</Button>
+                <Link href={`#`}>
+                  <Button variant={"outline"}>Coming Soon</Button>
                 </Link>
               </div>
             </CardContent>

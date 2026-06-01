@@ -120,6 +120,7 @@ export const useDhanGPT = () => {
   const sendMessage = (text: string) => {
     const trimmed = text.trim();
     if (!trimmed) return;
+    if (loading) return;
 
     const sessionId = ensureSessionId();
     const now = new Date();
@@ -129,15 +130,20 @@ export const useDhanGPT = () => {
       timeZone: "Asia/Kolkata",
     });
 
-    setChat((prev) => {
-      const next: ChatMessage[] = [
-        ...prev,
-        { person: "USER", response: trimmed, time: timeIst },
-        { person: "BOT", response: "", time: timeIst },
-      ];
-      void askBackend(trimmed, sessionId, next.length - 1);
-      return next;
-    });
+    // The bot row will be appended right after the user row, so its index
+    // is the current length + 1. Computing this BEFORE setChat is critical:
+    // React Strict Mode (on by default in Next.js dev) re-runs setState
+    // updaters, which would double-fire `askBackend` if the side effect
+    // lived inside the updater.
+    const botIndex = chat.length + 1;
+
+    setChat((prev) => [
+      ...prev,
+      { person: "USER", response: trimmed, time: timeIst },
+      { person: "BOT", response: "", time: timeIst },
+    ]);
+
+    void askBackend(trimmed, sessionId, botIndex);
   };
 
   return { chat, loading, sendMessage, clearChat };
