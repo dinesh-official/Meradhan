@@ -69,7 +69,7 @@ function BondsView({
 
         rootUrl={pathname}
       />
-      <SectionViewWrapper>
+      <SectionViewWrapper id="bonds-list">
         {showCategoriesAbove && <BondsByCategories />}
         {options.showUpcomingBonds && <UpcomingBonds />}
         {bondFilterManager.applyFilterMutation.isPending ? (
