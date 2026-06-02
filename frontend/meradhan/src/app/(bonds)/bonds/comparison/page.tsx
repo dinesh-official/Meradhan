@@ -275,7 +275,7 @@ async function page({
               />
 
               {/* Security */}
-              <BondRow
+              {/* <BondRow
                 label="Security"
                 values={bondsData.map(
                   (val: BondDetailResponse["responseData"], i) => (
@@ -283,6 +283,20 @@ async function page({
                       {val?.instrumentName?.includes("SECURED")
                         ? "SECURED"
                         : "UNSECURED"}
+                    </span>
+                  )
+                )}
+              /> */}
+              <BondRow
+                label="Security"
+                values={bondsData.map(
+                  (val: BondDetailResponse["responseData"], i) => (
+                    <span key={"security" + i}>
+                      {val?.natureOfInstrument?.toUpperCase() === "SECURED"
+                        ? "SECURED"
+                        : val?.natureOfInstrument?.toUpperCase() === "UNSECURED"
+                          ? "UNSECURED"
+                          : "-"}
                     </span>
                   )
                 )}
