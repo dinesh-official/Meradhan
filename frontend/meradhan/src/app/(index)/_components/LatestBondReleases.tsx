@@ -100,7 +100,6 @@ function LatestBondReleases({
     "zero-coupon": zeroCoupon,
     aaa: allBonds.filter((b) => b.creditRating?.includes("AAA")),
     secured: allBonds.filter((b) =>
-      // b.natureOfInstrument?.toLowerCase().includes("secured"),
       b.natureOfInstrument?.toUpperCase() === "SECURED",
     ),
     "monthly-income": allBonds.filter(
