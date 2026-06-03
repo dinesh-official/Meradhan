@@ -512,19 +512,11 @@ export default function CorporateProfileAndKycView({
               )}
 
               {isCorporate && corporateKyc ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => void handleGeneratePdf()}
-                  disabled={kycPdfLoading}
-                  title="Generate the corporate KYC PDF"
-                >
-                  {kycPdfLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
+                <Button variant="outline" asChild title="Open the PDF generator (external service) for this customer">
+                  <Link href={`/dashboard/customers/view/${encodedId}/corporate-kyc/pdf`}>
                     <FileDown className="h-4 w-4" />
-                  )}
-                  {kycPdfLoading ? "Generating..." : "Generate PDF"}
+                    PDF (Service)
+                  </Link>
                 </Button>
               ) : null}
 
