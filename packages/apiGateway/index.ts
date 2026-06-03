@@ -12,6 +12,7 @@ export * from "./src/types/response.types";
 import * as auth from "./src/core/api/auth.api";
 
 import * as crmCustomer from "./src/core/api/crm/crmCustomer.api";
+export type * from "./src/core/api/crm/crmCustomer.api";
 import * as crmUser from "./src/core/api/crm/crmUsers.api";
 
 import * as crmFollowUpLeads from "./src/core/api/crm/crmFollowUp.api";

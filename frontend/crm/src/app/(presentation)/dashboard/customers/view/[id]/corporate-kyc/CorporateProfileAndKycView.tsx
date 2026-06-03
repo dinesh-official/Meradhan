@@ -10,7 +10,7 @@ import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import { encodeId, genMediaUrl } from "@/global/utils/url.utils";
 import apiGateway from "@root/apiGateway";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Building2, FileDown, IdCardIcon, NotebookPen, Loader2, Paperclip, Pencil, Trash2, OctagonX } from "lucide-react";
+import { Building2, FileDown, IdCardIcon, NotebookPen, Loader2, Paperclip, Pencil, ShieldCheck, Trash2, OctagonX } from "lucide-react";
 import Link from "next/link";
 import {
   AddressSection,
@@ -512,19 +512,24 @@ export default function CorporateProfileAndKycView({
               )}
 
               {isCorporate && corporateKyc ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => void handleGeneratePdf()}
-                  disabled={kycPdfLoading}
-                  title="Generate the corporate KYC PDF"
-                >
-                  {kycPdfLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
+                <Button variant="outline" asChild title="Open the PDF generator (external service) for this customer">
+                  <Link href={`/dashboard/customers/view/${encodedId}/corporate-kyc/pdf`}>
                     <FileDown className="h-4 w-4" />
-                  )}
-                  {kycPdfLoading ? "Generating..." : "Generate PDF"}
+                    PDF (Service)
+                  </Link>
+                </Button>
+              ) : null}
+
+              {isCorporate && corporateKyc ? (
+                <Button
+                  variant="outline"
+                  asChild
+                  title="Preview the exact NDML KRA payload built from this corporate KYC, plus validation issues."
+                >
+                  <Link href={`/dashboard/customers/view/${encodedId}/corporate-kyc/kra`}>
+                    <ShieldCheck className="h-4 w-4" />
+                    KRA Preview
+                  </Link>
                 </Button>
               ) : null}
 
