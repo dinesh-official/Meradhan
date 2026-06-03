@@ -55,7 +55,7 @@ import {
 
 const DEFAULT_PDF_SERVICE_URL =
   process.env.NEXT_PUBLIC_CORPORATE_PDF_SERVICE_URL ??
-  "http://localhost:5003/api/corporate/pdf";
+  "https://pdf-service.meradhan.co/api/corporate/pdf";
 
 function buildFilename(entityName: string | undefined, customerId: number): string {
   const base = (entityName ?? "corporate")
@@ -408,12 +408,12 @@ export default function CorporateKycPdfView({
             {TABS.map((t) => {
               const count =
                 t.id === "bank" ? (payload?.bankAnnexure?.accounts?.length ?? 0)
-                : t.id === "demat" ? (payload?.dematAnnexure?.accounts?.length ?? 0)
-                : t.id === "promoters" ? (payload?.annexure1?.promoters?.length ?? 0)
-                : t.id === "ubo" ? (payload?.annexure12?.ubos?.length ?? 0)
-                : t.id === "fatca" ? (payload?.annexure11?.taxResidencies?.length ?? 0)
-                : t.id === "docs" ? (payload?.pdfDocumentsUrls?.length ?? 0)
-                : 0;
+                  : t.id === "demat" ? (payload?.dematAnnexure?.accounts?.length ?? 0)
+                    : t.id === "promoters" ? (payload?.annexure1?.promoters?.length ?? 0)
+                      : t.id === "ubo" ? (payload?.annexure12?.ubos?.length ?? 0)
+                        : t.id === "fatca" ? (payload?.annexure11?.taxResidencies?.length ?? 0)
+                          : t.id === "docs" ? (payload?.pdfDocumentsUrls?.length ?? 0)
+                            : 0;
               return (
                 <TabsTrigger key={t.id} value={t.id} className="gap-1.5 text-xs">
                   {t.label}
