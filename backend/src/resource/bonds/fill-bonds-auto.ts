@@ -119,7 +119,6 @@ export const getBondInfoCalcData = async (isin: string, { yeild }: { yeild?: str
     const lastCouponDate = await getLastCouponDateFromReferenceData(isin, new Date())
     const nextCouponDate = await getNextCouponDate(isin, new Date())
     const settlementDateObj = firstWorkingDayAfter(new Date(), new Set(DEFAULT_BOND_MARKET_HOLIDAYS));
-    console.log({ nextCouponDate, lastCouponDate });
 
     const pricing = accruedInterest({
         couponRate: bond?.couponRate || 0,
