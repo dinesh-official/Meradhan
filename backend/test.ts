@@ -1,110 +1,158 @@
-const RATING_TOKENS = [
-  "AAA",
-  "AA+",
-  "AA",
-  "AA-",
-  "A+",
-  "A",
-  "A-",
-  "BBB+",
-  "BBB",
-  "BBB-",
-  "BB+",
-  "BB",
-  "BB-",
-  "B+",
-  "B",
-  "B-",
-  "C+",
-  "C",
-  "C-",
-  "D",
-  "PP-MLD",
-  "PP-MLD?",
-  "A+(CE)",
-  "A-(CE)",
-  "AAA(CE)",
-  "A(CE)",
-  "AA(CE)",
-  "BB+(CE)",
-  "BBB-(CE)",
-  "BB-(CE)",
-  "B(CE)",
-  "AA-(CE)",
-  "BB-(SO)",
-  "A1+(SO)",
-  "AA+r",
-  "AA-r",
-  "AAAr",
-  "A++",
-  "A2",
-].sort((a, b) => b.length - a.length);
 
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+import "@packages/config/env";
+import { db } from "@core/database/database";
+import { OrderService } from "@resource/customer/order/order.service";
+
+interface AssignOrderToCustomerInput {
+  customerProfileId: number;
+  isin: string;
+  quantity: number;
+  /** Optional override; otherwise the bond's current sell price is used. */
+  sellPrice?: number;
+  dryRun?: boolean;
 }
 
-function findFirstRatingToken(normalized: string): { token: string; index: number } | null {
-  for (const token of RATING_TOKENS) {
-    const escaped = escapeRegExp(token);
-    const re = new RegExp(`(^|[^A-Z0-9])(${escaped})(?=[^A-Z0-9]|$)`, "i");
-    const match = re.exec(normalized);
-    if (match && match.index !== undefined) {
-      const index = match.index + (match[1]?.length ?? 0);
-      return { token, index };
-    }
+async function createOrderForCustomer(input: AssignOrderToCustomerInput) {
+  const { customerProfileId, isin, quantity, sellPrice, dryRun = false } = input;
+
+  const customer = await db.dataBase.customerProfileDataModel.findUnique({
+    where: { id: customerProfileId },
+    select: {
+      id: true,
+      userName: true,
+      firstName: true,
+      lastName: true,
+      emailAddress: true,
+      kycStatus: true,
+      isDeleted: true,
+      bankAccounts: {
+        where: { isPrimary: true },
+        select: { id: true, bankName: true, accountNumber: true, ifscCode: true },
+      },
+    },
+  });
+
+  if (!customer) {
+    throw new Error(`Customer profile not found: id=${customerProfileId}`);
   }
-  return null;
-}
-
-function removeRatingTokens(normalized: string): string {
-  let remainder = normalized;
-  for (const token of RATING_TOKENS) {
-    const escaped = escapeRegExp(token);
-    const re = new RegExp(`(^|[^A-Z0-9])${escaped}(?=[^A-Z0-9]|$)`, "gi");
-    remainder = remainder.replace(re, " ");
+  if (customer.isDeleted) {
+    throw new Error(`Customer ${customerProfileId} is marked deleted. Aborting.`);
   }
-  return remainder.replace(/\s+/g, " ").trim();
-}
-
-function extractRatingCompanyAndDate(str: string) {
-  if (!str) return null;
-
-  let normalized = str.trim().toUpperCase();
-  const dateMatch = normalized.match(/\b\d{2}-\d{2}-\d{4}\b/);
-  const date = dateMatch ? dateMatch[0] : null;
-
-  normalized = normalized.replace(/\b\d{2}-\d{2}-\d{4}\b/g, " ");
-  normalized = normalized.replace(/\b\d{4}-\d{2}-\d{2}\b/g, " ");
-  normalized = normalized.replace(/\bDT\b/g, " ");
-  normalized = normalized.replace(/\s+/g, " ").trim();
-
-  const ratingHit = findFirstRatingToken(normalized);
-  if (!ratingHit) return null;
-
-  let companyName = normalized.slice(0, ratingHit.index).trim();
-
-  if (!companyName) {
-    companyName = removeRatingTokens(normalized);
-  } else if (companyName.includes("DT")) {
-    companyName = companyName.split("DT")[0]?.trim() || "";
+  if (customer.bankAccounts.length === 0) {
+    throw new Error(
+      `Customer ${customerProfileId} has no primary bank account. createOrder will fail.`,
+    );
   }
 
-  companyName = companyName
-    .replace(/\s+/g, " ")
-    .replace(/[^A-Z0-9&\s.-]/g, "")
-    .trim();
+  const bond = await db.dataBase.bonds.findFirst({
+    where: { isin },
+    select: { isin: true, bondName: true, sellPrice: true, faceValue: true, maturityDate: true },
+  });
+  if (!bond) {
+    throw new Error(`Bond not found for ISIN ${isin}`);
+  }
 
-  if (!companyName) return null;
+  const orderService = new OrderService();
+  const preview = await orderService.previewOrder({ isin, quantity, sellPrice });
 
-  return {
-    companyName,
-    date,
-  };
+  console.log("── Customer ─────────────────────────────────");
+  console.log({
+    id: customer.id,
+    userName: customer.userName,
+    name: [customer.firstName, customer.lastName].filter(Boolean).join(" "),
+    email: customer.emailAddress,
+    kycStatus: customer.kycStatus,
+    primaryBank: customer.bankAccounts[0]?.bankName,
+  });
+  console.log("── Bond ─────────────────────────────────────");
+  console.log({
+    isin: bond.isin,
+    bondName: bond.bondName,
+    sellPrice: bond.sellPrice,
+    faceValue: bond.faceValue,
+    maturityDate: bond.maturityDate,
+  });
+  console.log("── Preview ──────────────────────────────────");
+  console.log({
+    quantity: preview.quantity,
+    unitPrice: preview.unitPrice,
+    subTotal: preview.subTotal,
+    stampDuty: preview.stampDuty,
+    totalAmount: preview.totalAmount,
+  });
+
+  if (dryRun) {
+    console.log("\n[dryRun=true] No order written.");
+    return;
+  }
+
+  const result = await orderService.createOrder(
+    customerProfileId,
+    { isin, quantity, sellPrice },
+    undefined,
+    true,
+  );
+
+  console.log("\n✅ Order created");
+  console.log(result);
+
+  const saved = await db.dataBase.order.findUnique({
+    where: { id: result.orderId },
+    select: {
+      id: true,
+      orderNumber: true,
+      customerProfileId: true,
+      isin: true,
+      bondName: true,
+      quantity: true,
+      totalAmount: true,
+      status: true,
+      paymentStatus: true,
+      paymentOrderId: true,
+      metadata: true,
+      createdAt: true,
+    },
+  });
+  console.log("\n── Persisted row ────────────────────────────");
+  console.log(saved);
 }
 
-console.log(
-  extractRatingCompanyAndDate(
-    "A- INDIA RATING AND RESEARCH PVT. LTD DT 24-12-2024",
-  ),
-);
+async function main() {
+  // ────────────────────────────────────────────────────────────────────
+  // EDIT THESE BEFORE RUNNING
+  // ────────────────────────────────────────────────────────────────────
+  const CUSTOMER_PROFILE_UCC = ""; // UCC of the customer to create the order for
+  const ISIN = "INE413U07426"; // ISIN of the bond to order
+  const QUANTITY = 1; // number of units to order
+  const SELL_PRICE: number | undefined = 99.0997; // sell price of the bond to order 0 - 100
+  const DRY_RUN = false; // true to skip actual order creation
+  // ────────────────────────────────────────────────────────────────────
+
+  const Customer = await db.dataBase.customerProfileDataModel.findUnique({
+    where: { userName: CUSTOMER_PROFILE_UCC },
+    select: { id: true },
+  });
+
+  if (!Customer) {
+    throw new Error(`Customer not found for UCC ${CUSTOMER_PROFILE_UCC}`);
+  }
+
+
+  await db.dataBase.$connect();
+  try {
+    await createOrderForCustomer({
+      customerProfileId: Customer?.id,
+      isin: ISIN,
+      quantity: QUANTITY,
+      sellPrice: SELL_PRICE,
+      dryRun: DRY_RUN,
+    });
+  } finally {
+    await db.dataBase.$disconnect();
+  }
+}
+
+main().catch((err) => {
+  console.error("❌ Script failed:", err);
+  process.exit(1);
+});

@@ -46,6 +46,7 @@ export class BondService {
         orderBy: { uploadedAt: "desc" },
         select: { id: true },
       });
+      console.log({ batch });
       if (!batch) return map;
 
       const lines = await db.dataBase.crmInventoryStockLine.findMany({
