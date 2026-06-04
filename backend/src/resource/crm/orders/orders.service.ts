@@ -659,11 +659,13 @@ export class CrmOrdersService {
   async createOrderFromRfq(
     orderNumber: string,
     customerId: number,
-    options?: { orderSide?: "BUY" | "SELL" },
+    options?: { orderSide?: "BUY" | "SELL", skipExistsCheck?: boolean },
   ) {
-    const existingOrder = await this.getCustomerByOrderNumber(orderNumber);
-    if (existingOrder) {
-      throw new Error(`Customer already exists for order number ${orderNumber}`);
+    if (!options?.skipExistsCheck) {
+      const existingOrder = await this.getCustomerByOrderNumber(orderNumber);
+      if (existingOrder) {
+        throw new Error(`Customer already exists for order number ${orderNumber}`);
+      }
     }
 
     const customerProfile = await db.dataBase.customerProfileDataModel.findUnique({

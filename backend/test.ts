@@ -2,18 +2,17 @@
 import "@packages/config/env";
 import { db } from "@core/database/database";
 import { OrderService } from "@resource/customer/order/order.service";
+import { CrmOrdersService } from "@resource/crm/orders/orders.service";
 
 interface AssignOrderToCustomerInput {
   customerProfileId: number;
   isin: string;
-  quantity: number;
-  /** Optional override; otherwise the bond's current sell price is used. */
-  sellPrice?: number;
+  orderNumber: string;
   dryRun?: boolean;
 }
 
 async function createOrderForCustomer(input: AssignOrderToCustomerInput) {
-  const { customerProfileId, isin, quantity, sellPrice, dryRun = false } = input;
+  const { customerProfileId, isin, orderNumber, dryRun = false } = input;
 
   const customer = await db.dataBase.customerProfileDataModel.findUnique({
     where: { id: customerProfileId },
@@ -52,8 +51,7 @@ async function createOrderForCustomer(input: AssignOrderToCustomerInput) {
     throw new Error(`Bond not found for ISIN ${isin}`);
   }
 
-  const orderService = new OrderService();
-  const preview = await orderService.previewOrder({ isin, quantity, sellPrice });
+  const orderService = new CrmOrdersService();
 
   console.log("── Customer ─────────────────────────────────");
   console.log({
@@ -72,32 +70,24 @@ async function createOrderForCustomer(input: AssignOrderToCustomerInput) {
     faceValue: bond.faceValue,
     maturityDate: bond.maturityDate,
   });
-  console.log("── Preview ──────────────────────────────────");
-  console.log({
-    quantity: preview.quantity,
-    unitPrice: preview.unitPrice,
-    subTotal: preview.subTotal,
-    stampDuty: preview.stampDuty,
-    totalAmount: preview.totalAmount,
-  });
+
 
   if (dryRun) {
     console.log("\n[dryRun=true] No order written.");
     return;
   }
 
-  const result = await orderService.createOrder(
-    customerProfileId,
-    { isin, quantity, sellPrice },
-    undefined,
-    true,
+  const result = await orderService.createOrderFromRfq(
+    orderNumber,
+    customer.id,
+    { orderSide: "BUY", skipExistsCheck: true },
   );
 
   console.log("\n✅ Order created");
   console.log(result);
 
   const saved = await db.dataBase.order.findUnique({
-    where: { id: result.orderId },
+    where: { id: result.id },
     select: {
       id: true,
       orderNumber: true,
@@ -121,10 +111,9 @@ async function main() {
   // ────────────────────────────────────────────────────────────────────
   // EDIT THESE BEFORE RUNNING
   // ────────────────────────────────────────────────────────────────────
-  const CUSTOMER_PROFILE_UCC = ""; // UCC of the customer to create the order for
-  const ISIN = "INE413U07426"; // ISIN of the bond to order
-  const QUANTITY = 1; // number of units to order
-  const SELL_PRICE: number | undefined = 99.0997; // sell price of the bond to order 0 - 100
+  const CUSTOMER_PROFILE_UCC = "MD1HRXWON"; // UCC of the customer to create the order for
+  const ISIN = "INE0NES07279"; // ISIN of the bond to order
+  const ORDER_NUMBER = "260529990010538"; // Order number of the order to create
   const DRY_RUN = false; // true to skip actual order creation
   // ────────────────────────────────────────────────────────────────────
 
@@ -143,8 +132,7 @@ async function main() {
     await createOrderForCustomer({
       customerProfileId: Customer?.id,
       isin: ISIN,
-      quantity: QUANTITY,
-      sellPrice: SELL_PRICE,
+      orderNumber: ORDER_NUMBER,
       dryRun: DRY_RUN,
     });
   } finally {

@@ -188,7 +188,7 @@ export class OrderService {
     customerId: number,
     item: OrderPreviewItem,
     _legacyClientOrderId?: string,
-    _skipPgMode?: boolean
+    _skipPgMode?: boolean,
   ) {
     await this.customerProfileManager.assertCustomerCanPlaceOrder(customerId);
 
