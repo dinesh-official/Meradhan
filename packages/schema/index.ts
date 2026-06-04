@@ -18,6 +18,8 @@ import * as customerKycSchema from "./lib/customers/kyc.schema";
 export {
   createCorporateKycSchema,
   updateCorporateKycSchema,
+  triggerCorporateKraSchema,
+  CorporateKraPastExecutionEnum,
   type CreateCorporateKycPayload,
   type UpdateCorporateKycPayload,
   type CorporateKycBankAccountPayload,
@@ -25,6 +27,8 @@ export {
   type CorporateKycDirectorPayload,
   type CorporateKycPromoterPayload,
   type CorporateKycAuthorisedSignatoryPayload,
+  type CorporateKraPastExecution,
+  type TriggerCorporateKraPayload,
 } from "./lib/customers/corporateKyc.schema";
 
 export {

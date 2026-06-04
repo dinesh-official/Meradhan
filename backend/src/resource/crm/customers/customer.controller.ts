@@ -683,10 +683,14 @@ export class CustomerProfileController {
       return;
     }
 
+    const { pastExecution, delayMs = 0 } =
+      appSchema.customer.triggerCorporateKraSchema.parse(req.body ?? {});
+
     const TTL_72_HOURS = 72 * 60 * 60;
     const kycDataStoreId = corporateKyc.id;
-    const cachedKey = `KRA_CORP:${customerId}-${kycDataStoreId}-RUNNER`;
-    const runner = await cacheStorage.get<string>(cachedKey);
+    const runnerKey = `KRA_CORP:${customerId}-${kycDataStoreId}-RUNNER`;
+    const lastTaskKey = `KRA_CORP:${customerId}-${kycDataStoreId}`;
+    const runner = await cacheStorage.get<string>(runnerKey);
     if (runner) {
       res.sendResponse({
         statusCode: HttpStatus.BAD_REQUEST,
@@ -695,15 +699,24 @@ export class CustomerProfileController {
       return;
     }
 
-    await cacheStorage.set(cachedKey, new Date().toISOString(), TTL_72_HOURS);
+    if (pastExecution === "NONE") {
+      await cacheStorage.delete(lastTaskKey);
+    } else {
+      const cacheValue =
+        pastExecution === "CBRICS_ONLY" ? "MODIFY" : pastExecution;
+      await cacheStorage.set(lastTaskKey, cacheValue, TTL_72_HOURS);
+    }
+
+    await cacheStorage.set(runnerKey, new Date().toISOString(), TTL_72_HOURS);
     await kraWorkerQueue.add(
       {
         kraType: "CORPORATE",
         customerId,
         kycDataStoreId,
         stage: "ENQUIRY_KRA",
+        ...(pastExecution === "CBRICS_ONLY" ? { cbricsOnly: true } : {}),
       },
-      { attempts: 1, delay: 0 },
+      { attempts: 1, delay: delayMs },
     );
 
     res.sendResponse({
