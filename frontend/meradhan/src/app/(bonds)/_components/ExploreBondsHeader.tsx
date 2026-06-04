@@ -365,6 +365,7 @@ function ExploreBondsHeader({
               <div
                 className="flex items-center gap-2 bg-red-500 hover:bg-red-600 px-3 py-1 rounded-full text-white text-sm transition-colors cursor-pointer"
                 onClick={() => {
+                  manager.applyFilterMutation.reset();
                   // manager.setSearch("");
                   // manager.setMaturity([]);
                   // manager.setRating([]);
