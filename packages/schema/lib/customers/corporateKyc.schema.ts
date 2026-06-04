@@ -188,3 +188,18 @@ export type CorporateKycPromoterPayload = z.infer<
 export type CorporateKycAuthorisedSignatoryPayload = z.infer<
   typeof corporateKycAuthorisedSignatorySchema
 >;
+
+export const CorporateKraPastExecutionEnum = z.enum([
+  "MODIFY",
+  "REGISTER",
+  "NONE",
+  "CBRICS_ONLY",
+]);
+
+export const triggerCorporateKraSchema = z.object({
+  pastExecution: CorporateKraPastExecutionEnum,
+  delayMs: z.number().int().nonnegative().optional(),
+});
+
+export type CorporateKraPastExecution = z.infer<typeof CorporateKraPastExecutionEnum>;
+export type TriggerCorporateKraPayload = z.infer<typeof triggerCorporateKraSchema>;

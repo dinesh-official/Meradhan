@@ -80,6 +80,18 @@ crmCustomersRoutes.get(
   (req, res) => controller.corporateKraStatus(req, res),
 );
 
+crmCustomersRoutes.get(
+  "/api/crm/customer/:customerId/corporate-kyc/kra/preview",
+  allowAccessMiddleware("ADMIN", "USER"),
+  (req, res) => controller.corporateKraPreview(req, res),
+);
+
+crmCustomersRoutes.post(
+  "/api/crm/customer/:customerId/corporate-kyc/kra/download",
+  allowAccessMiddleware("ADMIN"),
+  (req, res) => controller.corporateKraDownload(req, res),
+);
+
 crmCustomersRoutes.post(
   "/api/crm/customer/:customerId/corporate-kyc/kra/trigger",
   allowAccessMiddleware("ADMIN"),

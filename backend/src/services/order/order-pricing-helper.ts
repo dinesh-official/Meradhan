@@ -674,6 +674,19 @@ export const getNextCouponDate = async (isin: string, settlement: Date) => {
     return nextCouponDate ? toUTCISODate(nextCouponDate) : null;
 };
 
+export const getLastCouponDateFromReferenceData = async (isin: string, settlement: Date) => {
+    const settlementDt = new Date(settlement);
+    if (Number.isNaN(settlementDt.getTime())) return null;
+
+    const rows = await db.dataBase.bondReferenceCouponPaymentDate.findMany({
+        where: { isin, dueDate: { lt: settlementDt } },
+        orderBy: { dueDate: "desc" },
+    });
+
+    const lastCouponDate = rows[0]?.dueDate ?? null;
+    return lastCouponDate ? toUTCISODate(lastCouponDate) : null;
+};
+
 // console.log(getNextCouponDate("INE0NES07279", new Date("2026-04-11")));
 
 

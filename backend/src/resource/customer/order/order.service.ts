@@ -161,8 +161,12 @@ export class OrderService {
     isin: string,
     quantity: number,
   ) {
+    console.log(isin);
+
     const available = await bondService.getLatestCrmInventoryWholeUnitsForIsin(isin);
     const qty = Math.floor(Number(quantity));
+
+    console.log({ available, qty });
     if (!Number.isFinite(qty) || qty < 1) {
       throw new AppError("Invalid quantity", { code: "INVALID_QUANTITY" });
     }
@@ -184,7 +188,7 @@ export class OrderService {
     customerId: number,
     item: OrderPreviewItem,
     _legacyClientOrderId?: string,
-    _skipPgMode?: boolean
+    _skipPgMode?: boolean,
   ) {
     await this.customerProfileManager.assertCustomerCanPlaceOrder(customerId);
 

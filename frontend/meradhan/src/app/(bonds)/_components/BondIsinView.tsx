@@ -33,9 +33,9 @@ export default function BondIsinView({
   const callText = bond.putCallOptionDetails?.split("Call:")?.[1]?.trim() ?? "";
 
   const isSecured = () => {
-    if (bond.instrumentName?.includes("UNSECURED")) {
+    if (bond.natureOfInstrument?.includes("UNSECURED")) {
       return "Unsecured";
-    } else if (bond.instrumentName?.includes("SECURED")) {
+    } else if (bond.natureOfInstrument?.includes("SECURED")) {
       return "Secured";
     }
     return "-";

@@ -12,18 +12,34 @@ import { CorporateKycAttachmentsRepo } from "./corporatekyc_attachments.repo";
 import z from "zod";
 import { CustomerManageAccountsService } from "@resource/customer/profile/customer.manage_accounts.service";
 import { db } from "@core/database/database";
+import {
+  buildCorporateKraFieldMap,
+  buildCorporateKraPayload,
+  validateCorporateKycForKra,
+  type CorporateKycInputForKra,
+} from "@jobs/kra_worker/corporateKraPayload";
+import {
+  decodeKycStatus,
+  decodeRejectionReason,
+  NDML_CODE_REFERENCE,
+} from "@jobs/kra_worker/kraCodes";
+import { buildKraNonIndividualAppReqRootXml } from "kyc-providers";
+import { env } from "@packages/config/env";
+import { CorporateKraDownloadService } from "@jobs/kra_worker/corporateKraDownload.service";
 
 export class CustomerProfileController {
   private profileService: CustomerProfileService;
   private corporateKycService: CorporateKycService;
   private corporateKycAttachmentsRepo: CorporateKycAttachmentsRepo;
   private manageAccountsService: CustomerManageAccountsService;
+  private corporateKraDownloadService: CorporateKraDownloadService;
   constructor() {
     const repo = new CustomerProfileRepo();
     this.profileService = new CustomerProfileService(repo);
     this.corporateKycService = new CorporateKycService(new CorporateKycRepo());
     this.corporateKycAttachmentsRepo = new CorporateKycAttachmentsRepo();
     this.manageAccountsService = new CustomerManageAccountsService();
+    this.corporateKraDownloadService = new CorporateKraDownloadService();
   }
 
   async createCustomer(req: Request, res: Response): Promise<void> {
@@ -339,6 +355,259 @@ export class CustomerProfileController {
     });
   }
 
+  /**
+   * Build a *preview* of the exact NDML Non-Individual KRA payload that
+   * `CorporateKraWorkerService` would send for this customer, together with
+   * a validation report and a row-by-row source → XML mapping the CRM page
+   * can render. No SOAP call is made.
+   */
+  async corporateKraPreview(req: Request, res: Response): Promise<void> {
+    const customerId = Number(req.params.customerId);
+    if (Number.isNaN(customerId)) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid customer id",
+      });
+      return;
+    }
+
+    const corporateKyc = await db.dataBase.corporateKycModel.findUnique({
+      where: { customerProfileDataModelId: customerId },
+      include: {
+        authorisedSignatories: true,
+        directors: true,
+        promoters: true,
+      },
+    });
+
+    if (!corporateKyc) {
+      res.sendResponse({
+        statusCode: HttpStatus.OK,
+        responseData: {
+          hasCorporateKyc: false,
+          isRunning: false,
+          kycDataStoreId: null,
+        },
+      });
+      return;
+    }
+
+    const input: CorporateKycInputForKra = {
+      id: corporateKyc.id,
+      entityName: corporateKyc.entityName,
+      dateOfIncorporation: corporateKyc.dateOfIncorporation,
+      dateOfCommencementOfBusiness: corporateKyc.dateOfCommencementOfBusiness,
+      countryOfIncorporation: corporateKyc.countryOfIncorporation,
+      placeOfIncorporation: corporateKyc.placeOfIncorporation,
+      panNumber: corporateKyc.panNumber,
+      cinOrRegistrationNumber: corporateKyc.cinOrRegistrationNumber,
+      entityConstitutionType: corporateKyc.entityConstitutionType,
+      annualIncome: corporateKyc.annualIncome,
+      fatcaApplicable: corporateKyc.fatcaApplicable,
+      correspondenceLine1: corporateKyc.correspondenceLine1,
+      correspondenceLine2: corporateKyc.correspondenceLine2,
+      correspondenceLine3: corporateKyc.correspondenceLine3,
+      correspondenceCity: corporateKyc.correspondenceCity,
+      correspondencePinCode: corporateKyc.correspondencePinCode,
+      correspondenceState: corporateKyc.correspondenceState,
+      correspondenceAddressProofType: corporateKyc.correspondenceAddressProofType,
+      registeredLine1: corporateKyc.registeredLine1,
+      registeredLine2: corporateKyc.registeredLine2,
+      registeredLine3: corporateKyc.registeredLine3,
+      registeredCity: corporateKyc.registeredCity,
+      registeredPinCode: corporateKyc.registeredPinCode,
+      registeredState: corporateKyc.registeredState,
+      registeredAddressProofType: corporateKyc.registeredAddressProofType,
+      authorisedSignatories: corporateKyc.authorisedSignatories,
+      directors: corporateKyc.directors,
+      promoters: corporateKyc.promoters,
+    };
+
+    const built = buildCorporateKraPayload(input);
+    const fieldMap = buildCorporateKraFieldMap(input, built);
+    const issues = validateCorporateKycForKra(input);
+
+    // ── Build the exact XML the SDK would send to NDML, with credentials
+    //    masked so it is safe to render in the CRM UI. ───────────────────
+    const innerXml = buildKraNonIndividualAppReqRootXml(built.payload);
+    const MASK = "***";
+    const userName = env.KRA_USERNAME;
+    const okraCdOrMiId = env.KRA_OKRA_CD_MI_ID;
+
+    const registerByteArray = Array.from(Buffer.from(innerXml, "utf8"));
+    const soapRegisterXml = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:com="http://common.nsdl.com">
+  <soapenv:Header/>
+  <soapenv:Body>
+    <com:registration>
+      ${registerByteArray.map((r) => `<input>${r}</input>`).join("")}
+      <userId>${userName}</userId>
+      <userPassword>${MASK}</userPassword>
+      <passKey>${MASK}</passKey>
+      <okraCdOrMiId>${okraCdOrMiId}</okraCdOrMiId>
+    </com:registration>
+  </soapenv:Body>
+</soapenv:Envelope>`;
+
+    const soapModifyXml = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://service.webservice.pan.kra.ndml.com/">
+  <soapenv:Header/>
+  <soapenv:Body>
+    <ser:processModification>
+      <arg0><![CDATA[${innerXml.trim()}]]></arg0>
+      <arg1>${userName}</arg1>
+      <arg2>${MASK}</arg2>
+      <arg3>${MASK}</arg3>
+    </ser:processModification>
+  </soapenv:Body>
+</soapenv:Envelope>`;
+
+    const runnerKey = `KRA_CORP:${customerId}-${corporateKyc.id}-RUNNER`;
+    const runner = await cacheStorage.get<string>(runnerKey);
+
+    const lastDownload = await this.corporateKraDownloadService.getLastManualDownload(customerId);
+
+    const recentLogs = await db.dataBase.kraDataLogs.findMany({
+      where: { userId: customerId, kycId: corporateKyc.id },
+      orderBy: { id: "desc" },
+      take: 25,
+    });
+
+    // Walk each log's `responseData` and pull out any NDML status / error codes
+    // we can decode into plain English for the CRM UI.
+    const annotatedLogs = recentLogs.map((l) => {
+      const decoded: Array<{ field: string; code: string; label?: string }> = [];
+      const collect = (node: unknown, path: string) => {
+        if (node == null) return;
+        if (typeof node !== "object") return;
+        if (Array.isArray(node)) {
+          node.forEach((item, i) => collect(item, `${path}[${i}]`));
+          return;
+        }
+        for (const [key, value] of Object.entries(node as Record<string, unknown>)) {
+          const nextPath = path ? `${path}.${key}` : key;
+          if (typeof value === "string" || typeof value === "number") {
+            const v = String(value).trim();
+            if (!v) continue;
+            if (key === "APP_STATUS" || key === "APP_ADDLDATA_STATUS") {
+              const label = decodeKycStatus(v);
+              if (label) decoded.push({ field: nextPath, code: v, label });
+            } else if (key === "APP_ERROR_DESC" || key === "APP_ADDLDATA_ERROR_DESC") {
+              const label = decodeRejectionReason(v);
+              if (label) decoded.push({ field: nextPath, code: v, label });
+            }
+          } else if (typeof value === "object") {
+            collect(value, nextPath);
+          }
+        }
+      };
+      collect(l.responseData, "");
+      return { ...l, decoded };
+    });
+
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: {
+        hasCorporateKyc: true,
+        kycDataStoreId: corporateKyc.id,
+        isRunning: Boolean(runner),
+        runnerStartedAt: runner ?? null,
+        kraStatus: (await db.dataBase.customerProfileDataModel.findUnique({
+          where: { id: customerId },
+          select: { kraStatus: true, kycStatus: true, verifyDate: true },
+        })) ?? null,
+        validation: {
+          errors: issues.filter((i) => i.severity === "ERROR"),
+          warnings: issues.filter((i) => i.severity === "WARN"),
+          canTrigger: issues.every((i) => i.severity !== "ERROR"),
+        },
+        mapping: {
+          fields: fieldMap,
+          notes: built.mappingNotes,
+        },
+        payload: built.payload,
+        xml: {
+          inner: innerXml,
+          soapRegister: soapRegisterXml,
+          soapModify: soapModifyXml,
+          credentialsMasked: true,
+          soapAction: {
+            register: "registration",
+            modify: "processModification",
+          },
+        },
+        codeReference: NDML_CODE_REFERENCE,
+        lastDownload: lastDownload
+          ? {
+              logId: lastDownload.id,
+              kycId: lastDownload.kycId,
+              storedAt: (lastDownload.resTime ?? lastDownload.reqTime ?? new Date()).toISOString(),
+              summary: lastDownload.summary,
+              request: lastDownload.requestData,
+              response: lastDownload.responseData,
+            }
+          : null,
+        recentLogs: annotatedLogs,
+      },
+    });
+  }
+
+  /**
+   * Manually trigger a single corporate KRA download for this customer.
+   *
+   *   - Loads the corporate KYC.
+   *   - Calls NDML's `nonIndividualPanDownloadDetailsComplete` with the PAN +
+   *     DOI from the corporate KYC and the configured KRA mobile.
+   *   - Writes a `kraDataLogs` row with stage = `CORPORATE_MANUAL_DOWNLOAD`
+   *     (or `..._FAILED` on error so operators still have a trail).
+   *
+   * Does NOT touch `kraStatus` or enqueue the worker — this is purely a
+   * "fetch & remember" operation for the CRM "KRA preview" page.
+   */
+  async corporateKraDownload(req: Request, res: Response): Promise<void> {
+    const customerId = Number(req.params.customerId);
+    if (Number.isNaN(customerId)) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid customer id",
+      });
+      return;
+    }
+
+    try {
+      const result = await this.corporateKraDownloadService.downloadOnce(customerId);
+
+      await createCrmActivityLog(req, {
+        action: "create",
+        details: {
+          Reason: "CORPORATE_KRA_MANUAL_DOWNLOAD",
+          CustomerId: String(customerId),
+          KraLogId: String(result.logId),
+          NdmlStatus: result.summary.status.label ?? result.summary.status.code ?? "",
+        },
+        entityType: "CUSTOMER",
+        entityId: customerId,
+        userId: Number(req.session?.id),
+      });
+
+      res.sendResponse({
+        statusCode: HttpStatus.OK,
+        responseData: result,
+      });
+    } catch (err) {
+      if (err instanceof AppError) {
+        res.sendResponse({ statusCode: err.statusCode, message: err.message });
+        return;
+      }
+      console.error("Corporate KRA manual download failed:", err);
+      res.sendResponse({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message:
+          err instanceof Error
+            ? err.message
+            : "Failed to download corporate KRA data",
+      });
+    }
+  }
+
   async corporateKraStatus(req: Request, res: Response): Promise<void> {
     const customerId = Number(req.params.customerId);
     if (Number.isNaN(customerId)) {
@@ -414,10 +683,14 @@ export class CustomerProfileController {
       return;
     }
 
+    const { pastExecution, delayMs = 0 } =
+      appSchema.customer.triggerCorporateKraSchema.parse(req.body ?? {});
+
     const TTL_72_HOURS = 72 * 60 * 60;
     const kycDataStoreId = corporateKyc.id;
-    const cachedKey = `KRA_CORP:${customerId}-${kycDataStoreId}-RUNNER`;
-    const runner = await cacheStorage.get<string>(cachedKey);
+    const runnerKey = `KRA_CORP:${customerId}-${kycDataStoreId}-RUNNER`;
+    const lastTaskKey = `KRA_CORP:${customerId}-${kycDataStoreId}`;
+    const runner = await cacheStorage.get<string>(runnerKey);
     if (runner) {
       res.sendResponse({
         statusCode: HttpStatus.BAD_REQUEST,
@@ -426,15 +699,24 @@ export class CustomerProfileController {
       return;
     }
 
-    await cacheStorage.set(cachedKey, new Date().toISOString(), TTL_72_HOURS);
+    if (pastExecution === "NONE") {
+      await cacheStorage.delete(lastTaskKey);
+    } else {
+      const cacheValue =
+        pastExecution === "CBRICS_ONLY" ? "MODIFY" : pastExecution;
+      await cacheStorage.set(lastTaskKey, cacheValue, TTL_72_HOURS);
+    }
+
+    await cacheStorage.set(runnerKey, new Date().toISOString(), TTL_72_HOURS);
     await kraWorkerQueue.add(
       {
         kraType: "CORPORATE",
         customerId,
         kycDataStoreId,
         stage: "ENQUIRY_KRA",
+        ...(pastExecution === "CBRICS_ONLY" ? { cbricsOnly: true } : {}),
       },
-      { attempts: 1, delay: 0 },
+      { attempts: 1, delay: delayMs },
     );
 
     res.sendResponse({
