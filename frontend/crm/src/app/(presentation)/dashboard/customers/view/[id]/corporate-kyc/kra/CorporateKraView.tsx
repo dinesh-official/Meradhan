@@ -14,6 +14,16 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import {
   Table,
@@ -28,10 +38,15 @@ import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import { encodeId } from "@/global/utils/url.utils";
-import apiGateway, { type CorporateKraPreviewResponse } from "@root/apiGateway";
+import apiGateway, {
+  type CorporateKraPastExecution,
+  type CorporateKraPreviewResponse,
+  type TriggerCorporateKraPayload,
+} from "@root/apiGateway";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
+  Check,
   CheckCircle2,
   ChevronLeft,
   Clock,
@@ -100,6 +115,25 @@ export default function CorporateKraView({ profileId }: { profileId: number }) {
   const [downloadOpen, setDownloadOpen] = useState(false);
   const [showFullDownload, setShowFullDownload] = useState(false);
 
+  const pastExecutionOptions: CorporateKraPastExecution[] = [
+    "MODIFY",
+    "REGISTER",
+    "NONE",
+    "CBRICS_ONLY",
+  ];
+  const pastExecutionLabels: Record<CorporateKraPastExecution, string> = {
+    MODIFY: "Modify KRA",
+    REGISTER: "Fresh KRA (register)",
+    NONE: "None",
+    CBRICS_ONLY: "CBRICS only",
+  };
+  const [pastExecution, setPastExecution] =
+    useState<CorporateKraPastExecution>("MODIFY");
+  const [confirmValue, setConfirmValue] = useState("");
+  const confirmationRequiredValue = "CONFIRM";
+  const isConfirmValid =
+    confirmValue.trim().toUpperCase() === confirmationRequiredValue;
+
   const previewQuery = useQuery({
     queryKey: ["corporateKraPreview", profileId],
     queryFn: async () => (await api.corporateKraPreview(profileId)).data.responseData,
@@ -112,11 +146,21 @@ export default function CorporateKraView({ profileId }: { profileId: number }) {
   });
 
   const triggerMutation = useMutation({
-    mutationFn: async () => (await api.triggerCorporateKra(profileId)).data.responseData,
+    mutationFn: async (payload: TriggerCorporateKraPayload) =>
+      (await api.triggerCorporateKra(profileId, payload)).data.responseData,
     onSuccess: () => {
       toast.success("Corporate KRA triggered.");
       setTriggerOpen(false);
-      void queryClient.invalidateQueries({ queryKey: ["corporateKraPreview", profileId] });
+      setConfirmValue("");
+      void queryClient.invalidateQueries({
+        queryKey: ["corporateKraPreview", profileId],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["CorporateKraStatus", profileId],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["corporateKycKraLogs", profileId],
+      });
     },
     onError: (err: { response?: { data?: { message?: string } } }) => {
       toast.error(
@@ -125,6 +169,24 @@ export default function CorporateKraView({ profileId }: { profileId: number }) {
       );
     },
   });
+
+  const handleConfirmTriggerCorporateKra = () => {
+    const preview = previewQuery.data;
+    if (!preview || !("validation" in preview)) return;
+    if (preview.isRunning) {
+      toast.error("KRA process is already running.");
+      return;
+    }
+    if (!preview.validation.canTrigger) {
+      toast.error("Fix the highlighted validation errors first.");
+      return;
+    }
+    if (!isConfirmValid) {
+      toast.error("Please type CONFIRM to proceed.");
+      return;
+    }
+    triggerMutation.mutate({ pastExecution });
+  };
 
   const downloadMutation = useMutation({
     mutationFn: async () => (await api.downloadCorporateKra(profileId)).data.responseData,
@@ -304,58 +366,147 @@ export default function CorporateKraView({ profileId }: { profileId: number }) {
                   </AlertDialogContent>
                 </AlertDialog>
 
-                <AlertDialog open={triggerOpen} onOpenChange={setTriggerOpen}>
-                  <Button
-                    variant="default"
-                    disabled={!canTrigger || triggerMutation.isPending}
-                    title={
-                      data.isRunning
-                        ? "KRA process is already running"
-                        : !data.validation.canTrigger
-                          ? "Fix validation errors first"
-                          : undefined
+                <Button
+                  variant="default"
+                  disabled={!canTrigger || triggerMutation.isPending}
+                  title={
+                    data.isRunning
+                      ? "KRA process is already running"
+                      : !data.validation.canTrigger
+                        ? "Fix validation errors first"
+                        : undefined
+                  }
+                  onClick={() => {
+                    if (data.isRunning) {
+                      toast.error("KRA process is already running.");
+                      return;
                     }
-                    onClick={() => {
-                      if (data.isRunning) {
-                        toast.error("KRA process is already running.");
-                        return;
-                      }
-                      if (!data.validation.canTrigger) {
-                        toast.error("Fix the highlighted validation errors first.");
-                        return;
-                      }
-                      setTriggerOpen(true);
-                    }}
-                  >
-                    {triggerMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Play className="h-4 w-4" />
-                    )}
-                    Trigger KRA
-                  </Button>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Trigger corporate KRA?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        The worker will enqueue an NDML Non-Individual enquiry → register → download
-                        → modify → CBRICS register loop using the payload shown on this page.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel disabled={triggerMutation.isPending}>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => triggerMutation.mutate()}
+                    if (!data.validation.canTrigger) {
+                      toast.error("Fix the highlighted validation errors first.");
+                      return;
+                    }
+                    setPastExecution("MODIFY");
+                    setConfirmValue("");
+                    setTriggerOpen(true);
+                  }}
+                >
+                  {triggerMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Play className="h-4 w-4" />
+                  )}
+                  Trigger KRA
+                </Button>
+                <Dialog
+                  open={triggerOpen}
+                  onOpenChange={(open) => {
+                    setTriggerOpen(open);
+                    if (!open) setConfirmValue("");
+                  }}
+                >
+                  <DialogContent className="sm:max-w-lg">
+                    <DialogHeader>
+                      <DialogTitle>Trigger corporate KRA</DialogTitle>
+                      <DialogDescription>
+                        Select past execution (2×2), then type CONFIRM to
+                        proceed. CBRICS only skips CVL KRA and runs NSE CBRICS
+                        registration.
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Past execution</Label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {pastExecutionOptions.map((opt) => {
+                            const selected = pastExecution === opt;
+                            return (
+                              <button
+                                key={opt}
+                                type="button"
+                                onClick={() => setPastExecution(opt)}
+                                className={[
+                                  "w-full text-left min-h-[52px] rounded-xl border px-4 py-3 transition-colors",
+                                  selected
+                                    ? "border-blue-600 bg-blue-50"
+                                    : "border-gray-200 bg-white hover:bg-gray-50",
+                                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                                ].join(" ")}
+                              >
+                                <div className="flex items-center justify-between gap-3 h-full">
+                                  <div className="font-semibold">
+                                    {pastExecutionLabels[opt]}
+                                  </div>
+                                  {selected ? (
+                                    <Check className="size-4 text-blue-700" />
+                                  ) : (
+                                    <span className="size-4 block" />
+                                  )}
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {errors.length > 0 ? (
+                        <div className="rounded-lg border bg-muted/30 p-3">
+                          <div className="text-sm font-semibold">
+                            Blocking issues
+                          </div>
+                          <ul className="mt-2 list-disc pl-5 text-sm text-muted-foreground space-y-1">
+                            {errors.map((e, i) => (
+                              <li key={`${e.field}-${i}`}>
+                                <span className="font-medium">{e.field}</span>:{" "}
+                                {e.message}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : null}
+
+                      <div className="space-y-2">
+                        <Label htmlFor="corp-kra-trigger-confirm">
+                          Write confirm
+                        </Label>
+                        <Input
+                          id="corp-kra-trigger-confirm"
+                          placeholder="Type CONFIRM"
+                          value={confirmValue}
+                          onChange={(e) => setConfirmValue(e.target.value)}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Type{" "}
+                          <span className="font-semibold">CONFIRM</span> to
+                          enable trigger.
+                        </p>
+                      </div>
+                    </div>
+
+                    <DialogFooter className="gap-2 sm:gap-0">
+                      <Button
+                        variant="secondary"
+                        onClick={() => setTriggerOpen(false)}
                         disabled={triggerMutation.isPending}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleConfirmTriggerCorporateKra}
+                        disabled={
+                          triggerMutation.isPending ||
+                          !canTrigger ||
+                          !isConfirmValid
+                        }
                       >
                         {triggerMutation.isPending ? (
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         ) : null}
                         Trigger KRA
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
 
                 <AlertDialog open={finishOpen} onOpenChange={setFinishOpen}>
                   <Button

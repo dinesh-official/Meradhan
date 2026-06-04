@@ -1,5 +1,5 @@
 import { db } from "@core/database/database";
-import { accruedInterest, DEFAULT_BOND_MARKET_HOLIDAYS, firstWorkingDayAfter, getLastNextCouponDateBasedOnSettlementDate, getNextCouponDate } from "@services/order/order-pricing-helper";
+import { accruedInterest, DEFAULT_BOND_MARKET_HOLIDAYS, firstWorkingDayAfter, getLastCouponDate, getLastCouponDateFromReferenceData, getLastNextCouponDateBasedOnSettlementDate, getNextCouponDate } from "@services/order/order-pricing-helper";
 import axios from "axios";
 import moment from "moment";
 // Matches `enum INTEREST_MODE` in `bonds.prisma`
@@ -116,14 +116,15 @@ export const getBondInfoCalcData = async (isin: string, { yeild }: { yeild?: str
             : null;
 
     const couponDate = await getLastNextCouponDateBasedOnSettlementDate(isin, new Date())
+    const lastCouponDate = await getLastCouponDateFromReferenceData(isin, new Date())
     const nextCouponDate = await getNextCouponDate(isin, new Date())
     const settlementDateObj = firstWorkingDayAfter(new Date(), new Set(DEFAULT_BOND_MARKET_HOLIDAYS));
-    console.log({ nextCouponDate });
+    console.log({ nextCouponDate, lastCouponDate });
 
     const pricing = accruedInterest({
         couponRate: bond?.couponRate || 0,
         faceValue: bond?.faceValue || 0,
-        lastCouponDate: new Date(couponDate.lastCouponDate!),
+        lastCouponDate: new Date(lastCouponDate!),
         nextCouponDate: new Date(nextCouponDate!),
         quantity: 1,
         recordDays: couponDate.recordDays || 0,
@@ -137,7 +138,7 @@ export const getBondInfoCalcData = async (isin: string, { yeild }: { yeild?: str
         "Quantity": "1",
         "Settlement_Date": toYyyyMmDd(settlementDateObj),
         "Dated_Date": toYyyyMmDd(bond?.issueDateIst),
-        "Last_IP_Date": (couponDate?.lastCouponDate),
+        "Last_IP_Date": (lastCouponDate),
         "Next_IP_Date": (nextCouponDate),
         "Maturity_Date": toYyyyMmDd(bond?.maturityDateIst),
         "Period_Status": pricing.isUnderShutPeriod ? "Shut Period" : "Normal",
