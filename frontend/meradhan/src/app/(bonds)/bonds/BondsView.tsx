@@ -18,6 +18,8 @@ import BondPagePagination from "../_components/BondPagePagination";
 import ExploreBondsHeader from "../_components/ExploreBondsHeader";
 import useBondsFilters from "../_hooks/useBondsFilters";
 import { useViewModeStore } from "../_hooks/useViewModeStore";
+// [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold]
+import useBondFilterOptions from "../_hooks/useBondFilterOptions";
 
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -50,6 +52,9 @@ function BondsView({
 }) {
   const bondFilterManager = useBondsFilters({ pathname, category });
   const { setViewMode, viewMode } = useViewModeStore();
+  // [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold]
+  // Fetch dynamic filter options scoped to the current category
+  const filterOptions = useBondFilterOptions(category !== "all" ? category : undefined);
 
   const bondsListData =
     bondFilterManager.applyFilterMutation.data?.responseData || bondsData;
@@ -66,8 +71,9 @@ function BondsView({
         applyFilters={() => {
           bondFilterManager.applyFilters(bondFilterManager.filters);
         }}
-
         rootUrl={pathname}
+        // [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold]
+        filterOptions={filterOptions}
       />
       <SectionViewWrapper id="bonds-list">
         {showCategoriesAbove && <BondsByCategories />}

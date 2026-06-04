@@ -6,6 +6,7 @@ import type { BaseResponseData } from "../../../types/base";
 import type {
   BondDealAutofillResponse,
   BondDetailResponse,
+  BondFilterOptionsResponse,
   BondOrderPricingResponse,
   LatestBondsResponse,
   ListedBondsResponse,
@@ -30,6 +31,19 @@ export class BondsApi {
       "/bonds/listed/filter",
       payload.filters,
       { ...config, params: payload.params }
+    );
+    return response.data;
+  }
+
+  // [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold]
+  // Fetches only the filter option buckets that have actual active bonds in the DB.
+  public async getBondFilterOptions(
+    params?: { category?: string },
+    config?: AxiosRequestConfig
+  ) {
+    const response = await this.apiClient.get<BondFilterOptionsResponse>(
+      "/bonds/filter-options",
+      { ...config, params }
     );
     return response.data;
   }
