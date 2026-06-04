@@ -64,7 +64,7 @@ export function NavbarBondSearch() {
                 )}
 
               {!isLoading && suggestions.length > 0 && (
-                <CommandGroup>
+                <CommandGroup className="p-0">
                   {suggestions.map((suggestion) => (
                     <CommandItem
                       key={
@@ -73,20 +73,20 @@ export function NavbarBondSearch() {
                           : suggestion.bondName
                       }
                       onSelect={() => handleSelect(suggestion)}
-                      className="cursor-pointer py-2.5 text-gray-800 data-[selected=true]:bg-gray-100 data-[selected=true]:text-gray-900"
+                      className="cursor-pointer px-3 py-2.5 text-gray-800 data-[selected=true]:bg-gray-100 data-[selected=true]:text-gray-900 border-b border-gray-400 last:border-b-0 rounded-none"
                     >
                       {suggestion.type === "isin" ? (
-                        <span className="flex items-center gap-2">
+                        <span className="leading-snug whitespace-normal">
                           <span className="font-mono font-semibold text-primary text-xs">
                             {suggestion.isin}
                           </span>
-                          <span className="text-muted-foreground">:</span>
-                          <span className="truncate text-sm">
+                          <span className="text-muted-foreground mx-1 text-xs">:</span>
+                          <span className="text-sm wrap-break-word">
                             {suggestion.bondName}
                           </span>
                         </span>
                       ) : (
-                        <span className="text-sm truncate">
+                        <span className="text-sm whitespace-normal wrap-break-word">
                           {suggestion.bondName}
                         </span>
                       )}
