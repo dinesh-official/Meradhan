@@ -59,8 +59,7 @@ function BondsView({
   const bondsListData =
     bondFilterManager.applyFilterMutation.data?.responseData || bondsData;
   const isFiltered = bondFilterManager.anyFilterApplied;
-  const showCategoriesAbove = options.showBondsByCategory && !isFiltered;
-  const showCategoriesBelow = options.showBondsByCategory && isFiltered;
+  const showCategories = options.showBondsByCategory;
 
   return (
     <>
@@ -76,7 +75,6 @@ function BondsView({
         filterOptions={filterOptions}
       />
       <SectionViewWrapper id="bonds-list">
-        {showCategoriesAbove && <BondsByCategories />}
         {options.showUpcomingBonds && <UpcomingBonds />}
         {bondFilterManager.applyFilterMutation.isPending ? (
           <div className="flex justify-center items-center h-96 container">
@@ -96,7 +94,7 @@ function BondsView({
             isFiltered={isFiltered}
           />
         )}
-        {showCategoriesBelow && (
+        {showCategories && (
           <div className="mt-14">
             <BondsByCategories />
           </div>
@@ -144,12 +142,7 @@ function RenderBondView({
     );
 
   return (
-    <div
-      className={cn(
-        "container",
-        options.showBondsByCategory && !isFiltered && "mt-14 ",
-      )}
-    >
+    <div className="container">
       <div className="flex justify-between items-center">
         {isFiltered ? (
           <h4 className="text-xl">
