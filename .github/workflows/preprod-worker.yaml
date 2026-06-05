@@ -1,4 +1,4 @@
-name: stage worker deploy
+name: Preprod worker deploy
 
 on:
   push:
@@ -218,5 +218,5 @@ jobs:
         with:
           task-definition: stage-worker.json
           cluster: stage-cluster
-          service: meradhan-worker
+          service: 
           force-new-deployment: true
