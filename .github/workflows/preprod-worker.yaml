@@ -3,7 +3,7 @@ name: Preprod worker deploy
 on:
   push:
     branches:
-      - preprod
+      - staging-workerdeploy
 
 jobs:
   deploy:
@@ -27,8 +27,8 @@ jobs:
           DEV_DATABASE_URL: ${{ secrets.DEV_DATABASE_URL }}
           DEV_DIRECT_URL: ${{ secrets.DEV_DIRECT_URL }}
 
-          PREPROD_REDIS_HOST: ${{ vars.DEV_REDIS_HOST }}
-          PREPROD_REDIS_PORT: ${{ vars.DEV_REDIS_PORT }}
+          PREPROD_REDIS_HOST: ${{ vars.PREPROD_REDIS_HOST }}
+          PREPROD_REDIS_PORT: ${{ vars.PREPROD_REDIS_PORT }}
 
           DEV_KRA_USERNAME: ${{ secrets.KRA_USERNAME }}
           DEV_KRA_PASSWORD: ${{ secrets.KRA_PASSWORD }}
@@ -105,9 +105,6 @@ jobs:
           echo "NEXT_PUBLIC_DIGIO=sandbox" >> .env
           echo "STRAPI_API_URL=https://awsstrapi.meradhan.co/api" >> .env
           echo "PORT=4000" >> .env
-
-        
-    
 
         
           echo "GRAPHQL_KEY=${DEV_NEXT_PUBLIC_GRAPHQL_KEY}" >> .env
@@ -219,6 +216,6 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: preprod-worker.json
-          cluster: stage-cluster
+          cluster: prod-cluster
           service: preprod-worker-svc
           force-new-deployment: true
