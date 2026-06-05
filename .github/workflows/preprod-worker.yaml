@@ -218,7 +218,7 @@ jobs:
       - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
-          task-definition: stage-worker.json
+          task-definition: preprod-worker.yaml
           cluster: stage-cluster
-          service: 
+          service: preprod-worker-svc
           force-new-deployment: true
