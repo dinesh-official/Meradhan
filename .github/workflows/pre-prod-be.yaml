@@ -60,8 +60,8 @@ jobs:
           DEV_DIGIO_USERNAME_PASS: ${{ secrets.DEV_DIGIO_USERNAME_PASS }}
 
           DEV_NDSL_REQUESTOR_ID: ${{ secrets.DEV_NDSL_REQUESTOR_ID }}
-          DEV_NSDL_SECRET_KEY: ${{ secrets.DEV_NSDL_SECRET_KEY }}
-          DEV_NSDL_MODE: ${{ secrets.DEV_NSDL_MODE }}
+          DEV_NSDL_SECRET_KEY: ${{ secrets.NSDL_SECRET_KEY }}
+          DEV_NSDL_MODE: ${{ secrets.NSDL_MODE }}
 
           DEV_CDSL_AES_KEY: ${{ secrets.CDSL_AES_KEY }}
           DEV_ENTITY_ID: ${{ secrets.ENTITY_ID }}
