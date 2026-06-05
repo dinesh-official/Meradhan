@@ -17,6 +17,12 @@ import {
     buildCorporateKraPayload,
     type CorporateKycInputForKra,
 } from "./corporateKraPayload";
+import {
+    mapAddressProofToNdml,
+    mapAnnualIncomeToNdml,
+    mapCompStatusToNdml,
+} from "./kraCodes";
+import { getKraCountry, getKraState } from "./constent";
 
 const cbricsManager = new ParticipantManager();
 
@@ -141,6 +147,8 @@ export class CorporateKraWorkerService {
      */
     async processCorporateKra(data: KraWorkerJobData<{ kraPayload?: KraNonIndAppReqRoot }>) {
         const { customerId, kycDataStoreId } = data;
+        console.log(data);
+
 
         // A[Start] -> B[Check Runner Validity]
         const runner = await cacheStorage.get<string>(this.runnerKey(customerId, kycDataStoreId));
@@ -209,6 +217,9 @@ export class CorporateKraWorkerService {
                 });
                 return;
             }
+
+            console.log(data);
+
 
             // CBRICS-only short-circuit: skip CVL KRA enquiry/register/modify
             // and only run the CBRICS registration leg. Mirrors the individual
@@ -357,6 +368,15 @@ export class CorporateKraWorkerService {
                         dob: formatDDMMYYYY(new Date(doi)),
                         mobile: env.KRA_MOB_NO,
                     });
+                    // add audit log
+                    await db.dataBase.kraDataLogs.create({
+                        data: {
+                            userId: customerId,
+                            kycId: kycDataStoreId,
+                            stage: "CORPORATE_KRA_DOWNLOAD_TRIGGERED",
+                            requestData: { pan },
+                        },
+                    });
                 } catch (e) {
                     await this.failAndStop({
                         customerId,
@@ -370,13 +390,18 @@ export class CorporateKraWorkerService {
                 }
 
                 // Compare with corporate data (real check based on corporate KYC)
-                const matched = this.isCorporateKraDownloadMatched(
-                    corporateKyc,
-                    downloadRes,
-                    pan,
-                );
+                const diff = this.diffCorporateKraDownload(corporateKyc, downloadRes, pan);
 
-                if (matched) {
+                if (diff.matched) {
+                    await db.dataBase.kraDataLogs.create({
+                        data: {
+                            userId: customerId,
+                            kycId: kycDataStoreId,
+                            stage: "CORPORATE_KRA_DOWNLOAD_MATCHED",
+                            requestData: { pan },
+                            responseData: { message: "KRA download matched", matched: true },
+                        },
+                    });
                     // Proceed to CBricks Check
                     await this.ensureCorporateCbrics(customerId, kycDataStoreId);
                     return;
@@ -395,7 +420,10 @@ export class CorporateKraWorkerService {
                         userId: customerId,
                         kycId: kycDataStoreId,
                         stage: "CORPORATE_MODIFY_TRIGGERED",
-                        requestData: kraPayload as object,
+                        requestData: {
+                            kraPayload,
+                            mismatches: diff.mismatches,
+                        } as object,
                         responseData: modRes as object,
                         reqTime: nowIso(),
                         resTime: nowIso(),
@@ -462,23 +490,189 @@ export class CorporateKraWorkerService {
         return buildCorporateKraPayload(corporateKyc, { isModify: opts?.isModify }).payload;
     }
 
+    /**
+     * Compares the NDML download payload against the CRM corporate KYC row and
+     * returns a structured diff. A field is considered a mismatch only when the
+     * CRM side has a value AND it disagrees with the NDML side — empty CRM
+     * fields are ignored (nothing to push), and empty NDML-side values for
+     * fields the CRM has data for are flagged so the next MODIFY actually
+     * carries that data upstream.
+     *
+     * Code-driven fields (state, address-proof, income, comp-status, country)
+     * are compared at the NDML-code level so cosmetic label differences don't
+     * cause spurious MODIFY round-trips.
+     */
+    private diffCorporateKraDownload(
+        corporateKyc: CorporateKycInputForKra,
+        download: T_NON_INDIVIDUAL_PAN_DOWNLOAD,
+        pan: string,
+    ): { matched: boolean; mismatches: Array<{ field: string; ndml: string; crm: string }> } {
+        const mismatches: Array<{ field: string; ndml: string; crm: string }> = [];
+        const inq = download?.APP_RES_ROOT?.APP_PAN_INQ;
+        if (!inq) {
+            return {
+                matched: false,
+                mismatches: [{ field: "APP_PAN_INQ", ndml: "<missing>", crm: "<download-empty>" }],
+            };
+        }
+
+        // ── Normalisers ────────────────────────────────────────────────────
+        const trim = (s: unknown) => String(s ?? "").trim();
+        const upper = (s: unknown) => trim(s).toUpperCase();
+        const alnumUpper = (s: unknown) => upper(s).replace(/[^A-Z0-9]/g, "");
+        const onlyDigits = (s: unknown) => String(s ?? "").replace(/\D/g, "");
+        const lastN = (s: string, n: number) => (s.length > n ? s.slice(-n) : s);
+        const lower = (s: unknown) => trim(s).toLowerCase();
+
+        const parseDate = (v: unknown): string => {
+            // Returns YYYY-MM-DD, or "" if we can't parse it. Accepts Date, ISO,
+            // or NDML's DD-MM-YYYY / DD/MM/YYYY.
+            if (!v) return "";
+            if (v instanceof Date && !Number.isNaN(v.getTime())) {
+                return v.toISOString().slice(0, 10);
+            }
+            const raw = String(v).trim();
+            if (!raw) return "";
+            const dmy = raw.match(/^(\d{2})[-/](\d{2})[-/](\d{4})$/);
+            if (dmy) return `${dmy[3]}-${dmy[2]}-${dmy[1]}`;
+            const iso = new Date(raw);
+            return Number.isNaN(iso.getTime()) ? "" : iso.toISOString().slice(0, 10);
+        };
+
+        // Compares `ndmlRaw` against `crmRaw` after passing both through `norm`.
+        // - If CRM is empty after normalisation, the field is skipped (we have
+        //   nothing authoritative to push).
+        // - Otherwise both must equal; an empty NDML value is a mismatch (the
+        //   field is missing upstream and MODIFY should fill it in).
+        const compare = (
+            field: string,
+            ndmlRaw: unknown,
+            crmRaw: unknown,
+            norm: (s: unknown) => string = trim,
+        ) => {
+            const crm = norm(crmRaw);
+            if (!crm) return;
+            const ndml = norm(ndmlRaw);
+            if (ndml !== crm) {
+                mismatches.push({
+                    field,
+                    ndml: String(ndmlRaw ?? ""),
+                    crm: String(crmRaw ?? ""),
+                });
+            }
+        };
+
+        // ── Identity ───────────────────────────────────────────────────────
+        compare("APP_PAN_NO", inq.APP_PAN_NO, pan, alnumUpper);
+        compare("APP_NAME", inq.APP_NAME, corporateKyc.entityName, alnumUpper);
+        compare("APP_REGNO", inq.APP_REGNO, corporateKyc.cinOrRegistrationNumber, alnumUpper);
+
+        // ── Dates ──────────────────────────────────────────────────────────
+        compare("APP_DOI_DT", inq.APP_DOI_DT, corporateKyc.dateOfIncorporation, parseDate);
+        compare(
+            "APP_COMMENCE_DT",
+            inq.APP_COMMENCE_DT,
+            corporateKyc.dateOfCommencementOfBusiness,
+            parseDate,
+        );
+
+        // ── Entity-constitution / company status ───────────────────────────
+        const crmCompStatus = mapCompStatusToNdml(corporateKyc.entityConstitutionType)?.code;
+        if (crmCompStatus) {
+            compare("APP_COMP_STATUS", inq.APP_COMP_STATUS, crmCompStatus, upper);
+        }
+
+        // ── Place / country of incorporation ───────────────────────────────
+        compare("APP_INCORP_PLC", inq.APP_INCORP_PLC, corporateKyc.placeOfIncorporation, alnumUpper);
+
+        // ── Income bracket (NDML code-level) ───────────────────────────────
+        const crmIncome = mapAnnualIncomeToNdml(corporateKyc.annualIncome)?.code;
+        if (crmIncome) {
+            compare("APP_INCOME", inq.APP_INCOME, crmIncome, upper);
+        }
+
+        // ── Contact (email + last-10 of phone) ─────────────────────────────
+        // CorporateKycInputForKra doesn't carry email/mobile on the root, but
+        // when it does we still want to catch drift; cast to a permissive shape.
+        const contact = corporateKyc as unknown as {
+            email?: string | null;
+            mobile?: string | null;
+            phone?: string | null;
+        };
+        compare("APP_EMAIL", inq.APP_EMAIL, contact.email, lower);
+        compare(
+            "APP_MOB_NO",
+            lastN(onlyDigits(inq.APP_MOB_NO), 10),
+            lastN(onlyDigits(contact.mobile ?? contact.phone), 10),
+            trim,
+        );
+
+        // ── Correspondence address ────────────────────────────────────────
+        compare("APP_COR_ADD1", inq.APP_COR_ADD1, corporateKyc.correspondenceLine1, alnumUpper);
+        compare("APP_COR_ADD2", inq.APP_COR_ADD2, corporateKyc.correspondenceLine2, alnumUpper);
+        compare("APP_COR_ADD3", inq.APP_COR_ADD3, corporateKyc.correspondenceLine3, alnumUpper);
+        compare("APP_COR_CITY", inq.APP_COR_CITY, corporateKyc.correspondenceCity, alnumUpper);
+        compare(
+            "APP_COR_PINCD",
+            lastN(onlyDigits(inq.APP_COR_PINCD), 6),
+            lastN(onlyDigits(corporateKyc.correspondencePinCode ?? corporateKyc.registeredPinCode), 6),
+            trim,
+        );
+        const crmCorStateCode = corporateKyc.correspondenceState
+            ? getKraState(corporateKyc.correspondenceState).code
+            : "";
+        if (crmCorStateCode) {
+            compare("APP_COR_STATE", inq.APP_COR_STATE, crmCorStateCode, upper);
+        }
+        const crmCorAddProofCode = mapAddressProofToNdml(
+            corporateKyc.correspondenceAddressProofType ?? corporateKyc.registeredAddressProofType,
+        )?.code;
+        if (crmCorAddProofCode) {
+            compare("APP_COR_ADD_PROOF", inq.APP_COR_ADD_PROOF, crmCorAddProofCode, upper);
+        }
+
+        // ── Registered ("permanent") address ──────────────────────────────
+        compare("APP_PER_ADD1", inq.APP_PER_ADD1, corporateKyc.registeredLine1, alnumUpper);
+        compare("APP_PER_ADD2", inq.APP_PER_ADD2, corporateKyc.registeredLine2, alnumUpper);
+        compare("APP_PER_ADD3", inq.APP_PER_ADD3, corporateKyc.registeredLine3, alnumUpper);
+        compare("APP_PER_CITY", inq.APP_PER_CITY, corporateKyc.registeredCity, alnumUpper);
+        compare(
+            "APP_PER_PINCD",
+            lastN(onlyDigits(inq.APP_PER_PINCD), 6),
+            lastN(onlyDigits(corporateKyc.registeredPinCode ?? corporateKyc.correspondencePinCode), 6),
+            trim,
+        );
+        const crmPerStateCode = corporateKyc.registeredState
+            ? getKraState(corporateKyc.registeredState).code
+            : "";
+        if (crmPerStateCode) {
+            compare("APP_PER_STATE", inq.APP_PER_STATE, crmPerStateCode, upper);
+        }
+        const crmPerAddProofCode = mapAddressProofToNdml(
+            corporateKyc.registeredAddressProofType ?? corporateKyc.correspondenceAddressProofType,
+        )?.code;
+        if (crmPerAddProofCode) {
+            compare("APP_PER_ADD_PROOF", inq.APP_PER_ADD_PROOF, crmPerAddProofCode, upper);
+        }
+
+        // ── Country (correspondence + permanent share the same CRM source) ─
+        const crmCountryCode = corporateKyc.countryOfIncorporation
+            ? getKraCountry(corporateKyc.countryOfIncorporation)?.code
+            : undefined;
+        if (crmCountryCode) {
+            compare("APP_COR_CTRY", inq.APP_COR_CTRY, crmCountryCode, upper);
+            compare("APP_PER_CTRY", inq.APP_PER_CTRY, crmCountryCode, upper);
+        }
+
+        return { matched: mismatches.length === 0, mismatches };
+    }
+
     private isCorporateKraDownloadMatched(
         corporateKyc: CorporateKycInputForKra,
         download: T_NON_INDIVIDUAL_PAN_DOWNLOAD,
         pan: string,
     ): boolean {
-        const inq = download?.APP_RES_ROOT?.APP_PAN_INQ;
-        if (!inq) return false;
-
-        const norm = (s: string) => s.replace(/\s+/g, "").trim().toUpperCase();
-        const panOk = norm(inq.APP_PAN_NO ?? "") === norm(pan);
-        const nameOk = norm(inq.APP_NAME ?? "") === norm(corporateKyc.entityName ?? "");
-        const pinOk =
-            String(inq.APP_COR_PINCD ?? "").trim() ===
-            String(
-                corporateKyc.registeredPinCode ?? corporateKyc.correspondencePinCode ?? "",
-            ).trim();
-        return panOk && nameOk && pinOk;
+        return this.diffCorporateKraDownload(corporateKyc, download, pan).matched;
     }
 
     private async ensureCorporateCbrics(customerId: number, kycDataStoreId: number) {
@@ -503,7 +697,6 @@ export class CorporateKraWorkerService {
                 await db.dataBase.customerProfileDataModel.update({
                     where: { id: customerId },
                     data: {
-
                         kraStatus: "VERIFIED",
                         verifyDate: new Date(),
                     },
