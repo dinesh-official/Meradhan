@@ -27,8 +27,8 @@ jobs:
           DEV_DATABASE_URL: ${{ secrets.DEV_DATABASE_URL }}
           DEV_DIRECT_URL: ${{ secrets.DEV_DIRECT_URL }}
 
-          DEV_REDIS_HOST: ${{ secrets.DEV_REDIS_HOST }}
-          DEV_REDIS_PORT: ${{ secrets.DEV_REDIS_PORT }}
+          PREPROD_REDIS_HOST: ${{ secrets.DEV_REDIS_HOST }}
+          PREPROD_REDIS_PORT: ${{ secrets.DEV_REDIS_PORT }}
 
           DEV_KRA_USERNAME: ${{ secrets.DEV_KRA_USERNAME }}
           DEV_KRA_PASSWORD: ${{ secrets.DEV_KRA_PASSWORD }}
@@ -105,6 +105,8 @@ jobs:
           echo "NEXT_PUBLIC_DIGIO=sandbox" >> .env
           echo "STRAPI_API_URL=https://awsstrapi.meradhan.co/api" >> .env
           echo "PORT=4000" >> .env
+
+        
     
 
         
