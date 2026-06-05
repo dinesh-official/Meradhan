@@ -516,10 +516,9 @@ export function buildCorporateKraPayload(
     // For non-individuals NDML stores the incorporation date in APP_DOB_DT
     // (date-of-birth-equivalent for an entity) as well as APP_DOI_DT.
     APP_DOB_DT: doiStr,
-    APP_DOI_DT: doiStr,
+    APP_DOI_DT: "",
     APP_REGNO: nz(kyc.cinOrRegistrationNumber),
     APP_COMMENCE_DT: commenceStr,
-
     APP_NATIONALITY: "",
     APP_OTH_NATIONALITY: "",
     APP_COMP_STATUS: compStatus,

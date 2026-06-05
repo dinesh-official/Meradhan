@@ -141,6 +141,8 @@ export class CorporateKraWorkerService {
      */
     async processCorporateKra(data: KraWorkerJobData<{ kraPayload?: KraNonIndAppReqRoot }>) {
         const { customerId, kycDataStoreId } = data;
+        console.log(data);
+
 
         // A[Start] -> B[Check Runner Validity]
         const runner = await cacheStorage.get<string>(this.runnerKey(customerId, kycDataStoreId));
@@ -209,6 +211,9 @@ export class CorporateKraWorkerService {
                 });
                 return;
             }
+
+            console.log(data);
+
 
             // CBRICS-only short-circuit: skip CVL KRA enquiry/register/modify
             // and only run the CBRICS registration leg. Mirrors the individual
@@ -357,6 +362,15 @@ export class CorporateKraWorkerService {
                         dob: formatDDMMYYYY(new Date(doi)),
                         mobile: env.KRA_MOB_NO,
                     });
+                    // add audit log
+                    await db.dataBase.kraDataLogs.create({
+                        data: {
+                            userId: customerId,
+                            kycId: kycDataStoreId,
+                            stage: "CORPORATE_KRA_DOWNLOAD_TRIGGERED",
+                            requestData: { pan },
+                        },
+                    });
                 } catch (e) {
                     await this.failAndStop({
                         customerId,
@@ -376,7 +390,19 @@ export class CorporateKraWorkerService {
                     pan,
                 );
 
+
+
                 if (matched) {
+                    // add audit log
+                    await db.dataBase.kraDataLogs.create({
+                        data: {
+                            userId: customerId,
+                            kycId: kycDataStoreId,
+                            stage: "CORPORATE_KRA_DOWNLOAD_MATCHED",
+                            requestData: { pan },
+                            responseData: { message: "KRA download matched", matched },
+                        },
+                    });
                     // Proceed to CBricks Check
                     await this.ensureCorporateCbrics(customerId, kycDataStoreId);
                     return;
