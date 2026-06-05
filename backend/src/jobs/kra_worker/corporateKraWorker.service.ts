@@ -74,6 +74,15 @@ export class CorporateKraWorkerService {
         return `KRA_CORP:${customerId}-${kycDataStoreId}-RETRY`;
     }
 
+    /**
+     * Stores the operator-selected hint ("MODIFY" | "REGISTER") so the next
+     * enquiry result in `checkKraProcessCheckStatus` is biased the same way
+     * as the individual KRA flow (see `KraWorker.service.ts`).
+     */
+    private lastTaskKey(customerId: number, kycDataStoreId: number) {
+        return `KRA_CORP:${customerId}-${kycDataStoreId}`;
+    }
+
     private async incrementRetry(customerId: number, kycDataStoreId: number) {
         const key = this.retryKey(customerId, kycDataStoreId);
         const current = Number((await cacheStorage.get<string>(key)) ?? "0");
@@ -106,6 +115,7 @@ export class CorporateKraWorkerService {
             },
         });
         await cacheStorage.delete(this.runnerKey(args.customerId, args.kycDataStoreId));
+        await cacheStorage.delete(this.lastTaskKey(args.customerId, args.kycDataStoreId));
         await this.clearRetry(args.customerId, args.kycDataStoreId);
 
         // Don't downgrade a terminal status that was set deliberately
@@ -200,6 +210,26 @@ export class CorporateKraWorkerService {
                 return;
             }
 
+            // CBRICS-only short-circuit: skip CVL KRA enquiry/register/modify
+            // and only run the CBRICS registration leg. Mirrors the individual
+            // worker's `cbricsOnly` path in `KraWorker.service.ts`.
+            if (data.cbricsOnly) {
+                await db.dataBase.kraDataLogs.create({
+                    data: {
+                        userId: customerId,
+                        kycId: kycDataStoreId,
+                        stage: "CORPORATE_CBRICS_ONLY_TRIGGERED",
+                        requestData: { customerId, kycDataStoreId } as object,
+                        responseData: { message: "Skipping CVL KRA; CBRICS-only path" } as object,
+                        reqTime: nowIso(),
+                        resTime: nowIso(),
+                    },
+                });
+                await this.ensureCorporateCbrics(customerId, kycDataStoreId);
+                await cacheStorage.delete(this.lastTaskKey(customerId, kycDataStoreId));
+                return;
+            }
+
             // D[Enquiry API Call]
             await this.kra.init();
             const pan = (corporateKyc.panNumber ?? "").trim();
@@ -215,6 +245,10 @@ export class CorporateKraWorkerService {
                 return;
             }
 
+            const lastTask = await cacheStorage.get<string>(
+                this.lastTaskKey(customerId, kycDataStoreId),
+            );
+
             const enquiryReq = {
                 pan,
                 mobile: env.KRA_MOB_NO,
@@ -222,7 +256,7 @@ export class CorporateKraWorkerService {
             };
             const enquiryRes = (await this.kra.nonIndividualPanInquiryTwo(enquiryReq)) as T_APP_PAN_INQ;
 
-            const status = checkKraProcessCheckStatus(enquiryRes, null);
+            const status = checkKraProcessCheckStatus(enquiryRes, lastTask);
 
             // E[Evaluate Status]
             if (status === "REJECTED") {
@@ -285,6 +319,11 @@ export class CorporateKraWorkerService {
                         resTime: nowIso(),
                     },
                 });
+                await cacheStorage.set(
+                    this.lastTaskKey(customerId, kycDataStoreId),
+                    "REGISTER",
+                    TTL_72_HOURS_SEC,
+                );
                 await addKraWorkerJob(data, RESCHEDULE_4H_MS);
                 return;
             }
@@ -362,6 +401,11 @@ export class CorporateKraWorkerService {
                         resTime: nowIso(),
                     },
                 });
+                await cacheStorage.set(
+                    this.lastTaskKey(customerId, kycDataStoreId),
+                    "MODIFY",
+                    TTL_72_HOURS_SEC,
+                );
                 await addKraWorkerJob(data, RESCHEDULE_4H_MS);
                 return;
             }
@@ -465,6 +509,7 @@ export class CorporateKraWorkerService {
                     },
                 });
                 await cacheStorage.delete(this.runnerKey(customerId, kycDataStoreId));
+                await cacheStorage.delete(this.lastTaskKey(customerId, kycDataStoreId));
                 await this.clearRetry(customerId, kycDataStoreId);
                 await db.dataBase.kraDataLogs.create({
                     data: {
@@ -492,6 +537,7 @@ export class CorporateKraWorkerService {
                 },
             });
             await cacheStorage.delete(this.runnerKey(customerId, kycDataStoreId));
+            await cacheStorage.delete(this.lastTaskKey(customerId, kycDataStoreId));
             await this.clearRetry(customerId, kycDataStoreId);
             await db.dataBase.kraDataLogs.create({
                 data: {

@@ -15,6 +15,17 @@ import type { IApiCaller } from "../../connection/apiCaller.interface";
 import { ApiError } from "../../connection/error";
 import type { BaseResponseData } from "../../../types/base";
 
+export type CorporateKraPastExecution =
+  | "MODIFY"
+  | "REGISTER"
+  | "NONE"
+  | "CBRICS_ONLY";
+
+export type TriggerCorporateKraPayload = {
+  pastExecution: CorporateKraPastExecution;
+  delayMs?: number;
+};
+
 export type CorporateKraValidationIssue = {
   field: string;
   message: string;
@@ -229,6 +240,7 @@ export interface TCrmCustomerInterface {
 
   triggerCorporateKra(
     customerId: number,
+    payload: TriggerCorporateKraPayload,
     config?: AxiosRequestConfig,
   ): Promise<AxiosResponse<BaseResponseData<{ isTriggered: boolean }>>>;
 
@@ -447,11 +459,12 @@ export class CrmCustomerApi implements TCrmCustomerInterface {
 
   async triggerCorporateKra(
     customerId: number,
+    payload: TriggerCorporateKraPayload,
     config?: AxiosRequestConfig,
   ): ReturnType<TCrmCustomerInterface["triggerCorporateKra"]> {
     return this.apiClient.post<BaseResponseData<{ isTriggered: boolean }>>(
       `/crm/customer/${customerId}/corporate-kyc/kra/trigger`,
-      {},
+      payload,
       config,
     );
   }
