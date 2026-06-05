@@ -9,6 +9,7 @@ import { useCorporateKycFileUpload } from "../_hooks/useCorporateKycFileUpload";
 import type { CorporateKycFormHook } from "../_hooks/useCorporateKycForm";
 import { useState } from "react";
 import { addressProofOptions } from "../_utils/addressProofOptions";
+import { stateOptions } from "../_utils/stateOptions";
 
 function copyCorrespondenceToRegistered(hook: CorporateKycFormHook) {
   const { form, setField } = hook;
@@ -86,10 +87,12 @@ export function RegisteredAddressSection({ hook }: { hook: CorporateKycFormHook 
           value={form.registeredDistrict ?? ""}
           onChangeAction={(v) => setField("registeredDistrict", v)}
         />
-        <InputField
+        <SelectField
           label="State"
+          placeholder="Select state"
           value={form.registeredState ?? ""}
           onChangeAction={(v) => setField("registeredState", v)}
+          options={stateOptions}
         />
         <InputField
           label="PIN code"
