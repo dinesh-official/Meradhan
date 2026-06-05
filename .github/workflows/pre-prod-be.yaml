@@ -26,8 +26,8 @@ jobs:
           DEV_DATABASE_URL: ${{ secrets.DEV_DATABASE_URL }}
           DEV_DIRECT_URL: ${{ secrets.DEV_DIRECT_URL }}
 
-          PREPROD_REDIS_HOST: ${{ secrets.PREPROD_REDIS_HOST }}
-          PREPROD_REDIS_PORT: ${{ secrets.PREPROD_REDIS_PORT }}
+          PREPROD_REDIS_HOST: ${{ vars.PREPROD_REDIS_HOST }}
+          PREPROD_REDIS_PORT: ${{ vars.PREPROD_REDIS_PORT }}
 
           DEV_KRA_USERNAME: ${{ secrets.DEV_KRA_USERNAME }}
           DEV_KRA_PASSWORD: ${{ secrets.DEV_KRA_PASSWORD }}
