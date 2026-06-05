@@ -326,6 +326,9 @@ export class KraSDK {
       },
     });
 
+
+
+
     return (await KraXMLBuilder.parseSoapReturn(
       response.data
     )) as T_NON_INDIVIDUAL_PAN_DOWNLOAD;
