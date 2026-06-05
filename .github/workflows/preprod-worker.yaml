@@ -3,7 +3,7 @@ name: stage worker deploy
 on:
   push:
     branches:
-      - staging
+      - staging-workerdeploy
 
 jobs:
   deploy:
