@@ -26,15 +26,19 @@ interface PortfolioFilterOptions {
   isins: { isin: string; bondName: string }[];
 }
 
+// Hardcoded 3-char month abbreviations to avoid the "Sept" vs "Sep" inconsistency
+// introduced by newer ICU data in Node.js 18+ / Chrome 110+ where Intl.DateTimeFormat
+// with { month: "short" } outputs "Sept" (4 chars) for September.
+const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
 function formatPortfolioDate(value: string | Date | null | undefined): string | null {
   if (!value) return null;
   const d = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(d.getTime())) return null;
-  return d.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = MONTHS_SHORT[d.getMonth()];
+  const year = d.getFullYear();
+  return `${day} ${month} ${year}`;
 }
 
 export default function PortfolioDetails() {
