@@ -141,13 +141,14 @@ export const NDML_COMP_STATUS: CodeEntry[] = [
 ];
 
 // ─── 10. APP_INCOME (Gross Annual Income — Non Individual) ───────────────────
+//     Official NDML / CVL KRA codes.
 export const NDML_ANNUAL_INCOME_NON_INDIVIDUAL: CodeEntry[] = [
   { code: "01", label: "Below Rs. 1 Lac", aliases: ["Below Rs. 1  Lac", "Below 1 Lac", "<1L"] },
   { code: "02", label: "Btw Rs. 1 to Rs. 5 Lacs", aliases: ["1-5L", "Rs. 1 to Rs. 5 Lacs"] },
   { code: "03", label: "Btw Rs. 5 to Rs. 10 Lacs", aliases: ["5-10L"] },
   { code: "04", label: "Btw Rs. 10 to Rs. 25 Lacs", aliases: ["10-25L"] },
-  { code: "06", label: "Btw Rs. 25 Lacs to Rs. 1 Crore", aliases: ["25L-1Cr", "Btw Rs. 25 Lacs to Rs. 1 Cr"] },
-  { code: "07", label: "More than Rs. 1 Crore", aliases: [">1Cr", "Above 1 Crore"] },
+  { code: "05", label: "Btw Rs. 25 Lacs to Rs. 1 Crore", aliases: ["25L-1Cr", "Btw Rs. 25 Lacs to Rs. 1 Cr"] },
+  { code: "06", label: "More than Rs. 1 Crore", aliases: [">1Cr", "Above 1 Crore"] },
 ];
 
 // ─── 11. APP_OCC (Occupation — Individual; non-ind usually leaves blank) ─────
@@ -188,17 +189,132 @@ export const NDML_RELATIONSHIP: CodeEntry[] = [
 ];
 
 // ─── 14. APP_COR_ADD_PROOF / APP_PER_ADD_PROOF — Proof of Address ───────────
+//     Official NDML / CVL KRA codes. `lookup()` matches code, label, or any
+//     alias case-insensitively, so legacy stored values (whether as code or
+//     label) still resolve to the correct NDML code on submission.
 export const NDML_ADDRESS_PROOF: CodeEntry[] = [
   { code: "01", label: "Passport" },
-  { code: "06", label: "Voter Identity Card" },
-  { code: "07", label: "Ration Card" },
-  { code: "08", label: "Registered Lease / Sale Agreement of Residence" },
-  { code: "02", label: "Driving License" },
-  { code: "13", label: "Flat Maintenance Bill" },
-  { code: "14", label: "Insurance copy" },
-  { code: "09", label: "Latest Land Line / Electricity / Gas Bill", aliases: ["Telephone Bill", "Electricity Bill", "Gas Bill"] },
-  { code: "03", label: "Latest Bank Passbook / Account Statement", aliases: ["Bank Statement"] },
-  { code: "20", label: "Other (default)", aliases: ["OTHER"] },
+  { code: "02", label: "Voter Identity Card", aliases: ["Voter ID", "Voter ID Card"] },
+  { code: "03", label: "Ration Card" },
+  { code: "04", label: "Registered Lease / Sale Agreement of Residence" },
+  { code: "05", label: "Driving License" },
+  { code: "06", label: "Flat Maintenance Bill" },
+  { code: "07", label: "Insurance copy" },
+  {
+    code: "08",
+    label: "Latest Land Line Telephone / Electricity / Gas Bill",
+    aliases: [
+      "Latest Land Line Telephone Bill",
+      "Latest Electricity Bill",
+      "Gas Bill",
+      "Telephone Bill",
+      "Electricity Bill",
+    ],
+  },
+  {
+    code: "09",
+    label: "Latest Bank Passbook / Account Statement",
+    aliases: [
+      "Latest Bank Passbook",
+      "Latest Bank Account Statement",
+      "Bank Statement",
+    ],
+  },
+  { code: "10", label: "Self Declaration by High Court / Supreme Court Judge" },
+  {
+    code: "11",
+    label:
+      "Proof of Address by Scheduled Commercial / Co-operative / Multinational Foreign Banks",
+    aliases: [
+      "Proof of Address issued by Scheduled Commercial/Co-operative/Multinational Foreign banks",
+    ],
+  },
+  {
+    code: "12",
+    label: "Proof of Address by Gazetted Officer",
+    aliases: ["Proof of Address issued by Gazetted Officer"],
+  },
+  {
+    code: "13",
+    label: "Proof of Address by Notary Public",
+    aliases: ["Proof of Address issued by Notary Public"],
+  },
+  {
+    code: "14",
+    label: "Proof of Address by Elected representatives to the Legislative Assembly",
+    aliases: [
+      "Proof of Address issued by Elected representatives to the Legislative Assembly",
+    ],
+  },
+  {
+    code: "15",
+    label: "Proof of Address by Parliament",
+    aliases: ["Proof of Address issued by Parliament"],
+  },
+  {
+    code: "16",
+    label:
+      "Shops & Establishments Registration Certificate / Govt or Statutory Authority address proof",
+    aliases: [
+      "Registration Certificate issued under Shops and Establishments Act",
+      "Proof of Address issued by any Government / Statutory Authority",
+    ],
+  },
+  {
+    code: "17",
+    label: "ID Card with address by Central / State Government",
+    aliases: ["ID Card with address issued by Central / State Government"],
+  },
+  {
+    code: "18",
+    label: "ID Card with address by Statutory / Regulatory Authorities",
+    aliases: ["ID Card with address issued by Statutory / Regulatory Authorities"],
+  },
+  {
+    code: "19",
+    label: "ID Card with address by Public Sector Undertakings",
+    aliases: ["ID Card with address issued by Public Sector Undertakings"],
+  },
+  {
+    code: "20",
+    label: "ID Card with address by Scheduled Commercial Banks",
+    aliases: ["ID Card with address issued by Scheduled Commercial Banks"],
+  },
+  {
+    code: "21",
+    label: "ID Card with address by Public Financial Institutions",
+    aliases: ["ID Card with address issued by Public Financial Institutions"],
+  },
+  {
+    code: "22",
+    label: "ID Card with address by Colleges affiliated to universities",
+    aliases: ["ID Card with address issued by Colleges affiliated to universities"],
+  },
+  {
+    code: "23",
+    label: "ID Card by Professional Bodies (ICAI / ICWAI / ICSI / Bar Council, etc.)",
+    aliases: [
+      "ID Card issued by Professional Bodies (ICAI/ICWAI/ICSI/Bar Council etc.) to members",
+    ],
+  },
+  {
+    code: "24",
+    label:
+      "Power of Attorney given by FII / sub-account to Custodian (notarised / apostiled)",
+    aliases: [
+      "Power of Attorney given by FII/sub-account to Custodian (registered address)",
+    ],
+  },
+  { code: "25", label: "Proof of address in the name of the spouse" },
+  {
+    code: "26",
+    label: "Aadhaar / UID (Unique Identification Number)",
+    aliases: ["Aadhaar / UID", "Aadhaar", "UID", "AADHAAR"],
+  },
+  { code: "27", label: "NAREGA Job Card" },
+  { code: "30", label: "NPR (National Population Register)", aliases: ["NPR"] },
+  { code: "99", label: "Others", aliases: ["OTHER", "Other"] },
+  { code: "NA", label: "Latest Demat Account Statement" },
 ];
 
 // ─── 15. APP_EXMT_ID_PROOF — Proof of Identity ───────────────────────────────
@@ -429,8 +545,8 @@ export function mapAnnualIncomeToNdml(value: string | null | undefined): { code:
     if (num <= 5e5) return { code: "02", label: "Btw Rs. 1 to Rs. 5 Lacs" };
     if (num <= 1e6) return { code: "03", label: "Btw Rs. 5 to Rs. 10 Lacs" };
     if (num <= 2.5e6) return { code: "04", label: "Btw Rs. 10 to Rs. 25 Lacs" };
-    if (num <= 1e7) return { code: "06", label: "Btw Rs. 25 Lacs to Rs. 1 Crore" };
-    return { code: "07", label: "More than Rs. 1 Crore" };
+    if (num <= 1e7) return { code: "05", label: "Btw Rs. 25 Lacs to Rs. 1 Crore" };
+    return { code: "06", label: "More than Rs. 1 Crore" };
   }
   return undefined;
 }
