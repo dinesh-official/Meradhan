@@ -588,9 +588,18 @@ export function buildCorporateKraPayload(
     // "S" = self/short dump. NDML's stored records carry "S" here.
     APP_DUMP_TYPE: "S",
     APP_DNLDDT: "",
-    /** "IS" = Insert/Submit (non-individual). Both register and modify use the
-     * same Non-Individual SOAP method; the wire SOAP action distinguishes them. */
-    APP_IOP_FLG: isModify ? "IS" : "IS",
+    /**
+     * NDML strictly validates APP_IOP_FLG against the operation type:
+     *   - "IE" = Intermediary Entry (Register / New record). Matches
+     *     `_docs/api/Sample Request and Response/register-update/Registration API Request*.xml`.
+     *   - "II" = Intermediary Modification. Matches
+     *     `_docs/api/Sample Request and Response/modify/KYC Modification Request*.xml`.
+     *   - "IS" is what NDML *returns* on a download/fetch — never something
+     *     we send on register or modify. Sending "IS" on a modify request
+     *     triggers: "Requested XML input doesn't seem to be valid PAN
+     *     MODIFICATION content!".
+     */
+    APP_IOP_FLG: isModify ? "II" : "IE",
     // KRA source identifier; NDML records carry "CVLKRA" for entities sourced
     // through the CVL KRA pipeline (which is our path).
     APP_KRA_INFO: "",
@@ -607,12 +616,13 @@ export function buildCorporateKraPayload(
   };
 
   /**
-   * APP_ADDL_DATA — one block per related person, using the NDML relationship
-   * codes from the "Relationship with Applicant" master:
+   * APP_ADDL_DATA — one block per related person.
    *
-   *   01 = Promoter
-   *   02 = Whole Time Director
-   *   05 = Authorised Signatory
+   * NDML's "Relationship with Applicant" master allows multiple codes
+   * (01 = Promoter, 02 = Whole Time Director, 05 = Authorised Signatory,
+   * etc.), but we only emit Directors here. Authorised-signatory contact
+   * details are still surfaced upstream via APP_EMAIL / APP_MOB_NO at the
+   * envelope level; promoter rows are omitted on purpose.
    *
    * Source: Static Codes sheet, rows "Relationship with Applicant".
    */
@@ -654,13 +664,11 @@ export function buildCorporateKraPayload(
   };
 
   (kyc.directors ?? []).forEach((d) => pushAddl(d, "02"));
-  (kyc.promoters ?? []).forEach((p) => pushAddl(p, "01"));
-  (kyc.authorisedSignatories ?? []).forEach((s) => pushAddl(s, "05"));
 
   if (addl.length === 0) {
     notes.push({
       xmlTag: "APP_ADDL_DATA",
-      note: "No directors / promoters / signatories captured; empty additional data sent.",
+      note: "No directors captured; empty additional data sent.",
     });
   }
 
