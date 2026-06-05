@@ -7,6 +7,7 @@ import { SelectField } from "@/global/elements/inputs/SelectField";
 import type { CorporateKycFormHook } from "../_hooks/useCorporateKycForm";
 import { useCorporateKycFileUpload } from "../_hooks/useCorporateKycFileUpload";
 import { addressProofOptions } from "../_utils/addressProofOptions";
+import { stateOptions } from "../_utils/stateOptions";
 
 export function CorrespondenceAddressSection({
   hook,
@@ -53,10 +54,12 @@ export function CorrespondenceAddressSection({
           value={form.correspondenceDistrict ?? ""}
           onChangeAction={(v) => setField("correspondenceDistrict", v)}
         />
-        <InputField
+        <SelectField
           label="State"
+          placeholder="Select state"
           value={form.correspondenceState ?? ""}
           onChangeAction={(v) => setField("correspondenceState", v)}
+          options={stateOptions}
         />
         <InputField
           label="PIN code"
