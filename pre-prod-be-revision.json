@@ -1,5 +1,5 @@
 {
-    "taskDefinitionArn": "arn:aws:ecs:ap-south-1:450321244603:task-definition/pre-prod-be:80",
+    "taskDefinitionArn": "arn:aws:ecs:ap-south-1:450321244603:task-definition/pre-prod-be:119",
     "containerDefinitions": [
         {
             "name": "pre-prod-be",
@@ -34,7 +34,7 @@
     "taskRoleArn": "arn:aws:iam::450321244603:role/ecsTaskExecutionRole",
     "executionRoleArn": "arn:aws:iam::450321244603:role/ecsTaskExecutionRole",
     "networkMode": "awsvpc",
-    "revision": 80,
+    "revision": 119,
     "volumes": [],
     "status": "ACTIVE",
     "requiresAttributes": [
@@ -79,9 +79,9 @@
     "requiresCompatibilities": [
         "FARGATE"
     ],
-    "cpu": "256",
-    "memory": "512",
-    "registeredAt": "2026-05-05T10:34:09.901Z",
+    "cpu": "512",
+    "memory": "1024",
+    "registeredAt": "2026-06-05T17:56:15.057Z",
     "registeredBy": "arn:aws:iam::450321244603:user/Dinesh",
     "enableFaultInjection": false,
     "tags": []
