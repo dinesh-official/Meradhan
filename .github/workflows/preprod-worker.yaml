@@ -3,7 +3,7 @@ name: Preprod worker deploy
 on:
   push:
     branches:
-      - staging-workerdeploy
+      - preprod
 
 jobs:
   deploy:

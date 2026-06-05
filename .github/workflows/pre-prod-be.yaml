@@ -3,7 +3,7 @@ name: pre-prod-be-depoy
 on:
   push:
     branches:
-      - staging-workerdeploy
+      - preprod
 jobs:
   deploy:
     runs-on: ubuntu-latest
