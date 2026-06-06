@@ -329,12 +329,15 @@ export const getDatefromReferenceData = async (isin: string) => {
 
 export type ExternalCalcResponse = {
     accrued_days: number;
+    /** Human-readable label paired with `accrued_days` (e.g. "Accrued Days"). */
+    accrued_days_label?: string;
     cf_count: number;
     cf_rows: Array<{
         date: string;
         days: number;
         interest: string;
         num: number;
+        /** "-" for coupon-only rows; formatted decimal (e.g. "10,000.00") on the final maturity row. */
         principal: string;
         total: string;
         total_raw: number;
@@ -342,6 +345,7 @@ export type ExternalCalcResponse = {
     final_price: string;
     final_yield: string;
     final_yield_raw: number;
+    /** "Normal" | "Shut Period" — echoes the input. */
     period_status: string;
     principal_amount: string;
     quantity: string;
@@ -351,6 +355,8 @@ export type ExternalCalcResponse = {
     stamp_duty: string;
     total_ai: string;
     total_consideration: string;
+    /** Non-fatal advisories from the calc engine (date adjustments, schedule warnings, etc.). */
+    warnings?: string[];
 };
 
 function formatYmdAsiaKolkata(d: Date): string {
@@ -458,6 +464,29 @@ function toCalcPaymentFrequency(raw: string | null | undefined): string {
     return "Monthly";
 }
 
+/**
+ * Maps a stored / user-supplied day convention to the calc service's expected label.
+ * The calc form accepts `"Actual/Actual"` and `"Actual/365"` — defaults to `"Actual/Actual"`.
+ */
+function toCalcDayConvention(raw: string | null | undefined): "Actual/Actual" | "Actual/365" {
+    if (!raw?.trim()) return "Actual/Actual";
+    const u = raw.trim().toUpperCase().replace(/\s+/g, "");
+    if (u.includes("ACT/365") || u.includes("ACTUAL/365") || u === "A/365") return "Actual/365";
+    return "Actual/Actual";
+}
+
+/**
+ * Calc service `Bond_Type`. Defaults to `"Bullet"` (overwhelmingly the case for INR NCDs).
+ * Pass `"Amortizing"` along with `amort_schedule` only when the bond actually amortises.
+ */
+function toCalcBondType(raw: string | null | undefined): "Bullet" | "Amortizing" {
+    const v = String(raw ?? "").trim().toLowerCase();
+    if (v === "amortizing" || v === "amortising" || v === "amortized" || v.includes("amort")) {
+        return "Amortizing";
+    }
+    return "Bullet";
+}
+
 const addIstTimezoneToDate = (date: string) => {
     const d = new Date(date)
     d.setHours(d.getHours() + 5)
@@ -487,6 +516,8 @@ function buildBondCalcServicePayload(args: {
         nextCouponDate?: Date | null;
         maturityDate?: Date | null;
         dateOfAllotment?: Date | null;
+        /** Bond row's day convention (e.g. "Actual/Actual"). Falls back to "Actual/Actual". */
+        dayConvention?: string | null;
     };
     quantity: number;
     settlementDate: string;
@@ -494,6 +525,30 @@ function buildBondCalcServicePayload(args: {
     /** Reference sheet last/next coupon when bond row is empty */
     refLastCouponDate?: Date | null;
     refNextCouponDate?: Date | null;
+    /**
+     * Caller overrides for fields the calc service exposes via its UI form.
+     * All optional — when omitted, sensible defaults matching the calc form are used:
+     *  - periodStatus       → "Normal"
+     *  - inputType          → "Calculate from Yield"
+     *  - isEndOfMonthBond   → "No"
+     *  - priceRoundingDecimals → "4"
+     *  - stampDuty          → "0"
+     *  - dayConvention      → bond.dayConvention ?? "Actual/Actual"
+     *  - bondType           → "Bullet"
+     *  - amortSchedule      → ""   (only used when bondType = "Amortizing")
+     *  - isin               → ""
+     */
+    overrides?: {
+        periodStatus?: "Normal" | "Shut Period";
+        inputType?: "Calculate from Yield" | "Calculate from Clean Price";
+        isEndOfMonthBond?: "Yes" | "No";
+        priceRoundingDecimals?: "2" | "4" | string;
+        stampDuty?: number | string;
+        dayConvention?: "Actual/Actual" | "Actual/365" | string;
+        bondType?: "Bullet" | "Amortizing" | string;
+        amortSchedule?: string;
+        isin?: string;
+    };
 }) {
     const freq = toCalcPaymentFrequency(
         args.bond.interestPaymentFrequency || args.dateData.interestPaymentFrequency || "",
@@ -547,8 +602,16 @@ function buildBondCalcServicePayload(args: {
     );
     const yieldStr = Number.isFinite(args.pricingYield) ? String(args.pricingYield) : "0";
 
+    const ov = args.overrides ?? {};
+    const dayConvention = toCalcDayConvention(
+        ov.dayConvention ?? args.bond.dayConvention ?? "",
+    );
+    const bondType = toCalcBondType(ov.bondType);
+    const amortSchedule =
+        bondType === "Amortizing" ? String(ov.amortSchedule ?? "") : "";
 
     return {
+        ISIN: ov.isin ?? "",
         Face_Value: fv,
         Coupon_Rate_Pct: String(coupon),
         Payment_Frequency: freq,
@@ -558,12 +621,15 @@ function buildBondCalcServicePayload(args: {
         Last_IP_Date: lastIp,
         Next_IP_Date: nextIp,
         Maturity_Date: removeIstTimezoneFromDate(maturity),
-        Period_Status: "Shut Period",
-        Input_Type: "Calculate from Yield",
+        Period_Status: ov.periodStatus ?? "Normal",
+        Input_Type: ov.inputType ?? "Calculate from Yield",
         Pricing_Input: yieldStr,
-        Is_End_Of_Month_Bond: "No",
-        Price_Rounding_Decimals: "4",
-        Stamp_Duty: "0",
+        Is_End_Of_Month_Bond: ov.isEndOfMonthBond ?? "No",
+        Price_Rounding_Decimals: String(ov.priceRoundingDecimals ?? "4"),
+        Stamp_Duty: String(ov.stampDuty ?? "0"),
+        Day_Convention: dayConvention,
+        Bond_Type: bondType,
+        amort_schedule: amortSchedule,
     };
 }
 
@@ -583,6 +649,7 @@ export const calculateBondMargin = async ({
     const bondMargin = await getBondMargin(isin);
     const dateData = await getDatefromReferenceData(isin);
     const settlementYmd = formatYmdAsiaKolkata(new Date());
+
     const payload = buildBondCalcServicePayload({
         bondMargin,
         dateData,
@@ -594,12 +661,14 @@ export const calculateBondMargin = async ({
             nextCouponDate: bond.nextCouponDate,
             maturityDate: bond.maturityDate,
             dateOfAllotment: bond.dateOfAllotment,
+            dayConvention: bond.dayConvention,
         },
         quantity,
         settlementDate: settlementYmd,
         pricingYield: bondMargin.yield,
+        overrides: { isin },
     });
-    console.log(payload);
+    console.log({ payload });
     const calc = await calculateBondFromService(payload);
     return {
         margin: bondMargin,
@@ -702,12 +771,14 @@ export async function getBondDealAutofill(opts: {
             nextCouponDate: new Date(toISTISODate(new Date(dates.nextCouponDate || ""))),
             maturityDate: bond.maturityDate,
             dateOfAllotment: bond.dateOfAllotment,
+            dayConvention: bond.dayConvention ?? ref?.dayConvention ?? null,
         },
         quantity,
         settlementDate: settlementYmd,
         pricingYield,
         refLastCouponDate: ref?.lastCouponDate,
         refNextCouponDate: ref?.nextCouponDate,
+        overrides: { isin },
     });
 
     const calc = await calculateBondFromService(payload);
@@ -848,27 +919,45 @@ export async function getBondDealAutofill(opts: {
 
 /**
  * Proxy to `calc.meradhan.co/api/calculate` and return its JSON response.
- * The input shape is intentionally pass-through so the caller can send the same payload
- * as the calc UI (e.g. Face_Value, Coupon_Rate_Pct, Payment_Frequency, etc.).
+ * The input shape mirrors the calc UI form (see calc.meradhan.co `<form>` field names).
+ *
+ * `Day_Convention`, `Bond_Type`, and `amort_schedule` are required by the service —
+ * historical callers omitted them, so the calc engine fell back to legacy defaults
+ * which produced wrong AI / clean price for Actual/365 bonds and silently treated
+ * every bond as Bullet. They are now emitted by `buildBondCalcServicePayload`.
  */
+export type BondCalcServicePayload = {
+    /** Optional — calc service accepts and echoes this for traceability. */
+    ISIN?: string
+    Face_Value: number
+    Coupon_Rate_Pct: string
+    Payment_Frequency: string
+    Quantity: string
+    Settlement_Date: string
+    Dated_Date: string
+    Last_IP_Date: string
+    Next_IP_Date: string
+    Maturity_Date: string
+    /** "Normal" | "Shut Period" */
+    Period_Status: string
+    /** "Calculate from Yield" | "Calculate from Clean Price" */
+    Input_Type: string
+    Pricing_Input: string
+    /** "Yes" | "No" */
+    Is_End_Of_Month_Bond: string
+    /** "2" | "4" */
+    Price_Rounding_Decimals: string
+    Stamp_Duty: string
+    /** "Actual/Actual" | "Actual/365" */
+    Day_Convention: string
+    /** "Bullet" | "Amortizing" */
+    Bond_Type: string
+    /** Required by the calc service. Empty string for Bullet bonds. */
+    amort_schedule: string
+};
+
 export async function calculateBondFromService(
-    payload: {
-        Face_Value: number
-        Coupon_Rate_Pct: string
-        Payment_Frequency: string
-        Quantity: string
-        Settlement_Date: string
-        Dated_Date: string
-        Last_IP_Date: string
-        Next_IP_Date: string
-        Maturity_Date: string
-        Period_Status: string
-        Input_Type: string
-        Pricing_Input: string
-        Is_End_Of_Month_Bond: string
-        Price_Rounding_Decimals: string
-        Stamp_Duty: string
-    }
+    payload: BondCalcServicePayload,
 ): Promise<ExternalCalcResponse> {
     console.log(JSON.stringify(payload, null, 2));
     const url = "https://calc.meradhan.co/api/calculate";

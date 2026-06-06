@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BondDetailsResponse } from "@root/apiGateway";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
+import { canShowBuyNow } from "@/global/utils/bondPurchaseEligibility";
 
 type LatestBondReleasesProps = {
   latest: BondDetailsResponse[];
@@ -14,14 +15,33 @@ type LatestBondReleasesProps = {
   zeroCoupon: BondDetailsResponse[];
 };
 
-const TAB_DEFS: Array<{
-  value: "latest" | "high-yield" | "zero-coupon";
-  label: string;
-}> = [
+type TabValue =
+  | "all"
+  | "latest"
+  | "high-yield"
+  | "zero-coupon"
+  | "aaa"
+  | "secured"
+  | "monthly-income"
+  | "min-10000";
+
+const TAB_DEFS: Array<{ value: TabValue; label: string }> = [
+  { value: "all", label: "All Bonds" },
   { value: "latest", label: "Latest Release" },
   { value: "high-yield", label: "11+ Yield" },
   { value: "zero-coupon", label: "Zero Coupon" },
+  { value: "aaa", label: "AAA Bonds" },
+  { value: "secured", label: "Secured" },
+  { value: "monthly-income", label: "Monthly Income" },
+  { value: "min-10000", label: "Minimum ₹10,000" },
 ];
+
+function dedupe(bonds: BondDetailsResponse[]): BondDetailsResponse[] {
+  return bonds.filter(
+    (bond, index, self) =>
+      self.findIndex((b) => b.isin === bond.isin) === index,
+  );
+}
 
 const responsive = {
   superLargeDesktop: {
@@ -71,10 +91,23 @@ function LatestBondReleases({
   highYield,
   zeroCoupon,
 }: LatestBondReleasesProps) {
-  const bondsByTab: Record<(typeof TAB_DEFS)[number]["value"], BondDetailsResponse[]> = {
-    latest,
+  const allBonds = dedupe([...latest, ...highYield, ...zeroCoupon]);
+
+  const bondsByTab: Record<TabValue, BondDetailsResponse[]> = {
+    all: allBonds,
+    latest: latest,
     "high-yield": highYield,
     "zero-coupon": zeroCoupon,
+    aaa: allBonds.filter((b) => b.creditRating?.includes("AAA")),
+    secured: allBonds.filter((b) =>
+      b.natureOfInstrument?.toUpperCase() === "SECURED",
+    ),
+    "monthly-income": allBonds.filter(
+      (b) => b.interestPaymentFrequency === "MONTHLY",
+    ),
+    "min-10000": allBonds.filter(
+      (b) => b.faceValue == 10000
+    ),
   };
 
   const visibleTabs = TAB_DEFS.filter(
@@ -89,11 +122,11 @@ function LatestBondReleases({
         <SectionTitleDesc
           title={
             <>
-              <span className="font-semibold text-secondary">Latest</span> Bond
-              Releases
+              <span className="font-semibold text-secondary">Explore Bonds</span>{" "}
+              <span className="text-black">Available on MeraDhan</span>
             </>
           }
-          description="New bonds are in! See what’s just been released in the market."
+          description="Browse curated bond opportunities and choose what suits your investment needs."
         />
         <Tabs defaultValue={visibleTabs[0].value} className="gap-5">
           <TabsList className="bg-muted mx-auto h-10 p-1">

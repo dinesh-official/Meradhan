@@ -13,12 +13,12 @@ cron.schedule("0 8,20 * * *", async () => {
   }
 });
 
-// Schedule to run every day at 9:00 AM (IST / Asia/Kolkata)
+// Schedule to run every day at 7:00 AM (IST / Asia/Kolkata)
 cron.schedule(
-  "0 9 * * *",
+  "0 7 * * *",
   async () => {
     try {
-      console.log("Running task at 9:00 AM every day (Asia/Kolkata)");
+      console.log("Running task at 7:00 AM every day (Asia/Kolkata)");
       await revalidateBonds();
     } catch (error) {
       console.error(error);

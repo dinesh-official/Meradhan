@@ -15,6 +15,170 @@ import type { IApiCaller } from "../../connection/apiCaller.interface";
 import { ApiError } from "../../connection/error";
 import type { BaseResponseData } from "../../../types/base";
 
+export type CorporateKraPastExecution =
+  | "MODIFY"
+  | "REGISTER"
+  | "NONE"
+  | "CBRICS_ONLY";
+
+export type TriggerCorporateKraPayload = {
+  pastExecution: CorporateKraPastExecution;
+  delayMs?: number;
+};
+
+export type CorporateKraValidationIssue = {
+  field: string;
+  message: string;
+  severity: "ERROR" | "WARN";
+  xmlTag?: string;
+};
+
+export type CorporateKraFieldMapRow = {
+  group: string;
+  label: string;
+  source: string;
+  sourceValue: string | null;
+  xmlTag: string;
+  mappedValue: string;
+};
+
+export type CorporateKraCodeEntry = {
+  code: string;
+  label: string;
+  aliases?: string[];
+};
+
+export type CorporateKraCodeReference = {
+  iopFlag: CorporateKraCodeEntry[];
+  addlUpdateFlag: CorporateKraCodeEntry[];
+  entityType: CorporateKraCodeEntry[];
+  yesNo: CorporateKraCodeEntry[];
+  docProof: CorporateKraCodeEntry[];
+  dumpType: CorporateKraCodeEntry[];
+  kycStatus: CorporateKraCodeEntry[];
+  companyStatus: CorporateKraCodeEntry[];
+  annualIncome: CorporateKraCodeEntry[];
+  occupation: CorporateKraCodeEntry[];
+  politicalConnection: CorporateKraCodeEntry[];
+  relationship: CorporateKraCodeEntry[];
+  addressProof: CorporateKraCodeEntry[];
+  idProof: CorporateKraCodeEntry[];
+  tinType: CorporateKraCodeEntry[];
+  tinExemptReason: CorporateKraCodeEntry[];
+  fatcaOtherServices: CorporateKraCodeEntry[];
+};
+
+export type CorporateKraDecodedTag = {
+  /** Dot/bracket path on `responseData` where the code was found. */
+  field: string;
+  code: string;
+  label?: string;
+};
+
+/**
+ * Headline fields decoded from the latest NDML Non-Individual download.
+ * Stable schema — driven by `summariseCorporateKraDownload` on the backend.
+ */
+export type CorporateKraDownloadSummary = {
+  pan: string | null;
+  entityName: string | null;
+  status: { code: string | null; label?: string };
+  errorDesc: { code: string | null; label?: string };
+  downloadDate: string | null;
+  kraInfo: string | null;
+  fatcaApplicable: string | null;
+  registeredAddress: string | null;
+  correspondenceAddress: string | null;
+  doi: string | null;
+  commencement: string | null;
+  compStatus: string | null;
+  registrationNo: string | null;
+  ipvFlag: string | null;
+  ipvDate: string | null;
+  additionalRecords: number;
+  fatcaRecords: number;
+};
+
+/**
+ * The last successful "manual" KRA download for a corporate customer.
+ *
+ * `request` is the exact JSON we sent to NDML, `response` is the full parsed
+ * NDML response (large), and `summary` is the picked-out highlights used by
+ * the CRM card.
+ */
+export type CorporateKraLastDownload = {
+  logId: number;
+  kycId: number;
+  storedAt: string;
+  summary: CorporateKraDownloadSummary;
+  request: unknown;
+  response: unknown;
+};
+
+export type CorporateKraDownloadResponse = {
+  logId: number;
+  storedAt: string;
+  download: unknown;
+  summary: CorporateKraDownloadSummary;
+};
+
+export type CorporateKraPreviewResponse =
+  | {
+      hasCorporateKyc: false;
+      isRunning: false;
+      kycDataStoreId: null;
+    }
+  | {
+      hasCorporateKyc: true;
+      kycDataStoreId: number;
+      isRunning: boolean;
+      runnerStartedAt: string | null;
+      kraStatus: {
+        kraStatus: string | null;
+        kycStatus: string | null;
+        verifyDate: string | null;
+      } | null;
+      validation: {
+        errors: CorporateKraValidationIssue[];
+        warnings: CorporateKraValidationIssue[];
+        canTrigger: boolean;
+      };
+      mapping: {
+        fields: CorporateKraFieldMapRow[];
+        notes: Array<{ xmlTag: string; note: string }>;
+      };
+      payload: Record<string, unknown>;
+      xml: {
+        /** `<APP_REQ_ROOT>` payload (the actual KRA document). */
+        inner: string;
+        /** Full SOAP envelope for the `registration` action (credentials masked). */
+        soapRegister: string;
+        /** Full SOAP envelope for the `processModification` action (credentials masked). */
+        soapModify: string;
+        credentialsMasked: boolean;
+        soapAction: {
+          register: string;
+          modify: string;
+        };
+      };
+      codeReference: CorporateKraCodeReference;
+      /**
+       * Latest persisted NDML download for this customer (manual or worker
+       * trigger). `null` until at least one `Download from KRA` call has been
+       * made.
+       */
+      lastDownload: CorporateKraLastDownload | null;
+      recentLogs: Array<{
+        id: number;
+        stage: string;
+        kycId: number;
+        reqTime: string | null;
+        requestData: unknown;
+        responseData: unknown;
+        decoded?: CorporateKraDecodedTag[];
+      }>;
+    };
+
 export interface TCrmCustomerInterface {
   createCustomer(
     data: z.infer<(typeof appSchema.customer)["createNewCustomerSchema"]>,
@@ -64,10 +228,42 @@ export interface TCrmCustomerInterface {
     config?: AxiosRequestConfig,
   ): Promise<AxiosResponse<BaseResponseData<{ isRunning: boolean; kycDataStoreId: number | null }>>>;
 
-  triggerCorporateKra(
+  /**
+   * Returns the exact NDML Non-Individual KRA payload that the worker would
+   * send for this customer, plus a validation report and a row-by-row source
+   * → XML mapping. No SOAP call is made — pure preview.
+   */
+  corporateKraPreview(
     customerId: number,
     config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<BaseResponseData<CorporateKraPreviewResponse>>>;
+
+  triggerCorporateKra(
+    customerId: number,
+    payload: TriggerCorporateKraPayload,
+    config?: AxiosRequestConfig,
   ): Promise<AxiosResponse<BaseResponseData<{ isTriggered: boolean }>>>;
+
+  /**
+   * Performs a one-shot NDML Non-Individual KRA download for this customer
+   * and persists the response as a `kraDataLogs` row. Does not enqueue any
+   * worker job. Returns the parsed download + a UI-friendly summary.
+   */
+  downloadCorporateKra(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<BaseResponseData<CorporateKraDownloadResponse>>>;
+
+  /**
+   * CRM action: forcibly finish a running corporate KRA process so the
+   * Trigger KRA button becomes enabled again. Drains pending Bull jobs,
+   * clears Redis runner/retry keys, sets `kraStatus = MANUAL_FINISHED`
+   * (unless already VERIFIED), and writes a `MANUAL_FINISHED_BY_CRM` log.
+   */
+  finishCorporateKra(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<BaseResponseData<{ isFinished: boolean; removedJobIds: Array<string | number> }>>>;
 
   listCorporateKycAttachments(
     customerId: number,
@@ -251,12 +447,47 @@ export class CrmCustomerApi implements TCrmCustomerInterface {
     );
   }
 
+  async corporateKraPreview(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["corporateKraPreview"]> {
+    return this.apiClient.get<BaseResponseData<CorporateKraPreviewResponse>>(
+      `/crm/customer/${customerId}/corporate-kyc/kra/preview`,
+      config,
+    );
+  }
+
   async triggerCorporateKra(
     customerId: number,
+    payload: TriggerCorporateKraPayload,
     config?: AxiosRequestConfig,
   ): ReturnType<TCrmCustomerInterface["triggerCorporateKra"]> {
     return this.apiClient.post<BaseResponseData<{ isTriggered: boolean }>>(
       `/crm/customer/${customerId}/corporate-kyc/kra/trigger`,
+      payload,
+      config,
+    );
+  }
+
+  async downloadCorporateKra(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["downloadCorporateKra"]> {
+    return this.apiClient.post<BaseResponseData<CorporateKraDownloadResponse>>(
+      `/crm/customer/${customerId}/corporate-kyc/kra/download`,
+      {},
+      config,
+    );
+  }
+
+  async finishCorporateKra(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["finishCorporateKra"]> {
+    return this.apiClient.post<
+      BaseResponseData<{ isFinished: boolean; removedJobIds: Array<string | number> }>
+    >(
+      `/crm/customer/${customerId}/corporate-kyc/kra/finish`,
       {},
       config,
     );

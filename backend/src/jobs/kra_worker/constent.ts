@@ -1,238 +1,70 @@
 import { env } from "@packages/config/src/env";
 
 export const kraMobNo = env.KRA_MOB_NO;
+/**
+ * Official NDML / CVL KRA state codes — `code` is what gets sent in
+ * `APP_COR_STATE` / `APP_PER_STATE` after zero-padding to 3 digits in
+ * `getKraState()`.
+ *
+ * `id` mirrors the row number in NDML's master list so duplicate aliases
+ * for the same state (e.g. "Odisha" / "Orissa") share the same id.
+ *
+ * Source: NDML state-codes table provided by the integration.
+ */
 const kraState = [
-  {
-    id: 1,
-    state: "Andaman & Nicobar Islands",
-    code: 35,
-  },
-  {
-    id: 1,
-    state: "Andaman and Nicobar Islands",
-    code: 35,
-  },
-  {
-    id: 2,
-    state: "Andhra Pradesh",
-    code: 28,
-  },
-  {
-    id: 3,
-    state: "Arunachal Pradesh",
-    code: 12,
-  },
-  {
-    id: 4,
-    state: "Assam",
-    code: 13,
-  },
-  {
-    id: 5,
-    state: "Bihar",
-    code: 10,
-  },
-  {
-    id: 6,
-    state: "Chandigarh",
-    code: 4,
-  },
-  {
-    id: 7,
-    state: "Dadra & Nagar Haveli",
-    code: 26,
-  },
-  {
-    id: 7,
-    state: "Dadra and Nagar Haveli",
-    code: 26,
-  },
-  {
-    id: 8,
-    state: "Daman & Diu",
-    code: 25,
-  },
-  {
-    id: 8,
-    state: "Daman and Diu",
-    code: 25,
-  },
-  {
-    id: 9,
-    state: "Delhi",
-    code: 7,
-  },
-  {
-    id: 10,
-    state: "Goa",
-    code: 30,
-  },
-  {
-    id: 11,
-    state: "Gujarat",
-    code: 24,
-  },
-  {
-    id: 12,
-    state: "Haryana",
-    code: 6,
-  },
-  {
-    id: 13,
-    state: "Himachal Pradesh",
-    code: 2,
-  },
-  {
-    id: 14,
-    state: "Jammu & Kashmir",
-    code: 1,
-  },
-  {
-    id: 14,
-    state: "Jammu and Kashmir",
-    code: 1,
-  },
-  {
-    id: 15,
-    state: "Karnataka",
-    code: 29,
-  },
-  {
-    id: 16,
-    state: "Kerala",
-    code: 32,
-  },
-  {
-    id: 17,
-    state: "Lakhswadeep",
-    code: 31,
-  },
-  {
-    id: 18,
-    state: "Madhya Pradesh",
-    code: 23,
-  },
-  {
-    id: 19,
-    state: "Maharashtra",
-    code: 27,
-  },
-  {
-    id: 20,
-    state: "Manipur",
-    code: 14,
-  },
-  {
-    id: 21,
-    state: "Meghalaya",
-    code: 17,
-  },
-  {
-    id: 22,
-    state: "Mizoram",
-    code: 15,
-  },
-  {
-    id: 23,
-    state: "Nagaland",
-    code: 18,
-  },
-  {
-    id: 24,
-    state: "Orissa",
-    code: 21,
-  },
-  {
-    id: 24,
-    state: "Odisha",
-    code: 21,
-  },
-  {
-    // depricated this name
-    id: 25,
-    state: "Pondicherry",
-    code: 34,
-  },
-  {
-    // update state name 2006
-    id: 25,
-    state: "Puducherry",
-    code: 34,
-  },
-  {
-    id: 26,
-    state: "Punjab",
-    code: 3,
-  },
-  {
-    id: 27,
-    state: "Rajasthan",
-    code: 8,
-  },
-  {
-    id: 28,
-    state: "Sikkim",
-    code: 11,
-  },
-  {
-    id: 29,
-    state: "Tamil Nadu",
-    code: 33,
-  },
-  {
-    id: 30,
-    state: "Tripura",
-    code: 16,
-  },
-  {
-    id: 31,
-    state: "Uttar Pradesh",
-    code: 9,
-  },
-  {
-    id: 32,
-    state: "West Bengal",
-    code: 19,
-  },
-  {
-    id: 33,
-    state: "Chhattisgarh",
-    code: 22,
-  },
-  {
-    id: 34,
-    state: "Uttaranchal",
-    code: 5,
-  },
-  {
-    id: 34,
-    state: "Uttarakhand",
-    code: 5,
-  },
-  {
-    id: 35,
-    state: "Jharkhand",
-    code: 20,
-  },
-  {
-    id: 36,
-    state: "Telangana",
-    code: 37,
-  },
-  {
-    id: 99,
-    state: "Others (please specify)",
-    code: 99,
-  },
+  { id: 1, state: "Andaman & Nicobar Islands", code: 1 },
+  { id: 1, state: "Andaman and Nicobar Islands", code: 1 },
+  { id: 2, state: "Andhra Pradesh", code: 2 },
+  { id: 3, state: "Arunachal Pradesh", code: 3 },
+  { id: 4, state: "Assam", code: 4 },
+  { id: 5, state: "Bihar", code: 5 },
+  { id: 6, state: "Chandigarh", code: 6 },
+  { id: 7, state: "Dadra & Nagar Haveli", code: 7 },
+  { id: 7, state: "Dadra and Nagar Haveli", code: 7 },
+  { id: 8, state: "Daman & Diu", code: 8 },
+  { id: 8, state: "Daman and Diu", code: 8 },
+  { id: 9, state: "Delhi", code: 9 },
+  { id: 10, state: "Goa", code: 10 },
+  { id: 11, state: "Gujarat", code: 11 },
+  { id: 12, state: "Haryana", code: 12 },
+  { id: 13, state: "Himachal Pradesh", code: 13 },
+  { id: 14, state: "Jammu & Kashmir", code: 14 },
+  { id: 14, state: "Jammu and Kashmir", code: 14 },
+  { id: 15, state: "Karnataka", code: 15 },
+  { id: 16, state: "Kerala", code: 16 },
+  { id: 17, state: "Lakhswadeep", code: 17 },
+  { id: 17, state: "Lakshadweep", code: 17 },
+  { id: 18, state: "Madhya Pradesh", code: 18 },
+  { id: 19, state: "Maharashtra", code: 19 },
+  { id: 20, state: "Manipur", code: 20 },
+  { id: 21, state: "Meghalaya", code: 21 },
+  { id: 22, state: "Mizoram", code: 22 },
+  { id: 23, state: "Nagaland", code: 23 },
+  { id: 24, state: "Orissa", code: 24 },
+  { id: 24, state: "Odisha", code: 24 },
+  // "Pondicherry" is the legacy name (renamed to Puducherry in 2006);
+  // NDML still uses the legacy spelling in its master list.
+  { id: 25, state: "Pondicherry", code: 25 },
+  { id: 25, state: "Puducherry", code: 25 },
+  { id: 26, state: "Punjab", code: 26 },
+  { id: 27, state: "Rajasthan", code: 27 },
+  { id: 28, state: "Sikkim", code: 28 },
+  { id: 29, state: "Tamil Nadu", code: 29 },
+  { id: 30, state: "Tripura", code: 30 },
+  { id: 31, state: "Uttar Pradesh", code: 31 },
+  { id: 32, state: "West Bengal", code: 32 },
+  { id: 33, state: "Chhattisgarh", code: 33 },
+  { id: 34, state: "Uttaranchal", code: 34 },
+  { id: 34, state: "Uttarakhand", code: 34 },
+  { id: 35, state: "Jharkhand", code: 35 },
+  { id: 36, state: "Telangana", code: 36 },
+  { id: 99, state: "Others (please specify)", code: 99 },
 ];
 
 export const getKraState = (name: string) => {
-  console.log(name);
-
   const state = kraState.find((e) => {
     return e.state.trim().toLowerCase() == name.trim().toLowerCase();
   });
-  console.log(state, state?.code.toString().padStart(3, "0"));
 
   return {
     ...state,

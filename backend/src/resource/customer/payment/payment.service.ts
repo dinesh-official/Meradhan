@@ -90,7 +90,7 @@ export class PaymentService {
       amount: Math.round(amount * 100), // amount in paisa
       currency,
       receipt,
-      method: "netbanking",
+      // method: "netbanking",
       bank_account: bank,
       notes: {
         "Member_ID": env.CBRICS_DOMAIN, //Member_ID 

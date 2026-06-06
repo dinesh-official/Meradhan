@@ -26,8 +26,8 @@ jobs:
           DEV_DATABASE_URL: ${{ secrets.DEV_DATABASE_URL }}
           DEV_DIRECT_URL: ${{ secrets.DEV_DIRECT_URL }}
 
-          DEV_REDIS_HOST: ${{ secrets.DEV_REDIS_HOST }}
-          DEV_REDIS_PORT: ${{ secrets.DEV_REDIS_PORT }}
+          PREPROD_REDIS_HOST: ${{ vars.PREPROD_REDIS_HOST }}
+          PREPROD_REDIS_PORT: ${{ vars.PREPROD_REDIS_PORT }}
 
           DEV_KRA_USERNAME: ${{ secrets.DEV_KRA_USERNAME }}
           DEV_KRA_PASSWORD: ${{ secrets.DEV_KRA_PASSWORD }}
@@ -60,8 +60,8 @@ jobs:
           DEV_DIGIO_USERNAME_PASS: ${{ secrets.DEV_DIGIO_USERNAME_PASS }}
 
           DEV_NDSL_REQUESTOR_ID: ${{ secrets.DEV_NDSL_REQUESTOR_ID }}
-          DEV_NSDL_SECRET_KEY: ${{ secrets.DEV_NSDL_SECRET_KEY }}
-          DEV_NSDL_MODE: ${{ secrets.DEV_NSDL_MODE }}
+          DEV_NSDL_SECRET_KEY: ${{ secrets.NSDL_SECRET_KEY }}
+          DEV_NSDL_MODE: ${{ secrets.NSDL_MODE }}
 
           DEV_CDSL_AES_KEY: ${{ secrets.CDSL_AES_KEY }}
           DEV_ENTITY_ID: ${{ secrets.ENTITY_ID }}
@@ -122,8 +122,8 @@ jobs:
           echo "RFQ_CBRICS_ENV=UAT" >> .env
           echo "CBRICS_ENV=UAT" >>  .env
 
-          echo "REDIS_HOST=${DEV_REDIS_HOST}" >> .env
-          echo "REDIS_PORT=${DEV_REDIS_PORT}" >> .env
+          echo "REDIS_HOST=${PREPROD_REDIS_HOST}" >> .env
+          echo "REDIS_PORT=${PREPROD_REDIS_PORT}" >> .env
 
           echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env 
           
