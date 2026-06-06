@@ -1,13 +1,12 @@
 import Workspace from "@/global/elements/nav-sidebar/WorkSpace";
-import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import React from "react";
 import NewLeadView from "./NewLeadView";
 
 function CreateNewLead() {
   return (
-    <AllowOnlyView permissions={["create:leads"]}>
-    <Workspace>
+    <Workspace actionKey="leads.create">
+    
       <PageInfoBar
         title="Create New Lead"
         description="Add details to build a new lead."
@@ -15,7 +14,6 @@ function CreateNewLead() {
       />
       <NewLeadView />
     </Workspace>
-    </AllowOnlyView>
   );
 }
 

@@ -14,13 +14,12 @@ import Link from "next/link";
 import Swal from "sweetalert2";
 import { useCustomerTableActions } from "./useCustomerTableActionHook";
 import { useUserTracking } from "@/analytics/UserTrackingProvider";
-import useAppCookie from "@/hooks/useAppCookie.hook";
-import { canAccessNotifications } from "@/global/utils/role.utils";
+import { useNotificationAccess } from "@/global/elements/permissions/AllowOnlyView";
 import { useState } from "react";
 import CustomerNotificationLogsDialog from "./CustomerNotificationLogsDialog";
 
 const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {
-  const { cookies } = useAppCookie();
+  const notify = useNotificationAccess();
   const [notificationLogsOpen, setNotificationLogsOpen] = useState(false);
   const { trackActivity } = useUserTracking();
   const {
@@ -57,7 +56,7 @@ const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {
             </DropdownMenuItem>
           </ShowOnly>
 
-          <AllowOnlyView permissions={["view:customerkyc"]}>
+          <AllowOnlyView actionKey="customers.kyc.view">
             {profile.userType === "CORPORATE" ? (
               <DropdownMenuItem asChild>
                 <Link
@@ -78,13 +77,13 @@ const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {
             View Profile
           </DropdownMenuItem>
 
-          <ShowOnly condition={canAccessNotifications(cookies.role)}>
+          <ShowOnly condition={notify.canViewLogs()}>
             <DropdownMenuItem onClick={() => setNotificationLogsOpen(true)}>
               Notification logs
             </DropdownMenuItem>
           </ShowOnly>
 
-          <AllowOnlyView permissions={["delete:customer"]} condition={profile.kycStatus !== "PENDING"}>
+          <AllowOnlyView actionKey="customers.delete" condition={profile.kycStatus !== "PENDING"}>
             <DropdownMenuItem
               onClick={async () => {
 
@@ -125,7 +124,7 @@ const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {
             </DropdownMenuItem>
           </AllowOnlyView>
 
-          <AllowOnlyView permissions={["delete:customer"]} >
+          <AllowOnlyView actionKey="customers.delete" >
             <DropdownMenuItem
               className="bg-red-50 mt-1 text-red-500"
               onClick={async () => {

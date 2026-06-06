@@ -5,8 +5,9 @@ export const metadata = { title: "Notification Templates" };
 
 export default function NotificationTemplatesPage() {
   return (
-    <Workspace>
-      <NotificationTemplatesView />
-    </Workspace>
+    <Workspace actionKey="notifications.templates.view">
+      
+        <NotificationTemplatesView />
+      </Workspace>
   );
 }

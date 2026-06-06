@@ -13,8 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
-import useAppCookie from "@/hooks/useAppCookie.hook";
-import { canAccessNotifications } from "@/global/utils/role.utils";
+import { NotificationAccessGate } from "../_components/NotificationAccessGate";
 import apiGateway from "@root/apiGateway";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
@@ -33,7 +32,6 @@ const KYC_STEP_LABELS: Record<number, string> = {
 };
 
 export default function CustomerListNotificationsView() {
-  const { cookies } = useAppCookie();
   const [mounted, setMounted] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
@@ -47,17 +45,6 @@ export default function CustomerListNotificationsView() {
   useEffect(() => { setMounted(true); }, []);
 
   const api = new apiGateway.crm.notifications.CrmNotificationsApi(apiClientCaller);
-
-  // Wait for client hydration so cookies.role is available
-  if (!mounted) return null;
-
-  if (!canAccessNotifications(cookies.role)) {
-    return (
-      <p className="p-2 text-muted-foreground">
-        You do not have access to notifications.
-      </p>
-    );
-  }
 
   const runQuery = async () => {
     setLoading(true);
@@ -145,7 +132,10 @@ export default function CustomerListNotificationsView() {
         )
       : [];
 
+  if (!mounted) return null;
+
   return (
+    <NotificationAccessGate check={(a) => a.canViewCustomerList()}>
     <div className="space-y-4">
       <PageInfoBar title="Customer List (notifications)" />
       <Card>
@@ -246,6 +236,7 @@ export default function CustomerListNotificationsView() {
         </DialogContent>
       </Dialog>
     </div>
+    </NotificationAccessGate>
   );
 }
 

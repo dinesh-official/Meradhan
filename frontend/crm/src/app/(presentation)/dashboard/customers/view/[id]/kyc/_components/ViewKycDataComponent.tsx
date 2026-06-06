@@ -6,7 +6,7 @@ import { genMediaUrl } from "@/global/utils/url.utils";
 import { areNamesMatched } from "@/lib/utils";
 import apiGateway, { CustomerByIdPayload } from "@root/apiGateway";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import useAppCookie from "@/hooks/useAppCookie.hook";
+import usePermissions from "@/hooks/usePermissions.hook";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -98,11 +98,11 @@ type DefaultAccountConfirm =
   | { type: "demat"; id: number };
 
 function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
-  const { cookies } = useAppCookie();
   const queryClient = useQueryClient();
   const [defaultAccountConfirm, setDefaultAccountConfirm] =
     useState<DefaultAccountConfirm | null>(null);
-  const isSuperAdmin = cookies.role === "SUPER_ADMIN";
+  const { can } = usePermissions();
+  const canEditKyc = can("customers.kyc.edit");
   /** Must match backend `CustomerManageAccountsService.assertKycVerified` (kycStatus, not kraStatus). */
   const canManageDefaultAccounts =
     String(data.kycStatus ?? "").trim().toUpperCase() === "VERIFIED";
@@ -530,7 +530,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
                         `${data.firstName} ${data.middleName ? data.middleName + " " : ""}${data.lastName}`.toLowerCase()
                       }
                     />
-                    {isSuperAdmin && canManageDefaultAccounts && !e.isPrimary ? (
+                    {canEditKyc && canManageDefaultAccounts && !e.isPrimary ? (
                       <div className="flex justify-center mt-3">
                         <Button
                           type="button"
@@ -608,7 +608,7 @@ function ViewKycDataComponent({ data }: { data: CustomerByIdPayload }) {
                           : "--/--/----"
                       }
                     />
-                    {isSuperAdmin && canManageDefaultAccounts && !e.isPrimary ? (
+                    {canEditKyc && canManageDefaultAccounts && !e.isPrimary ? (
                       <div className="flex justify-center mt-3">
                         <Button
                           type="button"

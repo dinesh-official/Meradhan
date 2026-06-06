@@ -18,3 +18,7 @@ export const verifyOtpSchema = z.object({
   otp: z.string({ error: "enter your otp" }).min(6, { error: "enter a valid otp 6 care." })
 }, { error: "enter valid data" });
 
+export const impersonateUserSchema = z.object({
+  targetUserId: z.number().int().positive(),
+});
+

@@ -21,7 +21,7 @@ function NscRfqViewPage() {
                 Webhook notifications
               </Button>
             </Link>
-            <AllowOnlyView permissions={["create:rfq"]}>
+            <AllowOnlyView actionKey="rfqs.manage">
               <Link href={`/dashboard/rfqs/nse/create`}>
                 <Button>
                   <Plus /> Create New RFQ

@@ -5,11 +5,11 @@ import OrderDetailsView from "./OrderDetailsView";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Next.js page signature requires params
 async function page({ params }: { params: Promise<{ id: string }> }) {
   return (
-    <Workspace>
-      <OrderDetailsView />
-    </Workspace>
+    <Workspace actionKey="orders.view">
+      
+        <OrderDetailsView />
+      </Workspace>
   );
 }
 
 export default page;
-

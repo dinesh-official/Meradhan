@@ -125,7 +125,7 @@ const TrashActionButtons = ({ customer }: { customer: ITrashCustomer }) => {
   return (
     <div className="w-24" >
         <div className="flex gap-2 w-full">
-      <AllowOnlyView permissions={["edit:bin", "edit:customer"]}>
+      <AllowOnlyView actionKeys={["bin.restore", "customers.edit"]}>
         <Button
           variant="outline"
           size="sm"
@@ -145,7 +145,7 @@ const TrashActionButtons = ({ customer }: { customer: ITrashCustomer }) => {
         </Button>
       </AllowOnlyView>
 
-      <AllowOnlyView permissions={["delete:bin", "delete:customer"]}>
+      <AllowOnlyView actionKeys={["bin.purge", "customers.delete"]}>
         <Button
           variant="outline"
           size="sm"

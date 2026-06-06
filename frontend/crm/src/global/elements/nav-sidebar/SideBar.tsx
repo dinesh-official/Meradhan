@@ -9,14 +9,21 @@ import { SideBarItems } from "./SidebarItems";
 
 function SideBar({
   role,
+  permissions = [],
+  isImpersonating = false,
   isMobile = false,
 }: {
   role: Role;
+  permissions?: string[];
+  isImpersonating?: boolean;
   isMobile?: boolean;
 }) {
   const activePath = usePathname();
   const { isOpen } = useNavBarToggleStore();
-  const navItems = useMemo(() => generateNavItemsByRole(role), [role]);
+  const navItems = useMemo(
+    () => generateNavItemsByRole(role, permissions, isImpersonating),
+    [role, permissions, isImpersonating]
+  );
   const [tmpNavOpen, setTmpNavOpen] = useState(false);
 
   const hoverOpenTimer = useRef<NodeJS.Timeout | null>(null);

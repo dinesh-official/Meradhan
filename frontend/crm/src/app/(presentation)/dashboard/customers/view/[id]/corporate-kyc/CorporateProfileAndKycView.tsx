@@ -401,7 +401,7 @@ export default function CorporateProfileAndKycView({
           actions={
             <div className="flex w-full flex-wrap items-center justify-start gap-2 md:w-auto md:justify-end">
               {!isCorporate && (
-                <AllowOnlyView permissions={["view:customerkyc"]}>
+                <AllowOnlyView actionKey="customers.kyc.view">
                   <Button variant="outline" asChild>
                     <Link href={`/dashboard/customers/view/${encodedId}/kyc`}>
                       <IdCardIcon className="h-4 w-4" /> View KYC Data
@@ -415,7 +415,7 @@ export default function CorporateProfileAndKycView({
                 </Link>
               </Button>
               {isCorporate && (
-                <AllowOnlyView permissions={["edit:customer"]}>
+                <AllowOnlyView actionKey="customers.edit">
                   <Button variant="outline" asChild>
                     <Link href={`/dashboard/customers/${encodedId}/corporate-kyc`}>
                       <Pencil className="h-4 w-4" />
@@ -448,7 +448,7 @@ export default function CorporateProfileAndKycView({
               ) : null}
 
               {isCorporate && (
-                <AllowOnlyView permissions={["edit:customer"]}>
+                <AllowOnlyView actionKey="customers.edit">
                   <Sheet open={attachmentsOpen} onOpenChange={setAttachmentsOpen}>
                     <SheetTrigger asChild>
                       <Button
@@ -574,6 +574,84 @@ export default function CorporateProfileAndKycView({
                 </AllowOnlyView>
               )}
 
+              {isCorporate && (
+                <AllowOnlyView actionKey="customers.edit">
+                  <AlertDialog open={triggerKraOpen} onOpenChange={setTriggerKraOpen}>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={
+                          triggerCorporateKraMutation.isPending ||
+                          corpKraRunning ||
+                          !corporateKyc ||
+                          corpKycDataStoreId == null
+                        }
+                        title={
+                          corpKraRunning
+                            ? "KRA process is already running"
+                            : !corporateKyc || corpKycDataStoreId == null
+                              ? "Save corporate KYC first"
+                              : undefined
+                        }
+                        onClick={() => {
+                          if (!corporateKyc || corpKycDataStoreId == null) {
+                            toast.error("Corporate KYC data does not exist. Please save corporate KYC first.");
+                            return;
+                          }
+                          if (corpKraRunning) {
+                            toast.error("KRA process is already running for this corporate customer.");
+                            return;
+                          }
+                          setTriggerKraOpen(true);
+                        }}
+                      >
+                        {triggerCorporateKraMutation.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Loader2 className="h-4 w-4" />
+                        )}
+                        Trigger KRA
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Trigger corporate KRA?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will start the corporate KRA flow for this customer. If required corporate KYC fields are missing,
+                          the trigger will fail with an error.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      {missingCorporateKraFields.length > 0 ? (
+                        <div className="px-6 -mt-2">
+                          <div className="rounded-lg border bg-muted/30 p-3">
+                            <div className="text-sm font-semibold">Missing required fields</div>
+                            <ul className="mt-2 list-disc pl-5 text-sm text-muted-foreground space-y-1">
+                              {missingCorporateKraFields.map((f) => (
+                                <li key={f}>{f}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      ) : null}
+                      <AlertDialogFooter>
+                        <AlertDialogCancel disabled={triggerCorporateKraMutation.isPending}>
+                          Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => triggerCorporateKraMutation.mutate()}
+                          disabled={triggerCorporateKraMutation.isPending || !canTriggerCorporateKra}
+                        >
+                          {triggerCorporateKraMutation.isPending ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : null}
+                          Trigger KRA
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </AllowOnlyView>
+              )}
             </div>
           }
         />
@@ -595,7 +673,7 @@ export default function CorporateProfileAndKycView({
             <Card>
               <CardContent className="py-8 text-center text-muted-foreground">
                 <p>No corporate KYC data has been added for this customer yet.</p>
-                <AllowOnlyView permissions={["edit:customer"]}>
+                <AllowOnlyView actionKey="customers.edit">
                   <Button asChild variant="link" className="mt-2">
                     <Link href={`/dashboard/customers/${encodedId}/corporate-kyc`}>
                       Add Corporate KYC

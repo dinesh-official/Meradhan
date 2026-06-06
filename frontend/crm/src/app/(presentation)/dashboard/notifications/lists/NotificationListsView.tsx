@@ -7,8 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
-import useAppCookie from "@/hooks/useAppCookie.hook";
-import { canAccessNotifications } from "@/global/utils/role.utils";
+import { useNotificationAccess } from "@/global/elements/permissions/AllowOnlyView";
 import apiGateway from "@root/apiGateway";
 import { format } from "date-fns";
 import { Eye, List, Search, Trash2, Users, X } from "lucide-react";
@@ -44,7 +43,7 @@ function extractMsg(e: unknown): string {
 /* ─── component ─────────────────────────────────────────────── */
 
 export default function NotificationListsView() {
-  const { cookies } = useAppCookie();
+  const notify = useNotificationAccess();
   const [mounted, setMounted] = useState(false);
 
   const [lists, setLists] = useState<SavedList[]>([]);
@@ -58,8 +57,7 @@ export default function NotificationListsView() {
 
   const api = new apiGateway.crm.notifications.CrmNotificationsApi(apiClientCaller);
 
-  const isAdmin =
-    cookies.role === "ADMIN" || cookies.role === "SUPER_ADMIN";
+  const canDeleteList = notify.canDeleteList();
 
   useEffect(() => {
     setMounted(true);
@@ -132,7 +130,7 @@ export default function NotificationListsView() {
   };
 
   if (!mounted) return null;
-  if (!canAccessNotifications(cookies.role)) {
+  if (!notify.canViewLists()) {
     return (
       <div className="p-8 text-center text-destructive">
         You do not have access to notifications.
@@ -220,7 +218,7 @@ export default function NotificationListsView() {
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
                       Created {format(new Date(list.createdAt), "dd MMM yyyy")}
-                      {isAdmin && (
+                      {canDeleteList && (
                         <span className="ml-2">
                           &mdash; by{" "}
                           <span className="font-medium">{list.createdBy.name}</span>

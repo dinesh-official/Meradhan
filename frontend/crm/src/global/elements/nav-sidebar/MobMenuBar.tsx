@@ -10,7 +10,15 @@ import SideBar from "./SideBar";
 import { Role } from "@/global/constants/role.constants";
 import { CardTitle } from "@/components/ui/card";
 
-function MobMenuBar({ role }: { role: Role }) {
+function MobMenuBar({
+  role,
+  permissions = [],
+  isImpersonating = false,
+}: {
+  role: Role;
+  permissions?: string[];
+  isImpersonating?: boolean;
+}) {
   return (
     <Sheet>
       <SheetTrigger className="lg:hidden cursor-pointer">
@@ -34,7 +42,12 @@ function MobMenuBar({ role }: { role: Role }) {
             </div>
           </CardTitle>
         </SheetHeader>
-        <SideBar role={role} isMobile={true} />
+        <SideBar
+          role={role}
+          permissions={permissions}
+          isImpersonating={isImpersonating}
+          isMobile={true}
+        />
       </SheetContent>
     </Sheet>
   );

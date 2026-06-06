@@ -86,6 +86,12 @@ export type LeadSourceSummaryResponse = BaseResponseData<LeadSourceSummary[]>;
 export type LoginWithOtpDataResponse = BaseResponseData<{
   token: string;
 }>;
+export type ImpersonatorSummary = {
+  id: number;
+  name: string;
+  email: string;
+};
+
 // auth/verify-otp
 export type OtpVerifyDataResponse = BaseResponseData<{
   token: string;
@@ -96,6 +102,14 @@ export type OtpVerifyDataResponse = BaseResponseData<{
   avatar: string;
   role: Role;
 }>;
+
+export type ImpersonateSessionPayload = OtpVerifyDataResponse["responseData"] & {
+  permissions: string[];
+  impersonatedBy: ImpersonatorSummary | null;
+};
+
+export type ImpersonateDataResponse = BaseResponseData<ImpersonateSessionPayload>;
+
 // /session
 export type UserSessionDataResponse = BaseResponseData<{
   id: number;
@@ -104,6 +118,8 @@ export type UserSessionDataResponse = BaseResponseData<{
   phoneNo: string;
   avatar: string;
   role: Role;
+  permissions: string[];
+  impersonatedBy?: ImpersonatorSummary | null;
 }>;
 
 //CRM USERS TYPES

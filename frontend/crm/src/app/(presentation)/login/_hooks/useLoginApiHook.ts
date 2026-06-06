@@ -59,6 +59,7 @@ export const useLoginApiHook = () => {
         avatar: data.avatar,
         id: data.id,
         phoneNo: data.phoneNo,
+        permissions: data.permissions ?? [],
       });
       const sessionId = "ID:" + new Date().getTime();
       sessionStorage.setItem("SESSION", sessionId);

@@ -5,13 +5,14 @@ import NSEDealsView from "./NSEDealsView";
 
 function DealsPage() {
   return (
-    <Workspace>
-      <PageInfoBar
-        title="NSE Deals"
-        description="Manage NSE deal submissions and confirmations"
-      />
-      <NSEDealsView />
-    </Workspace>
+    <Workspace actionKey="rfqs.deals.view">
+      
+        <PageInfoBar
+          title="NSE Deals"
+          description="Manage NSE deal submissions and confirmations"
+        />
+        <NSEDealsView />
+      </Workspace>
   );
 }
 
