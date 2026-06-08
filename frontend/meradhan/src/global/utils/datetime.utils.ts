@@ -1,6 +1,10 @@
 import { addYears } from "date-fns";
 
 export type DateInput = Date | string | number;
+
+// Avoids the "Sept" vs "Sep" inconsistency from Intl.DateTimeFormat { month: "short" }
+// introduced in newer ICU data (Node 18+, Chrome 110+).
+const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 export type DateFormatToken =
   // Numeric dates
   | "DD MM YY"
@@ -59,10 +63,7 @@ export const dateTimeUtils = {
     const ampm = hours24 >= 12 ? "PM" : "AM";
     const hours12 = hours24 % 12 || 12;
 
-    // Intl for localized month names
-    const monthNamesShort = new Intl.DateTimeFormat(locale, { month: "short" }).format;
-    const monthNamesLong = new Intl.DateTimeFormat(locale, { month: "long" })
-      .format;
+    const monthNamesLong = new Intl.DateTimeFormat(locale, { month: "long" }).format;
 
     let formatted = format as string;
 
@@ -70,7 +71,7 @@ export const dateTimeUtils = {
       .replace(/DD/g, String(day).padStart(2, "0"))
       .replace(/\bD(?!D)\b/g, String(day))
       .replace(/MMMM/g, monthNamesLong(new Date(2000, month, 1)))
-      .replace(/MMM/g, monthNamesShort(new Date(2000, month, 1)))
+      .replace(/MMM/g, MONTHS_SHORT[month])
       .replace(/MM/g, String(month + 1).padStart(2, "0"))
       .replace(/YYYY/g, String(year))
       .replace(/YY/g, String(year).slice(-2))
@@ -273,7 +274,7 @@ export function formatDateCustom(dateStr: string): string {
   const date = new Date(dateStr);
 
   const day = date.getDate().toString().padStart(2, "0");
-  const month = date.toLocaleString("default", { month: "short" }); // e.g., "Aug"
+  const month = MONTHS_SHORT[date.getMonth()];
   const year = date.getFullYear();
 
   return `${day} ${month} ${year}`;

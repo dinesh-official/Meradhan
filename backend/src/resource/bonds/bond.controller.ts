@@ -265,6 +265,16 @@ export class BondController {
     });
   }
 
+  // [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold]
+  async getBondFilterOptions(req: Request, res: Response) {
+    const category = req.query.category?.toString();
+    const data = await this.bondService.getAvailableFilterOptions(category);
+    return res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: data,
+    });
+  }
+
   async autocompleteBondSearch(req: Request, res: Response) {
     const query = req.query.q as string;
     const data = await this.bondService.autocompleteBondSearch(query);

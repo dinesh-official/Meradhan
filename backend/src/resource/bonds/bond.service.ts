@@ -754,6 +754,153 @@ export class BondService {
     return data;
   }
 
+  // [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold]
+  // Returns only the filter-option buckets that actually have active bonds in the DB.
+  async getAvailableFilterOptions(category?: string) {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+
+    // Base filter: same visibility rules as the client directory
+    const baseWhere: Record<string, unknown> = {
+      isListed: { equals: "YES" },
+      redemptionDate: { gte: now },
+      creditRating: { notIn: ["D", "C"] },
+      allowForPurchase: { equals: true },
+    };
+
+    // Apply category filter if provided (same logic as filterBonds)
+    if (category && category !== "all") {
+      if (category === "perpetual") {
+        delete baseWhere.redemptionDate;
+      }
+      baseWhere.categories = { has: category };
+    }
+
+    // --- Maturity: check which year-buckets have at least one bond ---
+    const maturityBuckets = [
+      {
+        value: "0-2" as const,
+        gte: now,
+        lte: new Date(currentYear + 2, 11, 31),
+      },
+      {
+        value: "2-5" as const,
+        gte: new Date(currentYear + 2, 0, 1),
+        lte: new Date(currentYear + 5, 11, 31),
+      },
+      {
+        value: "5-10" as const,
+        gte: new Date(currentYear + 5, 0, 1),
+        lte: new Date(currentYear + 10, 11, 31),
+      },
+      {
+        value: "10-20" as const,
+        gte: new Date(currentYear + 10, 0, 1),
+        lte: new Date(currentYear + 20, 11, 31),
+      },
+      {
+        value: "20+" as const,
+        gte: new Date(currentYear + 20, 0, 1),
+        lte: undefined,
+      },
+    ] as const;
+
+    const couponBuckets = [
+      { value: "4-7" as const, gte: 4, lte: 7 },
+      { value: "8-10" as const, gte: 8, lte: 10 },
+      { value: "10+" as const, gte: 10, lte: undefined },
+    ] as const;
+
+    // Run all 5 independent query groups in parallel to minimise DB round-trips
+    const [
+      maturityChecks,
+      distinctRatings,
+      distinctTaxation,
+      couponChecks,
+      distinctInterest,
+    ] = await Promise.all([
+      // --- Maturity: check which year-buckets have at least one bond ---
+      // For perpetual bonds category skip maturity (they have no maturity date)
+      category === "perpetual"
+        ? Promise.resolve([] as { value: "0-2" | "2-5" | "5-10" | "10-20" | "20+"; hasData: boolean }[])
+        : Promise.all(
+          maturityBuckets.map(async (bucket) => {
+            const count = await db.dataBase.bonds.count({
+              where: {
+                ...baseWhere,
+                maturityDate: {
+                  gte: bucket.gte,
+                  ...(bucket.lte ? { lte: bucket.lte } : {}),
+                },
+              } as Record<string, unknown>,
+            });
+            return { value: bucket.value, hasData: count > 0 };
+          }),
+        ),
+      // --- Credit Rating: distinct ratings present in active bonds ---
+      db.dataBase.bonds.findMany({
+        where: baseWhere as Record<string, unknown>,
+        select: { creditRating: true },
+        distinct: ["creditRating"],
+      }),
+      // --- Taxation: distinct taxStatus values ---
+      db.dataBase.bonds.findMany({
+        where: baseWhere as Record<string, unknown>,
+        select: { taxStatus: true },
+        distinct: ["taxStatus"],
+      }),
+      // --- Coupon: check which coupon-rate buckets have at least one bond ---
+      Promise.all(
+        couponBuckets.map(async (bucket) => {
+          const count = await db.dataBase.bonds.count({
+            where: {
+              ...baseWhere,
+              couponRate: {
+                gte: bucket.gte,
+                ...(bucket.lte != null ? { lte: bucket.lte } : {}),
+              },
+            } as Record<string, unknown>,
+          });
+          return { value: bucket.value, hasData: count > 0 };
+        }),
+      ),
+      // --- Interest payment mode: distinct values ---
+      db.dataBase.bonds.findMany({
+        where: baseWhere as Record<string, unknown>,
+        select: { interestPaymentMode: true },
+        distinct: ["interestPaymentMode"],
+      }),
+    ]);
+
+    const availableMaturity = maturityChecks
+      .filter((b) => b.hasData)
+      .map((b) => b.value);
+
+    const availableRatings = distinctRatings
+      .map((b) => b.creditRating)
+      .filter((r): r is string => typeof r === "string" && r.trim() !== "");
+
+    const availableTaxation = distinctTaxation
+      .map((b) => b.taxStatus as string | null)
+      .filter((t): t is string => typeof t === "string" && t.trim() !== "");
+
+    const availableCoupon = couponChecks
+      .filter((b) => b.hasData)
+      .map((b) => b.value);
+
+    const availableInterest = distinctInterest
+      .map((b) => b.interestPaymentMode as string | null)
+      .filter((i): i is string => typeof i === "string" && i.trim() !== "" && i !== "UNKNOWN");
+
+    return {
+      maturity: availableMaturity,
+      rating: availableRatings,
+      taxation: availableTaxation,
+      coupon: availableCoupon,
+      interest: availableInterest,
+    };
+  }
+
   async getOngoingDeals() {
     const data = await db.dataBase.bonds.findMany({
       where: { isOngoingDeal: true },
