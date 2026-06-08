@@ -362,11 +362,7 @@ export default function PortfolioDetails() {
                               />
                               <Detail
                                 label="Rating Agency"
-                                value={
-                                  bond.ratingAgencyName === "N/A"
-                                    ? "Coming soon"
-                                    : extractRatingAgencyName(bond.ratingAgencyName)
-                                }
+                                value={extractRatingAgencyName(bond.ratingAgencyName)}
                               />
                             </div>
                           </td>
@@ -430,10 +426,13 @@ function Detail({ label, value }: { label: string; value: any }) {
     (typeof value === "string" &&
       (value.trim() === "" ||
         ["N/A", "NA", "UNKNOWN", "NULL"].includes(value.trim().toUpperCase())));
+
+  if (isMissing) return null;
+
   return (
     <div>
       <p className="text-xs text-gray-500">{label}</p>
-      <p className="font-medium text-black">{isMissing ? "Coming soon" : value}</p>
+      <p className="font-medium text-black">{value}</p>
     </div>
   );
 }

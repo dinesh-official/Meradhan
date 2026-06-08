@@ -824,19 +824,19 @@ export class BondService {
       category === "perpetual"
         ? Promise.resolve([] as { value: "0-2" | "2-5" | "5-10" | "10-20" | "20+"; hasData: boolean }[])
         : Promise.all(
-            maturityBuckets.map(async (bucket) => {
-              const count = await db.dataBase.bonds.count({
-                where: {
-                  ...baseWhere,
-                  maturityDate: {
-                    gte: bucket.gte,
-                    ...(bucket.lte ? { lte: bucket.lte } : {}),
-                  },
-                } as Record<string, unknown>,
-              });
-              return { value: bucket.value, hasData: count > 0 };
-            }),
-          ),
+          maturityBuckets.map(async (bucket) => {
+            const count = await db.dataBase.bonds.count({
+              where: {
+                ...baseWhere,
+                maturityDate: {
+                  gte: bucket.gte,
+                  ...(bucket.lte ? { lte: bucket.lte } : {}),
+                },
+              } as Record<string, unknown>,
+            });
+            return { value: bucket.value, hasData: count > 0 };
+          }),
+        ),
       // --- Credit Rating: distinct ratings present in active bonds ---
       db.dataBase.bonds.findMany({
         where: baseWhere as Record<string, unknown>,
@@ -889,7 +889,7 @@ export class BondService {
       .map((b) => b.value);
 
     const availableInterest = distinctInterest
-      .map((b) => b.interestPaymentMode)
+      .map((b) => b.interestPaymentMode as string | null)
       .filter((i): i is string => typeof i === "string" && i.trim() !== "" && i !== "UNKNOWN");
 
     return {

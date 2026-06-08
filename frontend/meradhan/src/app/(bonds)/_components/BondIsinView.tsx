@@ -24,6 +24,13 @@ export default function BondIsinView({
   bond: BondDetailResponse["responseData"];
   session?: ISessionResponse["responseData"] | null;
 }) {
+  const TAX_STATUS_LABELS: Record<string, string> = {
+    TAXABLE: "Taxable",
+    TAX_FREE: "Tax Free",
+    TAX_SAVING: "Tax Saving",
+    TAX_EXEMPTION: "Tax Exemption",
+  };
+
   const putText =
     bond.putCallOptionDetails
       ?.split("Call:")?.[0]
@@ -32,35 +39,29 @@ export default function BondIsinView({
 
   const callText = bond.putCallOptionDetails?.split("Call:")?.[1]?.trim() ?? "";
 
-  const isSecured = () => {
-    if (bond.natureOfInstrument?.includes("UNSECURED")) {
-      return "Unsecured";
-    } else if (bond.natureOfInstrument?.includes("SECURED")) {
-      return "Secured";
-    }
-    return "-";
-  };
+  const securedValue = (() => {
+    if (bond.natureOfInstrument?.includes("UNSECURED")) return "Unsecured";
+    if (bond.natureOfInstrument?.includes("SECURED")) return "Secured";
+    return null;
+  })();
+
   function pickWordsByMinLength(text: string, minLength: number): string {
     const words = text.trim().split("");
-
     if (words.length <= minLength) return text;
-
     return words.slice(0, minLength).join("") + "...";
   }
 
   const formateCategory = (category: string) => {
-    if (bond.categories?.[0] == "n/a") {
-      return "Coming Soon";
-    }
-
     const cat = ["nbfc", "psu"];
-
-    if (cat.includes(category.toLowerCase())) {
-      return category.toUpperCase();
-    }
-
+    if (cat.includes(category.toLowerCase())) return category.toUpperCase();
     return category;
   };
+
+  const firstCategory = bond.categories?.[0];
+  const hasCategory = !!firstCategory && firstCategory.toLowerCase() !== "n/a";
+
+  const taxStatusLabel = bond.taxStatus ? TAX_STATUS_LABELS[bond.taxStatus] : undefined;
+  const hasTaxStatus = !!taxStatusLabel;
 
   return (
     <div className="py-10">
@@ -68,98 +69,83 @@ export default function BondIsinView({
       <div className="gap-8 grid lg:grid-cols-3 py-10">
         <div className="lg:col-span-3">
           <div className="gap-5 grid md:grid-cols-3">
-            <SortInfoBox title="Issue Price">
+            <SortInfoBox title="Issue Price" hide={bond.issuePrice === null || bond.issuePrice === undefined}>
               <PiCurrencyInrBold /> {formatNumberTS(bond.issuePrice)}
             </SortInfoBox>
-            <SortInfoBox title="Face Value">
+            <SortInfoBox title="Face Value" hide={bond.faceValue === null || bond.faceValue === undefined}>
               <PiCurrencyInrBold /> {formatNumberTS(bond.faceValue)}
             </SortInfoBox>
-            <SortInfoBox title="Coupon Rate">{bond.couponRate !== null && bond.couponRate !== undefined ? `${Number(bond.couponRate).toFixed(2)}%` : "Coming Soon"}</SortInfoBox>
-            <SortInfoBox title="Yield">{bond.yield !== null && bond.yield !== undefined ? `${Number(bond.yield).toFixed(2)}%` : "Coming Soon"}</SortInfoBox>
-            <SortInfoBox title="Last Traded Yield">{bond.lastTradeYield !== null && bond.lastTradeYield !== undefined ? `${Number(bond.lastTradeYield).toFixed(2)}%` : "Coming Soon"}</SortInfoBox>
-            <SortInfoBox title="Last Traded Price">
-              {bond.lastTradePrice !== null && bond.lastTradePrice !== undefined ? (
-                <>
-                  <PiCurrencyInrBold /> {formatNumberTS(bond.lastTradePrice)}
-                </>
-              ) : (
-                "Coming Soon"
-              )}
+            <SortInfoBox title="Coupon Rate" hide={bond.couponRate === null || bond.couponRate === undefined}>
+              {`${Number(bond.couponRate).toFixed(2)}%`}
             </SortInfoBox>
-            <SortInfoBox title="Allotment Date">
-              {dateTimeUtils.formatDateTime(
-                bond.dateOfAllotment,
-                "DD MMM YYYY"
-              )}
+            <SortInfoBox title="Yield" hide={bond.yield === null || bond.yield === undefined}>
+              {`${Number(bond.yield).toFixed(2)}%`}
             </SortInfoBox>
-            <SortInfoBox title="Maturity Date">
+            <SortInfoBox title="Last Traded Yield" hide={bond.lastTradeYield === null || bond.lastTradeYield === undefined}>
+              {`${Number(bond.lastTradeYield).toFixed(2)}%`}
+            </SortInfoBox>
+            <SortInfoBox title="Last Traded Price" hide={bond.lastTradePrice === null || bond.lastTradePrice === undefined}>
+              <PiCurrencyInrBold /> {formatNumberTS(bond.lastTradePrice ?? 0)}
+            </SortInfoBox>
+            <SortInfoBox title="Allotment Date" hide={!bond.dateOfAllotment}>
+              {dateTimeUtils.formatDateTime(bond.dateOfAllotment, "DD MMM YYYY")}
+            </SortInfoBox>
+            <SortInfoBox title="Maturity Date" hide={!bond.maturityDate}>
               {dateTimeUtils.formatDateTime(bond.maturityDate, "DD MMM YYYY")}
             </SortInfoBox>
-            <SortInfoBox title="Bond Category">
-              <span className="capitalize" >{formateCategory(bond.categories?.[0] || "")}</span>
+            <SortInfoBox title="Bond Category" hide={!hasCategory}>
+              <span className="capitalize">{formateCategory(firstCategory || "")}</span>
             </SortInfoBox>
-
-            <SortInfoBox title="Interest Payment">
-              {bond.interestPaymentMode?.replaceAll("_", " ") || "Coming Soon"}
+            <SortInfoBox title="Interest Payment" hide={!bond.interestPaymentMode}>
+              {bond.interestPaymentMode?.replaceAll("_", " ")}
             </SortInfoBox>
-            <SortInfoBox title="Coupon Type">{bond.couponType !== null && bond.couponType !== undefined ? bond.couponType : "Coming Soon"}</SortInfoBox>
-            <SortInfoBox title="Taxable">
-              {bond.taxStatus !== null && bond.taxStatus !== undefined && bond.taxStatus == "TAXABLE"
-                ? "Yes"
-                : bond.taxStatus !== null && bond.taxStatus !== undefined && bond.taxStatus == "TAX_FREE"
-                  ? "No"
-                  : "Coming Soon"}
+            <SortInfoBox title="Coupon Type" hide={bond.couponType === null || bond.couponType === undefined}>
+              {bond.couponType}
             </SortInfoBox>
-
-            <SortInfoBox title="Put">
+            <SortInfoBox title="Tax Status" hide={!hasTaxStatus}>
+              {taxStatusLabel}
+            </SortInfoBox>
+            <SortInfoBox title="Put" hide={!putText}>
               <p className="flex items-center gap-1">
-                {pickWordsByMinLength(
-                  putText || "N/A",
-                  15
-                )}
-
+                {pickWordsByMinLength(putText, 15)}
                 {putText.length > 15 && (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <FaInfoCircle className="cursor-pointer" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p className="text-wrap max-w-48">
-                        {putText}
-                      </p>
+                      <p className="text-wrap max-w-48">{putText}</p>
                     </TooltipContent>
                   </Tooltip>
                 )}
               </p>
             </SortInfoBox>
-            <SortInfoBox title="Call">
+            <SortInfoBox title="Call" hide={!callText}>
               <p className="flex items-center gap-1 line-clamp-1">
-                {pickWordsByMinLength(
-                  callText || "N/A",
-                  15
-                )}
-
+                {pickWordsByMinLength(callText, 15)}
                 {callText.length > 15 && (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <FaInfoCircle className="cursor-pointer" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p className="text-wrap max-w-48">
-                        {callText}
-                      </p>
+                      <p className="text-wrap max-w-48">{callText}</p>
                     </TooltipContent>
                   </Tooltip>
                 )}
               </p>
             </SortInfoBox>
-            <SortInfoBox title="Mode of issuance">{bond.modeOfIssuance !== null && bond.modeOfIssuance !== undefined ? bond.modeOfIssuance : "Coming Soon"}</SortInfoBox>
-            <SortInfoBox title="Security">{isSecured()}</SortInfoBox>
-            <SortInfoBox title="Issue Size">
+            <SortInfoBox title="Mode of issuance" hide={bond.modeOfIssuance === null || bond.modeOfIssuance === undefined}>
+              {bond.modeOfIssuance}
+            </SortInfoBox>
+            <SortInfoBox title="Security" hide={!securedValue}>
+              {securedValue}
+            </SortInfoBox>
+            <SortInfoBox title="Issue Size" hide={!bond.totalIssueSize}>
               <PiCurrencyInrBold /> {formatNumberTS(bond.totalIssueSize || 0)}
             </SortInfoBox>
-            <SortInfoBox title="Next Interest Payment Date">
-              {bond.nextCouponDate !== null && bond.nextCouponDate !== undefined ? dateTimeUtils.formatDateTime(bond.nextCouponDate, "DD MMM YYYY") : "Coming Soon"}
+            <SortInfoBox title="Next Interest Payment Date" hide={bond.nextCouponDate === null || bond.nextCouponDate === undefined}>
+              {dateTimeUtils.formatDateTime(bond.nextCouponDate, "DD MMM YYYY")}
             </SortInfoBox>
           </div>
 
