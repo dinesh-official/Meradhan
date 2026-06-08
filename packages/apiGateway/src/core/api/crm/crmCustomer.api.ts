@@ -122,6 +122,79 @@ export type CorporateKraDownloadResponse = {
   summary: CorporateKraDownloadSummary;
 };
 
+/**
+ * Payload accepted by `autofillCorporateKra` — the operator-supplied
+ * identifiers used to query NDML's Non-Individual KRA download.
+ */
+export type AutofillCorporateKraPayload = {
+  pan: string;
+  /** Date of Incorporation. Accepts ISO `YYYY-MM-DD` or `DD-MM-YYYY`. */
+  dateOfIncorporation: string;
+};
+
+/**
+ * Form-shape patch returned by the "Autofill from KRA" action. Every field
+ * is optional — only keys NDML actually populated come through, so the CRM
+ * form can merge without clobbering operator-typed values.
+ */
+export type CorporateKycAutofillFormPatch = {
+  entityName?: string;
+  panNumber?: string;
+  cinOrRegistrationNumber?: string;
+  dateOfIncorporation?: string;
+  dateOfCommencementOfBusiness?: string;
+  placeOfIncorporation?: string;
+  countryOfIncorporation?: string;
+  entityConstitutionType?:
+    | "PRIVATE_LIMITED"
+    | "PUBLIC_LIMITED"
+    | "OPC"
+    | "LLP"
+    | "PARTNERSHIP"
+    | "TRUST"
+    | "OTHER";
+  annualIncome?: string;
+
+  correspondenceLine1?: string;
+  correspondenceLine2?: string;
+  correspondenceLine3?: string;
+  correspondenceCity?: string;
+  correspondencePinCode?: string;
+  correspondenceState?: string;
+  correspondenceAddressProofType?: string;
+
+  registeredLine1?: string;
+  registeredLine2?: string;
+  registeredLine3?: string;
+  registeredCity?: string;
+  registeredPinCode?: string;
+  registeredState?: string;
+  registeredAddressProofType?: string;
+
+  fatcaApplicable?: boolean;
+
+  directors?: Array<{
+    fullName: string;
+    pan: string;
+    din?: string;
+    designation?: string;
+  }>;
+  authorisedSignatories?: Array<{
+    fullName: string;
+    pan: string;
+    din?: string;
+    designation?: string;
+  }>;
+};
+
+export type CorporateKraAutofillResponse = {
+  /** `null` when the corporate KYC row doesn't exist yet (first-time fill). */
+  logId: number | null;
+  storedAt: string;
+  summary: CorporateKraDownloadSummary;
+  formPatch: CorporateKycAutofillFormPatch;
+};
+
 export type CorporateKraPreviewResponse =
   | {
       hasCorporateKyc: false;
@@ -253,6 +326,17 @@ export interface TCrmCustomerInterface {
     customerId: number,
     config?: AxiosRequestConfig,
   ): Promise<AxiosResponse<BaseResponseData<CorporateKraDownloadResponse>>>;
+
+  /**
+   * CRM "Autofill from KRA" — runs a Non-Individual download against the
+   * operator-supplied PAN + DOI and returns a form-shape patch (entity name,
+   * addresses, directors, etc.) for the corporate-KYC form to merge in.
+   */
+  autofillCorporateKra(
+    customerId: number,
+    payload: AutofillCorporateKraPayload,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<BaseResponseData<CorporateKraAutofillResponse>>>;
 
   /**
    * CRM action: forcibly finish a running corporate KRA process so the
@@ -476,6 +560,18 @@ export class CrmCustomerApi implements TCrmCustomerInterface {
     return this.apiClient.post<BaseResponseData<CorporateKraDownloadResponse>>(
       `/crm/customer/${customerId}/corporate-kyc/kra/download`,
       {},
+      config,
+    );
+  }
+
+  async autofillCorporateKra(
+    customerId: number,
+    payload: AutofillCorporateKraPayload,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["autofillCorporateKra"]> {
+    return this.apiClient.post<BaseResponseData<CorporateKraAutofillResponse>>(
+      `/crm/customer/${customerId}/corporate-kyc/kra/autofill`,
+      payload,
       config,
     );
   }

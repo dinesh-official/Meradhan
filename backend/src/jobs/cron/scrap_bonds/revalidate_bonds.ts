@@ -234,7 +234,7 @@ export const revalidateBonds = async () => {
     await emailer.sendEmail({
       // to: env.SMTP_SENDER,
       to: "sandeep.dhingra@meradhan.co,vikas.kukreja@meradhan.co,sourav@meradhan.co,mohammed.ali@meradhan.co,zahoor.ahmed@meradhan.co,dinesh.kumar@meradhan.co",
-      subject: "NSDL Bond Revalidation Summary " + formatDateTime(new Date()),
+      subject: "Absolute Data Bond Revalidation Summary " + formatDateTime(new Date()),
       text: emailContent,
     });
     console.log("Update email sent successfully.");
