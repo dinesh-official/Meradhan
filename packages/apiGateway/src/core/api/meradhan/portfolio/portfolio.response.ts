@@ -163,7 +163,7 @@ export interface PortfolioIsinOption {
 }
 
 export interface PortfolioFilterOptions {
-  bondTypes: string[];
+  bondCategories: string[];
   bondRatings: string[];
   couponRanges: string[];
   paymentFrequencies: string[];

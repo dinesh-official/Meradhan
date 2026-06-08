@@ -19,7 +19,7 @@ import { PortfolioDetailsTabShimmer } from "./PortfolioTabShimmers";
 import { extractRatingAgencyName } from "@/global/utils/ratingAgency";
 
 interface PortfolioFilterOptions {
-  bondTypes: string[];
+  bondCategories: string[];
   bondRatings: string[];
   couponRanges: string[];
   paymentFrequencies: string[];
@@ -58,7 +58,7 @@ function formatPortfolioDate(value: string | Date | null | undefined): string | 
 
 export default function PortfolioDetails() {
   const [filters, setFilters] = useState({
-    bondType: [] as string[],
+    bondCategory: [] as string[],
     bondRating: [] as string[],
     coupon: [] as string[],
     paymentFrequency: [] as string[],
@@ -103,7 +103,7 @@ export default function PortfolioDetails() {
     queryKey: [
       "portfolioDetails",
       currentPage,
-      filters.bondType.join("|"),
+      filters.bondCategory.join("|"),
       filters.bondRating.join("|"),
       filters.coupon.join("|"),
       filters.paymentFrequency.join("|"),
@@ -112,7 +112,7 @@ export default function PortfolioDetails() {
       const response = await portfolioApi.getPortfolioDetails({
         page: currentPage,
         limit: itemsPerPage,
-        bondTypes: filters.bondType.length ? filters.bondType : undefined,
+        bondCategories: filters.bondCategory.length ? filters.bondCategory : undefined,
         bondRatings: filters.bondRating.length ? filters.bondRating : undefined,
         couponRanges: filters.coupon.length ? filters.coupon : undefined,
         paymentFrequencies: filters.paymentFrequency.length
@@ -129,7 +129,7 @@ export default function PortfolioDetails() {
 
   const apiFilterOptions = filtersResponse?.responseData;
   const filterOptions = {
-    bondType: apiFilterOptions?.bondTypes ?? [],
+    bondCategory: apiFilterOptions?.bondCategories ?? [],
     bondRating: apiFilterOptions?.bondRatings ?? [],
     coupon: apiFilterOptions?.couponRanges ?? [],
     paymentFrequency: apiFilterOptions?.paymentFrequencies ?? [],
@@ -150,17 +150,17 @@ export default function PortfolioDetails() {
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 md:gap-6 mb-8">
         <MultiSelect
-          values={filters.bondType}
-          onValuesChange={(values) => setFilterValues("bondType", values)}
+          values={filters.bondCategory}
+          onValuesChange={(values) => setFilterValues("bondCategory", values)}
         >
           <MultiSelectTrigger className="md:max-w-[250px] w-full justify-between">
-            <MultiSelectValue placeholder="Bond Type" />
+            <MultiSelectValue placeholder="Bond Category" />
           </MultiSelectTrigger>
           <MultiSelectContent>
             <MultiSelectGroup>
-              {filterOptions.bondType.map((option) => (
+              {filterOptions.bondCategory.map((option) => (
                 <MultiSelectItem key={option} value={option}>
-                  {option}
+                  {getCategoryLabel(option)}
                 </MultiSelectItem>
               ))}
             </MultiSelectGroup>

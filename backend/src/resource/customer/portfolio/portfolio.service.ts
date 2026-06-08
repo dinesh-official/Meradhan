@@ -599,7 +599,7 @@ export class PortfolioService {
     customerId: number,
     page: number = 1,
     limit: number = 10,
-    bondTypes?: string[],
+    bondCategories?: string[],
     bondRatings?: string[],
     couponRanges?: string[],
     paymentFrequencies?: string[]
@@ -657,9 +657,9 @@ export class PortfolioService {
       const bond = bondByIsin.get(order.isin);
       if (!bond) return false;
 
-      if (bondTypes?.length) {
-        const type = bond.bondType ?? "";
-        if (!type || !bondTypes.includes(type)) return false;
+      if (bondCategories?.length) {
+        const hasMatch = bond.categories?.some((cat) => bondCategories.includes(cat));
+        if (!hasMatch) return false;
       }
       if (bondRatings?.length) {
         const rating = (bond.creditRating ?? "").trim();
@@ -721,7 +721,7 @@ export class PortfolioService {
 
   async getPortfolioFilterOptions(customerId: number) {
     const empty = {
-      bondTypes: [] as string[],
+      bondCategories: [] as string[],
       bondRatings: [] as string[],
       couponRanges: [] as string[],
       paymentFrequencies: [] as string[],
@@ -738,17 +738,18 @@ export class PortfolioService {
 
     const bonds = await db.dataBase.bonds.findMany({
       where: { isin: { in: this.uniqueIsins(ordersWithAmount) } },
-      select: { bondType: true, creditRating: true, couponRate: true, interestPaymentMode: true },
+      select: { categories: true, creditRating: true, couponRate: true, interestPaymentMode: true },
     });
 
-    const bondTypes = new Set<string>();
+    const bondCategories = new Set<string>();
     const bondRatings = new Set<string>();
     const couponRanges = new Set<string>();
     const paymentFrequencies = new Set<string>();
 
     for (const bond of bonds) {
-      const type = bond.bondType ?? "";
-      if (type) bondTypes.add(type);
+      for (const cat of bond.categories ?? []) {
+        if (cat) bondCategories.add(cat);
+      }
 
       const rating = (bond.creditRating ?? "").trim();
       if (rating) bondRatings.add(rating);
@@ -776,7 +777,7 @@ export class PortfolioService {
       .sort((a, b) => a.bondName.localeCompare(b.bondName, undefined, { sensitivity: "base" }));
 
     return {
-      bondTypes: Array.from(bondTypes),
+      bondCategories: Array.from(bondCategories),
       bondRatings: Array.from(bondRatings),
       couponRanges: Array.from(couponRanges),
       paymentFrequencies: Array.from(paymentFrequencies),
