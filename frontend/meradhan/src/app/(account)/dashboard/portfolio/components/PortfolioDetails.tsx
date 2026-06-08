@@ -26,6 +26,21 @@ interface PortfolioFilterOptions {
   isins: { isin: string; bondName: string }[];
 }
 
+const CATEGORY_LABELS: Record<string, string> = {
+  corporate: "Corporate",
+  "bank-bonds": "Bank bonds",
+  nbfc: "NBFC",
+  psu: "PSU",
+  "tax-free": "Tax free",
+  "zero-coupon": "Zero coupon",
+  perpetual: "Perpetual",
+  "latest-release": "Latest release",
+};
+
+function getCategoryLabel(slug: string): string {
+  return CATEGORY_LABELS[slug.toLowerCase()] ?? slug;
+}
+
 // Hardcoded 3-char month abbreviations to avoid the "Sept" vs "Sep" inconsistency
 // introduced by newer ICU data in Node.js 18+ / Chrome 110+ where Intl.DateTimeFormat
 // with { month: "short" } outputs "Sept" (4 chars) for September.
@@ -238,7 +253,7 @@ export default function PortfolioDetails() {
                 <tr>
                   <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Security Name</th>
                   <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">ISIN</th>
-                  <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Bond Type</th>
+                  <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Bond Category</th>
                   <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Coupon</th>
                   <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Investment Amount</th>
                   <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Face Value</th>
@@ -269,18 +284,22 @@ export default function PortfolioDetails() {
                         <td className="px-4 py-4 text-black">{bond.isin}</td>
 
                         <td className="px-4 py-4">
-                          <span
-                            className={`px-3 py-3 rounded-[5px] text-[12px] font-semibold whitespace-nowrap capitalize ${bond.bondType === "corporate"
-                              ? "bg-[#775DD0] text-white"
-                              : bond.bondType === "PSU"
-                                ? "bg-[#FF4560] text-white"
-                                : bond.bondType === "Government"
-                                  ? "bg-[#0C4580] text-white"
-                                  : "bg-[#4ecdc4] text-white"
-                              }`}
-                          >
-                            {bond.bondType || "N/A"}
-                          </span>
+                          {bond.categories && bond.categories.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {bond.categories.map((cat) => (
+                                <span
+                                  key={cat}
+                                  className="px-3 py-1 rounded-[5px] text-[12px] font-semibold whitespace-nowrap bg-[#4ecdc4] text-white"
+                                >
+                                  {getCategoryLabel(cat)}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="px-3 py-1 rounded-[5px] text-[12px] font-semibold whitespace-nowrap bg-[#4ecdc4] text-white">
+                              N/A
+                            </span>
+                          )}
                         </td>
 
                         <td className="px-4 py-4 text-black">
