@@ -64,7 +64,7 @@ const TimelineFilters = ({ activeFilters, onFilterChange }: TimelineFiltersProps
     },
   });
 
-  const bondTypeOptions: string[] = filtersResponse?.responseData?.bondTypes ?? [];
+  const bondTypeOptions: string[] = filtersResponse?.responseData?.bondCategories ?? [];
   const isinOptions = filtersResponse?.responseData?.isins ?? [];
 
   const handlePeriodChange = (next: CashflowPeriodPreset) => {
@@ -107,15 +107,15 @@ const TimelineFilters = ({ activeFilters, onFilterChange }: TimelineFiltersProps
     <div className="mb-10 w-full min-w-0">
       <div className="flex flex-col md:flex-row md:flex-wrap md:items-end gap-x-3 gap-y-4">
         <div className={`${filterFieldClass} md:w-[200px] md:shrink-0`}>
-          <span className={filterLabelClass} title="Bond type">
-            Bond type
+          <span className={filterLabelClass} title="Bond Category">
+            Bond Category
           </span>
           <MultiSelect
             values={selectedBondTypes}
             onValuesChange={(vals) => onFilterChange({ ...activeFilters, types: vals })}
           >
             <MultiSelectTrigger className={controlTriggerClass}>
-              <MultiSelectValue placeholder="All bond types" />
+              <MultiSelectValue placeholder="All bond categories" />
             </MultiSelectTrigger>
             <MultiSelectContent>
               <MultiSelectGroup>
