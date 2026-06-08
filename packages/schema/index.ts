@@ -19,6 +19,7 @@ export {
   createCorporateKycSchema,
   updateCorporateKycSchema,
   triggerCorporateKraSchema,
+  autofillCorporateKraSchema,
   CorporateKraPastExecutionEnum,
   type CreateCorporateKycPayload,
   type UpdateCorporateKycPayload,
@@ -29,6 +30,7 @@ export {
   type CorporateKycAuthorisedSignatoryPayload,
   type CorporateKraPastExecution,
   type TriggerCorporateKraPayload,
+  type AutofillCorporateKraPayload,
 } from "./lib/customers/corporateKyc.schema";
 
 export {
