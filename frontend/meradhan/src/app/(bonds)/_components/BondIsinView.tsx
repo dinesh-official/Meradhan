@@ -78,12 +78,16 @@ function deriveSecurity(bond: Bond): string {
   return "";
 }
 
-function deriveTaxable(taxStatus: string | null | undefined): string {
+const TAX_STATUS_LABELS: Record<string, string> = {
+  TAXABLE: "Taxable",
+  TAX_FREE: "Tax Free",
+  TAX_SAVING: "Tax Saving",
+  TAX_EXEMPTION: "Tax Exemption",
+};
+
+function formatTaxStatus(taxStatus: string | null | undefined): string {
   if (!taxStatus) return "";
-  const t = taxStatus.toUpperCase();
-  if (t === "TAXABLE") return "Yes";
-  if (t === "TAX_FREE") return "No";
-  return taxStatus;
+  return TAX_STATUS_LABELS[taxStatus] ?? "";
 }
 
 function deriveCategory(bond: Bond): string {
@@ -149,7 +153,7 @@ export default function BondIsinView({
 }) {
   const { put: putText, call: callText } = splitPutCall(bond.putCallOptionDetails);
   const security = deriveSecurity(bond);
-  const taxable = deriveTaxable(bond.taxStatus);
+  const taxStatus = formatTaxStatus(bond.taxStatus);
   const category = deriveCategory(bond);
 
   const hasAnyLongText =
@@ -286,8 +290,8 @@ export default function BondIsinView({
             <InfoCard title="Mode of Issuance" condition={hasValue(bond.modeOfIssuance)}>
               {String(bond.modeOfIssuance)}
             </InfoCard>
-            <InfoCard title="Taxable" condition={hasValue(taxable)}>
-              {taxable}
+            <InfoCard title="Tax Status" condition={hasValue(taxStatus)}>
+              {taxStatus}
             </InfoCard>
             <InfoCard title="Perpetual" condition={typeof bond.isPerpetual === "boolean"}>
               {yesNo(bond.isPerpetual)}
