@@ -1,4 +1,5 @@
 import Workspace from "@/global/elements/nav-sidebar/WorkSpace";
+import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import React from "react";
 import PartnershipDetailsView from "./PartnershipDetailsView";
@@ -10,8 +11,8 @@ async function page({ params }: { params: Promise<{ id: string }> }) {
   const { id: encodedId } = await params;
   const id = decodeId(encodedId);
   return (
-    <Workspace actionKey="leads.view">
-      
+    <AllowOnlyView permissions={["view:leads"]}>
+      <Workspace>
         <PageInfoBar
           title="Partnership Details"
           description="View partnership submission details"
@@ -19,6 +20,7 @@ async function page({ params }: { params: Promise<{ id: string }> }) {
         />
         <PartnershipDetailsView id={id} />
       </Workspace>
+    </AllowOnlyView>
   );
 }
 

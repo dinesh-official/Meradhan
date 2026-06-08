@@ -17,51 +17,153 @@ import { canShowBuyNow } from "@/global/utils/bondPurchaseEligibility";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
+type Bond = BondDetailResponse["responseData"];
+
+/**
+ * Treats null / undefined / empty / "n/a" / "-" as "no data" so the field can be hidden.
+ * Numeric `hideIfZero` is opt-in because some fields legitimately store 0 (e.g. recordDays).
+ */
+function hasValue(
+  v: unknown,
+  opts?: { hideIfZero?: boolean },
+): boolean {
+  if (v === null || v === undefined) return false;
+  if (typeof v === "string") {
+    const t = v.trim();
+    if (!t) return false;
+    if (/^(n\/?a|none|-+|null|undefined)$/i.test(t)) return false;
+    return true;
+  }
+  if (typeof v === "number") {
+    if (!Number.isFinite(v)) return false;
+    if (opts?.hideIfZero && v === 0) return false;
+    return true;
+  }
+  return true;
+}
+
+function formatPercent(v: number | string | null | undefined): string {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return "";
+  return `${n.toFixed(2)}%`;
+}
+
+function formatDate(v: string | number | null | undefined): string {
+  return dateTimeUtils.formatDateTime(
+    v as Parameters<typeof dateTimeUtils.formatDateTime>[0],
+    "DD MMM YYYY",
+  );
+}
+
+function humanize(v: string | null | undefined): string {
+  return (v ?? "").replaceAll("_", " ");
+}
+
+function yesNo(v: boolean | string | null | undefined): string {
+  if (v === true) return "Yes";
+  if (v === false) return "No";
+  if (typeof v === "string") {
+    const t = v.trim().toUpperCase();
+    if (t === "YES" || t === "Y" || t === "TRUE") return "Yes";
+    if (t === "NO" || t === "N" || t === "FALSE") return "No";
+    return v;
+  }
+  return "";
+}
+
+function deriveSecurity(bond: Bond): string {
+  const src = (bond.natureOfInstrument || bond.instrumentName || "").toUpperCase();
+  if (src.includes("UNSECURED")) return "Unsecured";
+  if (src.includes("SECURED")) return "Secured";
+  return "";
+}
+
+function deriveTaxable(taxStatus: string | null | undefined): string {
+  if (!taxStatus) return "";
+  const t = taxStatus.toUpperCase();
+  if (t === "TAXABLE") return "Yes";
+  if (t === "TAX_FREE") return "No";
+  return taxStatus;
+}
+
+function deriveCategory(bond: Bond): string {
+  const raw = bond.categories?.[0];
+  if (!raw || raw.toLowerCase() === "n/a") return "";
+  const upper = ["nbfc", "psu"];
+  return upper.includes(raw.toLowerCase()) ? raw.toUpperCase() : raw;
+}
+
+function splitPutCall(details: string | null | undefined): {
+  put: string;
+  call: string;
+} {
+  if (!details) return { put: "", call: "" };
+  const put = details.split("Call:")[0]?.replace("Put:", "").trim() ?? "";
+  const call = details.split("Call:")[1]?.trim() ?? "";
+  return { put, call };
+}
+
+function clip(text: string, max: number): string {
+  return text.length <= max ? text : `${text.slice(0, max)}...`;
+}
+
+/** Renders a SortInfoBox card only when `condition` is truthy. */
+function InfoCard({
+  title,
+  condition,
+  children,
+}: {
+  title: string;
+  condition: boolean;
+  children: React.ReactNode;
+}) {
+  if (!condition) return null;
+  return <SortInfoBox title={title}>{children}</SortInfoBox>;
+}
+
+/** Renders a labelled long-text row only when `condition` is truthy. */
+function DetailRow({
+  label,
+  condition,
+  children,
+}: {
+  label: string;
+  condition: boolean;
+  children: React.ReactNode;
+}) {
+  if (!condition) return null;
+  return (
+    <div className="flex flex-col gap-1 py-3 border-b last:border-b-0">
+      <p className="text-gray-500 text-sm">{label}</p>
+      <p className="text-base font-medium wrap-break-word">{children}</p>
+    </div>
+  );
+}
+
 export default function BondIsinView({
   bond,
   session,
 }: {
-  bond: BondDetailResponse["responseData"];
+  bond: Bond;
   session?: ISessionResponse["responseData"] | null;
 }) {
-  const TAX_STATUS_LABELS: Record<string, string> = {
-    TAXABLE: "Taxable",
-    TAX_FREE: "Tax Free",
-    TAX_SAVING: "Tax Saving",
-    TAX_EXEMPTION: "Tax Exemption",
-  };
+  const { put: putText, call: callText } = splitPutCall(bond.putCallOptionDetails);
+  const security = deriveSecurity(bond);
+  const taxable = deriveTaxable(bond.taxStatus);
+  const category = deriveCategory(bond);
 
-  const putText =
-    bond.putCallOptionDetails
-      ?.split("Call:")?.[0]
-      ?.replace("Put:", "")
-      ?.trim() ?? "";
-
-  const callText = bond.putCallOptionDetails?.split("Call:")?.[1]?.trim() ?? "";
-
-  const securedValue = (() => {
-    if (bond.natureOfInstrument?.includes("UNSECURED")) return "Unsecured";
-    if (bond.natureOfInstrument?.includes("SECURED")) return "Secured";
-    return null;
-  })();
-
-  function pickWordsByMinLength(text: string, minLength: number): string {
-    const words = text.trim().split("");
-    if (words.length <= minLength) return text;
-    return words.slice(0, minLength).join("") + "...";
-  }
-
-  const formateCategory = (category: string) => {
-    const cat = ["nbfc", "psu"];
-    if (cat.includes(category.toLowerCase())) return category.toUpperCase();
-    return category;
-  };
-
-  const firstCategory = bond.categories?.[0];
-  const hasCategory = !!firstCategory && firstCategory.toLowerCase() !== "n/a";
-
-  const taxStatusLabel = bond.taxStatus ? TAX_STATUS_LABELS[bond.taxStatus] : undefined;
-  const hasTaxStatus = !!taxStatusLabel;
+  const hasAnyLongText =
+    hasValue(bond.registrarDetails) ||
+    hasValue(bond.debentureTrustee) ||
+    hasValue(bond.physicalSecurityAddress) ||
+    hasValue(bond.defaultedInRedemption) ||
+    hasValue(bond.certificateNumbers) ||
+    hasValue(bond.remarks) ||
+    hasValue(bond.imDocumentLink) ||
+    hasValue(bond.providerName) ||
+    hasValue(bond.providerPrice, { hideIfZero: true }) ||
+    hasValue(bond.providerQuantity, { hideIfZero: true }) ||
+    hasValue(bond.providerInterestDate);
 
   return (
     <div className="py-10">
@@ -69,45 +171,146 @@ export default function BondIsinView({
       <div className="gap-8 grid lg:grid-cols-3 py-10">
         <div className="lg:col-span-3">
           <div className="gap-5 grid md:grid-cols-3">
-            <SortInfoBox title="Issue Price" hide={bond.issuePrice === null || bond.issuePrice === undefined}>
+            {/* ── Pricing & size ─────────────────────────────────────── */}
+            <InfoCard title="Issue Price" condition={hasValue(bond.issuePrice, { hideIfZero: true })}>
               <PiCurrencyInrBold /> {formatNumberTS(bond.issuePrice)}
-            </SortInfoBox>
-            <SortInfoBox title="Face Value" hide={bond.faceValue === null || bond.faceValue === undefined}>
+            </InfoCard>
+            <InfoCard title="Face Value" condition={hasValue(bond.faceValue, { hideIfZero: true })}>
               <PiCurrencyInrBold /> {formatNumberTS(bond.faceValue)}
-            </SortInfoBox>
-            <SortInfoBox title="Coupon Rate" hide={bond.couponRate === null || bond.couponRate === undefined}>
-              {`${Number(bond.couponRate).toFixed(2)}%`}
-            </SortInfoBox>
-            <SortInfoBox title="Yield" hide={bond.yield === null || bond.yield === undefined}>
-              {`${Number(bond.yield).toFixed(2)}%`}
-            </SortInfoBox>
-            <SortInfoBox title="Last Traded Yield" hide={bond.lastTradeYield === null || bond.lastTradeYield === undefined}>
-              {`${Number(bond.lastTradeYield).toFixed(2)}%`}
-            </SortInfoBox>
-            <SortInfoBox title="Last Traded Price" hide={bond.lastTradePrice === null || bond.lastTradePrice === undefined}>
-              <PiCurrencyInrBold /> {formatNumberTS(bond.lastTradePrice ?? 0)}
-            </SortInfoBox>
-            <SortInfoBox title="Allotment Date" hide={!bond.dateOfAllotment}>
-              {dateTimeUtils.formatDateTime(bond.dateOfAllotment, "DD MMM YYYY")}
-            </SortInfoBox>
-            <SortInfoBox title="Maturity Date" hide={!bond.maturityDate}>
-              {dateTimeUtils.formatDateTime(bond.maturityDate, "DD MMM YYYY")}
-            </SortInfoBox>
-            <SortInfoBox title="Bond Category" hide={!hasCategory}>
-              <span className="capitalize">{formateCategory(firstCategory || "")}</span>
-            </SortInfoBox>
-            <SortInfoBox title="Interest Payment" hide={!bond.interestPaymentMode}>
-              {bond.interestPaymentMode?.replaceAll("_", " ")}
-            </SortInfoBox>
-            <SortInfoBox title="Coupon Type" hide={bond.couponType === null || bond.couponType === undefined}>
-              {bond.couponType}
-            </SortInfoBox>
-            <SortInfoBox title="Tax Status" hide={!hasTaxStatus}>
-              {taxStatusLabel}
-            </SortInfoBox>
-            <SortInfoBox title="Put" hide={!putText}>
-              <p className="flex items-center gap-1">
-                {pickWordsByMinLength(putText, 15)}
+            </InfoCard>
+            <InfoCard title="Issue Size" condition={hasValue(bond.totalIssueSize, { hideIfZero: true })}>
+              <PiCurrencyInrBold /> {formatNumberTS(bond.totalIssueSize ?? 0)}
+            </InfoCard>
+            <InfoCard title="Buy Price" condition={hasValue(bond.buyPrice, { hideIfZero: true })}>
+              <PiCurrencyInrBold /> {formatNumberTS(bond.buyPrice ?? 0)}
+            </InfoCard>
+            <InfoCard title="Sell Price" condition={hasValue(bond.sellPrice, { hideIfZero: true })}>
+              <PiCurrencyInrBold /> {formatNumberTS(bond.sellPrice ?? 0)}
+            </InfoCard>
+            <InfoCard title="Last Traded Price" condition={hasValue(bond.lastTradePrice, { hideIfZero: true })}>
+              <PiCurrencyInrBold /> {formatNumberTS(bond.lastTradePrice as number)}
+            </InfoCard>
+            <InfoCard title="Stamp Duty" condition={hasValue(bond.stampDutyPercentage, { hideIfZero: true })}>
+              {formatPercent(bond.stampDutyPercentage)}
+            </InfoCard>
+            <InfoCard
+              title="CRM Available Quantity"
+              condition={hasValue(bond.crmAvailableQuantity, { hideIfZero: true })}
+            >
+              {formatNumberTS(bond.crmAvailableQuantity ?? 0)}
+            </InfoCard>
+
+            {/* ── Yields & coupon ────────────────────────────────────── */}
+            <InfoCard title="Coupon Rate" condition={hasValue(bond.couponRate, { hideIfZero: true })}>
+              {formatPercent(bond.couponRate)}
+            </InfoCard>
+            <InfoCard title="Yield" condition={hasValue(bond.yield, { hideIfZero: true })}>
+              {formatPercent(bond.yield as number)}
+            </InfoCard>
+            <InfoCard title="Buy Yield" condition={hasValue(bond.buyYield, { hideIfZero: true })}>
+              {formatPercent(bond.buyYield as number)}
+            </InfoCard>
+            <InfoCard title="Last Traded Yield" condition={hasValue(bond.lastTradeYield, { hideIfZero: true })}>
+              {formatPercent(bond.lastTradeYield as number)}
+            </InfoCard>
+            <InfoCard title="Coupon Type" condition={hasValue(bond.couponType)}>
+              {String(bond.couponType)}
+            </InfoCard>
+            <InfoCard title="Interest Payment Mode" condition={hasValue(bond.interestPaymentMode)}>
+              {humanize(bond.interestPaymentMode)}
+            </InfoCard>
+            <InfoCard
+              title="Interest Payment Frequency"
+              condition={hasValue(bond.interestPaymentFrequency)}
+            >
+              {humanize(bond.interestPaymentFrequency)}
+            </InfoCard>
+            <InfoCard title="Day Convention" condition={hasValue(bond.dayConvention)}>
+              {humanize(bond.dayConvention)}
+            </InfoCard>
+
+            {/* ── Dates ──────────────────────────────────────────────── */}
+            <InfoCard title="Allotment Date" condition={hasValue(formatDate(bond.dateOfAllotment))}>
+              {formatDate(bond.dateOfAllotment)}
+            </InfoCard>
+            <InfoCard title="Maturity Date" condition={hasValue(formatDate(bond.maturityDate))}>
+              {formatDate(bond.maturityDate)}
+            </InfoCard>
+            <InfoCard title="Redemption Date" condition={hasValue(formatDate(bond.redemptionDate))}>
+              {formatDate(bond.redemptionDate)}
+            </InfoCard>
+            <InfoCard title="Last Coupon Date" condition={hasValue(formatDate(bond.lastCouponDate))}>
+              {formatDate(bond.lastCouponDate)}
+            </InfoCard>
+            <InfoCard title="Next Interest Payment Date" condition={hasValue(formatDate(bond.nextCouponDate))}>
+              {formatDate(bond.nextCouponDate as string)}
+            </InfoCard>
+            <InfoCard title="Record Date" condition={hasValue(formatDate(bond.recordDate))}>
+              {formatDate(bond.recordDate)}
+            </InfoCard>
+            <InfoCard title="Record Days" condition={hasValue(bond.recordDays)}>
+              {bond.recordDays}
+            </InfoCard>
+            <InfoCard title="Rating Date" condition={hasValue(formatDate(bond.ratingDate))}>
+              {formatDate(bond.ratingDate)}
+            </InfoCard>
+            <InfoCard title="Start Date" condition={hasValue(formatDate(bond.startDate))}>
+              {formatDate(bond.startDate)}
+            </InfoCard>
+            <InfoCard title="End Date" condition={hasValue(formatDate(bond.endDate))}>
+              {formatDate(bond.endDate)}
+            </InfoCard>
+
+            {/* ── Classification ─────────────────────────────────────── */}
+            <InfoCard title="Bond Category" condition={hasValue(category)}>
+              <span className="capitalize">{category}</span>
+            </InfoCard>
+            <InfoCard title="Sector" condition={hasValue(bond.sectorName)}>
+              <span className="capitalize">{bond.sectorName}</span>
+            </InfoCard>
+            <InfoCard title="Bond Type" condition={hasValue(bond.bondType)}>
+              {humanize(bond.bondType)}
+            </InfoCard>
+            <InfoCard title="Nature of Instrument" condition={hasValue(bond.natureOfInstrument)}>
+              {humanize(bond.natureOfInstrument)}
+            </InfoCard>
+            <InfoCard title="Seniority" condition={hasValue(bond.seniority)}>
+              {humanize(bond.seniority)}
+            </InfoCard>
+            <InfoCard title="Security" condition={hasValue(security)}>
+              {security}
+            </InfoCard>
+            <InfoCard title="Redemption Type" condition={hasValue(bond.redemptionType)}>
+              {humanize(bond.redemptionType)}
+            </InfoCard>
+            <InfoCard title="Mode of Issuance" condition={hasValue(bond.modeOfIssuance)}>
+              {String(bond.modeOfIssuance)}
+            </InfoCard>
+            <InfoCard title="Taxable" condition={hasValue(taxable)}>
+              {taxable}
+            </InfoCard>
+            <InfoCard title="Perpetual" condition={typeof bond.isPerpetual === "boolean"}>
+              {yesNo(bond.isPerpetual)}
+            </InfoCard>
+            <InfoCard title="Listed" condition={hasValue(bond.isListed)}>
+              {yesNo(bond.isListed)}
+            </InfoCard>
+            <InfoCard title="Exchange Listed On" condition={hasValue(bond.exchangeListedOn)}>
+              {bond.exchangeListedOn}
+            </InfoCard>
+
+            {/* ── Rating ─────────────────────────────────────────────── */}
+            <InfoCard title="Credit Rating" condition={hasValue(bond.creditRating)}>
+              {bond.creditRating}
+            </InfoCard>
+            <InfoCard title="Rating Agency" condition={hasValue(bond.ratingAgencyName)}>
+              {bond.ratingAgencyName}
+            </InfoCard>
+
+            {/* ── Put / Call ─────────────────────────────────────────── */}
+            <InfoCard title="Put" condition={hasValue(putText)}>
+              <span className="flex items-center gap-1">
+                {clip(putText, 15)}
                 {putText.length > 15 && (
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -118,11 +321,11 @@ export default function BondIsinView({
                     </TooltipContent>
                   </Tooltip>
                 )}
-              </p>
-            </SortInfoBox>
-            <SortInfoBox title="Call" hide={!callText}>
-              <p className="flex items-center gap-1 line-clamp-1">
-                {pickWordsByMinLength(callText, 15)}
+              </span>
+            </InfoCard>
+            <InfoCard title="Call" condition={hasValue(callText)}>
+              <span className="flex items-center gap-1 line-clamp-1">
+                {clip(callText, 15)}
                 {callText.length > 15 && (
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -133,21 +336,71 @@ export default function BondIsinView({
                     </TooltipContent>
                   </Tooltip>
                 )}
-              </p>
-            </SortInfoBox>
-            <SortInfoBox title="Mode of issuance" hide={bond.modeOfIssuance === null || bond.modeOfIssuance === undefined}>
-              {bond.modeOfIssuance}
-            </SortInfoBox>
-            <SortInfoBox title="Security" hide={!securedValue}>
-              {securedValue}
-            </SortInfoBox>
-            <SortInfoBox title="Issue Size" hide={!bond.totalIssueSize}>
-              <PiCurrencyInrBold /> {formatNumberTS(bond.totalIssueSize || 0)}
-            </SortInfoBox>
-            <SortInfoBox title="Next Interest Payment Date" hide={bond.nextCouponDate === null || bond.nextCouponDate === undefined}>
-              {dateTimeUtils.formatDateTime(bond.nextCouponDate, "DD MMM YYYY")}
-            </SortInfoBox>
+              </span>
+            </InfoCard>
           </div>
+
+          {/* ── Long-text / document details ─────────────────────────── */}
+          {hasAnyLongText && (
+            <div className="mt-8 border rounded-lg p-5 bg-white">
+              <h3 className="text-lg font-semibold mb-2">Additional Details</h3>
+              <DetailRow label="Registrar" condition={hasValue(bond.registrarDetails)}>
+                {bond.registrarDetails}
+              </DetailRow>
+              <DetailRow label="Debenture Trustee" condition={hasValue(bond.debentureTrustee)}>
+                {bond.debentureTrustee}
+              </DetailRow>
+              <DetailRow
+                label="Physical Security Address"
+                condition={hasValue(bond.physicalSecurityAddress)}
+              >
+                {bond.physicalSecurityAddress}
+              </DetailRow>
+              <DetailRow
+                label="Defaulted in Redemption"
+                condition={hasValue(bond.defaultedInRedemption)}
+              >
+                {bond.defaultedInRedemption}
+              </DetailRow>
+              <DetailRow label="Certificate Numbers" condition={hasValue(bond.certificateNumbers)}>
+                {bond.certificateNumbers}
+              </DetailRow>
+              <DetailRow label="Remarks" condition={hasValue(bond.remarks)}>
+                {bond.remarks}
+              </DetailRow>
+              <DetailRow label="Information Memorandum" condition={hasValue(bond.imDocumentLink)}>
+                <a
+                  href={bond.imDocumentLink ?? "#"}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="text-secondary underline"
+                >
+                  View document
+                </a>
+              </DetailRow>
+              <DetailRow label="Provider" condition={hasValue(bond.providerName)}>
+                {bond.providerName}
+              </DetailRow>
+              <DetailRow
+                label="Provider Price"
+                condition={hasValue(bond.providerPrice, { hideIfZero: true })}
+              >
+                ₹ {formatNumberTS(bond.providerPrice as number)}
+              </DetailRow>
+              <DetailRow
+                label="Provider Quantity"
+                condition={hasValue(bond.providerQuantity, { hideIfZero: true })}
+              >
+                {formatNumberTS(bond.providerQuantity as number)}
+              </DetailRow>
+              <DetailRow
+                label="Provider Interest Date"
+                condition={hasValue(formatDate(bond.providerInterestDate as string))}
+              >
+                {formatDate(bond.providerInterestDate as string)}
+              </DetailRow>
+            </div>
+          )}
 
           {bond && canShowBuyNow(bond) && (
             (() => {
@@ -181,9 +434,6 @@ export default function BondIsinView({
             })()
           )}
         </div>
-        {/* <div className="lg:col-span-2">
-          <BondBuyNowCalc />
-        </div> */}
       </div>
 
       <div className="container">

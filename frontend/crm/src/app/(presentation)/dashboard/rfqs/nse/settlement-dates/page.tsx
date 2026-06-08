@@ -5,14 +5,10 @@ import SettlementDatesView from "./SettlementDatesView";
 
 function page() {
   return (
-    <Workspace actionKeys={[
-        "rfqs.settlement_dates.view",
-        "rfqs.settlement_dates.edit",
-      ]}>
-      
-        <PageInfoBar title="NSE Settlement Dates" />
-        <SettlementDatesView />
-      </Workspace>
+    <Workspace>
+      <PageInfoBar title="NSE Settlement Dates" />
+      <SettlementDatesView />
+    </Workspace>
   );
 }
 

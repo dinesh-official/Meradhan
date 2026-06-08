@@ -1,11 +1,12 @@
 import Workspace from "@/global/elements/nav-sidebar/WorkSpace";
+import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import SessionLogsHistory from "./_session_logs/SessionLogsHistory";
 
 function CrmAuditLogsPage() {
   return (
-    <Workspace actionKey="audit_logs.crm.view">
-    
+    <AllowOnlyView permissions={["view:crmauditlogs"]}>
+    <Workspace>
       <div className="flex flex-col gap-5">
         <PageInfoBar
           title="Authentication Activity Logs"
@@ -15,6 +16,7 @@ function CrmAuditLogsPage() {
         <SessionLogsHistory />
       </div>
     </Workspace>
+    </AllowOnlyView>
   );
 }
 

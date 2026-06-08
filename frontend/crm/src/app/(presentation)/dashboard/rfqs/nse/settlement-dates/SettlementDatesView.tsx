@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UniversalTable } from "@/global/elements/table/UniversalTable";
 import { cn } from "@/lib/utils";
-import usePermissions from "@/hooks/usePermissions.hook";
+import useAppCookie from "@/hooks/useAppCookie.hook";
 import {
   AlertCircle,
   ChevronLeft,
@@ -47,8 +47,9 @@ function formatMonthHeading(yearMonth: string): string {
 }
 
 export default function SettlementDatesView() {
-  const { can } = usePermissions();
-  const canSave = can("rfqs.settlement_dates.edit");
+  const { cookies } = useAppCookie();
+  const canSave =
+    cookies.role === "ADMIN" || cookies.role === "SUPER_ADMIN";
 
   const NSE_SETTLEMENT_CSV_URL =
     "https://bricsonline.nseindia.com/bondsnew/rest/login";

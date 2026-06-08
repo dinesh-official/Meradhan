@@ -7,10 +7,9 @@ async function page({ params }: { params: Promise<{ id: string }> }) {
   const id = decodeId(encodedId);
 
   return (
-    <Workspace actionKey="customers.view">
-      
-        <CustomerProfileView profileId={id} />
-      </Workspace>
+    <Workspace>
+      <CustomerProfileView profileId = {id}/>
+    </Workspace>
   );
 }
 

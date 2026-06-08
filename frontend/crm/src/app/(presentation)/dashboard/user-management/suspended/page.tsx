@@ -5,14 +5,13 @@ import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 
 function page() {
   return (
-    <Workspace actionKey="user_management.view">
-      
-        <PageInfoBar
-          title="Suspended User"
-          description="manage all suspended users"
-        />
-        <SuspendedUserView />
-      </Workspace>
+    <Workspace>
+      <PageInfoBar
+        title="Suspended User"
+        description="manage all suspended users"
+      />
+      <SuspendedUserView />
+    </Workspace>
   );
 }
 

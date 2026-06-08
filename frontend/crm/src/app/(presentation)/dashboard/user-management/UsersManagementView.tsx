@@ -44,7 +44,7 @@ function UsersManagementView() {
         title="User Management"
         description="Manage system users and their permissions"
         actions={
-          <AllowOnlyView actionKey="user_management.create">
+          <AllowOnlyView permissions={["create:user"]}>
             <CreateNewUserPopup>
               <Button>
                 <Plus /> Add New User

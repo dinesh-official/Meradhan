@@ -165,7 +165,7 @@ function OrderDetailsView() {
       </div>
 
       {/* Status Update Section - Admin Only */}
-      <AllowOnlyView actionKey="orders.edit" >
+      <AllowOnlyView permissions={['edit:orders']} >
         <div className="flex items-center gap-3">
           <span className="text-sm text-muted-foreground whitespace-nowrap">
             Update Status:

@@ -1,11 +1,13 @@
 import Workspace from "@/global/elements/nav-sidebar/WorkSpace";
+import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 import NewRfqFormView from "./_components/NewRfqForm";
 function NseCreate() {
   return (
-    <Workspace actionKey="rfqs.manage">
-      
+    <AllowOnlyView permissions={["create:rfq"]}>
+      <Workspace>
         <NewRfqFormView />
       </Workspace>
+    </AllowOnlyView>
   );
 }
 

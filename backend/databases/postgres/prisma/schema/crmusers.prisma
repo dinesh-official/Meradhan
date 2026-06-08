@@ -20,8 +20,6 @@ model CRMUserDataModel {
 
     savedProposals           CrmSavedProposal[]
 
-    rbacPoliciesUpdated      RbacRolePolicy[]                 @relation("RbacPolicyUpdatedBy")
-
     @@index([email])
     @@map("crm_users")
 }

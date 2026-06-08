@@ -7,10 +7,9 @@ async function page({ params }: { params: Promise<{ id: string }> }) {
   const id = decodeId(encodedId);
 
   return (
-    <Workspace actionKey="kyc.corporate.view">
-      
-        <CorporateKycPageView customerId={id} />
-      </Workspace>
+    <Workspace>
+      <CorporateKycPageView customerId={id} />
+    </Workspace>
   );
 }
 

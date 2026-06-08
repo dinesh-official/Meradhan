@@ -13,7 +13,7 @@ function RfqOverviewView() {
         title="RFQ Management"
         description="Manage Request for Quotes and NSE submissions"
         actions={
-          <AllowOnlyView actionKey="rfqs.manage">
+          <AllowOnlyView permissions={['create:rfq']}>
             <Link href={`/dashboard/leads/create`}>
               <Button>
                 <Plus /> Create New RFQ
