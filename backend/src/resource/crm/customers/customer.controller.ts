@@ -608,6 +608,76 @@ export class CustomerProfileController {
     }
   }
 
+  /**
+   * "Autofill from KRA" — fetches an entity's KRA record using an operator-
+   * supplied PAN + DOI and returns a form-shape patch the CRM corporate-KYC
+   * form merges into open state. Does not require a saved corporate KYC row.
+   */
+  async corporateKraAutofill(req: Request, res: Response): Promise<void> {
+    const customerId = Number(req.params.customerId);
+    if (Number.isNaN(customerId)) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid customer id",
+      });
+      return;
+    }
+
+    try {
+      const { pan, dateOfIncorporation } =
+        appSchema.customer.autofillCorporateKraSchema.parse(req.body ?? {});
+
+      const result = await this.corporateKraDownloadService.downloadByPanAndDoi(
+        customerId,
+        pan,
+        dateOfIncorporation,
+      );
+
+      await createCrmActivityLog(req, {
+        action: "create",
+        details: {
+          Reason: "CORPORATE_KRA_AUTOFILL",
+          CustomerId: String(customerId),
+          Pan: pan,
+          KraLogId: result.logId == null ? "(no kyc row)" : String(result.logId),
+          NdmlStatus:
+            result.summary.status.label ?? result.summary.status.code ?? "",
+        },
+        entityType: "CUSTOMER",
+        entityId: customerId,
+        userId: Number(req.session?.id),
+      });
+
+      res.sendResponse({
+        statusCode: HttpStatus.OK,
+        responseData: {
+          logId: result.logId,
+          storedAt: result.storedAt,
+          summary: result.summary,
+          formPatch: result.formPatch,
+        },
+      });
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        res.sendResponse({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: err.issues.map((i) => i.message).join("; "),
+        });
+        return;
+      }
+      if (err instanceof AppError) {
+        res.sendResponse({ statusCode: err.statusCode, message: err.message });
+        return;
+      }
+      console.error("Corporate KRA autofill failed:", err);
+      res.sendResponse({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message:
+          err instanceof Error ? err.message : "Failed to autofill from KRA",
+      });
+    }
+  }
+
   async corporateKraStatus(req: Request, res: Response): Promise<void> {
     const customerId = Number(req.params.customerId);
     if (Number.isNaN(customerId)) {

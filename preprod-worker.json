@@ -1,26 +1,29 @@
 {
-    "taskDefinitionArn": "arn:aws:ecs:ap-south-1:450321244603:task-definition/pre-prod-be:119",
+    "taskDefinitionArn": "arn:aws:ecs:ap-south-1:450321244603:task-definition/preprod-worker:2",
     "containerDefinitions": [
         {
-            "name": "pre-prod-be",
-            "image": "450321244603.dkr.ecr.ap-south-1.amazonaws.com/pre-prod-be:latest",
+            "name": "preprod-worker-cont",
+            "image": "450321244603.dkr.ecr.ap-south-1.amazonaws.com/preprod-worker:latest",
             "cpu": 0,
             "portMappings": [
                 {
-                    "containerPort": 4000,
-                    "hostPort": 4000,
+                    "containerPort": 80,
+                    "hostPort": 80,
                     "protocol": "tcp",
-                    "name": "pre-prod-be"
+                    "name": "preprod-worker",
+                    "appProtocol": "http"
                 }
             ],
             "essential": true,
             "environment": [],
+            "environmentFiles": [],
             "mountPoints": [],
             "volumesFrom": [],
+            "ulimits": [],
             "logConfiguration": {
                 "logDriver": "awslogs",
                 "options": {
-                    "awslogs-group": "/ecs/pre-prod-be",
+                    "awslogs-group": "/ecs/preprod-worker",
                     "awslogs-create-group": "true",
                     "awslogs-region": "ap-south-1",
                     "awslogs-stream-prefix": "ecs"
@@ -30,11 +33,11 @@
             "systemControls": []
         }
     ],
-    "family": "pre-prod-be",
+    "family": "preprod-worker",
     "taskRoleArn": "arn:aws:iam::450321244603:role/ecsTaskExecutionRole",
     "executionRoleArn": "arn:aws:iam::450321244603:role/ecsTaskExecutionRole",
     "networkMode": "awsvpc",
-    "revision": 119,
+    "revision": 2,
     "volumes": [],
     "status": "ACTIVE",
     "requiresAttributes": [
@@ -81,7 +84,7 @@
     ],
     "cpu": "512",
     "memory": "1024",
-    "registeredAt": "2026-06-05T17:56:15.057Z",
+    "registeredAt": "2026-06-05T13:10:15.620Z",
     "registeredBy": "arn:aws:iam::450321244603:user/Dinesh",
     "enableFaultInjection": false,
     "tags": []

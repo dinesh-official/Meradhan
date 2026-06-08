@@ -203,3 +203,35 @@ export const triggerCorporateKraSchema = z.object({
 
 export type CorporateKraPastExecution = z.infer<typeof CorporateKraPastExecutionEnum>;
 export type TriggerCorporateKraPayload = z.infer<typeof triggerCorporateKraSchema>;
+
+/**
+ * Payload for the CRM "Autofill from KRA" action on the corporate KYC form.
+ *
+ * The operator supplies the company PAN + Date of Incorporation (which NDML's
+ * `panDownloadDetailsComplete` requires in lieu of a DOB). The backend uses
+ * these to fetch the entity's current KRA record and return a partial form
+ * patch the UI can merge into the open corporate-KYC form.
+ */
+export const autofillCorporateKraSchema = z.object({
+  pan: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .regex(
+      /^[A-Z]{3}[CHFATBLJGP][A-Z]\d{4}[A-Z]$/,
+      "PAN must look like a non-individual PAN (e.g. ABCAA1234B)",
+    ),
+  /** Accepts ISO `YYYY-MM-DD` or `DD-MM-YYYY` / `DD/MM/YYYY`. */
+  dateOfIncorporation: z
+    .string()
+    .trim()
+    .min(1, "Date of incorporation is required")
+    .refine(
+      (v) =>
+        /^\d{4}-\d{2}-\d{2}/.test(v) ||
+        /^\d{2}[-/]\d{2}[-/]\d{4}$/.test(v),
+      "Date of incorporation must be YYYY-MM-DD or DD-MM-YYYY",
+    ),
+});
+
+export type AutofillCorporateKraPayload = z.infer<typeof autofillCorporateKraSchema>;

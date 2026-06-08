@@ -93,6 +93,12 @@ crmCustomersRoutes.post(
 );
 
 crmCustomersRoutes.post(
+  "/api/crm/customer/:customerId/corporate-kyc/kra/autofill",
+  allowAccessMiddleware("ADMIN"),
+  (req, res) => controller.corporateKraAutofill(req, res),
+);
+
+crmCustomersRoutes.post(
   "/api/crm/customer/:customerId/corporate-kyc/kra/trigger",
   allowAccessMiddleware("ADMIN"),
   (req, res) => controller.triggerCorporateKra(req, res),
