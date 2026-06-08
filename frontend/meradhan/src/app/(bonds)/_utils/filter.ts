@@ -42,9 +42,11 @@ export function validateBondsFilters(rawQuery: Record<string, unknown>) {
   // Merge cleaned values into defaults using Object.assign()
   const cleaned = Object.assign({}, baseFilters, {
     search:
-      typeof rawQuery.search === "string"
+      typeof rawQuery.search === "string" && rawQuery.search.trim()
         ? rawQuery.search.trim()
-        : undefined,
+        : typeof rawQuery.navSearch === "string" && rawQuery.navSearch.trim()
+          ? rawQuery.navSearch.trim()
+          : undefined,
 
     maturity: toValidatedArray(rawQuery.maturity, bonds.maturityYearEnums),
 

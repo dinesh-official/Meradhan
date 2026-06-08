@@ -71,6 +71,7 @@ export interface PortfolioDetailsBond {
   securityName: string;
   isin: string;
   bondType: string | null;
+  categories: string[];
   coupon: number;
   investmentAmount: number;
   quantity: number;
@@ -162,7 +163,7 @@ export interface PortfolioIsinOption {
 }
 
 export interface PortfolioFilterOptions {
-  bondTypes: string[];
+  bondCategories: string[];
   bondRatings: string[];
   couponRanges: string[];
   paymentFrequencies: string[];

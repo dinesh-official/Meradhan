@@ -107,7 +107,7 @@ export class PortfolioController {
     const page = Number.isFinite(pageNum) && pageNum >= 1 ? pageNum : 1;
     const limit = Number.isFinite(limitNum) && limitNum >= 1 ? Math.min(limitNum, 100) : 10;
     const {
-      bondTypes,
+      bondCategories,
       bondRatings,
       couponRanges,
       paymentFrequencies,
@@ -117,7 +117,7 @@ export class PortfolioController {
       customerId,
       page,
       limit,
-      Array.isArray(bondTypes) ? bondTypes : undefined,
+      Array.isArray(bondCategories) ? bondCategories : undefined,
       Array.isArray(bondRatings) ? bondRatings : undefined,
       Array.isArray(couponRanges) ? couponRanges : undefined,
       Array.isArray(paymentFrequencies) ? paymentFrequencies : undefined

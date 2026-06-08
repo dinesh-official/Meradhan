@@ -19,27 +19,46 @@ import { PortfolioDetailsTabShimmer } from "./PortfolioTabShimmers";
 import { extractRatingAgencyName } from "@/global/utils/ratingAgency";
 
 interface PortfolioFilterOptions {
-  bondTypes: string[];
+  bondCategories: string[];
   bondRatings: string[];
   couponRanges: string[];
   paymentFrequencies: string[];
   isins: { isin: string; bondName: string }[];
 }
 
+const CATEGORY_LABELS: Record<string, string> = {
+  corporate: "Corporate",
+  "bank-bonds": "Bank bonds",
+  nbfc: "NBFC",
+  psu: "PSU",
+  "tax-free": "Tax free",
+  "zero-coupon": "Zero coupon",
+  perpetual: "Perpetual",
+  "latest-release": "Latest release",
+};
+
+function getCategoryLabel(slug: string): string {
+  return CATEGORY_LABELS[slug.toLowerCase()] ?? slug;
+}
+
+// Hardcoded 3-char month abbreviations to avoid the "Sept" vs "Sep" inconsistency
+// introduced by newer ICU data in Node.js 18+ / Chrome 110+ where Intl.DateTimeFormat
+// with { month: "short" } outputs "Sept" (4 chars) for September.
+const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
 function formatPortfolioDate(value: string | Date | null | undefined): string | null {
   if (!value) return null;
   const d = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(d.getTime())) return null;
-  return d.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = MONTHS_SHORT[d.getMonth()];
+  const year = d.getFullYear();
+  return `${day} ${month} ${year}`;
 }
 
 export default function PortfolioDetails() {
   const [filters, setFilters] = useState({
-    bondType: [] as string[],
+    bondCategory: [] as string[],
     bondRating: [] as string[],
     coupon: [] as string[],
     paymentFrequency: [] as string[],
@@ -84,7 +103,7 @@ export default function PortfolioDetails() {
     queryKey: [
       "portfolioDetails",
       currentPage,
-      filters.bondType.join("|"),
+      filters.bondCategory.join("|"),
       filters.bondRating.join("|"),
       filters.coupon.join("|"),
       filters.paymentFrequency.join("|"),
@@ -93,7 +112,7 @@ export default function PortfolioDetails() {
       const response = await portfolioApi.getPortfolioDetails({
         page: currentPage,
         limit: itemsPerPage,
-        bondTypes: filters.bondType.length ? filters.bondType : undefined,
+        bondCategories: filters.bondCategory.length ? filters.bondCategory : undefined,
         bondRatings: filters.bondRating.length ? filters.bondRating : undefined,
         couponRanges: filters.coupon.length ? filters.coupon : undefined,
         paymentFrequencies: filters.paymentFrequency.length
@@ -110,7 +129,7 @@ export default function PortfolioDetails() {
 
   const apiFilterOptions = filtersResponse?.responseData;
   const filterOptions = {
-    bondType: apiFilterOptions?.bondTypes ?? [],
+    bondCategory: apiFilterOptions?.bondCategories ?? [],
     bondRating: apiFilterOptions?.bondRatings ?? [],
     coupon: apiFilterOptions?.couponRanges ?? [],
     paymentFrequency: apiFilterOptions?.paymentFrequencies ?? [],
@@ -131,17 +150,17 @@ export default function PortfolioDetails() {
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 md:gap-6 mb-8">
         <MultiSelect
-          values={filters.bondType}
-          onValuesChange={(values) => setFilterValues("bondType", values)}
+          values={filters.bondCategory}
+          onValuesChange={(values) => setFilterValues("bondCategory", values)}
         >
           <MultiSelectTrigger className="md:max-w-[250px] w-full justify-between">
-            <MultiSelectValue placeholder="Bond Type" />
+            <MultiSelectValue placeholder="Bond Category" />
           </MultiSelectTrigger>
           <MultiSelectContent>
             <MultiSelectGroup>
-              {filterOptions.bondType.map((option) => (
+              {filterOptions.bondCategory.map((option) => (
                 <MultiSelectItem key={option} value={option}>
-                  {option}
+                  {getCategoryLabel(option)}
                 </MultiSelectItem>
               ))}
             </MultiSelectGroup>
@@ -234,7 +253,7 @@ export default function PortfolioDetails() {
                 <tr>
                   <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Security Name</th>
                   <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">ISIN</th>
-                  <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Bond Type</th>
+                  <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Bond Category</th>
                   <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Coupon</th>
                   <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Investment Amount</th>
                   <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Face Value</th>
@@ -265,18 +284,22 @@ export default function PortfolioDetails() {
                         <td className="px-4 py-4 text-black">{bond.isin}</td>
 
                         <td className="px-4 py-4">
-                          <span
-                            className={`px-3 py-3 rounded-[5px] text-[12px] font-semibold whitespace-nowrap capitalize ${bond.bondType === "corporate"
-                              ? "bg-[#775DD0] text-white"
-                              : bond.bondType === "PSU"
-                                ? "bg-[#FF4560] text-white"
-                                : bond.bondType === "Government"
-                                  ? "bg-[#0C4580] text-white"
-                                  : "bg-[#4ecdc4] text-white"
-                              }`}
-                          >
-                            {bond.bondType || "N/A"}
-                          </span>
+                          {bond.categories && bond.categories.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {bond.categories.map((cat) => (
+                                <span
+                                  key={cat}
+                                  className="px-3 py-1 rounded-[5px] text-[12px] font-semibold whitespace-nowrap bg-[#4ecdc4] text-white"
+                                >
+                                  {getCategoryLabel(cat)}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="px-3 py-1 rounded-[5px] text-[12px] font-semibold whitespace-nowrap bg-[#4ecdc4] text-white">
+                              N/A
+                            </span>
+                          )}
                         </td>
 
                         <td className="px-4 py-4 text-black">
@@ -339,11 +362,7 @@ export default function PortfolioDetails() {
                               />
                               <Detail
                                 label="Rating Agency"
-                                value={
-                                  bond.ratingAgencyName === "N/A"
-                                    ? "Coming soon"
-                                    : extractRatingAgencyName(bond.ratingAgencyName)
-                                }
+                                value={extractRatingAgencyName(bond.ratingAgencyName)}
                               />
                             </div>
                           </td>
@@ -407,10 +426,13 @@ function Detail({ label, value }: { label: string; value: any }) {
     (typeof value === "string" &&
       (value.trim() === "" ||
         ["N/A", "NA", "UNKNOWN", "NULL"].includes(value.trim().toUpperCase())));
+
+  if (isMissing) return null;
+
   return (
     <div>
       <p className="text-xs text-gray-500">{label}</p>
-      <p className="font-medium text-black">{isMissing ? "Coming soon" : value}</p>
+      <p className="font-medium text-black">{value}</p>
     </div>
   );
 }

@@ -182,3 +182,20 @@ export interface BondDealAutofillResponse {
 }
 
 export type BondDealAutofillApiResponse = BaseResponseData<BondDealAutofillResponse>;
+
+// [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold]
+// Shape returned by GET /api/bonds/filter-options
+export interface BondFilterOptionsData {
+  /** Maturity year-buckets that have ≥1 active bond (e.g. ["0-2", "2-5"]) */
+  maturity: string[];
+  /** Distinct credit-rating values present in active bonds */
+  rating: string[];
+  /** Distinct tax-status values present in active bonds */
+  taxation: string[];
+  /** Coupon-rate buckets that have ≥1 active bond (e.g. ["4-7", "8-10"]) */
+  coupon: string[];
+  /** Distinct interestPaymentMode values (UNKNOWN excluded) */
+  interest: string[];
+}
+
+export type BondFilterOptionsResponse = BaseResponseData<BondFilterOptionsData>;
