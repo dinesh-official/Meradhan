@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import AuthActions from "./AuthActions";
 import MobMenu from "./MobMenu";
 import NavMenu from "./NavMenu";
+import NavbarBondSearch from "./NavbarBondSearch";
 function NavBar({
   session,
 }: {
@@ -22,9 +23,9 @@ function NavBar({
   return (
     <div className="top-0 right-0 left-0 z-50 sticky bg-white shadow shadow-black/10 w-full h-16 md:h-18">
       <div className="mx-auto h-full container">
-        <div className="flex justify-between items-center h-full">
+        <div className="flex justify-between items-center h-full gap-4">
           {/* Logo */}
-          <Link href={`/`}>
+          <Link href={`/`} className="shrink-0">
             <Image
               src={`/logo/mera-dhan-logo.svg`}
               width={400}
@@ -34,8 +35,11 @@ function NavBar({
             />
           </Link>
 
+          {/* Global Bond Search */}
+          <NavbarBondSearch />
+
           {/* Menu Items */}
-          <div className="hidden lg:flex justify-center items-center gap-7">
+          <div className="hidden lg:flex justify-center items-center gap-7 shrink-0">
             <NavMenu />
             <AuthActions session={session} />
           </div>

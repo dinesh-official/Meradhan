@@ -12,6 +12,9 @@ import {
 import { cn } from "@/lib/utils";
 import { Search, Trash2Icon, X } from "lucide-react";
 import { ReactNode, useEffect, useState } from "react";
+// [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold]
+// Commented out: static option arrays replaced by dynamic `filterOptions` prop.
+// Keeping the import for fallback label lookups in the selected-filter chips.
 import {
   couponOptions,
   interestPaymentOptions,
@@ -19,21 +22,27 @@ import {
   ratingOptions,
   taxationOptions,
 } from "../_hooks/bonds_filter_data";
+import type { useBondFilterOptions } from "../_hooks/useBondFilterOptions";
 import { BondsFilterHook } from "../_hooks/useBondsFilters";
 import { useRouter } from "nextjs-toploader/app";
 
+// [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold]
+// Added `filterOptions` prop so dropdowns only show options that exist in actual bond data.
 function ExploreBondsHeader({
   manager,
   applyFilters,
   desc,
   title,
   rootUrl,
+  filterOptions,
 }: {
   manager: BondsFilterHook;
   applyFilters?: () => void;
   title?: string | ReactNode;
   desc?: string | ReactNode;
   rootUrl: string;
+  /** Dynamic filter options from useBondFilterOptions hook. Falls back to static arrays if not provided. */
+  filterOptions?: ReturnType<typeof useBondFilterOptions>;
 }) {
   const [dounce, setDobunce] = useState(0);
   const router = useRouter();
@@ -118,7 +127,14 @@ function ExploreBondsHeader({
               </MultiSelectTrigger>
               <MultiSelectContent>
                 <MultiSelectGroup>
-                  {maturityOptions.map((option) => (
+                  {/* [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold] */}
+                  {/* Commented out: was using static maturityOptions — now using dynamic activeMaturityOptions */}
+                  {/* {maturityOptions.map((option) => (
+                    <MultiSelectItem key={option.value} value={option.value}>
+                      {option.title}
+                    </MultiSelectItem>
+                  ))} */}
+                  {(filterOptions?.activeMaturityOptions ?? maturityOptions).map((option) => (
                     <MultiSelectItem key={option.value} value={option.value}>
                       {option.title}
                     </MultiSelectItem>
@@ -139,7 +155,14 @@ function ExploreBondsHeader({
               </MultiSelectTrigger>
               <MultiSelectContent>
                 <MultiSelectGroup>
-                  {ratingOptions.map((option) => (
+                  {/* [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold] */}
+                  {/* Commented out: was using static ratingOptions — now using dynamic activeRatingOptions */}
+                  {/* {ratingOptions.map((option) => (
+                    <MultiSelectItem key={option.value} value={option.value}>
+                      {option.title}
+                    </MultiSelectItem>
+                  ))} */}
+                  {(filterOptions?.activeRatingOptions ?? ratingOptions).map((option) => (
                     <MultiSelectItem key={option.value} value={option.value}>
                       {option.title}
                     </MultiSelectItem>
@@ -160,7 +183,14 @@ function ExploreBondsHeader({
               </MultiSelectTrigger>
               <MultiSelectContent>
                 <MultiSelectGroup>
-                  {taxationOptions.map((option) => (
+                  {/* [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold] */}
+                  {/* Commented out: was using static taxationOptions — now using dynamic activeTaxationOptions */}
+                  {/* {taxationOptions.map((option) => (
+                    <MultiSelectItem key={option.value} value={option.value}>
+                      {option.title}
+                    </MultiSelectItem>
+                  ))} */}
+                  {(filterOptions?.activeTaxationOptions ?? taxationOptions).map((option) => (
                     <MultiSelectItem key={option.value} value={option.value}>
                       {option.title}
                     </MultiSelectItem>
@@ -181,7 +211,14 @@ function ExploreBondsHeader({
               </MultiSelectTrigger>
               <MultiSelectContent>
                 <MultiSelectGroup>
-                  {couponOptions.map((option) => (
+                  {/* [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold] */}
+                  {/* Commented out: was using static couponOptions — now using dynamic activeCouponOptions */}
+                  {/* {couponOptions.map((option) => (
+                    <MultiSelectItem key={option.value} value={option.value}>
+                      {option.title}
+                    </MultiSelectItem>
+                  ))} */}
+                  {(filterOptions?.activeCouponOptions ?? couponOptions).map((option) => (
                     <MultiSelectItem key={option.value} value={option.value}>
                       {option.title}
                     </MultiSelectItem>
@@ -202,7 +239,14 @@ function ExploreBondsHeader({
               </MultiSelectTrigger>
               <MultiSelectContent>
                 <MultiSelectGroup>
-                  {interestPaymentOptions.map((option) => (
+                  {/* [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold] */}
+                  {/* Commented out: was using static interestPaymentOptions — now using dynamic activeInterestOptions */}
+                  {/* {interestPaymentOptions.map((option) => (
+                    <MultiSelectItem key={option.value} value={option.value}>
+                      {option.title}
+                    </MultiSelectItem>
+                  ))} */}
+                  {(filterOptions?.activeInterestOptions ?? interestPaymentOptions).map((option) => (
                     <MultiSelectItem key={option.value} value={option.value}>
                       {option.title}
                     </MultiSelectItem>
@@ -365,6 +409,7 @@ function ExploreBondsHeader({
               <div
                 className="flex items-center gap-2 bg-red-500 hover:bg-red-600 px-3 py-1 rounded-full text-white text-sm transition-colors cursor-pointer"
                 onClick={() => {
+                  manager.applyFilterMutation.reset();
                   // manager.setSearch("");
                   // manager.setMaturity([]);
                   // manager.setRating([]);

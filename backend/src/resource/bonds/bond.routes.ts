@@ -34,6 +34,11 @@ bondRoute.post("/api/bonds/listed/filter", (req, res) =>
   bondController.filterListedBonds(req, res)
 );
 
+// [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold]
+bondRoute.get("/api/bonds/filter-options", (req, res) =>
+  bondController.getBondFilterOptions(req, res)
+);
+
 bondRoute.get("/api/bonds/:isin/order-pricing", (req, res) =>
   bondController.getBondOrderPricing(req, res),
 );

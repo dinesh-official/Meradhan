@@ -78,12 +78,16 @@ function deriveSecurity(bond: Bond): string {
   return "";
 }
 
-function deriveTaxable(taxStatus: string | null | undefined): string {
+const TAX_STATUS_LABELS: Record<string, string> = {
+  TAXABLE: "Taxable",
+  TAX_FREE: "Tax Free",
+  TAX_SAVING: "Tax Saving",
+  TAX_EXEMPTION: "Tax Exemption",
+};
+
+function formatTaxStatus(taxStatus: string | null | undefined): string {
   if (!taxStatus) return "";
-  const t = taxStatus.toUpperCase();
-  if (t === "TAXABLE") return "Yes";
-  if (t === "TAX_FREE") return "No";
-  return taxStatus;
+  return TAX_STATUS_LABELS[taxStatus] ?? "";
 }
 
 function deriveCategory(bond: Bond): string {
@@ -149,7 +153,7 @@ export default function BondIsinView({
 }) {
   const { put: putText, call: callText } = splitPutCall(bond.putCallOptionDetails);
   const security = deriveSecurity(bond);
-  const taxable = deriveTaxable(bond.taxStatus);
+  const taxStatus = formatTaxStatus(bond.taxStatus);
   const category = deriveCategory(bond);
 
   const hasAnyLongText =
@@ -181,24 +185,7 @@ export default function BondIsinView({
             <InfoCard title="Issue Size" condition={hasValue(bond.totalIssueSize, { hideIfZero: true })}>
               <PiCurrencyInrBold /> {formatNumberTS(bond.totalIssueSize ?? 0)}
             </InfoCard>
-            <InfoCard title="Buy Price" condition={hasValue(bond.buyPrice, { hideIfZero: true })}>
-              <PiCurrencyInrBold /> {formatNumberTS(bond.buyPrice ?? 0)}
-            </InfoCard>
-            <InfoCard title="Sell Price" condition={hasValue(bond.sellPrice, { hideIfZero: true })}>
-              <PiCurrencyInrBold /> {formatNumberTS(bond.sellPrice ?? 0)}
-            </InfoCard>
-            <InfoCard title="Last Traded Price" condition={hasValue(bond.lastTradePrice, { hideIfZero: true })}>
-              <PiCurrencyInrBold /> {formatNumberTS(bond.lastTradePrice as number)}
-            </InfoCard>
-            <InfoCard title="Stamp Duty" condition={hasValue(bond.stampDutyPercentage, { hideIfZero: true })}>
-              {formatPercent(bond.stampDutyPercentage)}
-            </InfoCard>
-            <InfoCard
-              title="CRM Available Quantity"
-              condition={hasValue(bond.crmAvailableQuantity, { hideIfZero: true })}
-            >
-              {formatNumberTS(bond.crmAvailableQuantity ?? 0)}
-            </InfoCard>
+
 
             {/* ── Yields & coupon ────────────────────────────────────── */}
             <InfoCard title="Coupon Rate" condition={hasValue(bond.couponRate, { hideIfZero: true })}>
@@ -207,18 +194,11 @@ export default function BondIsinView({
             <InfoCard title="Yield" condition={hasValue(bond.yield, { hideIfZero: true })}>
               {formatPercent(bond.yield as number)}
             </InfoCard>
-            <InfoCard title="Buy Yield" condition={hasValue(bond.buyYield, { hideIfZero: true })}>
-              {formatPercent(bond.buyYield as number)}
-            </InfoCard>
-            <InfoCard title="Last Traded Yield" condition={hasValue(bond.lastTradeYield, { hideIfZero: true })}>
-              {formatPercent(bond.lastTradeYield as number)}
-            </InfoCard>
+
             <InfoCard title="Coupon Type" condition={hasValue(bond.couponType)}>
               {String(bond.couponType)}
             </InfoCard>
-            <InfoCard title="Interest Payment Mode" condition={hasValue(bond.interestPaymentMode)}>
-              {humanize(bond.interestPaymentMode)}
-            </InfoCard>
+
             <InfoCard
               title="Interest Payment Frequency"
               condition={hasValue(bond.interestPaymentFrequency)}
@@ -236,30 +216,11 @@ export default function BondIsinView({
             <InfoCard title="Maturity Date" condition={hasValue(formatDate(bond.maturityDate))}>
               {formatDate(bond.maturityDate)}
             </InfoCard>
-            <InfoCard title="Redemption Date" condition={hasValue(formatDate(bond.redemptionDate))}>
-              {formatDate(bond.redemptionDate)}
-            </InfoCard>
-            <InfoCard title="Last Coupon Date" condition={hasValue(formatDate(bond.lastCouponDate))}>
-              {formatDate(bond.lastCouponDate)}
-            </InfoCard>
+
             <InfoCard title="Next Interest Payment Date" condition={hasValue(formatDate(bond.nextCouponDate))}>
               {formatDate(bond.nextCouponDate as string)}
             </InfoCard>
-            <InfoCard title="Record Date" condition={hasValue(formatDate(bond.recordDate))}>
-              {formatDate(bond.recordDate)}
-            </InfoCard>
-            <InfoCard title="Record Days" condition={hasValue(bond.recordDays)}>
-              {bond.recordDays}
-            </InfoCard>
-            <InfoCard title="Rating Date" condition={hasValue(formatDate(bond.ratingDate))}>
-              {formatDate(bond.ratingDate)}
-            </InfoCard>
-            <InfoCard title="Start Date" condition={hasValue(formatDate(bond.startDate))}>
-              {formatDate(bond.startDate)}
-            </InfoCard>
-            <InfoCard title="End Date" condition={hasValue(formatDate(bond.endDate))}>
-              {formatDate(bond.endDate)}
-            </InfoCard>
+
 
             {/* ── Classification ─────────────────────────────────────── */}
             <InfoCard title="Bond Category" condition={hasValue(category)}>
@@ -280,14 +241,12 @@ export default function BondIsinView({
             <InfoCard title="Security" condition={hasValue(security)}>
               {security}
             </InfoCard>
-            <InfoCard title="Redemption Type" condition={hasValue(bond.redemptionType)}>
-              {humanize(bond.redemptionType)}
-            </InfoCard>
+
             <InfoCard title="Mode of Issuance" condition={hasValue(bond.modeOfIssuance)}>
               {String(bond.modeOfIssuance)}
             </InfoCard>
-            <InfoCard title="Taxable" condition={hasValue(taxable)}>
-              {taxable}
+            <InfoCard title="Tax Status" condition={hasValue(taxStatus)}>
+              {taxStatus}
             </InfoCard>
             <InfoCard title="Perpetual" condition={typeof bond.isPerpetual === "boolean"}>
               {yesNo(bond.isPerpetual)}
@@ -295,17 +254,11 @@ export default function BondIsinView({
             <InfoCard title="Listed" condition={hasValue(bond.isListed)}>
               {yesNo(bond.isListed)}
             </InfoCard>
-            <InfoCard title="Exchange Listed On" condition={hasValue(bond.exchangeListedOn)}>
-              {bond.exchangeListedOn}
-            </InfoCard>
+
 
             {/* ── Rating ─────────────────────────────────────────────── */}
-            <InfoCard title="Credit Rating" condition={hasValue(bond.creditRating)}>
-              {bond.creditRating}
-            </InfoCard>
-            <InfoCard title="Rating Agency" condition={hasValue(bond.ratingAgencyName)}>
-              {bond.ratingAgencyName}
-            </InfoCard>
+
+
 
             {/* ── Put / Call ─────────────────────────────────────────── */}
             <InfoCard title="Put" condition={hasValue(putText)}>
@@ -341,7 +294,7 @@ export default function BondIsinView({
           </div>
 
           {/* ── Long-text / document details ─────────────────────────── */}
-          {hasAnyLongText && (
+          {/* {hasAnyLongText && (
             <div className="mt-8 border rounded-lg p-5 bg-white">
               <h3 className="text-lg font-semibold mb-2">Additional Details</h3>
               <DetailRow label="Registrar" condition={hasValue(bond.registrarDetails)}>
@@ -400,7 +353,7 @@ export default function BondIsinView({
                 {formatDate(bond.providerInterestDate as string)}
               </DetailRow>
             </div>
-          )}
+          )} */}
 
           {bond && canShowBuyNow(bond) && (
             (() => {
