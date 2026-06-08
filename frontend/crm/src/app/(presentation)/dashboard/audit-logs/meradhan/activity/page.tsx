@@ -1,11 +1,11 @@
-import Workspace from "@/global/elements/nav-sidebar/WorkSpace";
+import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 import MeradhanActivityLogsView from "./MeradhanActivityLogsView";
 
 function Page() {
   return (
-    <Workspace actionKey="audit_logs.web.view">
+    <AllowOnlyView permissions={["view:webauditlogs"]}>
       <MeradhanActivityLogsView />
-    </Workspace>
+    </AllowOnlyView>
   );
 }
 

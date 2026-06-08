@@ -47,7 +47,6 @@ import * as nseIsinSchema from "./lib/crm/req/nse/isin/filterIsin.schema";
 import * as getParticipants from "./lib/crm/req/nse/isin/getParticipants.schema";
 import * as auditlogs from "./lib/crm/auditlogs.schema";
 import * as notificationsSchema from "./lib/crm/notifications.schema";
-import * as rbacSchema from "./lib/crm/rbac.schema";
 
 import * as Enum from "./lib/enums";
 import * as bondsSchema from "./lib/bonds/bonds.schema";
@@ -66,7 +65,6 @@ export const appSchema = {
     orderReports: orderReportsSchema,
     auditlogs,
     notifications: notificationsSchema,
-    rbac: rbacSchema,
     rfq: {
       nse: {
         isin: nseIsinSchema,

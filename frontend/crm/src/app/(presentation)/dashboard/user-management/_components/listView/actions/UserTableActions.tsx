@@ -36,14 +36,14 @@ function UserTableActions({ profile }: { profile: CrmUsersProfile }) {
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
           <DropdownMenuSeparator />
-          <AllowOnlyView actionKey="user_management.edit">
+          <AllowOnlyView permissions={["edit:user"]}>
             <DropdownMenuItem onClick={() => setShowPopup(true)}>
               Edit Profile
             </DropdownMenuItem>
           </AllowOnlyView>
 
           <HideForMe userId={profile.id}>
-            <AllowOnlyView actionKey="user_management.edit">
+            <AllowOnlyView permissions={["edit:user"]}>
               <DropdownMenuItem
                 onClick={async () => {
                   const result = await Swal.fire({
@@ -70,7 +70,7 @@ function UserTableActions({ profile }: { profile: CrmUsersProfile }) {
                 {status}
               </DropdownMenuItem>
             </AllowOnlyView>
-            <AllowOnlyView actionKey="user_management.delete">
+            <AllowOnlyView permissions={["delete:user"]}>
               <DropdownMenuItem
                 className="bg-red-50 text-red-500"
                 onClick={async () => {

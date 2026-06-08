@@ -4,13 +4,12 @@ import CbricsManagerView from "./CbricsManagerView";
 
 export default function CbricsManagerPage() {
   return (
-    <Workspace actionKey="rfqs.manage">
-      
-        <PageInfoBar
-          title="CBRICS manager"
-          description="Inspect and act on NSE CBRICS unregistered participants, bank accounts, and DP accounts. Uses live CBRICS APIs; changes apply on the exchange side."
-        />
-        <CbricsManagerView />
-      </Workspace>
+    <Workspace>
+      <PageInfoBar
+        title="CBRICS manager"
+        description="Inspect and act on NSE CBRICS unregistered participants, bank accounts, and DP accounts. Uses live CBRICS APIs; changes apply on the exchange side."
+      />
+      <CbricsManagerView />
+    </Workspace>
   );
 }

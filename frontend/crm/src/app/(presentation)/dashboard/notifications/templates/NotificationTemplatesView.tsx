@@ -22,7 +22,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
-import { useNotificationAccess } from "@/global/elements/permissions/AllowOnlyView";
+import useAppCookie from "@/hooks/useAppCookie.hook";
+import { canAccessNotifications } from "@/global/utils/role.utils";
 import apiGateway from "@root/apiGateway";
 import { format } from "date-fns";
 import { Copy, FileText, MessageSquare, Pencil, Plus, Trash2 } from "lucide-react";
@@ -112,7 +113,7 @@ function MessagePreview({ message }: { message: string | null }) {
 /* ─── component ─────────────────────────────────────────────── */
 
 export default function NotificationTemplatesView() {
-  const notify = useNotificationAccess();
+  const { cookies } = useAppCookie();
   const [mounted, setMounted] = useState(false);
 
   const [activeMedium, setActiveMedium] = useState<Medium | "ALL">("ALL");
@@ -128,7 +129,7 @@ export default function NotificationTemplatesView() {
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const api = new apiGateway.crm.notifications.CrmNotificationsApi(apiClientCaller);
-  const canManageTemplates = notify.canManageTemplates();
+  const isAdmin = cookies.role === "ADMIN" || cookies.role === "SUPER_ADMIN";
 
   useEffect(() => {
     setMounted(true);
@@ -276,7 +277,7 @@ export default function NotificationTemplatesView() {
   };
 
   if (!mounted) return null;
-  if (!notify.canViewTemplates()) {
+  if (!canAccessNotifications(cookies.role)) {
     return (
       <div className="p-8 text-center text-destructive">
         You do not have access to notifications.
@@ -314,7 +315,7 @@ export default function NotificationTemplatesView() {
         ))}
 
         <div className="ml-auto">
-          {canManageTemplates && (
+          {isAdmin && (
             <Button onClick={openCreate} className="gap-2">
               <Plus className="w-4 h-4" />
               Add template
@@ -333,7 +334,7 @@ export default function NotificationTemplatesView() {
         <div className="border rounded-xl p-16 text-center">
           <FileText className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
           <p className="text-muted-foreground text-sm">
-            {canManageTemplates
+            {isAdmin
               ? 'No templates yet. Click "Add template" to create one.'
               : "No templates have been created by an admin yet."}
           </p>
@@ -380,7 +381,7 @@ export default function NotificationTemplatesView() {
                     </div>
                   </div>
 
-                  {canManageTemplates && (
+                  {isAdmin && (
                     <div className="flex items-center gap-1 shrink-0">
                       <Button
                         variant="ghost"

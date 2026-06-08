@@ -13,9 +13,7 @@
     "lint:fix": "eslint . --fix",
     "check": "npx tsc --noEmit",
     "test": "bun test",
-    "db:generate": "prisma generate --schema=databases/postgres/prisma/schema",
-    "seed:rbac": "bun run src/seeds/rbac.seed.ts",
-    "seed:rbac:generate": "bun run src/seeds/generate-rbac-seed-sql.ts"
+    "db:generate": "prisma generate --schema=databases/postgres/prisma/schema"
   },
   "exports": {
     "./response": "./types/response.types.ts"

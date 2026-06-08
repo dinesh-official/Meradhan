@@ -598,7 +598,7 @@ export default function BondAutoUpdateView() {
             )}
             Load all
           </Button>
-          <AllowOnlyView actionKey="bonds.edit">
+          <AllowOnlyView permissions={["edit:bonds"]}>
             <Button
               type="button"
               variant="secondary"
@@ -1202,7 +1202,7 @@ export default function BondAutoUpdateView() {
                             <X className="size-4" />
                             Reject
                           </Button>
-                          <AllowOnlyView actionKey="bonds.edit">
+                          <AllowOnlyView permissions={["edit:bonds"]}>
                             <Button
                               type="button"
                               className="gap-1"

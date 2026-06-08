@@ -11,15 +11,12 @@ import { appSchema } from "@root/schema";
 import { HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
 import { EmailAuthService } from "./email_auth.service";
-import { ImpersonationService } from "./impersonation.service";
 
 export class AuthController {
   private auditLogsRepo = new AuditLogRepository();
   private emailAuthService: EmailAuthService;
-  private impersonationService: ImpersonationService;
   constructor() {
     this.emailAuthService = new EmailAuthService();
-    this.impersonationService = new ImpersonationService();
   }
 
   async loginWithOtp(req: Request, res: Response): Promise<void> {
@@ -81,10 +78,7 @@ export class AuthController {
 
   async session(req: Request, res: Response): Promise<void> {
     const id = req.session!.id;
-    const session = await this.emailAuthService.getSession(
-      Number(id),
-      req.session?.impersonatedBy,
-    );
+    const session = await this.emailAuthService.getSession(Number(id));
     res.sendResponse({
       statusCode: HttpStatus.OK,
       message: "session",
@@ -92,44 +86,10 @@ export class AuthController {
     });
   }
 
-  async impersonate(req: Request, res: Response): Promise<void> {
-    const data = appSchema.auth.impersonateUserSchema.parse(req.body);
-
-    if (req.cookies?.impersonatorToken) {
-      return res.sendResponse({
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: "Exit the current impersonation session before switching again.",
-      }) as unknown as void;
-    }
-
-    const payload = await this.impersonationService.impersonate(
-      Number(req.session!.id),
-      data.targetUserId,
-      req,
-    );
-
-    res.sendResponse({
-      statusCode: HttpStatus.OK,
-      message: "Impersonation started",
-      responseData: payload,
-    });
-  }
-
-  async exitImpersonation(req: Request, res: Response): Promise<void> {
-    const payload = await this.impersonationService.exitImpersonation(req);
-
-    res.sendResponse({
-      statusCode: HttpStatus.OK,
-      message: "Impersonation ended",
-      responseData: payload,
-    });
-  }
-
   async logout(req: Request, res: Response): Promise<void> {
     // Clear all cookies
     res.clearCookie("userId");
     res.clearCookie("token");
-    res.clearCookie("impersonatorToken");
 
     await addCrmLoginBasedAuditLog(req, {
       sessionType: "logout",

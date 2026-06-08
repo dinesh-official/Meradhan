@@ -14,7 +14,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
-import { useNotificationAccess } from "@/global/elements/permissions/AllowOnlyView";
+import useAppCookie from "@/hooks/useAppCookie.hook";
+import { canAccessNotifications } from "@/global/utils/role.utils";
 import apiGateway from "@root/apiGateway";
 import { Eye, ExternalLink } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
@@ -101,7 +102,7 @@ function MessagePreview({ message }: { message: string | null }) {
 /* ─── main view ──────────────────────────────────────────────── */
 
 export default function SendNotificationView() {
-  const notify = useNotificationAccess();
+  const { cookies } = useAppCookie();
   const [mounted, setMounted] = useState(false);
 
   const [lists, setLists] = useState<SavedList[]>([]);
@@ -164,7 +165,7 @@ export default function SendNotificationView() {
   const dltTemplates = allTemplates.filter((t) => t.medium === medium);
 
   if (!mounted) return null;
-  if (!notify.canSend()) {
+  if (!canAccessNotifications(cookies.role)) {
     return (
       <p className="p-2 text-muted-foreground">
         You do not have access to notifications.

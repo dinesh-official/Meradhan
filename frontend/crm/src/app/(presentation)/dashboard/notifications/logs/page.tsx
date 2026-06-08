@@ -5,9 +5,8 @@ export const metadata = { title: "Notification Logs" };
 
 export default function NotificationLogsPage() {
   return (
-    <Workspace actionKey="notifications.logs.view">
-      
-        <NotificationLogsView />
-      </Workspace>
+    <Workspace>
+      <NotificationLogsView />
+    </Workspace>
   );
 }
