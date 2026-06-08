@@ -5,11 +5,10 @@ import SettleOrdersView from "./SettleOrdersView";
 
 function page() {
   return (
-    <Workspace actionKey="rfqs.settle_orders.view">
-      
-        <PageInfoBar title="Settle Orders" />
-        <SettleOrdersView />
-      </Workspace>
+    <Workspace>
+      <PageInfoBar title="Settle Orders" />
+      <SettleOrdersView />
+    </Workspace>
   );
 }
 

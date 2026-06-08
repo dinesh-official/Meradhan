@@ -4,10 +4,9 @@ import CustomerListNotificationsView from "./CustomerListNotificationsView";
 
 function Page() {
   return (
-    <Workspace actionKey="notifications.customer_list.view">
-      
-        <CustomerListNotificationsView />
-      </Workspace>
+    <Workspace>
+      <CustomerListNotificationsView />
+    </Workspace>
   );
 }
 

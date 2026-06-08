@@ -1,12 +1,13 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Workspace from "@/global/elements/nav-sidebar/WorkSpace";
+import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 import MeradhanActivityLogsView from "./activity/MeradhanActivityLogsView";
 import MeradhanAuthenticationLogsView from "./authentication/MeradhanAuthenticationLogsView";
 
 function page() {
   return (
-    <Workspace actionKey="audit_logs.web.view">
-    
+    <AllowOnlyView permissions={["view:webauditlogs"]}>
+    <Workspace>
       <Tabs defaultValue="activity">
         <TabsList>
           <TabsTrigger value="activity">Activity History</TabsTrigger>
@@ -20,6 +21,7 @@ function page() {
         </TabsContent>
       </Tabs>
     </Workspace>
+    </AllowOnlyView>
   );
 }
 

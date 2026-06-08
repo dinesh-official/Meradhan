@@ -4,7 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
-import usePermissions from "@/hooks/usePermissions.hook";
+import { hasOneOfPermission } from "@/global/utils/role.utils";
+import useAppCookie from "@/hooks/useAppCookie.hook";
 import apiGateway from "@root/apiGateway";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -14,8 +15,8 @@ import { getErrorMessage } from "@/core/utils/getErrorMessage";
 
 export default function PgManagementView() {
   const queryClient = useQueryClient();
-  const { can } = usePermissions();
-  const canEdit = can("orders.edit");
+  const { cookies } = useAppCookie();
+  const canEdit = hasOneOfPermission(cookies.role, ["edit:orders"]);
   const orderApi = new apiGateway.crm.crmOrdersApi(apiClientCaller);
 
   const settingsQuery = useQuery({

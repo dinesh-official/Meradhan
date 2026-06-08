@@ -25,7 +25,6 @@ import { CrmRazorpayRoutesApi } from "./src/core/api/crm/razorpayRoutes.api";
 import { CrmRazorpayStakeholdersApi } from "./src/core/api/crm/razorpayStakeholders.api";
 import { CrmDashboardApi } from "./src/core/api/crm/dashboard.api";
 import { CrmNotificationsApi } from "./src/core/api/crm/notifications.api";
-import { CrmRbacApi } from "./src/core/api/crm/rbac.api";
 export * from "./src/core/api/crm/crmLeads.api";
 export * from "./src/core/api/crm/crmPartnership.api";
 export * from "./src/core/api/crm/dashboard.api";
@@ -84,9 +83,6 @@ export default {
     },
     notifications: {
       CrmNotificationsApi,
-    },
-    rbac: {
-      CrmRbacApi,
     },
     auditlogs,
     rfq: {

@@ -5,7 +5,7 @@ import {
   SelectField,
   SelectOption,
 } from "@/global/elements/inputs/SelectField";
-import usePermissions from "@/hooks/usePermissions.hook";
+import useAppCookie from "@/hooks/useAppCookie.hook";
 import { IUserDataFormHook, UserFormData } from "./hooks/userForm";
 
 const baseRoleOptions = [
@@ -17,8 +17,8 @@ const baseRoleOptions = [
 ];
 
 const UserManageForm = ({ manager }: { manager: IUserDataFormHook }) => {
-  const { role } = usePermissions();
-  const isSuperAdmin = role === "SUPER_ADMIN";
+  const { cookies } = useAppCookie();
+  const isSuperAdmin = cookies.role === "SUPER_ADMIN";
   const roleOptions: (SelectOption & { value: Role })[] = [
     ...baseRoleOptions,
     ...(isSuperAdmin ? [{ label: "Super Admin", value: "SUPER_ADMIN" as Role }] : []),

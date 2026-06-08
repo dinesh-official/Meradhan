@@ -6,7 +6,6 @@ import {
 import { AppError } from "@utils/error/AppError";
 import { tokenUtils } from "@utils/token/JwtToken_utils";
 import { AuthRepo } from "./auth.repo";
-import { rbacService } from "@resource/crm/rbac/rbac.service";
 
 export class EmailAuthService {
   // OTP verification service
@@ -74,21 +73,8 @@ export class EmailAuthService {
     }
   }
 
-  async getSession(id: number, impersonatedById?: number) {
+  async getSession(id: number) {
     const user = await this.authRepo.getAuthSession(id);
-    const permissions = await rbacService.getPermissionsForRole(String(user.role));
-
-    let impersonatedBy: { id: number; name: string; email: string } | null =
-      null;
-    if (impersonatedById) {
-      const admin = await this.authRepo.getAuthSession(impersonatedById);
-      impersonatedBy = {
-        id: admin.id,
-        name: admin.name,
-        email: admin.email,
-      };
-    }
-
     return {
       id: user.id,
       role: user.role,
@@ -96,8 +82,6 @@ export class EmailAuthService {
       name: user.name,
       email: user.email,
       phoneNo: user.phoneNo,
-      permissions,
-      impersonatedBy,
     };
   }
 }

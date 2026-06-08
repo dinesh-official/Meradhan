@@ -1,11 +1,12 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Workspace from "@/global/elements/nav-sidebar/WorkSpace";
+import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 import CrmActivityLogsVIew from "./_activity_history/CrmActivityLogsVIew";
 import { LoginLogsHistory } from "./_login_logs/LoginLogsHistory";
 function page() {
   return (
-    <Workspace actionKey="audit_logs.crm.view">
-    
+    <AllowOnlyView permissions={["view:crmauditlogs"]}>
+    <Workspace>
       <Tabs defaultValue="activity">
         <TabsList>
           <TabsTrigger value="activity">Activity History</TabsTrigger>
@@ -19,6 +20,7 @@ function page() {
         </TabsContent>
       </Tabs>
     </Workspace>
+    </AllowOnlyView>
   );
 }
 

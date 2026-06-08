@@ -237,7 +237,7 @@ function BondsTable({ data, pageSize = 100, isLoading }: BondsTableProps) {
           stickyRight: true,
           sortable: false,
           cell: (row) => (
-            <AllowOnlyView actionKey="bonds.edit">
+            <AllowOnlyView permissions={["edit:bonds"]}>
               <Link href={`/dashboard/bonds/update/${row.isin}`}>
                 <Button variant="outline" size="sm" className="gap-2">
                   <Edit size={14} />
