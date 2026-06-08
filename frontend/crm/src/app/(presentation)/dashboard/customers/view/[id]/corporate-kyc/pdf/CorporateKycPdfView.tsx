@@ -106,7 +106,7 @@ export default function CorporateKycPdfView({
   const api = new apiGateway.crm.customer.CrmCustomerApi(apiClientCaller);
   const encodedId = encodeId(profileId);
 
-  const [customerQuery, corporateKycQuery] = useQueries({
+  const [customerQuery, corporateKycQuery, attachmentsQuery] = useQueries({
     queries: [
       {
         queryKey: ["fetchCustomer", profileId],
@@ -124,11 +124,20 @@ export default function CorporateKycPdfView({
         },
         refetchOnWindowFocus: false,
       },
+      {
+        queryKey: ["CorporateKycAttachments", profileId],
+        queryFn: async () => {
+          const res = await api.listCorporateKycAttachments(profileId);
+          return res.data.responseData ?? [];
+        },
+        refetchOnWindowFocus: false,
+      },
     ],
   });
 
   const customer = customerQuery.data;
   const corporateKyc = corporateKycQuery.data;
+  const attachments = useMemo(() => attachmentsQuery.data ?? [], [attachmentsQuery.data]);
   const isLoading = customerQuery.isLoading || corporateKycQuery.isLoading;
   const isCorporate = customer?.userType === "CORPORATE";
 
@@ -462,7 +471,12 @@ export default function CorporateKycPdfView({
               <NclTab value={payload} onChange={updatePayload} disabled={generating} />
             </TabsContent>
             <TabsContent value="docs" className="mt-3">
-              <DocumentsTab value={payload} onChange={updatePayload} disabled={generating} />
+              <DocumentsTab
+                value={payload}
+                onChange={updatePayload}
+                disabled={generating}
+                attachments={attachments}
+              />
             </TabsContent>
           </>
         ) : null}

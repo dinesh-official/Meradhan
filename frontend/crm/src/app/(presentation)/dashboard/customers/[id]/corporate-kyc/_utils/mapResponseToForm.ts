@@ -88,6 +88,11 @@ export function mapCorporateKycResponseToForm(
     directorsListCopyUrl: data.directorsListCopyUrl ?? "",
     powerOfAttorneyCopyUrl: data.powerOfAttorneyCopyUrl ?? "",
     documentsType: data.documentsType ?? "",
+    existingKycFileUrl:
+      (data as unknown as { existingKycFileUrl?: string | null }).existingKycFileUrl ?? "",
+    useExistingKycDeclarationUrl:
+      (data as unknown as { useExistingKycDeclarationUrl?: string | null })
+        .useExistingKycDeclarationUrl ?? "",
     termsAndConditionsUrl:
       (data as unknown as { termsAndConditionsUrl?: string | null }).termsAndConditionsUrl ?? "",
     fatcaApplicable: data.fatcaApplicable,

@@ -20,6 +20,9 @@ export {
   updateCorporateKycSchema,
   triggerCorporateKraSchema,
   autofillCorporateKraSchema,
+  createCorporateESignRequestSchema,
+  updateCorporateESignRequestSchema,
+  ESignRequestStatusEnum,
   CorporateKraPastExecutionEnum,
   type CreateCorporateKycPayload,
   type UpdateCorporateKycPayload,
@@ -31,6 +34,9 @@ export {
   type CorporateKraPastExecution,
   type TriggerCorporateKraPayload,
   type AutofillCorporateKraPayload,
+  type CreateCorporateESignRequestPayload,
+  type UpdateCorporateESignRequestPayload,
+  type ESignRequestStatusValue,
 } from "./lib/customers/corporateKyc.schema";
 
 export {

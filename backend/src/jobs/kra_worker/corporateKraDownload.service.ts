@@ -156,13 +156,16 @@ export function summariseCorporateKraDownload(
 /**
  * Reverse-lookup an NDML state code (zero-padded or unpadded) to the
  * canonical state name the CRM frontend stores. Returns "" when unknown.
+ *
+ * NOTE on Telangana — NDML's master list (and live KRA download responses)
+ * uses code `37` for Telangana since the state was created post-split in
+ * 2014. The repo's `kraState` master in `constent.ts` historically keeps
+ * Telangana at code `36`, so we accept *both* codes here to stay robust.
  */
 function stateCodeToName(code: string | null | undefined): string {
   if (!code) return "";
   const n = Number(String(code).trim());
   if (!Number.isFinite(n)) return "";
-  // Local subset of the NDML state master, mirroring the source of truth in
-  // `kra_worker/constent.ts` but keyed by code → preferred display name.
   const table: Record<number, string> = {
     1: "Andaman & Nicobar Islands",
     2: "Andhra Pradesh",
@@ -200,6 +203,7 @@ function stateCodeToName(code: string | null | undefined): string {
     34: "Uttarakhand",
     35: "Jharkhand",
     36: "Telangana",
+    37: "Telangana",
   };
   return table[n] ?? "";
 }
@@ -339,19 +343,77 @@ export function downloadToCorporateKycFormPatch(
   const stateName = stateCodeToName(inq.APP_COR_STATE);
   const perStateName = stateCodeToName(inq.APP_PER_STATE);
   const countryName = countryCodeToName(inq.APP_COR_CTRY);
+  const perCountryName = countryCodeToName(
+    (inq as { APP_PER_CTRY?: string }).APP_PER_CTRY,
+  );
 
-  // APP_ADDL_DATA: NDML doesn't tag each row with a clear "director vs
-  // signatory" marker — `APP_ADDLDATA_RELATIONSHIP` has 02 = Whole Time
-  // Director, 05 = Authorised Signatory, 01 = Promoter. Map accordingly.
-  const addl = Array.isArray(inq.APP_ADDL_DATA) ? inq.APP_ADDL_DATA : [];
-  const toPerson = (row: NonNullable<typeof addl>[number]) => ({
-    fullName: txt(row.APP_ADDLDATA_NAME) ?? "",
-    pan: txt(row.APP_ADDLDATA_PAN) ?? "",
-    din: txt(row.APP_ADDLDATA_DIN_UID ?? row.APP_ADDLDATA_DIN) ?? "",
-    designation: "",
-  });
+  // Date of Incorporation is the worst-populated NDML field — CAMSKRA in
+  // particular often returns it blank and stuffs the same date into
+  // `APP_DOB_DT` (entity DOB) and `APP_COMMENCE_DT` instead. Fall back so
+  // the form still gets a value.
+  const incorporationDate =
+    date(inq.APP_DOI_DT) ?? date(inq.APP_COMMENCE_DT) ?? date(inq.APP_DOB_DT);
+
+  // APP_ADDL_DATA is documented as an array but NDML often emits a single
+  // object when only one related person exists. Normalise to an array.
+  type AddlRow = NonNullable<NonNullable<typeof inq.APP_ADDL_DATA>[number]>;
+  const rawAddl = inq.APP_ADDL_DATA as AddlRow | AddlRow[] | undefined;
+  const addl: AddlRow[] = Array.isArray(rawAddl)
+    ? rawAddl
+    : rawAddl && typeof rawAddl === "object"
+      ? [rawAddl]
+      : [];
+
+  // FATCA_ADDL_DTLS carries the per-director FATCA tax records (entity PAN,
+  // country of residency, TIN, etc). NDML's response always emits 4
+  // placeholder rows in this array irrespective of the real record count —
+  // so we **must** use `APP_SUMM_REC.NO_OF_FATCA_ADDL_DTLS_RECORDS` as the
+  // gate. When that count is 0, the section is ignored entirely; otherwise
+  // we keep only rows with a real PAN populated.
+  const summRec = (download?.APP_RES_ROOT?.APP_SUMM_REC ?? {}) as {
+    NO_OF_FATCA_ADDL_DTLS_RECORDS?: string | number;
+  };
+  const fatcaRecordsCount = Number(summRec.NO_OF_FATCA_ADDL_DTLS_RECORDS ?? 0) || 0;
+  const fatcaRowsRaw = Array.isArray(download?.APP_RES_ROOT?.FATCA_ADDL_DTLS)
+    ? download.APP_RES_ROOT.FATCA_ADDL_DTLS
+    : [];
+  const fatcaRows =
+    fatcaRecordsCount > 0
+      ? fatcaRowsRaw.filter((r) =>
+          Boolean(String(r?.APP_FATCA_ENTITY_PAN ?? "").trim()),
+        )
+      : [];
+
+  /**
+   * Convert one APP_ADDL_DATA row into the form's person shape. When
+   * `fatcaRows` has a matching PAN, splice in the FATCA tax info (so far
+   * just `taxResidencyOfEntity` if we later add per-director FATCA fields
+   * to the form — the field is plumbed but unused today).
+   */
+  const toPerson = (row: AddlRow) => {
+    const pan = (txt(row.APP_ADDLDATA_PAN) ?? "").toUpperCase();
+    const fatca = pan
+      ? fatcaRows.find(
+          (r) => String(r?.APP_FATCA_ENTITY_PAN ?? "").trim().toUpperCase() === pan,
+        )
+      : undefined;
+    void fatca; // reserved for future per-director FATCA fields.
+    return {
+      fullName: txt(row.APP_ADDLDATA_NAME) ?? "",
+      pan,
+      din: txt(row.APP_ADDLDATA_DIN_UID ?? row.APP_ADDLDATA_DIN) ?? "",
+      designation: "",
+    };
+  };
+
+  // NDML relationship codes:
+  //   01 = Promoter, 02 = Whole-time Director, 03 = Karta (HUF),
+  //   04 = Trustee, 05 = Authorised Signatory, 06 = Partner (LLP / firm)
+  // Authorised signatories are their own bucket; everything else maps to
+  // the form's "directors" array (the closest governance equivalent for
+  // partners, promoters, trustees, kartas, etc).
   const directors = addl
-    .filter((r) => String(r.APP_ADDLDATA_RELATIONSHIP ?? "").trim() === "02")
+    .filter((r) => String(r.APP_ADDLDATA_RELATIONSHIP ?? "").trim() !== "05")
     .map(toPerson)
     .filter((p) => p.fullName || p.pan);
   const authorisedSignatories = addl
@@ -363,10 +425,10 @@ export function downloadToCorporateKycFormPatch(
     entityName: txt(inq.APP_NAME),
     panNumber: txt(inq.APP_PAN_NO),
     cinOrRegistrationNumber: txt(inq.APP_REGNO),
-    dateOfIncorporation: date(inq.APP_DOI_DT),
+    dateOfIncorporation: incorporationDate,
     dateOfCommencementOfBusiness: date(inq.APP_COMMENCE_DT),
     placeOfIncorporation: txt(inq.APP_INCORP_PLC),
-    countryOfIncorporation: countryName || undefined,
+    countryOfIncorporation: countryName || perCountryName || undefined,
     entityConstitutionType: compStatusCodeToEnum(inq.APP_COMP_STATUS),
     annualIncome: txt(inq.APP_INCOME),
 

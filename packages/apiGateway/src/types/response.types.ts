@@ -465,6 +465,10 @@ export type CorporateKycResponse = {
   directorsListCopyUrl?: string;
   powerOfAttorneyCopyUrl?: string;
   documentsType?: string;
+  /** Customer's existing KYC document held by another KRA. */
+  existingKycFileUrl?: string;
+  /** Signed declaration authorising the reuse of the existing KYC. */
+  useExistingKycDeclarationUrl?: string;
   fatcaApplicable: boolean;
   fatcaEntityName?: string;
   fatcaCountryOfIncorporation?: string;

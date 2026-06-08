@@ -62,6 +62,11 @@ function mapPayloadToPrismaCreate(customerId: number, payload: CreateCorporateKy
     directorsListCopyUrl: payload.directorsListCopyUrl ?? undefined,
     powerOfAttorneyCopyUrl: payload.powerOfAttorneyCopyUrl ?? undefined,
     documentsType: payload.documentsType ?? undefined,
+    existingKycFileUrl:
+      (payload as unknown as { existingKycFileUrl?: string }).existingKycFileUrl ?? undefined,
+    useExistingKycDeclarationUrl:
+      (payload as unknown as { useExistingKycDeclarationUrl?: string })
+        .useExistingKycDeclarationUrl ?? undefined,
     termsAndConditionsUrl: payload.termsAndConditionsUrl ?? undefined,
     fatcaApplicable: payload.fatcaApplicable ?? false,
     fatcaEntityName: payload.fatcaEntityName ?? undefined,
@@ -221,6 +226,12 @@ export class CorporateKycService {
         directorsListCopyUrl: payload.directorsListCopyUrl ?? undefined,
         powerOfAttorneyCopyUrl: payload.powerOfAttorneyCopyUrl ?? undefined,
         documentsType: payload.documentsType ?? undefined,
+        existingKycFileUrl:
+          (payload as unknown as { existingKycFileUrl?: string })
+            .existingKycFileUrl ?? undefined,
+        useExistingKycDeclarationUrl:
+          (payload as unknown as { useExistingKycDeclarationUrl?: string })
+            .useExistingKycDeclarationUrl ?? undefined,
         termsAndConditionsUrl: payload.termsAndConditionsUrl ?? undefined,
         fatcaApplicable: payload.fatcaApplicable ?? false,
         fatcaEntityName: payload.fatcaEntityName ?? undefined,
@@ -391,6 +402,8 @@ export class CorporateKycService {
       directorsListCopyUrl: row.directorsListCopyUrl ?? undefined,
       powerOfAttorneyCopyUrl: row.powerOfAttorneyCopyUrl ?? undefined,
       documentsType: row.documentsType ?? undefined,
+      existingKycFileUrl: row.existingKycFileUrl ?? undefined,
+      useExistingKycDeclarationUrl: row.useExistingKycDeclarationUrl ?? undefined,
       termsAndConditionsUrl: row.termsAndConditionsUrl ?? undefined,
       fatcaApplicable: row.fatcaApplicable,
       fatcaEntityName: row.fatcaEntityName ?? undefined,

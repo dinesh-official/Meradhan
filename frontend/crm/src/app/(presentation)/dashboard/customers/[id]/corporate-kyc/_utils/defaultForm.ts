@@ -46,6 +46,8 @@ export const defaultCorporateKycForm: CreateCorporateKycPayload = {
   directorsListCopyUrl: "",
   powerOfAttorneyCopyUrl: "",
   documentsType: "",
+  existingKycFileUrl: "",
+  useExistingKycDeclarationUrl: "",
   termsAndConditionsUrl: "",
   fatcaApplicable: false,
   fatcaEntityName: "",
