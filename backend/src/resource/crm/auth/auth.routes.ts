@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { AuthController } from "./auth.controller";
 import { allowAccessMiddleware } from "@middlewares/auth_middleware";
+import { requirePermission } from "@middlewares/require_permission_middleware";
 import { OtpVerifyLimiter, loginWithOtpLimiter } from "./auth.ratelimit";
 const crmAuthRoutes = Router();
 const controller = new AuthController();
@@ -12,6 +13,17 @@ crmAuthRoutes.post(
 );
 crmAuthRoutes.post("/api/auth/verify-otp", OtpVerifyLimiter, (req, res) =>
   controller.verifyLoginOtp(req, res)
+);
+crmAuthRoutes.post(
+  "/api/auth/impersonate",
+  allowAccessMiddleware("CRM"),
+  requirePermission("system.impersonate"),
+  (req, res) => controller.impersonate(req, res)
+);
+crmAuthRoutes.post(
+  "/api/auth/impersonate/exit",
+  allowAccessMiddleware("CRM"),
+  (req, res) => controller.exitImpersonation(req, res)
 );
 crmAuthRoutes.all("/api/auth/logout", (req, res) =>
   controller.logout(req, res)

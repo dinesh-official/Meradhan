@@ -24,8 +24,8 @@ import {
 
 // ─── NDML lookup helpers ────────────────────────────────────────────────────
 
-/** NDML address-proof code used when CRM has nothing set ("Other"). */
-const DEFAULT_ADD_PROOF = "20";
+/** NDML address-proof code used when CRM has nothing set ("Others"). */
+const DEFAULT_ADD_PROOF = "99";
 
 /**
  * Returns the official NDML 2-digit company-status code for a CRM constitution
@@ -322,7 +322,7 @@ export function validateCorporateKycForKra(
       push(
         "registeredAddressProofType",
         `Address proof "${proofRaw}" did not match any NDML code — risks ERR-90029/ERR-90038. ` +
-          `Use one of: ${[...new Set(["Passport","Voter ID","Driving License","Bank Statement","Gas Bill","Other"])].join(", ")}.`,
+        `Use one of: ${[...new Set(["Passport", "Voter ID", "Driving License", "Bank Statement", "Gas Bill", "Other"])].join(", ")}.`,
         "WARN",
         "APP_COR_ADD_PROOF",
       );
@@ -346,7 +346,7 @@ export function validateCorporateKycForKra(
       push(
         "annualIncome",
         `Annual income "${kyc.annualIncome}" did not match any NDML range — risks ERR-90041. ` +
-          `Use one of: ${NDML_COMP_STATUS.length > 0 ? "Below 1 Lac / 1-5L / 5-10L / 10-25L / 25L-1Cr / >1Cr" : ""}.`,
+        `Use one of: ${NDML_COMP_STATUS.length > 0 ? "Below 1 Lac / 1-5L / 5-10L / 10-25L / 25L-1Cr / >1Cr" : ""}.`,
         "WARN",
         "APP_INCOME",
       );
@@ -482,8 +482,23 @@ export function buildCorporateKraPayload(
     mapAddressProofToNdml(kyc.registeredAddressProofType ?? kyc.correspondenceAddressProofType)?.code ??
     DEFAULT_ADD_PROOF;
 
+  // ── Date pre-computations ────────────────────────────────────────────────
+  // NDML's actual stored records (and the official register-XML sample) use
+  // date-only `DD-MM-YYYY` for incorporation / IPV / address / FATCA / networth
+  // dates. Only `APP_DATE` is sent as date+time. See:
+  //   packages/kyc-providers/src/kra/_docs/api/Sample Request and Response/
+  //     register-update/Registration API Request with Fatca No.xml
+  const doiDate = asDate(kyc.dateOfIncorporation);
+  const commenceDate = asDate(kyc.dateOfCommencementOfBusiness);
+  const doiStr = doiDate ? formatKraDdMmYyyy(doiDate) : "";
+  const commenceStr = commenceDate ? formatKraDdMmYyyy(commenceDate) : "";
+  const todayStr = formatKraDdMmYyyy(now);
+  // NDML uses `01-01-1900` as the conventional empty/sentinel networth date
+  // when no networth is captured. Mirrors what the live KRA record shows.
+  const NETWORTH_DEFAULT_DT = "01-01-1900";
+
   const panInq: KraNonIndAppReqRoot["APP_PAN_INQ"] = {
-    APP_INT_CODE: env.KRA_OKRA_CD_MI_ID,
+    APP_INT_CODE: "",
     APP_POS_CODE: env.KRA_OKRA_CD_MI_ID,
     APP_TYPE: "N",
     APP_NO: "",
@@ -493,33 +508,30 @@ export function buildCorporateKraPayload(
     APP_EXMT_CAT: "",
     APP_EXMT_ID_PROOF: "01",
     APP_IPV_FLAG: "Y",
-    APP_IPV_DATE: formatKraDdMmYyyyHHmmss(now),
+    APP_IPV_DATE: todayStr,
 
     APP_GEN: "",
     APP_NAME: upper(kyc.entityName),
     APP_F_NAME: "",
-    APP_DOB_DT: "",
-    APP_DOI_DT: (() => {
-      const d = asDate(kyc.dateOfIncorporation);
-      return d ? formatKraDdMmYyyyHHmmss(d) : "";
-    })(),
+    // For non-individuals NDML stores the incorporation date in APP_DOB_DT
+    // (date-of-birth-equivalent for an entity) as well as APP_DOI_DT.
+    APP_DOB_DT: doiStr,
+    APP_DOI_DT: "",
     APP_REGNO: nz(kyc.cinOrRegistrationNumber),
-    APP_COMMENCE_DT: (() => {
-      const d = asDate(kyc.dateOfCommencementOfBusiness);
-      return d ? formatKraDdMmYyyyHHmmss(d) : "";
-    })(),
-
+    APP_COMMENCE_DT: commenceStr,
     APP_NATIONALITY: "",
     APP_OTH_NATIONALITY: "",
     APP_COMP_STATUS: compStatus,
     APP_OTH_COMP_STATUS: compStatus === "99" ? nz(kyc.entityConstitutionType) : "",
     APP_RES_STATUS: "",
-    APP_RES_STATUS_PROOF: "01",
+    // Non-individuals don't carry a residential-status proof; leave blank.
+    APP_RES_STATUS_PROOF: "",
 
     APP_PAN_NO: pan,
     APP_PANEX_NO: "",
     APP_PAN_COPY: "Y",
-    APP_UID_NO: "",
+    // Entities don't have Aadhaar; NDML stores "N" here.
+    APP_UID_NO: "N",
 
     APP_COR_ADD1: corLine1,
     APP_COR_ADD2: corLine2,
@@ -535,7 +547,7 @@ export function buildCorporateKraPayload(
     APP_EMAIL: upper(signatory?.email),
     APP_COR_ADD_PROOF: corProofCode,
     APP_COR_ADD_REF: "",
-    APP_COR_ADD_DT: formatKraDdMmYyyyHHmmss(now),
+    APP_COR_ADD_DT: todayStr,
 
     APP_PER_ADD1: perLine1,
     APP_PER_ADD2: perLine2,
@@ -546,18 +558,21 @@ export function buildCorporateKraPayload(
     APP_PER_CTRY: ctry,
     APP_PER_ADD_PROOF: perProofCode,
     APP_PER_ADD_REF: "",
-    APP_PER_ADD_DT: formatKraDdMmYyyyHHmmss(now),
+    APP_PER_ADD_DT: todayStr,
 
     APP_INCOME: incomeCode || nz(kyc.annualIncome),
     APP_OCC: "",
     APP_OTH_OCC: "",
     APP_POL_CONN: "",
     APP_DOC_PROOF: "S",
-    APP_INTERNAL_REF: "CORPORATE_KYC",
-    APP_BRANCH_CODE: "",
+    // NDML records originating from web-based KYC capture carry
+    // APP_INTERNAL_REF = "WEBSOLICIT" — keep parity so re-uploads merge cleanly.
+    APP_INTERNAL_REF: "WEBSOLICIT",
+    // NDML stores "HEADOFFICE" when the record isn't tied to a branch.
+    APP_BRANCH_CODE: "HEADOFFICE",
     APP_MAR_STATUS: "",
     APP_NETWRTH: "",
-    APP_NETWORTH_DT: "",
+    APP_NETWORTH_DT: NETWORTH_DEFAULT_DT,
     APP_INCORP_PLC: upper(kyc.placeOfIncorporation),
     APP_OTHERINFO: "",
 
@@ -570,30 +585,44 @@ export function buildCorporateKraPayload(
     APP_STATUS: "",
     APP_STATUSDT: "",
     APP_ERROR_DESC: "",
-    APP_DUMP_TYPE: "",
+    // "S" = self/short dump. NDML's stored records carry "S" here.
+    APP_DUMP_TYPE: "S",
     APP_DNLDDT: "",
-    /** "IS" = Insert/Submit (non-individual). Both register and modify use the
-     * same Non-Individual SOAP method; the wire SOAP action distinguishes them. */
-    APP_IOP_FLG: isModify ? "IS" : "IS",
-    APP_KRA_INFO: "CORPORATE",
+    /**
+     * NDML strictly validates APP_IOP_FLG against the operation type:
+     *   - "IE" = Intermediary Entry (Register / New record). Matches
+     *     `_docs/api/Sample Request and Response/register-update/Registration API Request*.xml`.
+     *   - "II" = Intermediary Modification. Matches
+     *     `_docs/api/Sample Request and Response/modify/KYC Modification Request*.xml`.
+     *   - "IS" is what NDML *returns* on a download/fetch — never something
+     *     we send on register or modify. Sending "IS" on a modify request
+     *     triggers: "Requested XML input doesn't seem to be valid PAN
+     *     MODIFICATION content!".
+     */
+    APP_IOP_FLG: isModify ? "II" : "IE",
+    // KRA source identifier; NDML records carry "CVLKRA" for entities sourced
+    // through the CVL KRA pipeline (which is our path).
+    APP_KRA_INFO: "",
     APP_SIGNATURE: "",
-    APP_KYC_MODE: "",
+    // "0" = standard KYC mode (no OVD/biometric). Mirrors what NDML stores.
+    APP_KYC_MODE: "0",
 
     APP_FATCA_APPLICABLE_FLAG: kyc.fatcaApplicable ? "Y" : "N",
     APP_FATCA_OTHER_SERVICES: "",
     APP_FATCA_BIRTH_PLACE: "",
     APP_FATCA_BIRTH_COUNTRY: "",
     APP_FATCA_COUNTRY_RES: "",
-    APP_FATCA_DATE_DECLARATION: kyc.fatcaApplicable ? formatKraDdMmYyyyHHmmss(now) : "",
+    APP_FATCA_DATE_DECLARATION: kyc.fatcaApplicable ? todayStr : "",
   };
 
   /**
-   * APP_ADDL_DATA — one block per related person, using the NDML relationship
-   * codes from the "Relationship with Applicant" master:
+   * APP_ADDL_DATA — one block per related person.
    *
-   *   01 = Promoter
-   *   02 = Whole Time Director
-   *   05 = Authorised Signatory
+   * NDML's "Relationship with Applicant" master allows multiple codes
+   * (01 = Promoter, 02 = Whole Time Director, 05 = Authorised Signatory,
+   * etc.), but we only emit Directors here. Authorised-signatory contact
+   * details are still surfaced upstream via APP_EMAIL / APP_MOB_NO at the
+   * envelope level; promoter rows are omitted on purpose.
    *
    * Source: Static Codes sheet, rows "Relationship with Applicant".
    */
@@ -604,12 +633,16 @@ export function buildCorporateKraPayload(
     relationship: string,
   ) => {
     addl.push({
-      APP_ADDLDATA_UPDTFLG: "01",
+      // "01" only on modify (NDML "update related person" flag). For a fresh
+      // register record NDML stores this empty — mirror that.
+      APP_ADDLDATA_UPDTFLG: isModify ? "01" : "",
       APP_ENTITY_PAN: pan,
       APP_ADDLDATA_PAN: upper(person.pan),
       APP_ADDLDATA_NAME: upper(person.fullName),
+      // NDML stores the DIN value in APP_ADDLDATA_DIN_UID, not APP_ADDLDATA_DIN.
+      // Leave APP_ADDLDATA_DIN blank to match what real NDML records contain.
       APP_ADDLDATA_DIN_UID: nz(person.din),
-      APP_ADDLDATA_DIN: nz(person.din),
+      APP_ADDLDATA_DIN: "",
       APP_ADDLDATA_UID: "",
       APP_ADDLDATA_RELATIONSHIP: relationship,
       APP_ADDLDATA_POLCONN: "NA",
@@ -631,33 +664,34 @@ export function buildCorporateKraPayload(
   };
 
   (kyc.directors ?? []).forEach((d) => pushAddl(d, "02"));
-  (kyc.promoters ?? []).forEach((p) => pushAddl(p, "01"));
-  (kyc.authorisedSignatories ?? []).forEach((s) => pushAddl(s, "05"));
 
   if (addl.length === 0) {
     notes.push({
       xmlTag: "APP_ADDL_DATA",
-      note: "No directors / promoters / signatories captured; empty additional data sent.",
+      note: "No directors captured; empty additional data sent.",
     });
   }
 
   const fatca: KraNonIndAppReqRoot["FATCA_ADDL_DTLS"] = kyc.fatcaApplicable
     ? [
-        {
-          APP_FATCA_ENTITY_PAN: pan,
-          APP_FATCA_COUNTRY_RESIDENCY: "",
-          APP_FATCA_TAX_IDENTIFICATION_TYPE: "TIN",
-          APP_FATCA_TAX_IDENTIFICATION_NO: "",
-          APP_FATCA_TAX_EXEMPT_FLAG: "N",
-          APP_FATCA_TAX_EXEMPT_REASON: "",
-        },
-      ]
+      {
+        APP_FATCA_ENTITY_PAN: pan,
+        APP_FATCA_COUNTRY_RESIDENCY: "",
+        APP_FATCA_TAX_IDENTIFICATION_TYPE: "TIN",
+        APP_FATCA_TAX_IDENTIFICATION_NO: "",
+        APP_FATCA_TAX_EXEMPT_FLAG: "N",
+        APP_FATCA_TAX_EXEMPT_REASON: "",
+      },
+    ]
     : [];
 
   const summ: KraNonIndAppReqRoot["APP_SUMM_REC"] = {
     APP_OTHKRA_CODE: env.KRA_OKRA_CD_MI_ID,
-    APP_OTHKRA_BATCH: "K",
-    APP_REQ_DATE: formatKraDdMmYyyyHHmmss(now),
+    // NDML assigns the batch number on its side; sending a placeholder like
+    // "K" pollutes the record. Leave blank — NDML fills this on the response.
+    APP_OTHKRA_BATCH: "",
+    // NDML's official register-XML sample uses date-only for APP_REQ_DATE.
+    APP_REQ_DATE: todayStr,
     APP_ADDLDATA_RECORDS: String(addl.length),
     APP_TOTAL_REC: "1",
     NO_OF_FATCA_ADDL_DTLS_RECORDS: String(fatca.length),

@@ -5,6 +5,7 @@ import type { appSchema } from "@root/schema";
 import type { IApiCaller } from "../connection/apiCaller.interface";
 import type {
   BaseResponseData,
+  ImpersonateDataResponse,
   OtpVerifyDataResponse,
   UserSessionDataResponse,
 } from "../../types/response.types";
@@ -18,6 +19,13 @@ export interface TAuthApiInterface {
     data: z.infer<(typeof appSchema.auth)["verifyOtpSchema"]>,
     config?: AxiosRequestConfig
   ): Promise<AxiosResponse<OtpVerifyDataResponse>>;
+  impersonate(
+    data: z.infer<(typeof appSchema.auth)["impersonateUserSchema"]>,
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<ImpersonateDataResponse>>;
+  exitImpersonation(
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<ImpersonateDataResponse>>;
   logout(config?: AxiosRequestConfig): Promise<AxiosResponse<BaseResponseData>>;
   getSession(
     config?: AxiosRequestConfig
@@ -39,6 +47,19 @@ export class AuthApi implements TAuthApiInterface {
     config?: AxiosRequestConfig
   ): ReturnType<TAuthApiInterface["verifyOtp"]> {
     return await this.apiClient.post("/auth/verify-otp", data, config);
+  }
+
+  async impersonate(
+    data: z.infer<(typeof appSchema.auth)["impersonateUserSchema"]>,
+    config?: AxiosRequestConfig
+  ): ReturnType<TAuthApiInterface["impersonate"]> {
+    return await this.apiClient.post("/auth/impersonate", data, config);
+  }
+
+  async exitImpersonation(
+    config?: AxiosRequestConfig
+  ): ReturnType<TAuthApiInterface["exitImpersonation"]> {
+    return await this.apiClient.post("/auth/impersonate/exit", undefined, config);
   }
 
   async logout(

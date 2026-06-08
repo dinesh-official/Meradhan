@@ -57,7 +57,7 @@ export function AllowPurchaseCheckbox({ bond }: AllowPurchaseCheckboxProps) {
   };
 
   return (
-    <AllowOnlyView permissions={["edit:bonds"]}>
+    <AllowOnlyView actionKey="bonds.edit">
       <Checkbox
         id={`allow-for-purchase-${bond.isin}`}
         checked={allowForPurchase}

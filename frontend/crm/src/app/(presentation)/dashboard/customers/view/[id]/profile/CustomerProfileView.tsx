@@ -7,18 +7,17 @@ import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 import LabelView from "@/global/elements/wrapper/LabelView";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import StatusBadge from "@/global/elements/wrapper/badges/StatusBadge";
-import { hasOneOfPermission } from "@/global/utils/role.utils";
+import usePermissions from "@/hooks/usePermissions.hook";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { encodeId } from "@/global/utils/url.utils";
 import apiGateway from "@root/apiGateway";
 import { useQuery } from "@tanstack/react-query";
 import { Building2, IdCardIcon, NotebookPen } from "lucide-react";
 import Link from "next/link";
-import useAppCookie from "@/hooks/useAppCookie.hook";
 
 function CustomerProfileView({ profileId }: { profileId: number }) {
-  const { cookies } = useAppCookie();
-  const canViewAllInfo = hasOneOfPermission(cookies.role, ["view:customerkyc"]);
+  const { can } = usePermissions();
+  const canViewAllInfo = can("customers.kyc.view");
   // const [useCustomerFormDataHook, setuseCustomerFormDataHook] = useState<GetCustomerResponseById>()])
   const fetchCustomer = async () => {
     const fetchCustomerProfile = new apiGateway.crm.customer.CrmCustomerApi(
@@ -54,7 +53,7 @@ function CustomerProfileView({ profileId }: { profileId: number }) {
         description="Complete customer information and account details"
         actions={
           <div className="gap-3 flex  justify-center items-center md:w-auto w-full">
-            <AllowOnlyView permissions={["view:customerkyc"]}>
+            <AllowOnlyView actionKey="customers.kyc.view">
               <Button variant="outline" asChild>
                 <Link href={`/dashboard/customers/view/${encodeId(profileId)}/kyc`}>
                   <IdCardIcon /> View KYC Data
@@ -62,7 +61,7 @@ function CustomerProfileView({ profileId }: { profileId: number }) {
               </Button>
             </AllowOnlyView>
             {customer?.userType === "CORPORATE" && (
-              <AllowOnlyView permissions={["view:customerkyc"]}>
+              <AllowOnlyView actionKey="customers.kyc.view">
                 <Button variant="outline" asChild>
                   <Link
                     href={`/dashboard/customers/view/${encodeId(profileId)}/corporate-kyc`}

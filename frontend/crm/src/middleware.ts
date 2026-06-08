@@ -1,5 +1,6 @@
 import { UserSessionDataResponse } from "@root/apiGateway";
 import { cookies } from "next/headers";
+import { hasRoutePermission } from "@/global/constants/rbac-routes.constants";
 
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -48,16 +49,33 @@ export async function middleware(request: NextRequest) {
 
     const session = await fetchUserSession(token);
 
-    // ❌ Invalid session or role mismatch → force logout
-    if (
-      !session?.responseData?.role ||
-      session.responseData.role !== roleCookie
-    ) {
+    if (!session?.responseData?.role) {
       const response = NextResponse.redirect(new URL("/logout", request.url));
-      cookie.delete("token");
-      cookie.delete("userId");
-      cookie.delete("role");
+      response.cookies.delete("token");
+      response.cookies.delete("userId");
+      response.cookies.delete("role");
+      response.cookies.delete("impersonatorToken");
       return response;
+    }
+
+    // Keep role/userId cookies in sync with the JWT session (required after impersonation)
+    if (session.responseData.role !== roleCookie) {
+      const syncUrl = request.nextUrl.clone();
+      const response = NextResponse.redirect(syncUrl);
+      response.cookies.set("role", session.responseData.role, { path: "/" });
+      response.cookies.set("userId", String(session.responseData.id), {
+        path: "/",
+      });
+      return response;
+    }
+
+    const permissions = session.responseData.permissions ?? [];
+    const role = session.responseData.role;
+
+    if (!hasRoutePermission(pathname, permissions, role)) {
+      const url = new URL("/dashboard", request.url);
+      url.searchParams.set("denied", "1");
+      return NextResponse.redirect(url);
     }
   }
 

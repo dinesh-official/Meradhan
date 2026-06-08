@@ -23,15 +23,16 @@ async function UpdateBondPage({
   }
 
   return (
-    <Workspace>
-      <PageInfoBar
-        title="Update Bond"
-        description={`Update bond details for ISIN: ${isin}`}
-        showBack
-      />
+    <Workspace actionKey="bonds.edit">
+      
+        <PageInfoBar
+          title="Update Bond"
+          description={`Update bond details for ISIN: ${isin}`}
+          showBack
+        />
 
-      {bondData && <BondForm initialData={bondData as any} isin={isin} />}
-    </Workspace>
+        {bondData && <BondForm initialData={bondData as any} isin={isin} />}
+      </Workspace>
   );
 }
 

@@ -1,0 +1,56 @@
+model RbacRole {
+  id            Int              @id @default(autoincrement())
+  key           String           @unique
+  label         String
+  description   String?
+  isSuperAdmin  Boolean          @default(false)
+  isSystem      Boolean          @default(false)
+  isActive      Boolean          @default(true)
+  policies      RbacRolePolicy[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@map("rbac_roles")
+}
+
+model RbacModule {
+  id          Int          @id @default(autoincrement())
+  key         String       @unique
+  label       String
+  description String?
+  isActive    Boolean      @default(true)
+  actions     RbacAction[]
+  createdAt   DateTime     @default(now())
+
+  @@map("rbac_modules")
+}
+
+model RbacAction {
+  id          Int              @id @default(autoincrement())
+  key         String           @unique
+  label       String
+  description String?
+  isGlobal    Boolean          @default(false)
+  isActive    Boolean          @default(true)
+  moduleId    Int
+  module      RbacModule       @relation(fields: [moduleId], references: [id])
+  policies    RbacRolePolicy[]
+  createdAt   DateTime         @default(now())
+
+  @@map("rbac_actions")
+}
+
+model RbacRolePolicy {
+  id          Int              @id @default(autoincrement())
+  actionId    Int
+  action      RbacAction       @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  roleId      Int
+  role        RbacRole         @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  granted     Boolean          @default(false)
+  updatedById Int
+  updatedBy   CRMUserDataModel @relation("RbacPolicyUpdatedBy", fields: [updatedById], references: [id])
+  updatedAt   DateTime         @updatedAt
+
+  @@unique([actionId, roleId])
+  @@map("rbac_role_policies")
+}

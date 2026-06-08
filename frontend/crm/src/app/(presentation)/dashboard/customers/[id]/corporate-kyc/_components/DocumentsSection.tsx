@@ -3,10 +3,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileUploadField } from "@/global/elements/inputs/FileUploadField";
 import { InputField } from "@/global/elements/inputs/InputField";
+import { SelectField } from "@/global/elements/inputs/SelectField";
 import { useCorporateKycFileUpload } from "../_hooks/useCorporateKycFileUpload";
 import type { CorporateKycFormHook } from "../_hooks/useCorporateKycForm";
 import { FileText, ExternalLink } from "lucide-react";
 import { genMediaUrl } from "@/global/utils/url.utils";
+import { annualIncomeOptions } from "../_utils/annualIncomeOptions";
 
 const DOCUMENT_FIELDS: {
   key: keyof NonNullable<CorporateKycFormHook["form"]>;
@@ -88,10 +90,12 @@ export function DocumentsSection({ hook }: { hook: CorporateKycFormHook }) {
           value={form.gstNumber ?? ""}
           onChangeAction={(v) => setField("gstNumber", v)}
         />
-        <InputField
+        <SelectField
           label="Annual income"
           value={form.annualIncome ?? ""}
           onChangeAction={(v) => setField("annualIncome", v)}
+          options={annualIncomeOptions}
+          placeholder="Select annual income bracket"
         />
         <InputField
           label="Documents type"

@@ -33,8 +33,7 @@ import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import CardPagination from "@/global/elements/table/CardPagination";
 import OrdersSectionTabs from "../_components/OrdersSectionTabs";
-import { hasOneOfPermission } from "@/global/utils/role.utils";
-import useAppCookie from "@/hooks/useAppCookie.hook";
+import usePermissions from "@/hooks/usePermissions.hook";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { Calendar, FileSpreadsheet, Minus, Pencil, Plus, Trash2, Upload } from "lucide-react";
@@ -86,9 +85,9 @@ const qtyFmt = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 4 });
 
 export default function InventoryStockView() {
   const queryClient = useQueryClient();
-  const { cookies } = useAppCookie();
-  const canEditStock = hasOneOfPermission(cookies.role, ["edit:orders"]);
-  const canDeleteBatch = hasOneOfPermission(cookies.role, ["edit:orders", "delete:orders"]);
+  const { can, canAny } = usePermissions();
+  const canEditStock = can("orders.inventory.edit");
+  const canDeleteBatch = canAny(["orders.inventory.edit", "orders.inventory.delete"]);
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [selectedBatchId, setSelectedBatchId] = useState<number | null>(null);
   const [lineSearchInput, setLineSearchInput] = useState("");

@@ -18,7 +18,11 @@ function TopBar({ session }: { session: UserSessionDataResponse }) {
     <div className="top-0 right-0 left-0 z-50 sticky flex justify-between items-center bg-white px-5 border-gray-100 border-b w-full h-[65px]">
       <div className="flex justify-start items-center gap-6 h-full">
         {/* Mobile Menu Bar */}
-        <MobMenuBar role={session.responseData.role} />
+        <MobMenuBar
+          role={session.responseData.role}
+          permissions={session.responseData.permissions ?? []}
+          isImpersonating={Boolean(session.responseData.impersonatedBy)}
+        />
 
         <div className="flex justify-start items-center gap-3">
           <div className="flex justify-start items-center gap-6 pl-1">

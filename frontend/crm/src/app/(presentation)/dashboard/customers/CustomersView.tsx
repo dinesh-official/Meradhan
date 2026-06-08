@@ -61,7 +61,7 @@ function CustomersView() {
               <Download className="mr-2 h-4 w-4" />
               {exportLoading ? "Exporting…" : "Export CSV"}
             </Button>
-            <AllowOnlyView permissions={["create:customer"]}>
+            <AllowOnlyView actionKey="customers.create">
               <Dialog open={addCustomerOpen} onOpenChange={setAddCustomerOpen}>
                 <DialogTrigger asChild>
                   <Button>

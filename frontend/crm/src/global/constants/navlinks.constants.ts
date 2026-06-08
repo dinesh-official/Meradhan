@@ -1,5 +1,4 @@
 "use client";
-// navbarConfig.ts
 import {
   BarChart,
   Bell,
@@ -15,52 +14,45 @@ import {
 } from "lucide-react";
 import React from "react";
 import { FaMoneyBill } from "react-icons/fa";
-import { ModuleName, Permission, Role } from "./role.constants";
+import { ModuleName, Role } from "./role.constants";
 
-/**
- * Define the structure of nested navigation items (up to 4 levels)
- */
 export interface NavItem {
   label: string;
   path?: string;
   icon?: React.ComponentType<{ className: string; size?: number }>;
   module?: ModuleName;
-  children?: NavItem[]; // nested submenus
-  allowOnly?: Permission[];
-  /** If set, only these CRM roles see the item (checked with allowOnly when both exist). */
+  children?: NavItem[];
+  /** RBAC action keys — visible if user has any of these (from session permissions). */
+  actionKeys?: string[];
   roles?: Role[];
   section?: boolean;
 }
 
-/**
- * NAV_ITEMS with 4-level nesting
- */
 export const NAV_ITEMS: NavItem[] = [
   {
     label: "Dashboard",
     path: "/dashboard",
     icon: PieChart,
     module: "dashboard",
-    allowOnly: ["view:dashboard"],
+    actionKeys: ["dashboard.view"],
   },
 
   {
     label: "Leads",
     icon: Users,
-    allowOnly: ["view:leads"],
-    // path: "/dashboard/leads",
+    actionKeys: ["leads.view", "leads.create", "leads.edit"],
     children: [
       {
         label: "All Leads",
         path: "/dashboard/leads",
         module: "leads",
-        allowOnly: ["view:leads"],
+        actionKeys: ["leads.view"],
       },
       {
         label: "Partners & Distributors",
         path: "/dashboard/leads/partnerships",
         module: "leads",
-        allowOnly: ["view:leads"],
+        actionKeys: ["leads.view"],
       },
     ],
   },
@@ -68,27 +60,38 @@ export const NAV_ITEMS: NavItem[] = [
   {
     label: "Notifications",
     icon: Bell,
-    roles: ["SALES", "ADMIN", "SUPER_ADMIN"],
+    actionKeys: [
+      "notifications.customer_list.view",
+      "notifications.lists.view",
+      "notifications.send",
+      "notifications.templates.view",
+      "notifications.logs.view",
+    ],
     children: [
       {
         label: "Customer List",
         path: "/dashboard/notifications/customer-list",
+        actionKeys: ["notifications.customer_list.view"],
       },
       {
         label: "Send Notification",
         path: "/dashboard/notifications/send",
+        actionKeys: ["notifications.send"],
       },
       {
         label: "Notification Lists",
         path: "/dashboard/notifications/lists",
+        actionKeys: ["notifications.lists.view"],
       },
       {
         label: "Templates",
         path: "/dashboard/notifications/templates",
+        actionKeys: ["notifications.templates.view"],
       },
       {
         label: "Logs",
         path: "/dashboard/notifications/logs",
+        actionKeys: ["notifications.logs.view"],
       },
     ],
   },
@@ -96,88 +99,76 @@ export const NAV_ITEMS: NavItem[] = [
   {
     label: "Customers",
     icon: User,
-    allowOnly: ["view:customer"],
     path: "/dashboard/customers",
-    // children: [
-    //   {
-    //     label: "Customers List",
-    //     path: "/dashboard/customers",
-    //     module: "customer",
-    //     allowOnly: ["view:customer"],
-    //   },
-    //   {
-    //     label: "Create Customer",
-    //     path: "/dashboard/customers/create",
-    //     module: "customer",
-    //     allowOnly: ["create:customer"],
-    //   },
-    // ],
+    actionKeys: ["customers.view", "customers.create", "customers.edit"],
   },
 
   {
     label: "RFQ Management",
     icon: ClipboardList,
     module: "rfq",
-    allowOnly: ["view:rfq"],
+    actionKeys: [
+      "rfqs.view",
+      "rfqs.manage",
+      "rfqs.deals.view",
+      "rfqs.settle_orders.view",
+      "rfqs.proposals.view",
+      "rfqs.settlement_dates.view",
+      "rfqs.participants.view",
+    ],
     children: [
       {
         label: "Overview",
         path: "/dashboard/rfqs/overview",
         module: "rfq",
-        allowOnly: ["view:rfq"],
+        actionKeys: ["rfqs.view"],
       },
       {
         label: "NSE RFQs",
-        allowOnly: ["view:rfq"],
+        actionKeys: ["rfqs.view", "rfqs.manage"],
         children: [
           {
             label: "Manage RFQs",
             path: "/dashboard/rfqs/nse",
             module: "rfq",
-            allowOnly: ["edit:rfq"],
+            actionKeys: ["rfqs.manage"],
           },
           {
             label: "Deal Book",
             path: "/dashboard/rfqs/nse/deals",
             module: "rfq",
-            allowOnly: ["edit:rfq"],
+            actionKeys: ["rfqs.deals.view"],
           },
           {
             label: "Settle Orders",
             path: "/dashboard/rfqs/nse/settle-orders",
             module: "rfq",
-            allowOnly: ["view:rfq"],
+            actionKeys: ["rfqs.settle_orders.view"],
           },
           {
             label: "Proposal Management",
             path: "/dashboard/rfqs/nse/proposals",
             module: "rfq",
-            allowOnly: ["view:rfq"],
+            actionKeys: ["rfqs.proposals.view"],
           },
           {
             label: "Settlement Dates",
             path: "/dashboard/rfqs/nse/settlement-dates",
             module: "rfq",
-            allowOnly: ["view:rfq"],
+            actionKeys: ["rfqs.settlement_dates.view", "rfqs.settlement_dates.edit"],
           },
           {
             label: "Participants",
             path: "/dashboard/rfqs/nse/participants",
             module: "rfq",
-            allowOnly: ["view:rfq"],
+            actionKeys: ["rfqs.participants.view"],
           },
           {
             label: "NSE webhook notifications",
             path: "/dashboard/rfqs/nse/webhook-notifications",
             module: "rfq",
-            allowOnly: ["view:rfq"],
+            actionKeys: ["rfqs.view"],
           },
-          // {
-          //     label: 'Add Participant',
-          //     path: '/dashboard/rfqs/nse/participants/create',
-          //     module: 'rfq',
-          //     allowOnly: ['create:rfq'],
-          // },
         ],
       },
     ],
@@ -187,205 +178,215 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Orders",
     icon: ShoppingCart,
     module: "orders",
-    allowOnly: ["view:orders", "edit:orders", "create:orders"],
+    actionKeys: [
+      "orders.view",
+      "orders.create",
+      "orders.edit",
+      "orders.inventory.view",
+      "orders.reports.view",
+    ],
     children: [
       {
         label: "View Orders",
         path: "/dashboard/orders",
         module: "orders",
-        allowOnly: ["view:orders"],
+        actionKeys: ["orders.view"],
       },
       {
         label: "PG Management",
         path: "/dashboard/orders/pg-management",
         module: "orders",
-        allowOnly: ["view:orders"],
+        actionKeys: ["orders.edit"],
       },
       {
         label: "Payment Process Logs",
         path: "/dashboard/orders/payment-process-logs",
         module: "orders",
-        allowOnly: ["view:orders"],
+        actionKeys: ["orders.view"],
       },
       {
         label: "Draft orders",
         path: "/dashboard/orders/draft-orders",
         module: "orders",
-        allowOnly: ["view:orders"],
+        actionKeys: ["orders.view"],
       },
       {
         label: "Inventory stock",
         path: "/dashboard/orders/inventory-stock",
         module: "orders",
-        allowOnly: ["view:orders"],
+        actionKeys: ["orders.inventory.view"],
       },
       {
         label: "Order reports",
         path: "/dashboard/orders/reports",
         module: "orders",
-        allowOnly: ["view:orders"],
+        actionKeys: ["orders.reports.view"],
       },
     ],
   },
 
-  // {
-  //   label: "Sales",
-  //   icon: ShoppingCart,
-  //   path: "#",
-  //   module: "sales",
-  //   allowOnly: ["view:sales"],
-  // },
-
   {
     label: "Support Tickets",
     icon: HelpCircle,
-    allowOnly: ["view:support"],
+    actionKeys: ["support.view", "support.create", "support.edit"],
     children: [
       {
         label: "Manage Tickets",
         path: "#",
         module: "support",
-        allowOnly: ["view:support", "edit:support", "create:support"],
+        actionKeys: ["support.view", "support.edit", "support.create"],
       },
       {
         label: "New Ticket",
         path: "#",
         module: "support",
-        allowOnly: ["create:support"],
+        actionKeys: ["support.create"],
       },
     ],
   },
+
   {
     label: "Bonds",
-    // path: "/dashboard/bonds",
     icon: FaMoneyBill,
     module: "bonds",
-    allowOnly: ["view:bonds"],
+    actionKeys: [
+      "bonds.view",
+      "bonds.create",
+      "bonds.edit",
+      "bonds.auto_update.view",
+      "bonds.priced_list.view",
+      "bonds.reference_data.view",
+      "bonds.margins.view",
+    ],
     children: [
       {
         label: "All Bonds",
         path: "/dashboard/bonds",
         module: "bonds",
-        allowOnly: ["view:bonds"],
+        actionKeys: ["bonds.view"],
       },
       {
         label: "Auto-update (sale-ready)",
         path: "/dashboard/bonds/auto-update",
         module: "bonds",
-        allowOnly: ["view:bonds"],
+        actionKeys: ["bonds.auto_update.view"],
       },
       {
         label: "Consolidated Management",
         path: "/dashboard/bonds/priced-list",
         module: "bonds",
-        allowOnly: ["view:bonds"],
+        actionKeys: ["bonds.priced_list.view"],
       },
       {
         label: "Reference Data Management",
         path: "/dashboard/bonds/reference-data",
         module: "bonds",
-        allowOnly: ["view:bonds"],
+        actionKeys: ["bonds.reference_data.view"],
       },
       {
         label: "Margin Management",
         path: "/dashboard/bonds/margins",
         module: "bonds",
-        allowOnly: ["edit:bonds"],
-        roles: ["ADMIN", "SUPER_ADMIN"],
+        actionKeys: ["bonds.margins.view"],
       },
     ],
   },
+
   {
     label: "Reports",
     icon: BarChart,
     path: "#",
     module: "reports",
-    allowOnly: ["view:reports"],
+    actionKeys: ["reports.view"],
   },
 
   {
     label: "Administration",
     section: true,
-    allowOnly: [
-      "view:user",
-      "create:user",
-      "edit:user",
-      "view:bin",
-      "view:webanalytics",
-      "view:webauditlogs",
+    actionKeys: [
+      "user_management.view",
+      "user_management.create",
+      "user_management.edit",
+      "bin.view",
+      "audit_logs.web.analytics",
+      "audit_logs.web.view",
+      "audit_logs.crm.view",
+      "system.rbac.manage",
     ],
   },
 
   {
     label: "User Management",
     icon: Briefcase,
-    allowOnly: ["view:user", "create:user", "edit:user"],
     path: "/dashboard/user-management",
+    actionKeys: ["user_management.view", "user_management.create", "user_management.edit"],
+  },
+
+  {
+    label: "Role Permissions",
+    icon: Shield,
+    path: "/dashboard/administration/rbac",
+    actionKeys: ["system.rbac.manage"],
+  },
+
+  {
+    label: "Impersonate User",
+    icon: User,
+    path: "/dashboard/administration/impersonate",
+    actionKeys: ["system.impersonate"],
   },
 
   {
     label: "Audit Logs",
     icon: Shield,
-    allowOnly: ["view:webauditlogs", "view:crmauditlogs"],
+    actionKeys: ["audit_logs.web.view", "audit_logs.crm.view"],
     children: [
       {
         label: "CRM Logs",
         module: "crmauditlogs",
-        allowOnly: ["view:crmauditlogs"],
+        actionKeys: ["audit_logs.crm.view"],
         children: [
           {
             label: "Activity History",
             path: "/dashboard/audit-logs/crm/logs",
             module: "crmauditlogs",
-            allowOnly: ["view:crmauditlogs"],
+            actionKeys: ["audit_logs.crm.view"],
           },
           {
             label: "Session History",
             path: "/dashboard/audit-logs/crm/authentication",
             module: "crmauditlogs",
-            allowOnly: ["view:crmauditlogs"],
+            actionKeys: ["audit_logs.crm.view"],
           },
-          // {
-          //     label: 'Session Analytics',
-          //     path: '#',
-          //     module: 'crmauditlogs',
-          //     allowOnly: ['view:crmauditlogs'],
-          // }
         ],
       },
       {
         label: "Website Logs",
         module: "webauditlogs",
-        allowOnly: ["view:webauditlogs"],
+        actionKeys: ["audit_logs.web.view"],
         children: [
           {
             label: "Activity Logs",
             path: "/dashboard/audit-logs/meradhan",
             module: "webauditlogs",
-            allowOnly: ["view:webauditlogs"],
+            actionKeys: ["audit_logs.web.view"],
           },
           {
             label: "Session Logs",
             path: "/dashboard/audit-logs/meradhan/session",
             module: "webauditlogs",
-            allowOnly: ["view:webauditlogs"],
+            actionKeys: ["audit_logs.web.view"],
           },
         ],
       },
     ],
   },
-  // {
-  //     label: 'Website Analytics',
-  //     path: '#',
-  //     icon: Earth,
-  //     module: 'bin',
-  //     allowOnly: ['view:webanalytics']
-  // },
+
   {
     label: "Recycle Bin",
     path: "/dashboard/bin",
     icon: Trash2,
     module: "bin",
-    allowOnly: ["create:bin", "view:bin", "edit:bin", "delete:bin"],
+    actionKeys: ["bin.view", "bin.restore", "bin.purge"],
   },
 ];

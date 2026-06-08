@@ -171,7 +171,7 @@ const DashBoardView = () => {
           </CardContent>
         </Card>
       </div>
-      <AllowOnlyView permissions={["view:crmauditlogs"]}>
+      <AllowOnlyView actionKey="audit_logs.crm.view">
         <LoginLogsHistory />
       </AllowOnlyView>
     </div>
