@@ -44,6 +44,34 @@ function CardPagination({
     }
   };
 
+  const renderNavButton = (
+    targetPage: number,
+    label: string,
+    isDisabled: boolean,
+    enabledClass: string
+  ) => {
+    const base = "px-2 py-2 min-w-8 font-medium text-sm text-center transition-colors";
+    if (isDisabled || disabled) {
+      return (
+        <button disabled className={clsx(base, "bg-gray-100 text-gray-400 cursor-not-allowed")}>
+          {label}
+        </button>
+      );
+    }
+    if (getPageLink) {
+      return (
+        <Link href={getPageLink(targetPage)} className={clsx(base, enabledClass)}>
+          {label}
+        </Link>
+      );
+    }
+    return (
+      <button onClick={() => onClick && onClick(targetPage)} className={clsx(base, enabledClass)}>
+        {label}
+      </button>
+    );
+  };
+
   const renderPage = (p: number | "ellipsis", index: number) => {
     if (p === "ellipsis") {
       return (
@@ -78,64 +106,14 @@ function CardPagination({
   return (
     <div className="w-full rounded-md bg-white overflow-hidden">
       <div className="flex justify-center items-center">
-        {/* First */}
-        <button
-          disabled={page === 1 || disabled}
-          onClick={() => onClick && onClick(1)}
-          className={clsx(
-            "px-2 py-2 min-w-8 font-medium text-sm text-center transition-colors ",
-            page === 1
-              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-              : "bg-white hover:bg-blue-100 text-blue-900"
-          )}
-        >
-          «
-        </button>
-
-        {/* Prev */}
-        <button
-          disabled={page === 1 || disabled}
-          onClick={() => onClick && onClick(page - 1)}
-          className={clsx(
-            "px-2 py-2 min-w-8 font-medium text-sm text-center transition-colors",
-            page === 1
-              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-              : "bg-gray-100 hover:bg-blue-100 text-blue-900"
-          )}
-        >
-          ‹
-        </button>
+        {renderNavButton(1, "«", page === 1, "bg-white hover:bg-blue-100 text-blue-900")}
+        {renderNavButton(page - 1, "‹", page === 1, "bg-gray-100 hover:bg-blue-100 text-blue-900")}
 
         {/* Page Numbers */}
         {pages.map((p, i) => renderPage(p, i))}
 
-        {/* Next */}
-        <button
-          disabled={page === totalPages || disabled}
-          onClick={() => onClick && onClick(page + 1)}
-          className={clsx(
-            "px-2 py-2 min-w-8 font-medium text-sm text-center transition-colors",
-            page === totalPages
-              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-              : "bg-gray-100 hover:bg-blue-100 text-blue-900"
-          )}
-        >
-          ›
-        </button>
-
-        {/* Last */}
-        <button
-          disabled={page === totalPages || disabled}
-          onClick={() => onClick && onClick(totalPages)}
-          className={clsx(
-            "px-2 py-2 min-w-8 font-medium text-sm text-center transition-colors",
-            page === totalPages
-              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-              : "bg-gray-100 hover:bg-blue-100 text-blue-900"
-          )}
-        >
-          »
-        </button>
+        {renderNavButton(page + 1, "›", page === totalPages, "bg-gray-100 hover:bg-blue-100 text-blue-900")}
+        {renderNavButton(totalPages, "»", page === totalPages, "bg-gray-100 hover:bg-blue-100 text-blue-900")}
       </div>
     </div>
   );

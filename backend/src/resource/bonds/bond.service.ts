@@ -192,7 +192,8 @@ export class BondService {
 
     const extendedQuery = whereQuery;
 
-    if (options?.all != "YES") {
+    if
+      (options?.all != "YES") {
       extendedQuery.isListed = { equals: "YES" };
       extendedQuery.redemptionDate = { gte: new Date() };
       extendedQuery.creditRating = { notIn: ["D", "C"] };
@@ -267,10 +268,18 @@ export class BondService {
         ],
       };
 
+      // Merge AND arrays explicitly — spreading two objects that both have an AND key
+      // would silently overwrite the search condition from whereQuery with eligibleCondition's AND.
+      const searchAnd = Array.isArray(whereQuery.AND) ? whereQuery.AND : [];
+      const eligibleAnd = Array.isArray(eligibleCondition.AND) ? eligibleCondition.AND : [];
+
       const whereBuyNow = {
         ...whereQuery,
         ...eligibleCondition,
         isin: { in: validIsins },
+        ...(searchAnd.length > 0 || eligibleAnd.length > 0
+          ? { AND: [...searchAnd, ...eligibleAnd] }
+          : {}),
       };
       const whereOther = {
         ...whereQuery,
@@ -387,6 +396,7 @@ export class BondService {
     const data = await db.dataBase.bonds.findMany({
       where: {
         isListed: { equals: "YES" },
+        allowForPurchase: { equals: true },
         dateOfAllotment: { lte: new Date() },
         creditRating: {
           in: [
@@ -423,6 +433,7 @@ export class BondService {
     const data = await db.dataBase.bonds.findMany({
       where: {
         isListed: { equals: "YES" },
+        allowForPurchase: { equals: true },
         dateOfAllotment: { lte: new Date() },
         yield: { gte: 11 },
         creditRating: {
@@ -460,6 +471,7 @@ export class BondService {
     const data = await db.dataBase.bonds.findMany({
       where: {
         isListed: { equals: "YES" },
+        allowForPurchase: { equals: true },
         dateOfAllotment: { lte: new Date() },
         categories: { has: "zero-coupon" },
         creditRating: {

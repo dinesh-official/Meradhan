@@ -280,9 +280,11 @@ async function page({
                 values={bondsData.map(
                   (val: BondDetailResponse["responseData"], i) => (
                     <span key={"security" + i}>
-                      {val?.instrumentName?.includes("SECURED")
+                      {val?.natureOfInstrument?.toUpperCase() === "SECURED"
                         ? "SECURED"
-                        : "UNSECURED"}
+                        : val?.natureOfInstrument?.toUpperCase() === "UNSECURED"
+                          ? "UNSECURED"
+                          : "-"}
                     </span>
                   )
                 )}

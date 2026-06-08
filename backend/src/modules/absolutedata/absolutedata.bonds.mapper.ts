@@ -72,8 +72,8 @@ const mapNature = (
 ): $Enums.INSTRUMENT_SECURITY | undefined => {
   const v = pickStr(n)?.toLowerCase();
   if (!v) return undefined;
-  if (v.includes("secured")) return "SECURED";
   if (v.includes("unsecured")) return "UNSECURED";
+  if (v.includes("secured")) return "SECURED";
   return "UNKNOWN";
 };
 

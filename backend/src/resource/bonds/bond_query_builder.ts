@@ -1,6 +1,7 @@
 import type { DataBaseSchema } from "@core/database/database";
 import type { appSchema } from "@root/schema";
 import type z from "zod";
+import { isISIN } from "@utils/filters/convert";
 
 export class BondQueryBuilder {
   /**
@@ -39,6 +40,12 @@ export class BondQueryBuilder {
     search?: string
   ): void {
     if (!search) return;
+
+    // Exact ISIN match only
+    if (isISIN(search)) {
+      conditions.push({ isin: { equals: search, mode: "insensitive" } });
+      return;
+    }
 
     conditions.push({
       OR: [
