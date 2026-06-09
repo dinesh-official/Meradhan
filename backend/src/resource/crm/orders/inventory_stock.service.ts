@@ -3,6 +3,7 @@ import { db } from "@core/database/database";
 import logger from "@utils/logger/logger";
 import * as xlsx from "xlsx";
 import moment from "moment-timezone";
+import { invalidateLatestInventoryBatchCache } from "@resource/bonds/bond.service";
 
 const TZ = "Asia/Kolkata";
 const LINE_CHUNK = 500;
@@ -140,6 +141,11 @@ export class CrmInventoryStockService {
 
       return b;
     });
+
+    // Bust the BondService in-process cache so the freshly uploaded batch
+    // becomes visible to homepage / bond list endpoints immediately instead
+    // of waiting for the 60s TTL to expire.
+    invalidateLatestInventoryBatchCache();
 
     return {
       batchId: batch.id,
