@@ -403,6 +403,10 @@ export type CorporateKycDirectorResponse = {
 
 export type CorporateKycPromoterResponse = CorporateKycDirectorResponse;
 
+export type CorporateKycPartnerResponse = CorporateKycDirectorResponse;
+
+export type CorporateKycTrusteeResponse = CorporateKycDirectorResponse;
+
 export type CorporateKycAuthorisedSignatoryResponse = {
   id: number;
   fullName: string;
@@ -481,6 +485,8 @@ export type CorporateKycResponse = {
   dematAccounts: CorporateKycDematAccountResponse[];
   directors: CorporateKycDirectorResponse[];
   promoters: CorporateKycPromoterResponse[];
+  partners: CorporateKycPartnerResponse[];
+  trustees: CorporateKycTrusteeResponse[];
   authorisedSignatories: CorporateKycAuthorisedSignatoryResponse[];
   createdAt: string;
   updatedAt: string;

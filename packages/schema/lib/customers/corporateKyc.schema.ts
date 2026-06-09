@@ -75,6 +75,38 @@ export const corporateKycPromoterSchema = z.object({
   mobile: z.string().optional(),
 });
 
+// LLP / Partnership firm partner – same shape as Director/Promoter so they
+// share the NDML APP_ADDL_DATA pipeline (partners go in with rel-code "06").
+export const corporateKycPartnerSchema = z.object({
+  id: z.number().optional(),
+  fullName: z.string().min(1, "Partner full name is required"),
+  pan: z.string().optional(),
+  panCopyFileUrl: z.string().optional(),
+  aadharCopyFileUrl: z.string().optional(),
+  passportPhotoFileUrl: z.string().optional(),
+  pepDeclaration: PepDeclarationEnum.optional(),
+  designation: z.string().optional(),
+  din: z.string().optional(),
+  email: z.union([z.string().email("Invalid email address"), z.literal("")]).optional(),
+  mobile: z.string().optional(),
+});
+
+// Trust entities list Trustees (not directors). Same shape so they share
+// the NDML APP_ADDL_DATA pipeline (trustees go in with rel-code "04").
+export const corporateKycTrusteeSchema = z.object({
+  id: z.number().optional(),
+  fullName: z.string().min(1, "Trustee full name is required"),
+  pan: z.string().optional(),
+  panCopyFileUrl: z.string().optional(),
+  aadharCopyFileUrl: z.string().optional(),
+  passportPhotoFileUrl: z.string().optional(),
+  pepDeclaration: PepDeclarationEnum.optional(),
+  designation: z.string().optional(),
+  din: z.string().optional(),
+  email: z.union([z.string().email("Invalid email address"), z.literal("")]).optional(),
+  mobile: z.string().optional(),
+});
+
 export const corporateKycAuthorisedSignatorySchema = z.object({
   id: z.number().optional(),
   fullName: z.string().min(1, "Full name is required"),
@@ -170,6 +202,8 @@ export const createCorporateKycSchema = z.object({
   dematAccounts: z.array(corporateKycDematAccountSchema).default([]),
   directors: z.array(corporateKycDirectorSchema).default([]),
   promoters: z.array(corporateKycPromoterSchema).default([]),
+  partners: z.array(corporateKycPartnerSchema).default([]),
+  trustees: z.array(corporateKycTrusteeSchema).default([]),
   authorisedSignatories: z.array(corporateKycAuthorisedSignatorySchema).default([]),
 });
 
@@ -188,6 +222,12 @@ export type CorporateKycDirectorPayload = z.infer<
 >;
 export type CorporateKycPromoterPayload = z.infer<
   typeof corporateKycPromoterSchema
+>;
+export type CorporateKycPartnerPayload = z.infer<
+  typeof corporateKycPartnerSchema
+>;
+export type CorporateKycTrusteePayload = z.infer<
+  typeof corporateKycTrusteeSchema
 >;
 export type CorporateKycAuthorisedSignatoryPayload = z.infer<
   typeof corporateKycAuthorisedSignatorySchema

@@ -1831,7 +1831,7 @@ async function main() {
   // ────────────────────────────────────────────────────────────────────
   const CUSTOMER_PROFILE_UCC = "MD1HRXWON"; // UCC of the customer to create the order for
   const ISIN = "INE0NES07279"; // ISIN of the bond to order
-  const ORDER_NUMBER = "260514990000120"; // Order number of the order to create
+  const ORDER_NUMBER = "260604990005639"; // Order number of the order to create
   const DRY_RUN = false; // true to skip actual order creation
   // ────────────────────────────────────────────────────────────────────
 

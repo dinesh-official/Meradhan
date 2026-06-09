@@ -380,6 +380,8 @@ export class CustomerProfileController {
         authorisedSignatories: true,
         directors: true,
         promoters: true,
+        partners: true,
+        trustees: true,
       },
     });
 
@@ -424,6 +426,8 @@ export class CustomerProfileController {
       authorisedSignatories: corporateKyc.authorisedSignatories,
       directors: corporateKyc.directors,
       promoters: corporateKyc.promoters,
+      partners: corporateKyc.partners,
+      trustees: corporateKyc.trustees,
     };
 
     const built = buildCorporateKraPayload(input);

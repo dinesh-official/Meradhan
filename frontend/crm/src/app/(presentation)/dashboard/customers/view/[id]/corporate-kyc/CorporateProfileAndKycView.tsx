@@ -19,7 +19,9 @@ import {
   DematAccountsSection,
   DirectorsSection,
   DocumentUrlsSection,
+  PartnersSection,
   PromotersSection,
+  TrusteesSection,
 } from "./_components/CorporateKycSections";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -649,7 +651,15 @@ export default function CorporateProfileAndKycView({
                   <DocumentUrlsSection data={corporateKyc} />
                   <BankAccountsSection data={corporateKyc} />
                   <DematAccountsSection data={corporateKyc} />
-                  <DirectorsSection data={corporateKyc} />
+                  {/* Trust entities show Trustees; everyone else shows Directors + Partners. */}
+                  {corporateKyc.entityConstitutionType === "TRUST" ? (
+                    <TrusteesSection data={corporateKyc} />
+                  ) : (
+                    <>
+                      <DirectorsSection data={corporateKyc} />
+                      <PartnersSection data={corporateKyc} />
+                    </>
+                  )}
                   <PromotersSection data={corporateKyc} />
                   <AuthorisedSignatoriesSection data={corporateKyc} />
                   <ESignRequestsCard

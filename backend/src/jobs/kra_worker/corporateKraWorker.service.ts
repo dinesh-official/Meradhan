@@ -203,6 +203,8 @@ export class CorporateKraWorkerService {
                     dematAccounts: true,
                     directors: true,
                     promoters: true,
+                    partners: true,
+                    trustees: true,
                     authorisedSignatories: true,
                 },
             });
