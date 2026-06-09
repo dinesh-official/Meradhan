@@ -128,4 +128,29 @@ crmCustomersRoutes.delete(
   (req, res) => controller.deleteCorporateKycAttachment(req, res),
 );
 
+// --- Corporate KYC e-sign requests ---
+crmCustomersRoutes.get(
+  "/api/crm/customer/:customerId/corporate-kyc/e-sign-requests",
+  allowAccessMiddleware("ADMIN", "USER"),
+  (req, res) => controller.listCorporateESignRequests(req, res),
+);
+
+crmCustomersRoutes.post(
+  "/api/crm/customer/:customerId/corporate-kyc/e-sign-requests",
+  allowAccessMiddleware("ADMIN"),
+  (req, res) => controller.createCorporateESignRequest(req, res),
+);
+
+crmCustomersRoutes.patch(
+  "/api/crm/customer/:customerId/corporate-kyc/e-sign-requests/:requestId",
+  allowAccessMiddleware("ADMIN"),
+  (req, res) => controller.updateCorporateESignRequest(req, res),
+);
+
+crmCustomersRoutes.delete(
+  "/api/crm/customer/:customerId/corporate-kyc/e-sign-requests/:requestId",
+  allowAccessMiddleware("ADMIN"),
+  (req, res) => controller.deleteCorporateESignRequest(req, res),
+);
+
 export default crmCustomersRoutes;

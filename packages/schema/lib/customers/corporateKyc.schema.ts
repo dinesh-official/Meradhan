@@ -148,6 +148,10 @@ export const createCorporateKycSchema = z.object({
   powerOfAttorneyCopyUrl: z.string().optional(),
   documentsType: z.string().optional(),
 
+  // "Use existing KYC" declarations
+  existingKycFileUrl: z.string().optional(),
+  useExistingKycDeclarationUrl: z.string().optional(),
+
   // Attachments / verifications (uploads)
   termsAndConditionsUrl: z.string().optional(),
 
@@ -235,3 +239,65 @@ export const autofillCorporateKraSchema = z.object({
 });
 
 export type AutofillCorporateKraPayload = z.infer<typeof autofillCorporateKraSchema>;
+
+// ---------------------------------------------------------------------------
+// Corporate KYC – E-Sign requests (CRM operator workflow)
+// ---------------------------------------------------------------------------
+
+export const ESignRequestStatusEnum = z.enum([
+  "PENDING",
+  "COMPLETED",
+  "REJECTED",
+]);
+
+export type ESignRequestStatusValue = z.infer<typeof ESignRequestStatusEnum>;
+
+/**
+ * Body for `POST /corporate-kyc/e-sign-requests`. The CRM operator uploads a
+ * PDF (`eSignDocumentUrl`) and picks one authorised signatory whose name +
+ * (optional) contact details are snapshotted into the request row.
+ */
+export const createCorporateESignRequestSchema = z.object({
+  eSignDocumentUrl: z
+    .string()
+    .trim()
+    .min(1, "Please upload the document to be signed"),
+  personName: z.string().trim().min(1, "Signatory name is required"),
+  authorisedSignatoryId: z.number().int().positive().optional(),
+  signatoryEmail: z
+    .string()
+    .trim()
+    .email("Please enter a valid email")
+    .optional()
+    .or(z.literal("")),
+  signatoryPan: z.string().trim().toUpperCase().optional().or(z.literal("")),
+  notes: z.string().trim().max(2000).optional().or(z.literal("")),
+});
+
+export type CreateCorporateESignRequestPayload = z.infer<
+  typeof createCorporateESignRequestSchema
+>;
+
+/**
+ * Body for `PATCH /corporate-kyc/e-sign-requests/:requestId`. The CRM
+ * operator uploads the signed PDF (`signFileUrl`) and/or changes the status.
+ * All fields are optional so the same endpoint handles "attach signed file",
+ * "mark completed", "reject" etc.
+ */
+export const updateCorporateESignRequestSchema = z
+  .object({
+    status: ESignRequestStatusEnum.optional(),
+    signFileUrl: z.string().trim().optional().or(z.literal("")),
+    notes: z.string().trim().max(2000).optional().or(z.literal("")),
+  })
+  .refine(
+    (v) =>
+      v.status !== undefined ||
+      (v.signFileUrl !== undefined && v.signFileUrl !== "") ||
+      v.notes !== undefined,
+    "Pass at least one of: status, signFileUrl, notes",
+  );
+
+export type UpdateCorporateESignRequestPayload = z.infer<
+  typeof updateCorporateESignRequestSchema
+>;
