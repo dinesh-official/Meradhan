@@ -19,6 +19,7 @@ import {
   DematAccountsSection,
   DirectorsSection,
   DocumentUrlsSection,
+  PartnersSection,
   PromotersSection,
 } from "./_components/CorporateKycSections";
 import { useState } from "react";
@@ -651,6 +652,7 @@ export default function CorporateProfileAndKycView({
                   <DematAccountsSection data={corporateKyc} />
                   <DirectorsSection data={corporateKyc} />
                   <PromotersSection data={corporateKyc} />
+                  <PartnersSection data={corporateKyc} />
                   <AuthorisedSignatoriesSection data={corporateKyc} />
                   <ESignRequestsCard
                     customerId={profileId}

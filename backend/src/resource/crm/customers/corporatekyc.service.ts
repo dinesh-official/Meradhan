@@ -128,6 +128,20 @@ function mapPayloadToPrismaCreate(customerId: number, payload: CreateCorporateKy
         mobile: p.mobile ?? undefined,
       })),
     },
+    partners: {
+      create: (payload.partners ?? []).map((p) => ({
+        fullName: p.fullName,
+        pan: p.pan ?? undefined,
+        panCopyFileUrl: p.panCopyFileUrl ?? undefined,
+        aadharCopyFileUrl: p.aadharCopyFileUrl ?? undefined,
+        passportPhotoFileUrl: p.passportPhotoFileUrl ?? undefined,
+        pepDeclaration: p.pepDeclaration ?? undefined,
+        designation: p.designation ?? undefined,
+        din: p.din ?? undefined,
+        email: p.email || undefined,
+        mobile: p.mobile ?? undefined,
+      })),
+    },
     authorisedSignatories: {
       create: (payload.authorisedSignatories ?? []).map((s) => ({
         fullName: s.fullName,
@@ -297,6 +311,21 @@ export class CorporateKycService {
             mobile: p.mobile ?? undefined,
           })),
         },
+        partners: {
+          deleteMany: {},
+          create: (payload.partners ?? []).map((p) => ({
+            fullName: p.fullName,
+            pan: p.pan ?? undefined,
+            panCopyFileUrl: p.panCopyFileUrl ?? undefined,
+            aadharCopyFileUrl: p.aadharCopyFileUrl ?? undefined,
+            passportPhotoFileUrl: p.passportPhotoFileUrl ?? undefined,
+            pepDeclaration: p.pepDeclaration ?? undefined,
+            designation: p.designation ?? undefined,
+            din: p.din ?? undefined,
+            email: p.email || undefined,
+            mobile: p.mobile ?? undefined,
+          })),
+        },
         authorisedSignatories: {
           deleteMany: {},
           create: (payload.authorisedSignatories ?? []).map((s) => ({
@@ -328,6 +357,7 @@ export class CorporateKycService {
           dematAccounts: true,
           directors: true,
           promoters: true,
+          partners: true,
           authorisedSignatories: true,
         },
       });
@@ -342,6 +372,7 @@ export class CorporateKycService {
         dematAccounts: true,
         directors: true,
         promoters: true,
+        partners: true,
         authorisedSignatories: true,
       },
     });
@@ -449,6 +480,19 @@ export class CorporateKycService {
         mobile: d.mobile ?? undefined,
       })),
       promoters: (row.promoters as any[]).map((p: any) => ({
+        id: p.id,
+        fullName: p.fullName,
+        pan: p.pan ?? undefined,
+        panCopyFileUrl: p.panCopyFileUrl ?? undefined,
+        aadharCopyFileUrl: p.aadharCopyFileUrl ?? undefined,
+        passportPhotoFileUrl: p.passportPhotoFileUrl ?? undefined,
+        pepDeclaration: p.pepDeclaration ?? undefined,
+        designation: p.designation ?? undefined,
+        din: p.din ?? undefined,
+        email: p.email ?? undefined,
+        mobile: p.mobile ?? undefined,
+      })),
+      partners: (row.partners as any[] | undefined ?? []).map((p: any) => ({
         id: p.id,
         fullName: p.fullName,
         pan: p.pan ?? undefined,

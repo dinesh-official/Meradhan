@@ -213,6 +213,12 @@ export type CorporateKycAutofillFormPatch = {
     din?: string;
     designation?: string;
   }>;
+  partners?: Array<{
+    fullName: string;
+    pan: string;
+    din?: string;
+    designation?: string;
+  }>;
   authorisedSignatories?: Array<{
     fullName: string;
     pan: string;

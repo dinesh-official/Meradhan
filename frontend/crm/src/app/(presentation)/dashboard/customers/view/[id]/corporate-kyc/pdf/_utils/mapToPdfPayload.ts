@@ -562,6 +562,7 @@ export function mapCorporateKycToPdfPayload(
   const primarySignatory = data.authorisedSignatories?.[0];
   const directors = data.directors ?? [];
   const promotersList = data.promoters ?? [];
+  const partnersList = data.partners ?? [];
 
   const customerEmail = customer?.emailAddress;
   const customerPhone = customer?.phoneNo;
@@ -626,7 +627,13 @@ export function mapCorporateKycToPdfPayload(
     beneficiaryId: acc.clientId ?? "",
   }));
 
-  const promoterRows: Promoter[] = [...directors, ...promotersList]
+  // Annexure-1 lists promoters/directors/partners together; dedupe by id so the
+  // same person isn't duplicated if they appear in multiple buckets.
+  const promoterRows: Promoter[] = [
+    ...directors,
+    ...promotersList,
+    ...partnersList,
+  ]
     .filter((p, idx, arr) => idx === arr.findIndex((x) => x.id === p.id))
     .map((p) => ({
       pan: p.pan ?? "",
@@ -707,7 +714,9 @@ export function mapCorporateKycToPdfPayload(
 
     numberOfRelatedPersons: Math.max(
       1,
-      (data.authorisedSignatories?.length ?? 0) + (data.directors?.length ?? 0),
+      (data.authorisedSignatories?.length ?? 0) +
+        (data.directors?.length ?? 0) +
+        (data.partners?.length ?? 0),
     ),
     remarks: "",
     applicantDeclarationDate: today,

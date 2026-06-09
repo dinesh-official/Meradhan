@@ -7,6 +7,7 @@ import type {
   CorporateKycDematAccountPayload,
   CorporateKycDirectorPayload,
   CorporateKycPromoterPayload,
+  CorporateKycPartnerPayload,
   CorporateKycAuthorisedSignatoryPayload,
 } from "@root/schema";
 import { useCallback, useState } from "react";
@@ -19,6 +20,7 @@ const NESTED_ERROR_KEYS = [
   "dematAccounts",
   "directors",
   "promoters",
+  "partners",
   "authorisedSignatories",
 ] as const;
 
@@ -29,6 +31,7 @@ export type CorporateKycFormErrors = Partial<
   dematAccounts?: NestedFieldErrors;
   directors?: NestedFieldErrors;
   promoters?: NestedFieldErrors;
+  partners?: NestedFieldErrors;
   authorisedSignatories?: NestedFieldErrors;
 };
 
@@ -53,6 +56,18 @@ const defaultDematAccount = (): CorporateKycDematAccountPayload => ({
 });
 
 const defaultDirector = (): CorporateKycDirectorPayload => ({
+  fullName: "",
+  pan: "",
+  panCopyFileUrl: "",
+  aadharCopyFileUrl: "",
+  passportPhotoFileUrl: "",
+  designation: "",
+  din: "",
+  email: "",
+  mobile: "",
+});
+
+const defaultPartner = (): CorporateKycPartnerPayload => ({
   fullName: "",
   pan: "",
   panCopyFileUrl: "",
@@ -220,6 +235,38 @@ export function useCorporateKycForm(initial: CreateCorporateKycPayload) {
     }));
   }, []);
 
+  const setPartner = useCallback(
+    (index: number, data: Partial<CorporateKycPartnerPayload>) => {
+      setForm((prev: CreateCorporateKycPayload) => {
+        const list = [...(prev.partners ?? [])];
+        list[index] = { ...defaultPartner(), ...list[index], ...data };
+        return { ...prev, partners: list };
+      });
+      setErrors((e) => {
+        const arr = [...(e.partners ?? [])];
+        if (arr[index]) arr[index] = {} as Record<string, string[]>;
+        return { ...e, partners: arr.length ? arr : undefined };
+      });
+    },
+    []
+  );
+
+  const addPartner = useCallback(() => {
+    setForm((prev: CreateCorporateKycPayload) => ({
+      ...prev,
+      partners: [...(prev.partners ?? []), defaultPartner()],
+    }));
+  }, []);
+
+  const removePartner = useCallback((index: number) => {
+    setForm((prev: CreateCorporateKycPayload) => ({
+      ...prev,
+      partners: (prev.partners ?? []).filter(
+        (_: CorporateKycPartnerPayload, i: number) => i !== index
+      ),
+    }));
+  }, []);
+
   const setAuthorisedSignatory = useCallback(
     (
       index: number,
@@ -331,6 +378,9 @@ export function useCorporateKycForm(initial: CreateCorporateKycPayload) {
     setPromoter,
     addPromoter,
     removePromoter,
+    setPartner,
+    addPartner,
+    removePartner,
     setAuthorisedSignatory,
     addAuthorisedSignatory,
     removeAuthorisedSignatory,

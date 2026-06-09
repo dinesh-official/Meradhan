@@ -30,6 +30,7 @@ export {
   type CorporateKycDematAccountPayload,
   type CorporateKycDirectorPayload,
   type CorporateKycPromoterPayload,
+  type CorporateKycPartnerPayload,
   type CorporateKycAuthorisedSignatoryPayload,
   type CorporateKraPastExecution,
   type TriggerCorporateKraPayload,
