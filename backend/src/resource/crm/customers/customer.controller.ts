@@ -9,6 +9,7 @@ import { createCrmActivityLog } from "@resource/crm/auditlogs/auditlog.repo";
 import { cacheStorage } from "@store/redis_store";
 import { kraWorkerQueue } from "@jobs/queue/worker_queues";
 import { CorporateKycAttachmentsRepo } from "./corporatekyc_attachments.repo";
+import { CorporateESignRequestsRepo } from "./corporate_esign.repo";
 import z from "zod";
 import { CustomerManageAccountsService } from "@resource/customer/profile/customer.manage_accounts.service";
 import { db } from "@core/database/database";
@@ -31,6 +32,7 @@ export class CustomerProfileController {
   private profileService: CustomerProfileService;
   private corporateKycService: CorporateKycService;
   private corporateKycAttachmentsRepo: CorporateKycAttachmentsRepo;
+  private corporateESignRequestsRepo: CorporateESignRequestsRepo;
   private manageAccountsService: CustomerManageAccountsService;
   private corporateKraDownloadService: CorporateKraDownloadService;
   constructor() {
@@ -38,6 +40,7 @@ export class CustomerProfileController {
     this.profileService = new CustomerProfileService(repo);
     this.corporateKycService = new CorporateKycService(new CorporateKycRepo());
     this.corporateKycAttachmentsRepo = new CorporateKycAttachmentsRepo();
+    this.corporateESignRequestsRepo = new CorporateESignRequestsRepo();
     this.manageAccountsService = new CustomerManageAccountsService();
     this.corporateKraDownloadService = new CorporateKraDownloadService();
   }
@@ -903,6 +906,229 @@ export class CustomerProfileController {
       statusCode: HttpStatus.OK,
       responseData: { isDeleted: true },
       message: "Attachment deleted successfully",
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // Corporate KYC – E-Sign requests
+  // -------------------------------------------------------------------------
+
+  async listCorporateESignRequests(req: Request, res: Response): Promise<void> {
+    const customerId = Number(req.params.customerId);
+    if (Number.isNaN(customerId)) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid customer id",
+      });
+      return;
+    }
+
+    const corporateKyc = await this.corporateKycService.getByCustomerId(customerId);
+    if (!corporateKyc) {
+      res.sendResponse({
+        statusCode: HttpStatus.OK,
+        responseData: [],
+      });
+      return;
+    }
+
+    const items = await this.corporateESignRequestsRepo.listByCorporateKycId(
+      corporateKyc.id,
+    );
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: items,
+    });
+  }
+
+  async createCorporateESignRequest(req: Request, res: Response): Promise<void> {
+    const customerId = Number(req.params.customerId);
+    if (Number.isNaN(customerId)) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid customer id",
+      });
+      return;
+    }
+
+    const corporateKyc = await this.corporateKycService.getByCustomerId(customerId);
+    if (!corporateKyc) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Corporate KYC data not found. Please save corporate KYC first.",
+      });
+      return;
+    }
+
+    const payload = appSchema.customer.createCorporateESignRequestSchema.parse(
+      req.body,
+    );
+
+    const createdByCrmUserId =
+      typeof (req.session as { id?: unknown } | undefined)?.id === "number"
+        ? ((req.session as { id: number }).id as number)
+        : undefined;
+
+    const created = await this.corporateESignRequestsRepo.create({
+      corporateKycModelId: corporateKyc.id,
+      eSignDocumentUrl: payload.eSignDocumentUrl,
+      personName: payload.personName,
+      authorisedSignatoryId: payload.authorisedSignatoryId ?? null,
+      signatoryEmail:
+        payload.signatoryEmail && payload.signatoryEmail !== ""
+          ? payload.signatoryEmail
+          : null,
+      signatoryPan:
+        payload.signatoryPan && payload.signatoryPan !== ""
+          ? payload.signatoryPan
+          : null,
+      notes: payload.notes && payload.notes !== "" ? payload.notes : null,
+      createdByCrmUserId,
+    });
+
+    await createCrmActivityLog(req, {
+      action: "create",
+      details: {
+        Reason: "CORPORATE_E_SIGN_REQUEST_CREATE",
+        PersonName: payload.personName,
+        Pan: payload.signatoryPan ?? "",
+      },
+      entityType: "CUSTOMER",
+      entityId: customerId,
+      userId: Number(req.session?.id),
+    });
+
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: created,
+      message: "E-Sign request created successfully",
+    });
+  }
+
+  async updateCorporateESignRequest(req: Request, res: Response): Promise<void> {
+    const customerId = Number(req.params.customerId);
+    const requestId = Number(req.params.requestId);
+    if (Number.isNaN(customerId) || Number.isNaN(requestId)) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid customer id or request id",
+      });
+      return;
+    }
+
+    const corporateKyc = await this.corporateKycService.getByCustomerId(customerId);
+    if (!corporateKyc) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Corporate KYC data not found. Please save corporate KYC first.",
+      });
+      return;
+    }
+
+    const payload = appSchema.customer.updateCorporateESignRequestSchema.parse(
+      req.body,
+    );
+
+    // If the operator just uploaded a signed file OR moved status away from
+    // PENDING, stamp `submittedAt = now()` so the timeline reflects the action.
+    const markSubmittedNow =
+      (payload.signFileUrl !== undefined && payload.signFileUrl !== "") ||
+      (payload.status !== undefined && payload.status !== "PENDING");
+
+    const updated = await this.corporateESignRequestsRepo.update(
+      { corporateKycModelId: corporateKyc.id, requestId },
+      {
+        status: payload.status,
+        signFileUrl:
+          payload.signFileUrl !== undefined
+            ? payload.signFileUrl === ""
+              ? null
+              : payload.signFileUrl
+            : undefined,
+        notes:
+          payload.notes !== undefined
+            ? payload.notes === ""
+              ? null
+              : payload.notes
+            : undefined,
+        markSubmittedNow,
+      },
+    );
+
+    if (!updated) {
+      res.sendResponse({
+        statusCode: HttpStatus.NOT_FOUND,
+        message: "E-Sign request not found",
+      });
+      return;
+    }
+
+    await createCrmActivityLog(req, {
+      action: "update",
+      details: {
+        Reason: "CORPORATE_E_SIGN_REQUEST_UPDATE",
+        RequestId: String(requestId),
+        Status: payload.status ?? updated.status,
+      },
+      entityType: "CUSTOMER",
+      entityId: customerId,
+      userId: Number(req.session?.id),
+    });
+
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: updated,
+      message: "E-Sign request updated successfully",
+    });
+  }
+
+  async deleteCorporateESignRequest(req: Request, res: Response): Promise<void> {
+    const customerId = Number(req.params.customerId);
+    const requestId = Number(req.params.requestId);
+    if (Number.isNaN(customerId) || Number.isNaN(requestId)) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid customer id or request id",
+      });
+      return;
+    }
+
+    const corporateKyc = await this.corporateKycService.getByCustomerId(customerId);
+    if (!corporateKyc) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Corporate KYC data not found. Please save corporate KYC first.",
+      });
+      return;
+    }
+
+    const deleted = await this.corporateESignRequestsRepo.deleteById({
+      corporateKycModelId: corporateKyc.id,
+      requestId,
+    });
+    if (!deleted) {
+      res.sendResponse({
+        statusCode: HttpStatus.NOT_FOUND,
+        message: "E-Sign request not found",
+      });
+      return;
+    }
+
+    await createCrmActivityLog(req, {
+      action: "delete",
+      details: {
+        Reason: "CORPORATE_E_SIGN_REQUEST_DELETE",
+        RequestId: String(requestId),
+      },
+      entityType: "CUSTOMER",
+      entityId: customerId,
+      userId: Number(req.session?.id),
+    });
+
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: { isDeleted: true },
+      message: "E-Sign request deleted successfully",
     });
   }
 

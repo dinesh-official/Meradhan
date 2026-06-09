@@ -36,6 +36,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useCorporateKycFileUpload } from "../../../[id]/corporate-kyc/_hooks/useCorporateKycFileUpload";
+import ESignRequestsCard from "./_components/ESignRequestsCard";
 
 /** Mirrors backend `corporateKycPdfFilename` in customer.service.ts so the saved file matches a direct API download. */
 function buildCorporateKycPdfFilename(customerId: number, entityName: string | undefined): string {
@@ -651,6 +652,10 @@ export default function CorporateProfileAndKycView({
                   <DirectorsSection data={corporateKyc} />
                   <PromotersSection data={corporateKyc} />
                   <AuthorisedSignatoriesSection data={corporateKyc} />
+                  <ESignRequestsCard
+                    customerId={profileId}
+                    corporateKyc={corporateKyc}
+                  />
                   <KraLogsCard logs={kraLogs} />
                 </>
               ) : null}

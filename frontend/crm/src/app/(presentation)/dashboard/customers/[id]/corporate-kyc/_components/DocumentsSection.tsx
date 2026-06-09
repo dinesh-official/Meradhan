@@ -39,11 +39,31 @@ const ATTACHMENT_FIELDS: {
   label: string;
 }[] = [{ key: "termsAndConditionsUrl", label: "Terms & Conditions" }];
 
+/**
+ * "Use existing KYC" reuse documents — both files are required together
+ * when the operator is electing to reuse an existing KYC instead of
+ * capturing one from scratch.
+ */
+const DECLARATION_FIELDS: {
+  key: keyof NonNullable<CorporateKycFormHook["form"]>;
+  label: string;
+}[] = [
+  { key: "existingKycFileUrl", label: "Existing KYC File" },
+  {
+    key: "useExistingKycDeclarationUrl",
+    label: "Declaration - Use Existing KYC File",
+  },
+];
+
 export function DocumentsSection({ hook }: { hook: CorporateKycFormHook }) {
   const { form, setField } = hook;
   const { uploadFile } = useCorporateKycFileUpload();
 
-  const uploadedList = [...DOCUMENT_FIELDS, ...ATTACHMENT_FIELDS].filter((f) => {
+  const uploadedList = [
+    ...DOCUMENT_FIELDS,
+    ...DECLARATION_FIELDS,
+    ...ATTACHMENT_FIELDS,
+  ].filter((f) => {
     const v = form[f.key];
     return typeof v === "string" && v.trim() !== "";
   });
@@ -66,6 +86,25 @@ export function DocumentsSection({ hook }: { hook: CorporateKycFormHook }) {
               placeholder="Select file or paste URL"
             />
           ))}
+        </div>
+
+        <div className="pt-2">
+          <h3 className="text-xs font-medium mb-2 text-muted-foreground">
+            Declarations
+          </h3>
+          <div className="grid gap-3 md:grid-cols-2">
+            {DECLARATION_FIELDS.map(({ key, label }) => (
+              <FileUploadField
+                key={key}
+                label={label}
+                value={(form[key] as string) ?? ""}
+                onChangeAction={(v) => setField(key, v)}
+                onUpload={(file) => uploadFile(file, "corporate-kyc")}
+                accept=".pdf,.jpg,.jpeg,.png"
+                placeholder="Select file or paste URL"
+              />
+            ))}
+          </div>
         </div>
 
         <div className="pt-2">

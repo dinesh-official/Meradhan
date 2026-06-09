@@ -1,4 +1,3 @@
-
 import "@packages/config/env";
 
 import type { Prisma } from "@databases/generated/prisma/postgres";

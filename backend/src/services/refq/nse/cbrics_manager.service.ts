@@ -84,6 +84,13 @@ export class ParticipantManager {
    * so we don't disturb existing behaviour.
    */
   public async registerCorporateParticipantFromCorporateKyc(userId: number) {
+    const user = await db.dataBase.customerProfileDataModel.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new AppError("Customer not found", {
+        code: "CUSTOMER_NOT_FOUND",
+        statusCode: 404,
+      });
+    }
     const corporateKyc = await db.dataBase.corporateKycModel.findUnique({
       where: { customerProfileDataModelId: userId },
       include: {
@@ -154,7 +161,7 @@ export class ParticipantManager {
       address3: address?.line3 || undefined,
       contactPerson,
       firstName: corporateKyc.entityName,
-      loginId: `CORP${userId}`,
+      loginId: user?.userName ?? "",
       mobileList: mobile ? [removeCountryCode(mobile)] : [],
       panNo: corporateKyc.panNumber ?? "",
       emailList: email ? [email] : [],
