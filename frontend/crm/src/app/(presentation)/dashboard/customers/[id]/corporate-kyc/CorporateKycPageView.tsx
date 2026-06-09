@@ -37,6 +37,7 @@ import { EntityDetailsSection } from "./_components/EntityDetailsSection";
 import { FatcaSection } from "./_components/FatcaSection";
 import { PromotersSection } from "./_components/PromotersSection";
 import { PartnersSection } from "./_components/PartnersSection";
+import { TrusteesSection } from "./_components/TrusteesSection";
 import { RegisteredAddressSection } from "./_components/RegisteredAddressSection";
 import { useCorporateKycFileUpload } from "./_hooks/useCorporateKycFileUpload";
 
@@ -186,6 +187,19 @@ export default function CorporateKycPageView({
           pan: p.pan,
           designation: p.designation ?? "",
           din: p.din ?? "",
+          email: "",
+          mobile: "",
+          panCopyFileUrl: "",
+          aadharCopyFileUrl: "",
+          passportPhotoFileUrl: "",
+        }));
+      }
+      if ((!current.trustees || current.trustees.length === 0) && patch.trustees?.length) {
+        merged.trustees = patch.trustees.map((t) => ({
+          fullName: t.fullName,
+          pan: t.pan,
+          designation: t.designation ?? "",
+          din: t.din ?? "",
           email: "",
           mobile: "",
           panCopyFileUrl: "",
@@ -604,9 +618,21 @@ export default function CorporateKycPageView({
         <FatcaSection hook={hook} />
         <BankAccountsSection hook={hook} />
         <DematAccountsSection hook={hook} />
-        <DirectorsSection hook={hook} />
+        {/*
+         * Constitution-aware governance section.
+         * - Trust  → list Trustees (NDML rel-code 04).
+         * - Others → list Directors + Partners (NDML rel-codes 02 & 06).
+         * Promoters & Authorised Signatories are always shown.
+         */}
+        {hook.form.entityConstitutionType === "TRUST" ? (
+          <TrusteesSection hook={hook} />
+        ) : (
+          <>
+            <DirectorsSection hook={hook} />
+            <PartnersSection hook={hook} />
+          </>
+        )}
         <PromotersSection hook={hook} />
-        <PartnersSection hook={hook} />
         <AuthorisedSignatoriesSection hook={hook} />
       </div>
     </div>

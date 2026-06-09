@@ -1,8 +1,6 @@
 import { db } from "@core/database/database";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 
-
-
 export class AuthRepo {
 
     async getAuthUserByEmail(email: string) {

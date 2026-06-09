@@ -31,6 +31,7 @@ export {
   type CorporateKycDirectorPayload,
   type CorporateKycPromoterPayload,
   type CorporateKycPartnerPayload,
+  type CorporateKycTrusteePayload,
   type CorporateKycAuthorisedSignatoryPayload,
   type CorporateKraPastExecution,
   type TriggerCorporateKraPayload,

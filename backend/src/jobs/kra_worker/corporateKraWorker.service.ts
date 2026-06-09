@@ -204,6 +204,7 @@ export class CorporateKraWorkerService {
                     directors: true,
                     promoters: true,
                     partners: true,
+                    trustees: true,
                     authorisedSignatories: true,
                 },
             });

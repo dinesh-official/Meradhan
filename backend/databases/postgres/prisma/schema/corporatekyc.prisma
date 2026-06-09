@@ -90,6 +90,7 @@ model CorporateKycModel {
   directors             CorporateKycDirectorModel[]
   promoters             CorporateKycPromoterModel[]
   partners              CorporateKycPartnerModel[]
+  trustees              CorporateKycTrusteeModel[]
   authorisedSignatories CorporateKycAuthorisedSignatoryModel[]
   attachments           CorporateKycAttachmentModel[]
 
@@ -250,6 +251,35 @@ model CorporateKycPartnerModel {
 
   @@index([corporateKycModelId])
   @@map("corporate_kyc_partners")
+}
+
+// ---------------------------------------------------------------------------
+// Trustee(s) for Corporate KYC – Trusts list trustees instead of directors /
+// partners. Mirrors the same shape so they share the NDML APP_ADDL_DATA
+// pipeline (trustees get relationship code "04").
+// ---------------------------------------------------------------------------
+model CorporateKycTrusteeModel {
+  id Int @id @default(autoincrement())
+
+  corporateKycModel   CorporateKycModel @relation(fields: [corporateKycModelId], references: [id], onDelete: Cascade)
+  corporateKycModelId Int
+
+  fullName             String
+  pan                  String?
+  panCopyFileUrl       String?
+  aadharCopyFileUrl    String?
+  passportPhotoFileUrl String?
+  pepDeclaration       String?
+  designation          String? /// e.g. Managing Trustee, Settlor
+  din                  String?
+  email                String?
+  mobile               String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([corporateKycModelId])
+  @@map("corporate_kyc_trustees")
 }
 
 // ---------------------------------------------------------------------------

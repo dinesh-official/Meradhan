@@ -142,6 +142,20 @@ function mapPayloadToPrismaCreate(customerId: number, payload: CreateCorporateKy
         mobile: p.mobile ?? undefined,
       })),
     },
+    trustees: {
+      create: (payload.trustees ?? []).map((t) => ({
+        fullName: t.fullName,
+        pan: t.pan ?? undefined,
+        panCopyFileUrl: t.panCopyFileUrl ?? undefined,
+        aadharCopyFileUrl: t.aadharCopyFileUrl ?? undefined,
+        passportPhotoFileUrl: t.passportPhotoFileUrl ?? undefined,
+        pepDeclaration: t.pepDeclaration ?? undefined,
+        designation: t.designation ?? undefined,
+        din: t.din ?? undefined,
+        email: t.email || undefined,
+        mobile: t.mobile ?? undefined,
+      })),
+    },
     authorisedSignatories: {
       create: (payload.authorisedSignatories ?? []).map((s) => ({
         fullName: s.fullName,
@@ -326,6 +340,21 @@ export class CorporateKycService {
             mobile: p.mobile ?? undefined,
           })),
         },
+        trustees: {
+          deleteMany: {},
+          create: (payload.trustees ?? []).map((t) => ({
+            fullName: t.fullName,
+            pan: t.pan ?? undefined,
+            panCopyFileUrl: t.panCopyFileUrl ?? undefined,
+            aadharCopyFileUrl: t.aadharCopyFileUrl ?? undefined,
+            passportPhotoFileUrl: t.passportPhotoFileUrl ?? undefined,
+            pepDeclaration: t.pepDeclaration ?? undefined,
+            designation: t.designation ?? undefined,
+            din: t.din ?? undefined,
+            email: t.email || undefined,
+            mobile: t.mobile ?? undefined,
+          })),
+        },
         authorisedSignatories: {
           deleteMany: {},
           create: (payload.authorisedSignatories ?? []).map((s) => ({
@@ -358,6 +387,7 @@ export class CorporateKycService {
           directors: true,
           promoters: true,
           partners: true,
+          trustees: true,
           authorisedSignatories: true,
         },
       });
@@ -373,6 +403,7 @@ export class CorporateKycService {
         directors: true,
         promoters: true,
         partners: true,
+        trustees: true,
         authorisedSignatories: true,
       },
     });
@@ -504,6 +535,19 @@ export class CorporateKycService {
         din: p.din ?? undefined,
         email: p.email ?? undefined,
         mobile: p.mobile ?? undefined,
+      })),
+      trustees: (row.trustees as any[] | undefined ?? []).map((t: any) => ({
+        id: t.id,
+        fullName: t.fullName,
+        pan: t.pan ?? undefined,
+        panCopyFileUrl: t.panCopyFileUrl ?? undefined,
+        aadharCopyFileUrl: t.aadharCopyFileUrl ?? undefined,
+        passportPhotoFileUrl: t.passportPhotoFileUrl ?? undefined,
+        pepDeclaration: t.pepDeclaration ?? undefined,
+        designation: t.designation ?? undefined,
+        din: t.din ?? undefined,
+        email: t.email ?? undefined,
+        mobile: t.mobile ?? undefined,
       })),
       authorisedSignatories: (row.authorisedSignatories as any[]).map((s: any) => ({
         id: s.id,

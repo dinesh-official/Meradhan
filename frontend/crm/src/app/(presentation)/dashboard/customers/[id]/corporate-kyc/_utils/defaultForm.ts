@@ -62,5 +62,6 @@ export const defaultCorporateKycForm: CreateCorporateKycPayload = {
   directors: [],
   promoters: [],
   partners: [],
+  trustees: [],
   authorisedSignatories: [],
 };

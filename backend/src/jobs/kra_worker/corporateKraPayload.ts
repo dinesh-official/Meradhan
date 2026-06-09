@@ -102,6 +102,15 @@ export interface CorporateKycInputForKra {
     mobile?: string | null;
     designation?: string | null;
   }> | null;
+
+  trustees?: Array<{
+    fullName?: string | null;
+    pan?: string | null;
+    din?: string | null;
+    email?: string | null;
+    mobile?: string | null;
+    designation?: string | null;
+  }> | null;
 }
 
 // ─── Formatting helpers (IST-stable, no Intl rounding surprises) ────────────
@@ -388,11 +397,12 @@ export function validateCorporateKycForKra(
     });
   }
 
-  // Directors + promoters + partners share the APP_ADDL_DATA constraints.
+  // Directors + promoters + partners + trustees share the APP_ADDL_DATA constraints.
   for (const list of [
     { rows: kyc.directors ?? [], key: "directors", relCode: "02 (Whole Time Director)" },
     { rows: kyc.promoters ?? [], key: "promoters", relCode: "01 (Promoter)" },
     { rows: kyc.partners ?? [], key: "partners", relCode: "06 (Partner)" },
+    { rows: kyc.trustees ?? [], key: "trustees", relCode: "04 (Trustee)" },
   ]) {
     list.rows.forEach((d, i) => {
       const nm = nz(d.fullName);
@@ -629,11 +639,12 @@ export function buildCorporateKraPayload(
    * APP_ADDL_DATA — one block per related person.
    *
    * NDML's "Relationship with Applicant" master allows multiple codes
-   * (01 = Promoter, 02 = Whole Time Director, 05 = Authorised Signatory,
-   * 06 = Partner, etc.). We emit Directors (rel-code "02") and LLP /
-   * Partnership-firm Partners (rel-code "06"). Authorised-signatory contact
-   * details are surfaced upstream via APP_EMAIL / APP_MOB_NO at the envelope
-   * level; promoter rows are intentionally omitted from this block.
+   * (01 = Promoter, 02 = Whole Time Director, 04 = Trustee,
+   * 05 = Authorised Signatory, 06 = Partner, etc.). We emit Directors
+   * (rel-code "02"), LLP / Partnership-firm Partners (rel-code "06") and
+   * Trust Trustees (rel-code "04"). Authorised-signatory contact details are
+   * surfaced upstream via APP_EMAIL / APP_MOB_NO at the envelope level;
+   * promoter rows are intentionally omitted from this block.
    *
    * Source: Static Codes sheet, rows "Relationship with Applicant".
    */
@@ -677,11 +688,13 @@ export function buildCorporateKraPayload(
   (kyc.directors ?? []).forEach((d) => pushAddl(d, "02"));
   // LLP / Partnership-firm partners use NDML relationship code "06".
   (kyc.partners ?? []).forEach((p) => pushAddl(p, "06"));
+  // Trust trustees use NDML relationship code "04".
+  (kyc.trustees ?? []).forEach((t) => pushAddl(t, "04"));
 
   if (addl.length === 0) {
     notes.push({
       xmlTag: "APP_ADDL_DATA",
-      note: "No directors or partners captured; empty additional data sent.",
+      note: "No directors, partners or trustees captured; empty additional data sent.",
     });
   }
 

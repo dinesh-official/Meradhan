@@ -315,6 +315,12 @@ export interface CorporateKycAutofillFormPatch {
     din?: string;
     designation?: string;
   }>;
+  trustees?: Array<{
+    fullName: string;
+    pan: string;
+    din?: string;
+    designation?: string;
+  }>;
   authorisedSignatories?: Array<{
     fullName: string;
     pan: string;
@@ -415,20 +421,24 @@ export function downloadToCorporateKycFormPatch(
   // NDML relationship codes:
   //   01 = Promoter, 02 = Whole-time Director, 03 = Karta (HUF),
   //   04 = Trustee, 05 = Authorised Signatory, 06 = Partner (LLP / firm)
-  // Authorised signatories and Partners get their own buckets; every other
-  // governance-related code (promoter, trustee, karta, beneficial-owner
-  // variants…) maps to the form's "directors" array.
+  // Authorised signatories, Partners and Trustees get their own buckets; every
+  // other governance-related code (promoter, karta, beneficial-owner variants…)
+  // maps to the form's "directors" array.
   const relCode = (r: AddlRow) =>
     String(r.APP_ADDLDATA_RELATIONSHIP ?? "").trim();
   const directors = addl
     .filter((r) => {
       const c = relCode(r);
-      return c !== "05" && c !== "06";
+      return c !== "04" && c !== "05" && c !== "06";
     })
     .map(toPerson)
     .filter((p) => p.fullName || p.pan);
   const partners = addl
     .filter((r) => relCode(r) === "06")
+    .map(toPerson)
+    .filter((p) => p.fullName || p.pan);
+  const trustees = addl
+    .filter((r) => relCode(r) === "04")
     .map(toPerson)
     .filter((p) => p.fullName || p.pan);
   const authorisedSignatories = addl
@@ -472,6 +482,7 @@ export function downloadToCorporateKycFormPatch(
 
     directors: directors.length ? directors : undefined,
     partners: partners.length ? partners : undefined,
+    trustees: trustees.length ? trustees : undefined,
     authorisedSignatories: authorisedSignatories.length ? authorisedSignatories : undefined,
   };
 

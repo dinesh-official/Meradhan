@@ -7,6 +7,7 @@ const corporateKycInclude = {
   directors: true,
   promoters: true,
   partners: true,
+  trustees: true,
   authorisedSignatories: true,
 } as const;
 
