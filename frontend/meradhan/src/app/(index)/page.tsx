@@ -15,23 +15,43 @@ export const generateMetadata = async () => {
   return await generatePagesMetaData("index");
 };
 
+// Helper: extract responseData from a settled promise; on rejection log the
+// reason and return an empty list so a single backend hiccup (ECONNRESET,
+// timeout, slow query…) doesn't take down the whole homepage render. Node 22's
+// undici has a known TransformStream cleanup bug that fires when an RSC stream
+// is aborted because a Server Component throws — eating the error here keeps
+// the render path complete and avoids triggering that secondary symptom.
+function pickResponseData<T>(
+  result: PromiseSettledResult<{ responseData?: T[] | null }>,
+  label: string,
+): T[] {
+  if (result.status === "fulfilled") {
+    return result.value?.responseData ?? [];
+  }
+  console.error(`[HomePage] ${label} failed:`, result.reason);
+  return [];
+}
+
 export default async function HomePage() {
   const apiCaller = new apiGateway.bondsApi.BondsApi(apiServerCaller);
 
-
-  const [latestRes, highYieldRes, zeroCouponRes] = await Promise.all([
+  const [latestRes, highYieldRes, zeroCouponRes] = await Promise.allSettled([
     apiCaller.getLatestBonds(100),
     apiCaller.getHighYieldBonds(100),
     apiCaller.getZeroCouponBonds(100),
   ]);
 
+  const latest = pickResponseData(latestRes, "getLatestBonds");
+  const highYield = pickResponseData(highYieldRes, "getHighYieldBonds");
+  const zeroCoupon = pickResponseData(zeroCouponRes, "getZeroCouponBonds");
+
   return (
     <ViewPort>
       <HomeHeroSection />
       <LatestBondReleases
-        latest={latestRes.responseData || []}
-        highYield={highYieldRes.responseData || []}
-        zeroCoupon={zeroCouponRes.responseData || []}
+        latest={latest}
+        highYield={highYield}
+        zeroCoupon={zeroCoupon}
       />
       <WhyMeraDhanSection />
       <ToolsOfferedByMeraDhan />
