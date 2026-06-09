@@ -19,6 +19,7 @@ const bondsFilterSchema = appSchema.bonds.bondsFilterSchema;
 // --- Hook ---
 export const useBondsFilters = ({ pathname, category }: { pathname: string, category: string }) => {
     const [search, setSearch] = useQueryState("search", parseAsString.withDefault(""));
+    const [navSearch] = useQueryState("navSearch", parseAsString.withDefault(""));
     const [maturity, setMaturity] = useQueryState("maturity", parseAsArrayOf(parseAsString).withDefault([]));
     const [rating, setRating] = useQueryState("rating", parseAsArrayOf(parseAsString).withDefault([]));
     const [coupon, setCoupon] = useQueryState("coupon", parseAsArrayOf(parseAsString).withDefault([]));
@@ -45,7 +46,7 @@ export const useBondsFilters = ({ pathname, category }: { pathname: string, cate
     const applyFilterMutation = useMutation({
         mutationKey: ["bonds", "filters"],
         mutationFn: async ({ filters }: { filters: z.infer<typeof bondsFilterSchema> }) => {
-            const queryFilter = validateBondsFilters(filters || {});
+            const queryFilter = validateBondsFilters({ ...(filters as Record<string, unknown>), navSearch });
             return await apiCaller.getListedBonds({
                 filters: queryFilter,
                 params: { page: 1, category }
@@ -67,6 +68,7 @@ export const useBondsFilters = ({ pathname, category }: { pathname: string, cate
 
     const anyFilterApplied = (() => {
         if (search) return true;
+        if (navSearch) return true;
         if (maturity.length > 0) return true;
         if (rating.length > 0) return true;
         if (coupon.length > 0) return true;

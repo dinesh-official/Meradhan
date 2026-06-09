@@ -73,7 +73,7 @@ export class CustomerPortfolioApi {
     body?: {
       page?: number;
       limit?: number;
-      bondTypes?: string[];
+      bondCategories?: string[];
       bondRatings?: string[];
       couponRanges?: string[];
       paymentFrequencies?: string[];
@@ -83,7 +83,7 @@ export class CustomerPortfolioApi {
     const payload = {
       page: body?.page,
       limit: body?.limit,
-      bondTypes: body?.bondTypes,
+      bondCategories: body?.bondCategories,
       bondRatings: body?.bondRatings,
       couponRanges: body?.couponRanges,
       paymentFrequencies: body?.paymentFrequencies,

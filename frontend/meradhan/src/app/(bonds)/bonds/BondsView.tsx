@@ -18,6 +18,8 @@ import BondPagePagination from "../_components/BondPagePagination";
 import ExploreBondsHeader from "../_components/ExploreBondsHeader";
 import useBondsFilters from "../_hooks/useBondsFilters";
 import { useViewModeStore } from "../_hooks/useViewModeStore";
+// [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold]
+import useBondFilterOptions from "../_hooks/useBondFilterOptions";
 
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -50,12 +52,14 @@ function BondsView({
 }) {
   const bondFilterManager = useBondsFilters({ pathname, category });
   const { setViewMode, viewMode } = useViewModeStore();
+  // [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold]
+  // Fetch dynamic filter options scoped to the current category
+  const filterOptions = useBondFilterOptions(category !== "all" ? category : undefined);
 
   const bondsListData =
     bondFilterManager.applyFilterMutation.data?.responseData || bondsData;
   const isFiltered = bondFilterManager.anyFilterApplied;
-  const showCategoriesAbove = options.showBondsByCategory && !isFiltered;
-  const showCategoriesBelow = options.showBondsByCategory && isFiltered;
+  const showCategories = options.showBondsByCategory;
 
   return (
     <>
@@ -66,11 +70,11 @@ function BondsView({
         applyFilters={() => {
           bondFilterManager.applyFilters(bondFilterManager.filters);
         }}
-
         rootUrl={pathname}
+        // [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold]
+        filterOptions={filterOptions}
       />
-      <SectionViewWrapper>
-        {showCategoriesAbove && <BondsByCategories />}
+      <SectionViewWrapper id="bonds-list">
         {options.showUpcomingBonds && <UpcomingBonds />}
         {bondFilterManager.applyFilterMutation.isPending ? (
           <div className="flex justify-center items-center h-96 container">
@@ -90,7 +94,7 @@ function BondsView({
             isFiltered={isFiltered}
           />
         )}
-        {showCategoriesBelow && (
+        {showCategories && (
           <div className="mt-14">
             <BondsByCategories />
           </div>
@@ -138,12 +142,7 @@ function RenderBondView({
     );
 
   return (
-    <div
-      className={cn(
-        "container",
-        options.showBondsByCategory && !isFiltered && "mt-14 ",
-      )}
-    >
+    <div className="container">
       <div className="flex justify-between items-center">
         {isFiltered ? (
           <h4 className="text-xl">
