@@ -3,7 +3,7 @@ name: stage be deploy
 on:
   push:
     branches:
-      - dev-fixing
+      - staging
 jobs:
   deploy:
     runs-on: ubuntu-latest
