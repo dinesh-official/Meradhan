@@ -314,9 +314,15 @@ export class CorporateKraWorkerService {
             }
 
             if (status === "REGISTER") {
-                // R1[Trigger Register API] then reschedule
+                // R1[Trigger Register API] then reschedule.
+                // APP_EMAIL / APP_MOB_NO must come from the customer's signup
+                // profile (same as CBRICS), not the authorised signatory.
                 const kraPayload = this.buildNonIndividualKraPayloadFromCorporateKyc(
-                    corporateKyc,
+                    {
+                        ...corporateKyc,
+                        primaryEmail: customer.emailAddress,
+                        primaryMobile: customer.phoneNo,
+                    },
                     pan,
                 );
 
@@ -391,8 +397,18 @@ export class CorporateKraWorkerService {
                     return;
                 }
 
-                // Compare with corporate data (real check based on corporate KYC)
-                const diff = this.diffCorporateKraDownload(corporateKyc, downloadRes, pan);
+                // Compare with corporate data (real check based on corporate KYC).
+                // Pass customer signup contact so APP_EMAIL / APP_MOB_NO drift
+                // is detected against the same source the builder used.
+                const diff = this.diffCorporateKraDownload(
+                    {
+                        ...corporateKyc,
+                        primaryEmail: customer.emailAddress,
+                        primaryMobile: customer.phoneNo,
+                    },
+                    downloadRes,
+                    pan,
+                );
 
                 if (diff.matched) {
                     await db.dataBase.kraDataLogs.create({
@@ -409,9 +425,13 @@ export class CorporateKraWorkerService {
                     return;
                 }
 
-                // MISMATCH -> MODIFY
+                // MISMATCH -> MODIFY. Same customer-profile contact source.
                 const kraPayload = this.buildNonIndividualKraPayloadFromCorporateKyc(
-                    corporateKyc,
+                    {
+                        ...corporateKyc,
+                        primaryEmail: customer.emailAddress,
+                        primaryMobile: customer.phoneNo,
+                    },
                     pan,
                     { isModify: true },
                 );
@@ -594,18 +614,18 @@ export class CorporateKraWorkerService {
         }
 
         // ── Contact (email + last-10 of phone) ─────────────────────────────
-        // CorporateKycInputForKra doesn't carry email/mobile on the root, but
-        // when it does we still want to catch drift; cast to a permissive shape.
-        const contact = corporateKyc as unknown as {
-            email?: string | null;
-            mobile?: string | null;
-            phone?: string | null;
-        };
-        compare("APP_EMAIL", inq.APP_EMAIL, contact.email, lower);
+        // The wire payload sources APP_EMAIL / APP_MOB_NO from the customer's
+        // signup profile (`primaryEmail` / `primaryMobile`), so diff against
+        // those. We also accept the authorised signatory as a fallback for
+        // legacy rows where the worker didn't pass signup data through.
+        const sig0 = (corporateKyc.authorisedSignatories ?? [])[0];
+        const expectedEmail = (corporateKyc.primaryEmail ?? sig0?.email ?? "").trim();
+        const expectedMobile = (corporateKyc.primaryMobile ?? sig0?.mobile ?? "").trim();
+        compare("APP_EMAIL", inq.APP_EMAIL, expectedEmail, lower);
         compare(
             "APP_MOB_NO",
             lastN(onlyDigits(inq.APP_MOB_NO), 10),
-            lastN(onlyDigits(contact.mobile ?? contact.phone), 10),
+            lastN(onlyDigits(expectedMobile), 10),
             trim,
         );
 

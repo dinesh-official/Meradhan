@@ -46,6 +46,7 @@ import apiGateway, {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
+  BadgeCheck,
   Check,
   CheckCircle2,
   ChevronLeft,
@@ -113,6 +114,8 @@ export default function CorporateKraView({ profileId }: { profileId: number }) {
   const [triggerOpen, setTriggerOpen] = useState(false);
   const [finishOpen, setFinishOpen] = useState(false);
   const [downloadOpen, setDownloadOpen] = useState(false);
+  const [verifyOpen, setVerifyOpen] = useState(false);
+  const [verifyConfirm, setVerifyConfirm] = useState("");
   const [showFullDownload, setShowFullDownload] = useState(false);
 
   const pastExecutionOptions: CorporateKraPastExecution[] = [
@@ -220,6 +223,29 @@ export default function CorporateKraView({ profileId }: { profileId: number }) {
     },
   });
 
+  const verifyMutation = useMutation({
+    mutationFn: async () => (await api.verifyCorporateCustomer(profileId)).data.responseData,
+    onSuccess: (res) => {
+      toast.success("Customer verified & activated.");
+      setVerifyOpen(false);
+      setVerifyConfirm("");
+      void queryClient.invalidateQueries({ queryKey: ["corporateKraPreview", profileId] });
+      void queryClient.invalidateQueries({ queryKey: ["customer", profileId] });
+      void queryClient.invalidateQueries({ queryKey: ["CorporateKraStatus", profileId] });
+      if (res?.warnings?.length) {
+        // Surface non-blocking pre-flight warnings as a second toast so the
+        // operator notices fields that were missing on the corporate KYC.
+        toast.warning(`Verified with ${res.warnings.length} warning(s).`);
+      }
+    },
+    onError: (err: { response?: { data?: { message?: string } } }) => {
+      toast.error(
+        err?.response?.data?.message ??
+          (err instanceof Error ? err.message : "Failed to verify corporate customer"),
+      );
+    },
+  });
+
   const data = previewQuery.data;
   const isLoading = previewQuery.isLoading;
 
@@ -280,6 +306,10 @@ export default function CorporateKraView({ profileId }: { profileId: number }) {
   const warnings = data.validation.warnings;
   const canTrigger = data.validation.canTrigger && !data.isRunning;
   const kraStatus = data.kraStatus?.kraStatus ?? null;
+  const kycStatusLabel = data.kraStatus?.kycStatus ?? null;
+  const isAlreadyVerified =
+    String(kycStatusLabel ?? "").trim().toUpperCase() === "VERIFIED";
+  const isVerifyConfirmValid = verifyConfirm.trim().toUpperCase() === "VERIFY";
 
   return (
     <div className="flex flex-col gap-6">
@@ -503,6 +533,134 @@ export default function CorporateKraView({ profileId }: { profileId: number }) {
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         ) : null}
                         Trigger KRA
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+
+                <Dialog
+                  open={verifyOpen}
+                  onOpenChange={(open) => {
+                    setVerifyOpen(open);
+                    if (!open) setVerifyConfirm("");
+                  }}
+                >
+                  <Button
+                    variant="default"
+                    className="bg-green-600 hover:bg-green-700"
+                    disabled={isAlreadyVerified || verifyMutation.isPending}
+                    title={
+                      isAlreadyVerified
+                        ? "Customer is already verified"
+                        : "Copy corporate KYC into the customer profile and mark KYC/KRA verified"
+                    }
+                    onClick={() => {
+                      if (isAlreadyVerified) {
+                        toast.info("Customer is already verified.");
+                        return;
+                      }
+                      setVerifyConfirm("");
+                      setVerifyOpen(true);
+                    }}
+                  >
+                    {verifyMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <BadgeCheck className="h-4 w-4" />
+                    )}
+                    Verify &amp; Activate Customer
+                  </Button>
+                  <DialogContent className="sm:max-w-lg">
+                    <DialogHeader>
+                      <DialogTitle>Verify &amp; activate corporate customer?</DialogTitle>
+                      <DialogDescription>
+                        Copies the corporate KYC into the customer&rsquo;s
+                        profile (fill-missing-only) and flips both KYC &amp;
+                        KRA status to <span className="font-mono">VERIFIED</span>.
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-4 text-sm">
+                      <div className="rounded-lg border bg-muted/30 p-3">
+                        <div className="font-semibold">What will be copied</div>
+                        <ul className="mt-2 list-disc pl-5 text-muted-foreground space-y-0.5">
+                          <li>PAN card row (when none exists yet)</li>
+                          <li>Current &amp; permanent address (from correspondence / registered blocks)</li>
+                          <li>Bank accounts (dedup by account number + IFSC)</li>
+                          <li>Demat accounts (dedup by DP id + client id)</li>
+                          <li>Legal entity name, FATCA flag, annual income</li>
+                        </ul>
+                        <div className="mt-2 text-xs text-muted-foreground">
+                          Existing customer-side rows are <span className="font-medium">never overwritten</span>.
+                        </div>
+                      </div>
+
+                      {kraStatus &&
+                      String(kraStatus).trim().toUpperCase() !== "VERIFIED" ? (
+                        <Alert className="border-amber-200 bg-amber-50/80 text-amber-900">
+                          <AlertTriangle className="h-4 w-4" />
+                          <AlertTitle>KRA is not VERIFIED yet</AlertTitle>
+                          <AlertDescription>
+                            Current KRA status:{" "}
+                            <span className="font-mono">{kraStatus}</span>. You can
+                            still proceed — KRA will be force-set to VERIFIED.
+                          </AlertDescription>
+                        </Alert>
+                      ) : null}
+
+                      {warnings.length > 0 ? (
+                        <div className="rounded-lg border bg-amber-50/60 p-3">
+                          <div className="text-sm font-semibold text-amber-900">
+                            Pre-flight warnings ({warnings.length})
+                          </div>
+                          <ul className="mt-2 list-disc pl-5 text-xs text-amber-900 space-y-1">
+                            {warnings.slice(0, 6).map((w, i) => (
+                              <li key={`${w.field}-${i}`}>
+                                <span className="font-medium">{w.field}</span>: {w.message}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : null}
+
+                      <div className="space-y-2">
+                        <Label htmlFor="corp-verify-confirm">
+                          Type <span className="font-semibold">VERIFY</span> to confirm
+                        </Label>
+                        <Input
+                          id="corp-verify-confirm"
+                          placeholder="Type VERIFY"
+                          value={verifyConfirm}
+                          onChange={(e) => setVerifyConfirm(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <DialogFooter className="gap-2 sm:gap-0">
+                      <Button
+                        variant="secondary"
+                        onClick={() => setVerifyOpen(false)}
+                        disabled={verifyMutation.isPending}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        className="bg-green-600 hover:bg-green-700"
+                        onClick={() => {
+                          if (!isVerifyConfirmValid) {
+                            toast.error("Please type VERIFY to proceed.");
+                            return;
+                          }
+                          verifyMutation.mutate();
+                        }}
+                        disabled={verifyMutation.isPending || !isVerifyConfirmValid}
+                      >
+                        {verifyMutation.isPending ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <BadgeCheck className="mr-2 h-4 w-4" />
+                        )}
+                        Verify &amp; Activate
                       </Button>
                     </DialogFooter>
                   </DialogContent>

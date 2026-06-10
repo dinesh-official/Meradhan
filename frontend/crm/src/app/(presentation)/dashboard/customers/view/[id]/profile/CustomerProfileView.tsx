@@ -12,13 +12,18 @@ import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { encodeId } from "@/global/utils/url.utils";
 import apiGateway from "@root/apiGateway";
 import { useQuery } from "@tanstack/react-query";
-import { Building2, IdCardIcon, NotebookPen } from "lucide-react";
+import { Building2, IdCardIcon, NotebookPen, ShieldCheck } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 import useAppCookie from "@/hooks/useAppCookie.hook";
+import { VerifyCustomerOtpDialog } from "./_components/VerifyCustomerOtpDialog";
 
 function CustomerProfileView({ profileId }: { profileId: number }) {
   const { cookies } = useAppCookie();
   const canViewAllInfo = hasOneOfPermission(cookies.role, ["view:customerkyc"]);
+  const [verifyChannel, setVerifyChannel] = useState<"mobile" | "email" | null>(
+    null,
+  );
   // const [useCustomerFormDataHook, setuseCustomerFormDataHook] = useState<GetCustomerResponseById>()])
   const fetchCustomer = async () => {
     const fetchCustomerProfile = new apiGateway.crm.customer.CrmCustomerApi(
@@ -109,21 +114,56 @@ function CustomerProfileView({ profileId }: { profileId: number }) {
           <b className="text-xs block mb-4 mt-7">Contact Information</b>
           <div className="grid xl:grid-cols-5 md:grid-cols-3 grid-cols-2 gap-5 mb-4">
             <LabelView title="Email ID">
-              <p>{customer?.emailAddress}</p>
+              <div className="flex flex-col gap-1">
+                <p className="break-all">{customer?.emailAddress || "—"}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <StatusBadge
+                    value={
+                      customer?.utility.isEmailVerified
+                        ? "Verified"
+                        : "pending"
+                    }
+                  />
+                  {customer && !customer.utility.isEmailVerified && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-6 px-2 py-0 text-xs"
+                      onClick={() => setVerifyChannel("email")}
+                    >
+                      <ShieldCheck className="size-3" /> Verify
+                    </Button>
+                  )}
+                </div>
+              </div>
             </LabelView>
             <LabelView title="Mobile Number">
-              <div className="flex flex-row gap-2">
-                <p>{customer?.phoneNo}</p>
-                <StatusBadge
-                  value={
-                    customer?.utility.isPhoneVerified ? "Verified" : "pending"
-                  }
-                />
+              <div className="flex flex-col gap-1">
+                <p>{customer?.phoneNo || "—"}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <StatusBadge
+                    value={
+                      customer?.utility.isPhoneVerified
+                        ? "Verified"
+                        : "pending"
+                    }
+                  />
+                  {customer && !customer.utility.isPhoneVerified && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-6 px-2 py-0 text-xs"
+                      onClick={() => setVerifyChannel("mobile")}
+                    >
+                      <ShieldCheck className="size-3" /> Verify
+                    </Button>
+                  )}
+                </div>
               </div>
             </LabelView>
             <LabelView title="WhatsApp Number">
               <div className="flex flex-row gap-2">
-                <p>{customer?.whatsAppNo}</p>
+                <p>{customer?.whatsAppNo || "—"}</p>
                 <StatusBadge
                   value={
                     customer?.utility.isPhoneVerified ? "Verified" : "pending"
@@ -134,6 +174,21 @@ function CustomerProfileView({ profileId }: { profileId: number }) {
           </div>
         </CardContent>
       </Card>
+
+      {customer && verifyChannel !== null && (
+        <VerifyCustomerOtpDialog
+          // Re-mount the dialog whenever the channel switches so the
+          // previous channel's OTP token, cooldown timer and entered
+          // digits can never leak into the new channel's verify call.
+          key={verifyChannel}
+          open
+          onOpenChange={(open) => {
+            if (!open) setVerifyChannel(null);
+          }}
+          customerId={profileId}
+          channel={verifyChannel}
+        />
+      )}
 
       <div className="grid lg:grid-cols-2 gap-5">
         <Card>

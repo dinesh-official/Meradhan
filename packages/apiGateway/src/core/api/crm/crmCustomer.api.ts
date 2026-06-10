@@ -3,6 +3,8 @@ import type { AxiosRequestConfig, AxiosResponse } from "axios";
 import type z from "zod";
 import type {
   CreateCustomerResponse,
+  CrmCustomerOtpSendResponse,
+  CrmCustomerOtpVerifyResponse,
   CustomerProfile,
   DeleteCustomerResponse,
   GetCorporateKycResponse,
@@ -10,10 +12,20 @@ import type {
   GetCustomerResponseById,
   SaveCorporateKycResponse,
   UpdateCustomerResponse,
+  VerifyCorporateCustomerResponse,
 } from "../../../types/response.types";
 import type { IApiCaller } from "../../connection/apiCaller.interface";
 import { ApiError } from "../../connection/error";
 import type { BaseResponseData } from "../../../types/base";
+
+/**
+ * Body for confirming a CRM-initiated customer OTP (mobile or email).
+ * `token` is returned by the matching `sendCustomer*VerifyOtp` call.
+ */
+export type CrmCustomerVerifyOtpConfirmPayload = {
+  otp: string;
+  token: string;
+};
 
 export type CorporateKraPastExecution =
   | "MODIFY"
@@ -395,6 +407,51 @@ export interface TCrmCustomerInterface {
     config?: AxiosRequestConfig,
   ): Promise<AxiosResponse<BaseResponseData<{ isFinished: boolean; removedJobIds: Array<string | number> }>>>;
 
+  /**
+   * CRM "Verify & Activate Customer" — copies the corporate KYC into the
+   * customer satellites (PAN, addresses, banks, demats, FATCA flag,
+   * legalEntityName, annualGrossIncome) — strictly fill-missing-only — and
+   * then flips kycStatus + kraStatus to VERIFIED. Idempotent; the backend
+   * returns 409 if the customer is already verified.
+   */
+  verifyCorporateCustomer(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<VerifyCorporateCustomerResponse>>;
+
+  /**
+   * Send an OTP to the customer's registered mobile so a CRM admin can
+   * mark the number as verified. Returns the `otpToken` to be echoed
+   * back in `verifyCustomerMobileOtp`.
+   */
+  sendCustomerMobileVerifyOtp(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<CrmCustomerOtpSendResponse>>;
+
+  /** Confirm the customer's mobile OTP and flip `utility.isPhoneVerified`. */
+  verifyCustomerMobileOtp(
+    customerId: number,
+    payload: CrmCustomerVerifyOtpConfirmPayload,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<CrmCustomerOtpVerifyResponse>>;
+
+  /**
+   * Send an OTP to the customer's registered email so a CRM admin can
+   * mark the address as verified. Rate-limited 5/min/IP on the backend.
+   */
+  sendCustomerEmailVerifyOtp(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<CrmCustomerOtpSendResponse>>;
+
+  /** Confirm the customer's email OTP and flip `utility.isEmailVerified`. */
+  verifyCustomerEmailOtp(
+    customerId: number,
+    payload: CrmCustomerVerifyOtpConfirmPayload,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<CrmCustomerOtpVerifyResponse>>;
+
   listCorporateKycAttachments(
     customerId: number,
     config?: AxiosRequestConfig,
@@ -656,6 +713,63 @@ export class CrmCustomerApi implements TCrmCustomerInterface {
     >(
       `/crm/customer/${customerId}/corporate-kyc/kra/finish`,
       {},
+      config,
+    );
+  }
+
+  async verifyCorporateCustomer(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["verifyCorporateCustomer"]> {
+    return this.apiClient.post<VerifyCorporateCustomerResponse>(
+      `/crm/customer/${customerId}/corporate-kyc/verify`,
+      {},
+      config,
+    );
+  }
+
+  async sendCustomerMobileVerifyOtp(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["sendCustomerMobileVerifyOtp"]> {
+    return this.apiClient.post<CrmCustomerOtpSendResponse>(
+      `/crm/customer/${customerId}/mobile/send-otp`,
+      {},
+      config,
+    );
+  }
+
+  async verifyCustomerMobileOtp(
+    customerId: number,
+    payload: CrmCustomerVerifyOtpConfirmPayload,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["verifyCustomerMobileOtp"]> {
+    return this.apiClient.post<CrmCustomerOtpVerifyResponse>(
+      `/crm/customer/${customerId}/mobile/verify-otp`,
+      payload,
+      config,
+    );
+  }
+
+  async sendCustomerEmailVerifyOtp(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["sendCustomerEmailVerifyOtp"]> {
+    return this.apiClient.post<CrmCustomerOtpSendResponse>(
+      `/crm/customer/${customerId}/email/send-otp`,
+      {},
+      config,
+    );
+  }
+
+  async verifyCustomerEmailOtp(
+    customerId: number,
+    payload: CrmCustomerVerifyOtpConfirmPayload,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["verifyCustomerEmailOtp"]> {
+    return this.apiClient.post<CrmCustomerOtpVerifyResponse>(
+      `/crm/customer/${customerId}/email/verify-otp`,
+      payload,
       config,
     );
   }

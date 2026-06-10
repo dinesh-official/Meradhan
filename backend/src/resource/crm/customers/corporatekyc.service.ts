@@ -1,11 +1,96 @@
 import type { CreateCorporateKycPayload } from "@root/schema";
 import { db } from "@core/database/database";
+import { AppError, HttpStatus } from "@utils/error/AppError";
 import { CorporateKycRepo } from "./corporatekyc.repo";
 
 function parseDate(s: string | undefined): Date | undefined {
   if (!s) return undefined;
   const d = new Date(s);
   return isNaN(d.getTime()) ? undefined : d;
+}
+
+/**
+ * `true` when the linked customer is KYC-verified or KRA-verified. Once
+ * either status is "VERIFIED" the bank/demat accounts have been sent to
+ * NDML/CBRICS and cannot be mutated from the CRM corporate-KYC form — any
+ * change must go through a dedicated modify flow with full audit.
+ */
+function isAccountsLocked(
+  customer?: { kycStatus?: string | null; kraStatus?: string | null } | null,
+): boolean {
+  if (!customer) return false;
+  const kyc = String(customer.kycStatus ?? "").trim().toUpperCase();
+  const kra = String(customer.kraStatus ?? "").trim().toUpperCase();
+  return kyc === "VERIFIED" || kra === "VERIFIED";
+}
+
+/**
+ * Returns a stable, sorted signature for a list of bank accounts so two
+ * snapshots can be compared by value. Field choice intentionally covers
+ * everything the CRM form can mutate, so any visible edit triggers a diff.
+ */
+function bankAccountsSignature(
+  rows: ReadonlyArray<{
+    accountHolderName?: string | null;
+    accountNumber?: string | null;
+    branch?: string | null;
+    bankName?: string | null;
+    ifscCode?: string | null;
+    bankProofFileUrls?: unknown;
+    isPrimaryAccount?: boolean | null;
+  }>,
+): string {
+  const norm = (v: unknown) =>
+    String(v ?? "").trim().toUpperCase();
+  const urls = (u: unknown): string => {
+    if (!Array.isArray(u)) return "[]";
+    return JSON.stringify(
+      (u as unknown[]).map((s) => String(s ?? "").trim()).sort(),
+    );
+  };
+  return rows
+    .map((a) =>
+      [
+        norm(a.accountNumber),
+        norm(a.ifscCode),
+        norm(a.bankName),
+        norm(a.accountHolderName),
+        norm(a.branch),
+        a.isPrimaryAccount ? "1" : "0",
+        urls(a.bankProofFileUrls),
+      ].join("|"),
+    )
+    .sort()
+    .join("\n");
+}
+
+/** Same idea for demat accounts. */
+function dematAccountsSignature(
+  rows: ReadonlyArray<{
+    depository?: string | null;
+    accountType?: string | null;
+    dpId?: string | null;
+    clientId?: string | null;
+    accountHolderName?: string | null;
+    dematProofFileUrl?: string | null;
+    isPrimary?: boolean | null;
+  }>,
+): string {
+  const norm = (v: unknown) => String(v ?? "").trim().toUpperCase();
+  return rows
+    .map((d) =>
+      [
+        norm(d.depository),
+        norm(d.dpId),
+        norm(d.clientId),
+        norm(d.accountType),
+        norm(d.accountHolderName),
+        norm(d.dematProofFileUrl),
+        d.isPrimary ? "1" : "0",
+      ].join("|"),
+    )
+    .sort()
+    .join("\n");
 }
 
 function mapPayloadToPrismaCreate(customerId: number, payload: CreateCorporateKycPayload) {
@@ -191,10 +276,34 @@ export class CorporateKycService {
   }
 
   async save(customerId: number, payload: CreateCorporateKycPayload) {
-    await this.repo.ensureCustomerExists(customerId);
+    const customer = await this.repo.ensureCustomerExists(customerId);
     const existing = await this.repo.findByCustomerId(customerId);
 
     if (existing) {
+      // When the customer is KYC/KRA-verified the bank + demat lists are
+      // sealed (already sent to NDML / CBRICS). Reject any edit/add/delete
+      // and skip the destructive `deleteMany + create` replace below so a
+      // stale frontend can't silently re-create rows with new IDs.
+      const locked = isAccountsLocked(customer);
+      if (locked) {
+        const existingBanksSig = bankAccountsSignature(existing.bankAccounts ?? []);
+        const incomingBanksSig = bankAccountsSignature(payload.bankAccounts ?? []);
+        if (existingBanksSig !== incomingBanksSig) {
+          throw new AppError(
+            "Bank accounts cannot be edited or deleted because this customer is KYC/KRA verified. Use the bank-account modify flow.",
+            { code: "CORPORATE_KYC_BANK_LOCKED", statusCode: HttpStatus.FORBIDDEN },
+          );
+        }
+        const existingDematsSig = dematAccountsSignature(existing.dematAccounts ?? []);
+        const incomingDematsSig = dematAccountsSignature(payload.dematAccounts ?? []);
+        if (existingDematsSig !== incomingDematsSig) {
+          throw new AppError(
+            "Demat accounts cannot be edited or deleted because this customer is KYC/KRA verified. Use the demat-account modify flow.",
+            { code: "CORPORATE_KYC_DEMAT_LOCKED", statusCode: HttpStatus.FORBIDDEN },
+          );
+        }
+      }
+
       const prisma = db.dataBase;
       const main = {
         entityName: payload.entityName,
@@ -271,30 +380,38 @@ export class CorporateKycService {
         taxResidencyOfEntity: payload.taxResidencyOfEntity ?? undefined,
         declarationByAuthorisedSignatory:
           payload.declarationByAuthorisedSignatory ?? false,
-        bankAccounts: {
-          deleteMany: {},
-          create: (payload.bankAccounts ?? []).map((acc) => ({
-            accountHolderName: acc.accountHolderName,
-            accountNumber: acc.accountNumber,
-            branch: acc.branch ?? undefined,
-            bankName: acc.bankName,
-            ifscCode: acc.ifscCode,
-            bankProofFileUrls: (acc.bankProofFileUrls ?? []) as unknown as object,
-            isPrimaryAccount: acc.isPrimaryAccount ?? false,
-          })),
-        },
-        dematAccounts: {
-          deleteMany: {},
-          create: (payload.dematAccounts ?? []).map((d) => ({
-            depository: d.depository,
-            accountType: d.accountType ?? undefined,
-            dpId: d.dpId,
-            clientId: d.clientId,
-            accountHolderName: d.accountHolderName,
-            dematProofFileUrl: d.dematProofFileUrl ?? undefined,
-            isPrimary: d.isPrimary ?? false,
-          })),
-        },
+        // When locked, skip the wipe-and-recreate so existing row IDs are
+        // preserved (the equality check above already proved nothing
+        // changed). When unlocked, the form is the source of truth and we
+        // replace the lists as before.
+        ...(locked
+          ? {}
+          : {
+              bankAccounts: {
+                deleteMany: {},
+                create: (payload.bankAccounts ?? []).map((acc) => ({
+                  accountHolderName: acc.accountHolderName,
+                  accountNumber: acc.accountNumber,
+                  branch: acc.branch ?? undefined,
+                  bankName: acc.bankName,
+                  ifscCode: acc.ifscCode,
+                  bankProofFileUrls: (acc.bankProofFileUrls ?? []) as unknown as object,
+                  isPrimaryAccount: acc.isPrimaryAccount ?? false,
+                })),
+              },
+              dematAccounts: {
+                deleteMany: {},
+                create: (payload.dematAccounts ?? []).map((d) => ({
+                  depository: d.depository,
+                  accountType: d.accountType ?? undefined,
+                  dpId: d.dpId,
+                  clientId: d.clientId,
+                  accountHolderName: d.accountHolderName,
+                  dematProofFileUrl: d.dematProofFileUrl ?? undefined,
+                  isPrimary: d.isPrimary ?? false,
+                })),
+              },
+            }),
         directors: {
           deleteMany: {},
           create: (payload.directors ?? []).map((d) => ({
@@ -565,6 +682,11 @@ export class CorporateKycService {
       })),
       createdAt: row.createdAt.toISOString(),
       updatedAt: row.updatedAt.toISOString(),
+      // Customer verification snapshot. The CRM uses these (and the derived
+      // `isAccountsLocked` flag) to gate bank/demat editing in the form.
+      kycStatus: row.customerProfileDataModel?.kycStatus ?? null,
+      kraStatus: row.customerProfileDataModel?.kraStatus ?? null,
+      isAccountsLocked: isAccountsLocked(row.customerProfileDataModel ?? null),
     };
   }
 }

@@ -442,4 +442,25 @@ export const customerEmailChangeVerifySchema = z.object({
   }),
 });
 
+/**
+ * CRM admin-initiated OTP confirmation for a customer's email or mobile.
+ *
+ * `customerId` is in the URL params, not the body. The send-OTP endpoints
+ * take an empty body (channel is implicit in the route), so only the
+ * confirm step needs a payload — the OTP code and the JWT-carried token
+ * returned by the matching send call.
+ *
+ * Width: `min(4)` accepts both 4-digit (MSG91 MOBILE_VERIFY) and 6-digit
+ * (EMAIL_VERIFY) OTPs without splitting the schema.
+ */
+export const crmCustomerVerifyOtpConfirmSchema = z.object({
+  otp: z
+    .string({ error: "OTP is required" })
+    .min(4, { message: "OTP must be at least 4 digits" })
+    .max(6, { message: "OTP must be at most 6 digits" }),
+  token: z
+    .string({ error: "Token is required" })
+    .min(1, { message: "Token is required" }),
+});
+
 export * from "./corporateKyc.schema";
