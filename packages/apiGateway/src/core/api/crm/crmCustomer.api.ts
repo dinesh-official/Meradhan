@@ -11,6 +11,7 @@ import type {
   GetCustomerResponse,
   GetCustomerResponseById,
   SaveCorporateKycResponse,
+  SetCorporateKycLastPdfResponse,
   UpdateCustomerResponse,
   VerifyCorporateCustomerResponse,
 } from "../../../types/response.types";
@@ -253,6 +254,40 @@ export type CorporateKraAutofillResponse = {
   formPatch: CorporateKycAutofillFormPatch;
 };
 
+/**
+ * Single validation note attached to the CBRICS payload preview (mirrors
+ * the KRA preview shape so the UI can reuse the same rendering).
+ */
+export type CorporateCbricsValidationIssue = {
+  field: string;
+  severity: "ERROR" | "WARN";
+  message: string;
+};
+
+/**
+ * Snapshot of the JSON the SDK would POST to NSE CBRICS for this
+ * corporate, plus a pre-flight validation report.
+ *
+ * `register` corresponds to `POST /rest/v1/unreg` (first-time
+ * registration), `modify` to `POST /rest/v1/unreg/update` (subsequent
+ * field edits). Both blocks are always populated so operators can
+ * eyeball the diff between them; `modify.id` will be `null` until the
+ * customer has been registered on CBRICS at least once.
+ */
+export type CorporateCbricsPreview = {
+  register: Record<string, unknown>;
+  modify: Record<string, unknown>;
+  validation: {
+    errors: CorporateCbricsValidationIssue[];
+    warnings: CorporateCbricsValidationIssue[];
+  };
+  participantId: number | null;
+  endpoint: {
+    register: string;
+    modify: string;
+  };
+};
+
 export type CorporateKraPreviewResponse =
   | {
       hasCorporateKyc: false;
@@ -293,6 +328,12 @@ export type CorporateKraPreviewResponse =
         };
       };
       codeReference: CorporateKraCodeReference;
+      /**
+       * Live JSON payloads the SDK would POST to NSE CBRICS for this
+       * corporate (register + modify), with the same source data the
+       * actual register flow reads. See {@link CorporateCbricsPreview}.
+       */
+      cbrics: CorporateCbricsPreview;
       /**
        * Latest persisted NDML download for this customer (manual or worker
        * trigger). `null` until at least one `Download from KRA` call has been
@@ -353,6 +394,18 @@ export interface TCrmCustomerInterface {
     data: z.infer<(typeof appSchema.customer)["createCorporateKycSchema"]>,
     config?: AxiosRequestConfig,
   ): Promise<AxiosResponse<SaveCorporateKycResponse>>;
+
+  /**
+   * Records the S3 URL of the most recently generated 19-page corporate
+   * KYC PDF on the corporate KYC row. The CRM PDF page calls this right
+   * after a successful render so the "Download last PDF" button can pick
+   * the snapshot up on the next `getCorporateKyc` refetch.
+   */
+  setCorporateKycLastPdf(
+    customerId: number,
+    payload: { fileUrl: string },
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<SetCorporateKycLastPdfResponse>>;
 
   corporateKraStatus(
     customerId: number,
@@ -645,6 +698,18 @@ export class CrmCustomerApi implements TCrmCustomerInterface {
     return this.apiClient.put<SaveCorporateKycResponse>(
       `/crm/customer/${customerId}/corporate-kyc`,
       data,
+      config,
+    );
+  }
+
+  async setCorporateKycLastPdf(
+    customerId: number,
+    payload: { fileUrl: string },
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["setCorporateKycLastPdf"]> {
+    return this.apiClient.post<SetCorporateKycLastPdfResponse>(
+      `/crm/customer/${customerId}/corporate-kyc/last-pdf`,
+      payload,
       config,
     );
   }

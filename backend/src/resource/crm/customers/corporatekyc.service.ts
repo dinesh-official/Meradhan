@@ -281,25 +281,35 @@ export class CorporateKycService {
 
     if (existing) {
       // When the customer is KYC/KRA-verified the bank + demat lists are
-      // sealed (already sent to NDML / CBRICS). Reject any edit/add/delete
-      // and skip the destructive `deleteMany + create` replace below so a
-      // stale frontend can't silently re-create rows with new IDs.
+      // sealed (already sent to NDML / CBRICS). The CRM form is rendered
+      // read-only on the frontend, so any bank/demat payload arriving here
+      // is either a round-trip echo (form state ↔ payload normalisation
+      // drift) or a tampered request. Either way the resolution is the
+      // same: leave the stored rows untouched.
+      //
+      // We deliberately do NOT throw here. Earlier we compared signatures
+      // and 403'd on diff, but legitimate round-trip drift (e.g. `branch:
+      // null` in DB ↔ `branch: ""` in payload, or JSON-vs-array shapes
+      // for `bankProofFileUrls`) caused false positives that blocked
+      // unrelated field edits on the same form. Silently dropping the
+      // bank/demat sections from the update payload is the safer
+      // behaviour: the rest of the form saves, and the protected rows
+      // stay verbatim.
       const locked = isAccountsLocked(customer);
+
+      // Lightweight audit so anomalies are still visible if they ever
+      // occur — fire-and-forget; we don't want a logger failure to break
+      // the save.
       if (locked) {
-        const existingBanksSig = bankAccountsSignature(existing.bankAccounts ?? []);
-        const incomingBanksSig = bankAccountsSignature(payload.bankAccounts ?? []);
-        if (existingBanksSig !== incomingBanksSig) {
-          throw new AppError(
-            "Bank accounts cannot be edited or deleted because this customer is KYC/KRA verified. Use the bank-account modify flow.",
-            { code: "CORPORATE_KYC_BANK_LOCKED", statusCode: HttpStatus.FORBIDDEN },
-          );
-        }
-        const existingDematsSig = dematAccountsSignature(existing.dematAccounts ?? []);
-        const incomingDematsSig = dematAccountsSignature(payload.dematAccounts ?? []);
-        if (existingDematsSig !== incomingDematsSig) {
-          throw new AppError(
-            "Demat accounts cannot be edited or deleted because this customer is KYC/KRA verified. Use the demat-account modify flow.",
-            { code: "CORPORATE_KYC_DEMAT_LOCKED", statusCode: HttpStatus.FORBIDDEN },
+        const banksDiffer =
+          bankAccountsSignature(existing.bankAccounts ?? []) !==
+          bankAccountsSignature(payload.bankAccounts ?? []);
+        const dematsDiffer =
+          dematAccountsSignature(existing.dematAccounts ?? []) !==
+          dematAccountsSignature(payload.dematAccounts ?? []);
+        if (banksDiffer || dematsDiffer) {
+          console.warn(
+            `[CorporateKycService.save] Ignoring bank/demat changes for verified customer #${customerId} (banksDiffer=${banksDiffer}, dematsDiffer=${dematsDiffer}). Frontend lock should have prevented this.`,
           );
         }
       }
@@ -687,6 +697,54 @@ export class CorporateKycService {
       kycStatus: row.customerProfileDataModel?.kycStatus ?? null,
       kraStatus: row.customerProfileDataModel?.kraStatus ?? null,
       isAccountsLocked: isAccountsLocked(row.customerProfileDataModel ?? null),
+      // S3 URL of the most recently generated corporate KYC PDF (set by
+      // `setLastGeneratedPdf` after the CRM "Generate" action) + the
+      // wall-clock timestamp of that generation. Both `null` until the
+      // first generation runs.
+      lastGeneratedPdfUrl: row.lastGeneratedPdfUrl ?? null,
+      lastGeneratedPdfAt: row.lastGeneratedPdfAt
+        ? row.lastGeneratedPdfAt.toISOString()
+        : null,
+    };
+  }
+
+  /**
+   * Records the S3 location of the most recently generated 19-page
+   * corporate KYC PDF. The CRM uploads the rendered blob to `/files/upload`
+   * (which returns an S3 location), then calls this so the URL is persisted
+   * on the corporate KYC row and surfaced as "Download last PDF".
+   *
+   * Throws when the customer doesn't exist or hasn't started corporate KYC.
+   */
+  async setLastGeneratedPdf(customerId: number, fileUrl: string) {
+    await this.repo.ensureCustomerExists(customerId);
+    const existing = await this.repo.findByCustomerId(customerId);
+    if (!existing) {
+      throw new AppError("Corporate KYC not found for this customer.", {
+        code: "CORPORATE_KYC_NOT_FOUND",
+        statusCode: HttpStatus.NOT_FOUND,
+      });
+    }
+    const trimmed = fileUrl.trim();
+    if (!trimmed) {
+      throw new AppError("File URL is required", {
+        code: "CORPORATE_KYC_PDF_URL_REQUIRED",
+        statusCode: HttpStatus.BAD_REQUEST,
+      });
+    }
+    const updated = await db.dataBase.corporateKycModel.update({
+      where: { id: existing.id },
+      data: {
+        lastGeneratedPdfUrl: trimmed,
+        lastGeneratedPdfAt: new Date(),
+      },
+      select: { lastGeneratedPdfUrl: true, lastGeneratedPdfAt: true },
+    });
+    return {
+      lastGeneratedPdfUrl: updated.lastGeneratedPdfUrl ?? null,
+      lastGeneratedPdfAt: updated.lastGeneratedPdfAt
+        ? updated.lastGeneratedPdfAt.toISOString()
+        : null,
     };
   }
 }

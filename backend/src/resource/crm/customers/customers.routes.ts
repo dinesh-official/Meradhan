@@ -99,6 +99,18 @@ crmCustomersRoutes.get(
   (req, res) => controller.downloadCorporateKycPdf(req, res)
 );
 
+/**
+ * Persist the S3 URL of the most recently generated corporate KYC PDF.
+ * Called by the CRM PDF page immediately after a successful render so the
+ * "Download last PDF" button on the same page can read it from
+ * `getCorporateKyc`.
+ */
+crmCustomersRoutes.post(
+  "/api/crm/customer/:customerId/corporate-kyc/last-pdf",
+  allowAccessMiddleware("ADMIN", "USER"),
+  (req, res) => controller.setCorporateKycLastPdf(req, res),
+);
+
 crmCustomersRoutes.get(
   "/api/crm/customer/:customerId/corporate-kyc",
   allowAccessMiddleware("ADMIN", "USER"),

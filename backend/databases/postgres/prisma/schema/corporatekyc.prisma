@@ -71,6 +71,16 @@ model CorporateKycModel {
   /// `existingKycFileUrl`.
   useExistingKycDeclarationUrl String?
 
+  /// S3 URL of the most recently generated 19-page corporate KYC PDF
+  /// snapshot. The CRM "Download last PDF" button reads this directly.
+  /// Each generation overwrites the value (history isn't kept here on
+  /// purpose; if needed we can grow into an attachment-based log later).
+  lastGeneratedPdfUrl String?
+  /// Wall-clock timestamp the snapshot in `lastGeneratedPdfUrl` was
+  /// produced. Surfaced in the CRM so operators know how stale the
+  /// "Download last PDF" artifact is before sending it out.
+  lastGeneratedPdfAt  DateTime?
+
   // ---------- Attachments / verifications (uploads) ----------
   termsAndConditionsUrl String?
 

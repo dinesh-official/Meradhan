@@ -29,6 +29,7 @@ import { env } from "@packages/config/env";
 import { CorporateKraDownloadService } from "@jobs/kra_worker/corporateKraDownload.service";
 import { CorporateKycVerifyService } from "./corporateKycVerify.service";
 import { CrmCustomerVerifyOtpService } from "./crmCustomerVerifyOtp.service";
+import { buildCorporateCbricsPayload } from "@services/refq/nse/corporateCbricsPayload";
 
 export class CustomerProfileController {
   private profileService: CustomerProfileService;
@@ -227,6 +228,43 @@ export class CustomerProfileController {
           err instanceof Error ? err.message : "Failed to generate corporate KYC PDF",
       });
     }
+  }
+
+  /**
+   * Records the S3 URL of the most recently generated corporate KYC PDF.
+   *
+   * The CRM PDF page generates the rendered PDF via the external pdf-service,
+   * uploads the resulting blob to `POST /api/files/upload` (S3), and then
+   * calls this endpoint with the returned `fileUrl` so the snapshot is
+   * persisted on the corporate KYC row. The "Download last PDF" button on
+   * the same page reads `lastGeneratedPdfUrl` off `getCorporateKyc`.
+   */
+  async setCorporateKycLastPdf(req: Request, res: Response): Promise<void> {
+    const customerId = Number(req.params.customerId);
+    if (Number.isNaN(customerId)) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid customer id",
+      });
+      return;
+    }
+
+    const payload = z
+      .object({
+        fileUrl: z.string().trim().min(1, "File URL is required"),
+      })
+      .parse(req.body);
+
+    const result = await this.corporateKycService.setLastGeneratedPdf(
+      customerId,
+      payload.fileUrl,
+    );
+
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      message: "Corporate KYC last PDF recorded.",
+      responseData: result,
+    });
   }
 
   async saveCorporateKyc(req: Request, res: Response): Promise<void> {
@@ -444,11 +482,26 @@ export class CustomerProfileController {
           promoters: true,
           partners: true,
           trustees: true,
+          // CBRICS preview needs the same bank/demat lists that the live
+          // register flow (`registerCorporateParticipantFromCorporateKyc`)
+          // loads — so the JSON shown in the "CBRICS payload" tab matches
+          // the actual POST body byte-for-byte.
+          bankAccounts: true,
+          dematAccounts: true,
         },
       }),
       db.dataBase.customerProfileDataModel.findUnique({
         where: { id: customerId },
-        select: { emailAddress: true, phoneNo: true },
+        select: {
+          emailAddress: true,
+          phoneNo: true,
+          userName: true,
+          nseDataSet: {
+            select: {
+              participant: { select: { id: true } },
+            },
+          },
+        },
       }),
     ]);
 
@@ -581,6 +634,55 @@ export class CustomerProfileController {
       return { ...l, decoded };
     });
 
+    // ── CBRICS payload preview (register + modify) ─────────────────────
+    // Built from the *same* corporate KYC row + customer profile that
+    // `ParticipantManager.registerCorporateParticipantFromCorporateKyc`
+    // reads at register time, so the JSON the operator sees here is the
+    // literal POST body the SDK would send.
+    const cbrics = buildCorporateCbricsPayload({
+      corporateKyc: {
+        entityName: corporateKyc.entityName,
+        panNumber: corporateKyc.panNumber,
+        dateOfIncorporation: corporateKyc.dateOfIncorporation,
+        registeredFullAddress: corporateKyc.registeredFullAddress,
+        correspondenceFullAddress: corporateKyc.correspondenceFullAddress,
+        registeredLine1: corporateKyc.registeredLine1,
+        registeredLine2: corporateKyc.registeredLine2,
+        registeredLine3: corporateKyc.registeredLine3,
+        registeredCity: corporateKyc.registeredCity,
+        registeredDistrict: corporateKyc.registeredDistrict,
+        registeredState: corporateKyc.registeredState,
+        registeredPinCode: corporateKyc.registeredPinCode,
+        correspondenceState: corporateKyc.correspondenceState,
+        authorisedSignatories: (corporateKyc.authorisedSignatories ?? []).map(
+          (s) => ({
+            fullName: s.fullName,
+            email: s.email,
+            mobile: s.mobile,
+          }),
+        ),
+        bankAccounts: (corporateKyc.bankAccounts ?? []).map((b) => ({
+          accountNumber: b.accountNumber,
+          ifscCode: b.ifscCode,
+          bankName: b.bankName,
+          isPrimaryAccount: b.isPrimaryAccount,
+        })),
+        dematAccounts: (corporateKyc.dematAccounts ?? []).map((d) => ({
+          clientId: d.clientId,
+          depository: d.depository,
+          dpId: d.dpId,
+          isPrimary: d.isPrimary,
+        })),
+      },
+      customer: {
+        userName: customerProfile?.userName ?? null,
+        emailAddress: customerProfile?.emailAddress ?? null,
+        phoneNo: customerProfile?.phoneNo ?? null,
+      },
+      existingParticipantId:
+        customerProfile?.nseDataSet?.participant?.id ?? null,
+    });
+
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: {
@@ -613,6 +715,7 @@ export class CustomerProfileController {
           },
         },
         codeReference: NDML_CODE_REFERENCE,
+        cbrics,
         lastDownload: lastDownload
           ? {
               logId: lastDownload.id,

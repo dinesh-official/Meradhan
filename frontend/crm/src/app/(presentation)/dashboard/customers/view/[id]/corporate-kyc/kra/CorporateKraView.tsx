@@ -56,6 +56,7 @@ import {
   Code2,
   Copy,
   FileWarning,
+  Landmark,
   Loader2,
   OctagonX,
   Play,
@@ -115,7 +116,6 @@ export default function CorporateKraView({ profileId }: { profileId: number }) {
   const [finishOpen, setFinishOpen] = useState(false);
   const [downloadOpen, setDownloadOpen] = useState(false);
   const [verifyOpen, setVerifyOpen] = useState(false);
-  const [verifyConfirm, setVerifyConfirm] = useState("");
   const [showFullDownload, setShowFullDownload] = useState(false);
 
   const pastExecutionOptions: CorporateKraPastExecution[] = [
@@ -228,7 +228,6 @@ export default function CorporateKraView({ profileId }: { profileId: number }) {
     onSuccess: (res) => {
       toast.success("Customer verified & activated.");
       setVerifyOpen(false);
-      setVerifyConfirm("");
       void queryClient.invalidateQueries({ queryKey: ["corporateKraPreview", profileId] });
       void queryClient.invalidateQueries({ queryKey: ["customer", profileId] });
       void queryClient.invalidateQueries({ queryKey: ["CorporateKraStatus", profileId] });
@@ -309,7 +308,11 @@ export default function CorporateKraView({ profileId }: { profileId: number }) {
   const kycStatusLabel = data.kraStatus?.kycStatus ?? null;
   const isAlreadyVerified =
     String(kycStatusLabel ?? "").trim().toUpperCase() === "VERIFIED";
-  const isVerifyConfirmValid = verifyConfirm.trim().toUpperCase() === "VERIFY";
+  // Verify & Activate is only safe to run once KRA has come back VERIFIED
+  // for this corporate — otherwise we would flip the customer's KYC/KRA
+  // flags to VERIFIED without an upstream source of truth backing it.
+  const isKraVerified =
+    String(kraStatus ?? "").trim().toUpperCase() === "VERIFIED";
 
   return (
     <div className="flex flex-col gap-6">
@@ -538,28 +541,43 @@ export default function CorporateKraView({ profileId }: { profileId: number }) {
                   </DialogContent>
                 </Dialog>
 
-                <Dialog
-                  open={verifyOpen}
-                  onOpenChange={(open) => {
-                    setVerifyOpen(open);
-                    if (!open) setVerifyConfirm("");
-                  }}
-                >
+                {/*
+                 * Verify & activate is a "soft" confirm — copying KYC data
+                 * into the customer satellites is additive (existing rows
+                 * are never overwritten) and the KYC/KRA flip is
+                 * reversible by the operator, so a standard AlertDialog
+                 * confirm is the right friction level. We still render
+                 * "what will be copied", any pre-flight warnings, and a
+                 * KRA-status heads-up inside the dialog so the operator
+                 * isn't clicking blind.
+                 */}
+                <AlertDialog open={verifyOpen} onOpenChange={setVerifyOpen}>
                   <Button
                     variant="default"
                     className="bg-green-600 hover:bg-green-700"
-                    disabled={isAlreadyVerified || verifyMutation.isPending}
+                    disabled={
+                      isAlreadyVerified ||
+                      !isKraVerified ||
+                      verifyMutation.isPending
+                    }
                     title={
                       isAlreadyVerified
                         ? "Customer is already verified"
-                        : "Copy corporate KYC into the customer profile and mark KYC/KRA verified"
+                        : !isKraVerified
+                          ? `KRA must be VERIFIED before activating the customer (current: ${kraStatus ?? "—"})`
+                          : "Copy corporate KYC into the customer profile and mark KYC/KRA verified"
                     }
                     onClick={() => {
                       if (isAlreadyVerified) {
                         toast.info("Customer is already verified.");
                         return;
                       }
-                      setVerifyConfirm("");
+                      if (!isKraVerified) {
+                        toast.error(
+                          `KRA must be VERIFIED before this customer can be activated. Current KRA status: ${kraStatus ?? "—"}.`,
+                        );
+                        return;
+                      }
                       setVerifyOpen(true);
                     }}
                   >
@@ -570,15 +588,15 @@ export default function CorporateKraView({ profileId }: { profileId: number }) {
                     )}
                     Verify &amp; Activate Customer
                   </Button>
-                  <DialogContent className="sm:max-w-lg">
-                    <DialogHeader>
-                      <DialogTitle>Verify &amp; activate corporate customer?</DialogTitle>
-                      <DialogDescription>
+                  <AlertDialogContent className="sm:max-w-lg">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Verify &amp; activate corporate customer?</AlertDialogTitle>
+                      <AlertDialogDescription>
                         Copies the corporate KYC into the customer&rsquo;s
                         profile (fill-missing-only) and flips both KYC &amp;
                         KRA status to <span className="font-mono">VERIFIED</span>.
-                      </DialogDescription>
-                    </DialogHeader>
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
 
                     <div className="space-y-4 text-sm">
                       <div className="rounded-lg border bg-muted/30 p-3">
@@ -595,19 +613,6 @@ export default function CorporateKraView({ profileId }: { profileId: number }) {
                         </div>
                       </div>
 
-                      {kraStatus &&
-                      String(kraStatus).trim().toUpperCase() !== "VERIFIED" ? (
-                        <Alert className="border-amber-200 bg-amber-50/80 text-amber-900">
-                          <AlertTriangle className="h-4 w-4" />
-                          <AlertTitle>KRA is not VERIFIED yet</AlertTitle>
-                          <AlertDescription>
-                            Current KRA status:{" "}
-                            <span className="font-mono">{kraStatus}</span>. You can
-                            still proceed — KRA will be force-set to VERIFIED.
-                          </AlertDescription>
-                        </Alert>
-                      ) : null}
-
                       {warnings.length > 0 ? (
                         <div className="rounded-lg border bg-amber-50/60 p-3">
                           <div className="text-sm font-semibold text-amber-900">
@@ -622,38 +627,22 @@ export default function CorporateKraView({ profileId }: { profileId: number }) {
                           </ul>
                         </div>
                       ) : null}
-
-                      <div className="space-y-2">
-                        <Label htmlFor="corp-verify-confirm">
-                          Type <span className="font-semibold">VERIFY</span> to confirm
-                        </Label>
-                        <Input
-                          id="corp-verify-confirm"
-                          placeholder="Type VERIFY"
-                          value={verifyConfirm}
-                          onChange={(e) => setVerifyConfirm(e.target.value)}
-                        />
-                      </div>
                     </div>
 
-                    <DialogFooter className="gap-2 sm:gap-0">
-                      <Button
-                        variant="secondary"
-                        onClick={() => setVerifyOpen(false)}
-                        disabled={verifyMutation.isPending}
-                      >
+                    <AlertDialogFooter>
+                      <AlertDialogCancel disabled={verifyMutation.isPending}>
                         Cancel
-                      </Button>
-                      <Button
+                      </AlertDialogCancel>
+                      <AlertDialogAction
                         className="bg-green-600 hover:bg-green-700"
-                        onClick={() => {
-                          if (!isVerifyConfirmValid) {
-                            toast.error("Please type VERIFY to proceed.");
-                            return;
-                          }
+                        onClick={(event) => {
+                          // Prevent the default auto-close so the dialog
+                          // stays open while the mutation runs; we close
+                          // it explicitly in the `onSuccess` handler.
+                          event.preventDefault();
                           verifyMutation.mutate();
                         }}
-                        disabled={verifyMutation.isPending || !isVerifyConfirmValid}
+                        disabled={verifyMutation.isPending}
                       >
                         {verifyMutation.isPending ? (
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -661,10 +650,10 @@ export default function CorporateKraView({ profileId }: { profileId: number }) {
                           <BadgeCheck className="mr-2 h-4 w-4" />
                         )}
                         Verify &amp; Activate
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
 
                 <AlertDialog open={finishOpen} onOpenChange={setFinishOpen}>
                   <Button
@@ -823,6 +812,18 @@ export default function CorporateKraView({ profileId }: { profileId: number }) {
             <TabsTrigger value="mapping">Field mapping</TabsTrigger>
             <TabsTrigger value="payload">Payload preview</TabsTrigger>
             <TabsTrigger value="xml">XML</TabsTrigger>
+            <TabsTrigger value="cbrics" className="flex items-center gap-1">
+              CBRICS payload
+              {data.cbrics?.validation.errors.length ? (
+                <Badge variant="destructive" className="ml-1">
+                  {data.cbrics.validation.errors.length}
+                </Badge>
+              ) : data.cbrics?.validation.warnings.length ? (
+                <Badge variant="outline" className={`ml-1 ${statusToneClass("PENDING")}`}>
+                  {data.cbrics.validation.warnings.length}
+                </Badge>
+              ) : null}
+            </TabsTrigger>
             <TabsTrigger value="signatories">People &amp; FATCA</TabsTrigger>
             <TabsTrigger value="download" className="flex items-center gap-1">
               KRA download
@@ -920,6 +921,11 @@ export default function CorporateKraView({ profileId }: { profileId: number }) {
             <XmlPreviewCard data={data} />
           </TabsContent>
 
+          {/* ── CBRICS register + modify payload preview ── */}
+          <TabsContent value="cbrics" className="space-y-4">
+            <CbricsPayloadCard data={data} />
+          </TabsContent>
+
           {/* ── People & FATCA ── */}
           <TabsContent value="signatories" className="space-y-4">
             <PeopleCard data={data} />
@@ -988,9 +994,12 @@ const XML_VARIANTS: Array<{
   },
 ];
 
-function downloadXml(filename: string, contents: string) {
+function downloadXml(filename: string, contents: string, mime?: string) {
   if (typeof window === "undefined") return;
-  const blob = new Blob([contents], { type: "application/xml" });
+  // Default to XML for backward compatibility with the KRA XML preview
+  // callers; JSON callers (CBRICS payload preview) pass `application/json`
+  // so the blob's Content-Type matches the saved file extension.
+  const blob = new Blob([contents], { type: mime ?? "application/xml" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -999,6 +1008,159 @@ function downloadXml(filename: string, contents: string) {
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+}
+
+// ─── CBRICS payload card ────────────────────────────────────────────────────
+
+type CbricsVariantKey = "register" | "modify";
+
+const CBRICS_VARIANTS: Array<{
+  key: CbricsVariantKey;
+  label: string;
+  description: string;
+  filename: (stem: string) => string;
+}> = [
+  {
+    key: "register",
+    label: "Register (unreg)",
+    description:
+      "Body that `ParticipantManager.registerCorporateParticipantFromCorporateKyc` POSTs to NSE CBRICS the first time this corporate is onboarded.",
+    filename: (s) => `cbrics-register-${s}.json`,
+  },
+  {
+    key: "modify",
+    label: "Modify (unreg/update)",
+    description:
+      "Body sent on subsequent field edits. Same shape as REGISTER minus `loginId`, with the NSE-assigned `id` and `actualStatus: 4` injected by the SDK.",
+    filename: (s) => `cbrics-modify-${s}.json`,
+  },
+];
+
+function CbricsPayloadCard({ data }: { data: LoadedPreview }) {
+  const [variant, setVariant] = useState<CbricsVariantKey>("register");
+  const cbrics = data.cbrics;
+  const active = CBRICS_VARIANTS.find((v) => v.key === variant) ?? CBRICS_VARIANTS[0]!;
+  const contents = useMemo(
+    () => JSON.stringify(cbrics[variant], null, 2),
+    [cbrics, variant],
+  );
+  const stem = String(data.kycDataStoreId ?? "preview");
+
+  // The two payloads only differ in a couple of fields (loginId vs
+  // id/actualStatus), so show a one-line summary up top so operators
+  // don't have to diff JSON manually to spot the participant id.
+  const summary = useMemo(() => {
+    return [
+      { label: "Endpoint", value: cbrics.endpoint[variant] },
+      {
+        label: "Participant id",
+        value: cbrics.participantId == null ? "— (not registered yet)" : String(cbrics.participantId),
+      },
+      {
+        label: "Bytes",
+        value: new Blob([contents]).size.toLocaleString(),
+      },
+    ];
+  }, [cbrics.endpoint, cbrics.participantId, variant, contents]);
+
+  return (
+    <Card>
+      <CardHeader className="gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Landmark className="h-4 w-4 text-muted-foreground" />
+            CBRICS payload preview
+          </CardTitle>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => copyToClipboard(contents, active.label)}
+            >
+              <Copy className="h-4 w-4" /> Copy JSON
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                downloadXml(active.filename(stem), contents, "application/json")
+              }
+            >
+              <FileWarning className="h-4 w-4" /> Download .json
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {CBRICS_VARIANTS.map((v) => (
+            <Button
+              key={v.key}
+              type="button"
+              size="sm"
+              variant={v.key === variant ? "default" : "outline"}
+              onClick={() => setVariant(v.key)}
+            >
+              {v.label}
+            </Button>
+          ))}
+        </div>
+
+        <p className="text-xs text-muted-foreground">{active.description}</p>
+
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          {summary.map((s) => (
+            <span key={s.label}>
+              <span className="font-medium">{s.label}:</span>{" "}
+              <span className="font-mono">{s.value}</span>
+            </span>
+          ))}
+        </div>
+
+        {cbrics.validation.errors.length > 0 ? (
+          <Alert variant="destructive">
+            <XCircle className="h-4 w-4" />
+            <AlertTitle>
+              {cbrics.validation.errors.length} blocking issue
+              {cbrics.validation.errors.length === 1 ? "" : "s"}
+            </AlertTitle>
+            <AlertDescription>
+              <ul className="list-disc pl-5 mt-1 space-y-0.5">
+                {cbrics.validation.errors.map((e, i) => (
+                  <li key={`${e.field}-${i}`}>
+                    <span className="font-medium">{e.field}</span>: {e.message}
+                  </li>
+                ))}
+              </ul>
+            </AlertDescription>
+          </Alert>
+        ) : null}
+
+        {cbrics.validation.warnings.length > 0 ? (
+          <Alert className="border-amber-200 bg-amber-50/80 text-amber-900">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>
+              {cbrics.validation.warnings.length} warning
+              {cbrics.validation.warnings.length === 1 ? "" : "s"}
+            </AlertTitle>
+            <AlertDescription>
+              <ul className="list-disc pl-5 mt-1 space-y-0.5">
+                {cbrics.validation.warnings.map((w, i) => (
+                  <li key={`${w.field}-${i}`}>
+                    <span className="font-medium">{w.field}</span>: {w.message}
+                  </li>
+                ))}
+              </ul>
+            </AlertDescription>
+          </Alert>
+        ) : null}
+      </CardHeader>
+      <CardContent>
+        <pre className="rounded-md border bg-muted/40 p-3 text-xs overflow-auto max-h-[60vh] whitespace-pre">
+          {contents}
+        </pre>
+      </CardContent>
+    </Card>
+  );
 }
 
 function XmlPreviewCard({ data }: { data: LoadedPreview }) {

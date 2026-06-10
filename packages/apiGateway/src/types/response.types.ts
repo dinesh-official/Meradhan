@@ -499,7 +499,23 @@ export type CorporateKycResponse = {
   kycStatus?: string | null;
   kraStatus?: string | null;
   isAccountsLocked?: boolean;
+
+  /**
+   * S3 URL + timestamp of the most recently generated 19-page corporate
+   * KYC PDF snapshot. The CRM "Download last PDF" button reads
+   * `lastGeneratedPdfUrl` directly; `lastGeneratedPdfAt` is shown next to
+   * the button so operators can tell how stale the file is.
+   */
+  lastGeneratedPdfUrl?: string | null;
+  lastGeneratedPdfAt?: string | null;
 };
+
+export type CorporateKycLastPdfResponseData = {
+  lastGeneratedPdfUrl: string | null;
+  lastGeneratedPdfAt: string | null;
+};
+
+export type SetCorporateKycLastPdfResponse = BaseResponseData<CorporateKycLastPdfResponseData>;
 
 export type GetCorporateKycResponse = BaseResponseData<CorporateKycResponse | null>;
 export type SaveCorporateKycResponse = BaseResponseData<CorporateKycResponse>;
