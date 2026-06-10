@@ -45,6 +45,7 @@ import watchListRoutes from "@resource/customer/watchlist/watchlist.routes";
 import kraRoutes from "@resource/kra/kra.routes";
 import logger from "@utils/logger/logger";
 import crmBondPricedListRoutes from "./src/resource/crm/bonds/bond_priced_list.routes";
+import bondPublicRouter from "@resource/bonds/bond.public.routes";
 const monitoring = new PrometheusMonitorProvider();
 const response_time_monitor = new PrometheusResponseTimeMonitor();
 
@@ -106,6 +107,7 @@ server.addRoutes([
 
   // bond routes
   bondRoute,
+  bondPublicRouter,
 
   trashRoutes,
   auditlogsRoutes,

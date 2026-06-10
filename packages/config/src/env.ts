@@ -23,6 +23,9 @@ const EnvSchema = z.object(
     // DATABASE
     DATABASE_URL: z.string().min(1, { message: "DATABASE_URL is required" }),
 
+    // Internal public API key (shared with teammates for /api/public/bonds)
+    INTERNAL_API_KEY: z.string().min(16, { message: "INTERNAL_API_KEY is required" }),
+
     // REDIS
     REDIS_USERNAME: z.string().min(1, { message: "REDIS_USERNAME is required" }).optional(),
     REDIS_PASSWORD: z.string().min(1, { message: "REDIS_PASSWORD is required" }).optional(),
