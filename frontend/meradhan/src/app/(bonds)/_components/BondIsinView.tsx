@@ -232,9 +232,7 @@ export default function BondIsinView({
             <InfoCard title="Bond Type" condition={hasValue(bond.bondType)}>
               {humanize(bond.bondType)}
             </InfoCard>
-            <InfoCard title="Nature of Instrument" condition={hasValue(bond.natureOfInstrument)}>
-              {humanize(bond.natureOfInstrument)}
-            </InfoCard>
+
             <InfoCard title="Seniority" condition={hasValue(bond.seniority)}>
               {humanize(bond.seniority)}
             </InfoCard>
@@ -257,8 +255,6 @@ export default function BondIsinView({
 
 
             {/* ── Rating ─────────────────────────────────────────────── */}
-
-
 
             {/* ── Put / Call ─────────────────────────────────────────── */}
             <InfoCard title="Put" condition={hasValue(putText)}>
@@ -293,67 +289,7 @@ export default function BondIsinView({
             </InfoCard>
           </div>
 
-          {/* ── Long-text / document details ─────────────────────────── */}
-          {/* {hasAnyLongText && (
-            <div className="mt-8 border rounded-lg p-5 bg-white">
-              <h3 className="text-lg font-semibold mb-2">Additional Details</h3>
-              <DetailRow label="Registrar" condition={hasValue(bond.registrarDetails)}>
-                {bond.registrarDetails}
-              </DetailRow>
-              <DetailRow label="Debenture Trustee" condition={hasValue(bond.debentureTrustee)}>
-                {bond.debentureTrustee}
-              </DetailRow>
-              <DetailRow
-                label="Physical Security Address"
-                condition={hasValue(bond.physicalSecurityAddress)}
-              >
-                {bond.physicalSecurityAddress}
-              </DetailRow>
-              <DetailRow
-                label="Defaulted in Redemption"
-                condition={hasValue(bond.defaultedInRedemption)}
-              >
-                {bond.defaultedInRedemption}
-              </DetailRow>
-              <DetailRow label="Certificate Numbers" condition={hasValue(bond.certificateNumbers)}>
-                {bond.certificateNumbers}
-              </DetailRow>
-              <DetailRow label="Remarks" condition={hasValue(bond.remarks)}>
-                {bond.remarks}
-              </DetailRow>
-              <DetailRow label="Information Memorandum" condition={hasValue(bond.imDocumentLink)}>
-                <a
-                  href={bond.imDocumentLink ?? "#"}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="text-secondary underline"
-                >
-                  View document
-                </a>
-              </DetailRow>
-              <DetailRow label="Provider" condition={hasValue(bond.providerName)}>
-                {bond.providerName}
-              </DetailRow>
-              <DetailRow
-                label="Provider Price"
-                condition={hasValue(bond.providerPrice, { hideIfZero: true })}
-              >
-                ₹ {formatNumberTS(bond.providerPrice as number)}
-              </DetailRow>
-              <DetailRow
-                label="Provider Quantity"
-                condition={hasValue(bond.providerQuantity, { hideIfZero: true })}
-              >
-                {formatNumberTS(bond.providerQuantity as number)}
-              </DetailRow>
-              <DetailRow
-                label="Provider Interest Date"
-                condition={hasValue(formatDate(bond.providerInterestDate as string))}
-              >
-                {formatDate(bond.providerInterestDate as string)}
-              </DetailRow>
-            </div>
-          )} */}
+
 
           {bond && canShowBuyNow(bond) && (
             (() => {

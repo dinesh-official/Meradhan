@@ -62,6 +62,11 @@ function mapPayloadToPrismaCreate(customerId: number, payload: CreateCorporateKy
     directorsListCopyUrl: payload.directorsListCopyUrl ?? undefined,
     powerOfAttorneyCopyUrl: payload.powerOfAttorneyCopyUrl ?? undefined,
     documentsType: payload.documentsType ?? undefined,
+    existingKycFileUrl:
+      (payload as unknown as { existingKycFileUrl?: string }).existingKycFileUrl ?? undefined,
+    useExistingKycDeclarationUrl:
+      (payload as unknown as { useExistingKycDeclarationUrl?: string })
+        .useExistingKycDeclarationUrl ?? undefined,
     termsAndConditionsUrl: payload.termsAndConditionsUrl ?? undefined,
     fatcaApplicable: payload.fatcaApplicable ?? false,
     fatcaEntityName: payload.fatcaEntityName ?? undefined,
@@ -121,6 +126,34 @@ function mapPayloadToPrismaCreate(customerId: number, payload: CreateCorporateKy
         din: p.din ?? undefined,
         email: p.email || undefined,
         mobile: p.mobile ?? undefined,
+      })),
+    },
+    partners: {
+      create: (payload.partners ?? []).map((p) => ({
+        fullName: p.fullName,
+        pan: p.pan ?? undefined,
+        panCopyFileUrl: p.panCopyFileUrl ?? undefined,
+        aadharCopyFileUrl: p.aadharCopyFileUrl ?? undefined,
+        passportPhotoFileUrl: p.passportPhotoFileUrl ?? undefined,
+        pepDeclaration: p.pepDeclaration ?? undefined,
+        designation: p.designation ?? undefined,
+        din: p.din ?? undefined,
+        email: p.email || undefined,
+        mobile: p.mobile ?? undefined,
+      })),
+    },
+    trustees: {
+      create: (payload.trustees ?? []).map((t) => ({
+        fullName: t.fullName,
+        pan: t.pan ?? undefined,
+        panCopyFileUrl: t.panCopyFileUrl ?? undefined,
+        aadharCopyFileUrl: t.aadharCopyFileUrl ?? undefined,
+        passportPhotoFileUrl: t.passportPhotoFileUrl ?? undefined,
+        pepDeclaration: t.pepDeclaration ?? undefined,
+        designation: t.designation ?? undefined,
+        din: t.din ?? undefined,
+        email: t.email || undefined,
+        mobile: t.mobile ?? undefined,
       })),
     },
     authorisedSignatories: {
@@ -221,6 +254,12 @@ export class CorporateKycService {
         directorsListCopyUrl: payload.directorsListCopyUrl ?? undefined,
         powerOfAttorneyCopyUrl: payload.powerOfAttorneyCopyUrl ?? undefined,
         documentsType: payload.documentsType ?? undefined,
+        existingKycFileUrl:
+          (payload as unknown as { existingKycFileUrl?: string })
+            .existingKycFileUrl ?? undefined,
+        useExistingKycDeclarationUrl:
+          (payload as unknown as { useExistingKycDeclarationUrl?: string })
+            .useExistingKycDeclarationUrl ?? undefined,
         termsAndConditionsUrl: payload.termsAndConditionsUrl ?? undefined,
         fatcaApplicable: payload.fatcaApplicable ?? false,
         fatcaEntityName: payload.fatcaEntityName ?? undefined,
@@ -286,6 +325,36 @@ export class CorporateKycService {
             mobile: p.mobile ?? undefined,
           })),
         },
+        partners: {
+          deleteMany: {},
+          create: (payload.partners ?? []).map((p) => ({
+            fullName: p.fullName,
+            pan: p.pan ?? undefined,
+            panCopyFileUrl: p.panCopyFileUrl ?? undefined,
+            aadharCopyFileUrl: p.aadharCopyFileUrl ?? undefined,
+            passportPhotoFileUrl: p.passportPhotoFileUrl ?? undefined,
+            pepDeclaration: p.pepDeclaration ?? undefined,
+            designation: p.designation ?? undefined,
+            din: p.din ?? undefined,
+            email: p.email || undefined,
+            mobile: p.mobile ?? undefined,
+          })),
+        },
+        trustees: {
+          deleteMany: {},
+          create: (payload.trustees ?? []).map((t) => ({
+            fullName: t.fullName,
+            pan: t.pan ?? undefined,
+            panCopyFileUrl: t.panCopyFileUrl ?? undefined,
+            aadharCopyFileUrl: t.aadharCopyFileUrl ?? undefined,
+            passportPhotoFileUrl: t.passportPhotoFileUrl ?? undefined,
+            pepDeclaration: t.pepDeclaration ?? undefined,
+            designation: t.designation ?? undefined,
+            din: t.din ?? undefined,
+            email: t.email || undefined,
+            mobile: t.mobile ?? undefined,
+          })),
+        },
         authorisedSignatories: {
           deleteMany: {},
           create: (payload.authorisedSignatories ?? []).map((s) => ({
@@ -317,6 +386,8 @@ export class CorporateKycService {
           dematAccounts: true,
           directors: true,
           promoters: true,
+          partners: true,
+          trustees: true,
           authorisedSignatories: true,
         },
       });
@@ -331,6 +402,8 @@ export class CorporateKycService {
         dematAccounts: true,
         directors: true,
         promoters: true,
+        partners: true,
+        trustees: true,
         authorisedSignatories: true,
       },
     });
@@ -391,6 +464,8 @@ export class CorporateKycService {
       directorsListCopyUrl: row.directorsListCopyUrl ?? undefined,
       powerOfAttorneyCopyUrl: row.powerOfAttorneyCopyUrl ?? undefined,
       documentsType: row.documentsType ?? undefined,
+      existingKycFileUrl: row.existingKycFileUrl ?? undefined,
+      useExistingKycDeclarationUrl: row.useExistingKycDeclarationUrl ?? undefined,
       termsAndConditionsUrl: row.termsAndConditionsUrl ?? undefined,
       fatcaApplicable: row.fatcaApplicable,
       fatcaEntityName: row.fatcaEntityName ?? undefined,
@@ -447,6 +522,32 @@ export class CorporateKycService {
         din: p.din ?? undefined,
         email: p.email ?? undefined,
         mobile: p.mobile ?? undefined,
+      })),
+      partners: (row.partners as any[] | undefined ?? []).map((p: any) => ({
+        id: p.id,
+        fullName: p.fullName,
+        pan: p.pan ?? undefined,
+        panCopyFileUrl: p.panCopyFileUrl ?? undefined,
+        aadharCopyFileUrl: p.aadharCopyFileUrl ?? undefined,
+        passportPhotoFileUrl: p.passportPhotoFileUrl ?? undefined,
+        pepDeclaration: p.pepDeclaration ?? undefined,
+        designation: p.designation ?? undefined,
+        din: p.din ?? undefined,
+        email: p.email ?? undefined,
+        mobile: p.mobile ?? undefined,
+      })),
+      trustees: (row.trustees as any[] | undefined ?? []).map((t: any) => ({
+        id: t.id,
+        fullName: t.fullName,
+        pan: t.pan ?? undefined,
+        panCopyFileUrl: t.panCopyFileUrl ?? undefined,
+        aadharCopyFileUrl: t.aadharCopyFileUrl ?? undefined,
+        passportPhotoFileUrl: t.passportPhotoFileUrl ?? undefined,
+        pepDeclaration: t.pepDeclaration ?? undefined,
+        designation: t.designation ?? undefined,
+        din: t.din ?? undefined,
+        email: t.email ?? undefined,
+        mobile: t.mobile ?? undefined,
       })),
       authorisedSignatories: (row.authorisedSignatories as any[]).map((s: any) => ({
         id: s.id,

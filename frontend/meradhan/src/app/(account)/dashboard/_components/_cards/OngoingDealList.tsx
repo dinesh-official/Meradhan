@@ -34,11 +34,11 @@ export function OngoingDealList({ bond }: OngoingDealListProps) {
           </p>
         </BondInfoLabel>
         <BondInfoLabel title="Coupon">
-          <p className="font-semibold">{bond.couponRate}%</p>
+          <p>{bond.couponRate != null ? `${Number(bond.couponRate).toFixed(2)}%` : "--"}</p>
         </BondInfoLabel>
         <BondInfoLabel title="Yield">
-          <p className="flex items-center">
-            {bond.yield ? `${bond.yield}%` : "--"}
+          <p className="flex items-center font-bold">
+            {bond.yield != null ? `${Number(bond.yield).toFixed(2)}%` : "--"}
           </p>
         </BondInfoLabel>
         <BondInfoLabel title="Maturity Date">

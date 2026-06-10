@@ -33,6 +33,40 @@ export type CorporateKraValidationIssue = {
   xmlTag?: string;
 };
 
+export type ESignRequestStatus = "PENDING" | "COMPLETED" | "REJECTED";
+
+export type CorporateESignRequest = {
+  id: number;
+  corporateKycModelId: number;
+  eSignDocumentUrl: string;
+  personName: string;
+  authorisedSignatoryId?: number | null;
+  signatoryEmail?: string | null;
+  signatoryPan?: string | null;
+  notes?: string | null;
+  submittedAt?: string | null;
+  signFileUrl?: string | null;
+  status: ESignRequestStatus;
+  createdByCrmUserId?: number | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CreateCorporateESignRequestPayload = {
+  eSignDocumentUrl: string;
+  personName: string;
+  authorisedSignatoryId?: number;
+  signatoryEmail?: string;
+  signatoryPan?: string;
+  notes?: string;
+};
+
+export type UpdateCorporateESignRequestPayload = {
+  status?: ESignRequestStatus;
+  signFileUrl?: string;
+  notes?: string;
+};
+
 export type CorporateKraFieldMapRow = {
   group: string;
   label: string;
@@ -174,6 +208,18 @@ export type CorporateKycAutofillFormPatch = {
   fatcaApplicable?: boolean;
 
   directors?: Array<{
+    fullName: string;
+    pan: string;
+    din?: string;
+    designation?: string;
+  }>;
+  partners?: Array<{
+    fullName: string;
+    pan: string;
+    din?: string;
+    designation?: string;
+  }>;
+  trustees?: Array<{
     fullName: string;
     pan: string;
     din?: string;
@@ -379,6 +425,31 @@ export interface TCrmCustomerInterface {
   deleteCorporateKycAttachment(
     customerId: number,
     attachmentId: number,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<BaseResponseData<{ isDeleted: boolean }>>>;
+
+  // --- Corporate KYC e-sign requests ---
+  listCorporateESignRequests(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<BaseResponseData<CorporateESignRequest[]>>>;
+
+  createCorporateESignRequest(
+    customerId: number,
+    data: CreateCorporateESignRequestPayload,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<BaseResponseData<CorporateESignRequest>>>;
+
+  updateCorporateESignRequest(
+    customerId: number,
+    requestId: number,
+    data: UpdateCorporateESignRequestPayload,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<BaseResponseData<CorporateESignRequest>>>;
+
+  deleteCorporateESignRequest(
+    customerId: number,
+    requestId: number,
     config?: AxiosRequestConfig,
   ): Promise<AxiosResponse<BaseResponseData<{ isDeleted: boolean }>>>;
 
@@ -633,6 +704,54 @@ export class CrmCustomerApi implements TCrmCustomerInterface {
   ): ReturnType<TCrmCustomerInterface["deleteCorporateKycAttachment"]> {
     return this.apiClient.delete<BaseResponseData<{ isDeleted: boolean }>>(
       `/crm/customer/${customerId}/corporate-kyc/attachments/${attachmentId}`,
+      config,
+    );
+  }
+
+  // --- Corporate KYC e-sign requests ---
+
+  async listCorporateESignRequests(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["listCorporateESignRequests"]> {
+    return this.apiClient.get<BaseResponseData<CorporateESignRequest[]>>(
+      `/crm/customer/${customerId}/corporate-kyc/e-sign-requests`,
+      config,
+    );
+  }
+
+  async createCorporateESignRequest(
+    customerId: number,
+    data: CreateCorporateESignRequestPayload,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["createCorporateESignRequest"]> {
+    return this.apiClient.post<BaseResponseData<CorporateESignRequest>>(
+      `/crm/customer/${customerId}/corporate-kyc/e-sign-requests`,
+      data,
+      config,
+    );
+  }
+
+  async updateCorporateESignRequest(
+    customerId: number,
+    requestId: number,
+    data: UpdateCorporateESignRequestPayload,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["updateCorporateESignRequest"]> {
+    return this.apiClient.patch<BaseResponseData<CorporateESignRequest>>(
+      `/crm/customer/${customerId}/corporate-kyc/e-sign-requests/${requestId}`,
+      data,
+      config,
+    );
+  }
+
+  async deleteCorporateESignRequest(
+    customerId: number,
+    requestId: number,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["deleteCorporateESignRequest"]> {
+    return this.apiClient.delete<BaseResponseData<{ isDeleted: boolean }>>(
+      `/crm/customer/${customerId}/corporate-kyc/e-sign-requests/${requestId}`,
       config,
     );
   }

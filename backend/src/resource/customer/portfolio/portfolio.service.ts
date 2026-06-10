@@ -748,7 +748,7 @@ export class PortfolioService {
 
     for (const bond of bonds) {
       for (const cat of bond.categories ?? []) {
-        if (cat) bondCategories.add(cat);
+        if (cat && cat.toLowerCase() !== "n/a") bondCategories.add(cat);
       }
 
       const rating = (bond.creditRating ?? "").trim();

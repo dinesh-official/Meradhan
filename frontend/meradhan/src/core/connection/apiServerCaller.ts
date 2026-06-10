@@ -20,6 +20,15 @@ import "server-only";
  * incompatible at compile time. The singleton is asserted at export; runtime
  * matches IApiCaller.
  */
+/**
+ * Server-side outbound request timeout (ms). Keeps a slow / hung backend from
+ * holding RSC streaming hostage — when the upstream eventually resets we want
+ * to surface the failure ourselves and let `Promise.allSettled` callers render
+ * partial pages, instead of the request dangling for minutes until the kernel
+ * times out the socket.
+ */
+const SERVER_REQUEST_TIMEOUT_MS = 15_000;
+
 class ApiServerCaller {
   private instance: AxiosInstance;
 
@@ -27,6 +36,7 @@ class ApiServerCaller {
     this.instance = axios.create({
       baseURL,
       withCredentials: true,
+      timeout: SERVER_REQUEST_TIMEOUT_MS,
     });
 
     this.instance.interceptors.response.use(

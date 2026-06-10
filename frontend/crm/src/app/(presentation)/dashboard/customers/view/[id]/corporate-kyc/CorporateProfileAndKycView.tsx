@@ -19,7 +19,9 @@ import {
   DematAccountsSection,
   DirectorsSection,
   DocumentUrlsSection,
+  PartnersSection,
   PromotersSection,
+  TrusteesSection,
 } from "./_components/CorporateKycSections";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -36,6 +38,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useCorporateKycFileUpload } from "../../../[id]/corporate-kyc/_hooks/useCorporateKycFileUpload";
+import { getConstitutionRoles } from "../../../[id]/corporate-kyc/_utils/constitutionRoles";
+import ESignRequestsCard from "./_components/ESignRequestsCard";
 
 /** Mirrors backend `corporateKycPdfFilename` in customer.service.ts so the saved file matches a direct API download. */
 function buildCorporateKycPdfFilename(customerId: number, entityName: string | undefined): string {
@@ -648,9 +652,36 @@ export default function CorporateProfileAndKycView({
                   <DocumentUrlsSection data={corporateKyc} />
                   <BankAccountsSection data={corporateKyc} />
                   <DematAccountsSection data={corporateKyc} />
-                  <DirectorsSection data={corporateKyc} />
-                  <PromotersSection data={corporateKyc} />
+                  {/*
+                   * Constitution-aware governance sections, mirrors the
+                   * editable form's `getConstitutionRoles` logic.
+                   */}
+                  {(() => {
+                    const roles = getConstitutionRoles(
+                      corporateKyc.entityConstitutionType,
+                    );
+                    return (
+                      <>
+                        {roles.directors && (
+                          <DirectorsSection data={corporateKyc} />
+                        )}
+                        {roles.partners && (
+                          <PartnersSection data={corporateKyc} />
+                        )}
+                        {roles.trustees && (
+                          <TrusteesSection data={corporateKyc} />
+                        )}
+                        {roles.promoters && (
+                          <PromotersSection data={corporateKyc} />
+                        )}
+                      </>
+                    );
+                  })()}
                   <AuthorisedSignatoriesSection data={corporateKyc} />
+                  <ESignRequestsCard
+                    customerId={profileId}
+                    corporateKyc={corporateKyc}
+                  />
                   <KraLogsCard logs={kraLogs} />
                 </>
               ) : null}
