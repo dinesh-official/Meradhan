@@ -36,6 +36,9 @@ import { DocumentsSection } from "./_components/DocumentsSection";
 import { EntityDetailsSection } from "./_components/EntityDetailsSection";
 import { FatcaSection } from "./_components/FatcaSection";
 import { PromotersSection } from "./_components/PromotersSection";
+import { PartnersSection } from "./_components/PartnersSection";
+import { TrusteesSection } from "./_components/TrusteesSection";
+import { getConstitutionRoles } from "./_utils/constitutionRoles";
 import { RegisteredAddressSection } from "./_components/RegisteredAddressSection";
 import { useCorporateKycFileUpload } from "./_hooks/useCorporateKycFileUpload";
 
@@ -172,6 +175,32 @@ export default function CorporateKycPageView({
           pan: d.pan,
           designation: d.designation ?? "",
           din: d.din ?? "",
+          email: "",
+          mobile: "",
+          panCopyFileUrl: "",
+          aadharCopyFileUrl: "",
+          passportPhotoFileUrl: "",
+        }));
+      }
+      if ((!current.partners || current.partners.length === 0) && patch.partners?.length) {
+        merged.partners = patch.partners.map((p) => ({
+          fullName: p.fullName,
+          pan: p.pan,
+          designation: p.designation ?? "",
+          din: p.din ?? "",
+          email: "",
+          mobile: "",
+          panCopyFileUrl: "",
+          aadharCopyFileUrl: "",
+          passportPhotoFileUrl: "",
+        }));
+      }
+      if ((!current.trustees || current.trustees.length === 0) && patch.trustees?.length) {
+        merged.trustees = patch.trustees.map((t) => ({
+          fullName: t.fullName,
+          pan: t.pan,
+          designation: t.designation ?? "",
+          din: t.din ?? "",
           email: "",
           mobile: "",
           panCopyFileUrl: "",
@@ -590,8 +619,27 @@ export default function CorporateKycPageView({
         <FatcaSection hook={hook} />
         <BankAccountsSection hook={hook} />
         <DematAccountsSection hook={hook} />
-        <DirectorsSection hook={hook} />
-        <PromotersSection hook={hook} />
+        {/*
+         * Constitution-aware governance sections. See `getConstitutionRoles`
+         * for the full mapping.
+         *   - Pvt/Public Ltd → Directors + Promoters
+         *   - OPC            → Directors
+         *   - LLP / Partnership → Partners
+         *   - Trust          → Trustees
+         *   - Other / blank  → all four
+         * Authorised Signatories are always rendered below.
+         */}
+        {(() => {
+          const roles = getConstitutionRoles(hook.form.entityConstitutionType);
+          return (
+            <>
+              {roles.directors && <DirectorsSection hook={hook} />}
+              {roles.partners && <PartnersSection hook={hook} />}
+              {roles.trustees && <TrusteesSection hook={hook} />}
+              {roles.promoters && <PromotersSection hook={hook} />}
+            </>
+          );
+        })()}
         <AuthorisedSignatoriesSection hook={hook} />
       </div>
     </div>

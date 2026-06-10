@@ -3,8 +3,6 @@
 // bank accounts, demat accounts, directors, promoters, authorised signatories test
 // ---------------------------------------------------------------------------
 
-
-
 model CorporateKycModel {
   id Int @id @default(autoincrement())
 
@@ -13,82 +11,92 @@ model CorporateKycModel {
   customerProfileDataModelId Int                      @unique
 
   // ---------- Entity details ----------
-  entityName                     String
-  dateOfCommencementOfBusiness   DateTime?
-  countryOfIncorporation         String?
-  panCopyFileUrl                 String?  /// PAN copy document (file path or URL)
-  entityConstitutionType         EntityConstitutionType?
-  otherConstitutionType          String?  /// Required when entityConstitutionType is OTHER
-  dateOfIncorporation            DateTime?
-  placeOfIncorporation           String?
-  panNumber                      String?
-  cinOrRegistrationNumber        String?
+  entityName                   String
+  dateOfCommencementOfBusiness DateTime?
+  countryOfIncorporation       String?
+  panCopyFileUrl               String? /// PAN copy document (file path or URL)
+  entityConstitutionType       EntityConstitutionType?
+  otherConstitutionType        String? /// Required when entityConstitutionType is OTHER
+  dateOfIncorporation          DateTime?
+  placeOfIncorporation         String?
+  panNumber                    String?
+  cinOrRegistrationNumber      String?
 
   // ---------- Correspondence address ----------
-  correspondenceFullAddress String?
-  correspondenceLine1        String?
-  correspondenceLine2        String?
-  correspondenceLine3        String?
-  correspondenceCity         String?
-  correspondenceDistrict     String?
-  correspondencePinCode     String?
-  correspondenceState       String?
+  correspondenceFullAddress         String?
+  correspondenceLine1               String?
+  correspondenceLine2               String?
+  correspondenceLine3               String?
+  correspondenceCity                String?
+  correspondenceDistrict            String?
+  correspondencePinCode             String?
+  correspondenceState               String?
   /// NDML proof-of-address type code (e.g. 01 Passport, 31 Aadhaar)
-  correspondenceAddressProofType String?
+  correspondenceAddressProofType    String?
   correspondenceAddressProofCopyUrl String?
 
   // ---------- Registered address ----------
-  registeredFullAddress String?
-  registeredLine1        String?
-  registeredLine2        String?
-  registeredLine3        String?
-  registeredCity         String?
-  registeredDistrict     String?
-  registeredPinCode     String?
-  registeredState       String?
+  registeredFullAddress         String?
+  registeredLine1               String?
+  registeredLine2               String?
+  registeredLine3               String?
+  registeredCity                String?
+  registeredDistrict            String?
+  registeredPinCode             String?
+  registeredState               String?
   /// NDML proof-of-address type code (e.g. 01 Passport, 31 Aadhaar)
-  registeredAddressProofType String?
+  registeredAddressProofType    String?
   registeredAddressProofCopyUrl String?
 
   // ---------- Documents (file paths or URLs) ----------
-  balanceSheetCopyUrl                 String?
-  certificateOfIncorporationUrl       String?
-  memorandumCopyUrl                  String?
-  boardResolutionCopyUrl             String?
-  gstCopyUrl                         String?
-  clientMasterHoldingCopyUrl         String?
-  annualIncome                       String?  /// Annual income (text/number)
-  shareHoldingPatternCopyUrl         String?
-  certificateOfCommencementOfBizUrl  String?
+  balanceSheetCopyUrl               String?
+  certificateOfIncorporationUrl     String?
+  memorandumCopyUrl                 String?
+  boardResolutionCopyUrl            String?
+  gstCopyUrl                        String?
+  clientMasterHoldingCopyUrl        String?
+  annualIncome                      String? /// Annual income (text/number)
+  shareHoldingPatternCopyUrl        String?
+  certificateOfCommencementOfBizUrl String?
   articlesOfAssociationUrl          String?
   gstNumber                         String?
   directorsListCopyUrl              String?
   powerOfAttorneyCopyUrl            String?
   documentsType                     String?
 
+  /// Customer's existing KYC document held by another KRA (used when the
+  /// customer opts out of fresh KYC capture and reuses prior KYC instead).
+  existingKycFileUrl           String?
+  /// Signed "Declaration to use existing KYC" form, uploaded alongside
+  /// `existingKycFileUrl`.
+  useExistingKycDeclarationUrl String?
+
   // ---------- Attachments / verifications (uploads) ----------
   termsAndConditionsUrl String?
 
   // ---------- FATCA ----------
-  fatcaApplicable                   Boolean  @default(false)
-  fatcaEntityName                   String?
-  fatcaCountryOfIncorporation       String?
-  fatcaEntityType                   CorporateEntityType?
-  fatcaClassification               String?
-  giin                              String?  /// Global Intermediary Identification Number (if applicable)
-  taxResidencyOfEntity               String?
-  declarationByAuthorisedSignatory  Boolean  @default(false)
+  fatcaApplicable                  Boolean              @default(false)
+  fatcaEntityName                  String?
+  fatcaCountryOfIncorporation      String?
+  fatcaEntityType                  CorporateEntityType?
+  fatcaClassification              String?
+  giin                             String? /// Global Intermediary Identification Number (if applicable)
+  taxResidencyOfEntity             String?
+  declarationByAuthorisedSignatory Boolean              @default(false)
 
   // ---------- Relations (one-to-many) ----------
-  bankAccounts            CorporateKycBankAccountModel[]
-  dematAccounts           CorporateKycDematAccountModel[]
-  directors               CorporateKycDirectorModel[]
-  promoters               CorporateKycPromoterModel[]
-  authorisedSignatories    CorporateKycAuthorisedSignatoryModel[]
-  attachments             CorporateKycAttachmentModel[]
+  bankAccounts          CorporateKycBankAccountModel[]
+  dematAccounts         CorporateKycDematAccountModel[]
+  directors             CorporateKycDirectorModel[]
+  promoters             CorporateKycPromoterModel[]
+  partners              CorporateKycPartnerModel[]
+  trustees              CorporateKycTrusteeModel[]
+  authorisedSignatories CorporateKycAuthorisedSignatoryModel[]
+  attachments           CorporateKycAttachmentModel[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt                   DateTime                     @default(now())
+  updatedAt                   DateTime                     @updatedAt
+  corporateESignRequestModels CorporateESignRequestModel[]
 
   @@map("corporate_kyc")
 }
@@ -131,8 +139,8 @@ model CorporateKycBankAccountModel {
   bankName          String
   ifscCode          String
   /// Bank proof (statement / cancel cheque) – stored as JSON array of file URLs
-  bankProofFileUrls  Json?   @default("[]")
-  isPrimaryAccount   Boolean @default(false)
+  bankProofFileUrls Json?   @default("[]")
+  isPrimaryAccount  Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -149,13 +157,13 @@ model CorporateKycDematAccountModel {
   corporateKycModel   CorporateKycModel @relation(fields: [corporateKycModelId], references: [id], onDelete: Cascade)
   corporateKycModelId Int
 
-  depository       DepositoryName  /// CDSL or NSDL
-  accountType      String?         /// e.g. SOLO, JOINT, CORPORATE
-  dpId             String
-  clientId         String
+  depository        DepositoryName /// CDSL or NSDL
+  accountType       String? /// e.g. SOLO, JOINT, CORPORATE
+  dpId              String
+  clientId          String
   accountHolderName String
-  dematProofFileUrl String?        /// CML statement copy (file path or URL)
-  isPrimary        Boolean @default(false)
+  dematProofFileUrl String? /// CML statement copy (file path or URL)
+  isPrimary         Boolean        @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -172,17 +180,17 @@ model CorporateKycDirectorModel {
   corporateKycModel   CorporateKycModel @relation(fields: [corporateKycModelId], references: [id], onDelete: Cascade)
   corporateKycModelId Int
 
-  fullName     String
-  pan          String?
+  fullName             String
+  pan                  String?
   /// Optional file paths/URLs for director uploads
-  panCopyFileUrl        String?
-  aadharCopyFileUrl     String?
-  passportPhotoFileUrl  String?
-  pepDeclaration        String?
-  designation  String?
-  din          String?   /// Director Identification Number
-  email        String?
-  mobile       String?
+  panCopyFileUrl       String?
+  aadharCopyFileUrl    String?
+  passportPhotoFileUrl String?
+  pepDeclaration       String?
+  designation          String?
+  din                  String? /// Director Identification Number
+  email                String?
+  mobile               String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -199,21 +207,79 @@ model CorporateKycPromoterModel {
   corporateKycModel   CorporateKycModel @relation(fields: [corporateKycModelId], references: [id], onDelete: Cascade)
   corporateKycModelId Int
 
-  fullName    String
-  pan         String?
-  panCopyFileUrl        String?
-  aadharCopyFileUrl     String?
-  passportPhotoFileUrl  String?
-  pepDeclaration        String?
-  designation String?
-  din         String?
-  email       String?
-  mobile      String?
+  fullName             String
+  pan                  String?
+  panCopyFileUrl       String?
+  aadharCopyFileUrl    String?
+  passportPhotoFileUrl String?
+  pepDeclaration       String?
+  designation          String?
+  din                  String?
+  email                String?
+  mobile               String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("corporate_kyc_promoters")
+}
+
+// ---------------------------------------------------------------------------
+// Partner(s) for Corporate KYC – LLP / Partnership-firm partners. Mirrors the
+// Director / Promoter shape so they all share the same NDML APP_ADDL_DATA
+// pipeline (partners get relationship code "06").
+// ---------------------------------------------------------------------------
+model CorporateKycPartnerModel {
+  id Int @id @default(autoincrement())
+
+  corporateKycModel   CorporateKycModel @relation(fields: [corporateKycModelId], references: [id], onDelete: Cascade)
+  corporateKycModelId Int
+
+  fullName             String
+  pan                  String?
+  panCopyFileUrl       String?
+  aadharCopyFileUrl    String?
+  passportPhotoFileUrl String?
+  pepDeclaration       String?
+  designation          String? /// e.g. Designated Partner, Managing Partner
+  din                  String? /// DPIN for LLP designated partners
+  email                String?
+  mobile               String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([corporateKycModelId])
+  @@map("corporate_kyc_partners")
+}
+
+// ---------------------------------------------------------------------------
+// Trustee(s) for Corporate KYC – Trusts list trustees instead of directors /
+// partners. Mirrors the same shape so they share the NDML APP_ADDL_DATA
+// pipeline (trustees get relationship code "04").
+// ---------------------------------------------------------------------------
+model CorporateKycTrusteeModel {
+  id Int @id @default(autoincrement())
+
+  corporateKycModel   CorporateKycModel @relation(fields: [corporateKycModelId], references: [id], onDelete: Cascade)
+  corporateKycModelId Int
+
+  fullName             String
+  pan                  String?
+  panCopyFileUrl       String?
+  aadharCopyFileUrl    String?
+  passportPhotoFileUrl String?
+  pepDeclaration       String?
+  designation          String? /// e.g. Managing Trustee, Settlor
+  din                  String?
+  email                String?
+  mobile               String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([corporateKycModelId])
+  @@map("corporate_kyc_trustees")
 }
 
 // ---------------------------------------------------------------------------
@@ -225,20 +291,62 @@ model CorporateKycAuthorisedSignatoryModel {
   corporateKycModel   CorporateKycModel @relation(fields: [corporateKycModelId], references: [id], onDelete: Cascade)
   corporateKycModelId Int
 
-  fullName    String
-  pan         String
+  fullName             String
+  pan                  String
   signatureFileUrl     String?
-  panCopyFileUrl        String?
-  aadharCopyFileUrl     String?
-  passportPhotoFileUrl  String?
-  pepDeclaration        String?
-  designation String?
-  din         String?
-  email       String
-  mobile      String?
+  panCopyFileUrl       String?
+  aadharCopyFileUrl    String?
+  passportPhotoFileUrl String?
+  pepDeclaration       String?
+  designation          String?
+  din                  String?
+  email                String
+  mobile               String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("corporate_kyc_authorised_signatories")
+}
+
+// ---------------------------------------------------------------------------
+// E-Sign requests against a Corporate KYC. An operator uploads a PDF to be
+// signed by a chosen authorised signatory and tracks the resulting signed
+// file + status. Snapshots the signatory's display name (`personName`) at
+// create-time so later edits to the signatory list don't lose history.
+// ---------------------------------------------------------------------------
+model CorporateESignRequestModel {
+  id                  Int                @id @default(autoincrement())
+  corporateKycModel   CorporateKycModel  @relation(fields: [corporateKycModelId], references: [id], onDelete: Cascade)
+  corporateKycModelId Int
+  eSignDocumentUrl    String /// Source PDF the CRM operator uploaded for signing
+  personName          String /// Snapshot of the chosen authorised signatory's name at request time
+  /// Optional FK-like reference to the authorised signatory row used at request
+  /// time. Stored as a loose Int (no FK) so deleting/renaming the signatory
+  /// still preserves the history.
+  authorisedSignatoryId Int?
+  /// Optional signer contact details captured at request time (for later
+  /// reminders, audit trail). Snapshotted to survive signatory edits.
+  signatoryEmail        String?
+  signatoryPan          String?
+  notes                 String?
+  submittedAt         DateTime? /// Marked when the signed file is uploaded (or status moves to COMPLETED/REJECTED)
+  signFileUrl         String? /// The signed PDF uploaded back into the CRM
+  status              ESignRequestStatus @default(PENDING)
+  /// CRM user who created this request (lightweight, no FK).
+  createdByCrmUserId  Int?
+
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  @@index([corporateKycModelId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("corporate_e_sign_requests")
+}
+
+enum ESignRequestStatus {
+  PENDING
+  COMPLETED
+  REJECTED
 }

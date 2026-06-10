@@ -46,6 +46,8 @@ export const defaultCorporateKycForm: CreateCorporateKycPayload = {
   directorsListCopyUrl: "",
   powerOfAttorneyCopyUrl: "",
   documentsType: "",
+  existingKycFileUrl: "",
+  useExistingKycDeclarationUrl: "",
   termsAndConditionsUrl: "",
   fatcaApplicable: false,
   fatcaEntityName: "",
@@ -59,5 +61,7 @@ export const defaultCorporateKycForm: CreateCorporateKycPayload = {
   dematAccounts: [],
   directors: [],
   promoters: [],
+  partners: [],
+  trustees: [],
   authorisedSignatories: [],
 };

@@ -315,6 +315,84 @@ export function PromotersSection({ data }: { data: CorporateKycResponse }) {
   );
 }
 
+export function PartnersSection({ data }: { data: CorporateKycResponse }) {
+  const list = data.partners ?? [];
+  if (list.length === 0) return null;
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Partners</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        {list.map((p, index) => (
+          <div
+            key={p.id ?? index}
+            className="rounded-lg border p-4 grid gap-3 md:grid-cols-2"
+          >
+            <LabelView title="Full name">
+              <p>{formatOptional(p.fullName)}</p>
+            </LabelView>
+            <LabelView title="PAN">
+              <p>{formatOptional(p.pan)}</p>
+            </LabelView>
+            <LabelView title="Designation">
+              <p>{formatOptional(p.designation)}</p>
+            </LabelView>
+            <LabelView title="DIN / DPIN">
+              <p>{formatOptional(p.din)}</p>
+            </LabelView>
+            <LabelView title="Email">
+              <p>{formatOptional(p.email)}</p>
+            </LabelView>
+            <LabelView title="Mobile">
+              <p>{formatOptional(p.mobile)}</p>
+            </LabelView>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
+export function TrusteesSection({ data }: { data: CorporateKycResponse }) {
+  const list = data.trustees ?? [];
+  if (list.length === 0) return null;
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Trustees</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        {list.map((t, index) => (
+          <div
+            key={t.id ?? index}
+            className="rounded-lg border p-4 grid gap-3 md:grid-cols-2"
+          >
+            <LabelView title="Full name">
+              <p>{formatOptional(t.fullName)}</p>
+            </LabelView>
+            <LabelView title="PAN">
+              <p>{formatOptional(t.pan)}</p>
+            </LabelView>
+            <LabelView title="Designation">
+              <p>{formatOptional(t.designation)}</p>
+            </LabelView>
+            <LabelView title="DIN / Identification No.">
+              <p>{formatOptional(t.din)}</p>
+            </LabelView>
+            <LabelView title="Email">
+              <p>{formatOptional(t.email)}</p>
+            </LabelView>
+            <LabelView title="Mobile">
+              <p>{formatOptional(t.mobile)}</p>
+            </LabelView>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
 export function AuthorisedSignatoriesSection({
   data,
 }: {

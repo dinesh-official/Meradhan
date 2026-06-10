@@ -284,9 +284,9 @@ export default function PortfolioDetails() {
                         <td className="px-4 py-4 text-black">{bond.isin}</td>
 
                         <td className="px-4 py-4">
-                          {bond.categories && bond.categories.length > 0 ? (
+                          {bond.categories && bond.categories.filter(cat => cat.toLowerCase() !== "n/a").length > 0 ? (
                             <div className="flex flex-wrap gap-1">
-                              {bond.categories.map((cat) => (
+                              {bond.categories.filter(cat => cat.toLowerCase() !== "n/a").map((cat) => (
                                 <span
                                   key={cat}
                                   className="px-3 py-1 rounded-[5px] text-[12px] font-semibold whitespace-nowrap bg-[#4ecdc4] text-white"

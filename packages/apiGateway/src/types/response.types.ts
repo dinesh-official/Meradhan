@@ -403,6 +403,10 @@ export type CorporateKycDirectorResponse = {
 
 export type CorporateKycPromoterResponse = CorporateKycDirectorResponse;
 
+export type CorporateKycPartnerResponse = CorporateKycDirectorResponse;
+
+export type CorporateKycTrusteeResponse = CorporateKycDirectorResponse;
+
 export type CorporateKycAuthorisedSignatoryResponse = {
   id: number;
   fullName: string;
@@ -465,6 +469,10 @@ export type CorporateKycResponse = {
   directorsListCopyUrl?: string;
   powerOfAttorneyCopyUrl?: string;
   documentsType?: string;
+  /** Customer's existing KYC document held by another KRA. */
+  existingKycFileUrl?: string;
+  /** Signed declaration authorising the reuse of the existing KYC. */
+  useExistingKycDeclarationUrl?: string;
   fatcaApplicable: boolean;
   fatcaEntityName?: string;
   fatcaCountryOfIncorporation?: string;
@@ -477,6 +485,8 @@ export type CorporateKycResponse = {
   dematAccounts: CorporateKycDematAccountResponse[];
   directors: CorporateKycDirectorResponse[];
   promoters: CorporateKycPromoterResponse[];
+  partners: CorporateKycPartnerResponse[];
+  trustees: CorporateKycTrusteeResponse[];
   authorisedSignatories: CorporateKycAuthorisedSignatoryResponse[];
   createdAt: string;
   updatedAt: string;

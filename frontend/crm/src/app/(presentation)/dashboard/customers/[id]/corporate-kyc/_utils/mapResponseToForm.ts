@@ -88,6 +88,11 @@ export function mapCorporateKycResponseToForm(
     directorsListCopyUrl: data.directorsListCopyUrl ?? "",
     powerOfAttorneyCopyUrl: data.powerOfAttorneyCopyUrl ?? "",
     documentsType: data.documentsType ?? "",
+    existingKycFileUrl:
+      (data as unknown as { existingKycFileUrl?: string | null }).existingKycFileUrl ?? "",
+    useExistingKycDeclarationUrl:
+      (data as unknown as { useExistingKycDeclarationUrl?: string | null })
+        .useExistingKycDeclarationUrl ?? "",
     termsAndConditionsUrl:
       (data as unknown as { termsAndConditionsUrl?: string | null }).termsAndConditionsUrl ?? "",
     fatcaApplicable: data.fatcaApplicable,
@@ -143,6 +148,32 @@ export function mapCorporateKycResponseToForm(
       din: p.din ?? "",
       email: p.email ?? "",
       mobile: p.mobile ?? "",
+    })),
+    partners: (data.partners ?? []).map((p) => ({
+      id: p.id,
+      fullName: p.fullName,
+      pan: p.pan ?? "",
+      panCopyFileUrl: p.panCopyFileUrl ?? "",
+      aadharCopyFileUrl: p.aadharCopyFileUrl ?? "",
+      passportPhotoFileUrl: p.passportPhotoFileUrl ?? "",
+      pepDeclaration: normalizePepDeclaration(p.pepDeclaration),
+      designation: p.designation ?? "",
+      din: p.din ?? "",
+      email: p.email ?? "",
+      mobile: p.mobile ?? "",
+    })),
+    trustees: (data.trustees ?? []).map((t) => ({
+      id: t.id,
+      fullName: t.fullName,
+      pan: t.pan ?? "",
+      panCopyFileUrl: t.panCopyFileUrl ?? "",
+      aadharCopyFileUrl: t.aadharCopyFileUrl ?? "",
+      passportPhotoFileUrl: t.passportPhotoFileUrl ?? "",
+      pepDeclaration: normalizePepDeclaration(t.pepDeclaration),
+      designation: t.designation ?? "",
+      din: t.din ?? "",
+      email: t.email ?? "",
+      mobile: t.mobile ?? "",
     })),
     authorisedSignatories: (data.authorisedSignatories ?? []).map((s) => ({
       id: s.id,
