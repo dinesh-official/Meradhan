@@ -61,6 +61,17 @@ export type CorporateESignRequest = {
   signFileUrl?: string | null;
   status: ESignRequestStatus;
   createdByCrmUserId?: number | null;
+  /**
+   * Digio doc id returned by the meradhan self-sign flow. Set when the
+   * customer initiates a Digio signing session via
+   * `POST /auth/customer/corporate-kyc/e-sign-requests/:id/digio-request`.
+   * Rotates if the customer retries.
+   */
+  digioDocumentId?: string | null;
+  /** Latest Digio access-token id used for the iframe handoff. */
+  digioAccessTokenId?: string | null;
+  /** Timestamp of the most recent `/digio-request` call. */
+  digioRequestedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 };

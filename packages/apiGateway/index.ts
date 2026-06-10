@@ -54,6 +54,9 @@ export type * from "./src/core/api/meradhan/customerauth.response";
 import * as customerKycApi from "./src/core/api/meradhan/kyc/Kyc.api";
 export type * from "./src/core/api/meradhan/kyc/Kyc.response";
 
+import * as customerCorporateKycApi from "./src/core/api/meradhan/corporateKyc/CorporateKyc.api";
+export type * from "./src/core/api/meradhan/corporateKyc/CorporateKyc.api";
+
 import { CustomerOrderApi } from "./src/core/api/meradhan/order/order.api";
 import { CustomerPortfolioApi } from "./src/core/api/meradhan/portfolio/portfolio.api";
 export type { CustomerOrderPdfQueryParams } from "./src/core/api/meradhan/order/order.api";
@@ -96,6 +99,7 @@ export default {
   meradhan: {
     customerAuthApi,
     customerKycApi,
+    customerCorporateKycApi,
     customerOrderApi: CustomerOrderApi,
     customerPortfolioApi: CustomerPortfolioApi,
     commonApi,

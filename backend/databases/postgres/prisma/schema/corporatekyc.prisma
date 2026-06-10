@@ -346,6 +346,17 @@ model CorporateESignRequestModel {
   /// CRM user who created this request (lightweight, no FK).
   createdByCrmUserId  Int?
 
+  /// Digio document id returned by `/v2/client/document/upload`. Rotates if
+  /// the customer retries the meradhan-side sign flow (Digio tokens are
+  /// short-lived). `@unique` so the verify endpoint can use the doc id as
+  /// the lookup key without an additional ownership check.
+  digioDocumentId     String?            @unique
+  /// Latest Digio access-token id (the `id` inside `access_token`). Stored
+  /// for audit + observability; not used by the verify endpoint.
+  digioAccessTokenId  String?
+  /// When the meradhan customer last called `/digio-request` for this row.
+  digioRequestedAt    DateTime?
+
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
 

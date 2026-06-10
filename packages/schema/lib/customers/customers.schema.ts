@@ -443,6 +443,20 @@ export const customerEmailChangeVerifySchema = z.object({
 });
 
 /**
+ * Body of the meradhan corporate KYC e-sign Digio verify endpoint.
+ *
+ * Digio's iframe success callback passes back a `digio_doc_id` — we just
+ * forward it as-is. The backend cross-checks it against the
+ * `digioDocumentId` it previously stored on the request row, so
+ * tampering or stale ids cleanly 400 out.
+ */
+export const corporateESignDigioVerifySchema = z.object({
+  digio_doc_id: z
+    .string({ error: "Digio document id is required" })
+    .min(1, { message: "Digio document id is required" }),
+});
+
+/**
  * CRM admin-initiated OTP confirmation for a customer's email or mobile.
  *
  * `customerId` is in the URL params, not the body. The send-OTP endpoints
