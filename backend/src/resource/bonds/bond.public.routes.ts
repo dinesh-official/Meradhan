@@ -8,32 +8,6 @@ const bondPublicRouter = Router();
 // 30 requests per minute per API key
 const publicBondsLimiter = withRateLimit({ max: 30, min: 1 });
 
-/**
- * Strips internal/sensitive fields before sending to external consumers.
- * Removed: providerName, providerQuantity, providerPrice, providerInterestDate,
- *           sellPrice, buyPrice, crmAvailableQuantity, ignoreAutoUpdate, sortedAt,
- *           autofillSavedAt, certificateNumbers, physicalSecurityAddress
- */
-function toPublicShape(bond: Record<string, unknown>) {
-    const {
-        // strip internal fields
-        providerName: _pn,
-        providerQuantity: _pq,
-        providerPrice: _pp,
-        providerInterestDate: _pid,
-        providerInterestDateIst: _pidi,
-        sellPrice: _sp,
-        buyPrice: _bp,
-        ignoreAutoUpdate: _iau,
-        sortedAt: _sa,
-        autofillSavedAt: _asa,
-        certificateNumbers: _cn,
-        physicalSecurityAddress: _psa,
-        // keep everything else
-        ...pub
-    } = bond;
-    return pub;
-}
 
 /**
  * POST /api/public/bonds
@@ -81,7 +55,7 @@ bondPublicRouter.post(
                 }),
             ]);
 
-            const data = bonds.map((b) => toPublicShape(b as unknown as Record<string, unknown>));
+            const data = bonds;
 
             res.json({
                 success: true,
@@ -138,7 +112,7 @@ bondPublicRouter.get(
                 success: true,
                 statusCode: 200,
                 message: "OK",
-                responseData: toPublicShape(bond as unknown as Record<string, unknown>),
+                responseData: bond,
             });
         } catch (err) {
             console.error("[bond.public] GET /api/public/bonds/:isin error:", err);
