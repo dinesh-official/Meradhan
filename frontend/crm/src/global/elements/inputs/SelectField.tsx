@@ -30,6 +30,8 @@ type Props = {
   required?: boolean;
   className?: string;
   error?: string;
+  /** Disable the entire select (trigger + value change). */
+  disabled?: boolean;
 };
 
 export function SelectField({
@@ -42,6 +44,7 @@ export function SelectField({
   required,
   className,
   error,
+  disabled,
 }: Props) {
   // Determine if controlled or uncontrolled
   const [internalValue, setInternalValue] = React.useState(defaultValue || "");
@@ -62,8 +65,9 @@ export function SelectField({
         <Select
           value={isControlled ? value : internalValue}
           onValueChange={handleChange}
+          disabled={disabled}
         >
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full" disabled={disabled}>
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>
           <SelectContent className="w-[var(--radix-select-trigger-width)]">

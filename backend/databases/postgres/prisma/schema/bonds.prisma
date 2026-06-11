@@ -115,6 +115,13 @@ model Bonds {
 
     @@index([isin])
     @@index([sortedAt])
+    // Homepage / listings filter patterns: (isListed='YES' AND allowForPurchase=TRUE)
+    // followed by dateOfAllotment / yield / creditRating sort. Without these
+    // Postgres falls back to a sequential scan + sort on the bonds table which
+    // is the main contributor to the 15s homepage timeouts.
+    @@index([isListed, allowForPurchase, dateOfAllotment(sort: Desc)])
+    @@index([isListed, allowForPurchase, yield(sort: Desc)])
+    @@index([creditRating])
     @@map("bonds")
 }
 

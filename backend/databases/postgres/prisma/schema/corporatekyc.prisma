@@ -71,6 +71,16 @@ model CorporateKycModel {
   /// `existingKycFileUrl`.
   useExistingKycDeclarationUrl String?
 
+  /// S3 URL of the most recently generated 19-page corporate KYC PDF
+  /// snapshot. The CRM "Download last PDF" button reads this directly.
+  /// Each generation overwrites the value (history isn't kept here on
+  /// purpose; if needed we can grow into an attachment-based log later).
+  lastGeneratedPdfUrl String?
+  /// Wall-clock timestamp the snapshot in `lastGeneratedPdfUrl` was
+  /// produced. Surfaced in the CRM so operators know how stale the
+  /// "Download last PDF" artifact is before sending it out.
+  lastGeneratedPdfAt  DateTime?
+
   // ---------- Attachments / verifications (uploads) ----------
   termsAndConditionsUrl String?
 
@@ -335,6 +345,17 @@ model CorporateESignRequestModel {
   status              ESignRequestStatus @default(PENDING)
   /// CRM user who created this request (lightweight, no FK).
   createdByCrmUserId  Int?
+
+  /// Digio document id returned by `/v2/client/document/upload`. Rotates if
+  /// the customer retries the meradhan-side sign flow (Digio tokens are
+  /// short-lived). `@unique` so the verify endpoint can use the doc id as
+  /// the lookup key without an additional ownership check.
+  digioDocumentId     String?            @unique
+  /// Latest Digio access-token id (the `id` inside `access_token`). Stored
+  /// for audit + observability; not used by the verify endpoint.
+  digioAccessTokenId  String?
+  /// When the meradhan customer last called `/digio-request` for this row.
+  digioRequestedAt    DateTime?
 
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt

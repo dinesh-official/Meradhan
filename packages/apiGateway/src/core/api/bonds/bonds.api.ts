@@ -64,7 +64,7 @@ export class BondsApi {
     const response = await this.apiClient.get<BondOrderPricingResponse>(
       `/bonds/${isin}/order-pricing`,
       { ...config, params: { ...(config?.params ?? {}), quantity } },
-      
+
     );
     return response.data;
   }

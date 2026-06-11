@@ -51,6 +51,22 @@ export interface CorporateKycInputForKra {
   annualIncome?: string | null;
   fatcaApplicable?: boolean | null;
 
+  /**
+   * Primary contact channel for the wire payload (`APP_EMAIL`, `APP_MOB_NO`)
+   * and CBRICS registration. These come from the customer's *signup* profile
+   * (`CustomerProfileDataModel.emailAddress` / `phoneNo`) — the same address
+   * the customer logs in with, and the one a CRM admin verifies via the
+   * profile OTP flow. We deliberately do NOT send the authorised
+   * signatory's contact details upstream anymore, since those frequently
+   * differ from the actual account holder.
+   *
+   * Both fields are optional on the type so legacy callers compile; the
+   * builder will fall back to `authorisedSignatories[0]` when these are
+   * absent, and validation will flag the absence.
+   */
+  primaryEmail?: string | null;
+  primaryMobile?: string | null;
+
   correspondenceLine1?: string | null;
   correspondenceLine2?: string | null;
   correspondenceLine3?: string | null;
@@ -347,13 +363,52 @@ export function validateCorporateKycForKra(
     }
   }
 
-  // ── Email ──
-  if (kyc.authorisedSignatories?.[0]?.email) {
-    const email = nz(kyc.authorisedSignatories[0].email);
-    if (email.length > NDML_FIELD_LENGTHS.APP_EMAIL) {
-      push("authorisedSignatories[0].email", `Email exceeds ${NDML_FIELD_LENGTHS.APP_EMAIL} chars`, "ERROR", "APP_EMAIL");
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      push("authorisedSignatories[0].email", `Email "${email}" looks invalid — risks ERR-90028`, "ERROR", "APP_EMAIL");
+  // ── Wire-level contact (APP_EMAIL / APP_MOB_NO) ──
+  // These map to the customer's signup profile (primaryEmail / primaryMobile).
+  // The signatory's email/mobile are NOT sent upstream — they're kept for
+  // e-sign workflows + APP_ADDL_DATA rows only.
+  {
+    const email = nz(kyc.primaryEmail);
+    const usingFallback = !email && !!nz(kyc.authorisedSignatories?.[0]?.email);
+    if (!email && !usingFallback) {
+      push(
+        "primaryEmail",
+        "Customer signup email is required (sent as APP_EMAIL)",
+        "ERROR",
+        "APP_EMAIL",
+      );
+    } else if (email) {
+      if (email.length > NDML_FIELD_LENGTHS.APP_EMAIL) {
+        push("primaryEmail", `Email exceeds ${NDML_FIELD_LENGTHS.APP_EMAIL} chars`, "ERROR", "APP_EMAIL");
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        push("primaryEmail", `Email "${email}" looks invalid — risks ERR-90028`, "ERROR", "APP_EMAIL");
+      }
+    } else if (usingFallback) {
+      push(
+        "primaryEmail",
+        "Customer signup email missing; falling back to authorised signatory email for APP_EMAIL.",
+        "WARN",
+        "APP_EMAIL",
+      );
+    }
+  }
+  {
+    const mobile = nz(kyc.primaryMobile);
+    const usingFallback = !mobile && !!nz(kyc.authorisedSignatories?.[0]?.mobile);
+    if (!mobile && !usingFallback) {
+      push(
+        "primaryMobile",
+        "Customer signup mobile is required (sent as APP_MOB_NO)",
+        "ERROR",
+        "APP_MOB_NO",
+      );
+    } else if (usingFallback) {
+      push(
+        "primaryMobile",
+        "Customer signup mobile missing; falling back to authorised signatory mobile for APP_MOB_NO.",
+        "WARN",
+        "APP_MOB_NO",
+      );
     }
   }
 
@@ -392,8 +447,10 @@ export function validateCorporateKycForKra(
       if (din && din.length > NDML_FIELD_LENGTHS.APP_ADDLDATA_DIN) {
         push(`authorisedSignatories[${i}].din`, `DIN exceeds ${NDML_FIELD_LENGTHS.APP_ADDLDATA_DIN} chars — risks ERR-90056`, "ERROR", "APP_ADDLDATA_DIN");
       }
-      if (i === 0 && !nz(s.email)) push(`authorisedSignatories[0].email`, "Primary signatory email is required (used as APP_EMAIL)", "ERROR", "APP_EMAIL");
-      if (i === 0 && !nz(s.mobile)) push(`authorisedSignatories[0].mobile`, "Primary signatory mobile is required (used as APP_MOB_NO)", "ERROR", "APP_MOB_NO");
+      // Signatory email/mobile no longer drive APP_EMAIL / APP_MOB_NO
+      // (those come from the customer's signup profile via `primaryEmail`
+      // / `primaryMobile`). Signatory contact is retained on the model for
+      // e-sign workflows and is not validated here.
     });
   }
 
@@ -459,6 +516,13 @@ export function buildCorporateKraPayload(
 
   const pan = upper(kyc.panNumber);
   const signatory = (kyc.authorisedSignatories ?? [])[0];
+
+  // Wire-level contact (APP_EMAIL / APP_MOB_NO) is sourced from the
+  // customer's signup profile. If the caller didn't pass it through (legacy
+  // path), fall back to the primary authorised signatory so we still emit
+  // *something* — validation will warn about the fallback.
+  const primaryEmail = nz(kyc.primaryEmail) || nz(signatory?.email);
+  const primaryMobile = nz(kyc.primaryMobile) || nz(signatory?.mobile);
 
   const useRegistered =
     !!(nz(kyc.registeredLine1) && nz(kyc.registeredCity) && nz(kyc.registeredPinCode));
@@ -562,9 +626,9 @@ export function buildCorporateKraPayload(
     APP_COR_CTRY: ctry,
     APP_OFF_NO: "",
     APP_RES_NO: "",
-    APP_MOB_NO: nz(signatory?.mobile),
+    APP_MOB_NO: primaryMobile,
     APP_FAX_NO: "",
-    APP_EMAIL: upper(signatory?.email),
+    APP_EMAIL: upper(primaryEmail),
     APP_COR_ADD_PROOF: corProofCode,
     APP_COR_ADD_REF: "",
     APP_COR_ADD_DT: todayStr,
@@ -829,9 +893,26 @@ export function buildCorporateKraFieldMap(
           : ""),
     },
 
-    // ── Primary signatory contact (drives APP_MOB_NO + APP_EMAIL)
-    { group: "Primary signatory", label: "Email", source: "authorisedSignatories[0].email", sourceValue: display(sig?.email), xmlTag: "APP_EMAIL", mappedValue: p.APP_EMAIL ?? "" },
-    { group: "Primary signatory", label: "Mobile", source: "authorisedSignatories[0].mobile", sourceValue: display(sig?.mobile), xmlTag: "APP_MOB_NO", mappedValue: p.APP_MOB_NO ?? "" },
+    // ── Wire-level contact (drives APP_EMAIL + APP_MOB_NO).
+    //    Sourced from the customer's signup profile so KRA + CBRICS share
+    //    the same address the user actually logs in with. Falls back to
+    //    the primary authorised signatory if signup data isn't set.
+    {
+      group: "Customer contact",
+      label: "Email (signup profile)",
+      source: "customerProfile.emailAddress",
+      sourceValue: display(kyc.primaryEmail ?? sig?.email),
+      xmlTag: "APP_EMAIL",
+      mappedValue: p.APP_EMAIL ?? "",
+    },
+    {
+      group: "Customer contact",
+      label: "Mobile (signup profile)",
+      source: "customerProfile.phoneNo",
+      sourceValue: display(kyc.primaryMobile ?? sig?.mobile),
+      xmlTag: "APP_MOB_NO",
+      mappedValue: p.APP_MOB_NO ?? "",
+    },
 
     // ── FATCA
     { group: "FATCA", label: "Applicable", source: "fatcaApplicable", sourceValue: display(kyc.fatcaApplicable), xmlTag: "APP_FATCA_APPLICABLE_FLAG", mappedValue: p.APP_FATCA_APPLICABLE_FLAG ?? "" },

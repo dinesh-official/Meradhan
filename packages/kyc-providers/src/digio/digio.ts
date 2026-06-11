@@ -140,14 +140,33 @@ export class DigioSDK {
       email,
       name,
       useKraKyc,
-    }: { email: string; name: string; useKraKyc?: boolean },
+      pageCount,
+      reason,
+    }: {
+      email: string;
+      name: string;
+      useKraKyc?: boolean;
+      /**
+       * Number of pages to draw the signature on. Defaults to the
+       * KYC-flow page counts (`ESIGN_PAGE_COUNT_KRA` / `ESIGN_PAGE_COUNT_DEFAULT`).
+       * For arbitrary documents (e.g. corporate KYC PDFs uploaded by a
+       * CRM operator), the caller should compute the real page count via
+       * {@link getPdfPageCount} and pass it here — otherwise Digio rejects
+       * the request when `sign_coordinates` references non-existent pages.
+       */
+      pageCount?: number;
+      /** Free-text "reason" stamped on the Digio signing screen. Defaults to KYC copy. */
+      reason?: string;
+    },
   ) {
     try {
       const form = new FormData();
       const time = new Date().getTime();
-      const signPageCount = useKraKyc
-        ? DigioSDK.ESIGN_PAGE_COUNT_KRA
-        : DigioSDK.ESIGN_PAGE_COUNT_DEFAULT;
+      const signPageCount =
+        pageCount ??
+        (useKraKyc
+          ? DigioSDK.ESIGN_PAGE_COUNT_KRA
+          : DigioSDK.ESIGN_PAGE_COUNT_DEFAULT);
 
       // Attach the PDF as binary
       // Attach the PDF file as binary stream
@@ -177,7 +196,7 @@ export class DigioSDK {
               identifier: email,
               name: name,
               sign_type: "aadhaar",
-              reason: "For MeraDhan Kyc",
+              reason: reason ?? "For MeraDhan Kyc",
             },
           ],
         }),
@@ -211,4 +230,23 @@ export class DigioSDK {
     );
     return response.data;
   }
+}
+
+/**
+ * Lightweight PDF page counter that scans the raw bytes for `/Type /Page`
+ * objects (excluding the parent `/Type /Pages` collection).
+ *
+ * Used by the corporate e-sign flow to size the `sign_coordinates` array
+ * for arbitrary CRM-uploaded PDFs — no `pdf-lib`/`pdfkit` runtime dep.
+ * Returns at least `1`, so a corrupt / non-PDF buffer doesn't blow up the
+ * request: Digio will reject it cleanly with a clearer error.
+ */
+export function getPdfPageCount(buffer: Buffer): number {
+  // PDF objects are 8-bit clean; reading as latin1 preserves byte values
+  // without forcing UTF-8 validation (PDFs aren't UTF-8).
+  const text = buffer.toString("latin1");
+  // `/Type /Page` with optional whitespace + a non-`s` lookahead so the
+  // parent `/Type /Pages` (the page-tree root) isn't counted.
+  const matches = text.match(/\/Type\s*\/Page(?!s)/g);
+  return matches?.length ?? 1;
 }

@@ -113,8 +113,13 @@ export class ParticipantManager {
       corporateKyc.entityName?.trim() ||
       "CORPORATE";
 
-    const email = (signatory?.email ?? "").trim();
-    const mobile = (signatory?.mobile ?? "").trim();
+    // CBRICS contact channel = customer's signup profile (same as KRA's
+    // APP_EMAIL / APP_MOB_NO). The authorised signatory's contact is kept
+    // for APP_ADDL_DATA + e-sign workflows but is not surfaced to CBRICS.
+    // Fall back to the signatory only when the profile is somehow blank
+    // (shouldn't happen — `emailAddress` is non-nullable in the schema).
+    const email = (user.emailAddress ?? signatory?.email ?? "").trim();
+    const mobile = (user.phoneNo ?? signatory?.mobile ?? "").trim();
 
     const fullAddress =
       corporateKyc.registeredFullAddress?.trim() ||
