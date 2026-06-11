@@ -9,7 +9,7 @@ function NewsLetter() {
         <div className="grid lg:grid-cols-2 gap-5">
           <div className="text-white">
             <h3 className="text-2xl ">Stay up-to-date with market updates!</h3>
-            <p>Stay up-to-date with market updates!</p>
+            {/* <p>Stay up-to-date with market updates!</p> */}
           </div>
           <div className="flex flex-col justify-center gap-2 lg:items-end text-white">
             <div className="flex md:flex-row flex-col gap-5 ">
