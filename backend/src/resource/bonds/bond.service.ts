@@ -25,6 +25,43 @@ export type GetBondOrderPricingResult =
   | { ok: false; reason: "not_found" }
   | { ok: false; reason: "missing_coupon_dates" };
 
+// ─── CRM inventory batch cache ─────────────────────────────────────────────
+// CRM inventory uploads happen manually and are rare, so we cache the latest
+// batch id in process for `INVENTORY_BATCH_CACHE_TTL_MS`. Without this every
+// bond request fires an extra `findFirst` on `crm_inventory_stock_batch`,
+// which is a real contributor to homepage timeouts when the Supabase pool
+// is busy (every endpoint that enriches with inventory does two DB hops).
+//
+// `INVENTORY_ENRICH_TIMEOUT_MS` caps the total inventory enrichment time so a
+// slow/locked DB never blocks the main bonds list response. Without this the
+// 15s axios timeout from the frontend is the only safety net, which means
+// every homepage render fails in lockstep.
+const INVENTORY_BATCH_CACHE_TTL_MS = 60_000;
+const INVENTORY_ENRICH_TIMEOUT_MS = 2_500;
+
+let cachedLatestBatchId: { id: number | null; expiresAt: number } | null = null;
+
+async function getCachedLatestInventoryBatchId(): Promise<number | null> {
+  const now = Date.now();
+  if (cachedLatestBatchId && cachedLatestBatchId.expiresAt > now) {
+    return cachedLatestBatchId.id;
+  }
+  const batch = await db.dataBase.crmInventoryStockBatch.findFirst({
+    orderBy: { uploadedAt: "desc" },
+    select: { id: true },
+  });
+  cachedLatestBatchId = {
+    id: batch?.id ?? null,
+    expiresAt: now + INVENTORY_BATCH_CACHE_TTL_MS,
+  };
+  return cachedLatestBatchId.id;
+}
+
+/** Exported so an admin "upload inventory" path can invalidate it immediately. */
+export function invalidateLatestInventoryBatchCache(): void {
+  cachedLatestBatchId = null;
+}
+
 export class BondService {
   /**
    * Latest CRM inventory batch: quantity per ISIN (uppercase key). Missing ISIN → 0.
@@ -42,16 +79,12 @@ export class BondService {
     if (normalized.length === 0) return map;
 
     try {
-      const batch = await db.dataBase.crmInventoryStockBatch.findFirst({
-        orderBy: { uploadedAt: "desc" },
-        select: { id: true },
-      });
-      console.log({ batch });
-      if (!batch) return map;
+      const batchId = await getCachedLatestInventoryBatchId();
+      if (batchId == null) return map;
 
       const lines = await db.dataBase.crmInventoryStockLine.findMany({
         where: {
-          batchId: batch.id,
+          batchId,
           isin: { in: normalized },
         },
         select: { isin: true, quantity: true },
@@ -61,7 +94,8 @@ export class BondService {
         map.set(k, Math.max(0, Number(line.quantity)));
       }
     } catch {
-      // e.g. migrations not applied — treat as no stock
+      // Migrations not applied / pool exhausted / DB transient error — leave
+      // the map at zeros so the calling endpoint can still return.
     }
     return map;
   }
@@ -77,7 +111,27 @@ export class BondService {
     rows: T[],
   ): Promise<Array<T & { crmAvailableQuantity: number }>> {
     if (rows.length === 0) return [];
-    const qtyMap = await this.getLatestCrmInventoryQuantityMap(rows.map((r) => r.isin));
+
+    // Best-effort enrichment: if the inventory lookup hasn't returned within
+    // `INVENTORY_ENRICH_TIMEOUT_MS` (typically because the Supabase pool is
+    // busy), fall back to crmAvailableQuantity: 0. The underlying query keeps
+    // running in the background and will populate the next call's cache, so
+    // we trade one stale render for an always-responsive homepage.
+    let qtyMap: Map<string, number>;
+    try {
+      qtyMap = await Promise.race([
+        this.getLatestCrmInventoryQuantityMap(rows.map((r) => r.isin)),
+        new Promise<never>((_, reject) =>
+          setTimeout(
+            () => reject(new Error("inventory_enrichment_timeout")),
+            INVENTORY_ENRICH_TIMEOUT_MS,
+          ).unref(),
+        ),
+      ]);
+    } catch {
+      qtyMap = new Map();
+    }
+
     return rows.map((r) => ({
       ...r,
       crmAvailableQuantity: qtyMap.get(r.isin.trim().toUpperCase()) ?? 0,

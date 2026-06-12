@@ -490,10 +490,77 @@ export type CorporateKycResponse = {
   authorisedSignatories: CorporateKycAuthorisedSignatoryResponse[];
   createdAt: string;
   updatedAt: string;
+  /**
+   * Customer-level verification snapshot used by the CRM corporate-KYC form
+   * to lock the bank + demat sections once the customer is KYC- or
+   * KRA-verified. `isAccountsLocked` is the derived flag the UI checks;
+   * `kycStatus` / `kraStatus` are exposed for richer messaging.
+   */
+  kycStatus?: string | null;
+  kraStatus?: string | null;
+  isAccountsLocked?: boolean;
+
+  /**
+   * S3 URL + timestamp of the most recently generated 19-page corporate
+   * KYC PDF snapshot. The CRM "Download last PDF" button reads
+   * `lastGeneratedPdfUrl` directly; `lastGeneratedPdfAt` is shown next to
+   * the button so operators can tell how stale the file is.
+   */
+  lastGeneratedPdfUrl?: string | null;
+  lastGeneratedPdfAt?: string | null;
 };
+
+export type CorporateKycLastPdfResponseData = {
+  lastGeneratedPdfUrl: string | null;
+  lastGeneratedPdfAt: string | null;
+};
+
+export type SetCorporateKycLastPdfResponse = BaseResponseData<CorporateKycLastPdfResponseData>;
 
 export type GetCorporateKycResponse = BaseResponseData<CorporateKycResponse | null>;
 export type SaveCorporateKycResponse = BaseResponseData<CorporateKycResponse>;
+
+/**
+ * Returned by `POST /crm/customer/:id/corporate-kyc/verify`.
+ *
+ * `syncedSections` lists customer satellites that were created/updated from
+ * the corporate KYC (e.g. "panCard", "currentAddress", "bankAccounts(+2)").
+ * `skippedSections` lists satellites that already had data and were left
+ * alone. `warnings` surfaces non-blocking pre-flight issues (missing PAN,
+ * empty banks, KRA not yet verified) for the UI to display.
+ */
+export type VerifyCorporateCustomerPayload = {
+  verified: true;
+  syncedSections: string[];
+  skippedSections: string[];
+  warnings: string[];
+  kycStatus: "VERIFIED";
+  kraStatus: "VERIFIED";
+  verifyDate: string;
+};
+export type VerifyCorporateCustomerResponse =
+  BaseResponseData<VerifyCorporateCustomerPayload>;
+
+/**
+ * Responses for the CRM-initiated customer email / mobile OTP endpoints.
+ *
+ * The OTP is sent to the customer's registered address — the admin asks
+ * the customer for the code and confirms via `verify*Otp`. `sentTo` is
+ * a masked rendering (e.g. `+91 XXXXXX1234`, `so***@example.com`) safe
+ * to display inside the dialog.
+ */
+export type CrmCustomerOtpSendPayload = {
+  otpToken: string;
+  sentTo: string;
+};
+export type CrmCustomerOtpSendResponse =
+  BaseResponseData<CrmCustomerOtpSendPayload>;
+
+export type CrmCustomerOtpVerifyPayload = {
+  verified: boolean;
+};
+export type CrmCustomerOtpVerifyResponse =
+  BaseResponseData<CrmCustomerOtpVerifyPayload>;
 
 //CRM LEADS TYPES
 

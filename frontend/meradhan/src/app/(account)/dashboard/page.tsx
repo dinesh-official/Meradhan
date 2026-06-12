@@ -15,6 +15,7 @@ import type { Order, InvestmentByIssuerTypeResponse } from "@root/apiGateway";
 import { cookies } from "next/headers";
 import { DashboardOrdersPreview } from "./_components/DashboardOrdersPreview";
 import { DashboardPortfolioDonut } from "./_components/DashboardPortfolioDonut";
+import CorporateESignBanner from "./_components/_banners/CorporateESignBanner";
 
 export const revalidate = 0;
 export const generateMetadata = async () => {
@@ -124,6 +125,7 @@ async function DashBoardPage() {
       }
     >
       <div className="flex flex-col gap-5">
+        <CorporateESignBanner />
         <div className="bg-gray-100 p-4 px-5 rounded">
           <p>Explore your portfolio, offers, and deals — all in one place.</p>
         </div>

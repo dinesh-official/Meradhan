@@ -617,8 +617,20 @@ export default function CorporateKycPageView({
         </Card>
         <DocumentsSection hook={hook} />
         <FatcaSection hook={hook} />
-        <BankAccountsSection hook={hook} />
-        <DematAccountsSection hook={hook} />
+        {/*
+         * Once the customer is KYC- or KRA-verified, bank + demat lists are
+         * sealed (NDML / CBRICS already received them). Pass `locked` so the
+         * sections render as read-only and the backend's hard guard is just
+         * a defence-in-depth.
+         */}
+        <BankAccountsSection
+          hook={hook}
+          locked={Boolean(corporateKyc?.isAccountsLocked)}
+        />
+        <DematAccountsSection
+          hook={hook}
+          locked={Boolean(corporateKyc?.isAccountsLocked)}
+        />
         {/*
          * Constitution-aware governance sections. See `getConstitutionRoles`
          * for the full mapping.

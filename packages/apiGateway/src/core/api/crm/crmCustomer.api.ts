@@ -3,17 +3,30 @@ import type { AxiosRequestConfig, AxiosResponse } from "axios";
 import type z from "zod";
 import type {
   CreateCustomerResponse,
+  CrmCustomerOtpSendResponse,
+  CrmCustomerOtpVerifyResponse,
   CustomerProfile,
   DeleteCustomerResponse,
   GetCorporateKycResponse,
   GetCustomerResponse,
   GetCustomerResponseById,
   SaveCorporateKycResponse,
+  SetCorporateKycLastPdfResponse,
   UpdateCustomerResponse,
+  VerifyCorporateCustomerResponse,
 } from "../../../types/response.types";
 import type { IApiCaller } from "../../connection/apiCaller.interface";
 import { ApiError } from "../../connection/error";
 import type { BaseResponseData } from "../../../types/base";
+
+/**
+ * Body for confirming a CRM-initiated customer OTP (mobile or email).
+ * `token` is returned by the matching `sendCustomer*VerifyOtp` call.
+ */
+export type CrmCustomerVerifyOtpConfirmPayload = {
+  otp: string;
+  token: string;
+};
 
 export type CorporateKraPastExecution =
   | "MODIFY"
@@ -48,6 +61,17 @@ export type CorporateESignRequest = {
   signFileUrl?: string | null;
   status: ESignRequestStatus;
   createdByCrmUserId?: number | null;
+  /**
+   * Digio doc id returned by the meradhan self-sign flow. Set when the
+   * customer initiates a Digio signing session via
+   * `POST /auth/customer/corporate-kyc/e-sign-requests/:id/digio-request`.
+   * Rotates if the customer retries.
+   */
+  digioDocumentId?: string | null;
+  /** Latest Digio access-token id used for the iframe handoff. */
+  digioAccessTokenId?: string | null;
+  /** Timestamp of the most recent `/digio-request` call. */
+  digioRequestedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -241,6 +265,40 @@ export type CorporateKraAutofillResponse = {
   formPatch: CorporateKycAutofillFormPatch;
 };
 
+/**
+ * Single validation note attached to the CBRICS payload preview (mirrors
+ * the KRA preview shape so the UI can reuse the same rendering).
+ */
+export type CorporateCbricsValidationIssue = {
+  field: string;
+  severity: "ERROR" | "WARN";
+  message: string;
+};
+
+/**
+ * Snapshot of the JSON the SDK would POST to NSE CBRICS for this
+ * corporate, plus a pre-flight validation report.
+ *
+ * `register` corresponds to `POST /rest/v1/unreg` (first-time
+ * registration), `modify` to `POST /rest/v1/unreg/update` (subsequent
+ * field edits). Both blocks are always populated so operators can
+ * eyeball the diff between them; `modify.id` will be `null` until the
+ * customer has been registered on CBRICS at least once.
+ */
+export type CorporateCbricsPreview = {
+  register: Record<string, unknown>;
+  modify: Record<string, unknown>;
+  validation: {
+    errors: CorporateCbricsValidationIssue[];
+    warnings: CorporateCbricsValidationIssue[];
+  };
+  participantId: number | null;
+  endpoint: {
+    register: string;
+    modify: string;
+  };
+};
+
 export type CorporateKraPreviewResponse =
   | {
       hasCorporateKyc: false;
@@ -281,6 +339,12 @@ export type CorporateKraPreviewResponse =
         };
       };
       codeReference: CorporateKraCodeReference;
+      /**
+       * Live JSON payloads the SDK would POST to NSE CBRICS for this
+       * corporate (register + modify), with the same source data the
+       * actual register flow reads. See {@link CorporateCbricsPreview}.
+       */
+      cbrics: CorporateCbricsPreview;
       /**
        * Latest persisted NDML download for this customer (manual or worker
        * trigger). `null` until at least one `Download from KRA` call has been
@@ -342,6 +406,18 @@ export interface TCrmCustomerInterface {
     config?: AxiosRequestConfig,
   ): Promise<AxiosResponse<SaveCorporateKycResponse>>;
 
+  /**
+   * Records the S3 URL of the most recently generated 19-page corporate
+   * KYC PDF on the corporate KYC row. The CRM PDF page calls this right
+   * after a successful render so the "Download last PDF" button can pick
+   * the snapshot up on the next `getCorporateKyc` refetch.
+   */
+  setCorporateKycLastPdf(
+    customerId: number,
+    payload: { fileUrl: string },
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<SetCorporateKycLastPdfResponse>>;
+
   corporateKraStatus(
     customerId: number,
     config?: AxiosRequestConfig,
@@ -394,6 +470,51 @@ export interface TCrmCustomerInterface {
     customerId: number,
     config?: AxiosRequestConfig,
   ): Promise<AxiosResponse<BaseResponseData<{ isFinished: boolean; removedJobIds: Array<string | number> }>>>;
+
+  /**
+   * CRM "Verify & Activate Customer" — copies the corporate KYC into the
+   * customer satellites (PAN, addresses, banks, demats, FATCA flag,
+   * legalEntityName, annualGrossIncome) — strictly fill-missing-only — and
+   * then flips kycStatus + kraStatus to VERIFIED. Idempotent; the backend
+   * returns 409 if the customer is already verified.
+   */
+  verifyCorporateCustomer(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<VerifyCorporateCustomerResponse>>;
+
+  /**
+   * Send an OTP to the customer's registered mobile so a CRM admin can
+   * mark the number as verified. Returns the `otpToken` to be echoed
+   * back in `verifyCustomerMobileOtp`.
+   */
+  sendCustomerMobileVerifyOtp(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<CrmCustomerOtpSendResponse>>;
+
+  /** Confirm the customer's mobile OTP and flip `utility.isPhoneVerified`. */
+  verifyCustomerMobileOtp(
+    customerId: number,
+    payload: CrmCustomerVerifyOtpConfirmPayload,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<CrmCustomerOtpVerifyResponse>>;
+
+  /**
+   * Send an OTP to the customer's registered email so a CRM admin can
+   * mark the address as verified. Rate-limited 5/min/IP on the backend.
+   */
+  sendCustomerEmailVerifyOtp(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<CrmCustomerOtpSendResponse>>;
+
+  /** Confirm the customer's email OTP and flip `utility.isEmailVerified`. */
+  verifyCustomerEmailOtp(
+    customerId: number,
+    payload: CrmCustomerVerifyOtpConfirmPayload,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<CrmCustomerOtpVerifyResponse>>;
 
   listCorporateKycAttachments(
     customerId: number,
@@ -592,6 +713,18 @@ export class CrmCustomerApi implements TCrmCustomerInterface {
     );
   }
 
+  async setCorporateKycLastPdf(
+    customerId: number,
+    payload: { fileUrl: string },
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["setCorporateKycLastPdf"]> {
+    return this.apiClient.post<SetCorporateKycLastPdfResponse>(
+      `/crm/customer/${customerId}/corporate-kyc/last-pdf`,
+      payload,
+      config,
+    );
+  }
+
   async corporateKraStatus(
     customerId: number,
     config?: AxiosRequestConfig,
@@ -656,6 +789,63 @@ export class CrmCustomerApi implements TCrmCustomerInterface {
     >(
       `/crm/customer/${customerId}/corporate-kyc/kra/finish`,
       {},
+      config,
+    );
+  }
+
+  async verifyCorporateCustomer(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["verifyCorporateCustomer"]> {
+    return this.apiClient.post<VerifyCorporateCustomerResponse>(
+      `/crm/customer/${customerId}/corporate-kyc/verify`,
+      {},
+      config,
+    );
+  }
+
+  async sendCustomerMobileVerifyOtp(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["sendCustomerMobileVerifyOtp"]> {
+    return this.apiClient.post<CrmCustomerOtpSendResponse>(
+      `/crm/customer/${customerId}/mobile/send-otp`,
+      {},
+      config,
+    );
+  }
+
+  async verifyCustomerMobileOtp(
+    customerId: number,
+    payload: CrmCustomerVerifyOtpConfirmPayload,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["verifyCustomerMobileOtp"]> {
+    return this.apiClient.post<CrmCustomerOtpVerifyResponse>(
+      `/crm/customer/${customerId}/mobile/verify-otp`,
+      payload,
+      config,
+    );
+  }
+
+  async sendCustomerEmailVerifyOtp(
+    customerId: number,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["sendCustomerEmailVerifyOtp"]> {
+    return this.apiClient.post<CrmCustomerOtpSendResponse>(
+      `/crm/customer/${customerId}/email/send-otp`,
+      {},
+      config,
+    );
+  }
+
+  async verifyCustomerEmailOtp(
+    customerId: number,
+    payload: CrmCustomerVerifyOtpConfirmPayload,
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["verifyCustomerEmailOtp"]> {
+    return this.apiClient.post<CrmCustomerOtpVerifyResponse>(
+      `/crm/customer/${customerId}/email/verify-otp`,
+      payload,
       config,
     );
   }

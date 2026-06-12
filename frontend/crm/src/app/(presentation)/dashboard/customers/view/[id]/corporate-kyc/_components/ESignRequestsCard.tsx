@@ -424,7 +424,8 @@ export default function ESignRequestsCard({ customerId, corporateKyc }: Props) {
               </CardTitle>
               <p className="mt-0.5 text-xs text-muted-foreground">
                 Send documents to authorised signatories and track signed
-                returns.
+                returns. Customers can also sign themselves via the Meradhan
+                dashboard.
               </p>
             </div>
           </div>
@@ -602,7 +603,23 @@ export default function ESignRequestsCard({ customerId, corporateKyc }: Props) {
                           {new Date(item.submittedAt).toLocaleString("en-IN")}
                         </span>
                       ) : null}
+                      {item.digioRequestedAt ? (
+                        <span className="inline-flex items-center gap-1 text-indigo-700 dark:text-indigo-300">
+                          <FileSignature className="h-3 w-3" />
+                          Digio session started{" "}
+                          {new Date(item.digioRequestedAt).toLocaleString("en-IN")}
+                        </span>
+                      ) : null}
                     </div>
+
+                    {item.status === "COMPLETED" && item.digioDocumentId ? (
+                      <p className="text-[11px] text-muted-foreground">
+                        Signed via Digio · doc id{" "}
+                        <code className="rounded bg-muted px-1 py-0.5 font-mono text-[10px]">
+                          {item.digioDocumentId}
+                        </code>
+                      </p>
+                    ) : null}
 
                     {item.notes ? (
                       <div className="rounded-md bg-muted/40 px-3 py-2 text-xs text-muted-foreground italic">

@@ -90,4 +90,48 @@ customerProfileRoutes.post(
   (req, res) => controller.saveRiskProfileAnswers(req, res),
 );
 
+// ---------------------------------------------------------------------------
+// Corporate KYC e-sign (Digio) — customer-facing routes.
+//
+// The CRM operator still creates the request via `/crm/.../e-sign-requests`
+// (see `crm/customers/customers.routes.ts`). These four endpoints power the
+// meradhan dashboard banner + 2-step sign page so the customer can sign the
+// CRM-uploaded PDF through Digio themselves. The questions endpoint is a
+// helper so the meradhan client doesn't have to duplicate question text —
+// it returns the same `CORPORATE_RISK_PROFILE_QUESTIONS` constant the CRM
+// uses, and the submission goes through the existing `/risk-profile` POST.
+// ---------------------------------------------------------------------------
+
+customerProfileRoutes.get(
+  "/api/auth/customer/corporate-kyc/risk-profile/questions",
+  allowAccessMiddleware("USER"),
+  (req, res) => controller.getCorporateRiskProfileQuestions(req, res),
+);
+
+customerProfileRoutes.get(
+  "/api/auth/customer/corporate-kyc/e-sign-requests/pending",
+  allowAccessMiddleware("USER"),
+  (req, res) => controller.listPendingCorporateESignRequests(req, res),
+);
+
+customerProfileRoutes.get(
+  "/api/auth/customer/corporate-kyc/e-sign-requests/:requestId",
+  allowAccessMiddleware("USER"),
+  (req, res) => controller.getCorporateESignRequest(req, res),
+);
+
+customerProfileRoutes.post(
+  "/api/auth/customer/corporate-kyc/e-sign-requests/:requestId/digio-request",
+  allowAccessMiddleware("USER"),
+  withRateLimit({ max: 10 }),
+  (req, res) => controller.digioRequestCorporateESign(req, res),
+);
+
+customerProfileRoutes.post(
+  "/api/auth/customer/corporate-kyc/e-sign-requests/:requestId/digio-verify",
+  allowAccessMiddleware("USER"),
+  withRateLimit({ max: 10 }),
+  (req, res) => controller.digioVerifyCorporateESign(req, res),
+);
+
 export default customerProfileRoutes;

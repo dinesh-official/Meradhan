@@ -20,19 +20,23 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
-import { encodeId } from "@/global/utils/url.utils";
+import { encodeId, genMediaUrl } from "@/global/utils/url.utils";
 import apiGateway from "@root/apiGateway";
-import { useQueries } from "@tanstack/react-query";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import {
   AlertCircle,
   ChevronDown,
+  Cloud,
+  CloudUpload,
   Eye,
   FileDown,
+  History,
   Loader2,
   RotateCcw,
   Settings2,
 } from "lucide-react";
+import { useCorporateKycFileUpload } from "@/app/(presentation)/dashboard/customers/[id]/corporate-kyc/_hooks/useCorporateKycFileUpload";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -98,6 +102,21 @@ const TABS = [
 ] as const;
 type TabId = (typeof TABS)[number]["id"];
 
+function formatRelativeTime(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const then = new Date(iso).getTime();
+  if (!Number.isFinite(then)) return "";
+  const diffMs = Date.now() - then;
+  const minutes = Math.floor(diffMs / 60_000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  return new Date(iso).toLocaleDateString();
+}
+
 export default function CorporateKycPdfView({
   profileId,
 }: {
@@ -105,6 +124,8 @@ export default function CorporateKycPdfView({
 }) {
   const api = new apiGateway.crm.customer.CrmCustomerApi(apiClientCaller);
   const encodedId = encodeId(profileId);
+  const queryClient = useQueryClient();
+  const { uploadFile } = useCorporateKycFileUpload();
 
   const [customerQuery, corporateKycQuery, attachmentsQuery] = useQueries({
     queries: [
@@ -150,6 +171,14 @@ export default function CorporateKycPdfView({
   const [generating, setGenerating] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  // "Saving to S3" inflight indicator. Decoupled from `generating` because
+  // the S3 upload happens *after* we hand the file to the browser, so we
+  // can show "Saved last PDF" success without blocking the download button.
+  const [savingLastPdf, setSavingLastPdf] = useState(false);
+  // "Downloading last PDF" inflight indicator. We refetch the S3 file via
+  // `fetch` + Blob so the download uses a clean filename instead of the
+  // S3 key.
+  const [downloadingLast, setDownloadingLast] = useState(false);
   const initialized = useRef(false);
 
   const initialPayload = useMemo<CorporateKycData | null>(() => {
@@ -202,6 +231,34 @@ export default function CorporateKycPdfView({
     toast.success("Form reset from CRM data.");
   };
 
+  /**
+   * Uploads the freshly generated PDF blob to S3 and records the location
+   * on the corporate KYC row so the "Download last PDF" button on this
+   * page (and any future visit) can fetch it. Runs as a fire-and-forget
+   * side-effect after the user already has their local download — failures
+   * surface as toasts but don't block the primary download flow.
+   */
+  const persistLastPdf = async (blob: Blob, filename: string) => {
+    setSavingLastPdf(true);
+    try {
+      const file = new File([blob], filename, { type: "application/pdf" });
+      const location = await uploadFile(file, "corporate-kyc/pdf");
+      if (!location) {
+        // useCorporateKycFileUpload already toasts the underlying error.
+        return;
+      }
+      await api.setCorporateKycLastPdf(profileId, { fileUrl: location });
+      await queryClient.invalidateQueries({ queryKey: ["corporateKyc", profileId] });
+      toast.success("Saved as latest PDF on S3.");
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to save last PDF on S3";
+      toast.error(message);
+    } finally {
+      setSavingLastPdf(false);
+    }
+  };
+
   const generate = async (mode: "download" | "preview") => {
     if (!payload) {
       toast.error(jsonError ?? "Payload is empty or invalid JSON.");
@@ -226,15 +283,20 @@ export default function CorporateKycPdfView({
       }
       const blob = await res.blob();
       const blobUrl = URL.createObjectURL(blob);
+      const filename = buildFilename(corporateKyc?.entityName, profileId);
       if (mode === "download") {
         const a = document.createElement("a");
         a.href = blobUrl;
-        a.download = buildFilename(corporateKyc?.entityName, profileId);
+        a.download = filename;
         document.body.appendChild(a);
         a.click();
         a.remove();
         URL.revokeObjectURL(blobUrl);
         toast.success("Corporate KYC PDF downloaded.");
+        // Side-effect: persist to S3 + record as the latest PDF so other
+        // operators (and a later visit) can pull the exact same artifact.
+        // Fire-and-forget — we already gave the file to the user above.
+        void persistLastPdf(blob, filename);
       } else {
         setPreviewUrl(blobUrl);
         setPreviewOpen(true);
@@ -245,6 +307,47 @@ export default function CorporateKycPdfView({
       toast.error(message);
     } finally {
       setGenerating(false);
+    }
+  };
+
+  /**
+   * Downloads the most recently saved PDF from S3. Uses `fetch` + Blob so
+   * the browser's "Save As" picks up our chosen filename instead of the
+   * raw S3 key (which is unfriendly to humans). Falls back to opening the
+   * URL in a new tab if the fetch fails (e.g. CORS quirks).
+   */
+  const downloadLastPdf = async () => {
+    const url = corporateKyc?.lastGeneratedPdfUrl;
+    if (!url) {
+      toast.error("No saved PDF yet. Generate one first.");
+      return;
+    }
+    setDownloadingLast(true);
+    try {
+      const absoluteUrl = genMediaUrl(url);
+      const res = await fetch(absoluteUrl, { credentials: "omit" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const filename = buildFilename(corporateKyc?.entityName, profileId);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
+      toast.success("Last saved PDF downloaded.");
+    } catch (err) {
+      // Fallback for any browser/CORS edge case: open in a new tab so the
+      // operator can save it manually.
+      const absoluteUrl = genMediaUrl(url);
+      window.open(absoluteUrl, "_blank", "noopener,noreferrer");
+      const message =
+        err instanceof Error ? err.message : "Failed to download last PDF";
+      toast.message("Opened last PDF in a new tab.", { description: message });
+    } finally {
+      setDownloadingLast(false);
     }
   };
 
@@ -342,11 +445,35 @@ export default function CorporateKycPdfView({
                 View preview
               </Button>
             ) : null}
+            {/*
+             * Download the most recent PDF previously saved to S3. Hidden
+             * when there's nothing saved yet (cleaner first-run UX).
+             */}
+            {corporateKyc?.lastGeneratedPdfUrl ? (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void downloadLastPdf()}
+                disabled={downloadingLast || generating}
+                title={
+                  corporateKyc?.lastGeneratedPdfAt
+                    ? `Last saved ${formatRelativeTime(corporateKyc.lastGeneratedPdfAt)} — fetched from S3.`
+                    : "Download the most recently saved PDF from S3."
+                }
+              >
+                {downloadingLast ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <History className="h-4 w-4" />
+                )}
+                Download last PDF
+              </Button>
+            ) : null}
             <Button
               type="button"
               onClick={() => void generate("download")}
               disabled={generating || !!jsonError || !payload}
-              title="Generate and download the PDF"
+              title="Generate, download, and save the PDF on S3 as the latest snapshot"
             >
               {generating ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -358,6 +485,31 @@ export default function CorporateKycPdfView({
           </div>
         }
       />
+
+      {/*
+       * Status line showing when the last PDF was saved to S3 (and a live
+       * indicator while a new save is in flight). Kept light-weight so it
+       * doesn't dominate the layout — sits right under PageInfoBar.
+       */}
+      {(corporateKyc?.lastGeneratedPdfAt || savingLastPdf) && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          {savingLastPdf ? (
+            <>
+              <CloudUpload className="h-3.5 w-3.5 animate-pulse" />
+              <span>Saving latest PDF on S3…</span>
+            </>
+          ) : (
+            <>
+              <Cloud className="h-3.5 w-3.5" />
+              <span>
+                Last saved on S3:{" "}
+                {new Date(corporateKyc!.lastGeneratedPdfAt!).toLocaleString()}{" "}
+                ({formatRelativeTime(corporateKyc!.lastGeneratedPdfAt!)})
+              </span>
+            </>
+          )}
+        </div>
+      )}
 
       <Card>
         <button
