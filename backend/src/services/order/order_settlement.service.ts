@@ -415,6 +415,16 @@ export class OrderSettlementService {
         fn: () => this.updateOrderStatus(orderId),
       });
       if (isNetBanking) {
+        // Settlement Razorpay-route-transfer requires a Meradhan customer
+        // (we route payouts to the customer's linked virtual account).
+        // Participant-counterparty orders never trigger this branch
+        // because they're created without a payment / Razorpay path.
+        if (order.customerProfileId == null) {
+          throw new Error(
+            "Razorpay route transfer requested for a participant-counterparty order; this is not supported.",
+          );
+        }
+        const customerProfileId = order.customerProfileId;
         await this.runWithAutomationLog({
           orderId: order.id,
           paymentId,
@@ -424,7 +434,7 @@ export class OrderSettlementService {
           inputData: {
             amount: Number(order.totalAmount),
             payId: order.paymentId || "",
-            userId: order.customerProfileId,
+            userId: customerProfileId,
             rfqNumber: addIsinResponse.rfqNumber,
             isin: addIsinResponse.isin,
           },
@@ -432,7 +442,7 @@ export class OrderSettlementService {
             makeRazorpayRouteTransition({
               amount: Number(order.totalAmount.toFixed(4)),
               payId: order.paymentId || "",
-              userId: order.customerProfileId,
+              userId: customerProfileId,
               notes: {
                 RFQ_NUMBER: addIsinResponse.rfqNumber,
                 UCC: order?.customerProfile?.nseDataSet?.participant?.loginId
@@ -1069,6 +1079,12 @@ export class OrderSettlementService {
         throw new AppError("Order number is missing; cannot generate order receipt PDF", {
           code: "ORDER_NUMBER_MISSING",
         });
+      }
+      if (order.customerProfileId == null) {
+        throw new AppError(
+          "Order receipt PDF email requires a Meradhan customer; this is a participant-counterparty order.",
+          { code: "PARTICIPANT_ORDER" },
+        );
       }
 
       const user = await new CustomerProfileRepo().getFullCustomerProfile(order.customerProfileId);

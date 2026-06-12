@@ -805,19 +805,29 @@ export class CrmOrdersService {
         code: "ORDER_NOT_FOUND",
       });
     }
+    // The CLI legacy path doesn't render PDFs for participant-counterparty
+    // orders (those use `OrdersService.generateOrderReceiptPdfBuffer` via
+    // `resolveOrderPdfActor`). Bail out clearly if a script caller hits one.
+    if (order.customerProfileId == null) {
+      throw new AppError(
+        "Legacy CLI PDF flow requires a Meradhan customer order; this is a participant-counterparty order.",
+        { statusCode: HttpStatus.BAD_REQUEST, code: "PARTICIPANT_ORDER" },
+      );
+    }
+    const customerProfileId = order.customerProfileId;
 
     const customerRepo = new CustomerProfileRepo();
     const bondService = new BondService();
-    const user = await customerRepo.getFullCustomerProfile(order.customerProfileId);
+    const user = await customerRepo.getFullCustomerProfile(customerProfileId);
     const getUserPrimaryBankAccount = await db.dataBase.customersBankAccountModel.findFirst({
       where: {
-        customerProfileDataModelId: order.customerProfileId,
+        customerProfileDataModelId: customerProfileId,
         isPrimary: true,
       },
     });
     const primaryDematAccount = await db.dataBase.customersDematAccountModel.findFirst({
       where: {
-        customerProfileDataModelId: order.customerProfileId,
+        customerProfileDataModelId: customerProfileId,
         isPrimary: true,
       },
     });
@@ -1040,6 +1050,12 @@ export class CrmOrdersService {
         statusCode: HttpStatus.NOT_FOUND,
         code: "ORDER_NOT_FOUND",
       });
+    }
+    if (order.customerProfileId == null) {
+      throw new AppError(
+        "Legacy CLI deal sheet flow requires a Meradhan customer order; this is a participant-counterparty order.",
+        { statusCode: HttpStatus.BAD_REQUEST, code: "PARTICIPANT_ORDER" },
+      );
     }
 
     const customerRepo = new CustomerProfileRepo();
@@ -1397,6 +1413,12 @@ export class CrmOrdersService {
         statusCode: HttpStatus.NOT_FOUND,
         code: "ORDER_NOT_FOUND",
       });
+    }
+    if (order.customerProfileId == null) {
+      throw new AppError(
+        "Legacy CLI send flow requires a Meradhan customer order; this is a participant-counterparty order.",
+        { statusCode: HttpStatus.BAD_REQUEST, code: "PARTICIPANT_ORDER" },
+      );
     }
 
     const customerRepo = new CustomerProfileRepo();

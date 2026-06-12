@@ -406,18 +406,32 @@ function GeneratePdfContent() {
       }),
     onSuccess: (res) => {
       const r = res.responseData;
+      const sideNote = r?.matchesBuySide
+        ? " (buy side)"
+        : r?.matchesSellSide
+          ? " (sell side)"
+          : "";
+      const orderId = r?.order?.orderNumber;
+      const dealId = r?.order?.dealId;
+      const orderLine =
+        orderId && dealId
+          ? ` Order ${orderId} · Deal ${dealId}`
+          : orderId
+            ? ` Order ${orderId}`
+            : "";
       toast.success(
-        r?.matchesBuySide
-          ? `Tagged as buy-side counterparty (${r.participantName}).`
-          : r?.matchesSellSide
-            ? `Tagged as sell-side counterparty (${r.participantName}).`
-            : "RFQ participant assigned to this settle order.",
+        `Assigned ${r?.participantName ?? "participant"}${sideNote}.${orderLine}`,
       );
       setSelectedParticipantCode(null);
-      // The RFQ-by-order-number response now exposes `linkedRfqParticipantCode`
-      // — refetch so the page swaps to the assigned-participant view.
+      // Both queries change after a participant assignment:
+      //  - rfq-by-order: settle_order now has `linkedRfqParticipantCode`
+      //  - customer-full-order: a real Meradhan Order row was created,
+      //    so the "Order assigned" card needs to populate too.
       void queryClient.invalidateQueries({
         queryKey: ["rfq-by-order", orderNumber],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["customer-full-order", orderNumber],
       });
     },
     onError: (err) => {
@@ -430,14 +444,44 @@ function GeneratePdfContent() {
   const customerOrder: CustomerFullOrder | null =
     customerOrderData?.responseData ?? null;
 
-  // Participant-assigned settle orders don't have a Meradhan Order row;
-  // the only signal is the `linkedRfqParticipantCode` column on settle_order
-  // (which `resolveOrderPdfActor` reads to pick the participant branch).
-  const linkedParticipantCode = rfq?.linkedRfqParticipantCode ?? null;
+  // Participant-counterparty resolution. After the new flow runs there is
+  // a real Meradhan `Order` row with `customerProfileId = null` and
+  // `linkedRfqParticipantCode` set; the legacy `settle_order`-only tag
+  // (from the `asign-order.ts` script) is the fallback.
+  const linkedParticipantCode =
+    customerOrder?.linkedRfqParticipantCode ??
+    rfq?.linkedRfqParticipantCode ??
+    null;
+  const linkedParticipantInfo = customerOrder?.rfqParticipantInfo ?? null;
+  // `NseRfqParticipantInfoSummary` is the lightweight shape used in the
+  // saved-participants dropdown; the Order's hydrated participant info is
+  // the richer shape and includes bank/demat lists, but we only need the
+  // header fields here for the participant card.
   const linkedParticipant: NseRfqParticipantInfoSummary | null =
     linkedParticipantCode
       ? (savedParticipants.find((p) => p.code === linkedParticipantCode) ??
-        null)
+        (linkedParticipantInfo
+          ? {
+            code: linkedParticipantInfo.code,
+            nameOverride: linkedParticipantInfo.nameOverride,
+            contactPerson: linkedParticipantInfo.contactPerson,
+            emailList: linkedParticipantInfo.emailList ?? [],
+            mobileList: linkedParticipantInfo.mobileList ?? [],
+            telephone: linkedParticipantInfo.telephone,
+            address: linkedParticipantInfo.address,
+            address2: linkedParticipantInfo.address2,
+            address3: linkedParticipantInfo.address3,
+            stateCode: linkedParticipantInfo.stateCode,
+            panNo: linkedParticipantInfo.panNo,
+            leiCode: linkedParticipantInfo.leiCode,
+            custodian: linkedParticipantInfo.custodian,
+            dobDoi: linkedParticipantInfo.dobDoi,
+            notes: linkedParticipantInfo.notes,
+            bankAccountsCount: linkedParticipantInfo.bankAccounts?.length ?? 0,
+            dematAccountsCount: linkedParticipantInfo.dematAccounts?.length ?? 0,
+            updatedAt: new Date().toISOString(),
+          }
+          : null))
       : null;
   // PDF actions / receipt options are valid in both customer and
   // participant-tagged flows; treat them as "owner is assigned".
@@ -1254,59 +1298,87 @@ BSE Member ID: 6963`
             ) : null}
           </>
         ) : linkedParticipantCode ? (
-          <Section title="NSE Participant (assigned counterparty)">
-            <InfoRow
-              label="Participant code"
-              value={linkedParticipantCode}
-            />
-            <InfoRow
-              label="Name"
-              value={
-                linkedParticipant?.nameOverride?.trim() ??
-                linkedParticipantCode
-              }
-            />
-            <InfoRow
-              label="Contact"
-              value={linkedParticipant?.contactPerson ?? null}
-            />
-            <InfoRow
-              label="Email"
-              value={(linkedParticipant?.emailList ?? []).join(", ") || null}
-            />
-            <InfoRow
-              label="Mobile"
-              value={(linkedParticipant?.mobileList ?? []).join(", ") || null}
-            />
-            <InfoRow
-              label="Telephone"
-              value={linkedParticipant?.telephone ?? null}
-            />
-            <InfoRow label="PAN" value={linkedParticipant?.panNo ?? null} />
-            <InfoRow label="LEI" value={linkedParticipant?.leiCode ?? null} />
-            <InfoRow
-              label="Custodian"
-              value={linkedParticipant?.custodian ?? null}
-            />
-            <InfoRow
-              label="Banks / Demats"
-              value={
-                linkedParticipant
-                  ? `${linkedParticipant.bankAccountsCount} bank · ${linkedParticipant.dematAccountsCount} demat`
-                  : null
-              }
-            />
-            <div className="pt-3">
-              <Button asChild variant="outline" size="sm">
-                <Link
-                  href={`/dashboard/rfqs/nse/rfq-participants`}
-                  target="_blank"
-                >
-                  Open participant info
-                </Link>
-              </Button>
-            </div>
-          </Section>
+          <>
+            <Section title="NSE Participant (assigned counterparty)">
+              <InfoRow
+                label="Participant code"
+                value={linkedParticipantCode}
+              />
+              <InfoRow
+                label="Name"
+                value={
+                  linkedParticipant?.nameOverride?.trim() ??
+                  linkedParticipantCode
+                }
+              />
+              <InfoRow
+                label="Contact"
+                value={linkedParticipant?.contactPerson ?? null}
+              />
+              <InfoRow
+                label="Email"
+                value={
+                  (linkedParticipant?.emailList ?? []).join(", ") || null
+                }
+              />
+              <InfoRow
+                label="Mobile"
+                value={
+                  (linkedParticipant?.mobileList ?? []).join(", ") || null
+                }
+              />
+              <InfoRow
+                label="Telephone"
+                value={linkedParticipant?.telephone ?? null}
+              />
+              <InfoRow label="PAN" value={linkedParticipant?.panNo ?? null} />
+              <InfoRow label="LEI" value={linkedParticipant?.leiCode ?? null} />
+              <InfoRow
+                label="Custodian"
+                value={linkedParticipant?.custodian ?? null}
+              />
+              <InfoRow
+                label="Banks / Demats"
+                value={
+                  linkedParticipant
+                    ? `${linkedParticipant.bankAccountsCount} bank · ${linkedParticipant.dematAccountsCount} demat`
+                    : null
+                }
+              />
+              <div className="pt-3">
+                <Button asChild variant="outline" size="sm">
+                  <Link
+                    href={`/dashboard/rfqs/nse/rfq-participants`}
+                    target="_blank"
+                  >
+                    Open participant info
+                  </Link>
+                </Button>
+              </div>
+            </Section>
+            {customerOrder?.orderNumber ? (
+              <Section title="MeraDhan identifiers">
+                <InfoRow
+                  label="MeraDhan Order ID"
+                  value={customerOrder.orderNumber}
+                />
+                <InfoRow
+                  label="MeraDhan Deal ID"
+                  value={
+                    (
+                      customerOrder.metadata as
+                        | { dealId?: string }
+                        | undefined
+                    )?.dealId ?? "—"
+                  }
+                />
+                <InfoRow
+                  label="Counterparty type"
+                  value="External NSE participant"
+                />
+              </Section>
+            ) : null}
+          </>
         ) : (
           <Card>
             <CardHeader className="pb-2">

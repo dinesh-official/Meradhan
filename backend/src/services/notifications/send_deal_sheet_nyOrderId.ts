@@ -51,6 +51,14 @@ export async function sendOrderReceiptPdfByOrderId(params: OrderEmailParams) {
             code: "BAD_REQUEST",
         });
     }
+    // This notification helper assumes a Meradhan-customer order.
+    // Participant-counterparty orders should use a different path.
+    if (order.customerProfileId == null) {
+        throw new AppError(
+            `Order ${orderIdRaw} has no customer (participant-counterparty); use the CRM PDF flow.`,
+            { statusCode: 400, code: "PARTICIPANT_ORDER" },
+        );
+    }
 
     const crmOrdersService = new CrmOrdersService();
     const user = await new CustomerProfileRepo().getFullCustomerProfile(order.customerProfileId);
@@ -221,6 +229,12 @@ export async function sendDealSheetPdfByOrderId(params: DealSheetEmailParams) {
             statusCode: 400,
             code: "BAD_REQUEST",
         });
+    }
+    if (order.customerProfileId == null) {
+        throw new AppError(
+            `Order ${orderIdAsString} has no customer (participant-counterparty); use the CRM PDF flow.`,
+            { statusCode: 400, code: "PARTICIPANT_ORDER" },
+        );
     }
 
     const crmOrdersService = new CrmOrdersService();
