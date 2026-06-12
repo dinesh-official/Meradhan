@@ -5,14 +5,17 @@ import {
   revalidateMeradhanTrackingSession,
 } from "@resource/customer/auditlogs/auditlog.repo";
 import { trackRateLimitSuccess } from "@resource/customer/auth/customer.auth.ratelimit";
-import { HttpStatus } from "@utils/error/AppError";
+import { AppError, HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
+import { CORPORATE_RISK_PROFILE_QUESTIONS } from "../../crm/customers/corporateRiskProfile.constant";
+import { CustomerCorporateESignService } from "./corporateESign.service";
 import { CustomerManageAccountsService } from "./customer.manage_accounts.service";
 import { CustomerProfileService } from "./customer.profile.service";
 
 export class CustomerProfileController {
   private profileService = new CustomerProfileService();
   private manageAccountsService = new CustomerManageAccountsService();
+  private corporateESignService = new CustomerCorporateESignService();
 
   async requestMobileUpdate(req: Request, res: Response) {
     const { mobile, newWhatsAppNo } =
@@ -237,6 +240,103 @@ export class CustomerProfileController {
         avatar: data.avatar,
         token: data.token,
       },
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Corporate KYC e-sign (Digio) — customer-facing endpoints.
+  //
+  // The CRM operator still creates the request via the
+  // `/crm/.../e-sign-requests` POST. These four endpoints let the meradhan
+  // customer actually sign the PDF through Digio (instead of waiting for
+  // the operator to manually upload a signed copy). Ownership is enforced
+  // inside `CustomerCorporateESignService` via the
+  // `CorporateKycModel.customerProfileDataModelId` join.
+  // ---------------------------------------------------------------------------
+
+  async listPendingCorporateESignRequests(req: Request, res: Response) {
+    const requests = await this.corporateESignService.listPendingForCustomer(
+      req.customer!.id,
+    );
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: { requests },
+    });
+  }
+
+  async getCorporateESignRequest(req: Request, res: Response) {
+    const requestId = Number(req.params.requestId);
+    if (!Number.isFinite(requestId)) {
+      throw new AppError("Invalid e-sign request id.", {
+        code: "CORP_ESIGN_BAD_ID",
+        statusCode: HttpStatus.BAD_REQUEST,
+      });
+    }
+    const request = await this.corporateESignService.getByIdForCustomer(
+      req.customer!.id,
+      requestId,
+    );
+    if (!request) {
+      throw new AppError("E-sign request not found.", {
+        code: "CORP_ESIGN_NOT_FOUND",
+        statusCode: HttpStatus.NOT_FOUND,
+      });
+    }
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: { request },
+    });
+  }
+
+  async digioRequestCorporateESign(req: Request, res: Response) {
+    const requestId = Number(req.params.requestId);
+    if (!Number.isFinite(requestId)) {
+      throw new AppError("Invalid e-sign request id.", {
+        code: "CORP_ESIGN_BAD_ID",
+        statusCode: HttpStatus.BAD_REQUEST,
+      });
+    }
+    const data = await this.corporateESignService.kickOffDigio(
+      req.customer!.id,
+      requestId,
+    );
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: data,
+    });
+  }
+
+  async digioVerifyCorporateESign(req: Request, res: Response) {
+    const requestId = Number(req.params.requestId);
+    if (!Number.isFinite(requestId)) {
+      throw new AppError("Invalid e-sign request id.", {
+        code: "CORP_ESIGN_BAD_ID",
+        statusCode: HttpStatus.BAD_REQUEST,
+      });
+    }
+    const { digio_doc_id } = appSchema.customer
+      .corporateESignDigioVerifySchema
+      .parse(req.body);
+    const data = await this.corporateESignService.verifyDigio(
+      req.customer!.id,
+      requestId,
+      digio_doc_id,
+    );
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: data,
+    });
+  }
+
+  /**
+   * Returns the corporate risk-profile question set verbatim. The meradhan
+   * client uses this to render the questionnaire in Step 1 of the e-sign
+   * flow, so the question text stays in sync with the CRM-side constant.
+   */
+  async getCorporateRiskProfileQuestions(_req: Request, res: Response) {
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: { questions: CORPORATE_RISK_PROFILE_QUESTIONS },
     });
   }
 }

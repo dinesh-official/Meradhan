@@ -27,6 +27,9 @@ import {
 import { buildKraNonIndividualAppReqRootXml } from "kyc-providers";
 import { env } from "@packages/config/env";
 import { CorporateKraDownloadService } from "@jobs/kra_worker/corporateKraDownload.service";
+import { CorporateKycVerifyService } from "./corporateKycVerify.service";
+import { CrmCustomerVerifyOtpService } from "./crmCustomerVerifyOtp.service";
+import { buildCorporateCbricsPayload } from "@services/refq/nse/corporateCbricsPayload";
 
 export class CustomerProfileController {
   private profileService: CustomerProfileService;
@@ -35,6 +38,8 @@ export class CustomerProfileController {
   private corporateESignRequestsRepo: CorporateESignRequestsRepo;
   private manageAccountsService: CustomerManageAccountsService;
   private corporateKraDownloadService: CorporateKraDownloadService;
+  private corporateKycVerifyService: CorporateKycVerifyService;
+  private verifyOtpService: CrmCustomerVerifyOtpService;
   constructor() {
     const repo = new CustomerProfileRepo();
     this.profileService = new CustomerProfileService(repo);
@@ -43,6 +48,8 @@ export class CustomerProfileController {
     this.corporateESignRequestsRepo = new CorporateESignRequestsRepo();
     this.manageAccountsService = new CustomerManageAccountsService();
     this.corporateKraDownloadService = new CorporateKraDownloadService();
+    this.corporateKycVerifyService = new CorporateKycVerifyService();
+    this.verifyOtpService = new CrmCustomerVerifyOtpService();
   }
 
   async createCustomer(req: Request, res: Response): Promise<void> {
@@ -223,6 +230,43 @@ export class CustomerProfileController {
     }
   }
 
+  /**
+   * Records the S3 URL of the most recently generated corporate KYC PDF.
+   *
+   * The CRM PDF page generates the rendered PDF via the external pdf-service,
+   * uploads the resulting blob to `POST /api/files/upload` (S3), and then
+   * calls this endpoint with the returned `fileUrl` so the snapshot is
+   * persisted on the corporate KYC row. The "Download last PDF" button on
+   * the same page reads `lastGeneratedPdfUrl` off `getCorporateKyc`.
+   */
+  async setCorporateKycLastPdf(req: Request, res: Response): Promise<void> {
+    const customerId = Number(req.params.customerId);
+    if (Number.isNaN(customerId)) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid customer id",
+      });
+      return;
+    }
+
+    const payload = z
+      .object({
+        fileUrl: z.string().trim().min(1, "File URL is required"),
+      })
+      .parse(req.body);
+
+    const result = await this.corporateKycService.setLastGeneratedPdf(
+      customerId,
+      payload.fileUrl,
+    );
+
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      message: "Corporate KYC last PDF recorded.",
+      responseData: result,
+    });
+  }
+
   async saveCorporateKyc(req: Request, res: Response): Promise<void> {
     const customerId = req.params.customerId;
     const payload = appSchema.customer.createCorporateKycSchema.parse(req.body);
@@ -359,6 +403,61 @@ export class CustomerProfileController {
   }
 
   /**
+   * CRM action: verify & activate a corporate customer.
+   *
+   * Hydrates the customer record (PAN, current/permanent address, bank +
+   * demat accounts, FATCA flag, legal entity name, annualGrossIncome) from
+   * the linked CorporateKycModel — strictly fill-missing-only, never
+   * overwrites — and then flips `kycStatus = VERIFIED`, `kraStatus = VERIFIED`,
+   * `verifyDate = now`, `VerifiedBy = crmUserId` in a single transaction.
+   * Appends a `MANUAL_VERIFIED_BY_CRM` row to `kraDataLogs` and a CRM
+   * activity log entry.
+   *
+   * Idempotency: the service throws `409 Customer is already verified.`
+   * when `kycStatus` is already VERIFIED.
+   */
+  async verifyCorporateCustomer(req: Request, res: Response): Promise<void> {
+    const customerId = Number(req.params.customerId);
+    if (Number.isNaN(customerId)) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid customer id",
+      });
+      return;
+    }
+
+    const crmUserId =
+      typeof (req.session as { id?: unknown } | undefined)?.id === "number"
+        ? ((req.session as { id: number }).id as number)
+        : null;
+
+    const result = await this.corporateKycVerifyService.verifyCorporateCustomer(
+      customerId,
+      crmUserId,
+    );
+
+    await createCrmActivityLog(req, {
+      action: "update",
+      details: {
+        Reason: "CORPORATE_CUSTOMER_VERIFIED",
+        customerId,
+        syncedSections: result.syncedSections,
+        skippedSections: result.skippedSections,
+        warnings: result.warnings,
+      },
+      entityType: "CUSTOMER",
+      entityId: customerId,
+      userId: Number(req.session?.id),
+    });
+
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: result,
+      message: "Corporate customer verified.",
+    });
+  }
+
+  /**
    * Build a *preview* of the exact NDML Non-Individual KRA payload that
    * `CorporateKraWorkerService` would send for this customer, together with
    * a validation report and a row-by-row source → XML mapping the CRM page
@@ -374,16 +473,37 @@ export class CustomerProfileController {
       return;
     }
 
-    const corporateKyc = await db.dataBase.corporateKycModel.findUnique({
-      where: { customerProfileDataModelId: customerId },
-      include: {
-        authorisedSignatories: true,
-        directors: true,
-        promoters: true,
-        partners: true,
-        trustees: true,
-      },
-    });
+    const [corporateKyc, customerProfile] = await Promise.all([
+      db.dataBase.corporateKycModel.findUnique({
+        where: { customerProfileDataModelId: customerId },
+        include: {
+          authorisedSignatories: true,
+          directors: true,
+          promoters: true,
+          partners: true,
+          trustees: true,
+          // CBRICS preview needs the same bank/demat lists that the live
+          // register flow (`registerCorporateParticipantFromCorporateKyc`)
+          // loads — so the JSON shown in the "CBRICS payload" tab matches
+          // the actual POST body byte-for-byte.
+          bankAccounts: true,
+          dematAccounts: true,
+        },
+      }),
+      db.dataBase.customerProfileDataModel.findUnique({
+        where: { id: customerId },
+        select: {
+          emailAddress: true,
+          phoneNo: true,
+          userName: true,
+          nseDataSet: {
+            select: {
+              participant: { select: { id: true } },
+            },
+          },
+        },
+      }),
+    ]);
 
     if (!corporateKyc) {
       res.sendResponse({
@@ -409,6 +529,10 @@ export class CustomerProfileController {
       entityConstitutionType: corporateKyc.entityConstitutionType,
       annualIncome: corporateKyc.annualIncome,
       fatcaApplicable: corporateKyc.fatcaApplicable,
+      // APP_EMAIL / APP_MOB_NO come from the customer's signup profile,
+      // not the authorised signatory. Worker mirrors this mapping.
+      primaryEmail: customerProfile?.emailAddress ?? null,
+      primaryMobile: customerProfile?.phoneNo ?? null,
       correspondenceLine1: corporateKyc.correspondenceLine1,
       correspondenceLine2: corporateKyc.correspondenceLine2,
       correspondenceLine3: corporateKyc.correspondenceLine3,
@@ -510,6 +634,55 @@ export class CustomerProfileController {
       return { ...l, decoded };
     });
 
+    // ── CBRICS payload preview (register + modify) ─────────────────────
+    // Built from the *same* corporate KYC row + customer profile that
+    // `ParticipantManager.registerCorporateParticipantFromCorporateKyc`
+    // reads at register time, so the JSON the operator sees here is the
+    // literal POST body the SDK would send.
+    const cbrics = buildCorporateCbricsPayload({
+      corporateKyc: {
+        entityName: corporateKyc.entityName,
+        panNumber: corporateKyc.panNumber,
+        dateOfIncorporation: corporateKyc.dateOfIncorporation,
+        registeredFullAddress: corporateKyc.registeredFullAddress,
+        correspondenceFullAddress: corporateKyc.correspondenceFullAddress,
+        registeredLine1: corporateKyc.registeredLine1,
+        registeredLine2: corporateKyc.registeredLine2,
+        registeredLine3: corporateKyc.registeredLine3,
+        registeredCity: corporateKyc.registeredCity,
+        registeredDistrict: corporateKyc.registeredDistrict,
+        registeredState: corporateKyc.registeredState,
+        registeredPinCode: corporateKyc.registeredPinCode,
+        correspondenceState: corporateKyc.correspondenceState,
+        authorisedSignatories: (corporateKyc.authorisedSignatories ?? []).map(
+          (s) => ({
+            fullName: s.fullName,
+            email: s.email,
+            mobile: s.mobile,
+          }),
+        ),
+        bankAccounts: (corporateKyc.bankAccounts ?? []).map((b) => ({
+          accountNumber: b.accountNumber,
+          ifscCode: b.ifscCode,
+          bankName: b.bankName,
+          isPrimaryAccount: b.isPrimaryAccount,
+        })),
+        dematAccounts: (corporateKyc.dematAccounts ?? []).map((d) => ({
+          clientId: d.clientId,
+          depository: d.depository,
+          dpId: d.dpId,
+          isPrimary: d.isPrimary,
+        })),
+      },
+      customer: {
+        userName: customerProfile?.userName ?? null,
+        emailAddress: customerProfile?.emailAddress ?? null,
+        phoneNo: customerProfile?.phoneNo ?? null,
+      },
+      existingParticipantId:
+        customerProfile?.nseDataSet?.participant?.id ?? null,
+    });
+
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: {
@@ -542,6 +715,7 @@ export class CustomerProfileController {
           },
         },
         codeReference: NDML_CODE_REFERENCE,
+        cbrics,
         lastDownload: lastDownload
           ? {
               logId: lastDownload.id,
@@ -745,11 +919,23 @@ export class CustomerProfileController {
 
     const authorisedSignatories = (corporateKyc as any).authorisedSignatories ?? [];
     if (!Array.isArray(authorisedSignatories) || authorisedSignatories.length === 0) {
+      // Signatories still feed APP_ADDL_DATA / e-sign workflows, so we keep
+      // requiring at least one. Their email/mobile are no longer the source
+      // of APP_EMAIL / APP_MOB_NO (see corporateKraPayload.ts).
       missing.push("At least 1 authorised signatory");
-    } else {
-      const first = authorisedSignatories[0] ?? {};
-      if (!first?.email) missing.push("Authorised signatory email");
-      if (!first?.mobile) missing.push("Authorised signatory mobile");
+    }
+
+    // APP_EMAIL / APP_MOB_NO + CBRICS contact are sourced from the customer's
+    // signup profile. Require those instead of the signatory contact.
+    const customerContact = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { id: customerId },
+      select: { emailAddress: true, phoneNo: true },
+    });
+    if (!customerContact?.emailAddress?.trim()) {
+      missing.push("Customer signup email (used for APP_EMAIL)");
+    }
+    if (!customerContact?.phoneNo?.trim()) {
+      missing.push("Customer signup mobile (used for APP_MOB_NO)");
     }
 
     if (missing.length > 0) {
@@ -1227,6 +1413,130 @@ export class CustomerProfileController {
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: response,
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // CRM-initiated OTP verification of a customer's email / mobile.
+  //
+  // OTP is delivered to the customer's *registered* phone / email (the only
+  // place that proves possession). The customer reads the code aloud (or
+  // forwards the email) to the admin who types it back into the CRM — this
+  // matches the standard call-centre verification pattern and reuses the
+  // exact same MSG91 + SMTP plumbing the customer-self flow uses.
+  // -------------------------------------------------------------------------
+
+  async sendCustomerMobileVerifyOtp(req: Request, res: Response): Promise<void> {
+    const customerId = Number(req.params.customerId);
+    if (Number.isNaN(customerId)) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid customer id",
+      });
+      return;
+    }
+
+    const result = await this.verifyOtpService.sendMobileVerifyOtp(customerId);
+
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: { otpToken: result.otpToken, sentTo: result.sentTo },
+      message: "OTP sent to customer's mobile.",
+    });
+  }
+
+  async verifyCustomerMobileOtp(req: Request, res: Response): Promise<void> {
+    const customerId = Number(req.params.customerId);
+    if (Number.isNaN(customerId)) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid customer id",
+      });
+      return;
+    }
+
+    const { otp, token } =
+      appSchema.customer.crmCustomerVerifyOtpConfirmSchema.parse(req.body ?? {});
+
+    const result = await this.verifyOtpService.verifyMobileOtp({
+      customerId,
+      otp,
+      token,
+    });
+
+    await createCrmActivityLog(req, {
+      action: "update",
+      details: {
+        Reason: "CUSTOMER_MOBILE_VERIFIED_BY_CRM",
+        customerId,
+        phoneNo: result.phoneNo,
+      },
+      entityType: "CUSTOMER",
+      entityId: customerId,
+      userId: Number(req.session?.id),
+    });
+
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: { verified: result.verified },
+      message: "Mobile number verified.",
+    });
+  }
+
+  async sendCustomerEmailVerifyOtp(req: Request, res: Response): Promise<void> {
+    const customerId = Number(req.params.customerId);
+    if (Number.isNaN(customerId)) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid customer id",
+      });
+      return;
+    }
+
+    const result = await this.verifyOtpService.sendEmailVerifyOtp(customerId);
+
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: { otpToken: result.otpToken, sentTo: result.sentTo },
+      message: "OTP sent to customer's email.",
+    });
+  }
+
+  async verifyCustomerEmailOtp(req: Request, res: Response): Promise<void> {
+    const customerId = Number(req.params.customerId);
+    if (Number.isNaN(customerId)) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid customer id",
+      });
+      return;
+    }
+
+    const { otp, token } =
+      appSchema.customer.crmCustomerVerifyOtpConfirmSchema.parse(req.body ?? {});
+
+    const result = await this.verifyOtpService.verifyEmailOtp({
+      customerId,
+      otp,
+      token,
+    });
+
+    await createCrmActivityLog(req, {
+      action: "update",
+      details: {
+        Reason: "CUSTOMER_EMAIL_VERIFIED_BY_CRM",
+        customerId,
+        email: result.email,
+      },
+      entityType: "CUSTOMER",
+      entityId: customerId,
+      userId: Number(req.session?.id),
+    });
+
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: { verified: result.verified },
+      message: "Email address verified.",
     });
   }
 }

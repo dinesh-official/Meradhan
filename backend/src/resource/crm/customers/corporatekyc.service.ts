@@ -1,11 +1,96 @@
 import type { CreateCorporateKycPayload } from "@root/schema";
 import { db } from "@core/database/database";
+import { AppError, HttpStatus } from "@utils/error/AppError";
 import { CorporateKycRepo } from "./corporatekyc.repo";
 
 function parseDate(s: string | undefined): Date | undefined {
   if (!s) return undefined;
   const d = new Date(s);
   return isNaN(d.getTime()) ? undefined : d;
+}
+
+/**
+ * `true` when the linked customer is KYC-verified or KRA-verified. Once
+ * either status is "VERIFIED" the bank/demat accounts have been sent to
+ * NDML/CBRICS and cannot be mutated from the CRM corporate-KYC form — any
+ * change must go through a dedicated modify flow with full audit.
+ */
+function isAccountsLocked(
+  customer?: { kycStatus?: string | null; kraStatus?: string | null } | null,
+): boolean {
+  if (!customer) return false;
+  const kyc = String(customer.kycStatus ?? "").trim().toUpperCase();
+  const kra = String(customer.kraStatus ?? "").trim().toUpperCase();
+  return kyc === "VERIFIED" || kra === "VERIFIED";
+}
+
+/**
+ * Returns a stable, sorted signature for a list of bank accounts so two
+ * snapshots can be compared by value. Field choice intentionally covers
+ * everything the CRM form can mutate, so any visible edit triggers a diff.
+ */
+function bankAccountsSignature(
+  rows: ReadonlyArray<{
+    accountHolderName?: string | null;
+    accountNumber?: string | null;
+    branch?: string | null;
+    bankName?: string | null;
+    ifscCode?: string | null;
+    bankProofFileUrls?: unknown;
+    isPrimaryAccount?: boolean | null;
+  }>,
+): string {
+  const norm = (v: unknown) =>
+    String(v ?? "").trim().toUpperCase();
+  const urls = (u: unknown): string => {
+    if (!Array.isArray(u)) return "[]";
+    return JSON.stringify(
+      (u as unknown[]).map((s) => String(s ?? "").trim()).sort(),
+    );
+  };
+  return rows
+    .map((a) =>
+      [
+        norm(a.accountNumber),
+        norm(a.ifscCode),
+        norm(a.bankName),
+        norm(a.accountHolderName),
+        norm(a.branch),
+        a.isPrimaryAccount ? "1" : "0",
+        urls(a.bankProofFileUrls),
+      ].join("|"),
+    )
+    .sort()
+    .join("\n");
+}
+
+/** Same idea for demat accounts. */
+function dematAccountsSignature(
+  rows: ReadonlyArray<{
+    depository?: string | null;
+    accountType?: string | null;
+    dpId?: string | null;
+    clientId?: string | null;
+    accountHolderName?: string | null;
+    dematProofFileUrl?: string | null;
+    isPrimary?: boolean | null;
+  }>,
+): string {
+  const norm = (v: unknown) => String(v ?? "").trim().toUpperCase();
+  return rows
+    .map((d) =>
+      [
+        norm(d.depository),
+        norm(d.dpId),
+        norm(d.clientId),
+        norm(d.accountType),
+        norm(d.accountHolderName),
+        norm(d.dematProofFileUrl),
+        d.isPrimary ? "1" : "0",
+      ].join("|"),
+    )
+    .sort()
+    .join("\n");
 }
 
 function mapPayloadToPrismaCreate(customerId: number, payload: CreateCorporateKycPayload) {
@@ -191,10 +276,44 @@ export class CorporateKycService {
   }
 
   async save(customerId: number, payload: CreateCorporateKycPayload) {
-    await this.repo.ensureCustomerExists(customerId);
+    const customer = await this.repo.ensureCustomerExists(customerId);
     const existing = await this.repo.findByCustomerId(customerId);
 
     if (existing) {
+      // When the customer is KYC/KRA-verified the bank + demat lists are
+      // sealed (already sent to NDML / CBRICS). The CRM form is rendered
+      // read-only on the frontend, so any bank/demat payload arriving here
+      // is either a round-trip echo (form state ↔ payload normalisation
+      // drift) or a tampered request. Either way the resolution is the
+      // same: leave the stored rows untouched.
+      //
+      // We deliberately do NOT throw here. Earlier we compared signatures
+      // and 403'd on diff, but legitimate round-trip drift (e.g. `branch:
+      // null` in DB ↔ `branch: ""` in payload, or JSON-vs-array shapes
+      // for `bankProofFileUrls`) caused false positives that blocked
+      // unrelated field edits on the same form. Silently dropping the
+      // bank/demat sections from the update payload is the safer
+      // behaviour: the rest of the form saves, and the protected rows
+      // stay verbatim.
+      const locked = isAccountsLocked(customer);
+
+      // Lightweight audit so anomalies are still visible if they ever
+      // occur — fire-and-forget; we don't want a logger failure to break
+      // the save.
+      if (locked) {
+        const banksDiffer =
+          bankAccountsSignature(existing.bankAccounts ?? []) !==
+          bankAccountsSignature(payload.bankAccounts ?? []);
+        const dematsDiffer =
+          dematAccountsSignature(existing.dematAccounts ?? []) !==
+          dematAccountsSignature(payload.dematAccounts ?? []);
+        if (banksDiffer || dematsDiffer) {
+          console.warn(
+            `[CorporateKycService.save] Ignoring bank/demat changes for verified customer #${customerId} (banksDiffer=${banksDiffer}, dematsDiffer=${dematsDiffer}). Frontend lock should have prevented this.`,
+          );
+        }
+      }
+
       const prisma = db.dataBase;
       const main = {
         entityName: payload.entityName,
@@ -271,30 +390,38 @@ export class CorporateKycService {
         taxResidencyOfEntity: payload.taxResidencyOfEntity ?? undefined,
         declarationByAuthorisedSignatory:
           payload.declarationByAuthorisedSignatory ?? false,
-        bankAccounts: {
-          deleteMany: {},
-          create: (payload.bankAccounts ?? []).map((acc) => ({
-            accountHolderName: acc.accountHolderName,
-            accountNumber: acc.accountNumber,
-            branch: acc.branch ?? undefined,
-            bankName: acc.bankName,
-            ifscCode: acc.ifscCode,
-            bankProofFileUrls: (acc.bankProofFileUrls ?? []) as unknown as object,
-            isPrimaryAccount: acc.isPrimaryAccount ?? false,
-          })),
-        },
-        dematAccounts: {
-          deleteMany: {},
-          create: (payload.dematAccounts ?? []).map((d) => ({
-            depository: d.depository,
-            accountType: d.accountType ?? undefined,
-            dpId: d.dpId,
-            clientId: d.clientId,
-            accountHolderName: d.accountHolderName,
-            dematProofFileUrl: d.dematProofFileUrl ?? undefined,
-            isPrimary: d.isPrimary ?? false,
-          })),
-        },
+        // When locked, skip the wipe-and-recreate so existing row IDs are
+        // preserved (the equality check above already proved nothing
+        // changed). When unlocked, the form is the source of truth and we
+        // replace the lists as before.
+        ...(locked
+          ? {}
+          : {
+              bankAccounts: {
+                deleteMany: {},
+                create: (payload.bankAccounts ?? []).map((acc) => ({
+                  accountHolderName: acc.accountHolderName,
+                  accountNumber: acc.accountNumber,
+                  branch: acc.branch ?? undefined,
+                  bankName: acc.bankName,
+                  ifscCode: acc.ifscCode,
+                  bankProofFileUrls: (acc.bankProofFileUrls ?? []) as unknown as object,
+                  isPrimaryAccount: acc.isPrimaryAccount ?? false,
+                })),
+              },
+              dematAccounts: {
+                deleteMany: {},
+                create: (payload.dematAccounts ?? []).map((d) => ({
+                  depository: d.depository,
+                  accountType: d.accountType ?? undefined,
+                  dpId: d.dpId,
+                  clientId: d.clientId,
+                  accountHolderName: d.accountHolderName,
+                  dematProofFileUrl: d.dematProofFileUrl ?? undefined,
+                  isPrimary: d.isPrimary ?? false,
+                })),
+              },
+            }),
         directors: {
           deleteMany: {},
           create: (payload.directors ?? []).map((d) => ({
@@ -565,6 +692,59 @@ export class CorporateKycService {
       })),
       createdAt: row.createdAt.toISOString(),
       updatedAt: row.updatedAt.toISOString(),
+      // Customer verification snapshot. The CRM uses these (and the derived
+      // `isAccountsLocked` flag) to gate bank/demat editing in the form.
+      kycStatus: row.customerProfileDataModel?.kycStatus ?? null,
+      kraStatus: row.customerProfileDataModel?.kraStatus ?? null,
+      isAccountsLocked: isAccountsLocked(row.customerProfileDataModel ?? null),
+      // S3 URL of the most recently generated corporate KYC PDF (set by
+      // `setLastGeneratedPdf` after the CRM "Generate" action) + the
+      // wall-clock timestamp of that generation. Both `null` until the
+      // first generation runs.
+      lastGeneratedPdfUrl: row.lastGeneratedPdfUrl ?? null,
+      lastGeneratedPdfAt: row.lastGeneratedPdfAt
+        ? row.lastGeneratedPdfAt.toISOString()
+        : null,
+    };
+  }
+
+  /**
+   * Records the S3 location of the most recently generated 19-page
+   * corporate KYC PDF. The CRM uploads the rendered blob to `/files/upload`
+   * (which returns an S3 location), then calls this so the URL is persisted
+   * on the corporate KYC row and surfaced as "Download last PDF".
+   *
+   * Throws when the customer doesn't exist or hasn't started corporate KYC.
+   */
+  async setLastGeneratedPdf(customerId: number, fileUrl: string) {
+    await this.repo.ensureCustomerExists(customerId);
+    const existing = await this.repo.findByCustomerId(customerId);
+    if (!existing) {
+      throw new AppError("Corporate KYC not found for this customer.", {
+        code: "CORPORATE_KYC_NOT_FOUND",
+        statusCode: HttpStatus.NOT_FOUND,
+      });
+    }
+    const trimmed = fileUrl.trim();
+    if (!trimmed) {
+      throw new AppError("File URL is required", {
+        code: "CORPORATE_KYC_PDF_URL_REQUIRED",
+        statusCode: HttpStatus.BAD_REQUEST,
+      });
+    }
+    const updated = await db.dataBase.corporateKycModel.update({
+      where: { id: existing.id },
+      data: {
+        lastGeneratedPdfUrl: trimmed,
+        lastGeneratedPdfAt: new Date(),
+      },
+      select: { lastGeneratedPdfUrl: true, lastGeneratedPdfAt: true },
+    });
+    return {
+      lastGeneratedPdfUrl: updated.lastGeneratedPdfUrl ?? null,
+      lastGeneratedPdfAt: updated.lastGeneratedPdfAt
+        ? updated.lastGeneratedPdfAt.toISOString()
+        : null,
     };
   }
 }

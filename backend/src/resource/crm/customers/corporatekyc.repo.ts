@@ -9,6 +9,12 @@ const corporateKycInclude = {
   partners: true,
   trustees: true,
   authorisedSignatories: true,
+  // Joined for the lock-state check: when the customer is KYC-verified or
+  // KRA-verified, CRM staff aren't allowed to mutate bank/demat accounts
+  // (those rows are sent upstream to NDML / CBRICS and shouldn't drift).
+  customerProfileDataModel: {
+    select: { kycStatus: true, kraStatus: true },
+  },
 } as const;
 
 export class CorporateKycRepo {

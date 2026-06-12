@@ -521,12 +521,19 @@ export class CustomerManageAccountsService {
     customerId: number,
     riskProfile: any[]
   ): Promise<boolean> {
+    // Use a nested `upsert` instead of `update` so customers who don't yet
+    // have a `CustomersRiskProfileModel` row (e.g. corporate users coming
+    // from the e-sign flow without ever running the individual KYC
+    // questionnaire) get one auto-created on first save. The previous
+    // `update`-only branch threw P2025 ("record not found for nested
+    // update on one-to-one relation") for that case.
     await db.dataBase.customerProfileDataModel.update({
       where: { id: customerId },
       data: {
         riskProfile: {
-          update: {
-            data: riskProfile,
+          upsert: {
+            create: { data: riskProfile },
+            update: { data: riskProfile },
           },
         },
       },
