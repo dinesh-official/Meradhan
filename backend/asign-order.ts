@@ -1825,34 +1825,161 @@ async function createOrderForCustomer(input: AssignOrderToCustomerInput) {
   console.log(saved);
 }
 
+/**
+ * Stamp the NSE `settle_order` row with the RFQ-participant `code` so
+ * downstream reports can show the counterparty when the order's customer
+ * side is an external participant rather than one of our Meradhan
+ * customers. The order's `buyParticipantLoginId` / `sellParticipantLoginId`
+ * are already populated by NSE — this column just records which side the
+ * operator has confirmed as the known counterparty.
+ */
+async function stampSettleOrderWithRfqParticipant(input: {
+  orderNumber: string;
+  participantCode: string;
+  participantName: string;
+  dryRun: boolean;
+}) {
+  const { orderNumber, participantCode, participantName, dryRun } = input;
+
+  const settle = await db.dataBase.settleOrderModel.findFirst({
+    where: { orderNumber },
+    select: {
+      id: true,
+      orderNumber: true,
+      symbol: true,
+      buyParticipantLoginId: true,
+      sellParticipantLoginId: true,
+      linkedRfqParticipantCode: true,
+    },
+  });
+
+  if (!settle) {
+    throw new Error(
+      `No NSE settle_order found for order number ${orderNumber}. ` +
+        `Cannot stamp an RFQ participant against a non-existent row.`,
+    );
+  }
+
+  console.log("── Settle order ─────────────────────────────");
+  console.log({
+    id: settle.id,
+    orderNumber: settle.orderNumber,
+    symbol: settle.symbol,
+    buyParticipantLoginId: settle.buyParticipantLoginId,
+    sellParticipantLoginId: settle.sellParticipantLoginId,
+    currentLinkedRfqParticipantCode: settle.linkedRfqParticipantCode,
+  });
+
+  const matchesBuy = settle.buyParticipantLoginId === participantCode;
+  const matchesSell = settle.sellParticipantLoginId === participantCode;
+  if (!matchesBuy && !matchesSell) {
+    console.warn(
+      `⚠️  Participant code ${participantCode} doesn't match either side of ` +
+        `the settle order (buy=${settle.buyParticipantLoginId}, ` +
+        `sell=${settle.sellParticipantLoginId}). Proceeding anyway — the ` +
+        `operator may be intentionally tagging an out-of-band counterparty.`,
+    );
+  }
+
+  if (
+    settle.linkedRfqParticipantCode &&
+    settle.linkedRfqParticipantCode !== participantCode
+  ) {
+    console.warn(
+      `⚠️  settle_order already linked to a different participant ` +
+        `(${settle.linkedRfqParticipantCode}); overwriting with ${participantCode}.`,
+    );
+  }
+
+  console.log("── Participant ──────────────────────────────");
+  console.log({
+    code: participantCode,
+    name: participantName,
+    side: matchesBuy ? "BUY" : matchesSell ? "SELL" : "UNKNOWN",
+  });
+
+  if (dryRun) {
+    console.log(
+      "\n[dryRun=true] Would set settle_order.linkedRfqParticipantCode = " +
+        participantCode,
+    );
+    return;
+  }
+
+  await db.dataBase.settleOrderModel.update({
+    where: { id: settle.id },
+    data: { linkedRfqParticipantCode: participantCode },
+  });
+
+  console.log(
+    `\n✅ Stamped settle_order #${settle.id} (order ${settle.orderNumber}) ` +
+      `with linkedRfqParticipantCode=${participantCode}.`,
+  );
+}
+
 async function main() {
   // ────────────────────────────────────────────────────────────────────
   // EDIT THESE BEFORE RUNNING
   // ────────────────────────────────────────────────────────────────────
-  const CUSTOMER_PROFILE_UCC = "MD1HRXWON"; // UCC of the customer to create the order for
-  const ISIN = "INE0NES07279"; // ISIN of the bond to order
-  const ORDER_NUMBER = "260604990005639"; // Order number of the order to create
-  const DRY_RUN = false; // true to skip actual order creation
+  // Identifier is tried as a customer UCC first; on miss it's tried as
+  // an RFQ-participant `code` (the NSE participants/all `code`).
+  const IDENTIFIER = "MD1HRXWON";
+  const ISIN = "INE0NES07329"; // ISIN of the bond to order (only used in the customer branch)
+  const ORDER_NUMBER = "260611990005114"; // NSE settle_order number
+  const DRY_RUN = false;
   // ────────────────────────────────────────────────────────────────────
-
-  const Customer = await db.dataBase.customerProfileDataModel.findUnique({
-    where: { userName: CUSTOMER_PROFILE_UCC },
-    select: { id: true },
-  });
-
-  if (!Customer) {
-    throw new Error(`Customer not found for UCC ${CUSTOMER_PROFILE_UCC}`);
-  }
-
 
   await db.dataBase.$connect();
   try {
-    await createOrderForCustomer({
-      customerProfileId: Customer?.id,
-      isin: ISIN,
-      orderNumber: ORDER_NUMBER,
-      dryRun: DRY_RUN,
+    // 1. Try the Meradhan customer side first — that's the common case.
+    const customer = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { userName: IDENTIFIER },
+      select: { id: true },
     });
+
+    if (customer) {
+      console.log(
+        `Resolved ${IDENTIFIER} as a Meradhan customer (id=${customer.id}). ` +
+          `Running the customer-side order assignment flow.`,
+      );
+      await createOrderForCustomer({
+        customerProfileId: customer.id,
+        isin: ISIN,
+        orderNumber: ORDER_NUMBER,
+        dryRun: DRY_RUN,
+      });
+      return;
+    }
+
+    // 2. Fall back to the RFQ-participant table (our local enrichment of
+    // NSE participants/all). This branch never creates a Meradhan Order;
+    // it just stamps the settle_order so reports can attribute it later.
+    const participant =
+      await db.dataBase.nseRfqParticipantInfoModel.findUnique({
+        where: { code: IDENTIFIER },
+        select: { code: true, nameOverride: true },
+      });
+
+    if (participant) {
+      console.log(
+        `Resolved ${IDENTIFIER} as an RFQ participant. No Meradhan Order ` +
+          `will be created; stamping the settle_order with the participant code.`,
+      );
+      await stampSettleOrderWithRfqParticipant({
+        orderNumber: ORDER_NUMBER,
+        participantCode: participant.code,
+        participantName: participant.nameOverride ?? IDENTIFIER,
+        dryRun: DRY_RUN,
+      });
+      return;
+    }
+
+    throw new Error(
+      `Identifier ${IDENTIFIER} did not match any Meradhan customer ` +
+        `(by userName/UCC) or any RFQ participant info row (by code). ` +
+        `If this is a brand-new external counterparty, add a participant ` +
+        `info entry first via /dashboard/rfqs/nse/rfq-participants.`,
+    );
   } finally {
     await db.dataBase.$disconnect();
   }

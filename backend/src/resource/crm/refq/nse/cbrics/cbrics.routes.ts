@@ -35,4 +35,26 @@ participantsRouter.get(
   (req, res) => controller.handleGetParticipantsRfq(req, res)
 );
 
+// CRM-private participant enrichment (contact / KYC / banks / demats)
+participantsRouter.get(
+  "/api/crm/rfq/nse/rfq/participants/info/codes",
+  allowAccessMiddleware("CRM"),
+  (req, res) => controller.handleListSavedRfqParticipantInfoCodes(req, res)
+);
+participantsRouter.get(
+  "/api/crm/rfq/nse/rfq/participants/info/summary",
+  allowAccessMiddleware("CRM"),
+  (req, res) => controller.handleListRfqParticipantInfoSummaries(req, res)
+);
+participantsRouter.get(
+  "/api/crm/rfq/nse/rfq/participants/:code/info",
+  allowAccessMiddleware("CRM"),
+  (req, res) => controller.handleGetRfqParticipantInfo(req, res)
+);
+participantsRouter.put(
+  "/api/crm/rfq/nse/rfq/participants/:code/info",
+  allowAccessMiddleware("CRM"),
+  (req, res) => controller.handleUpsertRfqParticipantInfo(req, res)
+);
+
 export default participantsRouter;

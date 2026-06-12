@@ -33,6 +33,7 @@ import apiGateway, {
   type RfqByOrderNumberSettleOrder,
   type CustomerFullOrder,
   type CustomerProfile,
+  type NseRfqParticipantInfoSummary,
 } from "@root/apiGateway";
 import { SelectCustomerUser } from "@/global/elements/autocomplete/SelectCustomerUser";
 import { genMediaUrl } from "@/global/utils/url.utils";
@@ -282,9 +283,22 @@ function GeneratePdfContent() {
   const [pdfAmortizedPrincipalPaymentDates, setPdfAmortizedPrincipalPaymentDates] = useState("");
   const ordersApi = new apiGateway.crm.crmOrdersApi(apiClientCaller);
   const customerApi = new apiGateway.crm.customer.CrmCustomerApi(apiClientCaller);
+  const participantsApi = new apiGateway.crm.rfq.participants.RfqParticipantsApi(
+    apiClientCaller,
+  );
   const [participantCode, setParticipantCode] = useState<string | null>(null);
   const [isAutoFetchedCustomer, setIsAutoFetchedCustomer] = useState(false);
   const [orderSide, setOrderSide] = useState<"BUY" | "SELL">("BUY");
+
+  // Owner type for the manual-assign UI: pick the source of the
+  // counterparty before showing the matching picker (customer autocomplete
+  // vs participant dropdown).
+  const [assignKind, setAssignKind] = useState<"customer" | "rfqParticipant">(
+    "customer",
+  );
+  const [selectedParticipantCode, setSelectedParticipantCode] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     if (participantCode) {
@@ -367,10 +381,68 @@ function GeneratePdfContent() {
     },
   });
 
+  // Saved RFQ participant info — used to populate the participant dropdown
+  // when the operator picks "NSE Participant" as the counterparty kind.
+  // We only show participants that already have a saved info row, because
+  // the backend assign-RFQ-participant endpoint (and the PDF actor
+  // resolver) refuse to stamp a code that hasn't been enriched.
+  const savedParticipantsQuery = useQuery({
+    queryKey: ["NseRfqParticipants:infoSummary"],
+    queryFn: async () => {
+      const res = await participantsApi.listRfqParticipantInfoSummaries();
+      return res.data.responseData?.summaries ?? [];
+    },
+    staleTime: 30 * 1000,
+  });
+
+  const savedParticipants: NseRfqParticipantInfoSummary[] =
+    savedParticipantsQuery.data ?? [];
+
+  const assignRfqParticipantMutation = useMutation({
+    mutationFn: () =>
+      ordersApi.assignRfqParticipantToSettleOrder({
+        orderNumber: orderNumber!,
+        code: selectedParticipantCode!,
+      }),
+    onSuccess: (res) => {
+      const r = res.responseData;
+      toast.success(
+        r?.matchesBuySide
+          ? `Tagged as buy-side counterparty (${r.participantName}).`
+          : r?.matchesSellSide
+            ? `Tagged as sell-side counterparty (${r.participantName}).`
+            : "RFQ participant assigned to this settle order.",
+      );
+      setSelectedParticipantCode(null);
+      // The RFQ-by-order-number response now exposes `linkedRfqParticipantCode`
+      // — refetch so the page swaps to the assigned-participant view.
+      void queryClient.invalidateQueries({
+        queryKey: ["rfq-by-order", orderNumber],
+      });
+    },
+    onError: (err) => {
+      toast.error(getApiErrorMessage(err, "Failed to assign participant"));
+    },
+  });
+
   const rfq: RfqByOrderNumberSettleOrder | null | undefined =
     data?.responseData ?? null;
   const customerOrder: CustomerFullOrder | null =
     customerOrderData?.responseData ?? null;
+
+  // Participant-assigned settle orders don't have a Meradhan Order row;
+  // the only signal is the `linkedRfqParticipantCode` column on settle_order
+  // (which `resolveOrderPdfActor` reads to pick the participant branch).
+  const linkedParticipantCode = rfq?.linkedRfqParticipantCode ?? null;
+  const linkedParticipant: NseRfqParticipantInfoSummary | null =
+    linkedParticipantCode
+      ? (savedParticipants.find((p) => p.code === linkedParticipantCode) ??
+        null)
+      : null;
+  // PDF actions / receipt options are valid in both customer and
+  // participant-tagged flows; treat them as "owner is assigned".
+  const hasAssignedOwner =
+    !!customerOrder?.customerProfile || !!linkedParticipantCode;
   const emailSalutation = getEmailSalutationFromGender(customerOrder?.customerProfile?.gender);
   const clientFullName = `${customerOrder?.customerProfile?.firstName ?? ""} ${customerOrder?.customerProfile?.middleName ?? ""} ${customerOrder?.customerProfile?.lastName ?? ""}`
     .trim()
@@ -888,7 +960,7 @@ BSE Member ID: 6963`
               Back to Settle Orders
             </Link>
           </Button>
-          {customerOrder?.customerProfile && (
+          {hasAssignedOwner && (
             <>
               <Button
                 size="sm"
@@ -908,43 +980,50 @@ BSE Member ID: 6963`
                 <FileDown className="mr-2 h-4 w-4" />
                 {downloadingDealPdf ? "Generating..." : "Download deal sheet PDF"}
               </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={downloadingOrderPdf || downloadingDealPdf || pdfAccruedInterestDays.trim() === ""}
-                onClick={() => {
-                  setEmailPdfType("order");
-                  applyEmailTemplate("order");
-                  setSendEmailOpen(true);
-                }}
-              >
-                Email order receipt
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={downloadingOrderPdf || downloadingDealPdf || pdfAccruedInterestDays.trim() === ""}
-                onClick={() => {
-                  setEmailPdfType("deal");
-                  applyEmailTemplate("deal");
-                  setSendEmailOpen(true);
-                }}
-              >
-                Email deal sheet
-              </Button>
-              <Button
-                size="sm"
-                variant="default"
-                disabled={downloadingOrderPdf || downloadingDealPdf}
-                onClick={() => setProposalEmailOpen(true)}
-              >
-                Email proposal
-              </Button>
+              {/* Email actions need a customer profile (template uses customer
+                  contact/email). Hide them for participant-tagged orders;
+                  PDF downloads still work from the buttons above. */}
+              {customerOrder?.customerProfile && (
+                <>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={downloadingOrderPdf || downloadingDealPdf || pdfAccruedInterestDays.trim() === ""}
+                    onClick={() => {
+                      setEmailPdfType("order");
+                      applyEmailTemplate("order");
+                      setSendEmailOpen(true);
+                    }}
+                  >
+                    Email order receipt
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={downloadingOrderPdf || downloadingDealPdf || pdfAccruedInterestDays.trim() === ""}
+                    onClick={() => {
+                      setEmailPdfType("deal");
+                      applyEmailTemplate("deal");
+                      setSendEmailOpen(true);
+                    }}
+                  >
+                    Email deal sheet
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="default"
+                    disabled={downloadingOrderPdf || downloadingDealPdf}
+                    onClick={() => setProposalEmailOpen(true)}
+                  >
+                    Email proposal
+                  </Button>
+                </>
+              )}
             </>
           )}
         </div>
 
-        {customerOrder?.customerProfile && (
+        {hasAssignedOwner && (
           <Section title="Receipt PDF options (fill before generating PDF)">
             <p className="text-muted-foreground text-sm mb-3">
               Accrued / Ex Interest is taken from settlement (negotiations) data. Values you use are saved for this order number when you download or email a PDF, and will auto-fill next time.
@@ -1087,7 +1166,15 @@ BSE Member ID: 6963`
           </Section>
         )}
 
-        {/* Customer: show full info if assigned, else select + assign */}
+        {/*
+          Ownership resolution for the settle order. There are three states:
+          1. customerOrder.customerProfile is set → a Meradhan customer owns
+             the order (existing flow).
+          2. rfq.linkedRfqParticipantCode is set → an external NSE RFQ
+             participant has been tagged (new flow; PDF actor resolver picks
+             this up automatically).
+          3. Neither → operator picks a type and an entity below to assign.
+        */}
         {customerOrderLoading ? (
           <Card>
             <CardContent className="pt-6">
@@ -1166,17 +1253,113 @@ BSE Member ID: 6963`
               </Section>
             ) : null}
           </>
+        ) : linkedParticipantCode ? (
+          <Section title="NSE Participant (assigned counterparty)">
+            <InfoRow
+              label="Participant code"
+              value={linkedParticipantCode}
+            />
+            <InfoRow
+              label="Name"
+              value={
+                linkedParticipant?.nameOverride?.trim() ??
+                linkedParticipantCode
+              }
+            />
+            <InfoRow
+              label="Contact"
+              value={linkedParticipant?.contactPerson ?? null}
+            />
+            <InfoRow
+              label="Email"
+              value={(linkedParticipant?.emailList ?? []).join(", ") || null}
+            />
+            <InfoRow
+              label="Mobile"
+              value={(linkedParticipant?.mobileList ?? []).join(", ") || null}
+            />
+            <InfoRow
+              label="Telephone"
+              value={linkedParticipant?.telephone ?? null}
+            />
+            <InfoRow label="PAN" value={linkedParticipant?.panNo ?? null} />
+            <InfoRow label="LEI" value={linkedParticipant?.leiCode ?? null} />
+            <InfoRow
+              label="Custodian"
+              value={linkedParticipant?.custodian ?? null}
+            />
+            <InfoRow
+              label="Banks / Demats"
+              value={
+                linkedParticipant
+                  ? `${linkedParticipant.bankAccountsCount} bank · ${linkedParticipant.dematAccountsCount} demat`
+                  : null
+              }
+            />
+            <div className="pt-3">
+              <Button asChild variant="outline" size="sm">
+                <Link
+                  href={`/dashboard/rfqs/nse/rfq-participants`}
+                  target="_blank"
+                >
+                  Open participant info
+                </Link>
+              </Button>
+            </div>
+          </Section>
         ) : (
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-base">No Customer assigned</CardTitle>
+              <CardTitle className="text-base">No counterparty assigned</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <p className="text-muted-foreground text-sm">Select a Customer and assign this settlement order to them. Only Customers with verified KYC can be assigned.</p>
+              <p className="text-muted-foreground text-sm">
+                This settle order isn&apos;t tied to a Meradhan customer or
+                NSE participant yet. Pick who should appear as the
+                counterparty on the order receipt / deal sheet PDF.
+              </p>
 
-              {isAutoFetchedCustomer && selectedCustomer && (
-                <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Auto-fetched from participant code</p>
+              {/*
+                Owner-type selector — drives which picker is shown below.
+                Default to "customer" because that's the existing flow; the
+                operator switches to "rfqParticipant" only for external NSE
+                counterparties enriched via /dashboard/rfqs/nse/rfq-participants.
+              */}
+              <div className="flex flex-col gap-2 max-w-md">
+                <Label htmlFor="assign-kind">Counterparty type</Label>
+                <Select
+                  value={assignKind}
+                  onValueChange={(v) => {
+                    const next = v as "customer" | "rfqParticipant";
+                    setAssignKind(next);
+                    // Clear the opposite picker so a stale selection can't
+                    // be submitted from the wrong branch.
+                    if (next === "customer") {
+                      setSelectedParticipantCode(null);
+                    } else {
+                      setSelectedCustomer(null);
+                    }
+                  }}
+                >
+                  <SelectTrigger id="assign-kind" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="customer">
+                      MeraDhan customer
+                    </SelectItem>
+                    <SelectItem value="rfqParticipant">
+                      NSE participant (external)
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {assignKind === "customer" && (
+                <>
+                  {isAutoFetchedCustomer && selectedCustomer && (
+                    <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Auto-fetched from participant code</p>
                   <div className="grid gap-2 text-sm">
                     <div className="grid grid-cols-[100px_1fr] gap-2">
                       <span className="text-muted-foreground">Name</span>
@@ -1294,6 +1477,142 @@ BSE Member ID: 6963`
               )}
               {selectedCustomer && String(selectedCustomer.kycStatus) !== "VERIFIED" && (
                 <p className="text-destructive text-sm">Selected Customer KYC is not verified. Only VERIFIED Customers can be assigned.</p>
+              )}
+                </>
+              )}
+
+              {assignKind === "rfqParticipant" && (
+                <div className="space-y-3">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    NSE participant
+                  </p>
+                  {savedParticipantsQuery.isLoading ? (
+                    <p className="text-sm text-muted-foreground">
+                      Loading participants…
+                    </p>
+                  ) : savedParticipants.length === 0 ? (
+                    <div className="rounded-lg border border-amber-200 bg-amber-50/70 dark:border-amber-900 dark:bg-amber-950/40 p-4">
+                      <p className="text-sm text-amber-900 dark:text-amber-100">
+                        No NSE participants with saved info yet. Add an
+                        entry first via{" "}
+                        <Link
+                          href="/dashboard/rfqs/nse/rfq-participants"
+                          className="font-medium underline underline-offset-2"
+                          target="_blank"
+                        >
+                          /dashboard/rfqs/nse/rfq-participants
+                        </Link>{" "}
+                        — only enriched participants can be assigned so the
+                        PDF has contact / bank / demat info to render.
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex flex-wrap items-end gap-4">
+                        <div className="min-w-[260px] flex-1 max-w-md">
+                          <Label htmlFor="participant-select">
+                            Pick a participant
+                          </Label>
+                          <Select
+                            value={selectedParticipantCode ?? undefined}
+                            onValueChange={(v) =>
+                              setSelectedParticipantCode(v)
+                            }
+                          >
+                            <SelectTrigger
+                              id="participant-select"
+                              className="w-full"
+                            >
+                              <SelectValue placeholder="Search & select participant…" />
+                            </SelectTrigger>
+                            <SelectContent className="max-h-[300px]">
+                              {savedParticipants
+                                .slice()
+                                .sort((a, b) =>
+                                  (a.nameOverride ?? a.code).localeCompare(
+                                    b.nameOverride ?? b.code,
+                                  ),
+                                )
+                                .map((p) => (
+                                  <SelectItem key={p.code} value={p.code}>
+                                    <span className="font-mono mr-2">
+                                      {p.code}
+                                    </span>
+                                    {p.nameOverride
+                                      ? `— ${p.nameOverride}`
+                                      : null}
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Button
+                          size="sm"
+                          disabled={
+                            !selectedParticipantCode ||
+                            assignRfqParticipantMutation.isPending
+                          }
+                          onClick={() =>
+                            assignRfqParticipantMutation.mutate()
+                          }
+                        >
+                          <UserPlus className="mr-2 h-4 w-4" />
+                          {assignRfqParticipantMutation.isPending
+                            ? "Assigning..."
+                            : "Assign as NSE participant"}
+                        </Button>
+                      </div>
+                      {selectedParticipantCode &&
+                        (() => {
+                          const p = savedParticipants.find(
+                            (x) => x.code === selectedParticipantCode,
+                          );
+                          if (!p) return null;
+                          return (
+                            <div className="rounded-lg border bg-muted/30 p-4 grid gap-1 text-sm">
+                              <div className="grid grid-cols-[120px_1fr] gap-2">
+                                <span className="text-muted-foreground">
+                                  Code
+                                </span>
+                                <span className="font-mono">{p.code}</span>
+                              </div>
+                              <div className="grid grid-cols-[120px_1fr] gap-2">
+                                <span className="text-muted-foreground">
+                                  Name
+                                </span>
+                                <span className="font-medium">
+                                  {p.nameOverride ?? p.code}
+                                </span>
+                              </div>
+                              <div className="grid grid-cols-[120px_1fr] gap-2">
+                                <span className="text-muted-foreground">
+                                  Contact
+                                </span>
+                                <span>{p.contactPerson ?? "—"}</span>
+                              </div>
+                              <div className="grid grid-cols-[120px_1fr] gap-2">
+                                <span className="text-muted-foreground">
+                                  PAN
+                                </span>
+                                <span className="font-mono">
+                                  {p.panNo ?? "—"}
+                                </span>
+                              </div>
+                              <div className="grid grid-cols-[120px_1fr] gap-2">
+                                <span className="text-muted-foreground">
+                                  Banks · Demat
+                                </span>
+                                <span>
+                                  {p.bankAccountsCount} ·{" "}
+                                  {p.dematAccountsCount}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })()}
+                    </>
+                  )}
+                </div>
               )}
             </CardContent>
           </Card>

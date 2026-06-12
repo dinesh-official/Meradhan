@@ -213,8 +213,27 @@ export interface RfqByOrderNumberSettleOrder {
   utrNumber: string | null;
   dpId: string | null;
   benId: string | null;
+  /// Set when the settle order has been tagged with an external NSE RFQ
+  /// participant code (via the CRM "Assign as NSE participant" flow or
+  /// the `asign-order.ts` CLI). Null for orders owned by Meradhan
+  /// customers.
+  linkedRfqParticipantCode: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+/** Response of `POST /api/crm/orders/assign-rfq-participant`. */
+export interface AssignRfqParticipantResponseData {
+  orderNumber: string;
+  linkedRfqParticipantCode: string;
+  participantName: string;
+  matchesBuySide: boolean;
+  matchesSellSide: boolean;
+}
+
+export interface AssignRfqParticipantResponse {
+  responseData: AssignRfqParticipantResponseData | null;
+  message?: string;
 }
 
 export interface GetRfqByOrderNumberResponse {
