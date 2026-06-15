@@ -935,7 +935,7 @@ export class CrmOrdersService {
         metadata: {
           dealId: (metadata.dealId as string) ?? undefined,
           clientOrderSide: (metadata.clientOrderSide as "BUY" | "SELL") ?? undefined,
-          rfqNumber: (metadata.rfqNumber as string) ?? undefined,
+          rfqNumber: (metadata.rfqNumber as string) ?? negotation?.tradeNumber ?? undefined,
           orderType: accessTypeText ?? "One To One (OTO) on RFQ Platform of the Exchange",
           interestPaymentDates:
             interestPaymentDatesParam?.length
