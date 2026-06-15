@@ -925,12 +925,53 @@ export class CrmOrdersService {
     lastInterestPaymentDate: string | null;
     interestPaymentDates: string[] | null;
   }> {
-    const order = await this.getCustomerByOrderNumber(orderNumber);
+    // The autofill values (accrued days, settlement no, coupon dates) are all
+    // bond + settle-order properties — they don't depend on which customer
+    // (or participant) is assigned. So accept either an Order or a raw
+    // settle_order row and build a minimal "order-like" view from whichever
+    // is available. This unblocks the Generate-PDF page autofill before any
+    // counterparty has been assigned.
+    const existingOrder = await this.getCustomerByOrderNumber(orderNumber);
+    const settleOrder = await this.getRfqByOrderNumber(orderNumber);
+
+    type OrderLike = {
+      isin: string;
+      quantity: number;
+      unitPrice: number;
+      createdAt: Date;
+    };
+
+    let order: OrderLike | null = null;
+    if (existingOrder) {
+      order = {
+        isin: existingOrder.isin,
+        quantity: existingOrder.quantity,
+        unitPrice: Number(existingOrder.unitPrice),
+        createdAt:
+          existingOrder.createdAt instanceof Date
+            ? existingOrder.createdAt
+            : new Date(existingOrder.createdAt),
+      };
+    } else if (settleOrder) {
+      order = {
+        isin: settleOrder.symbol,
+        quantity: Number(settleOrder.modQuantity ?? 0),
+        unitPrice: Number(settleOrder.price),
+        createdAt:
+          settleOrder.createdAt instanceof Date
+            ? settleOrder.createdAt
+            : new Date(settleOrder.createdAt),
+      };
+    }
+
     if (!order) {
-      throw new AppError("No order found for this settlement. Assign a customer first.", {
-        statusCode: HttpStatus.NOT_FOUND,
-        code: "ORDER_NOT_FOUND",
-      });
+      throw new AppError(
+        "No order or NSE settle order found for this settlement number.",
+        {
+          statusCode: HttpStatus.NOT_FOUND,
+          code: "ORDER_NOT_FOUND",
+        },
+      );
     }
 
     const bondService = new BondService();
@@ -954,7 +995,7 @@ export class CrmOrdersService {
     const pricingData = computeBondOrderPricingData({
       faceValue: bond.faceValue,
       quantity: order.quantity,
-      cleanPrice: Number(order.unitPrice),
+      cleanPrice: order.unitPrice,
       couponRate: bond.couponRate,
       lastCouponDate: (couponDates?.lastCouponDate || "").toString(),
       recordDays: recordDays,
@@ -974,7 +1015,6 @@ export class CrmOrdersService {
       });
     }
 
-    const settleOrder = await this.getRfqByOrderNumber(orderNumber);
     const negotiation = settleOrder?.orderNumber
       ? await db.dataBase.rFQNegotiation.findFirst({
         where: { tradeNumber: settleOrder.orderNumber },
@@ -986,8 +1026,7 @@ export class CrmOrdersService {
       })
       : null;
 
-    const fallbackOrderDate =
-      order.createdAt instanceof Date ? order.createdAt : new Date(order.createdAt);
+    const fallbackOrderDate = order.createdAt;
     const orderDateForPdf = parseRfqMasterDateTime(
       rfqDetails?.date,
       rfqDetails?.quoteTime,

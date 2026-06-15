@@ -742,7 +742,9 @@ export class CrmOrdersService {
         paymentId: rfq.orderNumber,
         paymentOrderId: rfq.orderNumber,
         reqOrderNumber: rfq.orderNumber,
-        metadata: { rfqNumber: rfq.orderNumber } as Prisma.InputJsonValue,
+        metadata: {
+          rfqNumber: rfq.orderNumber
+        } as Prisma.InputJsonValue,
         paymentStatus: PaymentStatus.PENDING,
         paymentProvider: "CUSTOM",
         status: OrderStatus.SETTLED,
@@ -947,7 +949,7 @@ export class CrmOrdersService {
         metadata: {
           dealId: (metadata.dealId as string) ?? undefined,
           clientOrderSide: (metadata.clientOrderSide as "BUY" | "SELL") ?? undefined,
-          rfqNumber: (metadata.rfqNumber as string) ?? undefined,
+          rfqNumber: (metadata.rfqNumber as string) ?? negotation?.tradeNumber ?? undefined,
           orderType: accessTypeText ?? "One To One (OTO) on RFQ Platform of the Exchange",
           interestPaymentDates:
             interestPaymentDatesParam?.length
@@ -1220,6 +1222,7 @@ export class CrmOrdersService {
             : Number(order.totalAmount),
         price: Number(settleOrder?.price ?? 0),
         metadata: {
+
           settlementType: rfqDetails?.settlementType ?? 0,
           dealId: (metadata.dealId as string) ?? undefined,
           clientOrderSide: (metadata.clientOrderSide as "BUY" | "SELL") ?? undefined,
@@ -1878,7 +1881,7 @@ async function stampSettleOrderWithRfqParticipant(input: {
   if (!settle) {
     throw new Error(
       `No NSE settle_order found for order number ${orderNumber}. ` +
-        `Cannot stamp an RFQ participant against a non-existent row.`,
+      `Cannot stamp an RFQ participant against a non-existent row.`,
     );
   }
 
@@ -1897,9 +1900,9 @@ async function stampSettleOrderWithRfqParticipant(input: {
   if (!matchesBuy && !matchesSell) {
     console.warn(
       `⚠️  Participant code ${participantCode} doesn't match either side of ` +
-        `the settle order (buy=${settle.buyParticipantLoginId}, ` +
-        `sell=${settle.sellParticipantLoginId}). Proceeding anyway — the ` +
-        `operator may be intentionally tagging an out-of-band counterparty.`,
+      `the settle order (buy=${settle.buyParticipantLoginId}, ` +
+      `sell=${settle.sellParticipantLoginId}). Proceeding anyway — the ` +
+      `operator may be intentionally tagging an out-of-band counterparty.`,
     );
   }
 
@@ -1909,7 +1912,7 @@ async function stampSettleOrderWithRfqParticipant(input: {
   ) {
     console.warn(
       `⚠️  settle_order already linked to a different participant ` +
-        `(${settle.linkedRfqParticipantCode}); overwriting with ${participantCode}.`,
+      `(${settle.linkedRfqParticipantCode}); overwriting with ${participantCode}.`,
     );
   }
 
@@ -1923,7 +1926,7 @@ async function stampSettleOrderWithRfqParticipant(input: {
   if (dryRun) {
     console.log(
       "\n[dryRun=true] Would set settle_order.linkedRfqParticipantCode = " +
-        participantCode,
+      participantCode,
     );
     return;
   }
@@ -1935,7 +1938,7 @@ async function stampSettleOrderWithRfqParticipant(input: {
 
   console.log(
     `\n✅ Stamped settle_order #${settle.id} (order ${settle.orderNumber}) ` +
-      `with linkedRfqParticipantCode=${participantCode}.`,
+    `with linkedRfqParticipantCode=${participantCode}.`,
   );
 }
 
@@ -1962,7 +1965,7 @@ async function main() {
     if (customer) {
       console.log(
         `Resolved ${IDENTIFIER} as a Meradhan customer (id=${customer.id}). ` +
-          `Running the customer-side order assignment flow.`,
+        `Running the customer-side order assignment flow.`,
       );
       await createOrderForCustomer({
         customerProfileId: customer.id,
@@ -1985,7 +1988,7 @@ async function main() {
     if (participant) {
       console.log(
         `Resolved ${IDENTIFIER} as an RFQ participant. No Meradhan Order ` +
-          `will be created; stamping the settle_order with the participant code.`,
+        `will be created; stamping the settle_order with the participant code.`,
       );
       await stampSettleOrderWithRfqParticipant({
         orderNumber: ORDER_NUMBER,
@@ -1998,9 +2001,9 @@ async function main() {
 
     throw new Error(
       `Identifier ${IDENTIFIER} did not match any Meradhan customer ` +
-        `(by userName/UCC) or any RFQ participant info row (by code). ` +
-        `If this is a brand-new external counterparty, add a participant ` +
-        `info entry first via /dashboard/rfqs/nse/rfq-participants.`,
+      `(by userName/UCC) or any RFQ participant info row (by code). ` +
+      `If this is a brand-new external counterparty, add a participant ` +
+      `info entry first via /dashboard/rfqs/nse/rfq-participants.`,
     );
   } finally {
     await db.dataBase.$disconnect();
