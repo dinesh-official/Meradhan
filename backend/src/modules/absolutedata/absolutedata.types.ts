@@ -37,7 +37,7 @@ const nullableNumber = z.number().nullable();
 export const absoluteDataInstrumentIdentifiersSchema = z.object({
   isin: z.string(),
   figi: nullableString,
-  ad_instrument_id: z.number(),
+  ad_instrument_id: nullableNumber,
   cusip: nullableString,
   isin_regs: z.unknown().nullable(),
   isin_144a: nullableString,
@@ -46,14 +46,14 @@ export const absoluteDataInstrumentIdentifiersSchema = z.object({
 });
 
 export const absoluteDataIssuerDomicileSchema = z.object({
-  country_of_incorporation: z.string(),
-  issuer_region: z.string(),
+  country_of_incorporation: nullableString,
+  issuer_region: nullableString,
 });
 
 export const absoluteDataIssuerClassificationSchema = z.object({
-  sector: z.string(),
-  bank_issuer_flag: z.boolean(),
-  non_profit_indicator: z.boolean(),
+  sector: nullableString,
+  bank_issuer_flag: z.boolean().nullable(),
+  non_profit_indicator: z.boolean().nullable(),
   exchange_name: nullableString,
 });
 
@@ -63,10 +63,10 @@ export const absoluteDataCorporateHierarchySchema = z.object({
 
 export const absoluteDataIssuerSchema = z.object({
   issuer_name: z.string(),
-  issuer_short_name: z.string(),
-  bond_category: z.string(),
-  organization_status: z.string(),
-  issuer_incorporation_year: z.number(),
+  issuer_short_name: nullableString,
+  bond_category: nullableString,
+  organization_status: nullableString,
+  issuer_incorporation_year: z.union([z.number(), z.string()]).nullable(),
   domicile: absoluteDataIssuerDomicileSchema,
   classification: absoluteDataIssuerClassificationSchema,
   corporate_hierarchy: absoluteDataCorporateHierarchySchema,
@@ -78,8 +78,8 @@ export const absoluteDataTermsAndConditionsSchema = z.object({
   maturity_date: nullableString,
   is_perpetual: z.boolean(),
   issue_currency: z.string(),
-  amount_issued: z.number(),
-  issue_price: z.number(),
+  amount_issued: nullableNumber,
+  issue_price: nullableNumber,
   seniority: nullableString,
   bond_type: nullableString,
   instrument_nature: nullableString,
@@ -92,8 +92,14 @@ export const absoluteDataTermsAndConditionsSchema = z.object({
 });
 
 export const absoluteDataListingAndTradingSchema = z.object({
-  is_listed: z.boolean(),
+  is_listed: z.boolean().nullable(),
 });
+
+export const absoluteDataCouponScheduleRowSchema = z.object({
+  payment_date: nullableString,
+  record_days: nullableNumber,
+  sequence: nullableNumber,
+}).passthrough();
 
 export const absoluteDataCouponSchema = z.object({
   coupon_type: nullableString,
@@ -105,11 +111,24 @@ export const absoluteDataCouponSchema = z.object({
   previous_coupon_date: nullableString,
   next_coupon_date: nullableString,
   last_coupon_date: nullableString,
+  payment_schedule: z.array(absoluteDataCouponScheduleRowSchema).optional(),
 });
+
+export const absoluteDataRedemptionScheduleRowSchema = z.object({
+  type: nullableString,
+  start_date: nullableString,
+  end_date: nullableString,
+  price: nullableNumber,
+  amount: nullableNumber,
+  option_type: nullableString,
+  option_frequency: nullableString,
+  sequence: nullableNumber,
+}).passthrough();
 
 export const absoluteDataRedemptionFeaturesSchema = z.object({
   call: z.object({ call_indicator: z.boolean() }),
   put: z.object({ put_indicator: z.boolean() }),
+  schedule: z.array(absoluteDataRedemptionScheduleRowSchema).optional(),
 });
 
 export const absoluteDataFigiBlockSchema = z.object({

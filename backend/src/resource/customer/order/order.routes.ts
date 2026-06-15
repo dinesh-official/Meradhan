@@ -24,6 +24,12 @@ orderRoutes.post(
 );
 
 orderRoutes.post(
+  "/api/customer/order/cancel",
+  allowAccessMiddleware("USER"),
+  orderController.cancelOrder
+);
+
+orderRoutes.post(
   "/api/customer/order/cancel/:orderId",
   allowAccessMiddleware("USER"),
   orderController.cancelOrder

@@ -82,7 +82,7 @@ function removeNsdlRatingTokens(normalized: string): string {
 export class NsdlBondProcessor {
   constructor(private bond: BondDataSet) { }
 
-  private toIstDateOnly(isoDateTime?: string | null): string | null {
+  private toIstDateOnly(isoDateTime?: string | null): Date | null {
     if (!isoDateTime) return null;
     const dt = new Date(isoDateTime);
     if (Number.isNaN(dt.getTime())) return null;
@@ -94,7 +94,7 @@ export class NsdlBondProcessor {
     const y = ist.getUTCFullYear();
     const m = String(ist.getUTCMonth() + 1).padStart(2, "0");
     const d = String(ist.getUTCDate()).padStart(2, "0");
-    return `${y}-${m}-${d}`;
+    return new Date(`${y}-${m}-${d}`);
   }
 
   /**
@@ -670,12 +670,25 @@ export class NsdlBondProcessor {
     isin: string,
   ): Promise<AbsoluteDataGetBondByIsinResult | null> {
     if (!env.ABSOLUTE_DATA_API_KEY?.trim()) {
+      console.log(`[AbsoluteData] ABSOLUTE_DATA_API_KEY not set — skipping ${isin}`);
       return null;
     }
     try {
       const api = absoluteDataApiFromEnv();
-      return await api.getBondByIsin(isin);
-    } catch {
+      const result = await api.getBondByIsin(isin);
+      if (!result.ok) {
+        if (result.error.code === "NOT_FOUND" || result.error.message.includes("No bond found")) {
+          // Expected — AbsoluteData simply doesn't have this ISIN
+        } else {
+          // Zod parse failure or unexpected API error — log for CloudWatch visibility
+          console.warn(`[AbsoluteData] ${isin} — parse failed: ${result.error.message}`);
+        }
+      } else {
+        // success — AbsoluteData returned data for this ISIN
+      }
+      return result;
+    } catch (err) {
+      console.error(`[AbsoluteData] ${isin} — exception:`, err);
       return null;
     }
   }

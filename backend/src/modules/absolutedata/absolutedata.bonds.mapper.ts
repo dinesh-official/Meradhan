@@ -150,9 +150,7 @@ function buildAdRemarksSupplement(item: AbsoluteDataBondItem): string {
 export function mergeAbsoluteDataIntoBond(
   base: BondsCreateInput,
   item: AbsoluteDataBondItem,
-): BondsCreateInput {
-  console.log(item);
-
+): BondsCreateInput & { _abItem?: AbsoluteDataBondItem } {
   const issuer = item.issuer;
   const terms = item.terms_and_conditions;
   const coupon = item.coupon;
@@ -337,7 +335,5 @@ export function mergeAbsoluteDataIntoBond(
     merged.startDate = firstCoupon;
     merged.startDateIst = ymdToIstDateOnly(coupon.first_coupon_date);
   }
-  console.log(merged);
-
-  return merged;
+  return { ...merged, _abItem: item };
 }

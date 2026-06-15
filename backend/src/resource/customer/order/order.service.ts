@@ -370,9 +370,41 @@ export class OrderService {
     return { status: "success", orderId: order.id };
   }
 
-  async cancelOrder(orderId: string) {
-    await db.dataBase.order.update({
-      where: { orderNumber: orderId },
+  /**
+   * Cancel a still-pending order that belongs to the given customer.
+   *
+   * Used by the "user dismissed the Razorpay modal" fast-path. It is intentionally
+   * idempotent and ownership-scoped:
+   * - only touches orders owned by `customerId`,
+   * - only flips orders that are still `PENDING` (never overrides a COMPLETED/REFUNDED
+   *   payment that may have raced in via the webhook),
+   * - returns `cancelled: 0` (instead of throwing) when there is nothing to cancel,
+   *   so the frontend dismiss handler can fire-and-forget safely.
+   *
+   * The resulting `paymentStatus: CANCELLED` is what the dashboard maps to
+   * "Not completed" (see frontend `isCheckoutNotCompleted`).
+   */
+  async cancelOrder(
+    customerId: number,
+    identifier: { paymentOrderId?: string; orderNumber?: string },
+  ) {
+    const where: Prisma.OrderWhereInput = {
+      customerProfileId: customerId,
+      paymentStatus: PaymentStatus.PENDING,
+    };
+
+    if (identifier.paymentOrderId) {
+      where.paymentOrderId = identifier.paymentOrderId;
+    } else if (identifier.orderNumber) {
+      where.orderNumber = identifier.orderNumber;
+    } else {
+      throw new AppError("Order identifier is required", {
+        code: "ORDER_IDENTIFIER_REQUIRED",
+      });
+    }
+
+    const result = await db.dataBase.order.updateMany({
+      where,
       data: {
         status: "REJECTED",
         paymentStatus: PaymentStatus.CANCELLED,
@@ -381,7 +413,7 @@ export class OrderService {
 
     return {
       status: "success",
-      orderId: orderId,
+      cancelled: result.count,
     };
   }
 

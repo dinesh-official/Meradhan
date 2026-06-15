@@ -24,3 +24,26 @@ cron.schedule(
     { timezone: "Asia/Kolkata" },
 );
 
+// Abandoned-order reconciliation: flips PENDING orders the customer never paid for
+// (closed the Razorpay modal / network dropped, so no paymentId was ever set) to
+// CANCELLED -> dashboard shows "Not completed". Recovers webhook-missed paid orders too.
+// Runs every 15 minutes so the UI updates quickly; the frontend dismiss handler is the
+// instant fast-path and this is the reliable backstop.
+cron.schedule(
+    "*/15 * * * *",
+    async () => {
+        const svc = new PaymentReconciliationService();
+        try {
+            const result = await svc.reconcileAbandonedRazorpayOrders({
+                lookbackHours: 72,
+                maxOrders: 100,
+                graceMinutes: 30,
+            });
+            logger.logInfo("Abandoned-order reconciliation cron completed", result as any);
+        } catch (error) {
+            logger.logError("Abandoned-order reconciliation cron failed", error);
+        }
+    },
+    { timezone: "Asia/Kolkata" },
+);
+
