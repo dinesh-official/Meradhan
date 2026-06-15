@@ -54,10 +54,25 @@ export class OrderController {
   };
 
   cancelOrder = async (req: Request, res: Response) => {
-    const orderId = req.params.orderId || req.body.orderId;
-    if (!orderId) throw new AppError("Order ID is required");
+    const customerId = req.customer?.id;
+    if (!customerId) throw new AppError("Unauthorized");
 
-    const result = await this.orderService.cancelOrder(orderId);
+    const paymentOrderId =
+      (req.body?.paymentOrderId as string | undefined) ?? undefined;
+    const orderNumber =
+      (req.params.orderId as string | undefined) ||
+      (req.body?.orderNumber as string | undefined);
+
+    if (!paymentOrderId && !orderNumber) {
+      throw new AppError("Order identifier is required", {
+        statusCode: HttpStatus.BAD_REQUEST,
+      });
+    }
+
+    const result = await this.orderService.cancelOrder(customerId, {
+      paymentOrderId,
+      orderNumber,
+    });
     return res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: result,

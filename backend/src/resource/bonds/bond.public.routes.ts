@@ -2,8 +2,10 @@ import { Router, type Request, type Response } from "express";
 import { db } from "@core/database/database";
 import { internalApiKeyMiddleware } from "@middlewares/apikey_middleware";
 import { withRateLimit } from "@middlewares/ratelimit_midddleare";
+import { BondService } from "./bond.service";
 
 const bondPublicRouter = Router();
+const bondService = new BondService();
 
 // 30 requests per minute per API key
 const publicBondsLimiter = withRateLimit({ max: 30, min: 1 });
@@ -55,7 +57,7 @@ bondPublicRouter.post(
                 }),
             ]);
 
-            const data = bonds;
+            const data = await bondService.enrichBondsWithCrmInventory(bonds);
 
             res.json({
                 success: true,
@@ -108,11 +110,13 @@ bondPublicRouter.get(
                 return;
             }
 
+            const [enriched] = await bondService.enrichBondsWithCrmInventory([bond]);
+
             res.json({
                 success: true,
                 statusCode: 200,
                 message: "OK",
-                responseData: bond,
+                responseData: enriched,
             });
         } catch (err) {
             console.error("[bond.public] GET /api/public/bonds/:isin error:", err);

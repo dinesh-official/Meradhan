@@ -1,6 +1,7 @@
 import { EmailCommunication } from "@communication/email_communication";
 import { db } from "@core/database/database";
 import { formatDateTime } from "@jobs/kra_worker/KraWorker.service";
+import { absoluteDataYmdToIstIso } from "@modules/absolutedata/absolutedata.bonds.mapper";
 import { NsdlBondProcessor } from "./nsdl_bond_processor";
 import { NsdlBondService } from "./nsdl_bond_service";
 import fs from "fs/promises";
@@ -70,6 +71,17 @@ export const revalidateBonds = async () => {
       /\b99\b/.test(raw)
     );
   };
+
+  // Pre-fetch ISINs already in the 2 reference tables to limit schedule sync.
+  const [couponRefIsins, redemptionRefIsins] = await Promise.all([
+    db.dataBase.bondReferenceCouponPaymentDate.findMany({ select: { isin: true }, distinct: ["isin"] }),
+    db.dataBase.bondReferenceRedemptionSchedule.findMany({ select: { isin: true }, distinct: ["isin"] }),
+  ]);
+  const knownIsins = new Set([
+    ...couponRefIsins.map((r) => r.isin),
+    ...redemptionRefIsins.map((r) => r.isin),
+  ]);
+
 
   // Map raw rows -> parsed rows with error handling (includes Absolute Data when configured)
   const parsedRows: Array<
@@ -151,18 +163,15 @@ export const revalidateBonds = async () => {
     ...zeroValidCoupon,
     ...unrated,
     ...over9999,
-    ...expired,
+    // expired bonds are excluded — users cannot buy them and NSDL includes all historical bonds
   ];
 
 
 
   for (const e of order) {
-    console.log("Updating");
-
     try {
-      // Exclude _index from the data before upserting
-      const { _index, _raw, ...bondData } = e;
-
+      // Exclude internal fields from the data before upserting
+      const { _index, _raw, _abItem, ...bondData } = e as any;
 
       // Check if bond exists and has ignoreAutoUpdate enabled
       const existingBond = await db.dataBase.bonds.findUnique({
@@ -183,15 +192,94 @@ export const revalidateBonds = async () => {
         update: {
           ...bondData,
           sortedAt: index,
-          // Preserve ignoreAutoUpdate if it was set to true
           ignoreAutoUpdate: existingBond?.ignoreAutoUpdate ?? false,
         },
         create: {
           ...bondData,
           sortedAt: index,
-          ignoreAutoUpdate: false, // Default for new bonds
+          ignoreAutoUpdate: false,
         },
       });
+
+      // Reference Tables Sync
+      if (_abItem) {
+        const isinStr = bondData.isin as string;
+        if (!knownIsins.has(isinStr)) {
+          // Skip updating reference tables for bonds not previously managed via CRM.
+        } else {
+          const paymentSchedule = _abItem.coupon?.payment_schedule;
+          const redemptionSchedule = _abItem.redemption_features?.schedule;
+          const hasCoupon = Array.isArray(paymentSchedule) && paymentSchedule.length > 0;
+          const hasRedemption = Array.isArray(redemptionSchedule) && redemptionSchedule.length > 0;
+
+
+
+          if (hasCoupon || hasRedemption) {
+            await db.dataBase.$transaction(async (tx) => {
+              if (hasCoupon) {
+                await tx.bondReferenceCouponPaymentDate.deleteMany({ where: { isin: isinStr } });
+
+
+                await tx.bondReferenceCouponPaymentDate.createMany({
+                  data: paymentSchedule!.map((r: any) => {
+                    const paymentDate = r.payment_date
+                      ? new Date(absoluteDataYmdToIstIso(r.payment_date)!)
+                      : null;
+                    const recordDate =
+                      paymentDate && typeof r.record_days === "number"
+                        ? new Date(paymentDate.getTime() - r.record_days * 24 * 60 * 60 * 1000)
+                        : null;
+                    return {
+                      isin: isinStr,
+                      interestPaymentDates: r.payment_date || "",
+                      recordDays: r.record_days,
+                      recordDate,
+                      recordDateIst: recordDate,
+                      dueDate: paymentDate,
+                      dueDateIst: paymentDate,
+                      raw: r,
+                    };
+                  }),
+                });
+
+              }
+
+              if (hasRedemption) {
+                await tx.bondReferenceRedemptionSchedule.deleteMany({ where: { isin: isinStr } });
+
+
+                await tx.bondReferenceRedemptionSchedule.createMany({
+                  data: redemptionSchedule!.map((r: any) => {
+                    const startDate = r.start_date
+                      ? new Date(absoluteDataYmdToIstIso(r.start_date)!)
+                      : null;
+                    const endDate = r.end_date
+                      ? new Date(absoluteDataYmdToIstIso(r.end_date)!)
+                      : null;
+                    return {
+                      isin: isinStr,
+                      redemptionType: r.type || "UNKNOWN",
+                      startDate,
+                      startDateIst: startDate,
+                      endDate,
+                      endDateIst: endDate,
+                      price: r.price,
+                      amount: r.amount,
+                      optionType: r.option_type,
+                      optionFrequency: r.option_frequency,
+                      raw: r,
+                    };
+                  }),
+                });
+
+              }
+            });
+
+          } else {
+
+          }
+        }
+      }
 
       // Check if this was an update or create by comparing timestamps
       // If createdAt and updatedAt are the same, it was a create operation
@@ -206,12 +294,20 @@ export const revalidateBonds = async () => {
     index++;
   }
 
+  const [couponCount, redemptionCount] = await Promise.all([
+    db.dataBase.bondReferenceCouponPaymentDate.count(),
+    db.dataBase.bondReferenceRedemptionSchedule.count(),
+  ]);
+  console.log(`[RefSync] Final table counts — bond_reference_coupon_payment_dates: ${couponCount}, bond_reference_redemption_schedule: ${redemptionCount}`);
+
   const emailContent = `
     Bond Data Processing Summary
     Total Bonds: ${parsedRows.length}
     Expired Bonds: ${expired.length}
     New Bonds Added: ${created}
     Bonds Updated: ${updated}
+    Reference Coupon Rows (total): ${couponCount}
+    Reference Redemption Rows (total): ${redemptionCount}
     \n
     Date Quality Checks
     Suspected "99→1999" date conversions: ${badDateSuspects.length}
@@ -233,7 +329,7 @@ export const revalidateBonds = async () => {
     const emailer = new EmailCommunication();
     await emailer.sendEmail({
       // to: env.SMTP_SENDER,
-      to: "sandeep.dhingra@meradhan.co,vikas.kukreja@meradhan.co,sourav@meradhan.co,mohammed.ali@meradhan.co,zahoor.ahmed@meradhan.co,dinesh.kumar@meradhan.co",
+      to: "sandeep.dhingra@meradhan.co,vikas.kukreja@meradhan.co,sourav@meradhan.co,mohammed.ali@meradhan.co,zahoor.ahmed@meradhan.co,dinesh.kumar@meradhan.co,sugandhan@meradhan.co",
       subject: "Absolute Data Bond Revalidation Summary " + formatDateTime(new Date()),
       text: emailContent,
     });
