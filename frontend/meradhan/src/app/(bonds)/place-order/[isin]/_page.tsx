@@ -296,6 +296,13 @@ function PlaceOrderPage() {
                 variant: "destructive",
               });
             }
+            // Fast-path: mark the abandoned order as cancelled so My Orders shows
+            // "Not completed" immediately instead of lingering on "Pending".
+            // Fire-and-forget; the hourly reconciliation cron is the reliable backstop
+            // if this call fails or never fires (hard crash / network drop / closed tab).
+            apiClientCaller
+              .post("/customer/order/cancel", { paymentOrderId })
+              .catch((err) => { console.warn("[cancel-on-dismiss]", err?.message); });
           },
         },
         prefill: {

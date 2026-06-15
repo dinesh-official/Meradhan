@@ -207,6 +207,13 @@ export function useRazorpay() {
               title: "Payment Cancelled",
               variant: "destructive",
             });
+            // Fast-path: mark the abandoned order as cancelled so My Orders shows
+            // "Not completed" instead of lingering on "Pending". Fire-and-forget; the
+            // hourly reconciliation cron is the backstop if this never fires
+            // (hard crash / network drop / closed tab).
+            apiClientCaller
+              .post("/customer/order/cancel", { paymentOrderId })
+              .catch((err) => { console.warn("[cancel-on-dismiss]", err?.message); });
           },
         },
         prefill: {
