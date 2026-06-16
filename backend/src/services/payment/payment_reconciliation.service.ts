@@ -395,6 +395,218 @@ export class PaymentReconciliationService {
     return { checked: candidates.length, updated, queuedSettlement, skipped };
   }
 
+  /**
+   * Reconcile *abandoned* Razorpay orders.
+   *
+   * The main pass (`reconcilePendingRazorpayOrders`) only looks at orders that already
+   * carry a `paymentId`. Orders where the customer closed the Razorpay modal / lost the
+   * network before paying never get a `paymentId`, so they stay `PENDING` forever and the
+   * dashboard keeps showing "Pending". This pass closes that gap.
+   *
+   * For each still-pending order older than the grace window we ask Razorpay what actually
+   * happened to the *order* (`GET /v1/orders/{id}/payments`) and then:
+   * - a captured payment exists      -> recover it (webhook was missed): mark
+   *   COMPLETED/APPLIED and queue settlement,
+   * - an authorized payment exists   -> attempt capture, recover if it captures,
+   * - no successful payment          -> mark CANCELLED/REJECTED, which the dashboard
+   *   renders as "Not completed".
+   *
+   * Asking Razorpay first guarantees we never cancel an order the customer really paid for.
+   */
+  async reconcileAbandonedRazorpayOrders(opts?: {
+    lookbackHours?: number;
+    maxOrders?: number;
+    graceMinutes?: number;
+  }) {
+    const lookbackHours = opts?.lookbackHours ?? 72;
+    const maxOrders = opts?.maxOrders ?? 100;
+    const graceMinutes = opts?.graceMinutes ?? 30;
+
+    if (!this.authHeader) {
+      logger.logError("Abandoned-order reconciliation skipped: Razorpay credentials missing");
+      reconS3Logger.error(
+        "Abandoned-order reconciliation skipped: Razorpay credentials missing",
+        s3Meta({ lookbackHours, maxOrders, graceMinutes }),
+      );
+      return { checked: 0, cancelled: 0, recovered: 0, queuedSettlement: 0, skipped: 0 };
+    }
+
+    const now = new Date();
+    const since = hoursAgoUtc(lookbackHours);
+    const olderThan = new Date(now.getTime() - graceMinutes * 60 * 1000);
+    // Skip orders already reconciled in the last cycle (cron runs every 15 min) so we don't
+    // re-hit Razorpay for orders that stay pending (e.g. authorized-but-capture-failing).
+    const recentReconcileCutoff = new Date(now.getTime() - 14 * 60 * 1000);
+
+    reconS3Logger.info(
+      "Abandoned-order reconciliation run started",
+      s3Meta({
+        lookbackHours,
+        maxOrders,
+        graceMinutes,
+        since: since.toISOString(),
+        olderThan: olderThan.toISOString(),
+        recentReconcileCutoff: recentReconcileCutoff.toISOString(),
+      }),
+    );
+
+    const candidates = await db.dataBase.order.findMany({
+      where: {
+        paymentProvider: "RAZORPAY",
+        paymentStatus: PaymentStatus.PENDING,
+        paymentId: null, // orders that DO have a paymentId are handled by the main pass
+        paymentOrderId: { not: null }, // we need the Razorpay order id to query
+        createdAt: { gte: since, lt: olderThan },
+      },
+      orderBy: { createdAt: "asc" },
+      take: maxOrders,
+      select: {
+        id: true,
+        orderNumber: true,
+        customerProfileId: true,
+        paymentOrderId: true,
+        totalAmount: true,
+        createdAt: true,
+      },
+    });
+
+    let cancelled = 0;
+    let recovered = 0;
+    let queuedSettlement = 0;
+    let skipped = 0;
+
+    reconS3Logger.info(
+      "Abandoned-order reconciliation candidates fetched",
+      s3Meta({ candidates: candidates.length }),
+    );
+
+    for (const order of candidates) {
+      const paymentOrderId = order.paymentOrderId ?? "";
+      if (!paymentOrderId) {
+        skipped++;
+        continue;
+      }
+
+      const recentRecon = await db.dataBase.orderLogs.findFirst({
+        where: {
+          orderId: order.id,
+          step: "PAYMENT_ABANDONMENT_RECONCILIATION",
+          createdAt: { gte: recentReconcileCutoff },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+      if (recentRecon) {
+        skipped++;
+        continue;
+      }
+
+      try {
+        const payments = await this.fetchOrderPayments(paymentOrderId);
+        let payment = payments.find((p) => p.status === "captured") ?? null;
+
+        // Authorized-but-not-captured: try to capture, then re-check.
+        if (!payment) {
+          const authorized = payments.find((p) => p.status === "authorized");
+          const paisa = roundPaisaFromRupees(order.totalAmount);
+          if (authorized?.id && paisa) {
+            await this.capturePayment(authorized.id, paisa).catch((e) => {
+              logger.logError(`Razorpay capture failed for ${authorized.id}`, e);
+            });
+            payment =
+              (await this.fetchOrderPayments(paymentOrderId)).find(
+                (p) => p.status === "captured",
+              ) ?? null;
+          }
+        }
+
+        if (payment?.id) {
+          // Customer actually paid but the webhook was missed. Recover through the SAME
+          // canonical path the webhook uses (captureOrderPayment also creates the
+          // CustomerBonds holding and decrements inventory in one transaction; it is
+          // idempotent on an already-COMPLETED order), then queue settlement.
+          const isNetBanking =
+            typeof payment.method === "string" ? payment.method === "netbanking" : false;
+
+          await this.orderService.captureOrderPayment(paymentOrderId, payment.id);
+          await this.orderService.updateOrderMetadata(order.id, payment as Record<string, any>);
+
+          await this.orderService.addOrderLog(
+            order.id,
+            "PAYMENT_ABANDONMENT_RECONCILIATION",
+            "SUCCESS",
+            { paymentId: payment.id, outcome: "RECOVERED" },
+            { razorpayPayment: payment },
+          );
+
+          await orderSettlementQueue.add({
+            type: "orderSettlement",
+            id: order.id,
+            paymentOrderId,
+            paymentId: payment.id,
+            paymentEntity: payment,
+            isNetBanking,
+          });
+
+          recovered++;
+          queuedSettlement++;
+          reconS3Logger.warn(
+            "Abandoned order had a captured payment; recovered and queued settlement",
+            s3Meta({ orderId: order.id, orderNumber: order.orderNumber, paymentOrderId }),
+          );
+          continue;
+        }
+
+        // No successful payment and the order is past the grace window -> truly abandoned.
+        // Guard on paymentStatus PENDING so we never race a webhook that just completed it.
+        const res = await db.dataBase.order.updateMany({
+          where: { id: order.id, paymentStatus: PaymentStatus.PENDING },
+          data: { status: "REJECTED", paymentStatus: PaymentStatus.CANCELLED },
+        });
+
+        if (res.count > 0) {
+          cancelled++;
+          await this.orderService.addOrderLog(
+            order.id,
+            "PAYMENT_ABANDONMENT_RECONCILIATION",
+            "SUCCESS",
+            { outcome: "CANCELLED", paymentsSeen: payments.length },
+          );
+          reconS3Logger.info(
+            "Abandoned order cancelled (no successful payment)",
+            s3Meta({
+              orderId: order.id,
+              orderNumber: order.orderNumber,
+              paymentOrderId,
+              paymentsSeen: payments.length,
+            }),
+          );
+        } else {
+          skipped++;
+        }
+      } catch (error) {
+        skipped++;
+        await this.orderService.addOrderLog(
+          order.id,
+          "PAYMENT_ABANDONMENT_RECONCILIATION",
+          "FAILED",
+          { paymentOrderId },
+          { error: error instanceof Error ? error.message : "Unknown error" },
+        );
+        reconS3Logger.error(
+          "Abandoned-order reconciliation failed for order",
+          s3Meta(
+            { orderId: order.id, orderNumber: order.orderNumber, paymentOrderId },
+            { error: error instanceof Error ? error.message : "Unknown error" },
+          ),
+        );
+      }
+    }
+
+    const result = { checked: candidates.length, cancelled, recovered, queuedSettlement, skipped };
+    reconS3Logger.info("Abandoned-order reconciliation run completed", s3Meta(result));
+    return result;
+  }
+
   private async fetchPayment(paymentId: string): Promise<RazorpayPayment> {
     const { data } = await axios.get<RazorpayPayment>(
       `https://api.razorpay.com/v1/payments/${encodeURIComponent(paymentId)}`,
@@ -419,6 +631,17 @@ export class PaymentReconciliationService {
       },
     );
     return data;
+  }
+
+  private async fetchOrderPayments(orderId: string): Promise<RazorpayPayment[]> {
+    const { data } = await axios.get<{ count?: number; items?: RazorpayPayment[] }>(
+      `https://api.razorpay.com/v1/orders/${encodeURIComponent(orderId)}/payments`,
+      {
+        headers: { Authorization: this.authHeader! },
+        timeout: 60_000,
+      },
+    );
+    return data?.items ?? [];
   }
 
   private async fetchTransfers(paymentId: string): Promise<RazorpayTransfersResponse> {

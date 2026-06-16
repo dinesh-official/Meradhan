@@ -291,12 +291,12 @@ export default function BondIsinView({
 
 
 
-          {bond && canShowBuyNow(bond) && (
+          {bond && session && canShowBuyNow(bond) && (
             (() => {
-              const kycOk = session ? isKycVerified(session.kycStatus) : false;
-              const kraOk = session ? isKraVerified(session.kraStatus) : false;
+              const kycOk = isKycVerified(session.kycStatus);
+              const kraOk = isKraVerified(session.kraStatus);
 
-              if (session && kycOk && kraOk) {
+              if (kycOk && kraOk) {
                 return (
                   <div className="flex justify-center mt-8">
                     <Link href={`/place-order/${bond.isin}`}>
