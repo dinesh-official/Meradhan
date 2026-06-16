@@ -836,6 +836,7 @@ export class CrmOrdersService {
         tradeNumber: settleOrder?.orderNumber,
       },
     });
+
     const rfqDetails = await db.dataBase.rFQMasterISIN.findFirst({
       where: {
         number: negotation?.rfqNumber,
@@ -1205,7 +1206,7 @@ export class CrmOrdersService {
           settlementType: rfqDetails?.settlementType ?? 0,
           dealId: (metadata.dealId as string) ?? undefined,
           clientOrderSide: (metadata.clientOrderSide as "BUY" | "SELL") ?? undefined,
-          rfqNumber: (metadata.rfqNumber as string) ?? undefined,
+          rfqNumber: (metadata.rfqNumber as string) ?? negotation?.tradeNumber ?? undefined,
           orderType: accessTypeText ?? "One To One (OTO) on RFQ Platform of the Exchange",
           interestPaymentDates:
             interestPaymentDatesParamDeal?.length
@@ -1246,7 +1247,7 @@ export class CrmOrdersService {
           settleOrder: settleOrder
             ? {
               id: settleOrder.id,
-              orderNumber: settleOrder.orderNumber,
+              orderNumber: settleOrder.orderNumber ?? negotation?.tradeNumber ?? undefined,
               symbol: settleOrder.symbol,
               buySell: negotation?.buySell,
               buyParticipantLoginId: settleOrder.buyParticipantLoginId,
