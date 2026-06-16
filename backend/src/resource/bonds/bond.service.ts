@@ -158,8 +158,8 @@ export class BondService {
 
     const cleanPrice = sellPrice || bond.sellPrice;
 
-    let lastCouponDateStr = bond.lastCouponDate?.toISOString() ?? null;
-    let nextCouponDateStr = bond.nextCouponDate?.toISOString() ?? null;
+    let lastCouponDateStr = bond.lastCouponDateIst?.toISOString() ?? null;
+    let nextCouponDateStr = bond.nextCouponDateIst?.toISOString() ?? null;
     let recordDays =
       typeof bond.recordDays === "number" && !Number.isNaN(bond.recordDays)
         ? bond.recordDays

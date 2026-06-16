@@ -310,7 +310,9 @@ export const accruedInterest = (params: {
         params.nextCouponDate,
         params.recordDays
     );
-    if (params.nextCouponDate.toISOString().split("T")[0] == params.settlementDate.toISOString().split("T")[0]) {
+    // console.log((params.nextCouponDate).toISOString().split("T")[0], params.settlementDate.toISOString().split("T")[0]);
+
+    if ((params.nextCouponDate).toISOString().split("T")[0] == params.settlementDate.toISOString().split("T")[0]) {
         return {
             accruedInterest: 0,
             noOfAccrualDays: 0,
@@ -377,6 +379,7 @@ export const computeBondOrderPricingData = (
         settlementDate: utcMidnightForISODate(settlement.settlementDate),
         recordDays: params.recordDays,
     });
+
 
     const accrued = accruedInterest({
         faceValue: params.faceValue,
