@@ -808,7 +808,7 @@ export class CrmOrdersService {
 
     const customerRepo = new CustomerProfileRepo();
     const bondService = new BondService();
-    const user = await customerRepo.getFullCustomerProfile(order.customerProfileId);
+    const user = await customerRepo.getFullCustomerProfile(order.customerProfileId!);
     const getUserPrimaryBankAccount = await db.dataBase.customersBankAccountModel.findFirst({
       where: {
         customerProfileDataModelId: order.customerProfileId,
@@ -1044,7 +1044,7 @@ export class CrmOrdersService {
 
     const customerRepo = new CustomerProfileRepo();
     const bondService = new BondService();
-    const user = await customerRepo.getFullCustomerProfile(order.customerProfileId);
+    const user = await customerRepo.getFullCustomerProfile(order.customerProfileId!);
     const bond = await bondService.getBondDetails(order.isin);
     if (!bond) {
       throw new AppError(`Bond not found for ISIN: ${order.isin}`, {
@@ -1400,7 +1400,7 @@ export class CrmOrdersService {
     }
 
     const customerRepo = new CustomerProfileRepo();
-    const user = await customerRepo.getFullCustomerProfile(order.customerProfileId);
+    const user = await customerRepo.getFullCustomerProfile(order.customerProfileId!);
     console.log(pdfQuery);
 
     let buffer: Buffer;
@@ -1830,8 +1830,8 @@ async function main() {
   // EDIT THESE BEFORE RUNNING
   // ────────────────────────────────────────────────────────────────────
   const CUSTOMER_PROFILE_UCC = "MD1HRXWON"; // UCC of the customer to create the order for
-  const ISIN = "INE0NES07279"; // ISIN of the bond to order
-  const ORDER_NUMBER = "260604990005639"; // Order number of the order to create
+  const ISIN = "INE0NES07329"; // ISIN of the bond to order
+  const ORDER_NUMBER = "260616990009300"; // Order number of the order to create
   const DRY_RUN = false; // true to skip actual order creation
   // ────────────────────────────────────────────────────────────────────
 
