@@ -3,7 +3,7 @@ name: Preprod worker deploy
 on:
   push:
     branches:
-      - preprod
+      - dev-fixing
 
 jobs:
   deploy:
