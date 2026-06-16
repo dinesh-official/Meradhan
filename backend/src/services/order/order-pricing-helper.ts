@@ -349,6 +349,21 @@ export const accruedInterest = (params: {
     settlementDate: Date;
     recordDays: number;
 }) => {
+    const shut = isUnderShutPeriod(
+        params.settlementDate,
+        params.nextCouponDate,
+        params.recordDays
+    );
+    // console.log((params.nextCouponDate).toISOString().split("T")[0], params.settlementDate.toISOString().split("T")[0]);
+
+    if ((params.nextCouponDate).toISOString().split("T")[0] == params.settlementDate.toISOString().split("T")[0]) {
+        return {
+            accruedInterest: 0,
+            noOfAccrualDays: 0,
+            isUnderShutPeriod: shut.isUnderShutPeriod,
+            recordDate: shut.recordDate,
+        };
+    }
 
     const quantum = params.faceValue * params.quantity;
     const annual = quantum * (params.couponRate / 100);
@@ -358,11 +373,6 @@ export const accruedInterest = (params: {
         toUTCISODate(params.settlementDate)
     );
 
-    const shut = isUnderShutPeriod(
-        params.settlementDate,
-        params.nextCouponDate,
-        params.recordDays
-    );
 
     const days = shut.isUnderShutPeriod
         ? shut.noOfAccrualDays
@@ -413,6 +423,7 @@ export const computeBondOrderPricingData = (
         settlementDate: utcMidnightForISODate(settlement.settlementDate),
         recordDays: params.recordDays,
     });
+
 
     const accrued = accruedInterest({
         faceValue: params.faceValue,
