@@ -643,7 +643,7 @@ export class PortfolioService {
         isin: true, bondName: true, description: true, faceValue: true,
         creditRating: true, couponRate: true, interestPaymentFrequency: true,
         interestPaymentMode: true, maturityDate: true, sectorName: true,
-        bondType: true, categories: true,
+        bondType: true,
         taxStatus: true, yield: true, lastTradeYield: true, lastTradePrice: true,
         modeOfIssuance: true, couponType: true, dateOfAllotment: true,
         redemptionDate: true, ratingAgencyName: true, natureOfInstrument: true,
@@ -653,13 +653,22 @@ export class PortfolioService {
 
     const bondByIsin = new Map(bonds.map((b) => [b.isin, b]));
 
+    // Bond Category is sourced from the reference metadata table (one row per ISIN).
+    const refMeta = await db.dataBase.bondReferenceMetadata.findMany({
+      where: { isin: { in: this.uniqueIsins(ordersWithAmount) } },
+      select: { isin: true, bondCategory: true },
+    });
+    const refCategoryByIsin = new Map(
+      refMeta.map((r) => [r.isin, (r.bondCategory ?? "").trim()]),
+    );
+
     const filtered = ordersWithAmount.filter((order) => {
       const bond = bondByIsin.get(order.isin);
       if (!bond) return false;
 
       if (bondCategories?.length) {
-        const hasMatch = bond.categories?.some((cat) => bondCategories.includes(cat));
-        if (!hasMatch) return false;
+        const cat = refCategoryByIsin.get(order.isin) ?? "";
+        if (!cat || !bondCategories.includes(cat)) return false;
       }
       if (bondRatings?.length) {
         const rating = (bond.creditRating ?? "").trim();
@@ -689,7 +698,9 @@ export class PortfolioService {
         securityName: order.bondName,
         isin: order.isin,
         bondType: bond?.bondType ?? null,
-        categories: bond?.categories ?? [],
+        categories: refCategoryByIsin.get(order.isin)
+          ? [refCategoryByIsin.get(order.isin)!]
+          : [],
         coupon: bond?.couponRate ?? 0,
         investmentAmount: Number(order.investedAmount.toFixed(2)),
         quantity: order.quantity,
@@ -738,7 +749,13 @@ export class PortfolioService {
 
     const bonds = await db.dataBase.bonds.findMany({
       where: { isin: { in: this.uniqueIsins(ordersWithAmount) } },
-      select: { categories: true, creditRating: true, couponRate: true, interestPaymentMode: true },
+      select: { creditRating: true, couponRate: true, interestPaymentMode: true },
+    });
+
+    // Bond Category options come from the reference metadata table (one row per ISIN).
+    const refMeta = await db.dataBase.bondReferenceMetadata.findMany({
+      where: { isin: { in: this.uniqueIsins(ordersWithAmount) } },
+      select: { bondCategory: true },
     });
 
     const bondCategories = new Set<string>();
@@ -746,11 +763,12 @@ export class PortfolioService {
     const couponRanges = new Set<string>();
     const paymentFrequencies = new Set<string>();
 
-    for (const bond of bonds) {
-      for (const cat of bond.categories ?? []) {
-        if (cat && cat.toLowerCase() !== "n/a") bondCategories.add(cat);
-      }
+    for (const ref of refMeta) {
+      const cat = (ref.bondCategory ?? "").trim();
+      if (cat && cat.toLowerCase() !== "n/a") bondCategories.add(cat);
+    }
 
+    for (const bond of bonds) {
       const rating = (bond.creditRating ?? "").trim();
       if (rating) bondRatings.add(rating);
 
