@@ -148,6 +148,12 @@ router.post(
   crmOrdersController.createOrderFromRfq
 );
 
+router.post(
+  "/api/crm/orders/assign-rfq-participant",
+  allowAccessMiddleware("CRM"),
+  crmOrdersController.assignRfqParticipantToSettleOrder
+);
+
 router.get(
   "/api/crm/orders/customer/:orderNumber",
   allowAccessMiddleware("CRM"),

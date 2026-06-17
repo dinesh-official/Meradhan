@@ -185,8 +185,9 @@ export class BondService {
     const quantity =
       Number.isFinite(rawQuantity) && rawQuantity > 0 ? rawQuantity : 1;
 
-    const pricing = computeBondOrderPricingData(
+    const pricing = await computeBondOrderPricingData(
       {
+        isin,
         faceValue: bond.faceValue,
         quantity,
         cleanPrice: cleanPrice ?? 0,

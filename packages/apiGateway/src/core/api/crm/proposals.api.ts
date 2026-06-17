@@ -31,7 +31,8 @@ export class CrmSavedProposalsApi {
 
   async create(
     payload: {
-      customerProfileId: number;
+      customerProfileId?: number | null;
+      linkedRfqParticipantCode?: string | null;
       isin: string;
       bondName: string;
       side: "BUY" | "SELL";

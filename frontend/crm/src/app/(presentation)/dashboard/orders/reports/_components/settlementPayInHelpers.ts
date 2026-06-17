@@ -43,6 +43,13 @@ export function formatUtrRef(row: OrderReportRegisterRow): string {
 }
 
 export function customerDisplayName(row: OrderReportRegisterRow): string {
+  if (!row.customerProfile) {
+    // Participant-counterparty order — fall back to the NSE participant code
+    // (we don't have the participant's name in this report's payload).
+    return row.linkedRfqParticipantCode
+      ? `NSE participant ${row.linkedRfqParticipantCode}`
+      : "External counterparty";
+  }
   const { firstName, middleName, lastName } = row.customerProfile;
   return [firstName, middleName, lastName].filter(Boolean).join(" ").trim() || row.customerProfile.emailAddress;
 }

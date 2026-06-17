@@ -10,6 +10,7 @@ import type {
   GetRfqByOrderNumberResponse,
   GetCustomerFullOrderResponse,
   CreateOrderFromRfqResponse,
+  AssignRfqParticipantResponse,
   SendOrderPdfEmailResponse,
   GetReceiptPdfOptionsResponse,
   UpsertReceiptPdfOptionsResponse,
@@ -162,6 +163,24 @@ export class CrmOrdersApi {
   ): Promise<CreateOrderFromRfqResponse> {
     const { data } = await this.apiClient.post<CreateOrderFromRfqResponse>(
       "/crm/orders/create-from-rfq",
+      payload,
+      config
+    );
+    return data;
+  }
+
+  /**
+   * Stamp a settle_order with an external NSE RFQ participant code so the
+   * generated PDFs render the participant as the counterparty. The
+   * participant must already have a saved info row in
+   * `nse_rfq_participant_info` (add via /dashboard/rfqs/nse/rfq-participants).
+   */
+  async assignRfqParticipantToSettleOrder(
+    payload: { orderNumber: string; code: string },
+    config?: AxiosRequestConfig
+  ): Promise<AssignRfqParticipantResponse> {
+    const { data } = await this.apiClient.post<AssignRfqParticipantResponse>(
+      "/crm/orders/assign-rfq-participant",
       payload,
       config
     );

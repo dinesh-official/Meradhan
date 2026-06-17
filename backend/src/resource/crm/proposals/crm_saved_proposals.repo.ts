@@ -3,7 +3,8 @@ import { db } from "@core/database/database";
 export const CrmSavedProposalsRepo = {
   create(input: {
     createdById: number;
-    customerProfileId: number;
+    customerProfileId?: number | null;
+    linkedRfqParticipantCode?: string | null;
     isin: string;
     bondName: string;
     side: string;
@@ -14,7 +15,8 @@ export const CrmSavedProposalsRepo = {
     return db.dataBase.crmSavedProposal.create({
       data: {
         createdById: input.createdById,
-        customerProfileId: input.customerProfileId,
+        customerProfileId: input.customerProfileId ?? null,
+        linkedRfqParticipantCode: input.linkedRfqParticipantCode ?? null,
         isin: input.isin,
         bondName: input.bondName,
         side: input.side,

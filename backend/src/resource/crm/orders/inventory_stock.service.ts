@@ -219,8 +219,8 @@ export class CrmInventoryStockService {
       batchId: params.batchId,
       ...(search
         ? {
-            isin: { contains: search, mode: "insensitive" as const },
-          }
+          isin: { contains: search, mode: "insensitive" as const },
+        }
         : {}),
     };
 

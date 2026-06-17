@@ -101,7 +101,7 @@ function CustomerDetail({
 
   /* Filter orders belonging to this customer */
   const custOrders = useMemo(
-    () => orders.filter((o) => o.customerProfile.emailAddress === email),
+    () => orders.filter((o) => o.customerProfile?.emailAddress === email),
     [orders, email],
   );
 

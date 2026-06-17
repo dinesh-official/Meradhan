@@ -214,6 +214,7 @@ export class OrderReportsService {
           unitPrice: true,
           bondDetails: true,
           customerProfileId: true,
+          linkedRfqParticipantCode: true,
           customerProfile: {
             select: {
               id: true,
@@ -476,9 +477,16 @@ export class OrderReportsService {
 
   async getByCustomer(filters: OrderReportFilters, page: number, limit: number) {
     const where = buildOrderWhere(filters);
+    // Participant-counterparty orders have `customerProfileId = null` —
+    // skip them in the "by customer" rollup because there's no Meradhan
+    // customer to bucket them under.
+    const whereCustomerOnly = {
+      ...where,
+      customerProfileId: { not: null as number | null },
+    };
     const grouped = await db.dataBase.order.groupBy({
       by: ["customerProfileId"],
-      where,
+      where: whereCustomerOnly,
       _count: { _all: true },
       _sum: { totalAmount: true, quantity: true },
       _min: { createdAt: true },
@@ -490,11 +498,14 @@ export class OrderReportsService {
 
     const totalGroups = await db.dataBase.order.groupBy({
       by: ["customerProfileId"],
-      where,
+      where: whereCustomerOnly,
       _count: { _all: true },
     });
 
-    const ids = grouped.map((g) => g.customerProfileId);
+    // After the not-null filter every group has a non-null id; assert it.
+    const ids = grouped
+      .map((g) => g.customerProfileId)
+      .filter((id): id is number => id != null);
     const { startUtc, endUtc } = istDateRangeToUtcBounds(filters.from, filters.to);
 
     const [profiles, favRows] = await Promise.all([
@@ -570,10 +581,13 @@ export class OrderReportsService {
     );
 
     const data = grouped.map((g) => {
-      const p = profileById.get(g.customerProfileId);
-      const fav = favById.get(g.customerProfileId);
+      // `whereCustomerOnly` filters out null `customerProfileId`s above,
+      // so this assertion is safe at runtime.
+      const customerProfileId = g.customerProfileId as number;
+      const p = profileById.get(customerProfileId);
+      const fav = favById.get(customerProfileId);
       return {
-        customerProfileId: g.customerProfileId,
+        customerProfileId,
         customer: p
           ? {
               id: p.id,

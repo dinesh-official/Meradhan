@@ -511,6 +511,52 @@ export class CrmOrdersController {
     });
   };
 
+  /**
+   * Stamp a settle_order with `linkedRfqParticipantCode` for an external
+   * NSE participant counterparty. Used by the generate-PDF page when the
+   * operator picks "Assign as NSE participant" instead of selecting a
+   * Meradhan customer.
+   */
+  assignRfqParticipantToSettleOrder = async (req: Request, res: Response) => {
+    const orderNumber =
+      typeof req.body?.orderNumber === "string"
+        ? req.body.orderNumber.trim()
+        : "";
+    const code =
+      typeof req.body?.code === "string" ? req.body.code.trim() : "";
+
+    if (!orderNumber || !code) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "orderNumber and code are required.",
+      });
+    }
+
+    try {
+      const result = await this.ordersService.assignRfqParticipantToSettleOrder({
+        orderNumber,
+        code,
+      });
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        responseData: result,
+      });
+    } catch (err) {
+      if (err instanceof AppError) {
+        return res.sendResponse({
+          statusCode: err.statusCode,
+          message: err.message,
+        });
+      }
+      const message =
+        err instanceof Error ? err.message : "Failed to assign participant";
+      return res.sendResponse({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message,
+      });
+    }
+  };
+
   createOrderFromRfq = async (req: Request, res: Response) => {
     const orderNumber = req.body.orderNumber;
     const customerId = req.body.customerId != null ? Number(req.body.customerId) : undefined;
