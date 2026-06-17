@@ -14,11 +14,16 @@ import {
   Mail,
   Pencil,
   RefreshCw,
+  Search,
   UserRound,
   Zap,
 } from "lucide-react";
 import type { AxiosError } from "axios";
-import apiGateway, { type BondDetailsResponse, type CustomerProfile } from "@root/apiGateway";
+import apiGateway, {
+  type BondDetailsResponse,
+  type CustomerProfile,
+  type ParticipantData,
+} from "@root/apiGateway";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -65,6 +70,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { SelectCustomerUser } from "@/global/elements/autocomplete/SelectCustomerUser";
+import { SelectNseParticipant } from "@/global/elements/autocomplete/SelectNseParticipant";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { useProposalFetcher, type ProposalFetchResult } from "./useProposalFetcher";
 import { useRouter } from "nextjs-toploader/app";
@@ -261,9 +268,16 @@ type ProposalDraft = {
   manualYieldEnabled: boolean;
   manualYield: string;
   customer: CustomerProfile;
+  /** NSE CBRICS participant selected when creating the proposal. */
+  participant?: ParticipantData | null;
   fetched: ProposalFetchResult;
   createdAt: string;
 };
+
+function participantPrimaryEmail(participant: ParticipantData | null | undefined) {
+  const email = participant?.emailList?.find((e) => e?.trim());
+  return email?.trim() || "";
+}
 
 function bondLabel(bond: Pick<BondDetailsResponse, "isin" | "bondName" | "instrumentName">) {
   return `${bond.isin} - ${bond.bondName || bond.instrumentName || "Unnamed Bond"}`;
@@ -288,6 +302,7 @@ function ProposalManagementView() {
   const bondsApi = new apiGateway.bondsApi.BondsApi(apiClientCaller);
   const ordersApi = new apiGateway.crm.crmOrdersApi(apiClientCaller);
   const savedProposalsApi = new apiGateway.crm.crmSavedProposalsApi(apiClientCaller);
+  const customerApi = new apiGateway.crm.customer.CrmCustomerApi(apiClientCaller);
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isin, setIsin] = useState("");
@@ -299,6 +314,12 @@ function ProposalManagementView() {
   const [manualYieldEnabled, setManualYieldEnabled] = useState(false);
   const [manualYield, setManualYield] = useState("");
   const [notes, setNotes] = useState("");
+  const [recipientMode, setRecipientMode] = useState<"NSE_PARTICIPANT" | "CUSTOMER">(
+    "NSE_PARTICIPANT",
+  );
+  const [selectedParticipant, setSelectedParticipant] = useState<ParticipantData | null>(null);
+  const [participantDialogOpen, setParticipantDialogOpen] = useState(false);
+  const [isResolvingParticipantCustomer, setIsResolvingParticipantCustomer] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerProfile | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [proposalDraft, setProposalDraft] = useState<ProposalDraft | null>(null);
@@ -531,6 +552,53 @@ function ProposalManagementView() {
     });
   };
 
+  const resolveParticipantCustomer = async (participant: ParticipantData) => {
+    try {
+      const response = await customerApi.getCustomerByParticipantCode(participant.loginId);
+      const customer = response.data.responseData;
+      if (!customer?.id) {
+        toast.error(`No linked customer found for participant ${participant.loginId}`);
+        return null;
+      }
+      return customer;
+    } catch (error) {
+      toast.error(
+        getApiErrorMessage(
+          error,
+          `No linked customer found for participant ${participant.loginId}`,
+        ),
+      );
+      return null;
+    }
+  };
+
+  const handleParticipantSelect = async (participant: ParticipantData | null) => {
+    setSelectedParticipant(participant);
+    if (!participant) {
+      setSelectedCustomer(null);
+      return;
+    }
+
+    setIsResolvingParticipantCustomer(true);
+    try {
+      const customer = await resolveParticipantCustomer(participant);
+      if (customer) {
+        setSelectedCustomer(customer);
+        toast.success(`Linked customer: ${customerFullName(customer)}`);
+      } else {
+        setSelectedCustomer(null);
+      }
+    } finally {
+      setIsResolvingParticipantCustomer(false);
+    }
+  };
+
+  const handleRecipientModeChange = (mode: "NSE_PARTICIPANT" | "CUSTOMER") => {
+    setRecipientMode(mode);
+    setSelectedCustomer(null);
+    setSelectedParticipant(null);
+  };
+
   const handleReset = () => {
     setIsin("");
     setIsinSearch("");
@@ -540,6 +608,8 @@ function ProposalManagementView() {
     setManualYield("");
     setQuantity("1");
     setNotes("");
+    setRecipientMode("NSE_PARTICIPANT");
+    setSelectedParticipant(null);
     setSelectedCustomer(null);
     setProposalDraft(null);
     setEditSourceId(null);
@@ -553,7 +623,15 @@ function ProposalManagementView() {
       return;
     }
     if (!selectedCustomer) {
-      toast.error("Please select a customer");
+      toast.error(
+        recipientMode === "NSE_PARTICIPANT"
+          ? "Please select an NSE participant with a linked customer"
+          : "Please select a customer",
+      );
+      return;
+    }
+    if (recipientMode === "NSE_PARTICIPANT" && !selectedParticipant) {
+      toast.error("Please select an NSE participant");
       return;
     }
     if (!Number.isFinite(quantityValue) || quantityValue <= 0 || !Number.isInteger(quantityValue)) {
@@ -589,6 +667,7 @@ function ProposalManagementView() {
         manualYieldEnabled,
         manualYield,
         customer: selectedCustomer,
+        participant: selectedParticipant,
         fetched,
         createdAt: new Date().toISOString(),
       });
@@ -612,6 +691,7 @@ function ProposalManagementView() {
       ...proposalDraft,
       notes: notes.trim(),
       customer: selectedCustomer ?? proposalDraft.customer,
+      participant: selectedParticipant ?? proposalDraft.participant ?? null,
       manualYieldEnabled,
       manualYield,
     };
@@ -630,6 +710,8 @@ function ProposalManagementView() {
     setManualYield(item.manualYield ?? "");
     setNotes(item.notes);
     setSelectedCustomer(item.customer);
+    setSelectedParticipant(item.participant ?? null);
+    setRecipientMode(item.participant ? "NSE_PARTICIPANT" : "CUSTOMER");
     setEditSourceId(null);
     setIsSheetOpen(true);
   };
@@ -652,6 +734,8 @@ function ProposalManagementView() {
     setManualYield(item.manualYield ?? "");
     setNotes(item.notes);
     setSelectedCustomer(item.customer);
+    setSelectedParticipant(item.participant ?? null);
+    setRecipientMode(item.participant ? "NSE_PARTICIPANT" : "CUSTOMER");
     setEditSourceId(item.id);
     setIsSheetOpen(true);
     toast.success(`Editing proposal (will save as new version)`);
@@ -792,7 +876,10 @@ function ProposalManagementView() {
     const quantum = faceValue != null ? faceValue * draft.quantity : undefined;
 
     const payload: SendProposalEmailPayload = {
-      toEmail: draft.customer.emailAddress,
+      toEmail:
+        draft.customer.emailAddress?.trim() ||
+        participantPrimaryEmail(draft.participant) ||
+        "",
       customerName: customerFullName(draft.customer),
       side: draft.side,
       bondName: currentBond?.bondName || currentBond?.instrumentName || "Bond",
@@ -1092,14 +1179,101 @@ function ProposalManagementView() {
               </div>
             </div>
 
-            {/* Customer */}
+            {/* Customer / NSE participant */}
             <div className="px-6 py-5">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Customer</p>
-              <SelectCustomerUser
-                value={selectedCustomer ?? undefined}
-                onSelect={setSelectedCustomer}
-                placeholder="Search and select customer..."
-              />
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  Recipient
+                </p>
+                <Tabs
+                  value={recipientMode}
+                  onValueChange={(value) =>
+                    handleRecipientModeChange(value as "NSE_PARTICIPANT" | "CUSTOMER")
+                  }
+                >
+                  <TabsList className="h-8">
+                    <TabsTrigger value="NSE_PARTICIPANT" className="text-xs">
+                      NSE Participant
+                    </TabsTrigger>
+                    <TabsTrigger value="CUSTOMER" className="text-xs">
+                      Customer
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
+
+              {recipientMode === "NSE_PARTICIPANT" ? (
+                <div className="space-y-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full justify-between font-normal shadow-none"
+                    onClick={() => setParticipantDialogOpen(true)}
+                    disabled={isResolvingParticipantCustomer}
+                  >
+                    <span className="flex min-w-0 items-center gap-2 truncate text-left">
+                      {isResolvingParticipantCustomer ? (
+                        <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+                      ) : (
+                        <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      )}
+                      {selectedParticipant ? (
+                        <span className="truncate">
+                          {selectedParticipant.firstName} ({selectedParticipant.loginId})
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">
+                          Search and select NSE participant...
+                        </span>
+                      )}
+                    </span>
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                  <SelectNseParticipant
+                    open={participantDialogOpen}
+                    setOpen={setParticipantDialogOpen}
+                    placeholder="Search by participant name or login id..."
+                    onSelect={(participant) => {
+                      void handleParticipantSelect(participant);
+                    }}
+                  />
+                  {selectedParticipant ? (
+                    <div className="rounded-lg border border-border bg-slate-50 p-3 text-sm">
+                      <p className="font-medium text-slate-800">
+                        {selectedParticipant.firstName}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Login ID: {selectedParticipant.loginId}
+                      </p>
+                      {participantPrimaryEmail(selectedParticipant) ? (
+                        <p className="text-xs text-muted-foreground">
+                          Email: {participantPrimaryEmail(selectedParticipant)}
+                        </p>
+                      ) : null}
+                      {selectedCustomer ? (
+                        <p className="mt-2 text-xs text-emerald-700">
+                          Linked customer: {customerFullName(selectedCustomer)}
+                        </p>
+                      ) : (
+                        <p className="mt-2 text-xs text-amber-700">
+                          No linked customer — participant login id must match a customer username.
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      Proposals for RFQ automation require an NSE participant with a linked customer
+                      profile (UCC).
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <SelectCustomerUser
+                  value={selectedCustomer ?? undefined}
+                  onSelect={setSelectedCustomer}
+                  placeholder="Search and select customer..."
+                />
+              )}
             </div>
 
             {/* Manual yield */}
@@ -1184,7 +1358,16 @@ function ProposalManagementView() {
                   </div>
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-slate-800">{customerFullName(proposalDraft.customer)}</p>
-                    <p className="truncate text-xs text-muted-foreground">{proposalDraft.customer.emailAddress || "—"}</p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {proposalDraft.customer.emailAddress ||
+                        participantPrimaryEmail(proposalDraft.participant) ||
+                        "—"}
+                    </p>
+                    {proposalDraft.participant ? (
+                      <p className="truncate text-xs text-slate-500">
+                        NSE: {proposalDraft.participant.loginId}
+                      </p>
+                    ) : null}
                   </div>
                 </div>
               </div>

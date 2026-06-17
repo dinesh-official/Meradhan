@@ -504,6 +504,7 @@ export class CrmOrdersService {
     interestPaymentDates: string[] | null;
   }> {
     const order = await this.getCustomerByOrderNumber(orderNumber);
+
     if (!order) {
       throw new AppError("No order found for this settlement. Assign a customer first.", {
         statusCode: HttpStatus.NOT_FOUND,
