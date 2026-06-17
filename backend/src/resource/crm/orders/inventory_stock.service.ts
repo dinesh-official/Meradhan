@@ -4,6 +4,17 @@ import logger from "@utils/logger/logger";
 import * as xlsx from "xlsx";
 import moment from "moment-timezone";
 import { invalidateLatestInventoryBatchCache } from "@resource/bonds/bond.service";
+import { parseDematHoldingPdf } from "./demat_pdf_parser";
+import { reconcileInventory } from "./inventory_reconciliation";
+
+/**
+ * Order states whose units are sold (paid) but have NOT yet left the firm's
+ * Demat account — i.e. still counted in the Demat statement. A bond only leaves
+ * the Demat at settlement payout (NSE settleStatus 4 -> Order.status SETTLED).
+ * REJECTED / EXPIRED / CANCELLED are terminal failures (unit never left / was
+ * returned); refunds flip paymentStatus away from COMPLETED. See design doc.
+ */
+const IN_FLIGHT_ORDER_STATUSES = ["APPLIED", "PENDING", "IN_PROGRESS"] as const;
 
 const TZ = "Asia/Kolkata";
 const LINE_CHUNK = 500;
@@ -219,8 +230,8 @@ export class CrmInventoryStockService {
       batchId: params.batchId,
       ...(search
         ? {
-            isin: { contains: search, mode: "insensitive" as const },
-          }
+          isin: { contains: search, mode: "insensitive" as const },
+        }
         : {}),
     };
 
@@ -308,6 +319,135 @@ export class CrmInventoryStockService {
       where: { id: batchId },
     });
     return { deletedId: batchId };
+  }
+
+  /**
+   * Sum of "in-flight" (paid but not-yet-settled) customer order quantities per
+   * ISIN. Single grouped query; the only seam that knows about settlement, so it
+   * can later be swapped for a live CBRICS Settlement API call without touching
+   * the parser or reconciliation. `Order.status` is kept current by the NSE
+   * webhook, so this reads fresh state locally with no external call.
+   */
+  async getInFlightQuantitiesByIsin(isins: string[]): Promise<Map<string, number>> {
+    const unique = [...new Set(isins.map((s) => s.trim().toUpperCase()).filter(Boolean))];
+    if (unique.length === 0) return new Map();
+
+    const grouped = await db.dataBase.order.groupBy({
+      by: ["isin"],
+      where: {
+        paymentStatus: "COMPLETED",
+        status: { in: [...IN_FLIGHT_ORDER_STATUSES] },
+        isin: { in: unique },
+      },
+      _sum: { quantity: true },
+    });
+
+    return new Map(grouped.map((g) => [g.isin, g._sum.quantity ?? 0]));
+  }
+
+  /** ISINs present in the most recent inventory batch (for disappeared-ISIN detection). */
+  private async getLatestBatchIsins(): Promise<string[]> {
+    const batch = await db.dataBase.crmInventoryStockBatch.findFirst({
+      orderBy: { uploadedAt: "desc" },
+      select: { id: true },
+    });
+    if (!batch) return [];
+    const lines = await db.dataBase.crmInventoryStockLine.findMany({
+      where: { batchId: batch.id },
+      select: { isin: true },
+    });
+    return lines.map((l) => l.isin);
+  }
+
+  /**
+   * Parse a Demat holding-statement PDF and compute the corrected available
+   * quantity per ISIN (PDF balance − in-flight). Read-only: no DB writes.
+   */
+  async previewDematPdf(params: { buffer: Buffer }) {
+    const { rows, parseWarnings } = await parseDematHoldingPdf(params.buffer);
+    if (rows.length === 0) {
+      throw new Error(parseWarnings[0] ?? "No holdings found in the PDF");
+    }
+
+    const inFlightByIsin = await this.getInFlightQuantitiesByIsin(rows.map((r) => r.isin));
+    const priorIsins = await this.getLatestBatchIsins();
+    const { lines, anomalies, disappearedIsins } = reconcileInventory({
+      pdfRows: rows,
+      inFlightByIsin,
+      priorIsins,
+    });
+
+    return {
+      lines,
+      anomalies,
+      disappearedIsins,
+      parseWarnings,
+      summary: {
+        pdfRowCount: rows.length,
+        adjustedCount: lines.filter((l) => l.inFlight > 0).length,
+        anomalyCount: anomalies.length,
+        disappearedCount: disappearedIsins.length,
+      },
+    };
+  }
+
+  /**
+   * Commit a Demat PDF: re-parse and re-derive server-side (authoritative, with
+   * the freshest in-flight figures), then write a new inventory batch whose line
+   * quantities are the corrected values. The new batch becomes the latest, which
+   * is what bond listings and the payment-capture decrement read.
+   */
+  async commitDematPdf(params: {
+    buffer: Buffer;
+    originalFileName: string;
+    uploadedByUserId?: number;
+    uploadedByEmail?: string;
+  }) {
+    const { rows, parseWarnings } = await parseDematHoldingPdf(params.buffer);
+    if (rows.length === 0) {
+      throw new Error(parseWarnings[0] ?? "No holdings found in the PDF");
+    }
+
+    const inFlightByIsin = await this.getInFlightQuantitiesByIsin(rows.map((r) => r.isin));
+    const { lines, anomalies } = reconcileInventory({ pdfRows: rows, inFlightByIsin });
+
+    const dayKey = moment().tz(TZ).format("YYYY-MM-DD");
+
+    const batch = await db.dataBase.$transaction(async (tx) => {
+      const b = await tx.crmInventoryStockBatch.create({
+        data: {
+          dayKey,
+          sourceFileName: params.originalFileName || null,
+          lineCount: lines.length,
+          uploadedByUserId: params.uploadedByUserId ?? null,
+          uploadedByEmail: params.uploadedByEmail ?? null,
+        },
+      });
+
+      for (let i = 0; i < lines.length; i += LINE_CHUNK) {
+        const slice = lines.slice(i, i + LINE_CHUNK);
+        await tx.crmInventoryStockLine.createMany({
+          data: slice.map((l) => ({
+            batchId: b.id,
+            isin: l.isin,
+            quantity: l.correctedQty,
+          })),
+        });
+      }
+
+      return b;
+    });
+
+    invalidateLatestInventoryBatchCache();
+
+    return {
+      batchId: batch.id,
+      dayKey: batch.dayKey,
+      uploadedAt: batch.uploadedAt,
+      lineCount: lines.length,
+      anomalies,
+      parseWarnings,
+    };
   }
 
   /**

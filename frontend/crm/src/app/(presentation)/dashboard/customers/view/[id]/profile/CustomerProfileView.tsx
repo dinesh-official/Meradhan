@@ -43,6 +43,17 @@ function CustomerProfileView({ profileId }: { profileId: number }) {
     refetchOnWindowFocus: false,
   });
 
+  /**
+   * Manual OTP verification from CRM is only meaningful for non-individual
+   * (corporate / LLP / trust / HUF / partnership) accounts where the
+   * primary contact may be signed up by an operator on behalf of the
+   * entity. Individuals are expected to verify their own contact channels
+   * during onboarding, so we hide the verify shortcut for them.
+   */
+  const userType = customer?.userType;
+  const isNonIndividual =
+    !!userType && userType !== "INDIVIDUAL" && userType !== "INDIVIDUAL_NRI_NRO";
+
   if (isLoading) {
     return (
       <div className="w-full h-96 flex justify-center items-center">
@@ -124,16 +135,18 @@ function CustomerProfileView({ profileId }: { profileId: number }) {
                         : "pending"
                     }
                   />
-                  {customer && !customer.utility.isEmailVerified && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-6 px-2 py-0 text-xs"
-                      onClick={() => setVerifyChannel("email")}
-                    >
-                      <ShieldCheck className="size-3" /> Verify
-                    </Button>
-                  )}
+                  {customer &&
+                    isNonIndividual &&
+                    !customer.utility.isEmailVerified && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-6 px-2 py-0 text-xs"
+                        onClick={() => setVerifyChannel("email")}
+                      >
+                        <ShieldCheck className="size-3" /> Verify
+                      </Button>
+                    )}
                 </div>
               </div>
             </LabelView>
@@ -148,16 +161,18 @@ function CustomerProfileView({ profileId }: { profileId: number }) {
                         : "pending"
                     }
                   />
-                  {customer && !customer.utility.isPhoneVerified && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-6 px-2 py-0 text-xs"
-                      onClick={() => setVerifyChannel("mobile")}
-                    >
-                      <ShieldCheck className="size-3" /> Verify
-                    </Button>
-                  )}
+                  {customer &&
+                    isNonIndividual &&
+                    !customer.utility.isPhoneVerified && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-6 px-2 py-0 text-xs"
+                        onClick={() => setVerifyChannel("mobile")}
+                      >
+                        <ShieldCheck className="size-3" /> Verify
+                      </Button>
+                    )}
                 </div>
               </div>
             </LabelView>
@@ -175,7 +190,7 @@ function CustomerProfileView({ profileId }: { profileId: number }) {
         </CardContent>
       </Card>
 
-      {customer && verifyChannel !== null && (
+      {customer && isNonIndividual && verifyChannel !== null && (
         <VerifyCustomerOtpDialog
           // Re-mount the dialog whenever the channel switches so the
           // previous channel's OTP token, cooldown timer and entered

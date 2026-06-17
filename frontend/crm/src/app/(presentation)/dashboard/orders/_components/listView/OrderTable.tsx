@@ -52,16 +52,37 @@ function OrderTable({ data, pageSize = 10, isLoading }: OrderTableProps) {
         {
           key: "customerProfile",
           label: "Customer",
-          cell: (row) => (
-            <div className="flex flex-col">
-              <span className="font-medium">
-                {row.customerProfile.firstName} {row.customerProfile.lastName}
-              </span>
-              <span className="text-muted-foreground text-xs">
-                {row.customerProfile.emailAddress}
-              </span>
-            </div>
-          ),
+          cell: (row) => {
+            // Participant-counterparty orders carry an external NSE RFQ
+            // participant instead of a Meradhan customer profile.
+            if (!row.customerProfile) {
+              const info = row.rfqParticipantInfo;
+              const code = row.linkedRfqParticipantCode ?? "—";
+              const name = info?.nameOverride?.trim() || code;
+              const secondary =
+                info?.contactPerson?.trim() ||
+                info?.emailList?.[0] ||
+                code;
+              return (
+                <div className="flex flex-col">
+                  <span className="font-medium">{name}</span>
+                  <span className="text-muted-foreground text-xs">
+                    NSE participant · {secondary}
+                  </span>
+                </div>
+              );
+            }
+            return (
+              <div className="flex flex-col">
+                <span className="font-medium">
+                  {row.customerProfile.firstName} {row.customerProfile.lastName}
+                </span>
+                <span className="text-muted-foreground text-xs">
+                  {row.customerProfile.emailAddress}
+                </span>
+              </div>
+            );
+          },
         },
         {
           key: "bondDetails",

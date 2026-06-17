@@ -9,7 +9,7 @@ function page() {
       <Workspace>
         <PageInfoBar
           title="Proposal Management"
-          description="Create a proposal from ISIN, customer, and quantity."
+          description="Create a proposal from ISIN, RFQ participant (with saved info), or customer, and quantity."
         />
         <ProposalManagementView />
       </Workspace>

@@ -3,8 +3,18 @@ model Order {
 
     orderNumber String @unique // For user reference (e.g., ORD-123456)
 
+    /// Owning Meradhan customer for this order. Null for orders whose
+    /// counterparty is an external NSE RFQ participant rather than one of
+    /// our customers (`linkedRfqParticipantCode` is set in that case).
     customerProfileId Int?
     customerProfile   CustomerProfileDataModel? @relation(fields: [customerProfileId], references: [id], onDelete: Cascade)
+
+    /// When the counterparty is an external NSE RFQ participant, this is the
+    /// `nse_rfq_participant_info.code`. Mutually exclusive with
+    /// `customerProfileId` at the business level — exactly one of the two is
+    /// expected to be set for any Order created through the CRM
+    /// assign-counterparty flow.
+    linkedRfqParticipantCode String? @db.VarChar(64)
 
     // Payment Details (Generic)
     paymentProvider String? // e.g., "RAZORPAY"
@@ -50,6 +60,7 @@ model Order {
     @@index([paymentId])
     @@index([orderNumber])
     @@index([scheduledExecutionAt])
+    @@index([linkedRfqParticipantCode])
     @@map("orders")
 }
 

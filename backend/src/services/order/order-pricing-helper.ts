@@ -4,6 +4,7 @@
 ========================= */
 
 import { db } from "@core/database/database";
+import { getBondInfoCalcData } from "@resource/bonds/fill-bonds-auto";
 
 type BondSettlementResult = {
     dealDate: string;
@@ -23,6 +24,7 @@ type BondSettlementOptions = {
 };
 
 type BondOrderPricingData = {
+    isin: string;
     faceValue: number;
     quantity: number;
     cleanPrice: number;
@@ -360,7 +362,7 @@ export const accruedInterest = (params: {
         return {
             accruedInterest: 0,
             noOfAccrualDays: 0,
-            isUnderShutPeriod: shut.isUnderShutPeriod,
+            isUnderShutPeriod: true,
             recordDate: shut.recordDate,
         };
     }
@@ -395,7 +397,7 @@ export const accruedInterest = (params: {
    IST 30-dec2026
 ========================= */
 
-export const computeBondOrderPricingData = (
+export const computeBondOrderPricingData = async (
     params: BondOrderPricingData,
     options?: {
         executionDateTime?: Date;
@@ -409,21 +411,12 @@ export const computeBondOrderPricingData = (
         settlement.settlementOrder = "T+0";
     }
 
+
     const principal = principalAmount(
         params.faceValue,
         params.quantity,
         params.cleanPrice
     );
-    console.log({
-        faceValue: params.faceValue,
-        quantity: params.quantity,
-        couponRate: params.couponRate,
-        lastCouponDate: utcMidnightForISODate(params.lastCouponDate),
-        nextCouponDate: utcMidnightForISODate(params.nextCouponDate),
-        settlementDate: utcMidnightForISODate(settlement.settlementDate),
-        recordDays: params.recordDays,
-    });
-
 
     const accrued = accruedInterest({
         faceValue: params.faceValue,
@@ -436,19 +429,33 @@ export const computeBondOrderPricingData = (
     });
 
     const stampDuty = calculateStampDuty(principal);
+    const bondInfo = await db.dataBase.bonds.findUnique({ where: { isin: params.isin } });
 
-    const total = principal + accrued.accruedInterest + stampDuty;
+
+    const bondData = await getBondInfoCalcData(params.isin, {
+        yeild: bondInfo?.yield?.toString(),
+        settlementDate: settlement.settlementDate,
+        quantity: params.quantity,
+        stampDuty: stampDuty,
+    });
+
+
+    // const total = principal + accrued.accruedInterest + stampDuty;
+
+    console.log(params, settlement);
 
     return {
         ...params,
         ...settlement,
-        principalAmount: principal,
-        accruedInterest: accrued.accruedInterest,
-        stampDuty,
-        settlementAmount: total,
-        noOfAccrualDays: accrued.noOfAccrualDays,
-        isUnderShutPeriod: accrued.isUnderShutPeriod,
+        cleanPrice: Number(bondData.calc.final_price),
+        principalAmount: Number(bondData.calc.principal_amount.replace(/,/g, "")),
+        accruedInterest: Number(bondData.calc.total_ai.replace(/,/g, "")),
+        stampDuty: Number(bondData.calc.stamp_duty.replace(/,/g, "")),
+        settlementAmount: Number(bondData.calc.settlement_amount.replace(/,/g, "")),
+        noOfAccrualDays: Number(bondData.calc.accrued_days),
+        isUnderShutPeriod: bondData.calc.period_status === "Shut Period",
         recordDate: accrued.recordDate,
+        recordDays: accrued.noOfAccrualDays,
     };
 };
 
@@ -727,6 +734,28 @@ export const getNextCouponDate = async (isin: string, settlement: Date) => {
 
     const nextCouponDate = rows[0]?.dueDate ?? null;
     return nextCouponDate ? toUTCISODate(nextCouponDate) : null;
+};
+
+export const getBondNextCouponDate = async (isin: string) => {
+    const settlementDt = new Date(isin);
+    if (Number.isNaN(settlementDt.getTime())) return null;
+
+    const rows = await db.dataBase.bonds.findFirst({
+        where: { isin },
+    });
+
+    const nextCouponDate = rows?.nextCouponDateIst ?? null;
+    return nextCouponDate ? toUTCISODate(nextCouponDate) : null;
+};
+
+
+export const getBondLastCouponDate = async (isin: string) => {
+    const rows = await db.dataBase.bonds.findFirst({
+        where: { isin },
+    });
+
+    const lastCouponDate = rows?.lastCouponDateIst ?? null;
+    return lastCouponDate ? toUTCISODate(lastCouponDate) : null;
 };
 
 export const getLastCouponDateFromReferenceData = async (isin: string, settlement: Date) => {

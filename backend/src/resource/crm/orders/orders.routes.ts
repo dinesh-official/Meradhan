@@ -88,6 +88,42 @@ router.post(
   inventoryStockController.upload
 );
 
+const dematPdfUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 20 * 1024 * 1024 },
+  fileFilter(_req, file, cb) {
+    const name = (file.originalname || "").toLowerCase();
+    const ok = name.endsWith(".pdf") || file.mimetype === "application/pdf";
+    if (ok) cb(null, true);
+    else cb(new Error("Only .pdf files are allowed"));
+  },
+});
+
+const handleDematPdfUpload = (req: import("express").Request, res: import("express").Response, next: import("express").NextFunction) => {
+  dematPdfUpload.single("file")(req, res, (err: unknown) => {
+    if (err) {
+      const message = err instanceof Error ? err.message : "Upload rejected";
+      return res.status(400).json({ status: false, code: "BAD_REQUEST", message });
+    }
+    next();
+  });
+};
+
+/** Demat statement PDF → inventory reconciliation (preview then commit). */
+router.post(
+  "/api/crm/orders/inventory-stock/demat-pdf/preview",
+  allowAccessMiddleware("CRM"),
+  handleDematPdfUpload,
+  inventoryStockController.previewDematPdf
+);
+
+router.post(
+  "/api/crm/orders/inventory-stock/demat-pdf/commit",
+  allowAccessMiddleware("CRM"),
+  handleDematPdfUpload,
+  inventoryStockController.commitDematPdf
+);
+
 router.get(
   "/api/crm/orders/inventory-stock/days",
   allowAccessMiddleware("CRM"),
@@ -146,6 +182,12 @@ router.post(
   "/api/crm/orders/create-from-rfq",
   allowAccessMiddleware("CRM"),
   crmOrdersController.createOrderFromRfq
+);
+
+router.post(
+  "/api/crm/orders/assign-rfq-participant",
+  allowAccessMiddleware("CRM"),
+  crmOrdersController.assignRfqParticipantToSettleOrder
 );
 
 router.get(

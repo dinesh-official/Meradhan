@@ -531,14 +531,15 @@ export class CrmOrdersService {
     const couponDates = await getLastNextCouponDateBasedOnSettlementDate(bond.isin, bond.maturityDate!)
     console.log(couponDates);
 
-    const pricingData = computeBondOrderPricingData({
+    const pricingData = await computeBondOrderPricingData({
+      isin: bond.isin,
       faceValue: bond.faceValue,
       quantity: order.quantity,
-      cleanPrice: Number(order.unitPrice),
-      couponRate: bond.couponRate,
-      lastCouponDate: (couponDates?.lastCouponDate || "").toString(),
-      recordDays: recordDays,
-      nextCouponDate: couponDates?.nextCouponDate || "",
+      cleanPrice: Number(order.unitPrice) || 0,
+      couponRate: bond.couponRate || 0,
+      lastCouponDate: (couponDates?.lastCouponDate || "").toString() || "",
+      recordDays: recordDays || 0,
+      nextCouponDate: couponDates?.nextCouponDate || "" || "",
     })
 
     const bondData = await getBondInfoCalcData(order.isin);
@@ -742,7 +743,9 @@ export class CrmOrdersService {
         paymentId: rfq.orderNumber,
         paymentOrderId: rfq.orderNumber,
         reqOrderNumber: rfq.orderNumber,
-        metadata: { rfqNumber: rfq.orderNumber } as Prisma.InputJsonValue,
+        metadata: {
+          rfqNumber: rfq.orderNumber
+        } as Prisma.InputJsonValue,
         paymentStatus: PaymentStatus.PENDING,
         paymentProvider: "CUSTOM",
         status: OrderStatus.SETTLED,
@@ -805,19 +808,29 @@ export class CrmOrdersService {
         code: "ORDER_NOT_FOUND",
       });
     }
+    // The CLI legacy path doesn't render PDFs for participant-counterparty
+    // orders (those use `OrdersService.generateOrderReceiptPdfBuffer` via
+    // `resolveOrderPdfActor`). Bail out clearly if a script caller hits one.
+    if (order.customerProfileId == null) {
+      throw new AppError(
+        "Legacy CLI PDF flow requires a Meradhan customer order; this is a participant-counterparty order.",
+        { statusCode: HttpStatus.BAD_REQUEST, code: "PARTICIPANT_ORDER" },
+      );
+    }
+    const customerProfileId = order.customerProfileId;
 
     const customerRepo = new CustomerProfileRepo();
     const bondService = new BondService();
     const user = await customerRepo.getFullCustomerProfile(order.customerProfileId!);
     const getUserPrimaryBankAccount = await db.dataBase.customersBankAccountModel.findFirst({
       where: {
-        customerProfileDataModelId: order.customerProfileId,
+        customerProfileDataModelId: customerProfileId,
         isPrimary: true,
       },
     });
     const primaryDematAccount = await db.dataBase.customersDematAccountModel.findFirst({
       where: {
-        customerProfileDataModelId: order.customerProfileId,
+        customerProfileDataModelId: customerProfileId,
         isPrimary: true,
       },
     });
@@ -1041,6 +1054,12 @@ export class CrmOrdersService {
         code: "ORDER_NOT_FOUND",
       });
     }
+    if (order.customerProfileId == null) {
+      throw new AppError(
+        "Legacy CLI deal sheet flow requires a Meradhan customer order; this is a participant-counterparty order.",
+        { statusCode: HttpStatus.BAD_REQUEST, code: "PARTICIPANT_ORDER" },
+      );
+    }
 
     const customerRepo = new CustomerProfileRepo();
     const bondService = new BondService();
@@ -1204,6 +1223,7 @@ export class CrmOrdersService {
             : Number(order.totalAmount),
         price: Number(settleOrder?.price ?? 0),
         metadata: {
+
           settlementType: rfqDetails?.settlementType ?? 0,
           dealId: (metadata.dealId as string) ?? undefined,
           clientOrderSide: (metadata.clientOrderSide as "BUY" | "SELL") ?? undefined,
@@ -1397,6 +1417,12 @@ export class CrmOrdersService {
         statusCode: HttpStatus.NOT_FOUND,
         code: "ORDER_NOT_FOUND",
       });
+    }
+    if (order.customerProfileId == null) {
+      throw new AppError(
+        "Legacy CLI send flow requires a Meradhan customer order; this is a participant-counterparty order.",
+        { statusCode: HttpStatus.BAD_REQUEST, code: "PARTICIPANT_ORDER" },
+      );
     }
 
     const customerRepo = new CustomerProfileRepo();
@@ -1825,6 +1851,98 @@ async function createOrderForCustomer(input: AssignOrderToCustomerInput) {
   console.log(saved);
 }
 
+/**
+ * Stamp the NSE `settle_order` row with the RFQ-participant `code` so
+ * downstream reports can show the counterparty when the order's customer
+ * side is an external participant rather than one of our Meradhan
+ * customers. The order's `buyParticipantLoginId` / `sellParticipantLoginId`
+ * are already populated by NSE — this column just records which side the
+ * operator has confirmed as the known counterparty.
+ */
+async function stampSettleOrderWithRfqParticipant(input: {
+  orderNumber: string;
+  participantCode: string;
+  participantName: string;
+  dryRun: boolean;
+}) {
+  const { orderNumber, participantCode, participantName, dryRun } = input;
+
+  const settle = await db.dataBase.settleOrderModel.findFirst({
+    where: { orderNumber },
+    select: {
+      id: true,
+      orderNumber: true,
+      symbol: true,
+      buyParticipantLoginId: true,
+      sellParticipantLoginId: true,
+      linkedRfqParticipantCode: true,
+    },
+  });
+
+  if (!settle) {
+    throw new Error(
+      `No NSE settle_order found for order number ${orderNumber}. ` +
+      `Cannot stamp an RFQ participant against a non-existent row.`,
+    );
+  }
+
+  console.log("── Settle order ─────────────────────────────");
+  console.log({
+    id: settle.id,
+    orderNumber: settle.orderNumber,
+    symbol: settle.symbol,
+    buyParticipantLoginId: settle.buyParticipantLoginId,
+    sellParticipantLoginId: settle.sellParticipantLoginId,
+    currentLinkedRfqParticipantCode: settle.linkedRfqParticipantCode,
+  });
+
+  const matchesBuy = settle.buyParticipantLoginId === participantCode;
+  const matchesSell = settle.sellParticipantLoginId === participantCode;
+  if (!matchesBuy && !matchesSell) {
+    console.warn(
+      `⚠️  Participant code ${participantCode} doesn't match either side of ` +
+      `the settle order (buy=${settle.buyParticipantLoginId}, ` +
+      `sell=${settle.sellParticipantLoginId}). Proceeding anyway — the ` +
+      `operator may be intentionally tagging an out-of-band counterparty.`,
+    );
+  }
+
+  if (
+    settle.linkedRfqParticipantCode &&
+    settle.linkedRfqParticipantCode !== participantCode
+  ) {
+    console.warn(
+      `⚠️  settle_order already linked to a different participant ` +
+      `(${settle.linkedRfqParticipantCode}); overwriting with ${participantCode}.`,
+    );
+  }
+
+  console.log("── Participant ──────────────────────────────");
+  console.log({
+    code: participantCode,
+    name: participantName,
+    side: matchesBuy ? "BUY" : matchesSell ? "SELL" : "UNKNOWN",
+  });
+
+  if (dryRun) {
+    console.log(
+      "\n[dryRun=true] Would set settle_order.linkedRfqParticipantCode = " +
+      participantCode,
+    );
+    return;
+  }
+
+  await db.dataBase.settleOrderModel.update({
+    where: { id: settle.id },
+    data: { linkedRfqParticipantCode: participantCode },
+  });
+
+  console.log(
+    `\n✅ Stamped settle_order #${settle.id} (order ${settle.orderNumber}) ` +
+    `with linkedRfqParticipantCode=${participantCode}.`,
+  );
+}
+
 async function main() {
   // ────────────────────────────────────────────────────────────────────
   // EDIT THESE BEFORE RUNNING
@@ -1835,24 +1953,57 @@ async function main() {
   const DRY_RUN = false; // true to skip actual order creation
   // ────────────────────────────────────────────────────────────────────
 
-  const Customer = await db.dataBase.customerProfileDataModel.findUnique({
-    where: { userName: CUSTOMER_PROFILE_UCC },
-    select: { id: true },
-  });
-
-  if (!Customer) {
-    throw new Error(`Customer not found for UCC ${CUSTOMER_PROFILE_UCC}`);
-  }
-
-
   await db.dataBase.$connect();
   try {
-    await createOrderForCustomer({
-      customerProfileId: Customer?.id,
-      isin: ISIN,
-      orderNumber: ORDER_NUMBER,
-      dryRun: DRY_RUN,
+    // 1. Try the Meradhan customer side first — that's the common case.
+    const customer = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { userName: IDENTIFIER },
+      select: { id: true },
     });
+
+    if (customer) {
+      console.log(
+        `Resolved ${IDENTIFIER} as a Meradhan customer (id=${customer.id}). ` +
+        `Running the customer-side order assignment flow.`,
+      );
+      await createOrderForCustomer({
+        customerProfileId: customer.id,
+        isin: ISIN,
+        orderNumber: ORDER_NUMBER,
+        dryRun: DRY_RUN,
+      });
+      return;
+    }
+
+    // 2. Fall back to the RFQ-participant table (our local enrichment of
+    // NSE participants/all). This branch never creates a Meradhan Order;
+    // it just stamps the settle_order so reports can attribute it later.
+    const participant =
+      await db.dataBase.nseRfqParticipantInfoModel.findUnique({
+        where: { code: IDENTIFIER },
+        select: { code: true, nameOverride: true },
+      });
+
+    if (participant) {
+      console.log(
+        `Resolved ${IDENTIFIER} as an RFQ participant. No Meradhan Order ` +
+        `will be created; stamping the settle_order with the participant code.`,
+      );
+      await stampSettleOrderWithRfqParticipant({
+        orderNumber: ORDER_NUMBER,
+        participantCode: participant.code,
+        participantName: participant.nameOverride ?? IDENTIFIER,
+        dryRun: DRY_RUN,
+      });
+      return;
+    }
+
+    throw new Error(
+      `Identifier ${IDENTIFIER} did not match any Meradhan customer ` +
+      `(by userName/UCC) or any RFQ participant info row (by code). ` +
+      `If this is a brand-new external counterparty, add a participant ` +
+      `info entry first via /dashboard/rfqs/nse/rfq-participants.`,
+    );
   } finally {
     await db.dataBase.$disconnect();
   }

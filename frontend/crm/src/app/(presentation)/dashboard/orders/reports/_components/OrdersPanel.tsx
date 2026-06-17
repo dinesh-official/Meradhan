@@ -211,7 +211,16 @@ export function OrdersPanel({
       const avgYield = yields.length > 0
         ? `${(yields.reduce((s, y) => s + y, 0) / yields.length).toFixed(2)}%`
         : "—";
-      const investors = new Set(g.orders.map((o) => o.customerProfile.emailAddress)).size;
+      // Use email when present (Meradhan customer), otherwise fall back to
+      // the participant code so external NSE counterparties still get
+      // counted as distinct investors.
+      const investors = new Set(
+        g.orders.map(
+          (o) =>
+            o.customerProfile?.emailAddress ??
+            `participant:${o.linkedRfqParticipantCode ?? "unknown"}`,
+        ),
+      ).size;
       const settled = g.orders.filter((o) =>
         ["SETTLED", "APPLIED"].includes(o.status.toUpperCase()),
       ).length;
@@ -271,7 +280,13 @@ export function OrdersPanel({
       const avgYield = yields.length > 0
         ? `${(yields.reduce((s, y) => s + y, 0) / yields.length).toFixed(2)}%`
         : "—";
-      const investors = new Set(orders.map((o) => o.customerProfile.emailAddress)).size;
+      const investors = new Set(
+        orders.map(
+          (o) =>
+            o.customerProfile?.emailAddress ??
+            `participant:${o.linkedRfqParticipantCode ?? "unknown"}`,
+        ),
+      ).size;
       const settled = orders.filter((o) => ["SETTLED", "APPLIED"].includes(o.status.toUpperCase())).length;
       const pending = orders.filter((o) => o.status.toUpperCase() === "PENDING").length;
       return { type, orders: orders.length, qty, value, avgYield, investors, settled, pending };
