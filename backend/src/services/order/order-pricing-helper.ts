@@ -318,7 +318,7 @@ export const accruedInterest = (params: {
         return {
             accruedInterest: 0,
             noOfAccrualDays: 0,
-            isUnderShutPeriod: shut.isUnderShutPeriod,
+            isUnderShutPeriod: true,
             recordDate: shut.recordDate,
         };
     }
