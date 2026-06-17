@@ -12,12 +12,25 @@ export interface CrmOrder {
   status: "PENDING" | "SETTLED" | "APPLIED" | "REJECTED";
   bondDetails: Record<string, unknown>;
   createdAt: string;
+  /**
+   * Null when this Order's counterparty is an external NSE RFQ participant
+   * rather than one of our Meradhan customers; `rfqParticipantInfo` and
+   * `linkedRfqParticipantCode` carry the counterparty's details instead.
+   */
   customerProfile: {
     firstName: string;
     lastName: string;
     emailAddress: string;
     phoneNo?: string;
-  };
+  } | null;
+  linkedRfqParticipantCode?: string | null;
+  rfqParticipantInfo?: {
+    code: string;
+    nameOverride: string | null;
+    contactPerson: string | null;
+    emailList: string[];
+    panNo: string | null;
+  } | null;
 }
 
 export interface GetCrmOrdersResponse {
@@ -116,7 +129,13 @@ export interface PaymentProcessLogGroup {
 export interface CrmOrderDetails {
   id: number;
   orderNumber: string;
-  customerProfileId: number;
+  /**
+   * Null when the counterparty is an external NSE RFQ participant rather
+   * than a Meradhan customer (`linkedRfqParticipantCode` is set in that
+   * case).
+   */
+  customerProfileId: number | null;
+  linkedRfqParticipantCode: string | null;
   paymentProvider: string | null;
   paymentOrderId: string | null;
   paymentId: string | null;
@@ -141,7 +160,15 @@ export interface CrmOrderDetails {
     lastName: string;
     emailAddress: string;
     phoneNo: string | null;
-  };
+  } | null;
+  rfqParticipantInfo?: {
+    code: string;
+    nameOverride: string | null;
+    contactPerson: string | null;
+    emailList: string[];
+    mobileList: string[];
+    panNo: string | null;
+  } | null;
   orderLogs: OrderLog[];
   settlementAutomationLogs: OrderSettlementAutomationLog[];
   customerBonds: {
@@ -213,8 +240,51 @@ export interface RfqByOrderNumberSettleOrder {
   utrNumber: string | null;
   dpId: string | null;
   benId: string | null;
+  /// Set when the settle order has been tagged with an external NSE RFQ
+  /// participant code (via the CRM "Assign as NSE participant" flow or
+  /// the `asign-order.ts` CLI). Null for orders owned by Meradhan
+  /// customers.
+  linkedRfqParticipantCode: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+/** Response of `POST /api/crm/orders/assign-rfq-participant`. */
+export interface AssignRfqParticipantOrderInfo {
+  id: number;
+  orderNumber: string;
+  dealId: string | null;
+  reqOrderNumber: string | null;
+  isin: string;
+  bondName: string;
+  quantity: number;
+  unitPrice: number;
+  subTotal: number;
+  stampDuty: number;
+  totalAmount: number;
+  action: "BUY" | "SELL" | "BOTH";
+  /** True if a new Order row was created; false if an existing one was reused. */
+  created: boolean;
+}
+
+export interface AssignRfqParticipantResponseData {
+  /** The NSE `settle_order.orderNumber` that was tagged. */
+  settleOrderNumber: string;
+  linkedRfqParticipantCode: string;
+  participantName: string;
+  matchesBuySide: boolean;
+  matchesSellSide: boolean;
+  /**
+   * The Meradhan `Order` row anchoring this participant assignment, created
+   * (or reused) so participant-counterparty orders show up the same way as
+   * customer-counterparty orders.
+   */
+  order: AssignRfqParticipantOrderInfo;
+}
+
+export interface AssignRfqParticipantResponse {
+  responseData: AssignRfqParticipantResponseData | null;
+  message?: string;
 }
 
 export interface GetRfqByOrderNumberResponse {
@@ -237,11 +307,55 @@ export interface CustomerDematAccount {
   [key: string]: unknown;
 }
 
+/**
+ * Participant info hydrated on a participant-counterparty Order (returned by
+ * GET /crm/orders/customer/:orderNumber when the Order has no customer
+ * profile but is anchored to an NSE RFQ participant).
+ */
+export interface OrderRfqParticipantInfo {
+  id: number;
+  code: string;
+  nameOverride: string | null;
+  contactPerson: string | null;
+  emailList: string[];
+  mobileList: string[];
+  telephone: string | null;
+  address: string | null;
+  address2: string | null;
+  address3: string | null;
+  stateCode: string | null;
+  panNo: string | null;
+  leiCode: string | null;
+  custodian: string | null;
+  dobDoi: string | null;
+  notes: string | null;
+  bankAccounts?: Array<{
+    id: number;
+    bankName: string;
+    bankIFSC: string;
+    bankAccountNo: string;
+    isDefault: boolean;
+  }>;
+  dematAccounts?: Array<{
+    id: number;
+    dpType: string;
+    dpId: string | null;
+    benId: string;
+    isDefault: boolean;
+  }>;
+}
+
 /** Order with full customer profile (GET /crm/orders/customer/:orderNumber) */
 export interface CustomerFullOrder {
   id: number;
   orderNumber: string;
-  customerProfileId: number;
+  /**
+   * Null when this Order's counterparty is an external NSE RFQ participant
+   * rather than one of our Meradhan customers — in that case
+   * `linkedRfqParticipantCode` and `rfqParticipantInfo` are set instead.
+   */
+  customerProfileId: number | null;
+  linkedRfqParticipantCode: string | null;
   isin: string;
   bondName: string;
   quantity: number;
@@ -265,7 +379,10 @@ export interface CustomerFullOrder {
     panCard?: unknown;
     aadhaarCard?: unknown;
     [key: string]: unknown;
-  };
+  } | null;
+  /** Populated when the Order is anchored to an NSE RFQ participant. */
+  rfqParticipantInfo?: OrderRfqParticipantInfo | null;
+  metadata?: Record<string, unknown> | null;
   [key: string]: unknown;
 }
 
@@ -275,7 +392,13 @@ export interface GetCustomerFullOrderResponse {
 
 /** Response from create-from-rfq (order may not include full customerProfile) */
 export interface CreateOrderFromRfqResponse {
-  responseData: Pick<CustomerFullOrder, "id" | "orderNumber" | "customerProfileId" | "status"> & { [key: string]: unknown };
+  responseData: {
+    id: CustomerFullOrder["id"];
+    orderNumber: CustomerFullOrder["orderNumber"];
+    customerProfileId: CustomerFullOrder["customerProfileId"];
+    status: CustomerFullOrder["status"];
+    [key: string]: unknown;
+  };
 }
 
 export interface SendOrderPdfEmailResponse {

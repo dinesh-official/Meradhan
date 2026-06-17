@@ -3,7 +3,8 @@ import type { BaseResponseData } from "../../../types/response.types";
 export type CrmSavedProposalRow = {
   id: number;
   createdById: number;
-  customerProfileId: number;
+  customerProfileId: number | null;
+  linkedRfqParticipantCode: string | null;
   isin: string;
   bondName: string;
   side: string;

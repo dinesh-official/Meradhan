@@ -35,7 +35,12 @@ export interface OrderReportRegisterRow {
   quantity: number;
   unitPrice: string;
   bondDetails?: Record<string, unknown> | null;
-  customerProfileId: number;
+  customerProfileId: number | null;
+  /**
+   * Null when this Order's counterparty is an external NSE RFQ participant
+   * rather than a Meradhan customer. UI consumers should fall back to
+   * `linkedRfqParticipantCode` in that case.
+   */
   customerProfile: {
     id: number;
     firstName: string;
@@ -44,7 +49,8 @@ export interface OrderReportRegisterRow {
     emailAddress: string;
     userType: string;
     kycStatus: string;
-  };
+  } | null;
+  linkedRfqParticipantCode?: string | null;
 }
 
 export interface OrderReportsRegisterResponse {

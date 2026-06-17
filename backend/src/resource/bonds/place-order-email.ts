@@ -193,8 +193,9 @@ async function resolveOrderPricing(
         return null;
     }
 
-    return computeBondOrderPricingData(
+    return await computeBondOrderPricingData(
         {
+            isin: orderData.isin,
             faceValue: bond.faceValue,
             quantity: orderData.quantity,
             cleanPrice: bond.sellPrice ?? 0,
@@ -245,7 +246,7 @@ export const placeOrderEmailCustomer = async (orderData: z.infer<typeof appSchem
     const accruedInterest = pricing?.accruedInterest ?? 0;
     const accrualDays = pricing?.noOfAccrualDays ?? 0;
     const stampDuty = pricing?.stampDuty ?? 0;
-    const totalConsideration = principalAmount + accruedInterest;
+    const totalConsideration = Number(principalAmount) + Number(accruedInterest);
     const settlementAmount = pricing?.settlementAmount ?? orderData.settlementAmount;
     const ytm = orderData.yield;
 
@@ -262,15 +263,15 @@ export const placeOrderEmailCustomer = async (orderData: z.infer<typeof appSchem
         ["Clean Price", `INR ${formatInrNumber(cleanPrice, 4)}`],
         ["YTM Ann", `${formatPercent2(ytm)}%`],
         ["Last IP Date", lastIpLabel],
-        ["Principal Amount", formatInrCurrency(principalAmount)],
+        ["Principal Amount", formatInrCurrency(Number(principalAmount))],
         [
             "Accrued / Ex Interest",
-            `${formatInrCurrency(accruedInterest)} (No. of Days: ${accrualDays})`,
+            `${formatInrCurrency(Number(accruedInterest))} (No. of Days: ${accrualDays})`,
         ],
         ["Total Consideration", formatInrCurrency(totalConsideration)],
-        ["Stamp Duty", formatInrNumber(stampDuty, 2)],
-        ["Settlement Amount", formatInrCurrency(settlementAmount)],
-        ["Amount in Words", amountToWords(settlementAmount)],
+        ["Stamp Duty", formatInrNumber(Number(stampDuty), 2)],
+        ["Settlement Amount", formatInrCurrency(Number(settlementAmount))],
+        ["Amount in Words", amountToWords(Number(settlementAmount))],
     ]
         .map(([label, value]) => `${label}\n${value}`)
         .join("\n\n");

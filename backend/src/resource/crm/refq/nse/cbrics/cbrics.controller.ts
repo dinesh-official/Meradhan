@@ -3,6 +3,7 @@ import { HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
 import { CbricsKraResyncService } from "./cbrics.kra_resync.service";
 import { CbricsParticipantService } from "./cbrics.service";
+import { NseRfqParticipantInfoService } from "./rfqParticipantInfo.service";
 import { NseCBRICS } from "@modules/RFQ/nse/nse_CBRICS";
 import { NseRfq } from "@modules/RFQ/nse/nse_RFQ";
 
@@ -17,6 +18,7 @@ export class CbricsParticipantController {
   private nseCbrics = new NseCBRICS();
   private nseRfq = new NseRfq();
   private cbricsKraResync = new CbricsKraResyncService();
+  private rfqParticipantInfo = new NseRfqParticipantInfoService();
 
   async handleGetParticipants(req: Request, res: Response) {
     // safeParse gives you non-throwing validation
@@ -123,15 +125,67 @@ export class CbricsParticipantController {
   };
 
   async handleGetParticipantsRfq(req: Request, res: Response) {
-    // safeParse gives you non-throwing validation
-    const result = appSchema.crm.rfq.nse.getParticipants.GetParticipantsZ.parse(
-      req.query
-    );
-    console.log(result);
+    appSchema.crm.rfq.nse.getParticipants.GetParticipantsZ.parse(req.query);
 
     const data = await this.nseRfq.getAllParticipants();
-    console.log(data);
 
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: data,
+    });
+  }
+
+  async handleListSavedRfqParticipantInfoCodes(_req: Request, res: Response) {
+    const codes = await this.rfqParticipantInfo.listSavedCodes();
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: { codes },
+    });
+  }
+
+  async handleListRfqParticipantInfoSummaries(
+    _req: Request,
+    res: Response,
+  ) {
+    const summaries = await this.rfqParticipantInfo.listAllInfoSummary();
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: { summaries },
+    });
+  }
+
+  async handleGetRfqParticipantInfo(req: Request, res: Response) {
+    const { code } =
+      appSchema.crm.rfq.nse.rfqParticipantInfo.NseRfqParticipantCodeParamZ.parse(
+        req.params,
+      );
+
+    const data = await this.rfqParticipantInfo.findByCode(code);
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: data,
+    });
+  }
+
+  async handleUpsertRfqParticipantInfo(req: Request, res: Response) {
+    const { code } =
+      appSchema.crm.rfq.nse.rfqParticipantInfo.NseRfqParticipantCodeParamZ.parse(
+        req.params,
+      );
+
+    const parsed =
+      appSchema.crm.rfq.nse.rfqParticipantInfo.NseRfqParticipantInfoUpsertBodyZ.safeParse(
+        req.body,
+      );
+    if (!parsed.success) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid participant info payload.",
+        responseData: parsed.error.flatten(),
+      });
+    }
+
+    const data = await this.rfqParticipantInfo.upsertByCode(code, parsed.data);
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: data,

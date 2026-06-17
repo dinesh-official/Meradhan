@@ -13,8 +13,15 @@ export function customerFullName(row: {
     middleName: string | null;
     lastName: string;
     emailAddress: string;
-  };
+  } | null;
+  linkedRfqParticipantCode?: string | null;
 }): string {
+  if (!row.customerProfile) {
+    // Participant-counterparty order — show the participant code instead.
+    return row.linkedRfqParticipantCode
+      ? `NSE participant ${row.linkedRfqParticipantCode}`
+      : "External counterparty";
+  }
   const { firstName, middleName, lastName, emailAddress } = row.customerProfile;
   const name = [firstName, middleName, lastName].filter(Boolean).join(" ").trim();
   return name || emailAddress;

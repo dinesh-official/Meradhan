@@ -91,6 +91,87 @@ enum DefaultSelect {
     N
 }
 
+/// CRM-private enrichment for NSE RFQ participants returned by
+/// `/participants/all`. NSE only gives us `{ code, name }` for that
+/// endpoint; operators want to attach contact, KYC, bank and demat
+/// details against each `code` for internal reference (settlement
+/// lookups, ops notes). This table is never pushed to NSE/CBRICS.
+model NseRfqParticipantInfoModel {
+    id Int @id @default(autoincrement())
+
+    /// NSE RFQ participant code — matches the `code` returned by
+    /// `/participants/all`. Often equal to a CBRICS `loginId` but we do
+    /// not enforce that link.
+    code         String  @unique
+    /// Optional CRM-side override of the NSE-returned `name`.
+    nameOverride String?
+
+    /// Contact details
+    contactPerson String?
+    emailList     String[] @default([])
+    mobileList    String[] @default([])
+    telephone     String?
+    address       String?
+    address2      String?
+    address3      String?
+    stateCode     String?
+
+    /// KYC bits (free-form to mirror what NSE/CBRICS sends back).
+    panNo     String?
+    leiCode   String?
+    custodian String?
+    /// DOB for individuals, DOI for entities — kept as a free-form string
+    /// to match how NSE/CBRICS surfaces the same field.
+    dobDoi    String?
+
+    /// Free-form ops notes (e.g. "settlement contact = Mr X, call before 4pm").
+    notes String?
+
+    bankAccounts  NseRfqParticipantBankAccountModel[]
+    dematAccounts NseRfqParticipantDpAccountModel[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("nse_rfq_participant_info")
+}
+
+model NseRfqParticipantBankAccountModel {
+    id Int @id @default(autoincrement())
+
+    participantInfo   NseRfqParticipantInfoModel @relation(fields: [participantInfoId], references: [id], onDelete: Cascade)
+    participantInfoId Int
+
+    bankName      String
+    bankIFSC      String
+    bankAccountNo String
+    isDefault     Boolean @default(false)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([participantInfoId])
+    @@map("nse_rfq_participant_bank_account")
+}
+
+model NseRfqParticipantDpAccountModel {
+    id Int @id @default(autoincrement())
+
+    participantInfo   NseRfqParticipantInfoModel @relation(fields: [participantInfoId], references: [id], onDelete: Cascade)
+    participantInfoId Int
+
+    dpType    DepositoryName
+    dpId      String?
+    benId     String
+    isDefault Boolean        @default(false)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([participantInfoId])
+    @@map("nse_rfq_participant_dp_account")
+}
+
 model NseIsinSecurityReceipt {
     id            Int      @id @default(autoincrement())
     symbol        String   @unique
@@ -154,6 +235,13 @@ model SettleOrderModel {
     utrNumber String? @db.VarChar(16)
     dpId      String? @db.VarChar(8)
     benId     String? @db.VarChar(16)
+
+    /// CRM operator stamp: when `asign-order.ts` is run with an identifier
+    /// that matches an RFQ participant (not a Meradhan customer), the
+    /// participant `code` is recorded here so downstream reports can show
+    /// who the counterparty is. Nullable because most settle orders are
+    /// assigned to actual customers.
+    linkedRfqParticipantCode String? @db.VarChar(64)
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
