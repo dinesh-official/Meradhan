@@ -1,5 +1,5 @@
 import { db } from "@core/database/database";
-import { accruedInterest, DEFAULT_BOND_MARKET_HOLIDAYS, firstWorkingDayAfter, getLastCouponDateFromReferenceData, getLastNextCouponDateBasedOnSettlementDate, getNextCouponDate, toISTISODate } from "@services/order/order-pricing-helper";
+import { accruedInterest, DEFAULT_BOND_MARKET_HOLIDAYS, firstWorkingDayAfter, getBondLastCouponDate, getBondNextCouponDate, getLastCouponDateFromReferenceData, getLastNextCouponDateBasedOnSettlementDate, getNextCouponDate, toISTISODate } from "@services/order/order-pricing-helper";
 import axios from "axios";
 import moment from "moment";
 // Matches `enum INTEREST_MODE` in `bonds.prisma`
@@ -160,8 +160,8 @@ export const getBondInfoCalcData = async (isin: string, { yeild, settlementDate,
         : firstWorkingDayAfter(new Date(), new Set(DEFAULT_BOND_MARKET_HOLIDAYS));
 
     const couponDate = await getLastNextCouponDateBasedOnSettlementDate(isin, settlementDateObj);
-    const lastCouponDate = await getLastCouponDateFromReferenceData(isin, settlementDateObj);
-    const nextCouponDate = await getNextCouponDate(isin, settlementDateObj);
+    const lastCouponDate = await getBondLastCouponDate(isin);
+    const nextCouponDate = await getBondNextCouponDate(isin);
 
     const pricing = accruedInterest({
         couponRate: bond?.couponRate || 0,
