@@ -21,7 +21,7 @@ import { OrderService } from "@resource/customer/order/order.service";
 import { CustomerProfileManager } from "@services/customer/customer_manager.service";
 
 export type GetBondOrderPricingResult =
-  | { ok: true; pricing: ReturnType<typeof computeBondOrderPricingData> }
+  | { ok: true; pricing: Awaited<ReturnType<typeof computeBondOrderPricingData>> }
   | { ok: false; reason: "not_found" }
   | { ok: false; reason: "missing_coupon_dates" };
 
@@ -185,9 +185,9 @@ export class BondService {
     const quantity =
       Number.isFinite(rawQuantity) && rawQuantity > 0 ? rawQuantity : 1;
 
-    const pricing = await computeBondOrderPricingData(
+    const pricingData = await computeBondOrderPricingData(
       {
-        isin,
+        isin: bond.isin,
         faceValue: bond.faceValue,
         quantity,
         cleanPrice: cleanPrice ?? 0,
@@ -206,7 +206,7 @@ export class BondService {
     return {
       ok: true,
       pricing: {
-        ...pricing,
+        ...pricingData,
         ...(yieldNum != null ? { yield: yieldNum } : {}),
       },
     };

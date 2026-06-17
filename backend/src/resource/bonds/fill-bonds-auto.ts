@@ -173,6 +173,8 @@ export const getBondInfoCalcData = async (isin: string, { yeild, settlementDate,
         settlementDate: settlementDateObj,
     });
 
+    console.log(pricing);
+
     const faceValue = Number(bond?.faceValue ?? bondData?.faceValue ?? 10000);
     const couponRate = Number(bond?.couponRate ?? bondData?.couponRate ?? 0);
     const bondType = toCalcBondType(bondData?.bondType ?? bond?.bondType);
