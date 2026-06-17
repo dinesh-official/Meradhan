@@ -692,6 +692,28 @@ export const getNextCouponDate = async (isin: string, settlement: Date) => {
     return nextCouponDate ? toUTCISODate(nextCouponDate) : null;
 };
 
+export const getBondNextCouponDate = async (isin: string) => {
+    const settlementDt = new Date(isin);
+    if (Number.isNaN(settlementDt.getTime())) return null;
+
+    const rows = await db.dataBase.bonds.findFirst({
+        where: { isin },
+    });
+
+    const nextCouponDate = rows?.nextCouponDateIst ?? null;
+    return nextCouponDate ? toUTCISODate(nextCouponDate) : null;
+};
+
+
+export const getBondLastCouponDate = async (isin: string) => {
+    const rows = await db.dataBase.bonds.findFirst({
+        where: { isin },
+    });
+
+    const lastCouponDate = rows?.lastCouponDateIst ?? null;
+    return lastCouponDate ? toUTCISODate(lastCouponDate) : null;
+};
+
 export const getLastCouponDateFromReferenceData = async (isin: string, settlement: Date) => {
     const settlementDt = new Date(settlement);
     if (Number.isNaN(settlementDt.getTime())) return null;
