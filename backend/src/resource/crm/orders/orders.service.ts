@@ -396,10 +396,45 @@ export class CrmOrdersService {
       }),
     ]);
 
+    // Hydrate participant info for any participant-counterparty orders in
+    // this page so the CRM list can show the external counterparty name
+    // alongside Meradhan customers.
+    const participantCodes = Array.from(
+      new Set(
+        orders
+          .filter((o) => o.customerProfileId == null && !!o.linkedRfqParticipantCode)
+          .map((o) => o.linkedRfqParticipantCode as string),
+      ),
+    );
+    const participantInfoByCode = participantCodes.length
+      ? new Map(
+        (
+          await db.dataBase.nseRfqParticipantInfoModel.findMany({
+            where: { code: { in: participantCodes } },
+            select: {
+              code: true,
+              nameOverride: true,
+              contactPerson: true,
+              emailList: true,
+              panNo: true,
+            },
+          })
+        ).map((p) => [p.code, p] as const),
+      )
+      : new Map();
+
+    const data = orders.map((o) => ({
+      ...o,
+      rfqParticipantInfo:
+        o.customerProfileId == null && o.linkedRfqParticipantCode
+          ? (participantInfoByCode.get(o.linkedRfqParticipantCode) ?? null)
+          : null,
+    }));
+
     const totalPages = Math.ceil(total / limit);
 
     return {
-      data: orders,
+      data,
       meta: {
         total,
         page,
@@ -435,8 +470,34 @@ export class CrmOrdersService {
 
     const settlementAutomationLogs = await this.getSettlementAutomationLogs(order.paymentId);
 
+    // Hydrate participant info for participant-counterparty orders so the
+    // order details view can show the external counterparty's name/contact
+    // instead of an empty customer card.
+    let rfqParticipantInfo: {
+      code: string;
+      nameOverride: string | null;
+      contactPerson: string | null;
+      emailList: string[];
+      mobileList: string[];
+      panNo: string | null;
+    } | null = null;
+    if (order.customerProfileId == null && order.linkedRfqParticipantCode) {
+      rfqParticipantInfo = await db.dataBase.nseRfqParticipantInfoModel.findUnique({
+        where: { code: order.linkedRfqParticipantCode },
+        select: {
+          code: true,
+          nameOverride: true,
+          contactPerson: true,
+          emailList: true,
+          mobileList: true,
+          panNo: true,
+        },
+      });
+    }
+
     return {
       ...order,
+      rfqParticipantInfo,
       settlementAutomationLogs,
     };
   }
@@ -487,6 +548,367 @@ export class CrmOrdersService {
     return rfq;
   }
 
+  /**
+   * Stamp an NSE settle_order with `linkedRfqParticipantCode` so downstream
+   * PDFs and reports can render the external counterparty when the order
+   * isn't owned by a Meradhan customer.
+   *
+   * Mirrors the behaviour of the `asign-order.ts` CLI helper but exposed
+   * to the CRM UI so operators can assign a participant straight from the
+   * settle-order generate page.
+   *
+   * Pre-conditions:
+   * - The settle order must exist.
+   * - An `NseRfqParticipantInfoModel` row must already exist for `code`
+   *   (operator has to enrich the participant first — same constraint as
+   *   the CLI and the PDF actor resolver). This guarantees the PDF can
+   *   pick up contact / PAN / bank / demat details for the participant.
+   *
+   * If the participant code doesn't match either side of the trade
+   * (`buyParticipantLoginId` / `sellParticipantLoginId`) the call still
+   * succeeds — the operator may be tagging a backoffice/broker/clearer.
+   */
+  async assignRfqParticipantToSettleOrder(input: {
+    orderNumber: string;
+    code: string;
+  }): Promise<{
+    settleOrderNumber: string;
+    linkedRfqParticipantCode: string;
+    participantName: string;
+    matchesBuySide: boolean;
+    matchesSellSide: boolean;
+    /**
+     * The Meradhan `Order` row that was created (or reused) to anchor this
+     * participant-counterparty assignment. Mirrors the customer-flow output
+     * of `createOrderFromRfq` so the CRM UI can show a real "Order assigned"
+     * card with a generated Order ID + Deal ID for participant orders too.
+     */
+    order: {
+      id: number;
+      orderNumber: string;
+      dealId: string | null;
+      reqOrderNumber: string | null;
+      isin: string;
+      bondName: string;
+      quantity: number;
+      unitPrice: number;
+      subTotal: number;
+      stampDuty: number;
+      totalAmount: number;
+      action: "BUY" | "SELL" | "BOTH";
+      created: boolean;
+    };
+  }> {
+    const orderNumber = input.orderNumber?.trim();
+    const code = input.code?.trim();
+    if (!orderNumber || !code) {
+      throw new AppError("orderNumber and participant code are required.", {
+        statusCode: HttpStatus.BAD_REQUEST,
+        code: "BAD_REQUEST",
+      });
+    }
+
+    const settleOrder = await db.dataBase.settleOrderModel.findFirst({
+      where: { orderNumber },
+      select: {
+        id: true,
+        orderNumber: true,
+        buyParticipantLoginId: true,
+        sellParticipantLoginId: true,
+        linkedRfqParticipantCode: true,
+      },
+    });
+    if (!settleOrder) {
+      throw new AppError(`Settle order ${orderNumber} not found.`, {
+        statusCode: HttpStatus.NOT_FOUND,
+        code: "SETTLE_ORDER_NOT_FOUND",
+      });
+    }
+
+    const participant =
+      await db.dataBase.nseRfqParticipantInfoModel.findUnique({
+        where: { code },
+        select: { code: true, nameOverride: true },
+      });
+    if (!participant) {
+      throw new AppError(
+        `RFQ participant info not found for code "${code}". Add an entry via /dashboard/rfqs/nse/rfq-participants first.`,
+        {
+          statusCode: HttpStatus.NOT_FOUND,
+          code: "PARTICIPANT_INFO_MISSING",
+        },
+      );
+    }
+
+    const matchesBuySide =
+      String(settleOrder.buyParticipantLoginId ?? "").trim() === code;
+    const matchesSellSide =
+      String(settleOrder.sellParticipantLoginId ?? "").trim() === code;
+
+    // -----------------------------------------------------------------
+    // Resolve RFQ + bond + negotiation context so we can create a real
+    // Meradhan `Order` row anchored to this participant counterparty.
+    // -----------------------------------------------------------------
+    const rfq = await this.getRfqByOrderNumber(orderNumber);
+    if (!rfq) {
+      throw new AppError(
+        `RFQ not found for settle order ${orderNumber}.`,
+        { statusCode: HttpStatus.NOT_FOUND, code: "RFQ_NOT_FOUND" },
+      );
+    }
+
+    const bondDetails = await db.dataBase.bonds.findFirst({
+      where: { isin: rfq.symbol },
+    });
+    if (!bondDetails) {
+      throw new AppError(
+        `Bond details not found for ISIN ${rfq.symbol}.`,
+        { statusCode: HttpStatus.NOT_FOUND, code: "BOND_NOT_FOUND" },
+      );
+    }
+
+    const negotation = await db.dataBase.rFQNegotiation.findFirst({
+      where: { tradeNumber: rfq.orderNumber },
+    });
+    if (!negotation) {
+      throw new AppError(
+        `Negotiation not found for settle order ${rfq.orderNumber}.`,
+        {
+          statusCode: HttpStatus.NOT_FOUND,
+          code: "NEGOTIATION_NOT_FOUND",
+        },
+      );
+    }
+
+    // Refuse to overwrite a customer-assigned Order. Operators should
+    // use the customer flow for those; never silently re-point one.
+    const existingCustomerOrder = await db.dataBase.order.findFirst({
+      where: {
+        OR: [
+          { reqOrderNumber: rfq.orderNumber },
+          { orderNumber: rfq.orderNumber },
+        ],
+        customerProfileId: { not: null },
+      },
+      select: { id: true, orderNumber: true },
+    });
+    if (existingCustomerOrder) {
+      throw new AppError(
+        `Order ${existingCustomerOrder.orderNumber} is already assigned to a Meradhan customer. Unassign that customer first to assign an NSE participant.`,
+        {
+          statusCode: HttpStatus.CONFLICT,
+          code: "ORDER_ALREADY_ASSIGNED_TO_CUSTOMER",
+        },
+      );
+    }
+
+    // Reuse any participant-flow Order row already pointing at this RFQ.
+    const existingParticipantOrder = await db.dataBase.order.findFirst({
+      where: {
+        OR: [
+          { reqOrderNumber: rfq.orderNumber },
+          { orderNumber: rfq.orderNumber },
+        ],
+        customerProfileId: null,
+      },
+      select: { id: true, orderNumber: true, metadata: true },
+    });
+
+    const resolveAction = (): "BUY" | "SELL" | "BOTH" => {
+      if (negotation.buySell === "B") return "BUY";
+      if (negotation.buySell === "S") return "SELL";
+      return "BOTH";
+    };
+    const action = resolveAction();
+    const idAction = action === "BOTH" ? "BUY" : action;
+    const dealDate =
+      rfq.createdAt instanceof Date ? rfq.createdAt : new Date(rfq.createdAt);
+    const issuerName = bondDetails.bondName || bondDetails.instrumentName || "";
+
+    const unitPrice = rfq.price.toNumber();
+    const quantity = Number(rfq.modQuantity) || 0;
+    const stampDutyVal = Number(negotation.acceptedAccruedInterest ?? 0);
+    const considerationVal = Number(negotation.acceptedConsideration ?? 0);
+
+    const result = await db.dataBase.$transaction(async (tx) => {
+      // 1. Stamp settle_order with linkedRfqParticipantCode (source of
+      //    truth for the counterparty even outside the Order row).
+      await tx.settleOrderModel.update({
+        where: { id: settleOrder.id },
+        data: { linkedRfqParticipantCode: code },
+      });
+
+      // 2. Upsert the anchor Order row (participant flow — no customer).
+      let orderRow: {
+        id: number;
+        orderNumber: string;
+        metadata: Prisma.JsonValue;
+        reqOrderNumber: string | null;
+        isin: string;
+        bondName: string;
+        quantity: number;
+        unitPrice: Prisma.Decimal;
+        subTotal: Prisma.Decimal;
+        stampDuty: Prisma.Decimal;
+        totalAmount: Prisma.Decimal;
+      };
+      let created = false;
+
+      if (existingParticipantOrder) {
+        const baseMeta =
+          (existingParticipantOrder.metadata as Record<
+            string,
+            unknown
+          > | null) ?? {};
+        orderRow = await tx.order.update({
+          where: { id: existingParticipantOrder.id },
+          data: {
+            linkedRfqParticipantCode: code,
+            metadata: {
+              ...baseMeta,
+              rfqNumber: rfq.orderNumber,
+              clientOrderSide: idAction,
+              participantName: participant.nameOverride ?? code,
+            } as Prisma.InputJsonValue,
+          },
+          select: {
+            id: true,
+            orderNumber: true,
+            metadata: true,
+            reqOrderNumber: true,
+            isin: true,
+            bondName: true,
+            quantity: true,
+            unitPrice: true,
+            subTotal: true,
+            stampDuty: true,
+            totalAmount: true,
+          },
+        });
+      } else {
+        const tempOrderNumber = `MD-PARTNER-TEMP-${crypto
+          .randomUUID()
+          .replace(/-/g, "")
+          .slice(0, 32)}`;
+
+        const inserted = await tx.order.create({
+          data: {
+            bondDetails: bondDetails as unknown as Prisma.InputJsonValue,
+            faceValue: bondDetails.faceValue,
+            quantity,
+            unitPrice,
+            isin: bondDetails.isin,
+            bondName: bondDetails.bondName,
+            orderNumber: tempOrderNumber,
+            stampDuty: stampDutyVal,
+            subTotal: considerationVal,
+            totalAmount: considerationVal,
+            customerProfileId: null,
+            linkedRfqParticipantCode: code,
+            paymentId: rfq.orderNumber,
+            paymentOrderId: rfq.orderNumber,
+            reqOrderNumber: rfq.orderNumber,
+            metadata: {
+              rfqNumber: rfq.orderNumber,
+              participantName: participant.nameOverride ?? code,
+            } as Prisma.InputJsonValue,
+            paymentStatus: PaymentStatus.PENDING,
+            paymentProvider: "CUSTOM",
+            status: OrderStatus.SETTLED,
+            // Intentionally no `customerBonds` create — this Order isn't
+            // owned by a Meradhan customer, so there's no portfolio entry
+            // to track.
+          },
+          select: {
+            id: true,
+            orderNumber: true,
+            metadata: true,
+            reqOrderNumber: true,
+            isin: true,
+            bondName: true,
+            quantity: true,
+            unitPrice: true,
+            subTotal: true,
+            stampDuty: true,
+            totalAmount: true,
+          },
+        });
+        created = true;
+
+        const finalOrderNumber = generateOrderId({
+          channel: "ASSIST",
+          action: idAction,
+          date: dealDate,
+          orderSequence: inserted.id,
+        });
+        const dealId = generateDealId({
+          issuerName,
+          channel: "ASSIST",
+          action: idAction,
+          date: dealDate,
+          orderSequence: inserted.id,
+        });
+
+        orderRow = await tx.order.update({
+          where: { id: inserted.id },
+          data: {
+            orderNumber: finalOrderNumber,
+            metadata: {
+              ...((inserted.metadata as Record<string, unknown>) ?? {}),
+              dealId,
+              clientOrderSide: idAction,
+            } as Prisma.InputJsonValue,
+          },
+          select: {
+            id: true,
+            orderNumber: true,
+            metadata: true,
+            reqOrderNumber: true,
+            isin: true,
+            bondName: true,
+            quantity: true,
+            unitPrice: true,
+            subTotal: true,
+            stampDuty: true,
+            totalAmount: true,
+          },
+        });
+      }
+
+      return { orderRow, created };
+    });
+
+    const meta =
+      (result.orderRow.metadata as Record<string, unknown> | null) ?? {};
+    const dealId =
+      typeof meta.dealId === "string" && meta.dealId.length > 0
+        ? meta.dealId
+        : null;
+
+    return {
+      settleOrderNumber: settleOrder.orderNumber,
+      linkedRfqParticipantCode: code,
+      participantName: participant.nameOverride ?? code,
+      matchesBuySide,
+      matchesSellSide,
+      order: {
+        id: result.orderRow.id,
+        orderNumber: result.orderRow.orderNumber,
+        dealId,
+        reqOrderNumber: result.orderRow.reqOrderNumber,
+        isin: result.orderRow.isin,
+        bondName: result.orderRow.bondName,
+        quantity: Number(result.orderRow.quantity),
+        unitPrice: Number(result.orderRow.unitPrice),
+        subTotal: Number(result.orderRow.subTotal),
+        stampDuty: Number(result.orderRow.stampDuty),
+        totalAmount: Number(result.orderRow.totalAmount),
+        action,
+        created: result.created,
+      },
+    };
+  }
+
   async getReceiptPdfOptions(orderNumber: string) {
     return db.dataBase.crmOrderReceiptPdfOptions.findUnique({
       where: { orderNumber },
@@ -503,12 +925,53 @@ export class CrmOrdersService {
     lastInterestPaymentDate: string | null;
     interestPaymentDates: string[] | null;
   }> {
-    const order = await this.getCustomerByOrderNumber(orderNumber);
+    // The autofill values (accrued days, settlement no, coupon dates) are all
+    // bond + settle-order properties — they don't depend on which customer
+    // (or participant) is assigned. So accept either an Order or a raw
+    // settle_order row and build a minimal "order-like" view from whichever
+    // is available. This unblocks the Generate-PDF page autofill before any
+    // counterparty has been assigned.
+    const existingOrder = await this.getCustomerByOrderNumber(orderNumber);
+    const settleOrder = await this.getRfqByOrderNumber(orderNumber);
+
+    type OrderLike = {
+      isin: string;
+      quantity: number;
+      unitPrice: number;
+      createdAt: Date;
+    };
+
+    let order: OrderLike | null = null;
+    if (existingOrder) {
+      order = {
+        isin: existingOrder.isin,
+        quantity: existingOrder.quantity,
+        unitPrice: Number(existingOrder.unitPrice),
+        createdAt:
+          existingOrder.createdAt instanceof Date
+            ? existingOrder.createdAt
+            : new Date(existingOrder.createdAt),
+      };
+    } else if (settleOrder) {
+      order = {
+        isin: settleOrder.symbol,
+        quantity: Number(settleOrder.modQuantity ?? 0),
+        unitPrice: Number(settleOrder.price),
+        createdAt:
+          settleOrder.createdAt instanceof Date
+            ? settleOrder.createdAt
+            : new Date(settleOrder.createdAt),
+      };
+    }
+
     if (!order) {
-      throw new AppError("No order found for this settlement. Assign a customer first.", {
-        statusCode: HttpStatus.NOT_FOUND,
-        code: "ORDER_NOT_FOUND",
-      });
+      throw new AppError(
+        "No order or NSE settle order found for this settlement number.",
+        {
+          statusCode: HttpStatus.NOT_FOUND,
+          code: "ORDER_NOT_FOUND",
+        },
+      );
     }
 
     const bondService = new BondService();
@@ -529,10 +992,11 @@ export class CrmOrdersService {
     const couponDates = await getLastNextCouponDateBasedOnSettlementDate(bond.isin, bond.maturityDate!)
     console.log(couponDates);
 
-    const pricingData = computeBondOrderPricingData({
+    const pricingData = await computeBondOrderPricingData({
+      isin: bond.isin,
       faceValue: bond.faceValue,
       quantity: order.quantity,
-      cleanPrice: Number(order.unitPrice),
+      cleanPrice: order.unitPrice,
       couponRate: bond.couponRate,
       lastCouponDate: (couponDates?.lastCouponDate || "").toString(),
       recordDays: recordDays,
@@ -552,7 +1016,6 @@ export class CrmOrdersService {
       });
     }
 
-    const settleOrder = await this.getRfqByOrderNumber(orderNumber);
     const negotiation = settleOrder?.orderNumber
       ? await db.dataBase.rFQNegotiation.findFirst({
         where: { tradeNumber: settleOrder.orderNumber },
@@ -564,8 +1027,7 @@ export class CrmOrdersService {
       })
       : null;
 
-    const fallbackOrderDate =
-      order.createdAt instanceof Date ? order.createdAt : new Date(order.createdAt);
+    const fallbackOrderDate = order.createdAt;
     const orderDateForPdf = parseRfqMasterDateTime(
       rfqDetails?.date,
       rfqDetails?.quoteTime,
@@ -652,7 +1114,26 @@ export class CrmOrdersService {
         }
       }
     });
-    return order;
+
+    if (!order) return null;
+
+    // For participant-counterparty orders (customerProfileId null,
+    // linkedRfqParticipantCode set) we hydrate the participant info so the
+    // CRM page can render an "Assigned to NSE participant" card with name,
+    // contact, bank and demat data instead of an empty customer block.
+    if (!order.customerProfileId && order.linkedRfqParticipantCode) {
+      const participantInfo =
+        await db.dataBase.nseRfqParticipantInfoModel.findUnique({
+          where: { code: order.linkedRfqParticipantCode },
+          include: {
+            bankAccounts: { orderBy: [{ isDefault: "desc" }, { id: "asc" }] },
+            dematAccounts: { orderBy: [{ isDefault: "desc" }, { id: "asc" }] },
+          },
+        });
+      return Object.assign(order, { rfqParticipantInfo: participantInfo });
+    }
+
+    return Object.assign(order, { rfqParticipantInfo: null });
   }
 
 
@@ -789,36 +1270,390 @@ export class CrmOrdersService {
   }
 
   /**
+   * Build a `CustomerByIdPayload`-shaped shim from an NSE RFQ participant
+   * info row. Used by both the Order-anchored participant flow and the
+   * legacy `settle_order` fallback so PDF templates don't need to branch.
+   * Only fields actually read by `OrderPdf` / `DealPdf` need to be present;
+   * the rest are best-effort defaults.
+   */
+  private buildRfqParticipantShimUser(participant: {
+    id: number;
+    code: string;
+    nameOverride: string | null;
+    emailList: string[];
+    mobileList: string[];
+    address: string | null;
+    address2: string | null;
+    address3: string | null;
+    stateCode: string | null;
+    panNo: string | null;
+    bankAccounts: Array<{
+      id: number;
+      bankName: string;
+      bankIFSC: string;
+      bankAccountNo: string;
+      isDefault: boolean;
+    }>;
+    dematAccounts: Array<{
+      id: number;
+      dpType: string;
+      dpId: string | null;
+      benId: string;
+      isDefault: boolean;
+    }>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  }): any {
+    const code = participant.code;
+    const displayName = (participant.nameOverride ?? code).trim() || code;
+    return {
+      id: -participant.id,
+      userName: code,
+      firstName: displayName,
+      middleName: null,
+      lastName: "",
+      legalEntityName: displayName,
+      emailAddress: participant.emailList?.[0] ?? "",
+      phoneNo: participant.mobileList?.[0] ?? "",
+      whatsAppNo: null,
+      gender: "OTHER",
+      userType: "CORPORATE",
+      kycStatus: "VERIFIED",
+      kraStatus: "VERIFIED",
+      aadhaarCard: null,
+      permanentAddress: null,
+      currentAddress: participant.address
+        ? {
+          address: participant.address,
+          address2: participant.address2 ?? "",
+          address3: participant.address3 ?? "",
+          stateCode: participant.stateCode ?? null,
+        }
+        : null,
+      personalInformation: null,
+      riskProfile: { id: 0, data: [] },
+      panCard: participant.panNo ? { panCardNo: participant.panNo } : null,
+      bankAccounts: participant.bankAccounts.map((b, idx, arr) => ({
+        id: -b.id,
+        accountHolderName: displayName,
+        bankAccountType: "SAVINGS",
+        accountNumber: b.bankAccountNo,
+        ifscCode: b.bankIFSC,
+        bankName: b.bankName,
+        branch: "",
+        isPrimary:
+          b.isDefault || (idx === 0 && !arr.some((x) => x.isDefault)),
+        isVerified: true,
+      })),
+      dematAccounts: participant.dematAccounts.map((d, idx, arr) => ({
+        id: -d.id,
+        depositoryName: d.dpType,
+        dpId: d.dpId ?? "",
+        clientId: d.benId,
+        accountType: "SOLO",
+        depositoryParticipantName: d.dpType,
+        accountHolderName: displayName,
+        isPrimary:
+          d.isDefault || (idx === 0 && !arr.some((x) => x.isDefault)),
+        isVerified: true,
+      })),
+      avatar: null,
+      isAFatcaCustomer: false,
+      allowSEBITerms: true,
+      isAPep: false,
+      utility: {},
+    };
+  }
+
+  /**
+   * Resolves the user/bank/demat context for an order PDF.
+   *
+   * Three flows are supported:
+   *
+   * 1. **Customer flow** — the `orderNumber` matches a Meradhan `Order` row
+   *    with `customerProfileId` set; we return the customer profile and the
+   *    customer's primary bank/demat.
+   *
+   * 2. **RFQ-participant Order flow** — preferred. The CRM
+   *    "Assign as NSE participant" action creates a Meradhan `Order` row
+   *    with `customerProfileId = null` and `linkedRfqParticipantCode = X`.
+   *    Quantity/consideration are stored on the Order itself; participant
+   *    info populates the user shim.
+   *
+   * 3. **Legacy `settle_order` fallback** — no Meradhan order exists, but
+   *    the NSE `settle_order` row carries `linkedRfqParticipantCode`
+   *    (stamped by the `asign-order.ts` script before flow #2 existed).
+   *    We synthesise an order-like payload from `settle_order`.
+   *
+   * Throws `AppError NOT_FOUND` when none of the flows resolve.
+   */
+  private async resolveOrderPdfActor(orderNumber: string): Promise<{
+    kind: "customer" | "rfqParticipant";
+    /// Shape compatible with what the PDF pipeline reads from a Meradhan
+    /// `order` row (orderNumber/reqOrderNumber/metadata/quantity/totalAmount/
+    /// stampDuty/createdAt/isin). For the participant flow this is built
+    /// from the matching `settle_order`.
+    orderForPdf: {
+      orderNumber: string;
+      reqOrderNumber: string | null;
+      customerProfileId: number | null;
+      isin: string;
+      quantity: number;
+      totalAmount: number;
+      stampDuty: number;
+      metadata: unknown;
+      createdAt: Date;
+    };
+    /// Loose `CustomerByIdPayload`-like shape consumed by `OrderPdf` /
+    /// `DealPdf`. For the participant flow this is a shim built from the
+    /// participant info row.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    user: any;
+    primaryBank: {
+      bankName: string | null;
+      ifscCode: string | null;
+      accountNumber: string | null;
+    } | null;
+    primaryDemat: {
+      dpId: string | null;
+      clientId: string | null;
+      depositoryParticipantName: string | null;
+    } | null;
+    rfqParticipantCode?: string;
+  }> {
+    // 1. Try the Meradhan-customer order path first.
+    const customerOrder = await this.getCustomerByOrderNumber(orderNumber);
+    if (customerOrder && customerOrder.customerProfileId != null) {
+      const customerProfileId = customerOrder.customerProfileId;
+      const customerRepo = new CustomerProfileRepo();
+      const user = await customerRepo.getFullCustomerProfile(
+        customerProfileId,
+      );
+      const primaryBank = await db.dataBase.customersBankAccountModel.findFirst({
+        where: {
+          customerProfileDataModelId: customerProfileId,
+          isPrimary: true,
+        },
+      });
+      const primaryDemat = await db.dataBase.customersDematAccountModel.findFirst({
+        where: {
+          customerProfileDataModelId: customerProfileId,
+          isPrimary: true,
+        },
+      });
+      return {
+        kind: "customer",
+        // Normalise `Decimal` columns to `number` so the helper's return
+        // type is a uniform shape that the participant branch can also
+        // satisfy. Downstream still wraps these with `Number(...)`.
+        orderForPdf: {
+          orderNumber: customerOrder.orderNumber,
+          reqOrderNumber: customerOrder.reqOrderNumber,
+          customerProfileId,
+          isin: customerOrder.isin,
+          quantity: customerOrder.quantity,
+          totalAmount: Number(customerOrder.totalAmount),
+          stampDuty: Number(customerOrder.stampDuty),
+          metadata: customerOrder.metadata,
+          createdAt: customerOrder.createdAt,
+        },
+        user,
+        primaryBank: primaryBank
+          ? {
+            bankName: primaryBank.bankName,
+            ifscCode: primaryBank.ifscCode,
+            accountNumber: primaryBank.accountNumber,
+          }
+          : null,
+        primaryDemat: primaryDemat
+          ? {
+            dpId: primaryDemat.dpId,
+            clientId: primaryDemat.clientId,
+            depositoryParticipantName: primaryDemat.depositoryParticipantName,
+          }
+          : null,
+      };
+    }
+
+    // 2a. Participant-flow Order row already exists (preferred path —
+    //     created by `assignRfqParticipantToSettleOrder`). The Order
+    //     itself carries quantity / consideration / stamp duty stored at
+    //     assignment time, so the PDF reads from the real Order row
+    //     rather than re-deriving from `settle_order`.
+    if (
+      customerOrder &&
+      customerOrder.customerProfileId == null &&
+      customerOrder.linkedRfqParticipantCode
+    ) {
+      const participantInfo =
+        customerOrder.rfqParticipantInfo ??
+        (await db.dataBase.nseRfqParticipantInfoModel.findUnique({
+          where: { code: customerOrder.linkedRfqParticipantCode },
+          include: { bankAccounts: true, dematAccounts: true },
+        }));
+      if (!participantInfo) {
+        throw new AppError(
+          `RFQ participant info not found for code "${customerOrder.linkedRfqParticipantCode}".`,
+          { statusCode: HttpStatus.NOT_FOUND, code: "ORDER_NOT_FOUND" },
+        );
+      }
+
+      const defaultBank =
+        participantInfo.bankAccounts?.find((b) => b.isDefault) ??
+        participantInfo.bankAccounts?.[0] ??
+        null;
+      const defaultDemat =
+        participantInfo.dematAccounts?.find((d) => d.isDefault) ??
+        participantInfo.dematAccounts?.[0] ??
+        null;
+
+      const user = this.buildRfqParticipantShimUser(participantInfo);
+
+      return {
+        kind: "rfqParticipant",
+        orderForPdf: {
+          orderNumber: customerOrder.orderNumber,
+          reqOrderNumber: customerOrder.reqOrderNumber,
+          customerProfileId: null,
+          isin: customerOrder.isin,
+          quantity: customerOrder.quantity,
+          totalAmount: Number(customerOrder.totalAmount),
+          stampDuty: Number(customerOrder.stampDuty),
+          metadata: customerOrder.metadata,
+          createdAt: customerOrder.createdAt,
+        },
+        user,
+        primaryBank: defaultBank
+          ? {
+            bankName: defaultBank.bankName,
+            ifscCode: defaultBank.bankIFSC,
+            accountNumber: defaultBank.bankAccountNo,
+          }
+          : null,
+        primaryDemat: defaultDemat
+          ? {
+            dpId: defaultDemat.dpId,
+            clientId: defaultDemat.benId,
+            depositoryParticipantName: String(defaultDemat.dpType),
+          }
+          : null,
+        rfqParticipantCode: participantInfo.code,
+      };
+    }
+
+    // 2b. Legacy fallback — `settle_order` tagged with an RFQ participant
+    //     by the `asign-order.ts` script before the Order-anchoring flow
+    //     existed. Synthesise an order-like payload from `settle_order`
+    //     so existing tagged orders keep rendering.
+    const settleOrder = await db.dataBase.settleOrderModel.findFirst({
+      where: { orderNumber },
+    });
+    if (!settleOrder || !settleOrder.linkedRfqParticipantCode) {
+      throw new AppError(
+        "No order found for this settlement. Assign a customer first.",
+        { statusCode: HttpStatus.NOT_FOUND, code: "ORDER_NOT_FOUND" },
+      );
+    }
+
+    const participant =
+      await db.dataBase.nseRfqParticipantInfoModel.findUnique({
+        where: { code: settleOrder.linkedRfqParticipantCode },
+        include: { bankAccounts: true, dematAccounts: true },
+      });
+    if (!participant) {
+      throw new AppError(
+        `RFQ participant info not found for code "${settleOrder.linkedRfqParticipantCode}". Add an entry via /dashboard/rfqs/nse/rfq-participants first.`,
+        { statusCode: HttpStatus.NOT_FOUND, code: "ORDER_NOT_FOUND" },
+      );
+    }
+
+    // Prefer the explicit `isDefault` row; otherwise fall back to the first.
+    const defaultBank =
+      participant.bankAccounts.find((b) => b.isDefault) ??
+      participant.bankAccounts[0] ??
+      null;
+    const defaultDemat =
+      participant.dematAccounts.find((d) => d.isDefault) ??
+      participant.dematAccounts[0] ??
+      null;
+
+    // Infer which side our participant is on so the PDF can show BUY/SELL
+    // consistently with the customer flow. Best-effort: leave undefined if
+    // the participant code is not recorded on either side of the trade.
+    const code = participant.code;
+    const isBuySide =
+      String(settleOrder.buyParticipantLoginId ?? "").trim() === code;
+    const isSellSide =
+      String(settleOrder.sellParticipantLoginId ?? "").trim() === code;
+    const clientOrderSide: "BUY" | "SELL" | undefined = isBuySide
+      ? "BUY"
+      : isSellSide
+        ? "SELL"
+        : undefined;
+
+    const orderForPdf = {
+      orderNumber: settleOrder.orderNumber,
+      reqOrderNumber: null,
+      customerProfileId: null,
+      isin: settleOrder.symbol ?? "",
+      quantity:
+        settleOrder.modQuantity != null ? Number(settleOrder.modQuantity) : 0,
+      totalAmount: Number(
+        settleOrder.modConsideration ?? settleOrder.value ?? 0,
+      ),
+      stampDuty: Number(settleOrder.stampDutyAmount ?? 0),
+      metadata: {
+        rfqNumber: settleOrder.orderNumber,
+        clientOrderSide,
+        isRfqParticipant: true,
+        participantCode: code,
+      } as Record<string, unknown>,
+      createdAt: settleOrder.createdAt ?? new Date(),
+    };
+
+    const userShim = this.buildRfqParticipantShimUser(participant);
+
+    return {
+      kind: "rfqParticipant",
+      orderForPdf,
+      user: userShim,
+      primaryBank: defaultBank
+        ? {
+          bankName: defaultBank.bankName,
+          ifscCode: defaultBank.bankIFSC,
+          accountNumber: defaultBank.bankAccountNo,
+        }
+        : null,
+      primaryDemat: defaultDemat
+        ? {
+          dpId: defaultDemat.dpId ?? null,
+          clientId: defaultDemat.benId,
+          depositoryParticipantName: defaultDemat.dpType,
+        }
+        : null,
+      rfqParticipantCode: code,
+    };
+  }
+
+  /**
    * Builds the CRM order receipt PDF (settlement / RFQ) as a buffer.
+   *
+   * Resolves the actor for `orderNumber` using {@link resolveOrderPdfActor}
+   * so the PDF works for both Meradhan customers and external RFQ
+   * participants (settle orders stamped by `asign-order.ts`).
+   *
    * @throws AppError NOT_FOUND when order or bond is missing
    */
   async generateOrderReceiptPdfBuffer(
     orderNumber: string,
     pdfQuery: Record<string, string | undefined>,
   ): Promise<{ buffer: Buffer; filename: string }> {
-    const order = await this.getCustomerByOrderNumber(orderNumber);
-    if (!order) {
-      throw new AppError("No order found for this settlement. Assign a customer first.", {
-        statusCode: HttpStatus.NOT_FOUND,
-        code: "ORDER_NOT_FOUND",
-      });
-    }
+    const actor = await this.resolveOrderPdfActor(orderNumber);
+    const order = actor.orderForPdf;
+    const user = actor.user;
+    const getUserPrimaryBankAccount = actor.primaryBank;
+    const primaryDematAccount = actor.primaryDemat;
 
-    const customerRepo = new CustomerProfileRepo();
     const bondService = new BondService();
-    const user = await customerRepo.getFullCustomerProfile(order.customerProfileId);
-    const getUserPrimaryBankAccount = await db.dataBase.customersBankAccountModel.findFirst({
-      where: {
-        customerProfileDataModelId: order.customerProfileId,
-        isPrimary: true,
-      },
-    });
-    const primaryDematAccount = await db.dataBase.customersDematAccountModel.findFirst({
-      where: {
-        customerProfileDataModelId: order.customerProfileId,
-        isPrimary: true,
-      },
-    });
     const bond = await bondService.getBondDetails(order.isin);
     if (!bond) {
       throw new AppError(`Bond not found for ISIN: ${order.isin}`, {
@@ -1033,17 +1868,11 @@ export class CrmOrdersService {
     orderNumber: string,
     pdfQuery: Record<string, string | undefined>,
   ): Promise<{ buffer: Buffer; filename: string }> {
-    const order = await this.getCustomerByOrderNumber(orderNumber);
-    if (!order) {
-      throw new AppError("No order found for this settlement. Assign a customer first.", {
-        statusCode: HttpStatus.NOT_FOUND,
-        code: "ORDER_NOT_FOUND",
-      });
-    }
+    const actor = await this.resolveOrderPdfActor(orderNumber);
+    const order = actor.orderForPdf;
+    const user = actor.user;
 
-    const customerRepo = new CustomerProfileRepo();
     const bondService = new BondService();
-    const user = await customerRepo.getFullCustomerProfile(order.customerProfileId);
     const bond = await bondService.getBondDetails(order.isin);
     if (!bond) {
       throw new AppError(`Bond not found for ISIN: ${order.isin}`, {
@@ -1090,18 +1919,8 @@ export class CrmOrdersService {
       }
     }
 
-    const getUserPrimaryBankAccount = await db.dataBase.customersBankAccountModel.findFirst({
-      where: {
-        customerProfileDataModelId: order.customerProfileId,
-        isPrimary: true,
-      },
-    });
-    const primaryDematAccount = await db.dataBase.customersDematAccountModel.findFirst({
-      where: {
-        customerProfileDataModelId: order.customerProfileId,
-        isPrimary: true,
-      },
-    });
+    const getUserPrimaryBankAccount = actor.primaryBank;
+    const primaryDematAccount = actor.primaryDemat;
     const negotation = await db.dataBase.rFQNegotiation.findFirst({
       where: {
         tradeNumber: settleOrder?.orderNumber,
@@ -1396,6 +2215,16 @@ export class CrmOrdersService {
         statusCode: HttpStatus.NOT_FOUND,
         code: "ORDER_NOT_FOUND",
       });
+    }
+    // Participant-counterparty orders can't go through this email flow yet
+    // because the PDF is password-protected with the customer's DOB —
+    // participants have no DOB on file. Operators should download the PDF
+    // for participant orders and email manually.
+    if (order.customerProfileId == null) {
+      throw new AppError(
+        "Email PDF flow isn't supported for NSE-participant counterparties yet. Download the PDF and send it manually instead.",
+        { statusCode: HttpStatus.BAD_REQUEST, code: "PARTICIPANT_ORDER_EMAIL_UNSUPPORTED" },
+      );
     }
 
     const customerRepo = new CustomerProfileRepo();

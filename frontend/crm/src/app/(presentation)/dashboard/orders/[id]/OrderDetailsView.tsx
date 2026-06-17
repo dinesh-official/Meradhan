@@ -194,39 +194,98 @@ function OrderDetailsView() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Order Information */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Customer Information */}
+          {/* Counterparty information — Meradhan customer (default) or
+              external NSE participant (when assigned via the CRM
+              assign-rfq-participant flow). */}
           <Card>
             <CardHeader>
-              <CardTitle>Customer Information</CardTitle>
+              <CardTitle>
+                {order.customerProfile
+                  ? "Customer Information"
+                  : "NSE Participant (counterparty)"}
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Name</p>
-                  <p className="font-medium">
-                    {order.customerProfile.firstName}{" "}
-                    {order.customerProfile.lastName}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Email</p>
-                  <p className="font-medium">
-                    {order.customerProfile.emailAddress}
-                  </p>
-                </div>
-                {order.customerProfile.phoneNo && (
+              {order.customerProfile ? (
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-muted-foreground">Phone</p>
+                    <p className="text-sm text-muted-foreground">Name</p>
                     <p className="font-medium">
-                      {order.customerProfile.phoneNo}
+                      {order.customerProfile.firstName}{" "}
+                      {order.customerProfile.lastName}
                     </p>
                   </div>
-                )}
-                <div>
-                  <p className="text-sm text-muted-foreground">Customer ID</p>
-                  <p className="font-medium">{order.customerProfile.id}</p>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Email</p>
+                    <p className="font-medium">
+                      {order.customerProfile.emailAddress}
+                    </p>
+                  </div>
+                  {order.customerProfile.phoneNo && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Phone</p>
+                      <p className="font-medium">
+                        {order.customerProfile.phoneNo}
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-sm text-muted-foreground">Customer ID</p>
+                    <p className="font-medium">{order.customerProfile.id}</p>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      Participant code
+                    </p>
+                    <p className="font-medium font-mono">
+                      {order.linkedRfqParticipantCode ?? "—"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Name</p>
+                    <p className="font-medium">
+                      {order.rfqParticipantInfo?.nameOverride?.trim() ||
+                        order.linkedRfqParticipantCode ||
+                        "—"}
+                    </p>
+                  </div>
+                  {order.rfqParticipantInfo?.contactPerson && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Contact</p>
+                      <p className="font-medium">
+                        {order.rfqParticipantInfo.contactPerson}
+                      </p>
+                    </div>
+                  )}
+                  {!!order.rfqParticipantInfo?.emailList?.length && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Email</p>
+                      <p className="font-medium break-all">
+                        {order.rfqParticipantInfo.emailList.join(", ")}
+                      </p>
+                    </div>
+                  )}
+                  {!!order.rfqParticipantInfo?.mobileList?.length && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Mobile</p>
+                      <p className="font-medium">
+                        {order.rfqParticipantInfo.mobileList.join(", ")}
+                      </p>
+                    </div>
+                  )}
+                  {order.rfqParticipantInfo?.panNo && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">PAN</p>
+                      <p className="font-medium font-mono">
+                        {order.rfqParticipantInfo.panNo}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
 

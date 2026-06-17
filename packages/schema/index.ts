@@ -53,8 +53,20 @@ export type {
 
 export { ResyncKraFromCbricsParticipantsBodyZ } from "./lib/crm/req/nse/isin/getParticipants.schema";
 
+export {
+  NseRfqParticipantInfoUpsertBodyZ,
+  NseRfqParticipantBankAccountInputZ,
+  NseRfqParticipantDpAccountInputZ,
+  NseRfqParticipantCodeParamZ,
+  type NseRfqParticipantInfoUpsertBody,
+  type NseRfqParticipantBankAccountInput,
+  type NseRfqParticipantDpAccountInput,
+  type NseRfqParticipantCodeParam,
+} from "./lib/crm/req/nse/isin/rfqParticipantInfo.schema";
+
 import * as nseIsinSchema from "./lib/crm/req/nse/isin/filterIsin.schema";
 import * as getParticipants from "./lib/crm/req/nse/isin/getParticipants.schema";
+import * as rfqParticipantInfo from "./lib/crm/req/nse/isin/rfqParticipantInfo.schema";
 import * as auditlogs from "./lib/crm/auditlogs.schema";
 import * as notificationsSchema from "./lib/crm/notifications.schema";
 
@@ -79,6 +91,7 @@ export const appSchema = {
       nse: {
         isin: nseIsinSchema,
         getParticipants,
+        rfqParticipantInfo,
       },
     },
   },

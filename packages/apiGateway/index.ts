@@ -38,6 +38,12 @@ export type * from "./src/core/api/crm/razorpayStakeholders.response";
 import * as auditlogs from "./src/core/api/crm/auditlogs/auditlogs.api";
 
 import * as participants from "./src/core/api/crm/RFQ/nse/participants.api";
+export type {
+  NseRfqParticipantInfoData,
+  NseRfqParticipantBankAccountData,
+  NseRfqParticipantDpAccountData,
+  NseRfqParticipantInfoSummary,
+} from "./src/core/api/crm/RFQ/nse/participants.api";
 import { RfqIsinApi } from "./src/core/api/crm/RFQ/nse/isin.api";
 import { CbricsManagerApi } from "./src/core/api/crm/cbrics_manager.api";
 export type { CbricsWorkflowStatus } from "./src/core/api/crm/cbrics_manager.api";

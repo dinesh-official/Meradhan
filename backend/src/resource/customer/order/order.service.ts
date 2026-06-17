@@ -310,6 +310,15 @@ export class OrderService {
     if (order.paymentStatus === PaymentStatus.COMPLETED) {
       return { message: "Already captured", id: order.id };
     }
+    // The customer payment path is for Meradhan-customer orders only;
+    // participant-counterparty orders never go through Razorpay.
+    if (order.customerProfileId == null) {
+      throw new AppError(
+        "Cannot capture payment on a participant-counterparty order.",
+        { code: "PARTICIPANT_ORDER" },
+      );
+    }
+    const customerProfileId = order.customerProfileId;
 
     if (signature) {
       const isValid = this.payment.verifySignature(
@@ -347,7 +356,7 @@ export class OrderService {
 
       await tx.customerBonds.create({
         data: {
-          customerProfileId: order.customerProfileId,
+          customerProfileId,
           orderId: order.id,
           isin: order.isin,
           bondName: order.bondName,

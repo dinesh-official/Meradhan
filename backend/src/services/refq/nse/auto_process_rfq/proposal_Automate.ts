@@ -355,13 +355,57 @@ type PRPOSALDATA = {
         verifyDate: any
         emailAddress: string
         currentKycStepName: string
-    }
+    } | null
+    rfqParticipant?: {
+        code: string
+        emailList?: string[]
+        nameOverride?: string | null
+    } | null
     quantity: number
     createdAt: string
     manualYield: string
     settlementType: string
     manualYieldEnabled: boolean
 }
+
+const resolveClientUccCode = async (data: PRPOSALDATA) => {
+    const rfqCode = data.rfqParticipant?.code?.trim();
+    if (rfqCode) {
+        const info = await db.dataBase.nseRfqParticipantInfoModel.findUnique({
+            where: { code: rfqCode },
+        });
+        if (!info) {
+            throw new Error(
+                `RFQ participant info not found for code "${rfqCode}"`,
+            );
+        }
+        return {
+            clientUCCCode: rfqCode,
+            customerProfileId: null as number | null,
+            linkedRfqParticipantCode: rfqCode,
+        };
+    }
+
+    if (!data.customer?.id) {
+        throw new Error("Proposal has no linked customer or RFQ participant");
+    }
+
+    const nseDataSet = await db.dataBase.nseDataSet.findUnique({
+        where: { customerProfileDataModelId: data.customer.id },
+        include: { participant: true },
+    });
+    if (!nseDataSet?.participant?.loginId) {
+        throw new Error(
+            `Customer ${data.customer.id} has no NSE participant (UCC) registered`,
+        );
+    }
+
+    return {
+        clientUCCCode: nseDataSet.participant.loginId,
+        customerProfileId: data.customer.id,
+        linkedRfqParticipantCode: null as string | null,
+    };
+};
 
 const createOrderFromProposal = async (data: PRPOSALDATA): Promise<{
     order: Awaited<ReturnType<typeof db.dataBase.order.update>>;
@@ -372,15 +416,8 @@ const createOrderFromProposal = async (data: PRPOSALDATA): Promise<{
     const action = data.side.toUpperCase() === "SELL" ? "SELL" : "BUY";
     const bondName = bond.bondName || bond.instrumentName;
 
-    // Fetch customer's NSE UCC code from nseDataSet
-    const nseDataSet = await db.dataBase.nseDataSet.findUnique({
-        where: { customerProfileDataModelId: data.customer.id },
-        include: { participant: true },
-    });
-    if (!nseDataSet?.participant?.loginId) {
-        throw new Error(`Customer ${data.customer.id} has no NSE participant (UCC) registered`);
-    }
-    const clientUCCCode = nseDataSet.participant.loginId;
+    const { clientUCCCode, customerProfileId, linkedRfqParticipantCode } =
+        await resolveClientUccCode(data);
 
     const settlementType: 0 | 1 = data.settlementType === "T+0" ? 0 : 1;
     const yieldValue = data.manualYieldEnabled ? parseFloat(data.manualYield) : bond.yield;
@@ -389,7 +426,8 @@ const createOrderFromProposal = async (data: PRPOSALDATA): Promise<{
 
     const order = await db.dataBase.order.create({
         data: {
-            customerProfileId: data.customer.id,
+            customerProfileId,
+            linkedRfqParticipantCode,
             orderNumber: tempOrderNumber,
             subTotal: pricing.principalAmount,
             stampDuty: pricing.stampDuty,
@@ -479,6 +517,9 @@ export const proposalProcessing = async (id: number) => {
     }
 
     const proposalData = proposal.data as PRPOSALDATA;
+    if (!proposalData.rfqParticipant && proposal.linkedRfqParticipantCode) {
+        proposalData.rfqParticipant = { code: proposal.linkedRfqParticipantCode };
+    }
     const { order, rfqPayload } = await createOrderFromProposal(proposalData);
 
     try {
@@ -513,12 +554,22 @@ export const proposalProcessing = async (id: number) => {
             }),
         ]);
 
-        await sendOrderReceiptPdfByOrderId({
-            orderId: order.id,
-            toEmail: proposalData.customer.emailAddress,
-        }).catch((err: unknown) => {
-            console.error(`Order receipt email failed for order ${order.id}:`, err);
-        });
+        const receiptEmail =
+            proposalData.customer?.emailAddress?.trim() ||
+            proposalData.rfqParticipant?.emailList?.find((e) => e?.trim())?.trim() ||
+            null;
+
+        if (receiptEmail) {
+            await sendOrderReceiptPdfByOrderId({
+                orderId: order.id,
+                toEmail: receiptEmail,
+            }).catch((err: unknown) => {
+                console.error(
+                    `Order receipt email failed for order ${order.id}:`,
+                    err,
+                );
+            });
+        }
 
         return {
             orderId: order.id,
