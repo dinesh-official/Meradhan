@@ -1,10 +1,17 @@
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import { CrmSavedProposalsRepo } from "./crm_saved_proposals.repo";
 import { db } from "@core/database/database";
+import { RfqMasterService } from "@resource/crm/refq/nse/rfq_master/rfq_master.service";
+import {
+  buildAddIsinPayloadFromProposal,
+  rfqManageRedirectFromCreateResult,
+} from "./proposal_rfq_payload.util";
 
 export class CrmSavedProposalsService {
+  private rfqMasterService = new RfqMasterService();
   async createProposal(createdById: number, input: {
-    customerProfileId: number;
+    customerProfileId?: number | null;
+    linkedRfqParticipantCode?: string | null;
     isin: string;
     bondName: string;
     side: "BUY" | "SELL";
@@ -17,9 +24,41 @@ export class CrmSavedProposalsService {
         statusCode: HttpStatus.UNAUTHORIZED,
       });
     }
+
+    const customerProfileId = input.customerProfileId ?? null;
+    const linkedRfqParticipantCode =
+      input.linkedRfqParticipantCode?.trim() || null;
+
+    if (customerProfileId == null && !linkedRfqParticipantCode) {
+      throw new AppError(
+        "Either customerProfileId or linkedRfqParticipantCode is required",
+        { statusCode: HttpStatus.BAD_REQUEST },
+      );
+    }
+    if (customerProfileId != null && linkedRfqParticipantCode) {
+      throw new AppError(
+        "Provide either customerProfileId or linkedRfqParticipantCode, not both",
+        { statusCode: HttpStatus.BAD_REQUEST },
+      );
+    }
+
+    if (linkedRfqParticipantCode) {
+      const participantInfo =
+        await db.dataBase.nseRfqParticipantInfoModel.findUnique({
+          where: { code: linkedRfqParticipantCode },
+        });
+      if (!participantInfo) {
+        throw new AppError(
+          `RFQ participant info not found for code "${linkedRfqParticipantCode}". Add an entry via RFQ Participants first.`,
+          { statusCode: HttpStatus.BAD_REQUEST },
+        );
+      }
+    }
+
     return CrmSavedProposalsRepo.create({
       createdById,
-      customerProfileId: input.customerProfileId,
+      customerProfileId,
+      linkedRfqParticipantCode,
       isin: input.isin,
       bondName: input.bondName,
       side: input.side,
@@ -99,6 +138,22 @@ export class CrmSavedProposalsService {
       data: { status: "WAITING_FOR_APPROVAL" },
     });
     return { success: true };
+  }
+
+  /**
+   * Step 1 only for NSE RFQ participant proposals: POST add-ISIN to NSE and
+   * sync RFQ master — no order creation, negotiation, or deal automation.
+   */
+  async createIsinRfqFromProposal(createdById: number, id: number) {
+    const proposal = await this.getMyProposalById(createdById, id);
+    const rfqPayload = buildAddIsinPayloadFromProposal(proposal);
+    const created = await this.rfqMasterService.createNewRfq(rfqPayload, createdById);
+
+    return {
+      rfq: Array.isArray(created) ? created[0] : created,
+      redirectTo: rfqManageRedirectFromCreateResult(created),
+      mode: "create_isin_only" as const,
+    };
   }
 }
 

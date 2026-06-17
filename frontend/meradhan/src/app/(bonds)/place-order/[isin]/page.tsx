@@ -93,6 +93,7 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
 
   const kycOk = isKycVerified(session.kycStatus);
   const kraOk = isKraVerified(session.kraStatus);
+  console.log(orderPricing);
 
   if (!kycOk || !kraOk) {
     return (

@@ -18,7 +18,11 @@ import {
   Zap,
 } from "lucide-react";
 import type { AxiosError } from "axios";
-import apiGateway, { type BondDetailsResponse, type CustomerProfile } from "@root/apiGateway";
+import apiGateway, {
+  type BondDetailsResponse,
+  type CustomerProfile,
+  type NseRfqParticipantInfoSummary,
+} from "@root/apiGateway";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -65,6 +69,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { SelectCustomerUser } from "@/global/elements/autocomplete/SelectCustomerUser";
+import {
+  RfqParticipantInfoCard,
+  SelectRfqParticipantWithInfo,
+} from "@/global/elements/autocomplete/SelectRfqParticipantWithInfo";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { useProposalFetcher, type ProposalFetchResult } from "./useProposalFetcher";
 import { useRouter } from "nextjs-toploader/app";
@@ -260,10 +269,57 @@ type ProposalDraft = {
   settlementType: "T+0" | "T+1";
   manualYieldEnabled: boolean;
   manualYield: string;
-  customer: CustomerProfile;
+  customer: CustomerProfile | null;
+  /** CRM-enriched NSE RFQ participant from /rfq-participants. */
+  rfqParticipant?: NseRfqParticipantInfoSummary | null;
+  /** DB column when saved without a Meradhan customer. */
+  linkedRfqParticipantCode?: string | null;
   fetched: ProposalFetchResult;
   createdAt: string;
 };
+
+function rfqParticipantDisplayName(
+  participant: NseRfqParticipantInfoSummary | null | undefined,
+) {
+  if (!participant) return "—";
+  return participant.nameOverride?.trim() || participant.code;
+}
+
+function rfqParticipantPrimaryEmail(
+  participant: NseRfqParticipantInfoSummary | null | undefined,
+) {
+  const email = participant?.emailList?.find((e) => e?.trim());
+  return email?.trim() || "";
+}
+
+function proposalRecipientName(draft: {
+  customer: CustomerProfile | null;
+  rfqParticipant?: NseRfqParticipantInfoSummary | null;
+}) {
+  if (draft.rfqParticipant) return rfqParticipantDisplayName(draft.rfqParticipant);
+  return customerFullName(draft.customer);
+}
+
+function proposalRecipientEmail(draft: {
+  customer: CustomerProfile | null;
+  rfqParticipant?: NseRfqParticipantInfoSummary | null;
+}) {
+  return (
+    draft.customer?.emailAddress?.trim() ||
+    rfqParticipantPrimaryEmail(draft.rfqParticipant) ||
+    ""
+  );
+}
+
+/** Saved proposal targeted at an enriched NSE RFQ participant (not a Meradhan customer). */
+function isNseParticipantProposal(draft: {
+  rfqParticipant?: NseRfqParticipantInfoSummary | null;
+  linkedRfqParticipantCode?: string | null;
+}) {
+  return Boolean(
+    draft.rfqParticipant?.code?.trim() || draft.linkedRfqParticipantCode?.trim(),
+  );
+}
 
 function bondLabel(bond: Pick<BondDetailsResponse, "isin" | "bondName" | "instrumentName">) {
   return `${bond.isin} - ${bond.bondName || bond.instrumentName || "Unnamed Bond"}`;
@@ -288,6 +344,7 @@ function ProposalManagementView() {
   const bondsApi = new apiGateway.bondsApi.BondsApi(apiClientCaller);
   const ordersApi = new apiGateway.crm.crmOrdersApi(apiClientCaller);
   const savedProposalsApi = new apiGateway.crm.crmSavedProposalsApi(apiClientCaller);
+  const customerApi = new apiGateway.crm.customer.CrmCustomerApi(apiClientCaller);
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isin, setIsin] = useState("");
@@ -299,6 +356,12 @@ function ProposalManagementView() {
   const [manualYieldEnabled, setManualYieldEnabled] = useState(false);
   const [manualYield, setManualYield] = useState("");
   const [notes, setNotes] = useState("");
+  const [recipientMode, setRecipientMode] = useState<"RFQ_PARTICIPANT" | "CUSTOMER">(
+    "RFQ_PARTICIPANT",
+  );
+  const [selectedRfqParticipant, setSelectedRfqParticipant] =
+    useState<NseRfqParticipantInfoSummary | null>(null);
+  const [isResolvingParticipantCustomer, setIsResolvingParticipantCustomer] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerProfile | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [proposalDraft, setProposalDraft] = useState<ProposalDraft | null>(null);
@@ -428,6 +491,8 @@ function ProposalManagementView() {
           createdAt: row.createdAt,
           status: row.status ?? "PENDING",
           failedNote: row.failedNote ?? null,
+          linkedRfqParticipantCode:
+            row.linkedRfqParticipantCode ?? data.linkedRfqParticipantCode ?? null,
         } as ProposalDraft;
       })
       .filter((x): x is ProposalDraft => Boolean(x));
@@ -481,8 +546,8 @@ function ProposalManagementView() {
 
       const bondName =
         item.fetched?.bond?.bondName || item.fetched?.bond?.instrumentName || "";
-      const customerName = customerFullName(item.customer).toLowerCase();
-      const email = (item.customer?.emailAddress || "").toLowerCase();
+      const customerName = proposalRecipientName(item).toLowerCase();
+      const email = proposalRecipientEmail(item).toLowerCase();
       const isin = (item.isin || "").toLowerCase();
 
       return (
@@ -531,6 +596,46 @@ function ProposalManagementView() {
     });
   };
 
+  const resolveParticipantCustomer = async (participantCode: string) => {
+    try {
+      const response = await customerApi.getCustomerByParticipantCode(participantCode);
+      const customer = response.data.responseData;
+      if (!customer?.id) {
+        return null;
+      }
+      return customer;
+    } catch {
+      return null;
+    }
+  };
+
+  const handleRfqParticipantSelect = async (
+    participant: NseRfqParticipantInfoSummary | null,
+  ) => {
+    setSelectedRfqParticipant(participant);
+    if (!participant) {
+      setSelectedCustomer(null);
+      return;
+    }
+
+    setIsResolvingParticipantCustomer(true);
+    try {
+      const customer = await resolveParticipantCustomer(participant.code);
+      setSelectedCustomer(customer);
+      if (customer) {
+        toast.success(`Linked customer: ${customerFullName(customer)}`);
+      }
+    } finally {
+      setIsResolvingParticipantCustomer(false);
+    }
+  };
+
+  const handleRecipientModeChange = (mode: "RFQ_PARTICIPANT" | "CUSTOMER") => {
+    setRecipientMode(mode);
+    setSelectedCustomer(null);
+    setSelectedRfqParticipant(null);
+  };
+
   const handleReset = () => {
     setIsin("");
     setIsinSearch("");
@@ -540,6 +645,8 @@ function ProposalManagementView() {
     setManualYield("");
     setQuantity("1");
     setNotes("");
+    setRecipientMode("RFQ_PARTICIPANT");
+    setSelectedRfqParticipant(null);
     setSelectedCustomer(null);
     setProposalDraft(null);
     setEditSourceId(null);
@@ -552,7 +659,12 @@ function ProposalManagementView() {
       toast.error("ISIN is required");
       return;
     }
-    if (!selectedCustomer) {
+    if (recipientMode === "RFQ_PARTICIPANT") {
+      if (!selectedRfqParticipant) {
+        toast.error("Please select an RFQ participant with saved info");
+        return;
+      }
+    } else if (!selectedCustomer) {
       toast.error("Please select a customer");
       return;
     }
@@ -589,6 +701,7 @@ function ProposalManagementView() {
         manualYieldEnabled,
         manualYield,
         customer: selectedCustomer,
+        rfqParticipant: selectedRfqParticipant,
         fetched,
         createdAt: new Date().toISOString(),
       });
@@ -604,6 +717,12 @@ function ProposalManagementView() {
       toast.error("Create a proposal first");
       return;
     }
+    const rfqCode =
+      selectedRfqParticipant?.code ?? proposalDraft.rfqParticipant?.code ?? null;
+    if (!proposalDraft.customer?.id && !rfqCode) {
+      toast.error("Select a customer or RFQ participant before saving");
+      return;
+    }
     if (saveMutation.isPending) return;
 
     // Sync latest form values into the draft before saving so edits to
@@ -612,6 +731,7 @@ function ProposalManagementView() {
       ...proposalDraft,
       notes: notes.trim(),
       customer: selectedCustomer ?? proposalDraft.customer,
+      rfqParticipant: selectedRfqParticipant ?? proposalDraft.rfqParticipant ?? null,
       manualYieldEnabled,
       manualYield,
     };
@@ -630,6 +750,8 @@ function ProposalManagementView() {
     setManualYield(item.manualYield ?? "");
     setNotes(item.notes);
     setSelectedCustomer(item.customer);
+    setSelectedRfqParticipant(item.rfqParticipant ?? null);
+    setRecipientMode(item.rfqParticipant ? "RFQ_PARTICIPANT" : "CUSTOMER");
     setEditSourceId(null);
     setIsSheetOpen(true);
   };
@@ -652,6 +774,8 @@ function ProposalManagementView() {
     setManualYield(item.manualYield ?? "");
     setNotes(item.notes);
     setSelectedCustomer(item.customer);
+    setSelectedRfqParticipant(item.rfqParticipant ?? null);
+    setRecipientMode(item.rfqParticipant ? "RFQ_PARTICIPANT" : "CUSTOMER");
     setEditSourceId(item.id);
     setIsSheetOpen(true);
     toast.success(`Editing proposal (will save as new version)`);
@@ -660,8 +784,11 @@ function ProposalManagementView() {
   const saveMutation = useMutation({
     mutationFn: async (draft: ProposalDraft) => {
       const bondName = draft.fetched?.bond?.bondName || draft.fetched?.bond?.instrumentName || "Bond";
+      const customerId = draft.customer?.id ?? null;
+      const rfqCode = draft.rfqParticipant?.code?.trim() || null;
       const res = await savedProposalsApi.create({
-        customerProfileId: draft.customer.id,
+        customerProfileId: customerId,
+        linkedRfqParticipantCode: customerId ? null : rfqCode,
         isin: draft.isin,
         bondName,
         side: draft.side,
@@ -689,8 +816,11 @@ function ProposalManagementView() {
 
   const autoCreateRfqMutation = useMutation({
     mutationFn: async (proposalId: number) => savedProposalsApi.autoCreateRfq(proposalId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["crm-saved-proposals"] });
+    },
     onError: (error: unknown) => {
-      toast.error(getApiErrorMessage(error, "Failed to auto create RFQ"));
+      toast.error(getApiErrorMessage(error, "Failed to create ISIN RFQ"));
     },
   });
 
@@ -728,14 +858,15 @@ function ProposalManagementView() {
       return;
     }
     const res = await autoCreateRfqMutation.mutateAsync(idNum);
-    const redirectTo = res?.responseData?.redirectTo || "/dashboard/rfqs/nse/deals";
+    const redirectTo = res?.responseData?.redirectTo || "/dashboard/rfqs/nse";
     router.push(redirectTo);
   };
 
   const openEmailPreviewForDraft = (draft: ProposalDraft) => {
     setEmailDraftId(Number.isFinite(Number(draft.id)) ? draft.id : null);
-    if (!draft.customer.emailAddress) {
-      toast.error("Selected customer does not have an email address");
+    const recipientEmail = proposalRecipientEmail(draft);
+    if (!recipientEmail) {
+      toast.error("No email on file for this recipient — add email on RFQ Participants or customer profile");
       return;
     }
 
@@ -792,8 +923,8 @@ function ProposalManagementView() {
     const quantum = faceValue != null ? faceValue * draft.quantity : undefined;
 
     const payload: SendProposalEmailPayload = {
-      toEmail: draft.customer.emailAddress,
-      customerName: customerFullName(draft.customer),
+      toEmail: proposalRecipientEmail(draft),
+      customerName: proposalRecipientName(draft),
       side: draft.side,
       bondName: currentBond?.bondName || currentBond?.instrumentName || "Bond",
       isin: draft.isin,
@@ -844,8 +975,21 @@ function ProposalManagementView() {
       return;
     }
     const res = await autoCreateRfqMutation.mutateAsync(idNum);
-    const redirectTo = res?.responseData?.redirectTo || "/dashboard/rfqs/nse/deals";
+    const redirectTo = res?.responseData?.redirectTo || "/dashboard/rfqs/nse";
+    toast.success("ISIN RFQ created on NSE");
     router.push(redirectTo);
+  };
+
+  const handleConfirmRfqProcessing = async (draft: ProposalDraft) => {
+    const idNum = Number(draft.id);
+    if (!Number.isFinite(idNum)) return;
+
+    if (isNseParticipantProposal(draft)) {
+      await handleAutoCreateRfqFromSaved(draft);
+      return;
+    }
+
+    await queueProcessingMutation.mutateAsync(idNum);
   };
 
   const openEditDialog = (item: ProposalDraft) => {
@@ -1092,14 +1236,68 @@ function ProposalManagementView() {
               </div>
             </div>
 
-            {/* Customer */}
+            {/* Recipient: RFQ participant or customer */}
             <div className="px-6 py-5">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Customer</p>
-              <SelectCustomerUser
-                value={selectedCustomer ?? undefined}
-                onSelect={setSelectedCustomer}
-                placeholder="Search and select customer..."
-              />
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  Recipient
+                </p>
+                <Tabs
+                  value={recipientMode}
+                  onValueChange={(value) =>
+                    handleRecipientModeChange(value as "RFQ_PARTICIPANT" | "CUSTOMER")
+                  }
+                >
+                  <TabsList className="h-8">
+                    <TabsTrigger value="RFQ_PARTICIPANT" className="text-xs">
+                      RFQ Participant
+                    </TabsTrigger>
+                    <TabsTrigger value="CUSTOMER" className="text-xs">
+                      Customer
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
+
+              {recipientMode === "RFQ_PARTICIPANT" ? (
+                <div className="space-y-3">
+                  <SelectRfqParticipantWithInfo
+                    value={selectedRfqParticipant}
+                    onSelect={(participant) => {
+                      void handleRfqParticipantSelect(participant);
+                    }}
+                    placeholder="Select RFQ participant with saved info…"
+                    disabled={isResolvingParticipantCustomer}
+                  />
+                  {selectedRfqParticipant ? (
+                    <>
+                      <RfqParticipantInfoCard participant={selectedRfqParticipant} />
+                      {selectedCustomer ? (
+                        <p className="text-xs text-emerald-700">
+                          Linked Meradhan customer: {customerFullName(selectedCustomer)}
+                        </p>
+                      ) : (
+                        <p className="text-xs text-muted-foreground">
+                          Saving uses this RFQ participant directly — no Meradhan customer
+                          link required. Add email on RFQ Participants for proposal emails.
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      Only participants enriched on{" "}
+                      <span className="font-medium">RFQ Participants</span> appear here. Add
+                      contact, bank and demat details there first.
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <SelectCustomerUser
+                  value={selectedCustomer ?? undefined}
+                  onSelect={setSelectedCustomer}
+                  placeholder="Search and select customer..."
+                />
+              )}
             </div>
 
             {/* Manual yield */}
@@ -1183,8 +1381,17 @@ function ProposalManagementView() {
                     <UserRound className="h-4 w-4" />
                   </div>
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-slate-800">{customerFullName(proposalDraft.customer)}</p>
-                    <p className="truncate text-xs text-muted-foreground">{proposalDraft.customer.emailAddress || "—"}</p>
+                    <p className="truncate text-sm font-semibold text-slate-800">
+                      {proposalRecipientName(proposalDraft)}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {proposalRecipientEmail(proposalDraft) || "—"}
+                    </p>
+                    {proposalDraft.rfqParticipant ? (
+                      <p className="truncate text-xs text-slate-500">
+                        RFQ: {proposalDraft.rfqParticipant.code}
+                      </p>
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -1314,7 +1521,7 @@ function ProposalManagementView() {
                   <tr className="border-b border-border bg-slate-50">
                     <th className="w-9 px-3 py-3" />
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Bond / ISIN</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Customer</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Recipient</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Side</th>
                     <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Qty</th>
                     <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Clean Px</th>
@@ -1382,11 +1589,19 @@ function ProposalManagementView() {
                             </div>
                           </td>
 
-                          {/* Customer */}
+                          {/* Recipient */}
                           <td className="max-w-[200px] px-4 py-3.5">
-                            <p className="truncate text-sm font-medium text-slate-700">{customerFullName(item.customer)}</p>
-                            {item.customer?.emailAddress ? (
-                              <p className="truncate text-[11px] text-slate-400">{item.customer.emailAddress}</p>
+                            <p className="truncate text-sm font-medium text-slate-700">
+                              {proposalRecipientName(item)}
+                            </p>
+                            {item.rfqParticipant ? (
+                              <p className="truncate font-mono text-[11px] text-slate-400">
+                                {item.rfqParticipant.code}
+                              </p>
+                            ) : proposalRecipientEmail(item) ? (
+                              <p className="truncate text-[11px] text-slate-400">
+                                {proposalRecipientEmail(item)}
+                              </p>
                             ) : null}
                           </td>
 
@@ -1497,7 +1712,11 @@ function ProposalManagementView() {
                                     <Zap className="h-3.5 w-3.5" />
                                   </button>
                                 </TooltipTrigger>
-                                <TooltipContent>Trigger RFQ processing</TooltipContent>
+                                <TooltipContent>
+                                  {isNseParticipantProposal(item)
+                                    ? "Create ISIN RFQ on NSE (step 1 only)"
+                                    : "Trigger full RFQ processing"}
+                                </TooltipContent>
                               </Tooltip>
                             </div>
                           </td>
@@ -1614,7 +1833,14 @@ function ProposalManagementView() {
                     <Button
                       size="sm"
                       variant="secondary"
-                      onClick={() => void handleAutoCreateRfqFromSaved(proposalDraft)}
+                      onClick={() => {
+                        if (isNseParticipantProposal(proposalDraft)) {
+                          setConfirmProcessItem(proposalDraft);
+                          setConfirmProcessOpen(true);
+                        } else {
+                          void handleAutoCreateRfqFromSaved(proposalDraft);
+                        }
+                      }}
                       disabled={autoCreateRfqMutation.isPending || !Number.isFinite(Number(proposalDraft.id))}
                     >
                       <Zap className="h-4 w-4" />
@@ -1626,17 +1852,28 @@ function ProposalManagementView() {
               <div className="rounded-xl border border-gray-200 p-4 space-y-4">
                 <div>
                   <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                    Customer
+                    Recipient
                   </p>
                   <h3 className="text-base font-semibold">
-                    {customerFullName(proposalDraft.customer)}
+                    {proposalRecipientName(proposalDraft)}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    {proposalDraft.customer.emailAddress || "—"}
+                    {proposalRecipientEmail(proposalDraft) || "—"}
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    {proposalDraft.customer.phoneNo || "—"}
-                  </p>
+                  {proposalDraft.rfqParticipant ? (
+                    <div className="mt-3">
+                      <RfqParticipantInfoCard participant={proposalDraft.rfqParticipant} />
+                    </div>
+                  ) : proposalDraft.customer?.phoneNo ? (
+                    <p className="text-sm text-muted-foreground">
+                      {proposalDraft.customer.phoneNo}
+                    </p>
+                  ) : null}
+                  {proposalDraft.customer ? (
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Linked customer: {customerFullName(proposalDraft.customer)}
+                    </p>
+                  ) : null}
                 </div>
 
                 <Separator />
@@ -2146,15 +2383,20 @@ function ProposalManagementView() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Zap className="h-4 w-4 text-amber-500" />
-              Confirm RFQ Processing
+              {confirmProcessItem && isNseParticipantProposal(confirmProcessItem)
+                ? "Confirm Create ISIN RFQ"
+                : "Confirm RFQ Processing"}
             </DialogTitle>
             <DialogDescription>
-              Review the proposal details below. Confirming will queue this proposal for automated NSE RFQ execution.
+              {confirmProcessItem && isNseParticipantProposal(confirmProcessItem)
+                ? "Review the proposal below. Confirming will post the add-ISIN RFQ to NSE for this participant (first step only). Negotiation and deal steps are done separately on the RFQ manage screen."
+                : "Review the proposal details below. Confirming will queue this proposal for automated NSE RFQ execution."}
             </DialogDescription>
           </DialogHeader>
 
           {confirmProcessItem && (() => {
             const item = confirmProcessItem;
+            const participantProposal = isNseParticipantProposal(item);
             const bond = item.fetched?.bond;
             const pricing = item.fetched?.pricing;
             const deal = item.fetched?.dealAutofill;
@@ -2174,11 +2416,17 @@ function ProposalManagementView() {
 
                 {/* Info grid */}
                 <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-                  <div className="text-muted-foreground">Customer</div>
-                  <div className="font-medium text-slate-800">{customerFullName(item.customer)}</div>
+                  <div className="text-muted-foreground">
+                    {participantProposal ? "RFQ participant" : "Customer"}
+                  </div>
+                  <div className="font-medium text-slate-800">
+                    {proposalRecipientName(item)}
+                  </div>
 
                   <div className="text-muted-foreground">Email</div>
-                  <div className="truncate text-slate-600">{item.customer?.emailAddress || "—"}</div>
+                  <div className="truncate text-slate-600">
+                    {proposalRecipientEmail(item) || "—"}
+                  </div>
 
                   <div className="text-muted-foreground">Side</div>
                   <div className={cn("font-semibold", item.side === "SELL" ? "text-red-600" : "text-blue-600")}>
@@ -2222,7 +2470,9 @@ function ProposalManagementView() {
             <Button
               variant="outline"
               onClick={() => setConfirmProcessOpen(false)}
-              disabled={queueProcessingMutation.isPending}
+              disabled={
+                queueProcessingMutation.isPending || autoCreateRfqMutation.isPending
+              }
             >
               Cancel
             </Button>
@@ -2230,19 +2480,35 @@ function ProposalManagementView() {
               className="bg-amber-500 hover:bg-amber-600 text-white"
               disabled={
                 queueProcessingMutation.isPending ||
+                autoCreateRfqMutation.isPending ||
                 !Number.isFinite(Number(confirmProcessItem?.id))
               }
               onClick={async () => {
                 if (!confirmProcessItem) return;
                 const idNum = Number(confirmProcessItem.id);
                 if (!Number.isFinite(idNum)) return;
-                await queueProcessingMutation.mutateAsync(idNum);
+                await handleConfirmRfqProcessing(confirmProcessItem);
                 setConfirmProcessOpen(false);
               }}
             >
-              {queueProcessingMutation.isPending
-                ? <><Loader2 className="h-4 w-4 animate-spin" />Queuing…</>
-                : <><Zap className="h-4 w-4" />Confirm & Queue</>}
+              {queueProcessingMutation.isPending || autoCreateRfqMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {confirmProcessItem && isNseParticipantProposal(confirmProcessItem)
+                    ? "Creating ISIN RFQ…"
+                    : "Queuing…"}
+                </>
+              ) : confirmProcessItem && isNseParticipantProposal(confirmProcessItem) ? (
+                <>
+                  <Zap className="h-4 w-4" />
+                  Confirm & Create ISIN
+                </>
+              ) : (
+                <>
+                  <Zap className="h-4 w-4" />
+                  Confirm & Queue
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -600,12 +600,10 @@ export class NseRfq {
 
   public async getAllParticipants(): Promise<GetAllParticipantsResponse> {
     return this.withReLoginRetry(async (loginKey) => {
-      const { data, request } = await this.client.get<GetAllParticipantsResponse>(
+      const { data } = await this.client.get<GetAllParticipantsResponse>(
         "/participants/all",
         { headers: { loginKey } }
       );
-      console.log(request.config.baseURL);
-      console.log(request.config.url);
       return data;
     });
   }
