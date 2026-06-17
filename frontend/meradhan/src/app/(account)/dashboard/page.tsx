@@ -116,13 +116,6 @@ async function DashBoardPage() {
   return (
     <AccountViewPort
       title={<NameTitleView />}
-      navActions={
-        <Link href="/bonds">
-          <Button variant="outline" size="sm">
-            Explore All Bonds
-          </Button>
-        </Link>
-      }
     >
       <div className="flex flex-col gap-5">
         <CorporateESignBanner />

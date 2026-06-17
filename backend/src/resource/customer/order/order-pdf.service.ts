@@ -61,8 +61,8 @@ export class OrderPdfService {
       });
     }
 
-    let lastCouponDateStr = bond.lastCouponDate?.toISOString() ?? null;
-    let nextCouponDateStr = bond.nextCouponDate?.toISOString() ?? null;
+    let lastCouponDateStr = bond.lastCouponDateIst?.toISOString() ?? null;
+    let nextCouponDateStr = bond.nextCouponDateIst?.toISOString() ?? null;
     let recordDays =
       typeof bond.recordDays === "number" && !Number.isNaN(bond.recordDays)
         ? bond.recordDays
@@ -87,9 +87,10 @@ export class OrderPdfService {
       );
     }
 
-    const cleanPrice = bond.sellPrice;
+    const cleanPrice = bond.sellPrice ?? 0;
 
-    const pricing = computeBondOrderPricingData({
+    const pricing = await computeBondOrderPricingData({
+      isin: bond.isin,
       faceValue: bond.faceValue,
       quantity,
       cleanPrice: cleanPrice ?? 0,
@@ -155,7 +156,12 @@ export class OrderPdfService {
       bond,
       qun: quantity,
       user,
-      orderData,
+      orderData: {
+        ...orderData,
+        subTotal: Number(orderData?.subTotal ?? 0),
+        stampDuty: Number(orderData?.stampDuty ?? 0),
+        totalAmount: Number(orderData?.totalAmount ?? 0),
+      },
     });
   }
 }

@@ -10,6 +10,7 @@
  */
 
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
@@ -30,6 +31,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { cn } from "@/lib/utils";
 import type {
@@ -40,7 +43,7 @@ import type {
 import apiGateway from "@root/apiGateway";
 import type { NseRfqParticipantInfoUpsertBody } from "@root/schema";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Plus, Save, Trash2, X } from "lucide-react";
+import { Loader2, Plus, Save, Trash2, X, Building2, Landmark, Wallet, UserRound, MapPin, FileText } from "lucide-react";
 import * as React from "react";
 import { toast } from "sonner";
 
@@ -176,6 +179,107 @@ function buildStateFromServer(data: NseRfqParticipantInfoData): FormState {
   };
 }
 
+function formatUpdatedAt(value: string | undefined) {
+  if (!value) return null;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return null;
+  return new Intl.DateTimeFormat("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(d);
+}
+
+function countFilledSections(form: FormState, hasSaved: boolean) {
+  const checks = [
+    Boolean(form.nameOverride.trim() || form.contactPerson.trim()),
+    Boolean(form.emails.length || form.mobiles.length || form.telephone.trim()),
+    Boolean(form.address.trim() || form.address2.trim() || form.stateCode.trim()),
+    Boolean(form.panNo.trim() || form.leiCode.trim() || form.custodian.trim()),
+    form.bankAccounts.some((b) => b.bankName.trim() && b.bankIFSC.trim()),
+    form.dematAccounts.some((d) => d.benId.trim()),
+    Boolean(form.notes.trim()),
+  ];
+  return { filled: checks.filter(Boolean).length, total: checks.length, hasSaved };
+}
+
+type ParticipantTabId =
+  | "profile"
+  | "contact"
+  | "address"
+  | "banks"
+  | "demat"
+  | "notes";
+
+function sectionHasData(tab: ParticipantTabId, form: FormState): boolean {
+  switch (tab) {
+    case "profile":
+      return Boolean(form.nameOverride.trim() || form.contactPerson.trim());
+    case "contact":
+      return Boolean(
+        form.emails.length || form.mobiles.length || form.telephone.trim(),
+      );
+    case "address":
+      return Boolean(
+        form.address.trim() ||
+          form.address2.trim() ||
+          form.address3.trim() ||
+          form.stateCode.trim() ||
+          form.panNo.trim() ||
+          form.leiCode.trim() ||
+          form.custodian.trim() ||
+          form.dobDoi.trim(),
+      );
+    case "banks":
+      return form.bankAccounts.some(
+        (b) => b.bankName.trim() && b.bankIFSC.trim(),
+      );
+    case "demat":
+      return form.dematAccounts.some((d) => d.benId.trim());
+    case "notes":
+      return Boolean(form.notes.trim());
+    default:
+      return false;
+  }
+}
+
+const PARTICIPANT_TABS: {
+  id: ParticipantTabId;
+  label: string;
+  shortLabel: string;
+  icon: React.ComponentType<{ className?: string }>;
+  count?: (form: FormState) => number;
+}[] = [
+  { id: "profile", label: "Profile", shortLabel: "Profile", icon: UserRound },
+  { id: "contact", label: "Contact", shortLabel: "Contact", icon: Building2 },
+  {
+    id: "address",
+    label: "Address & KYC",
+    shortLabel: "Address",
+    icon: MapPin,
+  },
+  {
+    id: "banks",
+    label: "Bank accounts",
+    shortLabel: "Banks",
+    icon: Landmark,
+    count: (f) => f.bankAccounts.length,
+  },
+  {
+    id: "demat",
+    label: "Demat accounts",
+    shortLabel: "Demat",
+    icon: Wallet,
+    count: (f) => f.dematAccounts.length,
+  },
+  { id: "notes", label: "Notes", shortLabel: "Notes", icon: FileText },
+];
+
+const participantTabTriggerClass =
+  "group h-9 shrink-0 flex-none justify-start gap-2.5 rounded-md border border-transparent px-3 text-sm font-medium text-muted-foreground shadow-none transition-colors hover:bg-muted/70 hover:text-foreground data-[state=active]:border-primary/20 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm md:h-10 md:w-full";
+
 export function RfqParticipantInfoDialog({
   open,
   onOpenChange,
@@ -224,6 +328,12 @@ export function RfqParticipantInfoDialog({
       });
       void queryClient.invalidateQueries({
         queryKey: ["NseRfqParticipants:savedCodes"],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["NseRfqParticipants:infoSummary"],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["rfq-participant-info-summaries"],
       });
       onOpenChange(false);
     },
@@ -312,237 +422,375 @@ export function RfqParticipantInfoDialog({
 
   const isLoading = infoQuery.isLoading;
   const isSaving = upsertMutation.isPending;
+  const hasSaved = Boolean(infoQuery.data);
+  const updatedLabel = formatUpdatedAt(infoQuery.data?.updatedAt);
+  const completion = countFilledSections(form, hasSaved);
+  const displayName = form.nameOverride.trim() || nseName;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-baseline gap-3">
-            <span>Participant info</span>
-            <span className="font-mono text-sm text-muted-foreground">
-              {code}
-            </span>
-          </DialogTitle>
-          <DialogDescription>
-            NSE name: <span className="font-medium text-foreground">{nseName}</span>
-            . Saved locally only — never pushed to NSE or CBRICS.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="flex max-h-[92vh] w-[min(98vw,72rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-[72rem]">
+        {/* Header */}
+        <div className="shrink-0 border-b bg-slate-50/80 px-6 py-5">
+          <DialogHeader className="space-y-3 text-left">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0 space-y-1">
+                <DialogTitle className="text-lg font-semibold leading-tight">
+                  {displayName}
+                </DialogTitle>
+                <DialogDescription className="flex flex-wrap items-center gap-2 text-sm">
+                  <span className="font-mono text-xs text-foreground">{code}</span>
+                  {nseName !== displayName ? (
+                    <>
+                      <span className="text-muted-foreground">·</span>
+                      <span>NSE: {nseName}</span>
+                    </>
+                  ) : null}
+                </DialogDescription>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                {hasSaved ? (
+                  <Badge variant="secondary" className="gap-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    Saved locally
+                  </Badge>
+                ) : (
+                  <Badge variant="outline">Not saved yet</Badge>
+                )}
+                {updatedLabel ? (
+                  <span className="text-xs text-muted-foreground">
+                    Updated {updatedLabel}
+                  </span>
+                ) : null}
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              CRM-only enrichment for proposals, settlement PDFs, and order assign.
+              Never synced to NSE or CBRICS.
+            </p>
+            {!isLoading ? (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="font-medium text-foreground">
+                  {completion.filled}/{completion.total}
+                </span>
+                <span>sections with data</span>
+                <div className="h-1.5 flex-1 max-w-[140px] overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-emerald-600 transition-all"
+                    style={{
+                      width: `${Math.round((completion.filled / completion.total) * 100)}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            ) : null}
+          </DialogHeader>
+        </div>
 
         {isLoading ? (
-          <div className="flex justify-center items-center h-48">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <div className="flex flex-1 items-center justify-center py-20">
+            <Loader2 className="h-7 w-7 animate-spin text-muted-foreground" />
           </div>
         ) : (
-          <div className="space-y-6">
-            {/* Identity */}
-            <section className="space-y-3">
-              <SectionTitle>Identity</SectionTitle>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Field label="Name override (optional)" htmlFor="nameOverride">
-                  <Input
-                    id="nameOverride"
-                    value={form.nameOverride}
-                    onChange={(e) =>
-                      setForm((s) => ({ ...s, nameOverride: e.target.value }))
-                    }
-                    placeholder={nseName}
-                  />
-                </Field>
-                <Field label="Contact person" htmlFor="contactPerson">
-                  <Input
-                    id="contactPerson"
-                    value={form.contactPerson}
-                    onChange={(e) =>
-                      setForm((s) => ({ ...s, contactPerson: e.target.value }))
-                    }
-                  />
-                </Field>
-              </div>
-            </section>
+          <Tabs defaultValue="profile" className="flex min-h-0 flex-1 flex-col md:flex-row">
+            <nav
+              aria-label="Participant form sections"
+              className="shrink-0 border-b bg-muted/30 px-3 py-2 md:w-56 md:border-b-0 md:border-r md:bg-muted/20 md:px-2 md:py-4"
+            >
+              <TabsList
+                className={cn(
+                  "h-auto w-full gap-1 bg-transparent p-0",
+                  "flex flex-row flex-nowrap justify-start overflow-x-auto scrollbar-none",
+                  "md:flex-col md:gap-0.5 md:overflow-visible",
+                )}
+              >
+                {PARTICIPANT_TABS.map((tab) => {
+                  const Icon = tab.icon;
+                  const count = tab.count?.(form) ?? 0;
+                  const filled = sectionHasData(tab.id, form);
+                  return (
+                    <TabsTrigger
+                      key={tab.id}
+                      value={tab.id}
+                      className={cn(
+                        participantTabTriggerClass,
+                        "min-w-max md:min-w-0",
+                      )}
+                    >
+                      <Icon className="h-3.5 w-3.5 shrink-0 md:h-4 md:w-4" />
+                      <span className="truncate text-left md:flex-1">
+                        <span className="md:hidden">{tab.shortLabel}</span>
+                        <span className="hidden md:inline">{tab.label}</span>
+                      </span>
+                      <span className="ml-auto flex shrink-0 items-center gap-1.5">
+                        {count > 0 ? (
+                          <span className="rounded-full bg-foreground/10 px-1.5 text-[10px] font-semibold tabular-nums group-data-[state=active]:bg-primary-foreground/20">
+                            {count}
+                          </span>
+                        ) : null}
+                        <span
+                          className={cn(
+                            "hidden h-1.5 w-1.5 rounded-full md:inline-block",
+                            filled
+                              ? "bg-emerald-500 group-data-[state=active]:bg-emerald-300"
+                              : "bg-border group-data-[state=active]:bg-primary-foreground/35",
+                          )}
+                          aria-hidden
+                        />
+                      </span>
+                    </TabsTrigger>
+                  );
+                })}
+              </TabsList>
+            </nav>
 
-            {/* Contact */}
-            <section className="space-y-3">
-              <SectionTitle>Contact</SectionTitle>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Field label="Emails" htmlFor="emails">
-                  <ChipsInput
-                    id="emails"
-                    values={form.emails}
-                    onChange={(next) =>
-                      setForm((s) => ({ ...s, emails: next }))
-                    }
-                    placeholder="ops@partner.in, settle@partner.in"
-                  />
-                </Field>
-                <Field label="Mobiles" htmlFor="mobiles">
-                  <ChipsInput
-                    id="mobiles"
-                    values={form.mobiles}
-                    onChange={(next) =>
-                      setForm((s) => ({ ...s, mobiles: next }))
-                    }
-                    placeholder="+91 98xxxxxxxx"
-                  />
-                </Field>
-                <Field label="Telephone" htmlFor="telephone">
-                  <Input
-                    id="telephone"
-                    value={form.telephone}
-                    onChange={(e) =>
-                      setForm((s) => ({ ...s, telephone: e.target.value }))
-                    }
-                  />
-                </Field>
-                <Field label="State code" htmlFor="stateCode">
-                  <Input
-                    id="stateCode"
-                    value={form.stateCode}
-                    onChange={(e) =>
-                      setForm((s) => ({ ...s, stateCode: e.target.value }))
-                    }
-                    placeholder="e.g. MH, KA"
-                  />
-                </Field>
-                <Field label="Address line 1" htmlFor="address">
-                  <Input
-                    id="address"
-                    value={form.address}
-                    onChange={(e) =>
-                      setForm((s) => ({ ...s, address: e.target.value }))
-                    }
-                  />
-                </Field>
-                <Field label="Address line 2" htmlFor="address2">
-                  <Input
-                    id="address2"
-                    value={form.address2}
-                    onChange={(e) =>
-                      setForm((s) => ({ ...s, address2: e.target.value }))
-                    }
-                  />
-                </Field>
-                <Field label="Address line 3" htmlFor="address3">
-                  <Input
-                    id="address3"
-                    value={form.address3}
-                    onChange={(e) =>
-                      setForm((s) => ({ ...s, address3: e.target.value }))
-                    }
-                  />
-                </Field>
-              </div>
-            </section>
+            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+              <TabsContent value="profile" className="mt-0 space-y-4">
+                <SectionIntro
+                  title="Identity"
+                  description="Override the NSE display name or add a primary contact person."
+                />
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Field label="Display name override" htmlFor="nameOverride">
+                    <Input
+                      id="nameOverride"
+                      value={form.nameOverride}
+                      onChange={(e) =>
+                        setForm((s) => ({ ...s, nameOverride: e.target.value }))
+                      }
+                      placeholder={nseName}
+                    />
+                    <p className="text-[11px] text-muted-foreground">
+                      Leave blank to use the NSE name in emails and PDFs.
+                    </p>
+                  </Field>
+                  <Field label="Contact person" htmlFor="contactPerson">
+                    <Input
+                      id="contactPerson"
+                      value={form.contactPerson}
+                      onChange={(e) =>
+                        setForm((s) => ({ ...s, contactPerson: e.target.value }))
+                      }
+                      placeholder="Relationship manager / ops contact"
+                    />
+                  </Field>
+                </div>
+              </TabsContent>
 
-            {/* KYC */}
-            <section className="space-y-3">
-              <SectionTitle>KYC</SectionTitle>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Field label="PAN" htmlFor="panNo">
-                  <Input
-                    id="panNo"
-                    value={form.panNo}
-                    onChange={(e) =>
+              <TabsContent value="contact" className="mt-0 space-y-4">
+                <SectionIntro
+                  title="Contact details"
+                  description="Used for proposal emails and settlement correspondence."
+                />
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Field label="Email addresses" htmlFor="emails" className="sm:col-span-2">
+                    <ChipsInput
+                      id="emails"
+                      values={form.emails}
+                      onChange={(next) => setForm((s) => ({ ...s, emails: next }))}
+                      placeholder="Type email and press Enter — ops@partner.in"
+                    />
+                  </Field>
+                  <Field label="Mobile numbers" htmlFor="mobiles">
+                    <ChipsInput
+                      id="mobiles"
+                      values={form.mobiles}
+                      onChange={(next) => setForm((s) => ({ ...s, mobiles: next }))}
+                      placeholder="+91 98xxxxxxxx"
+                    />
+                  </Field>
+                  <Field label="Landline" htmlFor="telephone">
+                    <Input
+                      id="telephone"
+                      value={form.telephone}
+                      onChange={(e) =>
+                        setForm((s) => ({ ...s, telephone: e.target.value }))
+                      }
+                      placeholder="022-xxxxxxxx"
+                    />
+                  </Field>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="address" className="mt-0 space-y-6">
+                <div className="space-y-4">
+                  <SectionIntro
+                    title="Registered address"
+                    description="Optional — appears on settlement documents when configured."
+                  />
+                  <div className="grid grid-cols-1 gap-4">
+                    <Field label="Address line 1" htmlFor="address">
+                      <Input
+                        id="address"
+                        value={form.address}
+                        onChange={(e) =>
+                          setForm((s) => ({ ...s, address: e.target.value }))
+                        }
+                      />
+                    </Field>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <Field label="Address line 2" htmlFor="address2">
+                        <Input
+                          id="address2"
+                          value={form.address2}
+                          onChange={(e) =>
+                            setForm((s) => ({ ...s, address2: e.target.value }))
+                          }
+                        />
+                      </Field>
+                      <Field label="Address line 3" htmlFor="address3">
+                        <Input
+                          id="address3"
+                          value={form.address3}
+                          onChange={(e) =>
+                            setForm((s) => ({ ...s, address3: e.target.value }))
+                          }
+                        />
+                      </Field>
+                    </div>
+                    <Field label="State code" htmlFor="stateCode" className="max-w-xs">
+                      <Input
+                        id="stateCode"
+                        value={form.stateCode}
+                        onChange={(e) =>
+                          setForm((s) => ({ ...s, stateCode: e.target.value }))
+                        }
+                        placeholder="MH, KA, DL…"
+                        className="uppercase"
+                        maxLength={2}
+                      />
+                    </Field>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-4">
+                  <SectionIntro
+                    title="KYC identifiers"
+                    description="PAN, LEI and custodian details for compliance checks."
+                  />
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <Field label="PAN" htmlFor="panNo">
+                      <Input
+                        id="panNo"
+                        value={form.panNo}
+                        onChange={(e) =>
+                          setForm((s) => ({
+                            ...s,
+                            panNo: e.target.value.toUpperCase(),
+                          }))
+                        }
+                        maxLength={10}
+                        placeholder="AAAAA9999A"
+                        className="uppercase font-mono"
+                      />
+                    </Field>
+                    <Field label="LEI code" htmlFor="leiCode">
+                      <Input
+                        id="leiCode"
+                        value={form.leiCode}
+                        onChange={(e) =>
+                          setForm((s) => ({ ...s, leiCode: e.target.value }))
+                        }
+                        className="font-mono"
+                      />
+                    </Field>
+                    <Field label="Custodian" htmlFor="custodian">
+                      <Input
+                        id="custodian"
+                        value={form.custodian}
+                        onChange={(e) =>
+                          setForm((s) => ({ ...s, custodian: e.target.value }))
+                        }
+                      />
+                    </Field>
+                    <Field label="DOB / DOI" htmlFor="dobDoi">
+                      <Input
+                        id="dobDoi"
+                        value={form.dobDoi}
+                        onChange={(e) =>
+                          setForm((s) => ({ ...s, dobDoi: e.target.value }))
+                        }
+                        placeholder="dd-mm-yyyy"
+                      />
+                    </Field>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="banks" className="mt-0 space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  <SectionIntro
+                    title="Bank accounts"
+                    description="Settlement pay-in accounts. Mark one as default."
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0"
+                    onClick={() =>
                       setForm((s) => ({
                         ...s,
-                        panNo: e.target.value.toUpperCase(),
+                        bankAccounts: [...s.bankAccounts, blankBank()],
                       }))
                     }
-                    maxLength={10}
-                    placeholder="AAAAA9999A"
-                    className="uppercase"
-                  />
-                </Field>
-                <Field label="LEI code" htmlFor="leiCode">
-                  <Input
-                    id="leiCode"
-                    value={form.leiCode}
-                    onChange={(e) =>
-                      setForm((s) => ({ ...s, leiCode: e.target.value }))
-                    }
-                  />
-                </Field>
-                <Field label="Custodian" htmlFor="custodian">
-                  <Input
-                    id="custodian"
-                    value={form.custodian}
-                    onChange={(e) =>
-                      setForm((s) => ({ ...s, custodian: e.target.value }))
-                    }
-                  />
-                </Field>
-                <Field label="DOB / DOI" htmlFor="dobDoi">
-                  <Input
-                    id="dobDoi"
-                    value={form.dobDoi}
-                    onChange={(e) =>
-                      setForm((s) => ({ ...s, dobDoi: e.target.value }))
-                    }
-                    placeholder="dd-mm-yyyy"
-                  />
-                </Field>
-              </div>
-            </section>
-
-            {/* Bank accounts */}
-            <section className="space-y-3">
-              <div className="flex items-center justify-between">
-                <SectionTitle>Bank accounts</SectionTitle>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    setForm((s) => ({
-                      ...s,
-                      bankAccounts: [...s.bankAccounts, blankBank()],
-                    }))
-                  }
-                >
-                  <Plus className="h-4 w-4" />
-                  Add bank
-                </Button>
-              </div>
-              {form.bankAccounts.length === 0 ? (
-                <EmptyHint>No bank accounts saved. Click “Add bank” to add one.</EmptyHint>
-              ) : (
-                <div className="space-y-3">
-                  {form.bankAccounts.map((b) => (
-                    <div
-                      key={b.uid}
-                      className="rounded-md border p-3 space-y-3"
-                    >
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <Field label="Bank name">
-                          <Input
-                            value={b.bankName}
-                            onChange={(e) =>
-                              setBank(b.uid, { bankName: e.target.value })
-                            }
-                          />
-                        </Field>
-                        <Field label="IFSC">
-                          <Input
-                            value={b.bankIFSC}
-                            onChange={(e) =>
-                              setBank(b.uid, {
-                                bankIFSC: e.target.value.toUpperCase(),
-                              })
-                            }
-                            className="uppercase"
-                            maxLength={11}
-                          />
-                        </Field>
-                        <Field label="Account no.">
-                          <Input
-                            value={b.bankAccountNo}
-                            onChange={(e) =>
-                              setBank(b.uid, { bankAccountNo: e.target.value })
-                            }
-                          />
-                        </Field>
-                      </div>
-                      <div className="flex items-center justify-between">
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add bank
+                  </Button>
+                </div>
+                {form.bankAccounts.length === 0 ? (
+                  <EmptyHint>
+                    No bank accounts yet. Add at least one for settlement PDFs.
+                  </EmptyHint>
+                ) : (
+                  <div className="space-y-3">
+                    {form.bankAccounts.map((b, index) => (
+                      <AccountCard
+                        key={b.uid}
+                        title={`Bank account ${index + 1}`}
+                        icon={<Landmark className="h-4 w-4 text-muted-foreground" />}
+                        isDefault={b.isDefault}
+                        onRemove={() =>
+                          setForm((s) => ({
+                            ...s,
+                            bankAccounts: s.bankAccounts.filter((x) => x.uid !== b.uid),
+                          }))
+                        }
+                      >
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                          <Field label="Bank name">
+                            <Input
+                              value={b.bankName}
+                              onChange={(e) =>
+                                setBank(b.uid, { bankName: e.target.value })
+                              }
+                            />
+                          </Field>
+                          <Field label="IFSC">
+                            <Input
+                              value={b.bankIFSC}
+                              onChange={(e) =>
+                                setBank(b.uid, {
+                                  bankIFSC: e.target.value.toUpperCase(),
+                                })
+                              }
+                              className="uppercase font-mono"
+                              maxLength={11}
+                            />
+                          </Field>
+                          <Field label="Account number">
+                            <Input
+                              value={b.bankAccountNo}
+                              onChange={(e) =>
+                                setBank(b.uid, { bankAccountNo: e.target.value })
+                              }
+                              className="font-mono"
+                            />
+                          </Field>
+                        </div>
                         <label className="flex items-center gap-2 text-sm">
                           <Checkbox
                             checked={b.isDefault}
@@ -553,102 +801,96 @@ export function RfqParticipantInfoDialog({
                           />
                           Default for settlement
                         </label>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive"
-                          onClick={() =>
-                            setForm((s) => ({
-                              ...s,
-                              bankAccounts: s.bankAccounts.filter(
-                                (x) => x.uid !== b.uid,
-                              ),
-                            }))
-                          }
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          Remove
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
+                      </AccountCard>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
 
-            {/* Demat accounts */}
-            <section className="space-y-3">
-              <div className="flex items-center justify-between">
-                <SectionTitle>Demat accounts</SectionTitle>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    setForm((s) => ({
-                      ...s,
-                      dematAccounts: [...s.dematAccounts, blankDemat()],
-                    }))
-                  }
-                >
-                  <Plus className="h-4 w-4" />
-                  Add demat
-                </Button>
-              </div>
-              {form.dematAccounts.length === 0 ? (
-                <EmptyHint>No demat accounts saved. Click “Add demat” to add one.</EmptyHint>
-              ) : (
-                <div className="space-y-3">
-                  {form.dematAccounts.map((d) => (
-                    <div
-                      key={d.uid}
-                      className="rounded-md border p-3 space-y-3"
-                    >
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <Field label="DP type">
-                          <Select
-                            value={d.dpType}
-                            onValueChange={(v) =>
-                              setDemat(d.uid, {
-                                dpType: v as "NSDL" | "CDSL",
-                              })
+              <TabsContent value="demat" className="mt-0 space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  <SectionIntro
+                    title="Demat accounts"
+                    description="NSDL or CDSL beneficiary details for security transfer."
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0"
+                    onClick={() =>
+                      setForm((s) => ({
+                        ...s,
+                        dematAccounts: [...s.dematAccounts, blankDemat()],
+                      }))
+                    }
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add demat
+                  </Button>
+                </div>
+                {form.dematAccounts.length === 0 ? (
+                  <EmptyHint>
+                    No demat accounts yet. Add NSDL/CDSL details for settlement.
+                  </EmptyHint>
+                ) : (
+                  <div className="space-y-3">
+                    {form.dematAccounts.map((d, index) => (
+                      <AccountCard
+                        key={d.uid}
+                        title={`Demat ${index + 1} · ${d.dpType}`}
+                        icon={<Wallet className="h-4 w-4 text-muted-foreground" />}
+                        isDefault={d.isDefault}
+                        onRemove={() =>
+                          setForm((s) => ({
+                            ...s,
+                            dematAccounts: s.dematAccounts.filter((x) => x.uid !== d.uid),
+                          }))
+                        }
+                      >
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                          <Field label="Depository">
+                            <Select
+                              value={d.dpType}
+                              onValueChange={(v) =>
+                                setDemat(d.uid, { dpType: v as "NSDL" | "CDSL" })
+                              }
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="NSDL">NSDL</SelectItem>
+                                <SelectItem value="CDSL">CDSL</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </Field>
+                          <Field
+                            label={
+                              d.dpType === "NSDL"
+                                ? "DP ID (required)"
+                                : "DP ID (optional)"
                             }
                           >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="NSDL">NSDL</SelectItem>
-                              <SelectItem value="CDSL">CDSL</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </Field>
-                        <Field
-                          label={
-                            d.dpType === "NSDL"
-                              ? "DP ID (NSDL)"
-                              : "DP ID (optional for CDSL)"
-                          }
-                        >
-                          <Input
-                            value={d.dpId}
-                            onChange={(e) =>
-                              setDemat(d.uid, { dpId: e.target.value })
-                            }
-                            placeholder={d.dpType === "NSDL" ? "IN300XYZ" : ""}
-                          />
-                        </Field>
-                        <Field label="BEN ID">
-                          <Input
-                            value={d.benId}
-                            onChange={(e) =>
-                              setDemat(d.uid, { benId: e.target.value })
-                            }
-                          />
-                        </Field>
-                      </div>
-                      <div className="flex items-center justify-between">
+                            <Input
+                              value={d.dpId}
+                              onChange={(e) =>
+                                setDemat(d.uid, { dpId: e.target.value })
+                              }
+                              placeholder={d.dpType === "NSDL" ? "IN300…" : ""}
+                              className="font-mono"
+                            />
+                          </Field>
+                          <Field label="Beneficiary ID">
+                            <Input
+                              value={d.benId}
+                              onChange={(e) =>
+                                setDemat(d.uid, { benId: e.target.value })
+                              }
+                              className="font-mono"
+                            />
+                          </Field>
+                        </div>
                         <label className="flex items-center gap-2 text-sm">
                           <Checkbox
                             checked={d.isDefault}
@@ -659,70 +901,120 @@ export function RfqParticipantInfoDialog({
                           />
                           Default for settlement
                         </label>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive"
-                          onClick={() =>
-                            setForm((s) => ({
-                              ...s,
-                              dematAccounts: s.dematAccounts.filter(
-                                (x) => x.uid !== d.uid,
-                              ),
-                            }))
-                          }
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          Remove
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
+                      </AccountCard>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
 
-            {/* Notes */}
-            <section className="space-y-3">
-              <SectionTitle>Notes</SectionTitle>
-              <Textarea
-                value={form.notes}
-                onChange={(e) =>
-                  setForm((s) => ({ ...s, notes: e.target.value }))
-                }
-                rows={3}
-                placeholder="Ops notes — e.g. preferred contact window, exceptions, etc."
-              />
-            </section>
-          </div>
+              <TabsContent value="notes" className="mt-0 space-y-4">
+                <SectionIntro
+                  title="Internal notes"
+                  description="Ops-only context — preferred contact window, exceptions, etc."
+                />
+                <Textarea
+                  value={form.notes}
+                  onChange={(e) =>
+                    setForm((s) => ({ ...s, notes: e.target.value }))
+                  }
+                  rows={6}
+                  placeholder="e.g. Confirm trades before 3 PM. CC settle@partner.in on all deal sheets."
+                  className="resize-none"
+                />
+              </TabsContent>
+            </div>
+          </Tabs>
         )}
 
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button type="button" variant="outline" disabled={isSaving}>
-              Cancel
+        {/* Sticky footer */}
+        <DialogFooter className="shrink-0 border-t bg-background px-6 py-4 sm:justify-between">
+          <p className="hidden text-xs text-muted-foreground sm:block">
+            Participant code <span className="font-mono">{code}</span>
+          </p>
+          <div className="flex w-full flex-wrap justify-end gap-2 sm:w-auto">
+            <DialogClose asChild>
+              <Button type="button" variant="outline" disabled={isSaving}>
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button
+              type="button"
+              onClick={handleSave}
+              disabled={isSaving || isLoading}
+              className="min-w-[120px]"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Saving…
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" />
+                  Save info
+                </>
+              )}
             </Button>
-          </DialogClose>
-          <Button type="button" onClick={handleSave} disabled={isSaving || isLoading}>
-            {isSaving ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
-            Save info
-          </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
+function SectionIntro({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
   return (
-    <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+    <div className="space-y-0.5">
+      <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+      <p className="text-xs text-muted-foreground">{description}</p>
+    </div>
+  );
+}
+
+function AccountCard({
+  title,
+  icon,
+  isDefault,
+  onRemove,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  isDefault: boolean;
+  onRemove: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-lg border bg-card p-4 shadow-sm space-y-3">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          {icon}
+          <span className="text-sm font-medium truncate">{title}</span>
+          {isDefault ? (
+            <Badge variant="secondary" className="text-[10px]">
+              Default
+            </Badge>
+          ) : null}
+        </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="shrink-0 text-destructive hover:text-destructive"
+          onClick={onRemove}
+        >
+          <Trash2 className="h-4 w-4" />
+          <span className="sr-only">Remove</span>
+        </Button>
+      </div>
       {children}
-    </h3>
+    </div>
   );
 }
 
@@ -739,7 +1031,7 @@ function Field({
 }) {
   return (
     <div className={cn("space-y-1.5", className)}>
-      <Label htmlFor={htmlFor} className="text-xs text-muted-foreground">
+      <Label htmlFor={htmlFor} className="text-xs font-medium text-foreground">
         {label}
       </Label>
       {children}

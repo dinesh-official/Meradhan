@@ -531,14 +531,15 @@ export class CrmOrdersService {
     const couponDates = await getLastNextCouponDateBasedOnSettlementDate(bond.isin, bond.maturityDate!)
     console.log(couponDates);
 
-    const pricingData = computeBondOrderPricingData({
+    const pricingData = await computeBondOrderPricingData({
+      isin: bond.isin,
       faceValue: bond.faceValue,
       quantity: order.quantity,
-      cleanPrice: Number(order.unitPrice),
-      couponRate: bond.couponRate,
-      lastCouponDate: (couponDates?.lastCouponDate || "").toString(),
-      recordDays: recordDays,
-      nextCouponDate: couponDates?.nextCouponDate || "",
+      cleanPrice: Number(order.unitPrice) || 0,
+      couponRate: bond.couponRate || 0,
+      lastCouponDate: (couponDates?.lastCouponDate || "").toString() || "",
+      recordDays: recordDays || 0,
+      nextCouponDate: couponDates?.nextCouponDate || "" || "",
     })
 
     const bondData = await getBondInfoCalcData(order.isin);
@@ -820,7 +821,7 @@ export class CrmOrdersService {
 
     const customerRepo = new CustomerProfileRepo();
     const bondService = new BondService();
-    const user = await customerRepo.getFullCustomerProfile(customerProfileId);
+    const user = await customerRepo.getFullCustomerProfile(order.customerProfileId!);
     const getUserPrimaryBankAccount = await db.dataBase.customersBankAccountModel.findFirst({
       where: {
         customerProfileDataModelId: customerProfileId,
@@ -1062,7 +1063,7 @@ export class CrmOrdersService {
 
     const customerRepo = new CustomerProfileRepo();
     const bondService = new BondService();
-    const user = await customerRepo.getFullCustomerProfile(order.customerProfileId);
+    const user = await customerRepo.getFullCustomerProfile(order.customerProfileId!);
     const bond = await bondService.getBondDetails(order.isin);
     if (!bond) {
       throw new AppError(`Bond not found for ISIN: ${order.isin}`, {
@@ -1425,7 +1426,7 @@ export class CrmOrdersService {
     }
 
     const customerRepo = new CustomerProfileRepo();
-    const user = await customerRepo.getFullCustomerProfile(order.customerProfileId);
+    const user = await customerRepo.getFullCustomerProfile(order.customerProfileId!);
     console.log(pdfQuery);
 
     let buffer: Buffer;
@@ -1946,12 +1947,10 @@ async function main() {
   // ────────────────────────────────────────────────────────────────────
   // EDIT THESE BEFORE RUNNING
   // ────────────────────────────────────────────────────────────────────
-  // Identifier is tried as a customer UCC first; on miss it's tried as
-  // an RFQ-participant `code` (the NSE participants/all `code`).
-  const IDENTIFIER = "MD1HRXWON";
-  const ISIN = "INE0NES07329"; // ISIN of the bond to order (only used in the customer branch)
-  const ORDER_NUMBER = "260611990005114"; // NSE settle_order number
-  const DRY_RUN = false;
+  const CUSTOMER_PROFILE_UCC = "MD1HRXWON"; // UCC of the customer to create the order for
+  const ISIN = "INE0NES07329"; // ISIN of the bond to order
+  const ORDER_NUMBER = "260616990009300"; // Order number of the order to create
+  const DRY_RUN = false; // true to skip actual order creation
   // ────────────────────────────────────────────────────────────────────
 
   await db.dataBase.$connect();

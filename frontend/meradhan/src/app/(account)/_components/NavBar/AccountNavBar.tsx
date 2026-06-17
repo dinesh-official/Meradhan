@@ -73,7 +73,13 @@ function AccountNavBar({
         >
           {/* Action Buttons */}
           <div className="right-0 bottom-0 z-40 fixed sm:relative flex justify-between sm:justify-end items-center gap-8 sm:gap-5 bg-white sm:bg-transparent shadow sm:shadow-none px-4 sm:px-0 py-2 lg:py-0 border-gray-100 sm:border-0 border-t w-full sm:w-auto">
-            {/* Explore All Bonds Button*/}
+            {/* Explore All Bonds Button — always present across all account pages */}
+            <Link href="/bonds">
+              <Button variant="outline" size="sm">
+                Explore All Bonds
+              </Button>
+            </Link>
+            {/* Optional page-specific actions */}
             {navActions}
             {/* KYC Button */}
             {session?.kycStatus == "PENDING" && (

@@ -6,8 +6,13 @@ model CrmSavedProposal {
   createdById Int
   createdBy   CRMUserDataModel @relation(fields: [createdById], references: [id])
 
-  customerProfileId Int
-  customerProfile   CustomerProfileDataModel @relation(fields: [customerProfileId], references: [id], onDelete: Cascade)
+  /// Meradhan customer when the proposal targets an onboarded user.
+  customerProfileId Int?
+  customerProfile   CustomerProfileDataModel? @relation(fields: [customerProfileId], references: [id], onDelete: Cascade)
+
+  /// External NSE RFQ participant (`nse_rfq_participant_info.code`) when
+  /// there is no linked Meradhan customer profile.
+  linkedRfqParticipantCode String? @db.VarChar(64)
 
   isin     String
   bondName String
@@ -27,6 +32,7 @@ model CrmSavedProposal {
 
   @@index([createdById])
   @@index([customerProfileId])
+  @@index([linkedRfqParticipantCode])
   @@index([isin])
   @@map("crm_saved_proposals")
 }

@@ -51,7 +51,6 @@ model Order {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    @@index([customerProfileId])
     @@index([paymentOrderId])
     @@index([paymentId])
     @@index([orderNumber])

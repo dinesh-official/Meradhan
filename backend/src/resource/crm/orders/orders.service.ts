@@ -408,19 +408,19 @@ export class CrmOrdersService {
     );
     const participantInfoByCode = participantCodes.length
       ? new Map(
-          (
-            await db.dataBase.nseRfqParticipantInfoModel.findMany({
-              where: { code: { in: participantCodes } },
-              select: {
-                code: true,
-                nameOverride: true,
-                contactPerson: true,
-                emailList: true,
-                panNo: true,
-              },
-            })
-          ).map((p) => [p.code, p] as const),
-        )
+        (
+          await db.dataBase.nseRfqParticipantInfoModel.findMany({
+            where: { code: { in: participantCodes } },
+            select: {
+              code: true,
+              nameOverride: true,
+              contactPerson: true,
+              emailList: true,
+              panNo: true,
+            },
+          })
+        ).map((p) => [p.code, p] as const),
+      )
       : new Map();
 
     const data = orders.map((o) => ({
@@ -992,7 +992,8 @@ export class CrmOrdersService {
     const couponDates = await getLastNextCouponDateBasedOnSettlementDate(bond.isin, bond.maturityDate!)
     console.log(couponDates);
 
-    const pricingData = computeBondOrderPricingData({
+    const pricingData = await computeBondOrderPricingData({
+      isin: bond.isin,
       faceValue: bond.faceValue,
       quantity: order.quantity,
       cleanPrice: order.unitPrice,
@@ -1670,6 +1671,7 @@ export class CrmOrdersService {
         tradeNumber: settleOrder?.orderNumber,
       },
     });
+
     const rfqDetails = await db.dataBase.rFQMasterISIN.findFirst({
       where: {
         number: negotation?.rfqNumber,
@@ -1769,7 +1771,7 @@ export class CrmOrdersService {
         metadata: {
           dealId: (metadata.dealId as string) ?? undefined,
           clientOrderSide: (metadata.clientOrderSide as "BUY" | "SELL") ?? undefined,
-          rfqNumber: (metadata.rfqNumber as string) ?? undefined,
+          rfqNumber: (metadata.rfqNumber as string) ?? negotation?.tradeNumber ?? undefined,
           orderType: accessTypeText ?? "One To One (OTO) on RFQ Platform of the Exchange",
           interestPaymentDates:
             interestPaymentDatesParam?.length
@@ -2023,7 +2025,7 @@ export class CrmOrdersService {
           settlementType: rfqDetails?.settlementType ?? 0,
           dealId: (metadata.dealId as string) ?? undefined,
           clientOrderSide: (metadata.clientOrderSide as "BUY" | "SELL") ?? undefined,
-          rfqNumber: (metadata.rfqNumber as string) ?? undefined,
+          rfqNumber: (metadata.rfqNumber as string) ?? negotation?.tradeNumber ?? undefined,
           orderType: accessTypeText ?? "One To One (OTO) on RFQ Platform of the Exchange",
           interestPaymentDates:
             interestPaymentDatesParamDeal?.length
@@ -2064,7 +2066,7 @@ export class CrmOrdersService {
           settleOrder: settleOrder
             ? {
               id: settleOrder.id,
-              orderNumber: settleOrder.orderNumber,
+              orderNumber: settleOrder.orderNumber ?? negotation?.tradeNumber ?? undefined,
               symbol: settleOrder.symbol,
               buySell: negotation?.buySell,
               buyParticipantLoginId: settleOrder.buyParticipantLoginId,

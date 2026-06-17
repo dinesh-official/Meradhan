@@ -117,7 +117,7 @@ export function DigioSignStep({
       </CardHeader>
       <CardContent accountMode className="pt-6">
         <p className="text-sm text-muted-foreground">
-          You're signing on behalf of{" "}
+          You&apos;re signing on behalf of{" "}
           <span className="font-medium text-foreground">{personName}</span>.
           Signing is via Digio Aadhaar e-sign — please keep your registered
           mobile handy for the OTP.
