@@ -19,6 +19,7 @@ import {
   DematAccountsSection,
   DirectorsSection,
   DocumentUrlsSection,
+  KartasSection,
   PartnersSection,
   PromotersSection,
   TrusteesSection,
@@ -664,6 +665,9 @@ export default function CorporateProfileAndKycView({
                       <>
                         {roles.directors && (
                           <DirectorsSection data={corporateKyc} />
+                        )}
+                        {roles.kartas && (
+                          <KartasSection data={corporateKyc} />
                         )}
                         {roles.partners && (
                           <PartnersSection data={corporateKyc} />

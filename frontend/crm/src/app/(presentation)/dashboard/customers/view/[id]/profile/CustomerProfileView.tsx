@@ -1,200 +1,204 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
+import { queryClient } from "@/core/config/reactQuery";
+import { SelectRoleUser } from "@/global/elements/autocomplete/SelectRoleUser";
 import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
-import LabelView from "@/global/elements/wrapper/LabelView";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
-import StatusBadge from "@/global/elements/wrapper/badges/StatusBadge";
 import { hasOneOfPermission } from "@/global/utils/role.utils";
-import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { encodeId } from "@/global/utils/url.utils";
-import apiGateway from "@root/apiGateway";
-import { useQuery } from "@tanstack/react-query";
-import { Building2, IdCardIcon, NotebookPen, ShieldCheck } from "lucide-react";
+import useAppCookie from "@/hooks/useAppCookie.hook";
+import apiGateway, { type CrmUsersProfile } from "@root/apiGateway";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  Building2,
+  IdCardIcon,
+  NotebookPen,
+  Pencil,
+  Phone,
+  UserRound,
+} from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import useAppCookie from "@/hooks/useAppCookie.hook";
+import { toast } from "sonner";
+import { RelationshipManagerUserInfo } from "../../../_components/RelationshipManagerUserInfo";
+import { CustomerProfileTopSection } from "./_components/CustomerProfileTopSection";
+import {
+  CustomerTimelineCard,
+  ProfileSectionCard,
+} from "./_components/CustomerAccountSummary";
+import { ContactChannelList } from "./_components/ContactChannelList";
 import { VerifyCustomerOtpDialog } from "./_components/VerifyCustomerOtpDialog";
 
 function CustomerProfileView({ profileId }: { profileId: number }) {
   const { cookies } = useAppCookie();
   const canViewAllInfo = hasOneOfPermission(cookies.role, ["view:customerkyc"]);
+  const canEditCustomer = hasOneOfPermission(cookies.role, ["edit:customer"]);
   const [verifyChannel, setVerifyChannel] = useState<"mobile" | "email" | null>(
     null,
   );
-  // const [useCustomerFormDataHook, setuseCustomerFormDataHook] = useState<GetCustomerResponseById>()])
+
   const fetchCustomer = async () => {
     const fetchCustomerProfile = new apiGateway.crm.customer.CrmCustomerApi(
-      apiClientCaller
+      apiClientCaller,
     );
-    try {
-      const response = await fetchCustomerProfile.customerInfoById(profileId);
-      return response.data.responseData;
-    } catch {
-      // Silently handle error - will show error state in component
-    }
+    const response = await fetchCustomerProfile.customerInfoById(profileId);
+    return response.data.responseData;
   };
 
-  const { data: customer, isLoading } = useQuery({
+  const { data: customer, isLoading, isError } = useQuery({
     queryKey: ["fetchCustomer", profileId],
     queryFn: fetchCustomer,
     refetchOnWindowFocus: false,
   });
 
-  /**
-   * Manual OTP verification from CRM is only meaningful for non-individual
-   * (corporate / LLP / trust / HUF / partnership) accounts where the
-   * primary contact may be signed up by an operator on behalf of the
-   * entity. Individuals are expected to verify their own contact channels
-   * during onboarding, so we hide the verify shortcut for them.
-   */
+  const customerApi = new apiGateway.crm.customer.CrmCustomerApi(apiClientCaller);
+  const rm = customer?.utility.relationshipManager ?? null;
+
+  const assignRmMutation = useMutation({
+    mutationFn: async (relationshipManagerId: number) => {
+      const res = await customerApi.updateCustomer(
+        { relationshipManagerId },
+        String(profileId),
+      );
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["fetchCustomer", profileId] });
+      queryClient.invalidateQueries({ queryKey: ["searchCustomersList"] });
+      toast.success("Relationship manager assigned");
+    },
+    onError: () => {
+      toast.error("Failed to assign relationship manager");
+    },
+  });
+
   const userType = customer?.userType;
   const isNonIndividual =
     !!userType && userType !== "INDIVIDUAL" && userType !== "INDIVIDUAL_NRI_NRO";
 
   if (isLoading) {
     return (
-      <div className="w-full h-96 flex justify-center items-center">
+      <div className="flex h-96 w-full items-center justify-center">
         <Spinner />
       </div>
     );
   }
 
+  if (!customer || isError) {
+    return (
+      <div className="flex h-96 w-full flex-col items-center justify-center gap-3 text-center">
+        <p className="text-lg font-medium">Customer not found</p>
+        <p className="text-sm text-muted-foreground">
+          This profile could not be loaded. It may have been removed.
+        </p>
+        <Button variant="outline" asChild>
+          <Link href="/dashboard/customers">Back to customers</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  const encodedId = encodeId(profileId);
+  const isCorporate = customer.userType === "CORPORATE";
+
   return (
-    <div className="flex flex-col  gap-5">
+    <div className="flex flex-col gap-6">
       <PageInfoBar
         showBack
-        title="Customer Profile"
-        description="Complete customer information and account details"
+        title="Customer profile"
+        description="Account overview, contact details, and relationship manager"
         actions={
-          <div className="gap-3 flex  justify-center items-center md:w-auto w-full">
+          <div className="flex w-full flex-wrap items-center justify-end gap-2 md:w-auto">
+            {canEditCustomer && (
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/dashboard/customers/view/${encodedId}/update`}>
+                  <Pencil className="h-4 w-4" />
+                  Edit
+                </Link>
+              </Button>
+            )}
             <AllowOnlyView permissions={["view:customerkyc"]}>
-              <Button variant="outline" asChild>
-                <Link href={`/dashboard/customers/view/${encodeId(profileId)}/kyc`}>
-                  <IdCardIcon /> View KYC Data
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/dashboard/customers/view/${encodedId}/kyc`}>
+                  <IdCardIcon className="h-4 w-4" />
+                  KYC
                 </Link>
               </Button>
             </AllowOnlyView>
-            {customer?.userType === "CORPORATE" && (
+            {isCorporate && (
               <AllowOnlyView permissions={["view:customerkyc"]}>
-                <Button variant="outline" asChild>
-                  <Link
-                    href={`/dashboard/customers/view/${encodeId(profileId)}/corporate-kyc`}
-                  >
-                    <Building2 /> View profile & Corporate KYC
+                <Button variant="outline" size="sm" asChild>
+                  <Link href={`/dashboard/customers/view/${encodedId}/corporate-kyc`}>
+                    <Building2 className="h-4 w-4" />
+                    Corporate KYC
                   </Link>
                 </Button>
               </AllowOnlyView>
             )}
-            <Button variant="default" asChild>
+            <Button variant="outline" size="sm" asChild>
               <Link href="/dashboard/rfqs/nse">
-                <NotebookPen /> View RFQs
+                <NotebookPen className="h-4 w-4" />
+                RFQs
               </Link>
             </Button>
           </div>
         }
       />
-      <Card>
-        <CardHeader>
-          <CardTitle>Customer Overview</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <b className="text-xs block mb-4">Basic Information</b>
-          <div className="grid xl:grid-cols-5 md:grid-cols-3 grid-cols-2 gap-5 mb-4">
-            <LabelView title="Full Name">
-              <p>
-                {customer?.firstName} {customer?.middleName}{" "}
-                {customer?.lastName}
-              </p>
-            </LabelView>
-            <LabelView title="First Name">
-              <p>{customer?.firstName}</p>
-            </LabelView>
-            <LabelView title="Middle Name">
-              <p>{customer?.middleName}</p>
-            </LabelView>
-            <LabelView title="Last Name">
-              <p>{customer?.lastName}</p>
-            </LabelView>
-            <LabelView title="User Type">
-              <p>{customer?.userType}</p>
-            </LabelView>
-          </div>
-          <b className="text-xs block mb-4 mt-7">Contact Information</b>
-          <div className="grid xl:grid-cols-5 md:grid-cols-3 grid-cols-2 gap-5 mb-4">
-            <LabelView title="Email ID">
-              <div className="flex flex-col gap-1">
-                <p className="break-all">{customer?.emailAddress || "—"}</p>
-                <div className="flex flex-wrap items-center gap-2">
-                  <StatusBadge
-                    value={
-                      customer?.utility.isEmailVerified
-                        ? "Verified"
-                        : "pending"
-                    }
-                  />
-                  {customer &&
-                    isNonIndividual &&
-                    !customer.utility.isEmailVerified && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-6 px-2 py-0 text-xs"
-                        onClick={() => setVerifyChannel("email")}
-                      >
-                        <ShieldCheck className="size-3" /> Verify
-                      </Button>
-                    )}
-                </div>
-              </div>
-            </LabelView>
-            <LabelView title="Mobile Number">
-              <div className="flex flex-col gap-1">
-                <p>{customer?.phoneNo || "—"}</p>
-                <div className="flex flex-wrap items-center gap-2">
-                  <StatusBadge
-                    value={
-                      customer?.utility.isPhoneVerified
-                        ? "Verified"
-                        : "pending"
-                    }
-                  />
-                  {customer &&
-                    isNonIndividual &&
-                    !customer.utility.isPhoneVerified && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-6 px-2 py-0 text-xs"
-                        onClick={() => setVerifyChannel("mobile")}
-                      >
-                        <ShieldCheck className="size-3" /> Verify
-                      </Button>
-                    )}
-                </div>
-              </div>
-            </LabelView>
-            <LabelView title="WhatsApp Number">
-              <div className="flex flex-row gap-2">
-                <p>{customer?.whatsAppNo || "—"}</p>
-                <StatusBadge
-                  value={
-                    customer?.utility.isPhoneVerified ? "Verified" : "pending"
-                  }
-                />
-              </div>
-            </LabelView>
-          </div>
-        </CardContent>
-      </Card>
 
-      {customer && isNonIndividual && verifyChannel !== null && (
+      <CustomerProfileTopSection customer={customer} showKra={canViewAllInfo} />
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <ProfileSectionCard title="Contact channels" icon={Phone}>
+          <ContactChannelList
+            email={customer.emailAddress}
+            phone={customer.phoneNo}
+            whatsApp={customer.whatsAppNo}
+            emailVerified={customer.utility.isEmailVerified}
+            phoneVerified={customer.utility.isPhoneVerified}
+            isNonIndividual={isNonIndividual}
+            onVerifyEmail={() => setVerifyChannel("email")}
+            onVerifyPhone={() => setVerifyChannel("mobile")}
+          />
+        </ProfileSectionCard>
+
+        <ProfileSectionCard title="Relationship manager" icon={UserRound}>
+          {rm ? (
+            <RelationshipManagerUserInfo user={rm} />
+          ) : (
+            <div className="rounded-lg border border-dashed bg-muted/20 px-4 py-8 text-center">
+              <UserRound className="mx-auto h-8 w-8 text-muted-foreground/60" />
+              <p className="mt-2 text-sm font-medium">No RM assigned</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Assign a relationship manager to own this account.
+              </p>
+            </div>
+          )}
+          {canEditCustomer && (
+            <div className="mt-4 border-t pt-4">
+              <p className="mb-2 text-xs text-muted-foreground">
+                {rm ? "Change relationship manager" : "Assign relationship manager"}
+              </p>
+              <SelectRoleUser
+                role="RELATIONSHIP_MANAGER"
+                placeholder={rm?.name ?? "Select relationship manager"}
+                value={rm ?? undefined}
+                onSelect={(user: CrmUsersProfile | null) => {
+                  if (!user || user.id === rm?.id) return;
+                  assignRmMutation.mutate(user.id);
+                }}
+              />
+            </div>
+          )}
+        </ProfileSectionCard>
+      </div>
+
+      {canViewAllInfo && <CustomerTimelineCard customer={customer} />}
+
+      {isNonIndividual && verifyChannel !== null && (
         <VerifyCustomerOtpDialog
-          // Re-mount the dialog whenever the channel switches so the
-          // previous channel's OTP token, cooldown timer and entered
-          // digits can never leak into the new channel's verify call.
           key={verifyChannel}
           open
           onOpenChange={(open) => {
@@ -204,67 +208,6 @@ function CustomerProfileView({ profileId }: { profileId: number }) {
           channel={verifyChannel}
         />
       )}
-
-      <div className="grid lg:grid-cols-2 gap-5">
-        <Card>
-          <CardHeader>
-            <CardTitle>Account Status</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid xl:grid-cols-4 grid-cols-2  gap-5 mb-4">
-              <LabelView title="Account Status">
-                <StatusBadge
-                  value={customer?.utility?.accountStatus ?? "pending"}
-                />
-              </LabelView>
-              <LabelView title="KYC Status">
-                <StatusBadge value={customer?.kycStatus ?? "pending"} />
-              </LabelView>
-              <LabelView title="Terms Accepted">
-                <StatusBadge
-                  value={
-                    customer?.utility.termsAccepted ? "Accepted" : "pending"
-                  }
-                />
-              </LabelView>
-              <LabelView title="WhatsApp Notifications">
-                <StatusBadge
-                  value={
-                    customer?.utility.whatsAppNotificationAllow
-                      ? "Accepted"
-                      : "Pending"
-                  }
-                />
-              </LabelView>
-            </div>
-          </CardContent>
-        </Card>
-        {canViewAllInfo && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Account Timeline</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid lg:grid-cols-2 gap-5">
-                <LabelView title="Account Created">
-                  <p>
-                    {customer?.createdAt
-                      ? dateTimeUtils.formatDateTime(
-                        customer.createdAt,
-                        "DD MMMM YYYY hh:mm AA"
-                      )
-                      : "—"}
-                  </p>
-                </LabelView>
-
-                <LabelView title="Customer ID">
-                  <p>{customer?.userName}</p>
-                </LabelView>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
     </div>
   );
 }

@@ -182,6 +182,7 @@ export type CustomerUtility = {
   lastLogin: string | null;
   isEmailVerified?: boolean;
   isPhoneVerified?: boolean;
+  relationshipManager?: CrmUsersProfile | null;
 };
 
 // Extended Profile

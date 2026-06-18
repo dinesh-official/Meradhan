@@ -6,6 +6,9 @@ import type { BaseResponseData } from "../../../types/base";
 import type {
   BondDealAutofillResponse,
   BondDetailResponse,
+  BondDocumentItem,
+  BondDocumentMutationResponse,
+  BondDocumentsListResponse,
   BondFilterOptionsResponse,
   BondOrderPricingResponse,
   LatestBondsResponse,
@@ -252,6 +255,53 @@ export class BondsApi {
     const response = await this.apiClient.post<
       BaseResponseData<unknown>
     >(`/bonds/place-order`, payload, config);
+    return response.data;
+  }
+
+  public async listBondDocuments(isin: string, config?: AxiosRequestConfig) {
+    const response = await this.apiClient.get<BondDocumentsListResponse>(
+      `/crm/bonds/${encodeURIComponent(isin)}/documents`,
+      config,
+    );
+    return response.data;
+  }
+
+  public async createBondDocument(
+    isin: string,
+    payload: { name: string; fileUrl: string; fileName?: string | null },
+    config?: AxiosRequestConfig,
+  ) {
+    const response = await this.apiClient.post<BondDocumentMutationResponse>(
+      `/crm/bonds/${encodeURIComponent(isin)}/documents`,
+      payload,
+      config,
+    );
+    return response.data;
+  }
+
+  public async updateBondDocument(
+    isin: string,
+    documentId: number,
+    payload: { name?: string; fileUrl?: string; fileName?: string | null },
+    config?: AxiosRequestConfig,
+  ) {
+    const response = await this.apiClient.patch<BondDocumentMutationResponse>(
+      `/crm/bonds/${encodeURIComponent(isin)}/documents/${documentId}`,
+      payload,
+      config,
+    );
+    return response.data;
+  }
+
+  public async deleteBondDocument(
+    isin: string,
+    documentId: number,
+    config?: AxiosRequestConfig,
+  ) {
+    const response = await this.apiClient.delete<BaseResponseData<{ success: boolean }>>(
+      `/crm/bonds/${encodeURIComponent(isin)}/documents/${documentId}`,
+      config,
+    );
     return response.data;
   }
 }

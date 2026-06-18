@@ -408,6 +408,9 @@ function mapEntityConstitution(
       e.trustCharityNgo = true;
       e.trust = true;
       break;
+    case "HUF":
+      e.huf = true;
+      break;
     case "OPC":
       e.othersSpecify = true;
       break;

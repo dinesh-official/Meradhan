@@ -293,6 +293,12 @@ export const NAV_ITEMS: NavItem[] = [
         allowOnly: ["view:bonds"],
       },
       {
+        label: "Documents",
+        path: "/dashboard/bonds/documents",
+        module: "bonds",
+        allowOnly: ["view:bonds"],
+      },
+      {
         label: "Margin Management",
         path: "/dashboard/bonds/margins",
         module: "bonds",

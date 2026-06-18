@@ -49,11 +49,14 @@ export class CustomerProfileService extends CustomerProfileManager {
       isDeleted: false,
     };
 
-    if (payload.accountStatus) {
+    if (payload.accountStatus || payload.relationshipManagerId) {
       filters.utility = {
-        accountStatus: {
-          equals: payload.accountStatus,
-        },
+        ...(payload.accountStatus
+          ? { accountStatus: { equals: payload.accountStatus } }
+          : {}),
+        ...(payload.relationshipManagerId
+          ? { cRMUserDataModelId: payload.relationshipManagerId }
+          : {}),
       };
     }
 
@@ -135,6 +138,21 @@ export class CustomerProfileService extends CustomerProfileManager {
             lastLogin: true,
             isEmailVerified: true,
             isPhoneVerified: true,
+            relationshipManager: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                phoneNo: true,
+                avatar: true,
+                role: true,
+                accountStatus: true,
+                lastLogin: true,
+                createdAt: true,
+                updatedAt: true,
+                createdBy: true,
+              },
+            },
           },
         },
         createdAt: true,
