@@ -20,6 +20,7 @@ export function bondDetailsResponseToFormData(
     bondName: initialData.bondName,
     instrumentName: initialData.instrumentName,
     description: initialData.description,
+    issuerDescription: initialData.issuerDescription || undefined,
     issuePrice: num(initialData.issuePrice),
     faceValue: num(initialData.faceValue),
     stampDutyPercentage: num(initialData.stampDutyPercentage, 0),
