@@ -30,7 +30,7 @@ export default function BondDetailTabs({
   session?: ISessionResponse["responseData"] | null;
 }) {
   return (
-    <Tabs defaultValue="overview" className="py-6">
+    <Tabs defaultValue="overview" className="pt-10 pb-4">
       <TabsList className="grid h-auto w-full grid-cols-2 gap-1 p-1.5 sm:grid-cols-4">
         <TabsTrigger value="overview" className="py-2.5 text-base md:text-lg font-semibold">
           Overview

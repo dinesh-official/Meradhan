@@ -25,6 +25,7 @@ export const useBondsFilters = ({ pathname, category }: { pathname: string, cate
     const [coupon, setCoupon] = useQueryState("coupon", parseAsArrayOf(parseAsString).withDefault([]));
     const [taxation, setTaxation] = useQueryState("taxation", parseAsArrayOf(parseAsString).withDefault([]));
     const [interest, setInterest] = useQueryState("interest", parseAsArrayOf(parseAsString).withDefault([]));
+    const [sort, setSort] = useQueryState("sort", parseAsString.withDefault(""));
     const { page } = useParams<{ page?: string }>(); // returns an object
     const router = useRouter();
 
@@ -49,7 +50,7 @@ export const useBondsFilters = ({ pathname, category }: { pathname: string, cate
             const queryFilter = validateBondsFilters({ ...(filters as Record<string, unknown>), navSearch });
             return await apiCaller.getListedBonds({
                 filters: queryFilter,
-                params: { page: 1, category }
+                params: { page: 1, category, sort: sort || undefined }
             });
         },
     });
@@ -88,12 +89,14 @@ export const useBondsFilters = ({ pathname, category }: { pathname: string, cate
                 taxation: toValidatedArray(filters.taxation, appSchema.bonds.taxationEnums),
                 interest: toValidatedArray(filters.interest, appSchema.bonds.INTEREST_MODE_VALUES),
             },
+        sort,
         setSearch,
         setMaturity,
         setRating,
         setCoupon,
         setTaxation,
         setInterest,
+        setSort,
         applyFilters,
         applyFilterMutation,
         anyFilterApplied,

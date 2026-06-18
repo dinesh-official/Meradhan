@@ -9,6 +9,14 @@ import {
   MultiSelectTrigger,
   MultiSelectValue,
 } from "@/components/ui/multi-select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { Search, Trash2Icon, X } from "lucide-react";
 import { ReactNode, useEffect, useState } from "react";
@@ -25,6 +33,18 @@ import {
 import type { useBondFilterOptions } from "../_hooks/useBondFilterOptions";
 import { BondsFilterHook } from "../_hooks/useBondsFilters";
 import { useRouter } from "nextjs-toploader/app";
+
+// "Sort by" options. Values are `${field}_${dir}` tokens parsed by the backend
+// (desc = highest value first). Rating uses a custom credit-quality order;
+// Tenure = Maturity Date − Allotment Date.
+const sortOptions = [
+  { value: "yield_desc", title: "Yield: High to Low" },
+  { value: "yield_asc", title: "Yield: Low to High" },
+  { value: "rating_desc", title: "Rating: High to Low" },
+  { value: "rating_asc", title: "Rating: Low to High" },
+  { value: "tenure_desc", title: "Tenure: High to Low" },
+  { value: "tenure_asc", title: "Tenure: Low to High" },
+] as const;
 
 // [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold]
 // Added `filterOptions` prop so dropdowns only show options that exist in actual bond data.
@@ -93,8 +113,36 @@ function ExploreBondsHeader({
               <Search className="mr-3 text-secondary" />
             </button>
           </div>
-          <p className="mt-5">Or Search by Filter</p>
-          <div className="gap-3 grid grid-cols-2 lg:grid-cols-5">
+          {/* Centered over the 5 filters only — the leading spacer matches the
+              2-column Sort By so the label aligns with the filter columns. */}
+          <div className="mt-5 lg:grid lg:grid-cols-7 lg:gap-3">
+            <span className="hidden lg:block lg:col-span-2" />
+            <p className="lg:col-span-5 text-center">Or Search by Filter</p>
+          </div>
+          <div className="gap-3 grid grid-cols-2 lg:grid-cols-7">
+            {/* Sort By — single-select; sorts the whole result set by the chosen
+                field. Spans 2 columns and is styled blue/bold to stand apart. */}
+            <Select
+              value={manager.sort || undefined}
+              onValueChange={(value) => {
+                manager.setSort(value);
+                setDobunce((prev) => prev + 1);
+              }}
+            >
+              <SelectTrigger className="col-span-2 bg-blue-100 border-blue-300 w-full font-bold text-black lg:col-span-2">
+                <SelectValue placeholder="Sort By" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {sortOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.title}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+
             {/* <MultiSelect
               defaultValues={[]}
               onValuesChange={() => {
