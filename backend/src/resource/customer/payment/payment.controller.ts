@@ -4,12 +4,7 @@ import { AppError, HttpStatus } from "@utils/error/AppError";
 import { db } from "@core/database/database";
 import logger from "@utils/logger/logger";
 import { PaymentService } from "./payment.service";
-import { orderSettlementQueue } from "@jobs/queue/worker_queues";
-import {
-  isMarketOpen,
-  nextMarketOpen,
-} from "@services/order/order-pricing-helper";
-import { sendOrderReceivedEmail } from "@services/notifications/order_received_email";
+import { dispatchOrScheduleSettlement } from "@services/order/settlement_dispatch";
 
 export class PaymentController {
   private paymentService = new PaymentService();
@@ -144,43 +139,16 @@ export class PaymentController {
           await this.orderService.updateOrderMetadata(order.id, paymentEntity);
 
           // 24/7 trading: inventory is already decremented at capture time.
-          // If the market is open, submit to NSE immediately (existing flow).
-          // Otherwise schedule the trade for the next market open — the
-          // scheduler cron enqueues it then — and tell the customer.
-          const now = new Date();
-          if (isMarketOpen(now)) {
-            const job = await orderSettlementQueue.add({
-              type: "orderSettlement",
-              id: order.id,
-              paymentOrderId,
-              paymentId,
-              paymentEntity,
-              isNetBanking,
-            });
-            logger.logInfo(
-              `Payment captured and settlement job queued for order: ${paymentOrderId}`,
-              {
-                jobId: job.id,
-              }
-            );
-          } else {
-            const scheduledExecutionAt = nextMarketOpen(now);
-            await this.orderService.scheduleOrderExecution(
-              order.id,
-              scheduledExecutionAt
-            );
-            await sendOrderReceivedEmail({
-              orderId: order.id,
-              scheduledExecutionAt,
-            });
-            logger.logInfo(
-              `Payment captured outside market hours; order scheduled for next market open: ${paymentOrderId}`,
-              {
-                orderId: order.id,
-                scheduledExecutionAt: scheduledExecutionAt.toISOString(),
-              }
-            );
-          }
+          // Submit to NSE now if the market is open, otherwise schedule for the
+          // next market open. Centralised so every settlement entry point (this
+          // webhook + the payment reconciliation cron) honours the same gate.
+          await dispatchOrScheduleSettlement({
+            orderId: order.id,
+            paymentOrderId,
+            paymentId,
+            paymentEntity,
+            isNetBanking,
+          });
         }
       } catch (error) {
         logger.logError("Error processing payment.captured webhook:", error);
