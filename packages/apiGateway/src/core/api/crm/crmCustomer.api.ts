@@ -210,6 +210,7 @@ export type CorporateKycAutofillFormPatch = {
     | "LLP"
     | "PARTNERSHIP"
     | "TRUST"
+    | "HUF"
     | "OTHER";
   annualIncome?: string;
 
