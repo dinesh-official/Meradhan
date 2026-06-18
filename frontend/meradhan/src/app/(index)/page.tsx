@@ -10,7 +10,9 @@ import ToolsOfferedByMeraDhan from "./_components/ToolsOfferedbyMeraDhan";
 import WhyMeraDhanSection from "./_components/WhyMeraDhanSection";
 import XirrCalculator from "../(tools)/ytm-calculator/_components/XirrCalculator";
 
-export const revalidate = 0; // Revalidate the page every hour
+// ISR: one render per hour per path — avoids hammering stage-be with 3 parallel
+// bond list queries on every homepage visit (was `0`, i.e. fully dynamic).
+export const revalidate = 3600;
 export const generateMetadata = async () => {
   return await generatePagesMetaData("index");
 };
@@ -35,10 +37,14 @@ function pickResponseData<T>(
 export default async function HomePage() {
   const apiCaller = new apiGateway.bondsApi.BondsApi(apiServerCaller);
 
+  // Enough rows for tab filters (AAA, secured, etc.) without pulling 100×3 full
+  // bond payloads on every SSR pass.
+  const homepageBondLimit = 40;
+
   const [latestRes, highYieldRes, zeroCouponRes] = await Promise.allSettled([
-    apiCaller.getLatestBonds(100),
-    apiCaller.getHighYieldBonds(100),
-    apiCaller.getZeroCouponBonds(100),
+    apiCaller.getLatestBonds(homepageBondLimit),
+    apiCaller.getHighYieldBonds(homepageBondLimit),
+    apiCaller.getZeroCouponBonds(homepageBondLimit),
   ]);
 
   const latest = pickResponseData(latestRes, "getLatestBonds");

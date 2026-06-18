@@ -165,7 +165,7 @@ export class BondsApi {
   public async getLatestBonds(count: number = 3, config?: AxiosRequestConfig) {
     const response = await this.apiClient.get<LatestBondsResponse>(
       `/bonds/latest`,
-      { ...config, params: { count } }
+      { ...config, params: { limit: count } }
     );
     return response.data;
   }

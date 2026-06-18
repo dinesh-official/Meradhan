@@ -156,7 +156,11 @@ export class CustomerProfileController {
   }
 
   async filterCustomer(req: Request, res: Response): Promise<void> {
-    const payload = appSchema.customer.findManyCustomerSchema.parse(req.query);
+    const parsed = appSchema.customer.findManyCustomerSchema.parse(req.query);
+    const payload =
+      req.session?.role === "RELATIONSHIP_MANAGER" && req.session.id
+        ? { ...parsed, relationshipManagerId: req.session.id }
+        : parsed;
     const response = await this.profileService.filterCustomers(payload);
     res.sendResponse({
       statusCode: HttpStatus.OK,
@@ -177,6 +181,11 @@ export class CustomerProfileController {
 
   async getFullProfileCustomer(req: Request, res: Response): Promise<void> {
     const customerId = req.params.customerId;
+
+    await this.profileService.assertRelationshipManagerCustomerAccess(
+      Number(customerId),
+      req.session,
+    );
 
     const response = await this.profileService.getFullCustomerProfile(
       Number(customerId)

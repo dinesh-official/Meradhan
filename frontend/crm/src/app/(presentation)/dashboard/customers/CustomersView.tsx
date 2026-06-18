@@ -11,7 +11,7 @@ import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import CustomerSearchFilterBar from "./_components/listView/CustomerSearchFilterBar";
 import CustomerTable from "./_components/listView/CustomerTable";
 import { downloadCustomersCsv } from "./_components/listView/exportCustomersCsv";
-import { useFilterListApiHook } from "./_components/listView/useCustomerListApiHook";
+import { useFilterListApiHook, buildCustomerListQueryParams } from "./_components/listView/useCustomerListApiHook";
 import { useCustomerFilterListHook } from "./_components/listView/useCustomerListHook";
 import NewCustomerView from "./create/NewCustomerView";
 import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
@@ -31,8 +31,9 @@ function CustomersView() {
     try {
       const customerApi = new apiGateway.crm.customer.CrmCustomerApi(apiClientCaller);
       const res = await customerApi.getCustomer({
+        ...buildCustomerListQueryParams(filterManager.state, cookies),
         page: "1",
-        pageSize: 50000
+        pageSize: 50000,
       });
       const data = res.data?.responseData?.data ?? [];
       downloadCustomersCsv(data);
