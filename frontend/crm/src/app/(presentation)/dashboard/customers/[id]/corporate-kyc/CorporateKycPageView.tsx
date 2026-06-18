@@ -32,6 +32,7 @@ import { BankAccountsSection } from "./_components/BankAccountsSection";
 import { CorrespondenceAddressSection } from "./_components/CorrespondenceAddressSection";
 import { DematAccountsSection } from "./_components/DematAccountsSection";
 import { DirectorsSection } from "./_components/DirectorsSection";
+import { KartasSection } from "./_components/KartasSection";
 import { DocumentsSection } from "./_components/DocumentsSection";
 import { EntityDetailsSection } from "./_components/EntityDetailsSection";
 import { FatcaSection } from "./_components/FatcaSection";
@@ -638,6 +639,7 @@ export default function CorporateKycPageView({
          *   - OPC            → Directors
          *   - LLP / Partnership → Partners
          *   - Trust          → Trustees
+         *   - HUF            → Kartas
          *   - Other / blank  → all four
          * Authorised Signatories are always rendered below.
          */}
@@ -646,6 +648,7 @@ export default function CorporateKycPageView({
           return (
             <>
               {roles.directors && <DirectorsSection hook={hook} />}
+              {roles.kartas && <KartasSection hook={hook} />}
               {roles.partners && <PartnersSection hook={hook} />}
               {roles.trustees && <TrusteesSection hook={hook} />}
               {roles.promoters && <PromotersSection hook={hook} />}

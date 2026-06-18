@@ -120,6 +120,7 @@ enum EntityConstitutionType {
   LLP
   PARTNERSHIP
   TRUST
+  HUF
   OTHER
 }
 

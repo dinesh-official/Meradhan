@@ -113,6 +113,8 @@ model Bonds {
 
     autofillSavedAt DateTime?
 
+    documents BondDocument[]
+
     @@index([isin])
     @@index([sortedAt])
     // Homepage / listings filter patterns: (isListed='YES' AND allowForPurchase=TRUE)

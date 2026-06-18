@@ -10,9 +10,36 @@ import type { CorporateKycFormHook } from "../_hooks/useCorporateKycForm";
 import { Plus, Trash2 } from "lucide-react";
 import { useCorporateKycFileUpload } from "../_hooks/useCorporateKycFileUpload";
 
-export function DirectorsSection({ hook }: { hook: CorporateKycFormHook }) {
+type GovernanceVariant = "directors" | "kartas";
+
+const VARIANT_CONFIG: Record<
+  GovernanceVariant,
+  { title: string; rowLabel: string; empty: string; uploadDir: string }
+> = {
+  directors: {
+    title: "Directors",
+    rowLabel: "Director",
+    empty: "No directors added.",
+    uploadDir: "corporate-kyc/directors",
+  },
+  kartas: {
+    title: "Kartas",
+    rowLabel: "Karta",
+    empty: "No kartas added.",
+    uploadDir: "corporate-kyc/kartas",
+  },
+};
+
+export function DirectorsSection({
+  hook,
+  variant = "directors",
+}: {
+  hook: CorporateKycFormHook;
+  variant?: GovernanceVariant;
+}) {
   const { form, errors, setDirector, addDirector, removeDirector } = hook;
   const { uploadFile } = useCorporateKycFileUpload();
+  const config = VARIANT_CONFIG[variant];
   const list = form.directors ?? [];
   const rowErrors = (i: number): Record<string, string[]> =>
     (errors.directors?.[i] ?? {}) as Record<string, string[]>;
@@ -20,14 +47,14 @@ export function DirectorsSection({ hook }: { hook: CorporateKycFormHook }) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-sm">Directors</CardTitle>
+        <CardTitle className="text-sm">{config.title}</CardTitle>
         <Button type="button" variant="outline" size="sm" onClick={addDirector}>
           <Plus className="h-4 w-4" /> Add
         </Button>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {list.length === 0 && (
-          <p className="text-muted-foreground text-xs">No directors added.</p>
+          <p className="text-muted-foreground text-xs">{config.empty}</p>
         )}
         {list.map((dir: CorporateKycDirectorPayload, index: number) => (
           <div
@@ -35,7 +62,9 @@ export function DirectorsSection({ hook }: { hook: CorporateKycFormHook }) {
             className="rounded-lg border p-4 grid gap-3 md:grid-cols-2"
           >
             <div className="md:col-span-2 flex justify-between items-center">
-              <span className="text-xs font-medium">Director {index + 1}</span>
+              <span className="text-xs font-medium">
+                {config.rowLabel} {index + 1}
+              </span>
               <Button
                 type="button"
                 variant="ghost"
@@ -62,7 +91,7 @@ export function DirectorsSection({ hook }: { hook: CorporateKycFormHook }) {
               className="md:col-span-2"
               value={dir.passportPhotoFileUrl ?? ""}
               onChangeAction={(v) => setDirector(index, { passportPhotoFileUrl: v })}
-              onUpload={(file) => uploadFile(file, "corporate-kyc/directors")}
+              onUpload={(file) => uploadFile(file, config.uploadDir)}
               accept=".jpg,.jpeg,.png,.pdf"
               placeholder="Select file or paste URL"
             />
@@ -71,7 +100,7 @@ export function DirectorsSection({ hook }: { hook: CorporateKycFormHook }) {
               className="md:col-span-2"
               value={dir.aadharCopyFileUrl ?? ""}
               onChangeAction={(v) => setDirector(index, { aadharCopyFileUrl: v })}
-              onUpload={(file) => uploadFile(file, "corporate-kyc/directors")}
+              onUpload={(file) => uploadFile(file, config.uploadDir)}
               accept=".jpg,.jpeg,.png,.pdf"
               placeholder="Select file or paste URL"
             />
@@ -80,7 +109,7 @@ export function DirectorsSection({ hook }: { hook: CorporateKycFormHook }) {
               className="md:col-span-2"
               value={dir.panCopyFileUrl ?? ""}
               onChangeAction={(v) => setDirector(index, { panCopyFileUrl: v })}
-              onUpload={(file) => uploadFile(file, "corporate-kyc/directors")}
+              onUpload={(file) => uploadFile(file, config.uploadDir)}
               accept=".jpg,.jpeg,.png,.pdf"
               placeholder="Select file or paste URL"
             />

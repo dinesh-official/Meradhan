@@ -125,7 +125,7 @@ export const NDML_COMP_STATUS: CodeEntry[] = [
   { code: "05", label: "Trust / Charities / NGOs", aliases: ["TRUST", "Trust", "Charities", "NGO", "NGOs"] },
   { code: "06", label: "FI", aliases: ["Financial Institution"] },
   { code: "07", label: "FII" },
-  { code: "08", label: "HUF", aliases: ["Hindu Undivided Family"] },
+  { code: "08", label: "HUF", aliases: ["HUF", "Hindu Undivided Family"] },
   { code: "09", label: "AOP", aliases: ["Association of Persons"] },
   { code: "10", label: "Bank" },
   { code: "11", label: "Government Body", aliases: ["Government"] },
