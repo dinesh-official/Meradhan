@@ -15,8 +15,12 @@ import { useFilterListApiHook } from "./_components/listView/useCustomerListApiH
 import { useCustomerFilterListHook } from "./_components/listView/useCustomerListHook";
 import NewCustomerView from "./create/NewCustomerView";
 import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
+import useAppCookie from "@/hooks/useAppCookie.hook";
 
 function CustomersView() {
+  const { cookies } = useAppCookie();
+  const showRmAssignmentFilter =
+    cookies.role === "ADMIN" || cookies.role === "SUPER_ADMIN";
   const [addCustomerOpen, setAddCustomerOpen] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
   const filterManager = useCustomerFilterListHook();
@@ -85,11 +89,16 @@ function CustomersView() {
           kycValue={filterManager.state.accountKycStatus}
           statusValue={filterManager.state.accountStatus}
           userTypeValue={filterManager.state.userType}
+          rmAssignmentValue={filterManager.state.rmAssignment}
+          showRmAssignmentFilter={showRmAssignmentFilter}
           searchValue={filterManager.state.search}
           onKycChange={filterManager.state.setAccountKycStatus}
           onSearchChange={filterManager.state.setSearch}
           onStatusChange={filterManager.state.setAccountStatus}
           onUserTypeChange={filterManager.state.setUserType}
+          onRmAssignmentChange={filterManager.state.setRmAssignment}
+          hasActiveFilters={filterManager.state.hasActiveFilters}
+          onClearFilters={filterManager.state.resetAll}
         />
         <CardContent>
           <CustomerTable

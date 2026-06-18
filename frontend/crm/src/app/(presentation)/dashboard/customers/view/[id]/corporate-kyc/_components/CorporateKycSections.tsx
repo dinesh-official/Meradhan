@@ -240,13 +240,19 @@ export function DematAccountsSection({ data }: { data: CorporateKycResponse }) {
   );
 }
 
-export function DirectorsSection({ data }: { data: CorporateKycResponse }) {
+export function DirectorsSection({
+  data,
+  title = "Directors",
+}: {
+  data: CorporateKycResponse;
+  title?: string;
+}) {
   const list = data.directors ?? [];
   if (list.length === 0) return null;
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Directors</CardTitle>
+        <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {list.map((dir, index) => (
@@ -277,6 +283,10 @@ export function DirectorsSection({ data }: { data: CorporateKycResponse }) {
       </CardContent>
     </Card>
   );
+}
+
+export function KartasSection({ data }: { data: CorporateKycResponse }) {
+  return <DirectorsSection data={data} title="Kartas" />;
 }
 
 export function PromotersSection({ data }: { data: CorporateKycResponse }) {

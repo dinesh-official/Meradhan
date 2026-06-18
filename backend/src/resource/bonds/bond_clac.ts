@@ -781,7 +781,9 @@ export async function getBondDealAutofill(opts: {
         overrides: { isin },
     });
 
+
     const calc = await calculateBondFromService(payload);
+    console.log(calc);
     const sellPrice = parseCalcFormattedDecimal(calc.final_price);
 
     const yieldSource: BondDealAutofillResult["sources"]["yieldSource"] =

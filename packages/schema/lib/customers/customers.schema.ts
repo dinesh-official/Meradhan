@@ -36,6 +36,8 @@ export const findManyCustomerSchema = z.object({
   accountStatus: AccountStatusEnum.optional(),
   kycStatus: z.enum([...kycStatus]).optional(),
   userType: z.enum([...UserAccountType]).optional(),
+  /** Filter customers assigned to this CRM user as relationship manager. */
+  relationshipManagerId: z.coerce.number().int().positive().optional(),
 });
 
 export const sendEmailOtpSchema = z.object({

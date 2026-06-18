@@ -92,8 +92,8 @@ function formatNumber(value: number | string | null | undefined, digits = 2) {
   const numeric = Number(value);
   if (!Number.isFinite(numeric)) return "—";
   return new Intl.NumberFormat("en-IN", {
-    maximumFractionDigits: digits,
     minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
   }).format(numeric);
 }
 
@@ -223,7 +223,7 @@ function buildEmailPreviewHtml(params: SendProposalEmailPayload) {
     ["Face Value", faceVal],
     ["Quantity", formatInteger(params.quantity)],
     ["Quantum", formatCurrency(params.quantum)],
-    ["Clean Price", cleanPriceDisplay],
+    ["Clean Price", cleanPx != null ? `${formatNumber(cleanPx, 4)}` : "—"],
     ["YTM Ann", params.ytmAnn != null ? `${formatNumber(params.ytmAnn, 2)}%` : "—"],
     ["Last IP Date", formatDealDateForEmailSubject(params.lastIpDate ?? undefined)],
     ["Principal Amount", formatCurrency(params.principalAmount)],
@@ -1516,243 +1516,243 @@ function ProposalManagementView() {
           ) : (
             <div className="overflow-hidden rounded-xl border border-border bg-white">
               <div className="overflow-x-auto">
-              <table className="w-full min-w-[1000px] text-sm">
-                <thead>
-                  <tr className="border-b border-border bg-slate-50">
-                    <th className="w-9 px-3 py-3" />
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Bond / ISIN</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Recipient</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Side</th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Qty</th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Clean Px</th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Settle Amt</th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">YTM</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Saved</th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {proposalGroups.map(([rootId, items]) => {
-                    const primary = items[0]!;
-                    const hasChildren = items.length > 1;
-                    const isExpanded = expandedGroups.has(rootId);
+                <table className="w-full min-w-[1000px] text-sm">
+                  <thead>
+                    <tr className="border-b border-border bg-slate-50">
+                      <th className="w-9 px-3 py-3" />
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Bond / ISIN</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Recipient</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Side</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Qty</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Clean Px</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Settle Amt</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">YTM</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Saved</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {proposalGroups.map(([rootId, items]) => {
+                      const primary = items[0]!;
+                      const hasChildren = items.length > 1;
+                      const isExpanded = expandedGroups.has(rootId);
 
-                    const renderItemCells = (item: ProposalDraft, isChild = false) => {
-                      const deal = item.fetched?.dealAutofill;
-                      const manual = item.manualYieldEnabled && item.manualYield?.trim() ? Number(item.manualYield) : null;
-                      const calcYtm = deal?.pricing?.finalYieldRaw;
-                      const fallbackYtm = deal?.suggested?.yield ?? deal?.suggested?.buyYield ?? (item.fetched?.bond?.buyYield as unknown as number | null | undefined);
-                      const ytm =
-                        manual != null && Number.isFinite(manual) && manual > 0 ? manual
-                          : calcYtm != null && Number.isFinite(Number(calcYtm)) && Number(calcYtm) > 0 ? Number(calcYtm)
-                            : fallbackYtm != null && Number.isFinite(Number(fallbackYtm)) && Number(fallbackYtm) > 0 ? Number(fallbackYtm)
-                              : null;
-                      const bondName = item.fetched?.bond?.bondName || item.fetched?.bond?.instrumentName || "—";
-                      const settleAmt = item.fetched?.dealAutofill?.pricing?.settlementAmount ?? item.fetched?.pricing?.settlementAmount;
-                      const calcPx = item.fetched?.dealAutofill?.pricing?.finalPrice ?? item.fetched?.pricing?.cleanPrice;
+                      const renderItemCells = (item: ProposalDraft, isChild = false) => {
+                        const deal = item.fetched?.dealAutofill;
+                        const manual = item.manualYieldEnabled && item.manualYield?.trim() ? Number(item.manualYield) : null;
+                        const calcYtm = deal?.pricing?.finalYieldRaw;
+                        const fallbackYtm = deal?.suggested?.yield ?? deal?.suggested?.buyYield ?? (item.fetched?.bond?.buyYield as unknown as number | null | undefined);
+                        const ytm =
+                          manual != null && Number.isFinite(manual) && manual > 0 ? manual
+                            : calcYtm != null && Number.isFinite(Number(calcYtm)) && Number(calcYtm) > 0 ? Number(calcYtm)
+                              : fallbackYtm != null && Number.isFinite(Number(fallbackYtm)) && Number(fallbackYtm) > 0 ? Number(fallbackYtm)
+                                : null;
+                        const bondName = item.fetched?.bond?.bondName || item.fetched?.bond?.instrumentName || "—";
+                        const settleAmt = item.fetched?.dealAutofill?.pricing?.settlementAmount ?? item.fetched?.pricing?.settlementAmount;
+                        const calcPx = item.fetched?.dealAutofill?.pricing?.finalPrice ?? item.fetched?.pricing?.cleanPrice;
+
+                        return (
+                          <>
+                            {/* Expand toggle */}
+                            <td className="w-9 px-3 py-3.5">
+                              {!isChild && hasChildren ? (
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); toggleGroup(rootId); }}
+                                  className="flex h-6 w-6 items-center justify-center rounded-md border border-border bg-white text-slate-400 shadow-sm transition-colors hover:border-slate-300 hover:text-slate-600"
+                                >
+                                  {isExpanded
+                                    ? <ChevronDown className="h-3.5 w-3.5" />
+                                    : <ChevronRight className="h-3.5 w-3.5" />}
+                                </button>
+                              ) : isChild ? (
+                                <span className="pl-2 text-slate-300">└</span>
+                              ) : null}
+                            </td>
+
+                            {/* Bond / ISIN */}
+                            <td className={cn("max-w-[240px] px-4 py-3.5", isChild && "pl-6")}>
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-semibold text-slate-800">{bondName}</p>
+                                <div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+                                  <span className="font-mono text-[11px] text-slate-400">{item.isin}</span>
+                                  {!isChild && hasChildren && (
+                                    <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">
+                                      {items.length} versions
+                                    </span>
+                                  )}
+                                  {isChild && item.editOfId && (
+                                    <span className="font-mono text-[10px] text-slate-400">edit of #{item.editOfId}</span>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* Recipient */}
+                            <td className="max-w-[200px] px-4 py-3.5">
+                              <p className="truncate text-sm font-medium text-slate-700">
+                                {proposalRecipientName(item)}
+                              </p>
+                              {item.rfqParticipant ? (
+                                <p className="truncate font-mono text-[11px] text-slate-400">
+                                  {item.rfqParticipant.code}
+                                </p>
+                              ) : proposalRecipientEmail(item) ? (
+                                <p className="truncate text-[11px] text-slate-400">
+                                  {proposalRecipientEmail(item)}
+                                </p>
+                              ) : null}
+                            </td>
+
+                            {/* Side */}
+                            <td className="px-4 py-3.5">
+                              <span className={cn(
+                                "text-sm font-semibold",
+                                item.side === "SELL" ? "text-red-600" : "text-blue-600",
+                              )}>
+                                {item.side}
+                              </span>
+                              <span className="text-slate-400"> · </span>
+                              <span className="text-sm text-slate-500">{item.settlementType ?? "T+0"}</span>
+                              {item.manualYieldEnabled && (
+                                <>
+                                  <span className="text-slate-400"> · </span>
+                                  <span className="text-sm text-violet-600">{item.manualYield || "—"}%</span>
+                                </>
+                              )}
+                            </td>
+
+                            {/* Qty */}
+                            <td className="px-4 py-3.5 text-right font-mono text-sm tabular-nums text-slate-700">
+                              {formatInteger(item.quantity)}
+                            </td>
+
+                            {/* Clean Price */}
+                            <td className="px-4 py-3.5 text-right font-mono text-sm tabular-nums text-slate-700">
+                              {formatNumber(calcPx, 4)}
+                            </td>
+
+                            {/* Settle Amount */}
+                            <td className="px-4 py-3.5 text-right font-mono text-sm tabular-nums text-slate-800 font-medium">
+                              {formatCurrency(settleAmt)}
+                            </td>
+
+                            {/* YTM */}
+                            <td className="px-4 py-3.5 text-right font-mono text-sm tabular-nums text-slate-700">
+                              {ytm != null ? `${formatNumber(ytm, 4)}%` : "—"}
+                            </td>
+
+                            {/* Status */}
+                            <td className="px-4 py-3.5">
+                              {item.status === "FAILED" && item.failedNote ? (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div className="cursor-help space-y-0.5">
+                                      <ProposalStatusBadge status={item.status} />
+                                      <p className="max-w-[160px] truncate text-[10px] text-red-500">
+                                        {item.failedNote}
+                                      </p>
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="max-w-xs whitespace-pre-wrap text-xs">
+                                    {item.failedNote}
+                                  </TooltipContent>
+                                </Tooltip>
+                              ) : (
+                                <ProposalStatusBadge status={item.status} />
+                              )}
+                            </td>
+
+                            {/* Saved date */}
+                            <td className="whitespace-nowrap px-4 py-3.5 text-[11px] text-slate-400">
+                              {formatDisplayDate(item.createdAt)}
+                            </td>
+
+                            {/* Actions */}
+                            <td className="px-4 py-3.5 text-right">
+                              <div className="flex items-center justify-end gap-1">
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => { e.stopPropagation(); openEditDialog(item); }}
+                                      className="flex h-7 w-7 items-center justify-center rounded-md border border-border bg-white text-slate-500 shadow-sm transition-colors hover:border-slate-300 hover:text-slate-800"
+                                    >
+                                      <Pencil className="h-3.5 w-3.5" />
+                                    </button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Edit (new version)</TooltipContent>
+                                </Tooltip>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => { e.stopPropagation(); void sendEmailForDraft(item); }}
+                                      disabled={sendProposalEmailMutation.isPending}
+                                      className="flex h-7 w-7 items-center justify-center rounded-md border border-blue-200 bg-blue-50 text-blue-600 shadow-sm transition-colors hover:bg-blue-100 disabled:opacity-50"
+                                    >
+                                      <Mail className="h-3.5 w-3.5" />
+                                    </button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Send proposal email</TooltipContent>
+                                </Tooltip>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setConfirmProcessItem(item);
+                                        setConfirmProcessOpen(true);
+                                      }}
+                                      disabled={item.status === "PROCESSING" || item.status === "CONVERTED"}
+                                      className="flex h-7 w-7 items-center justify-center rounded-md border border-amber-200 bg-amber-50 text-amber-600 shadow-sm transition-colors hover:bg-amber-100 disabled:opacity-40"
+                                    >
+                                      <Zap className="h-3.5 w-3.5" />
+                                    </button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    {isNseParticipantProposal(item)
+                                      ? "Create ISIN RFQ on NSE (step 1 only)"
+                                      : "Trigger full RFQ processing"}
+                                  </TooltipContent>
+                                </Tooltip>
+                              </div>
+                            </td>
+                          </>
+                        );
+                      };
 
                       return (
                         <>
-                          {/* Expand toggle */}
-                          <td className="w-9 px-3 py-3.5">
-                            {!isChild && hasChildren ? (
-                              <button
-                                type="button"
-                                onClick={(e) => { e.stopPropagation(); toggleGroup(rootId); }}
-                                className="flex h-6 w-6 items-center justify-center rounded-md border border-border bg-white text-slate-400 shadow-sm transition-colors hover:border-slate-300 hover:text-slate-600"
-                              >
-                                {isExpanded
-                                  ? <ChevronDown className="h-3.5 w-3.5" />
-                                  : <ChevronRight className="h-3.5 w-3.5" />}
-                              </button>
-                            ) : isChild ? (
-                              <span className="pl-2 text-slate-300">└</span>
-                            ) : null}
-                          </td>
-
-                          {/* Bond / ISIN */}
-                          <td className={cn("max-w-[240px] px-4 py-3.5", isChild && "pl-6")}>
-                            <div className="min-w-0">
-                              <p className="truncate text-sm font-semibold text-slate-800">{bondName}</p>
-                              <div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
-                                <span className="font-mono text-[11px] text-slate-400">{item.isin}</span>
-                                {!isChild && hasChildren && (
-                                  <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">
-                                    {items.length} versions
-                                  </span>
-                                )}
-                                {isChild && item.editOfId && (
-                                  <span className="font-mono text-[10px] text-slate-400">edit of #{item.editOfId}</span>
-                                )}
-                              </div>
-                            </div>
-                          </td>
-
-                          {/* Recipient */}
-                          <td className="max-w-[200px] px-4 py-3.5">
-                            <p className="truncate text-sm font-medium text-slate-700">
-                              {proposalRecipientName(item)}
-                            </p>
-                            {item.rfqParticipant ? (
-                              <p className="truncate font-mono text-[11px] text-slate-400">
-                                {item.rfqParticipant.code}
-                              </p>
-                            ) : proposalRecipientEmail(item) ? (
-                              <p className="truncate text-[11px] text-slate-400">
-                                {proposalRecipientEmail(item)}
-                              </p>
-                            ) : null}
-                          </td>
-
-                          {/* Side */}
-                          <td className="px-4 py-3.5">
-                            <span className={cn(
-                              "text-sm font-semibold",
-                              item.side === "SELL" ? "text-red-600" : "text-blue-600",
-                            )}>
-                              {item.side}
-                            </span>
-                            <span className="text-slate-400"> · </span>
-                            <span className="text-sm text-slate-500">{item.settlementType ?? "T+0"}</span>
-                            {item.manualYieldEnabled && (
-                              <>
-                                <span className="text-slate-400"> · </span>
-                                <span className="text-sm text-violet-600">{item.manualYield || "—"}%</span>
-                              </>
+                          <tr
+                            key={`group-${rootId}`}
+                            onClick={() => handleOpenSavedProposal(primary)}
+                            className={cn(
+                              "cursor-pointer transition-colors hover:bg-slate-50/80",
+                              isExpanded && "bg-slate-50/60",
+                              primary.status === "CONVERTED" && "bg-emerald-50/30 hover:bg-emerald-50/60",
+                              primary.status === "PROCESSING" && "bg-amber-50/30 hover:bg-amber-50/60",
+                              primary.status === "FAILED" && "bg-red-50/20 hover:bg-red-50/40",
                             )}
-                          </td>
-
-                          {/* Qty */}
-                          <td className="px-4 py-3.5 text-right font-mono text-sm tabular-nums text-slate-700">
-                            {formatInteger(item.quantity)}
-                          </td>
-
-                          {/* Clean Price */}
-                          <td className="px-4 py-3.5 text-right font-mono text-sm tabular-nums text-slate-700">
-                            {formatNumber(calcPx, 4)}
-                          </td>
-
-                          {/* Settle Amount */}
-                          <td className="px-4 py-3.5 text-right font-mono text-sm tabular-nums text-slate-800 font-medium">
-                            {formatCurrency(settleAmt)}
-                          </td>
-
-                          {/* YTM */}
-                          <td className="px-4 py-3.5 text-right font-mono text-sm tabular-nums text-slate-700">
-                            {ytm != null ? `${formatNumber(ytm, 4)}%` : "—"}
-                          </td>
-
-                          {/* Status */}
-                          <td className="px-4 py-3.5">
-                            {item.status === "FAILED" && item.failedNote ? (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <div className="cursor-help space-y-0.5">
-                                    <ProposalStatusBadge status={item.status} />
-                                    <p className="max-w-[160px] truncate text-[10px] text-red-500">
-                                      {item.failedNote}
-                                    </p>
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent className="max-w-xs whitespace-pre-wrap text-xs">
-                                  {item.failedNote}
-                                </TooltipContent>
-                              </Tooltip>
-                            ) : (
-                              <ProposalStatusBadge status={item.status} />
-                            )}
-                          </td>
-
-                          {/* Saved date */}
-                          <td className="whitespace-nowrap px-4 py-3.5 text-[11px] text-slate-400">
-                            {formatDisplayDate(item.createdAt)}
-                          </td>
-
-                          {/* Actions */}
-                          <td className="px-4 py-3.5 text-right">
-                            <div className="flex items-center justify-end gap-1">
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <button
-                                    type="button"
-                                    onClick={(e) => { e.stopPropagation(); openEditDialog(item); }}
-                                    className="flex h-7 w-7 items-center justify-center rounded-md border border-border bg-white text-slate-500 shadow-sm transition-colors hover:border-slate-300 hover:text-slate-800"
-                                  >
-                                    <Pencil className="h-3.5 w-3.5" />
-                                  </button>
-                                </TooltipTrigger>
-                                <TooltipContent>Edit (new version)</TooltipContent>
-                              </Tooltip>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <button
-                                    type="button"
-                                    onClick={(e) => { e.stopPropagation(); void sendEmailForDraft(item); }}
-                                    disabled={sendProposalEmailMutation.isPending}
-                                    className="flex h-7 w-7 items-center justify-center rounded-md border border-blue-200 bg-blue-50 text-blue-600 shadow-sm transition-colors hover:bg-blue-100 disabled:opacity-50"
-                                  >
-                                    <Mail className="h-3.5 w-3.5" />
-                                  </button>
-                                </TooltipTrigger>
-                                <TooltipContent>Send proposal email</TooltipContent>
-                              </Tooltip>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setConfirmProcessItem(item);
-                                      setConfirmProcessOpen(true);
-                                    }}
-                                    disabled={item.status === "PROCESSING" || item.status === "CONVERTED"}
-                                    className="flex h-7 w-7 items-center justify-center rounded-md border border-amber-200 bg-amber-50 text-amber-600 shadow-sm transition-colors hover:bg-amber-100 disabled:opacity-40"
-                                  >
-                                    <Zap className="h-3.5 w-3.5" />
-                                  </button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  {isNseParticipantProposal(item)
-                                    ? "Create ISIN RFQ on NSE (step 1 only)"
-                                    : "Trigger full RFQ processing"}
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                          </td>
+                          >
+                            {renderItemCells(primary, false)}
+                          </tr>
+                          {isExpanded && items.slice(1).map((child) => (
+                            <tr
+                              key={`child-${child.id}`}
+                              onClick={() => handleOpenSavedProposal(child)}
+                              className="cursor-pointer bg-indigo-50/40 transition-colors hover:bg-indigo-50/70"
+                            >
+                              {renderItemCells(child, true)}
+                            </tr>
+                          ))}
                         </>
                       );
-                    };
-
-                    return (
-                      <>
-                        <tr
-                          key={`group-${rootId}`}
-                          onClick={() => handleOpenSavedProposal(primary)}
-                          className={cn(
-                            "cursor-pointer transition-colors hover:bg-slate-50/80",
-                            isExpanded && "bg-slate-50/60",
-                            primary.status === "CONVERTED" && "bg-emerald-50/30 hover:bg-emerald-50/60",
-                            primary.status === "PROCESSING" && "bg-amber-50/30 hover:bg-amber-50/60",
-                            primary.status === "FAILED" && "bg-red-50/20 hover:bg-red-50/40",
-                          )}
-                        >
-                          {renderItemCells(primary, false)}
-                        </tr>
-                        {isExpanded && items.slice(1).map((child) => (
-                          <tr
-                            key={`child-${child.id}`}
-                            onClick={() => handleOpenSavedProposal(child)}
-                            className="cursor-pointer bg-indigo-50/40 transition-colors hover:bg-indigo-50/70"
-                          >
-                            {renderItemCells(child, true)}
-                          </tr>
-                        ))}
-                      </>
-                    );
-                  })}
-                </tbody>
-              </table>
+                    })}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}
@@ -1922,9 +1922,9 @@ function ProposalManagementView() {
                 <InfoRow
                   label="Clean Price"
                   value={formatNumber(
+                    dealAutofill?.pricing.finalPrice ??
                     calcAmounts?.cleanPrice ??
-                    pricing?.cleanPrice ??
-                    dealAutofill?.pricing.finalPrice,
+                    pricing?.cleanPrice,
                     4,
                   )}
                 />
@@ -1943,23 +1943,21 @@ function ProposalManagementView() {
                 <InfoRow
                   label="Principal Amount"
                   value={formatCurrency(
-                    calcAmounts?.principalAmount ??
-                    pricing?.principalAmount ??
+
                     dealAutofill?.pricing.principalAmount,
                   )}
                 />
                 <InfoRow
                   label="Accrued Interest"
                   value={formatCurrency(
-                    calcAmounts?.accruedInterest ??
-                    pricing?.accruedInterest ??
-                    dealAutofill?.pricing.totalAccruedInterest,
+                    dealAutofill?.pricing.totalAccruedInterest ?? calcAmounts?.accruedInterest ??
+                    pricing?.accruedInterest
                   )}
                 />
                 <InfoRow
                   label="Total Consideration"
                   value={formatCurrency(
-                    calcAmounts?.totalConsideration ?? dealAutofill?.pricing.totalConsideration,
+                    dealAutofill?.pricing.totalConsideration ?? calcAmounts?.totalConsideration
                   )}
                 />
                 <InfoRow
@@ -1969,8 +1967,8 @@ function ProposalManagementView() {
                 <InfoRow
                   label="Settlement Amount"
                   value={formatCurrency(
-                    calcAmounts?.settlementAmount ??
                     dealAutofill?.pricing.settlementAmount ??
+                    calcAmounts?.settlementAmount ??
                     pricing?.settlementAmount,
                   )}
                 />
@@ -2400,10 +2398,11 @@ function ProposalManagementView() {
             const bond = item.fetched?.bond;
             const pricing = item.fetched?.pricing;
             const deal = item.fetched?.dealAutofill;
-            const calcPx = deal?.pricing?.finalPrice ?? pricing?.cleanPrice;
+            const calcPx = deal?.pricing?.finalPrice ?? calcAmounts?.cleanPrice ?? pricing?.cleanPrice;
             const settleAmt = deal?.pricing?.settlementAmount ?? pricing?.settlementAmount;
             const ytmRaw = deal?.pricing?.finalYieldRaw;
             const idNum = Number(item.id);
+
             return (
               <div className="space-y-4 py-1">
                 {/* Bond block */}

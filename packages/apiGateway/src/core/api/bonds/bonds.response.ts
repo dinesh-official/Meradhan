@@ -6,6 +6,7 @@ export interface BondDetailsResponse {
   bondName: string
   instrumentName: string
   description: string
+  issuerDescription?: string | null
   issuePrice: number
   faceValue: number
   stampDutyPercentage: number
@@ -199,3 +200,22 @@ export interface BondFilterOptionsData {
 }
 
 export type BondFilterOptionsResponse = BaseResponseData<BondFilterOptionsData>;
+
+export type BondDocumentItem = {
+  id: number;
+  isin: string;
+  name: string;
+  fileUrl: string;
+  fileName: string | null;
+  createdByCrmUserId: number | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type BondDocumentsListResponse = BaseResponseData<{
+  documents: BondDocumentItem[];
+}>;
+
+export type BondDocumentMutationResponse = BaseResponseData<{
+  document: BondDocumentItem;
+}>;

@@ -10,6 +10,7 @@
  *   LLP             → Partners only
  *   PARTNERSHIP     → Partners only
  *   TRUST           → Trustees only
+ *   HUF             → Kartas only (stored in `directors`)
  *   OTHER / blank   → show everything so the operator can choose
  *
  * Authorised Signatories are unconditional and rendered alongside, not
@@ -20,15 +21,17 @@ export type ConstitutionRoles = {
   partners: boolean;
   trustees: boolean;
   promoters: boolean;
+  kartas: boolean;
 };
 
 const ROLES_BY_CONSTITUTION: Record<string, ConstitutionRoles> = {
-  PRIVATE_LIMITED: { directors: true,  partners: false, trustees: false, promoters: true  },
-  PUBLIC_LIMITED:  { directors: true,  partners: false, trustees: false, promoters: true  },
-  OPC:             { directors: true,  partners: false, trustees: false, promoters: false },
-  LLP:             { directors: false, partners: true,  trustees: false, promoters: false },
-  PARTNERSHIP:     { directors: false, partners: true,  trustees: false, promoters: false },
-  TRUST:           { directors: false, partners: false, trustees: true,  promoters: false },
+  PRIVATE_LIMITED: { directors: true,  partners: false, trustees: false, promoters: true,  kartas: false },
+  PUBLIC_LIMITED:  { directors: true,  partners: false, trustees: false, promoters: true,  kartas: false },
+  OPC:             { directors: true,  partners: false, trustees: false, promoters: false, kartas: false },
+  LLP:             { directors: false, partners: true,  trustees: false, promoters: false, kartas: false },
+  PARTNERSHIP:     { directors: false, partners: true,  trustees: false, promoters: false, kartas: false },
+  TRUST:           { directors: false, partners: false, trustees: true,  promoters: false, kartas: false },
+  HUF:             { directors: false, partners: false, trustees: false, promoters: false, kartas: true  },
 };
 
 /**
@@ -41,6 +44,7 @@ const DEFAULT_ROLES: ConstitutionRoles = {
   partners: true,
   trustees: false,
   promoters: true,
+  kartas: false,
 };
 
 export function getConstitutionRoles(
