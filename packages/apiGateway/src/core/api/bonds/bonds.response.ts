@@ -6,6 +6,7 @@ export interface BondDetailsResponse {
   bondName: string
   instrumentName: string
   description: string
+  issuerDescription?: string | null
   issuePrice: number
   faceValue: number
   stampDutyPercentage: number

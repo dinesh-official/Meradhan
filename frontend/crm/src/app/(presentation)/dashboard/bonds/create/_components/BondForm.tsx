@@ -75,6 +75,7 @@ type BondDetailsResponse = {
   bondName: string;
   instrumentName: string;
   description: string;
+  issuerDescription?: string | null;
   issuePrice: number;
   faceValue: number;
   stampDutyPercentage: number | null;
@@ -220,6 +221,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
         bondName: initialData.bondName,
         instrumentName: initialData.instrumentName,
         description: initialData.description,
+        issuerDescription: initialData.issuerDescription || undefined,
         issuePrice: initialData.issuePrice,
         faceValue: initialData.faceValue,
         stampDutyPercentage: initialData.stampDutyPercentage ?? 0,
@@ -330,6 +332,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
         bondName: "",
         instrumentName: "",
         description: "",
+        issuerDescription: "",
         issuePrice: 0,
         faceValue: 0,
         stampDutyPercentage: 0,
@@ -656,6 +659,25 @@ function BondForm({ initialData, isin }: BondFormProps) {
                       <FormLabel>Bond Name *</FormLabel>
                       <FormControl>
                         <Input {...field} placeholder="Enter bond name" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="issuerDescription"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Issuer Description</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          value={field.value || ""}
+                          placeholder="About the issuer — shown under the Issuer tab on the bond detail page"
+                          rows={3}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
