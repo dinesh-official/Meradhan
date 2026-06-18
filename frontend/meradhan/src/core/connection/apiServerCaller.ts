@@ -27,7 +27,7 @@ import "server-only";
  * partial pages, instead of the request dangling for minutes until the kernel
  * times out the socket.
  */
-const SERVER_REQUEST_TIMEOUT_MS = 15_000;
+const SERVER_REQUEST_TIMEOUT_MS = 30000;
 
 class ApiServerCaller {
   private instance: AxiosInstance;

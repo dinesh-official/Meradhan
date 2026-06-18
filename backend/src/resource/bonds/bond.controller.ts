@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Request, Response } from "express";
-import { BondService } from "./bond.service";
+import { BondService, parseHomepageBondLimit } from "./bond.service";
 import { HttpStatus } from "@utils/error/AppError";
 import { appSchema } from "@root/schema";
 import { createCrmActivityLog } from "@resource/crm/auditlogs/auditlog.repo";
@@ -282,7 +282,7 @@ export class BondController {
   }
 
   async getLatestListedBonds(req: Request, res: Response) {
-    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 3;
+    const limit = parseHomepageBondLimit(req.query.limit ?? req.query.count);
     const data = await this.bondService.getLatestBonds(limit);
     return res.sendResponse({
       statusCode: HttpStatus.OK,
@@ -300,7 +300,7 @@ export class BondController {
   }
 
   async getHighYieldListedBonds(req: Request, res: Response) {
-    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 3;
+    const limit = parseHomepageBondLimit(req.query.limit ?? req.query.count);
     const data = await this.bondService.getHighYieldBonds(limit);
     return res.sendResponse({
       statusCode: HttpStatus.OK,
@@ -309,7 +309,7 @@ export class BondController {
   }
 
   async getZeroCouponListedBonds(req: Request, res: Response) {
-    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 3;
+    const limit = parseHomepageBondLimit(req.query.limit ?? req.query.count);
     const data = await this.bondService.getZeroCouponBonds(limit);
     return res.sendResponse({
       statusCode: HttpStatus.OK,
