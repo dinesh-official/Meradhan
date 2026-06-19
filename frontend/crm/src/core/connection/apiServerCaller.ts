@@ -22,7 +22,7 @@ class ApiServerCaller implements IApiCaller {
     this.instance = axios.create({
       baseURL,
       withCredentials: true,
-      timeout: 10000,
+      timeout: 30000,
     });
 
     this.instance.interceptors.response.use(

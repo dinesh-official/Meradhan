@@ -11,7 +11,9 @@ import type {
   BondDocumentsListResponse,
   BondFilterOptionsResponse,
   BondOrderPricingResponse,
+  BondCashflowResponse,
   LatestBondsResponse,
+  HomepageBondsResponse,
   ListedBondsResponse,
 } from "./bonds.response";
 
@@ -57,6 +59,30 @@ export class BondsApi {
     const response = await this.apiClient.get<BondDetailResponse>(
       `/bonds/${isin}`,
       config
+    );
+    return response.data;
+  }
+
+  public async getBondCashflow(
+    isin: string,
+    params?: {
+      quantity?: number;
+      settlementDate?: string;
+      pricingYield?: number;
+    },
+    config?: AxiosRequestConfig,
+  ) {
+    const response = await this.apiClient.get<BondCashflowResponse>(
+      `/bonds/${isin}/cashflow`,
+      {
+        ...config,
+        params: {
+          ...(config?.params ?? {}),
+          quantity: params?.quantity,
+          settlementDate: params?.settlementDate,
+          pricingYield: params?.pricingYield,
+        },
+      },
     );
     return response.data;
   }
@@ -164,10 +190,21 @@ export class BondsApi {
     return response.data;
   }
 
+  public async getHomepageBonds(
+    limit: number = 40,
+    config?: AxiosRequestConfig,
+  ) {
+    const response = await this.apiClient.get<HomepageBondsResponse>(
+      `/bonds/homepage`,
+      { ...config, params: { limit } },
+    );
+    return response.data;
+  }
+
   public async getLatestBonds(count: number = 3, config?: AxiosRequestConfig) {
     const response = await this.apiClient.get<LatestBondsResponse>(
       `/bonds/latest`,
-      { ...config, params: { count } }
+      { ...config, params: { limit: count } }
     );
     return response.data;
   }
@@ -255,6 +292,17 @@ export class BondsApi {
     const response = await this.apiClient.post<
       BaseResponseData<unknown>
     >(`/bonds/place-order`, payload, config);
+    return response.data;
+  }
+
+  public async listBondDocumentsByIsin(
+    isin: string,
+    config?: AxiosRequestConfig,
+  ) {
+    const response = await this.apiClient.get<BondDocumentsListResponse>(
+      `/bonds/${encodeURIComponent(isin)}/documents`,
+      config,
+    );
     return response.data;
   }
 

@@ -1,9 +1,12 @@
 import { Router } from "express";
 import { BondController } from "./bond.controller";
-import { allowAccessMiddleware } from "@middlewares/auth_middleware";
+import { allowAccessMiddleware, optionalCustomerAuth } from "@middlewares/auth_middleware";
 
 const bondController = new BondController();
 const bondRoute = Router();
+bondRoute.get("/api/bonds/homepage", (req, res) =>
+  bondController.getHomepageBonds(req, res)
+);
 bondRoute.get("/api/bonds/ongoing-deals", (req, res) =>
   bondController.getOngoingDeals(req, res)
 );
@@ -37,6 +40,16 @@ bondRoute.post("/api/bonds/listed/filter", (req, res) =>
 // [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold]
 bondRoute.get("/api/bonds/filter-options", (req, res) =>
   bondController.getBondFilterOptions(req, res)
+);
+
+bondRoute.get("/api/bonds/:isin/cashflow", (req, res) =>
+  bondController.getBondCashflow(req, res),
+);
+
+bondRoute.get(
+  "/api/bonds/:isin/documents",
+  optionalCustomerAuth,
+  (req, res) => bondController.listBondDocuments(req, res),
 );
 
 bondRoute.get("/api/bonds/:isin/order-pricing", (req, res) =>

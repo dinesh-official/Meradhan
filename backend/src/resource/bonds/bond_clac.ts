@@ -958,6 +958,44 @@ export type BondCalcServicePayload = {
     amort_schedule: string
 };
 
+function parseCalcServiceErrorBody(text: string): string {
+    const trimmed = text.trim();
+    if (!trimmed) {
+        return "We couldn't calculate cashflow for this bond right now. Please try again later.";
+    }
+
+    try {
+        const parsed = JSON.parse(trimmed) as {
+            error?: string;
+            message?: string;
+            detail?: string;
+        };
+        const nested =
+            (typeof parsed.error === "string" && parsed.error.trim()) ||
+            (typeof parsed.message === "string" && parsed.message.trim()) ||
+            (typeof parsed.detail === "string" && parsed.detail.trim());
+        if (nested) return nested;
+    } catch {
+        // Plain-text body — fall through.
+    }
+
+    if (/^Calc service failed/i.test(trimmed)) {
+        const afterPrefix = trimmed.replace(
+            /^Calc service failed\s*\([^)]*\)\s*:?\s*/i,
+            "",
+        ).trim();
+        if (afterPrefix && afterPrefix !== trimmed) {
+            return parseCalcServiceErrorBody(afterPrefix);
+        }
+    }
+
+    if (/^\d{3}\s/.test(trimmed) || trimmed.startsWith("{")) {
+        return "We couldn't calculate cashflow for this bond right now. Please try again later.";
+    }
+
+    return trimmed;
+}
+
 export async function calculateBondFromService(
     payload: BondCalcServicePayload,
 ): Promise<ExternalCalcResponse> {
@@ -974,9 +1012,7 @@ export async function calculateBondFromService(
 
     if (!res.ok) {
         const text = await res.text().catch(() => "");
-        throw new Error(
-            `Calc service failed (${res.status} ${res.statusText})${text ? `: ${text}` : ""}`,
-        );
+        throw new Error(parseCalcServiceErrorBody(text));
     }
 
     return (await res.json()) as ExternalCalcResponse;

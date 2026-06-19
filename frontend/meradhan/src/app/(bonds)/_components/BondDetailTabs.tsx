@@ -3,6 +3,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BondDetailResponse, ISessionResponse } from "@root/apiGateway";
 import BondOverview from "./BondOverview";
+import BondCashflowTab from "./BondCashflowTab";
+import BondDocumentsTab from "./BondDocumentsTab";
 
 type Bond = BondDetailResponse["responseData"];
 
@@ -11,15 +13,6 @@ function hasText(v: string | null | undefined): boolean {
   const t = v.trim();
   if (!t) return false;
   return !/^(n\/?a|none|-+|null|undefined)$/i.test(t);
-}
-
-/** Centered "coming soon" placeholder for tabs whose content is not built yet. */
-function ComingSoon({ label }: { label: string }) {
-  return (
-    <div className="flex items-center justify-center py-16 text-gray-400 text-sm">
-      {label} details coming soon.
-    </div>
-  );
 }
 
 export default function BondDetailTabs({
@@ -70,11 +63,14 @@ export default function BondDetailTabs({
       </TabsContent>
 
       <TabsContent value="cashflow">
-        <ComingSoon label="Cash flow" />
+        <BondCashflowTab isin={bond.isin} />
       </TabsContent>
 
       <TabsContent value="documents">
-        <ComingSoon label="Document" />
+        <BondDocumentsTab
+          isin={bond.isin}
+          isLoggedIn={Boolean(session?.id)}
+        />
       </TabsContent>
     </Tabs>
   );
