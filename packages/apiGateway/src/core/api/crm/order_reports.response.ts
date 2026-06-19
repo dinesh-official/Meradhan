@@ -193,3 +193,28 @@ export interface OrderReportsLifecycleResponse {
     meta: { total: number; page: number; limit: number; totalPages: number };
   };
 }
+
+export interface OrderReportsRmPerformanceRow {
+  rmId: number | null;
+  name: string;
+  email: string | null;
+  ordersHandled: number;
+  conversionRate: number;
+  revenueGenerated: string;
+  customersAcquired: number;
+  avgTicket: string;
+  followUpEfficiency: number;
+  monthlyTrend: {
+    month: string;
+    monthKey: string;
+    orders: number;
+    revenue: string;
+  }[];
+}
+
+export interface OrderReportsRmPerformanceResponse {
+  responseData: {
+    data: OrderReportsRmPerformanceRow[];
+    meta: { from: string; to: string; totalRms: number };
+  };
+}
