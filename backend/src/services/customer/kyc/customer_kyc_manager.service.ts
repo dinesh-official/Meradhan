@@ -514,7 +514,11 @@ export class CustomerKycManager {
         bankAccounts: true,
         dematAccounts: true,
         riskProfile: true,
-        utility: true,
+        utility: {
+          include: {
+            relationshipManager: true,
+          },
+        },
       },
     });
 

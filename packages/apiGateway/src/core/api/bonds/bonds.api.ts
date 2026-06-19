@@ -6,9 +6,15 @@ import type { BaseResponseData } from "../../../types/base";
 import type {
   BondDealAutofillResponse,
   BondDetailResponse,
+  BondDocumentItem,
+  BondDocumentMutationResponse,
+  BondDocumentsListResponse,
   BondFilterOptionsResponse,
+  BondLogoResponse,
   BondOrderPricingResponse,
+  BondCashflowResponse,
   LatestBondsResponse,
+  HomepageBondsResponse,
   ListedBondsResponse,
 } from "./bonds.response";
 
@@ -23,6 +29,8 @@ export class BondsApi {
         limit?: number | string;
         category?: string;
         all?: string;
+        /** User "Sort by" token, e.g. "yield_desc" | "rating_asc" | "tenure_desc". */
+        sort?: string;
       };
     },
     config?: AxiosRequestConfig
@@ -52,6 +60,30 @@ export class BondsApi {
     const response = await this.apiClient.get<BondDetailResponse>(
       `/bonds/${isin}`,
       config
+    );
+    return response.data;
+  }
+
+  public async getBondCashflow(
+    isin: string,
+    params?: {
+      quantity?: number;
+      settlementDate?: string;
+      pricingYield?: number;
+    },
+    config?: AxiosRequestConfig,
+  ) {
+    const response = await this.apiClient.get<BondCashflowResponse>(
+      `/bonds/${isin}/cashflow`,
+      {
+        ...config,
+        params: {
+          ...(config?.params ?? {}),
+          quantity: params?.quantity,
+          settlementDate: params?.settlementDate,
+          pricingYield: params?.pricingYield,
+        },
+      },
     );
     return response.data;
   }
@@ -159,10 +191,21 @@ export class BondsApi {
     return response.data;
   }
 
+  public async getHomepageBonds(
+    limit: number = 40,
+    config?: AxiosRequestConfig,
+  ) {
+    const response = await this.apiClient.get<HomepageBondsResponse>(
+      `/bonds/homepage`,
+      { ...config, params: { limit } },
+    );
+    return response.data;
+  }
+
   public async getLatestBonds(count: number = 3, config?: AxiosRequestConfig) {
     const response = await this.apiClient.get<LatestBondsResponse>(
       `/bonds/latest`,
-      { ...config, params: { count } }
+      { ...config, params: { limit: count } }
     );
     return response.data;
   }
@@ -250,6 +293,107 @@ export class BondsApi {
     const response = await this.apiClient.post<
       BaseResponseData<unknown>
     >(`/bonds/place-order`, payload, config);
+    return response.data;
+  }
+
+  public async listBondDocumentsByIsin(
+    isin: string,
+    config?: AxiosRequestConfig,
+  ) {
+    const response = await this.apiClient.get<BondDocumentsListResponse>(
+      `/bonds/${encodeURIComponent(isin)}/documents`,
+      config,
+    );
+    return response.data;
+  }
+
+  public async listBondDocuments(isin: string, config?: AxiosRequestConfig) {
+    const response = await this.apiClient.get<BondDocumentsListResponse>(
+      `/crm/bonds/${encodeURIComponent(isin)}/documents`,
+      config,
+    );
+    return response.data;
+  }
+
+  public async createBondDocument(
+    isin: string,
+    payload: { name: string; fileUrl: string; fileName?: string | null },
+    config?: AxiosRequestConfig,
+  ) {
+    const response = await this.apiClient.post<BondDocumentMutationResponse>(
+      `/crm/bonds/${encodeURIComponent(isin)}/documents`,
+      payload,
+      config,
+    );
+    return response.data;
+  }
+
+  public async updateBondDocument(
+    isin: string,
+    documentId: number,
+    payload: { name?: string; fileUrl?: string; fileName?: string | null },
+    config?: AxiosRequestConfig,
+  ) {
+    const response = await this.apiClient.patch<BondDocumentMutationResponse>(
+      `/crm/bonds/${encodeURIComponent(isin)}/documents/${documentId}`,
+      payload,
+      config,
+    );
+    return response.data;
+  }
+
+  public async deleteBondDocument(
+    isin: string,
+    documentId: number,
+    config?: AxiosRequestConfig,
+  ) {
+    const response = await this.apiClient.delete<BaseResponseData<{ success: boolean }>>(
+      `/crm/bonds/${encodeURIComponent(isin)}/documents/${documentId}`,
+      config,
+    );
+    return response.data;
+  }
+
+  public async getBondLogo(isin: string, config?: AxiosRequestConfig) {
+    const response = await this.apiClient.get<BondLogoResponse>(
+      `/crm/bonds/${encodeURIComponent(isin)}/logo`,
+      config,
+    );
+    return response.data;
+  }
+
+  public async updateBondLogo(
+    isin: string,
+    logoUrl: string,
+    config?: AxiosRequestConfig,
+  ) {
+    const response = await this.apiClient.put<BondLogoResponse>(
+      `/crm/bonds/${encodeURIComponent(isin)}/logo`,
+      { logoUrl },
+      config,
+    );
+    return response.data;
+  }
+
+  public async deleteBondLogo(isin: string, config?: AxiosRequestConfig) {
+    const response = await this.apiClient.delete<BondLogoResponse>(
+      `/crm/bonds/${encodeURIComponent(isin)}/logo`,
+      config,
+    );
+    return response.data;
+  }
+
+  /** TEMPORARY — logo.dev import; remove with backend `_temp/logo_dev_fetch.ts`. */
+  public async importBondLogoFromLogoDev(
+    isin: string,
+    bondName: string,
+    config?: AxiosRequestConfig,
+  ) {
+    const response = await this.apiClient.post<BondLogoResponse>(
+      `/crm/bonds/${encodeURIComponent(isin)}/logo/import-logo-dev`,
+      { bondName },
+      config,
+    );
     return response.data;
   }
 }

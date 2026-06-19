@@ -6,6 +6,7 @@ export interface BondDetailsResponse {
   bondName: string
   instrumentName: string
   description: string
+  issuerDescription?: string | null
   issuePrice: number
   faceValue: number
   stampDutyPercentage: number
@@ -69,6 +70,8 @@ export interface BondDetailsResponse {
   autofillSavedAt?: string | null
   /** Units available from the latest CRM inventory upload (0 if none / not in file). */
   crmAvailableQuantity?: number
+  /** Issuer/bond logo URL */
+  logoUrl?: string | null
 }
 export type ListedBondsResponse = BaseResponseData<{
   data: BondDetailsResponse[];
@@ -77,6 +80,48 @@ export type ListedBondsResponse = BaseResponseData<{
 
 export type BondDetailResponse = BaseResponseData<BondDetailsResponse>;
 export type LatestBondsResponse = BaseResponseData<BondDetailsResponse[]>;
+
+export type HomepageBondsBundle = {
+  latest: BondDetailsResponse[];
+  highYield: BondDetailsResponse[];
+  zeroCoupon: BondDetailsResponse[];
+};
+
+export type HomepageBondsResponse = BaseResponseData<HomepageBondsBundle>;
+
+export interface BondCashflowRow {
+  period: number;
+  date: string;
+  coupon: string;
+  principal: string;
+  totalCashflow: string;
+  totalCashflowRaw: number;
+  days: number;
+}
+
+export interface BondCashflowSummary {
+  settlementDate: string;
+  finalPrice: string;
+  finalYield: string;
+  finalYieldRaw: number;
+  settlementAmount: string;
+  totalAccruedInterest: string;
+  principalAmount: string;
+  stampDuty: string;
+  totalConsideration: string;
+  accruedDays: number;
+  quantity: string;
+}
+
+export interface BondCashflowData {
+  isin: string;
+  quantity: number;
+  summary: BondCashflowSummary;
+  cashflow: BondCashflowRow[];
+  warnings: string[];
+}
+
+export type BondCashflowResponse = BaseResponseData<BondCashflowData>;
 
 /** Server-side bond order pricing (settlement, principal, accrued, stamp duty). */
 export interface BondOrderPricingData {
@@ -199,3 +244,27 @@ export interface BondFilterOptionsData {
 }
 
 export type BondFilterOptionsResponse = BaseResponseData<BondFilterOptionsData>;
+
+export type BondDocumentItem = {
+  id: number;
+  isin: string;
+  name: string;
+  fileUrl: string | null;
+  fileName: string | null;
+  createdByCrmUserId?: number | null;
+  canDownload?: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type BondDocumentsListResponse = BaseResponseData<{
+  documents: BondDocumentItem[];
+}>;
+
+export type BondDocumentMutationResponse = BaseResponseData<{
+  document: BondDocumentItem;
+}>;
+
+export type BondLogoResponse = BaseResponseData<{
+  logoUrl: string | null;
+}>;

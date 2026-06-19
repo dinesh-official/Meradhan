@@ -86,6 +86,7 @@ export const bondCreateUpdateSchema = z.object({
   bondName: z.string().trim().min(1, "Bond name is required"),
   instrumentName: z.string().trim().min(1, "Instrument name is required"),
   description: z.string().trim().min(1, "Description is required"),
+  issuerDescription: z.string().trim().optional().nullable(),
   issuePrice: z.number().nonnegative("Issue price must be non-negative"),
   faceValue: z.number().positive("Face value must be positive"),
   stampDutyPercentage: z

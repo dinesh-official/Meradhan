@@ -5,6 +5,7 @@ import { UniversalTable } from "@/global/elements/table/UniversalTable";
 import { CustomerProfile } from "@root/apiGateway";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import CustomerTableActions from "./actions/CustomerTableActions";
+import { AssignRelationshipManagerCell } from "./AssignRelationshipManagerCell";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { CheckCircle2 } from "lucide-react";
 
@@ -73,11 +74,6 @@ function CustomerTable({ data, pageSize = 10, isLoading }: UsersTableProps) {
           ),
         },
         { key: "panCard.panCardNo", label: "PAN Number" },
-        {
-          key: "kycStatus",
-          label: "KYC",
-          cell: (row) => <StatusBadge value={row.kycStatus} />,
-        },
         // Commented temporarily to hide the KRA status column for Users.
         // TODO: Uncomment when KRA status need 
         // {
@@ -116,6 +112,12 @@ function CustomerTable({ data, pageSize = 10, isLoading }: UsersTableProps) {
         //   type: "currency",
         //   currency: "INR",
         // },
+        {
+          key: "relationshipManager",
+          label: "Relationship Manager",
+          sortable: false,
+          cell: (row) => <AssignRelationshipManagerCell profile={row} />,
+        },
         {
           key: "createdAt",
           label: "Created/Update",

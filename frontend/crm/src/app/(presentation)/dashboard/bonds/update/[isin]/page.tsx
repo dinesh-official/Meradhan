@@ -5,6 +5,7 @@ import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import apiGateway from "@root/apiGateway";
 import { BondDetailsResponse } from "@root/apiGateway";
 import BondForm from "../../create/_components/BondForm";
+import { BondDocumentsSection } from "../../_components/BondDocumentsSection";
 
 async function UpdateBondPage({
   params,
@@ -30,7 +31,15 @@ async function UpdateBondPage({
         showBack
       />
 
-      {bondData && <BondForm initialData={bondData as any} isin={isin} />}
+      {bondData ? (
+        <div className="space-y-8">
+          <BondForm initialData={bondData as any} isin={isin} />
+          <BondDocumentsSection
+            isin={isin}
+            bondName={bondData.bondName || bondData.instrumentName}
+          />
+        </div>
+      ) : null}
     </Workspace>
   );
 }

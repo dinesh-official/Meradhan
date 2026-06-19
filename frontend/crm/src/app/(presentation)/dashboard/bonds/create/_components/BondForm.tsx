@@ -53,6 +53,7 @@ import {
   formatDateForDateInput,
   parseApiDateStringToLocalDate,
 } from "../../_utils/bondCalendarDates";
+import { BondLogoField } from "../../_components/BondLogoField";
 
 const OPTIONAL_ENUM_NONE = "__none__" as const;
 
@@ -75,6 +76,7 @@ type BondDetailsResponse = {
   bondName: string;
   instrumentName: string;
   description: string;
+  issuerDescription?: string | null;
   issuePrice: number;
   faceValue: number;
   stampDutyPercentage: number | null;
@@ -121,6 +123,7 @@ type BondDetailsResponse = {
   recordDate?: string | null;
   recordDays?: number | null;
   imDocumentLink?: string | null;
+  logoUrl?: string | null;
   exchangeListedOn?: string | null;
   lastCouponDate?: string | null;
   isPerpetual?: boolean | null;
@@ -220,6 +223,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
         bondName: initialData.bondName,
         instrumentName: initialData.instrumentName,
         description: initialData.description,
+        issuerDescription: initialData.issuerDescription || undefined,
         issuePrice: initialData.issuePrice,
         faceValue: initialData.faceValue,
         stampDutyPercentage: initialData.stampDutyPercentage ?? 0,
@@ -330,6 +334,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
         bondName: "",
         instrumentName: "",
         description: "",
+        issuerDescription: "",
         issuePrice: 0,
         faceValue: 0,
         stampDutyPercentage: 0,
@@ -627,6 +632,13 @@ function BondForm({ initialData, isin }: BondFormProps) {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {isUpdateMode && isin ? (
+                  <BondLogoField
+                    isin={isin}
+                    initialLogoUrl={initialData?.logoUrl}
+                  />
+                ) : null}
+
                 <FormField
                   control={form.control}
                   name="isin"
@@ -656,6 +668,25 @@ function BondForm({ initialData, isin }: BondFormProps) {
                       <FormLabel>Bond Name *</FormLabel>
                       <FormControl>
                         <Input {...field} placeholder="Enter bond name" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="issuerDescription"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Issuer Description</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          value={field.value || ""}
+                          placeholder="About the issuer — shown under the Issuer tab on the bond detail page"
+                          rows={3}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

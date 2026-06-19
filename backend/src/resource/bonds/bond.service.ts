@@ -1,4 +1,5 @@
 import { db } from "@core/database/database";
+import type { DataBaseSchema } from "@core/database/database";
 import type { appSchema } from "@root/schema";
 import type z from "zod";
 import { BondQueryBuilder } from "./bond_query_builder";
@@ -38,8 +39,55 @@ export type GetBondOrderPricingResult =
 // every homepage render fails in lockstep.
 const INVENTORY_BATCH_CACHE_TTL_MS = 60_000;
 const INVENTORY_ENRICH_TIMEOUT_MS = 2_500;
+/** Homepage bond lists change infrequently; cache avoids 3× DB hits per SSR. */
+const HOMEPAGE_BONDS_CACHE_TTL_MS = 60_000;
+const HOMEPAGE_BONDS_MAX_LIMIT = 50;
+
+const HOMEPAGE_ELIGIBLE_CREDIT_RATINGS = [
+  "AAA",
+  "AA",
+  "AA+",
+  "AAA(CE)",
+  "AA+(CE)",
+  "AA(CE)",
+  "A+(CE)",
+  "AAA",
+  "AA+",
+  "AA",
+  "A+",
+  "A",
+  "A-",
+  "BBB+",
+  "BBB",
+] as const;
 
 let cachedLatestBatchId: { id: number | null; expiresAt: number } | null = null;
+
+type HomepageBondsCacheEntry<T> = { data: T; expiresAt: number };
+const homepageBondsCache = new Map<string, HomepageBondsCacheEntry<unknown>>();
+
+export function parseHomepageBondLimit(raw: unknown, fallback = 3): number {
+  const n = raw != null ? parseInt(String(raw), 10) : fallback;
+  if (!Number.isFinite(n) || n < 1) return fallback;
+  return Math.min(n, HOMEPAGE_BONDS_MAX_LIMIT);
+}
+
+async function cachedHomepageBonds<T>(
+  key: string,
+  fetcher: () => Promise<T>,
+): Promise<T> {
+  const now = Date.now();
+  const hit = homepageBondsCache.get(key);
+  if (hit && hit.expiresAt > now) {
+    return hit.data as T;
+  }
+  const data = await fetcher();
+  homepageBondsCache.set(key, {
+    data,
+    expiresAt: now + HOMEPAGE_BONDS_CACHE_TTL_MS,
+  });
+  return data;
+}
 
 async function getCachedLatestInventoryBatchId(): Promise<number | null> {
   const now = Date.now();
@@ -220,9 +268,16 @@ export class BondService {
       sortBy?: keyof ReturnType<typeof BondQueryBuilder.getSortingOptions>;
       category?: string;
       all?: string;
+      /** User-facing "Sort by" token, e.g. "yield_desc" | "rating_asc" | "tenure_desc". */
+      sort?: string | string[];
     },
   ) {
     const whereQuery = BondQueryBuilder.generateFilterQuery(filters);
+
+    // User-facing sort (Yield / Rating / Tenure). When present it overrides the
+    // default/category ordering, but only for the *intra-tier* order — the
+    // Buy-Now-first grouping below is preserved.
+    const userSort = BondQueryBuilder.parseUserSort(options?.sort);
 
     const sortingOptions = BondQueryBuilder.getSortingOptions();
     // Convert page and limit to numbers for calculations
@@ -344,47 +399,70 @@ export class BondService {
         },
       };
 
-      const [countBuyNow, countOther] = await Promise.all([
-        db.dataBase.bonds.count({ where: whereBuyNow }),
-        db.dataBase.bonds.count({ where: whereOther }),
-      ]);
-      total = countBuyNow + countOther;
+      if (userSort) {
+        // Sort within each tier (Buy Now first, then others), then page across
+        // the merged order. Keeps the grouping intact while honouring the sort.
+        const sorted = await this.paginateBondsByUserSort(
+          [whereBuyNow, whereOther],
+          userSort,
+          paginationOptions.skip,
+          paginationOptions.take,
+        );
+        data = sorted.data;
+        total = sorted.total;
+      } else {
+        const [countBuyNow, countOther] = await Promise.all([
+          db.dataBase.bonds.count({ where: whereBuyNow }),
+          db.dataBase.bonds.count({ where: whereOther }),
+        ]);
+        total = countBuyNow + countOther;
 
-      const skip = paginationOptions.skip;
-      const take = paginationOptions.take;
+        const skip = paginationOptions.skip;
+        const take = paginationOptions.take;
 
-      if (skip < countBuyNow) {
-        // Offset starts within buy now bonds
-        const buyNowBonds = await db.dataBase.bonds.findMany({
-          where: whereBuyNow,
-          orderBy,
-          skip,
-          take,
-        });
-        data.push(...buyNowBonds);
+        if (skip < countBuyNow) {
+          // Offset starts within buy now bonds
+          const buyNowBonds = await db.dataBase.bonds.findMany({
+            where: whereBuyNow,
+            orderBy,
+            skip,
+            take,
+          });
+          data.push(...buyNowBonds);
 
-        if (data.length < take) {
-          // Fill the remaining spots with other bonds (starting from index 0)
-          const remaining = take - data.length;
+          if (data.length < take) {
+            // Fill the remaining spots with other bonds (starting from index 0)
+            const remaining = take - data.length;
+            const otherBonds = await db.dataBase.bonds.findMany({
+              where: whereOther,
+              orderBy,
+              skip: 0,
+              take: remaining,
+            });
+            data.push(...otherBonds);
+          }
+        } else {
+          // Offset is entirely within other bonds
+          const otherOffset = skip - countBuyNow;
           const otherBonds = await db.dataBase.bonds.findMany({
             where: whereOther,
             orderBy,
-            skip: 0,
-            take: remaining,
+            skip: otherOffset,
+            take,
           });
           data.push(...otherBonds);
         }
-      } else {
-        // Offset is entirely within other bonds
-        const otherOffset = skip - countBuyNow;
-        const otherBonds = await db.dataBase.bonds.findMany({
-          where: whereOther,
-          orderBy,
-          skip: otherOffset,
-          take,
-        });
-        data.push(...otherBonds);
       }
+    } else if (userSort) {
+      // Single-tier (all-bonds / no-inventory) listing with a user sort.
+      const sorted = await this.paginateBondsByUserSort(
+        [whereQuery],
+        userSort,
+        paginationOptions.skip,
+        paginationOptions.take,
+      );
+      data = sorted.data;
+      total = sorted.total;
     } else {
       const [rawBonds, countAll] = await Promise.all([
         db.dataBase.bonds.findMany({
@@ -423,6 +501,48 @@ export class BondService {
     };
   }
 
+  /**
+   * Pages a result set by a user-chosen sort (Yield / Rating / Tenure) that
+   * can't be expressed as a Prisma `orderBy`.
+   *
+   * `whereTiers` is ordered by priority — each tier is sorted independently and
+   * the tiers are concatenated in order, so e.g. Buy-Now bonds stay above the
+   * rest while still being sorted internally. Only lightweight sort-key columns
+   * are fetched for the whole set; full rows are loaded for just the page.
+   */
+  private async paginateBondsByUserSort(
+    whereTiers: DataBaseSchema.BondsWhereInput[],
+    userSort: NonNullable<ReturnType<typeof BondQueryBuilder.parseUserSort>>,
+    skip: number,
+    take: number,
+  ): Promise<{ data: any[]; total: number }> {
+    const comparator = BondQueryBuilder.getUserSortComparator(userSort);
+    const select = BondQueryBuilder.getUserSortSelect();
+
+    const tierKeyLists = await Promise.all(
+      whereTiers.map((where) =>
+        db.dataBase.bonds.findMany({ where, select }),
+      ),
+    );
+
+    // Sort each tier independently, then concat preserving tier priority.
+    const orderedKeys = tierKeyLists.flatMap((keys) => keys.slice().sort(comparator));
+    const total = orderedKeys.length;
+
+    const pageIds = orderedKeys.slice(skip, skip + take).map((k) => k.id);
+    if (pageIds.length === 0) return { data: [], total };
+
+    const rows = await db.dataBase.bonds.findMany({
+      where: { id: { in: pageIds } },
+    });
+    const byId = new Map(rows.map((r) => [r.id, r]));
+    const data = pageIds
+      .map((id) => byId.get(id))
+      .filter((r): r is NonNullable<typeof r> => Boolean(r));
+
+    return { data, total };
+  }
+
   async autocompleteBondSearch(query: string) {
     const data = await db.dataBase.bonds.findMany({
       where: {
@@ -448,116 +568,189 @@ export class BondService {
   }
 
   async getLatestBonds(limit: number = 3) {
-    const data = await db.dataBase.bonds.findMany({
-      where: {
-        isListed: { equals: "YES" },
-        allowForPurchase: { equals: true },
-        dateOfAllotment: { lte: new Date() },
-        creditRating: {
-          in: [
-            "AAA",
-            "AA",
-            "AA+",
-            "AAA(CE)",
-            "AA+(CE)",
-            "AA(CE)",
-            "A+(CE)",
-            "AAA",
-            "AA+",
-            "AA",
-            "A+",
-            "A",
-            "A-",
-            "BBB+",
-            "BBB",
-          ],
+    const safeLimit = parseHomepageBondLimit(limit);
+    return cachedHomepageBonds(`latest:${safeLimit}`, async () => {
+      const data = await db.dataBase.bonds.findMany({
+        where: {
+          isListed: { equals: "YES" },
+          allowForPurchase: { equals: true },
+          dateOfAllotment: { lte: new Date() },
+          creditRating: {
+            in: [
+              "AAA",
+              "AA",
+              "AA+",
+              "AAA(CE)",
+              "AA+(CE)",
+              "AA(CE)",
+              "A+(CE)",
+              "AAA",
+              "AA+",
+              "AA",
+              "A+",
+              "A",
+              "A-",
+              "BBB+",
+              "BBB",
+            ],
+          },
         },
-      },
-      orderBy: [
-        { allowForPurchase: "desc" },
-        { dateOfAllotment: "desc" },
-        { creditRating: "asc" },
-      ],
-      take: limit,
-    });
+        orderBy: [
+          { allowForPurchase: "desc" },
+          { dateOfAllotment: "desc" },
+          { creditRating: "asc" },
+        ],
+        take: safeLimit,
+      });
 
-    return this.enrichBondsWithCrmInventory(data);
+      return this.enrichBondsWithCrmInventory(data);
+    });
   }
 
   async getHighYieldBonds(limit: number = 3) {
-    const data = await db.dataBase.bonds.findMany({
-      where: {
-        isListed: { equals: "YES" },
-        allowForPurchase: { equals: true },
-        dateOfAllotment: { lte: new Date() },
-        yield: { gte: 11 },
-        creditRating: {
-          in: [
-            "AAA",
-            "AA",
-            "AA+",
-            "AAA(CE)",
-            "AA+(CE)",
-            "AA(CE)",
-            "A+(CE)",
-            "AAA",
-            "AA+",
-            "AA",
-            "A+",
-            "A",
-            "A-",
-            "BBB+",
-            "BBB",
-          ],
+    const safeLimit = parseHomepageBondLimit(limit);
+    return cachedHomepageBonds(`high-yield:${safeLimit}`, async () => {
+      const data = await db.dataBase.bonds.findMany({
+        where: {
+          isListed: { equals: "YES" },
+          allowForPurchase: { equals: true },
+          dateOfAllotment: { lte: new Date() },
+          yield: { gte: 11 },
+          creditRating: {
+            in: [
+              "AAA",
+              "AA",
+              "AA+",
+              "AAA(CE)",
+              "AA+(CE)",
+              "AA(CE)",
+              "A+(CE)",
+              "AAA",
+              "AA+",
+              "AA",
+              "A+",
+              "A",
+              "A-",
+              "BBB+",
+              "BBB",
+            ],
+          },
         },
-      },
-      orderBy: [
-        { allowForPurchase: "desc" },
-        { yield: "desc" },
-        { dateOfAllotment: "desc" },
-      ],
-      take: limit,
-    });
+        orderBy: [
+          { allowForPurchase: "desc" },
+          { yield: "desc" },
+          { dateOfAllotment: "desc" },
+        ],
+        take: safeLimit,
+      });
 
-    return this.enrichBondsWithCrmInventory(data);
+      return this.enrichBondsWithCrmInventory(data);
+    });
   }
 
   async getZeroCouponBonds(limit: number = 3) {
-    const data = await db.dataBase.bonds.findMany({
-      where: {
-        isListed: { equals: "YES" },
+    const safeLimit = parseHomepageBondLimit(limit);
+    return cachedHomepageBonds(`zero-coupon:${safeLimit}`, async () => {
+      const data = await db.dataBase.bonds.findMany({
+        where: {
+          isListed: { equals: "YES" },
+          allowForPurchase: { equals: true },
+          dateOfAllotment: { lte: new Date() },
+          categories: { has: "zero-coupon" },
+          creditRating: {
+            in: [
+              "AAA",
+              "AA",
+              "AA+",
+              "AAA(CE)",
+              "AA+(CE)",
+              "AA(CE)",
+              "A+(CE)",
+              "AAA",
+              "AA+",
+              "AA",
+              "A+",
+              "A",
+              "A-",
+              "BBB+",
+              "BBB",
+            ],
+          },
+        },
+        orderBy: [
+          { allowForPurchase: "desc" },
+          { dateOfAllotment: "desc" },
+          { creditRating: "asc" },
+        ],
+        take: safeLimit,
+      });
+
+      return this.enrichBondsWithCrmInventory(data);
+    });
+  }
+
+  /**
+   * Single round-trip for the meradhan homepage: three bond lists + one shared
+   * inventory enrichment pass. Cached as one bundle so ISR revalidation does
+   * not open three HTTP connections to stage-be (a common ECONNRESET source
+   * during ECS rolling deploys).
+   */
+  async getHomepageBonds(limit: number = 40) {
+    const safeLimit = parseHomepageBondLimit(limit);
+    return cachedHomepageBonds(`homepage-bundle:${safeLimit}`, async () => {
+      const baseWhere = {
+        isListed: { equals: "YES" as const },
         allowForPurchase: { equals: true },
         dateOfAllotment: { lte: new Date() },
-        categories: { has: "zero-coupon" },
-        creditRating: {
-          in: [
-            "AAA",
-            "AA",
-            "AA+",
-            "AAA(CE)",
-            "AA+(CE)",
-            "AA(CE)",
-            "A+(CE)",
-            "AAA",
-            "AA+",
-            "AA",
-            "A+",
-            "A",
-            "A-",
-            "BBB+",
-            "BBB",
-          ],
-        },
-      },
-      orderBy: [
-        { allowForPurchase: "desc" },
-        { dateOfAllotment: "desc" },
-        { creditRating: "asc" },
-      ],
-      take: limit,
-    });
+        creditRating: { in: [...HOMEPAGE_ELIGIBLE_CREDIT_RATINGS] },
+      };
 
-    return this.enrichBondsWithCrmInventory(data);
+      const [latestRaw, highYieldRaw, zeroCouponRaw] = await Promise.all([
+        db.dataBase.bonds.findMany({
+          where: baseWhere,
+          orderBy: [
+            { allowForPurchase: "desc" },
+            { dateOfAllotment: "desc" },
+            { creditRating: "asc" },
+          ],
+          take: safeLimit,
+        }),
+        db.dataBase.bonds.findMany({
+          where: { ...baseWhere, yield: { gte: 11 } },
+          orderBy: [
+            { allowForPurchase: "desc" },
+            { yield: "desc" },
+            { dateOfAllotment: "desc" },
+          ],
+          take: safeLimit,
+        }),
+        db.dataBase.bonds.findMany({
+          where: {
+            ...baseWhere,
+            categories: { has: "zero-coupon" },
+          },
+          orderBy: [
+            { allowForPurchase: "desc" },
+            { dateOfAllotment: "desc" },
+            { creditRating: "asc" },
+          ],
+          take: safeLimit,
+        }),
+      ]);
+
+      const allEnriched = await this.enrichBondsWithCrmInventory([
+        ...latestRaw,
+        ...highYieldRaw,
+        ...zeroCouponRaw,
+      ]);
+
+      let offset = 0;
+      const latest = allEnriched.slice(offset, (offset += latestRaw.length));
+      const highYield = allEnriched.slice(offset, (offset += highYieldRaw.length));
+      const zeroCoupon = allEnriched.slice(offset);
+
+      return { latest, highYield, zeroCoupon };
+    });
   }
 
   async getLatestBondsTop3(limit: number = 3) {
@@ -642,6 +835,7 @@ export class BondService {
         bondName: bondData.bondName,
         instrumentName: bondData.instrumentName,
         description: bondData.description,
+        issuerDescription: bondData.issuerDescription || null,
         issuePrice: bondData.issuePrice,
         faceValue: bondData.faceValue,
         stampDutyPercentage: bondData.stampDutyPercentage ?? 0,
@@ -739,6 +933,7 @@ export class BondService {
         bondName: bondData.bondName,
         instrumentName: bondData.instrumentName,
         description: bondData.description,
+        issuerDescription: bondData.issuerDescription || null,
         issuePrice: bondData.issuePrice,
         faceValue: bondData.faceValue,
         stampDutyPercentage: bondData.stampDutyPercentage ?? 0,
