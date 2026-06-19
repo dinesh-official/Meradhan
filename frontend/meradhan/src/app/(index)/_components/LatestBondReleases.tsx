@@ -5,6 +5,7 @@ import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
 import { BondListCard } from "@/global/components/Bond/BondListCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BondDetailsResponse } from "@root/apiGateway";
+import Link from "next/link";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
 import { canShowBuyNow } from "@/global/utils/bondPurchaseEligibility";
@@ -142,6 +143,14 @@ function LatestBondReleases({
             </TabsContent>
           ))}
         </Tabs>
+        <div className="flex justify-center pt-4">
+          <Link
+            href="/bonds"
+            className="inline-flex items-center justify-center rounded-lg bg-[#002a54] px-12 py-3.5 text-base font-semibold text-white shadow-sm transition-all hover:bg-[#001e3d] hover:shadow active:scale-95"
+          >
+            View All Bonds
+          </Link>
+        </div>
       </div>
     </SectionWrapper>
   );
