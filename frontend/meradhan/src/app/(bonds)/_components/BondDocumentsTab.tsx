@@ -89,9 +89,9 @@ export default function BondDocumentsTab({
   const loginHref = `/login?redirect=${encodeURIComponent(`/bonds/detail/${normalizedIsin}`)}`;
   const [loginOpen, setLoginOpen] = useState(false);
 
-  const query = useQuery({
+  const query = useQuery<BondDocumentItem[]>({
     queryKey: ["bond-documents-public", normalizedIsin, isLoggedIn],
-    queryFn: async () => {
+    queryFn: async (): Promise<BondDocumentItem[]> => {
       const bondsApi = new apiGateway.bondsApi.BondsApi(apiClientCaller);
       const res = await bondsApi.listBondDocumentsByIsin(normalizedIsin);
       return res.responseData?.documents ?? [];
