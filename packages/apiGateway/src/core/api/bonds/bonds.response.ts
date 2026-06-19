@@ -70,6 +70,8 @@ export interface BondDetailsResponse {
   autofillSavedAt?: string | null
   /** Units available from the latest CRM inventory upload (0 if none / not in file). */
   crmAvailableQuantity?: number
+  /** Issuer/bond logo URL */
+  logoUrl?: string | null
 }
 export type ListedBondsResponse = BaseResponseData<{
   data: BondDetailsResponse[];
@@ -261,4 +263,8 @@ export type BondDocumentsListResponse = BaseResponseData<{
 
 export type BondDocumentMutationResponse = BaseResponseData<{
   document: BondDocumentItem;
+}>;
+
+export type BondLogoResponse = BaseResponseData<{
+  logoUrl: string | null;
 }>;

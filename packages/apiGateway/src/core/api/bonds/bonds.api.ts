@@ -10,6 +10,7 @@ import type {
   BondDocumentMutationResponse,
   BondDocumentsListResponse,
   BondFilterOptionsResponse,
+  BondLogoResponse,
   BondOrderPricingResponse,
   BondCashflowResponse,
   LatestBondsResponse,
@@ -346,6 +347,35 @@ export class BondsApi {
   ) {
     const response = await this.apiClient.delete<BaseResponseData<{ success: boolean }>>(
       `/crm/bonds/${encodeURIComponent(isin)}/documents/${documentId}`,
+      config,
+    );
+    return response.data;
+  }
+
+  public async getBondLogo(isin: string, config?: AxiosRequestConfig) {
+    const response = await this.apiClient.get<BondLogoResponse>(
+      `/crm/bonds/${encodeURIComponent(isin)}/logo`,
+      config,
+    );
+    return response.data;
+  }
+
+  public async updateBondLogo(
+    isin: string,
+    logoUrl: string,
+    config?: AxiosRequestConfig,
+  ) {
+    const response = await this.apiClient.put<BondLogoResponse>(
+      `/crm/bonds/${encodeURIComponent(isin)}/logo`,
+      { logoUrl },
+      config,
+    );
+    return response.data;
+  }
+
+  public async deleteBondLogo(isin: string, config?: AxiosRequestConfig) {
+    const response = await this.apiClient.delete<BondLogoResponse>(
+      `/crm/bonds/${encodeURIComponent(isin)}/logo`,
       config,
     );
     return response.data;
