@@ -10,6 +10,7 @@ import type {
   BondDocumentMutationResponse,
   BondDocumentsListResponse,
   BondFilterOptionsResponse,
+  BondLogoResponse,
   BondOrderPricingResponse,
   BondCashflowResponse,
   LatestBondsResponse,
@@ -348,6 +349,49 @@ export class BondsApi {
   ) {
     const response = await this.apiClient.delete<BaseResponseData<{ success: boolean }>>(
       `/crm/bonds/${encodeURIComponent(isin)}/documents/${documentId}`,
+      config,
+    );
+    return response.data;
+  }
+
+  public async getBondLogo(isin: string, config?: AxiosRequestConfig) {
+    const response = await this.apiClient.get<BondLogoResponse>(
+      `/crm/bonds/${encodeURIComponent(isin)}/logo`,
+      config,
+    );
+    return response.data;
+  }
+
+  public async updateBondLogo(
+    isin: string,
+    logoUrl: string,
+    config?: AxiosRequestConfig,
+  ) {
+    const response = await this.apiClient.put<BondLogoResponse>(
+      `/crm/bonds/${encodeURIComponent(isin)}/logo`,
+      { logoUrl },
+      config,
+    );
+    return response.data;
+  }
+
+  public async deleteBondLogo(isin: string, config?: AxiosRequestConfig) {
+    const response = await this.apiClient.delete<BondLogoResponse>(
+      `/crm/bonds/${encodeURIComponent(isin)}/logo`,
+      config,
+    );
+    return response.data;
+  }
+
+  /** TEMPORARY — logo.dev import; remove with backend `_temp/logo_dev_fetch.ts`. */
+  public async importBondLogoFromLogoDev(
+    isin: string,
+    bondName: string,
+    config?: AxiosRequestConfig,
+  ) {
+    const response = await this.apiClient.post<BondLogoResponse>(
+      `/crm/bonds/${encodeURIComponent(isin)}/logo/import-logo-dev`,
+      { bondName },
       config,
     );
     return response.data;

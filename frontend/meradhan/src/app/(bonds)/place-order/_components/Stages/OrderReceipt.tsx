@@ -2,6 +2,13 @@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   BondDetailsResponse,
   BondOrderPricingData,
   CustomerByIdPayload,
@@ -11,6 +18,8 @@ import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { useState } from "react";
+import { AlertCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { getMaxOrderQuantityFromBond } from "../../_utils/quantity";
 import { hasCrmInventoryAvailable } from "@/global/utils/bondPurchaseEligibility";
 import { useQuery } from "@tanstack/react-query";
@@ -44,6 +53,8 @@ function OrderReceipt({
   const { makePayment, cancelPayment, isLoading, meradhanOrderNumber } = useRazorpay();
   const [checkTaC, setCheckTaC] = useState(false);
   const [checkOrderCerTaC, setCheckOrderCerTaC] = useState(false);
+  const [termsDialogOpen, setTermsDialogOpen] = useState(false);
+  const [termsHighlight, setTermsHighlight] = useState(false);
   const {
     trackCheckboxInteraction,
     trackPaymentAttempt,
@@ -124,6 +135,38 @@ function OrderReceipt({
     }
   };
 
+  const allTermsAccepted = checkTaC && checkOrderCerTaC;
+
+  const validateTermsAccepted = (): boolean => {
+    if (allTermsAccepted) return true;
+    setTermsHighlight(true);
+    setTermsDialogOpen(true);
+    return false;
+  };
+
+  const closeTermsDialog = () => {
+    setTermsDialogOpen(false);
+    setTermsHighlight(false);
+  };
+
+  const handleAcceptAllChange = (checked: boolean) => {
+    setCheckTaC(checked);
+    setCheckOrderCerTaC(checked);
+    trackCheckboxInteraction(orderId, "AGREE_ALL_TERMS", checked);
+    trackCheckboxInteraction(orderId, "TERMS_AND_CONDITIONS", checked);
+    trackCheckboxInteraction(orderId, "ORDER_CONFIRMATION", checked);
+  };
+
+  const handleTermsChange = (checked: boolean) => {
+    setCheckTaC(checked);
+    trackCheckboxInteraction(orderId, "TERMS_AND_CONDITIONS", checked);
+  };
+
+  const handleOrderConfirmationChange = (checked: boolean) => {
+    setCheckOrderCerTaC(checked);
+    trackCheckboxInteraction(orderId, "ORDER_CONFIRMATION", checked);
+  };
+
   return (
     <div className="container">
       <h1 className="title">Order Receipt (Draft)</h1>
@@ -149,37 +192,67 @@ function OrderReceipt({
         <BondInfoData bondData={bond} />
       </div>
 
-      <div className="text-sm  mt-6">
-        <label className="mt-3 block">
+      <div
+        id="order-terms-checkboxes"
+        className={cn(
+          "mt-6 space-y-4 rounded-lg text-sm transition-shadow",
+          termsHighlight &&
+            "bg-amber-50/40 p-4 ring-2 ring-amber-400 ring-offset-2",
+        )}
+      >
+        <label className="flex cursor-pointer items-start gap-3 font-medium text-slate-900">
+          <Checkbox
+            checked={allTermsAccepted}
+            onCheckedChange={(checked) =>
+              handleAcceptAllChange(checked === true)
+            }
+            className="mt-0.5"
+          />
+          <span>Accept all Terms and Conditions</span>
+        </label>
+
+        <label className="flex cursor-pointer items-start gap-3">
           <Checkbox
             checked={checkTaC}
-            onClick={() => {
-              const newValue = !checkTaC;
-              setCheckTaC(newValue);
-              trackCheckboxInteraction(orderId, "TERMS_AND_CONDITIONS", newValue);
-            }}
-          />{" "}
-          &nbsp; I have read, understood, and agree to all the{" "}
-          <Link href="/terms-of-use" target="_blank" className="text-primary mx-1   ">
-            Terms and Conditions
-          </Link>
-          .
+            onCheckedChange={(checked) =>
+              handleTermsChange(checked === true)
+            }
+            className="mt-1"
+          />
+          <p>
+            I have read, understood, and agree to all the{" "}
+            <Link
+              href="/terms-of-use"
+              target="_blank"
+              className="text-primary"
+              onClick={(e) => e.stopPropagation()}
+            >
+              Terms and Conditions
+            </Link>
+            .
+          </p>
         </label>
-        <label className="mt-3 gap-2 block">
+
+        <label className="flex cursor-pointer items-start gap-3">
           <Checkbox
             checked={checkOrderCerTaC}
-            onClick={() => {
-              const newValue = !checkOrderCerTaC;
-              setCheckOrderCerTaC(newValue);
-              trackCheckboxInteraction(orderId, "ORDER_CONFIRMATION", newValue);
-            }}
-          />{" "}
-          &nbsp; I confirm that I want to place the order as shown in the draft
-          order receipt, and I have read the
-          <Link href="#" className="text-primary mx-2">
-            Exchange Circular
-          </Link>
-          on settlement failure and deal cancellation.
+            onCheckedChange={(checked) =>
+              handleOrderConfirmationChange(checked === true)
+            }
+            className="mt-1"
+          />
+          <p>
+            I confirm that I want to place the order as shown in the draft
+            order receipt, and I have read the{" "}
+            <Link
+              href="#"
+              className="text-primary"
+              onClick={(e) => e.stopPropagation()}
+            >
+              Exchange Circular
+            </Link>{" "}
+            on settlement failure and deal cancellation.
+          </p>
         </label>
       </div>
 
@@ -212,14 +285,13 @@ function OrderReceipt({
             className="md:w-auto w-full"
             variant="default"
             disabled={
-              !(checkTaC && checkOrderCerTaC) ||
               !orderPricing ||
               isPlacing ||
               isVerifyingStock
             }
             onClick={async () => {
               if (!validateBeforeSubmit()) return;
-              if (!(checkTaC && checkOrderCerTaC)) return;
+              if (!validateTermsAccepted()) return;
               setIsVerifyingStock(true);
               try {
                 const okStock = await verifyFreshInventory();
@@ -284,14 +356,13 @@ function OrderReceipt({
             className="md:w-auto w-full"
             variant="default"
             disabled={
-              !(checkTaC && checkOrderCerTaC) ||
               !orderPricing ||
               isLoading ||
               isVerifyingStock
             }
             onClick={async () => {
               if (!validateBeforeSubmit()) return;
-              if (!(checkTaC && checkOrderCerTaC)) return;
+              if (!validateTermsAccepted()) return;
               setIsVerifyingStock(true);
               try {
                 const okStock = await verifyFreshInventory();
@@ -388,6 +459,47 @@ function OrderReceipt({
           </div>
         </div>
       )}
+
+      <Dialog
+        open={termsDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) closeTermsDialog();
+          else setTermsDialogOpen(true);
+        }}
+      >
+        <DialogContent className="max-w-md text-center sm:max-w-md">
+          <div className="flex flex-col items-center gap-4 pt-2">
+            <div
+              className="flex size-14 items-center justify-center rounded-full bg-amber-100 text-amber-700"
+              aria-hidden
+            >
+              <AlertCircle className="size-7" />
+            </div>
+
+            <DialogHeader className="items-center space-y-2 text-center">
+              <DialogTitle className="text-center">
+                Terms &amp; Conditions required
+              </DialogTitle>
+              <DialogDescription className="text-center text-slate-600">
+                Accept T&amp;C to proceed further for Payment.
+              </DialogDescription>
+            </DialogHeader>
+
+            <Button
+              type="button"
+              className="w-full bg-secondary hover:bg-secondary/90 sm:w-auto sm:min-w-[140px]"
+              onClick={() => {
+                closeTermsDialog();
+                document
+                  .getElementById("order-terms-checkboxes")
+                  ?.scrollIntoView({ behavior: "smooth", block: "center" });
+              }}
+            >
+              Got it
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

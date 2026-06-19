@@ -1,14 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import apiGateway from "@root/apiGateway";
 import { useQuery } from "@tanstack/react-query";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import BondCashflowTable from "./BondCashflowTable";
 import { BondCashflowTabShimmer } from "./BondDetailTabShimmers";
 import { BondTabErrorState } from "./BondTabErrorState";
 
 export default function BondCashflowTab({ isin }: { isin: string }) {
   const bondsApi = new apiGateway.bondsApi.BondsApi(apiClientCaller);
+  const [applyTds, setApplyTds] = useState(false);
 
   const query = useQuery({
     queryKey: ["bondCashflow", isin],
@@ -53,7 +57,26 @@ export default function BondCashflowTab({ isin }: { isin: string }) {
         </div>
       )}
 
-      <BondCashflowTable rows={cashflow} />
+      <BondCashflowTable
+        rows={cashflow}
+        applyTds={applyTds}
+        tdsToggle={
+          <div className="flex items-center gap-2">
+            <Switch
+              id="bond-cashflow-tds"
+              checked={applyTds}
+              onCheckedChange={setApplyTds}
+              className="border border-slate-300 data-[state=checked]:border-secondary data-[state=checked]:bg-secondary data-[state=unchecked]:bg-slate-300 [&_[data-slot=switch-thumb]]:bg-white"
+            />
+            <Label
+              htmlFor="bond-cashflow-tds"
+              className="cursor-pointer text-sm font-medium text-slate-700"
+            >
+              10% TDS
+            </Label>
+          </div>
+        }
+      />
     </div>
   );
 }
