@@ -71,4 +71,10 @@ router.get(
   ctrl.getLifecycle,
 );
 
+router.get(
+  "/api/crm/reports/orders/rm-performance",
+  allowAccessMiddleware("CRM"),
+  ctrl.getRmPerformance,
+);
+
 export default router;

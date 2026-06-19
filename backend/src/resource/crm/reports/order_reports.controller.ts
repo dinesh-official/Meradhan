@@ -262,6 +262,40 @@ export class OrderReportsController {
     return res.sendResponse({ statusCode: HttpStatus.OK, responseData: data });
   };
 
+  getRmPerformance = async (req: Request, res: Response) => {
+    const q = req.query as Record<string, string | undefined>;
+    const parsed = appSchema.crm.orderReports.OrderReportsRmPerformanceQuerySchema.safeParse({
+      from: q.from,
+      to: q.to,
+      paymentStatus: q.paymentStatus,
+      status: q.status,
+      isin: q.isin,
+      customerId: q.customerId,
+      email: q.email,
+      userType: q.userType,
+      kycStatus: q.kycStatus,
+    });
+    if (!parsed.success) {
+      throw new AppError("Invalid query", {
+        statusCode: HttpStatus.BAD_REQUEST,
+        code: "ORDER_REPORTS_VALIDATION",
+      });
+    }
+    const d = parsed.data;
+    const data = await this.service.getRmPerformance({
+      from: d.from,
+      to: d.to,
+      paymentStatus: d.paymentStatus,
+      status: d.status,
+      isin: d.isin,
+      customerId: d.customerId,
+      email: d.email,
+      userType: d.userType,
+      kycStatus: d.kycStatus,
+    });
+    return res.sendResponse({ statusCode: HttpStatus.OK, responseData: data });
+  };
+
   getRegisterExport = async (req: Request, res: Response) => {
     const { filters } = parseFilters(req);
     const rows = await this.service.getRegisterCsvRows(filters, MAX_CSV_ROWS);
