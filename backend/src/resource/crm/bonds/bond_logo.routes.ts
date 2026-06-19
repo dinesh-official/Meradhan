@@ -23,4 +23,11 @@ router.delete(
   (req, res) => controller.remove(req, res),
 );
 
+/** TEMPORARY — logo.dev import; remove with `_temp/logo_dev_fetch.ts`. */
+router.post(
+  "/api/crm/bonds/:isin/logo/import-logo-dev",
+  allowAccessMiddleware("CRM"),
+  (req, res) => controller.importFromLogoDev(req, res),
+);
+
 export default router;

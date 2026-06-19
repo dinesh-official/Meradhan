@@ -1,5 +1,6 @@
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import { db } from "@core/database/database";
+import { importIssuerLogoFromLogoDev } from "./_temp/logo_dev_fetch";
 
 export class BondLogoService {
   async get(isin: string) {
@@ -39,6 +40,22 @@ export class BondLogoService {
       return await db.dataBase.bonds.update({
         where: { isin: normalizedIsin },
         data: { logoUrl: null },
+        select: { isin: true, logoUrl: true },
+      });
+    } catch {
+      throw new AppError("Bond not found", { statusCode: HttpStatus.NOT_FOUND });
+    }
+  }
+
+  /** TEMPORARY — logo.dev import; remove with `_temp/logo_dev_fetch.ts`. */
+  async importFromLogoDev(isin: string, bondName: string) {
+    const normalizedIsin = isin.trim().toUpperCase();
+    const logoUrl = await importIssuerLogoFromLogoDev(bondName);
+
+    try {
+      return await db.dataBase.bonds.update({
+        where: { isin: normalizedIsin },
+        data: { logoUrl },
         select: { isin: true, logoUrl: true },
       });
     } catch {

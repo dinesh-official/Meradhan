@@ -380,4 +380,18 @@ export class BondsApi {
     );
     return response.data;
   }
+
+  /** TEMPORARY — logo.dev import; remove with backend `_temp/logo_dev_fetch.ts`. */
+  public async importBondLogoFromLogoDev(
+    isin: string,
+    bondName: string,
+    config?: AxiosRequestConfig,
+  ) {
+    const response = await this.apiClient.post<BondLogoResponse>(
+      `/crm/bonds/${encodeURIComponent(isin)}/logo/import-logo-dev`,
+      { bondName },
+      config,
+    );
+    return response.data;
+  }
 }

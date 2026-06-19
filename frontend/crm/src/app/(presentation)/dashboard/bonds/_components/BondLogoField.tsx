@@ -8,9 +8,10 @@ import { genMediaUrl } from "@/global/utils/url.utils";
 import { cn } from "@/lib/utils";
 import apiGateway from "@root/apiGateway";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ImageIcon, Loader2, Trash2, Upload } from "lucide-react";
+import { ImageIcon, Loader2, Sparkles, Trash2, Upload } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { useFormContext } from "react-hook-form";
 import { toast } from "sonner";
 
 const bondsApi = new apiGateway.bondsApi.BondsApi(apiClientCaller);
@@ -27,6 +28,8 @@ export function BondLogoField({
   className,
 }: BondLogoFieldProps) {
   const queryClient = useQueryClient();
+  const form = useFormContext<{ bondName?: string }>();
+  const bondName = form.watch("bondName")?.trim() ?? "";
   const { uploadFile, uploading } = useCorporateKycFileUpload();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const normalizedIsin = isin.trim().toUpperCase();
@@ -85,6 +88,27 @@ export function BondLogoField({
     },
   });
 
+  /** TEMPORARY — logo.dev import; remove with backend `_temp/logo_dev_fetch.ts`. */
+  const logoDevMutation = useMutation({
+    mutationFn: async () => {
+      if (!bondName) throw new Error("Bond name is required");
+      return bondsApi.importBondLogoFromLogoDev(normalizedIsin, bondName);
+    },
+    onSuccess: (res) => {
+      const url = res.responseData?.logoUrl ?? null;
+      if (url) setPendingLogoUrl(url);
+      toast.success("Logo fetched from logo.dev and saved");
+      void queryClient.invalidateQueries({ queryKey: logoQueryKey });
+    },
+    onError: (err: unknown) => {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message ??
+        (err instanceof Error ? err.message : "Failed to fetch logo from logo.dev");
+      toast.error(message);
+    },
+  });
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -98,7 +122,10 @@ export function BondLogoField({
     : null;
   const hasChanges = pendingLogoUrl.trim() !== (logoUrl ?? "").trim();
   const busy =
-    uploading || saveMutation.isPending || removeMutation.isPending;
+    uploading ||
+    saveMutation.isPending ||
+    removeMutation.isPending ||
+    logoDevMutation.isPending;
 
   if (!normalizedIsin) return null;
 
@@ -152,6 +179,27 @@ export function BondLogoField({
             <Upload className="mr-1.5 h-3.5 w-3.5" />
           )}
           {uploading ? "Uploading…" : "Upload"}
+        </Button>
+
+        {/* TEMPORARY — logo.dev; delete this button with backend `_temp/logo_dev_fetch.ts`. */}
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          disabled={busy || !bondName}
+          title={
+            bondName
+              ? `Fetch logo for “${bondName}” via logo.dev`
+              : "Enter bond name first"
+          }
+          onClick={() => logoDevMutation.mutate()}
+        >
+          {logoDevMutation.isPending ? (
+            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+          )}
+          {logoDevMutation.isPending ? "Fetching…" : "Auto-fetch"}
         </Button>
 
         <div className="flex flex-wrap gap-2 sm:ml-auto">
