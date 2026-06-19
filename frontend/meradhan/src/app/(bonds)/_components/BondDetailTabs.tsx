@@ -3,6 +3,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BondDetailResponse, ISessionResponse } from "@root/apiGateway";
 import BondOverview from "./BondOverview";
+import BondCashflowTab from "./BondCashflowTab";
+import BondDocumentsTab from "./BondDocumentsTab";
 
 type Bond = BondDetailResponse["responseData"];
 
@@ -70,11 +72,14 @@ export default function BondDetailTabs({
       </TabsContent>
 
       <TabsContent value="cashflow">
-        <ComingSoon label="Cash flow" />
+        <BondCashflowTab isin={bond.isin} />
       </TabsContent>
 
       <TabsContent value="documents">
-        <ComingSoon label="Document" />
+        <BondDocumentsTab
+          isin={bond.isin}
+          isLoggedIn={Boolean(session?.id)}
+        />
       </TabsContent>
     </Tabs>
   );

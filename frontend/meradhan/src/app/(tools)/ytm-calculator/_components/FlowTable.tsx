@@ -29,9 +29,14 @@ const formatDateSimple = (dateStr: string): string => {
   }
 };
 
+const parseMoney = (value: string) => {
+  const num = Number(String(value).replace(/,/g, "").trim());
+  return Number.isFinite(num) ? num : null;
+};
+
 const formatNumber = (value: string) => {
-  const num = Number(value);
-  if (!Number.isFinite(num)) return value;
+  const num = parseMoney(value);
+  if (num == null) return value;
   return num.toLocaleString("en-IN", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -40,14 +45,18 @@ const formatNumber = (value: string) => {
 
 export default function FlowTable({
   cashflow,
+  showTitle = true,
 }: {
   cashflow: ApiCashflowItem[];
+  showTitle?: boolean;
 }) {
   return (
     <div className="container">
-      <h2 className="mb-6 text-[32px] quicksand-semibold">
-        Cash <span className="text-red-600"> Flow</span>
-      </h2>
+      {showTitle && (
+        <h2 className="mb-6 text-[32px] quicksand-semibold">
+          Cash <span className="text-red-600"> Flow</span>
+        </h2>
+      )}
       <div className="w-full overflow-x-auto">
         <table className="divide-y first:divide-white w-full table-fixed">
           <thead className="rounded overflow-hidden">
@@ -65,12 +74,14 @@ export default function FlowTable({
           {/* Table Body */}
           <tbody className="bg-white divide-y divide-gray-200">
             {cashflow.map((flow, index) => {
-              const total = Number(flow.totalCashflow);
+              let total =
+                parseMoney(flow.totalCashflow) ??
+                (parseMoney(flow.coupon) ?? 0) + (parseMoney(flow.principal) ?? 0);
               return (
                 <tr
                   key={`${flow.period}-${flow.date}-${index}`}
                   className={cn("hover:bg-gray-50", {
-                    "font-bold": Number(flow.principal) > 0,
+                    "font-bold": (parseMoney(flow.principal) ?? 0) > 0,
                   })}
                 >
                   <td className="p-4 text-left">{flow.period}</td>
@@ -84,10 +95,15 @@ export default function FlowTable({
                     </span>
                   </td>
                   <td className="p-4 text-left">
-                    <span className="flex items-center">
-                      <IndianRupee size={14} className="mt-0.5" />
-                      {formatNumber(flow.principal)}
-                    </span>
+                    {(parseMoney(flow.principal) ?? 0) === 0 ||
+                    flow.principal === "-" ? (
+                      "-"
+                    ) : (
+                      <span className="flex items-center">
+                        <IndianRupee size={14} className="mt-0.5" />
+                        {formatNumber(flow.principal)}
+                      </span>
+                    )}
                   </td>
                   <td className="p-4 text-left">
                     <span className="flex items-center">

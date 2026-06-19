@@ -1,17 +1,119 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Request, Response } from "express";
 import { BondService, parseHomepageBondLimit } from "./bond.service";
-import { HttpStatus } from "@utils/error/AppError";
+import { AppError, HttpStatus } from "@utils/error/AppError";
 import { appSchema } from "@root/schema";
 import { createCrmActivityLog } from "@resource/crm/auditlogs/auditlog.repo";
 import { getBondDealAutofill } from "./bond_clac";
 import { getBondInfoCalcData } from "./fill-bonds-auto";
+import { BondCashflowService } from "./bond_cashflow.service";
+import { BondDocumentsService } from "@resource/crm/bonds/bond_documents.service";
 import logger from "@utils/logger/logger";
 import e from "express";
 import { isAxiosError } from "axios";
 
 export class BondController {
   private bondService = new BondService();
+  private bondCashflowService = new BondCashflowService();
+  private bondDocumentsService = new BondDocumentsService();
+
+  async listBondDocuments(req: Request, res: Response) {
+    const isin = req.params.isin?.trim() ?? "";
+    if (!isin) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        success: false,
+        message: "Missing ISIN",
+      });
+    }
+
+    try {
+      const canDownload = Boolean(req.customer?.id);
+      const documents = await this.bondDocumentsService.list(isin);
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        responseData: {
+          documents: documents.map((doc) => ({
+            id: doc.id,
+            isin: doc.isin,
+            name: doc.name,
+            fileName: doc.fileName,
+            createdAt: doc.createdAt,
+            updatedAt: doc.updatedAt,
+            canDownload,
+            fileUrl: canDownload ? doc.fileUrl : null,
+          })),
+        },
+      });
+    } catch (err) {
+      if (err instanceof AppError) {
+        return res.sendResponse({
+          statusCode: err.statusCode,
+          success: false,
+          message: err.message,
+        });
+      }
+      logger.error("listBondDocuments failed", err);
+      return res.sendResponse({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        success: false,
+        message: "Failed to load bond documents",
+      });
+    }
+  }
+
+  async getBondCashflow(req: Request, res: Response) {
+    const isin = req.params.isin?.toString() ?? "";
+    if (!isin) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        success: false,
+        message: "Missing ISIN",
+      });
+    }
+
+    const quantity = req.query.quantity
+      ? Math.max(1, Number(req.query.quantity))
+      : 1;
+    const settlementDate =
+      typeof req.query.settlementDate === "string"
+        ? req.query.settlementDate
+        : undefined;
+    const pricingYieldRaw = req.query.pricingYield ?? req.query.yield;
+    const pricingYield =
+      pricingYieldRaw != null && pricingYieldRaw !== ""
+        ? Number(pricingYieldRaw)
+        : undefined;
+
+    try {
+      const data = await this.bondCashflowService.getBondCashflow(isin, {
+        quantity: Number.isFinite(quantity) ? quantity : 1,
+        settlementDate,
+        pricingYield:
+          pricingYield != null && Number.isFinite(pricingYield)
+            ? pricingYield
+            : undefined,
+      });
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        responseData: data,
+      });
+    } catch (err) {
+      if (err instanceof AppError) {
+        return res.sendResponse({
+          statusCode: err.statusCode,
+          success: false,
+          message: err.message,
+        });
+      }
+      logger.error("getBondCashflow failed", err);
+      return res.sendResponse({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        success: false,
+        message: "Failed to load bond cashflow",
+      });
+    }
+  }
 
   async getBondDetails(req: Request, res: Response) {
     const isin = req.params.isin!.toString();

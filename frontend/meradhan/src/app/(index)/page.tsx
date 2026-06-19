@@ -1,4 +1,4 @@
-import apiServerCaller from "@/core/connection/apiServerCaller";
+import { apiServerCallerPublic } from "@/core/connection/apiServerCaller";
 import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
 import ViewPort from "@/global/components/wrapper/ViewPort";
 import { generatePagesMetaData } from "@/graphql/pagesMetaDataGql_Action";
@@ -32,7 +32,7 @@ const emptyBondLists: HomepageBondLists = {
 
 const loadHomepageBonds = unstable_cache(
   async (): Promise<HomepageBondLists> => {
-    const apiCaller = new apiGateway.bondsApi.BondsApi(apiServerCaller);
+    const apiCaller = new apiGateway.bondsApi.BondsApi(apiServerCallerPublic);
     try {
       const res = await apiCaller.getHomepageBonds(HOMEPAGE_BOND_LIMIT);
       return {

@@ -11,6 +11,7 @@ import type {
   BondDocumentsListResponse,
   BondFilterOptionsResponse,
   BondOrderPricingResponse,
+  BondCashflowResponse,
   LatestBondsResponse,
   HomepageBondsResponse,
   ListedBondsResponse,
@@ -56,6 +57,30 @@ export class BondsApi {
     const response = await this.apiClient.get<BondDetailResponse>(
       `/bonds/${isin}`,
       config
+    );
+    return response.data;
+  }
+
+  public async getBondCashflow(
+    isin: string,
+    params?: {
+      quantity?: number;
+      settlementDate?: string;
+      pricingYield?: number;
+    },
+    config?: AxiosRequestConfig,
+  ) {
+    const response = await this.apiClient.get<BondCashflowResponse>(
+      `/bonds/${isin}/cashflow`,
+      {
+        ...config,
+        params: {
+          ...(config?.params ?? {}),
+          quantity: params?.quantity,
+          settlementDate: params?.settlementDate,
+          pricingYield: params?.pricingYield,
+        },
+      },
     );
     return response.data;
   }
@@ -265,6 +290,17 @@ export class BondsApi {
     const response = await this.apiClient.post<
       BaseResponseData<unknown>
     >(`/bonds/place-order`, payload, config);
+    return response.data;
+  }
+
+  public async listBondDocumentsByIsin(
+    isin: string,
+    config?: AxiosRequestConfig,
+  ) {
+    const response = await this.apiClient.get<BondDocumentsListResponse>(
+      `/bonds/${encodeURIComponent(isin)}/documents`,
+      config,
+    );
     return response.data;
   }
 

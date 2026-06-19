@@ -49,8 +49,13 @@ function sleep(ms: number) {
 
 class ApiServerCaller {
   private instance: AxiosInstance;
+  private readonly forwardRequestHeaders: boolean;
 
-  constructor(baseURL: string = API_SERVER_URL_IP) {
+  constructor(
+    baseURL: string = API_SERVER_URL_IP,
+    options: { forwardRequestHeaders?: boolean } = {},
+  ) {
+    this.forwardRequestHeaders = options.forwardRequestHeaders ?? true;
     this.instance = axios.create({
       baseURL,
       withCredentials: true,
@@ -84,6 +89,10 @@ class ApiServerCaller {
   private async prepareHeaders(
     configHeaders?: AxiosRequestHeaders | Record<string, string>
   ) {
+    if (!this.forwardRequestHeaders) {
+      return { ...(configHeaders || {}) };
+    }
+
     const incomingHeaders = await headers();
     const headersObj: Record<string, string> = {};
 
@@ -199,4 +208,10 @@ class ApiServerCaller {
 
 // Export a default singleton instance (see class note re: IApiCaller + axios)
 const apiServerCaller = new ApiServerCaller() as unknown as IApiCaller;
+
+/** No incoming-request headers — safe inside `unstable_cache` / static fetches. */
+export const apiServerCallerPublic = new ApiServerCaller(API_SERVER_URL_IP, {
+  forwardRequestHeaders: false,
+}) as unknown as IApiCaller;
+
 export default apiServerCaller;
