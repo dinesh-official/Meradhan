@@ -4,6 +4,9 @@ import { allowAccessMiddleware } from "@middlewares/auth_middleware";
 
 const bondController = new BondController();
 const bondRoute = Router();
+bondRoute.get("/api/bonds/homepage", (req, res) =>
+  bondController.getHomepageBonds(req, res)
+);
 bondRoute.get("/api/bonds/ongoing-deals", (req, res) =>
   bondController.getOngoingDeals(req, res)
 );
