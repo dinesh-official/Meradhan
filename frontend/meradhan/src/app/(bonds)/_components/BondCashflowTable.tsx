@@ -4,6 +4,13 @@ import { cn } from "@/lib/utils";
 import type { BondCashflowRow } from "@root/apiGateway";
 import { IndianRupee } from "lucide-react";
 
+const TDS_RATE = 0.1;
+
+function applyTdsToInterest(interest: number, applyTds: boolean): number {
+  if (!applyTds || interest <= 0) return interest;
+  return interest * (1 - TDS_RATE);
+}
+
 function parseMoney(value: string | undefined): number | null {
   if (value == null || value === "" || value === "-") return null;
   const num = Number(String(value).replace(/,/g, "").trim());
@@ -46,21 +53,41 @@ function MoneyCell({ value }: { value: number }) {
 
 export default function BondCashflowTable({
   rows,
+  applyTds = false,
+  tdsToggle,
 }: {
   rows: BondCashflowRow[];
+  applyTds?: boolean;
+  tdsToggle?: React.ReactNode;
 }) {
   const paymentRows = rows.filter((row) => resolveTotal(row) >= 0);
   const displayRows = paymentRows.length > 0 ? paymentRows : rows;
-  const grandTotal = displayRows.reduce((sum, row) => sum + resolveTotal(row), 0);
+  const grandTotal = displayRows.reduce((sum, row) => {
+    const coupon = parseMoney(row.coupon) ?? 0;
+    const principalAmount = parseMoney(row.principal);
+    const hasPrincipal =
+      row.principal !== "-" &&
+      principalAmount != null &&
+      principalAmount > 0;
+    const interest = applyTdsToInterest(coupon, applyTds);
+    const principal = hasPrincipal ? principalAmount : 0;
+    return sum + interest + principal;
+  }, 0);
 
   return (
     <div className="w-full">
-      <div className="px-0 py-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-0 py-4">
         <h3 className="text-lg font-semibold text-slate-900">
           Cash Flow — {displayRows.length} payment
           {displayRows.length === 1 ? "" : "s"}
         </h3>
+        {tdsToggle}
       </div>
+      {applyTds ? (
+        <p className="mb-3 text-xs text-slate-500">
+          10% TDS deducted on interest. Principal is shown as received.
+        </p>
+      ) : null}
 
       <div className="overflow-x-auto">
         <table className="w-full min-w-[640px] text-sm">
@@ -76,12 +103,14 @@ export default function BondCashflowTable({
           </thead>
           <tbody>
             {displayRows.map((row, index) => {
-              const total = resolveTotal(row);
+              const coupon = parseMoney(row.coupon) ?? 0;
               const principalAmount = parseMoney(row.principal);
               const hasPrincipal =
                 row.principal !== "-" &&
                 principalAmount != null &&
                 principalAmount > 0;
+              const interest = applyTdsToInterest(coupon, applyTds);
+              const total = interest + (hasPrincipal ? principalAmount : 0);
               const isLast = index === displayRows.length - 1;
 
               return (
@@ -101,7 +130,7 @@ export default function BondCashflowTable({
                     {row.days}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <MoneyCell value={parseMoney(row.coupon) ?? 0} />
+                    <MoneyCell value={interest} />
                   </td>
                   <td className="px-4 py-3 text-right">
                     {hasPrincipal ? (
