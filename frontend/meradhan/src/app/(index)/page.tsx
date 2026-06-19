@@ -2,54 +2,57 @@ import apiServerCaller from "@/core/connection/apiServerCaller";
 import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
 import ViewPort from "@/global/components/wrapper/ViewPort";
 import { generatePagesMetaData } from "@/graphql/pagesMetaDataGql_Action";
-import apiGateway from "@root/apiGateway";
+import apiGateway, { type BondDetailsResponse } from "@root/apiGateway";
 import BondsByCategories from "../../global/components/Bond/BondsByCategories";
 import HomeHeroSection from "./_components/HomeHeroSection";
 import LatestBondReleases from "./_components/LatestBondReleases";
 import ToolsOfferedByMeraDhan from "./_components/ToolsOfferedbyMeraDhan";
 import WhyMeraDhanSection from "./_components/WhyMeraDhanSection";
-import XirrCalculator from "../(tools)/ytm-calculator/_components/XirrCalculator";
+import { unstable_cache } from "next/cache";
 
-// ISR: one render per hour per path — avoids hammering stage-be with 3 parallel
-// bond list queries on every homepage visit (was `0`, i.e. fully dynamic).
+// ISR: one render per hour per path — avoids hammering stage-be on every visit.
 export const revalidate = 3600;
 export const generateMetadata = async () => {
   return await generatePagesMetaData("index");
 };
 
-// Helper: extract responseData from a settled promise; on rejection log the
-// reason and return an empty list so a single backend hiccup (ECONNRESET,
-// timeout, slow query…) doesn't take down the whole homepage render. Node 22's
-// undici has a known TransformStream cleanup bug that fires when an RSC stream
-// is aborted because a Server Component throws — eating the error here keeps
-// the render path complete and avoids triggering that secondary symptom.
-function pickResponseData<T>(
-  result: PromiseSettledResult<{ responseData?: T[] | null }>,
-  label: string,
-): T[] {
-  if (result.status === "fulfilled") {
-    return result.value?.responseData ?? [];
-  }
-  console.error(`[HomePage] ${label} failed:`, result.reason);
-  return [];
-}
+const HOMEPAGE_BOND_LIMIT = 40;
+
+type HomepageBondLists = {
+  latest: BondDetailsResponse[];
+  highYield: BondDetailsResponse[];
+  zeroCoupon: BondDetailsResponse[];
+};
+
+const emptyBondLists: HomepageBondLists = {
+  latest: [],
+  highYield: [],
+  zeroCoupon: [],
+};
+
+const loadHomepageBonds = unstable_cache(
+  async (): Promise<HomepageBondLists> => {
+    const apiCaller = new apiGateway.bondsApi.BondsApi(apiServerCaller);
+    try {
+      const res = await apiCaller.getHomepageBonds(HOMEPAGE_BOND_LIMIT);
+      return {
+        latest: res.responseData?.latest ?? [],
+        highYield: res.responseData?.highYield ?? [],
+        zeroCoupon: res.responseData?.zeroCoupon ?? [],
+      };
+    } catch (err) {
+      // One HTTP hop (not three) — transient ECONNRESET during ECS deploy still
+      // renders the page with empty carousels instead of failing SSR.
+      console.error("[HomePage] getHomepageBonds failed:", err);
+      return emptyBondLists;
+    }
+  },
+  ["meradhan-homepage-bonds"],
+  { revalidate: 3600 },
+);
 
 export default async function HomePage() {
-  const apiCaller = new apiGateway.bondsApi.BondsApi(apiServerCaller);
-
-  // Enough rows for tab filters (AAA, secured, etc.) without pulling 100×3 full
-  // bond payloads on every SSR pass.
-  const homepageBondLimit = 40;
-
-  const [latestRes, highYieldRes, zeroCouponRes] = await Promise.allSettled([
-    apiCaller.getLatestBonds(homepageBondLimit),
-    apiCaller.getHighYieldBonds(homepageBondLimit),
-    apiCaller.getZeroCouponBonds(homepageBondLimit),
-  ]);
-
-  const latest = pickResponseData(latestRes, "getLatestBonds");
-  const highYield = pickResponseData(highYieldRes, "getHighYieldBonds");
-  const zeroCoupon = pickResponseData(zeroCouponRes, "getZeroCouponBonds");
+  const { latest, highYield, zeroCoupon } = await loadHomepageBonds();
 
   return (
     <ViewPort>
@@ -66,14 +69,6 @@ export default async function HomePage() {
           <BondsByCategories />
         </SectionWrapper>
       </div>
-      {/* <ReturnsCalculationSection /> */}
-      {/* <XirrCalculator
-        showTitle={true}
-        showFlowChart={false}
-        showChart={false}
-      /> */}
-      {/* <CustomersTestimonials /> */}
-      {/* <RecentBlogs /> */}
     </ViewPort>
   );
 }

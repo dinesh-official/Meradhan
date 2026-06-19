@@ -281,6 +281,15 @@ export class BondController {
     return res.send(data);
   }
 
+  async getHomepageBonds(req: Request, res: Response) {
+    const limit = parseHomepageBondLimit(req.query.limit ?? req.query.count, 40);
+    const data = await this.bondService.getHomepageBonds(limit);
+    return res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: data,
+    });
+  }
+
   async getLatestListedBonds(req: Request, res: Response) {
     const limit = parseHomepageBondLimit(req.query.limit ?? req.query.count);
     const data = await this.bondService.getLatestBonds(limit);

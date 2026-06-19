@@ -79,6 +79,14 @@ export type ListedBondsResponse = BaseResponseData<{
 export type BondDetailResponse = BaseResponseData<BondDetailsResponse>;
 export type LatestBondsResponse = BaseResponseData<BondDetailsResponse[]>;
 
+export type HomepageBondsBundle = {
+  latest: BondDetailsResponse[];
+  highYield: BondDetailsResponse[];
+  zeroCoupon: BondDetailsResponse[];
+};
+
+export type HomepageBondsResponse = BaseResponseData<HomepageBondsBundle>;
+
 /** Server-side bond order pricing (settlement, principal, accrued, stamp duty). */
 export interface BondOrderPricingData {
   couponRate: number;

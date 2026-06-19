@@ -27,7 +27,25 @@ import "server-only";
  * partial pages, instead of the request dangling for minutes until the kernel
  * times out the socket.
  */
-const SERVER_REQUEST_TIMEOUT_MS = 30000;
+const SERVER_REQUEST_TIMEOUT_MS = 30_000;
+const RETRYABLE_NETWORK_CODES = new Set([
+  "ECONNRESET",
+  "ECONNABORTED",
+  "ETIMEDOUT",
+  "EPIPE",
+]);
+const GET_RETRY_ATTEMPTS = 2;
+const GET_RETRY_DELAY_MS = 400;
+
+function getErrorCode(error: unknown): string | undefined {
+  if (axios.isAxiosError(error)) return error.code;
+  if (error instanceof ApiError) return error.code;
+  return undefined;
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 class ApiServerCaller {
   private instance: AxiosInstance;
@@ -102,7 +120,27 @@ class ApiServerCaller {
       headers: mergedHeaders,
     };
 
-    return this.instance.request<T>(finalConfig);
+    const method = (finalConfig.method ?? "GET").toUpperCase();
+    const maxAttempts =
+      method === "GET" ? GET_RETRY_ATTEMPTS : 1;
+
+    let lastError: unknown;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        return await this.instance.request<T>(finalConfig);
+      } catch (error) {
+        lastError = error;
+        const code = getErrorCode(error);
+        const canRetry =
+          attempt < maxAttempts - 1 &&
+          code != null &&
+          RETRYABLE_NETWORK_CODES.has(code);
+        if (!canRetry) throw error;
+        await sleep(GET_RETRY_DELAY_MS);
+      }
+    }
+
+    throw lastError;
   }
 
   /**

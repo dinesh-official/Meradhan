@@ -12,6 +12,7 @@ import type {
   BondFilterOptionsResponse,
   BondOrderPricingResponse,
   LatestBondsResponse,
+  HomepageBondsResponse,
   ListedBondsResponse,
 } from "./bonds.response";
 
@@ -158,6 +159,17 @@ export class BondsApi {
         ...config,
         params: { quantity },
       },
+    );
+    return response.data;
+  }
+
+  public async getHomepageBonds(
+    limit: number = 40,
+    config?: AxiosRequestConfig,
+  ) {
+    const response = await this.apiClient.get<HomepageBondsResponse>(
+      `/bonds/homepage`,
+      { ...config, params: { limit } },
     );
     return response.data;
   }
