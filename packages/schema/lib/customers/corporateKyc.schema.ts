@@ -7,6 +7,7 @@ export const EntityConstitutionTypeEnum = z.enum([
   "LLP",
   "PARTNERSHIP",
   "TRUST",
+  "HUF",
   "OTHER",
 ]);
 

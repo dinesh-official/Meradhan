@@ -111,30 +111,42 @@ export class CustomerProfileManager {
       await db.dataBase.customerProfileDataModel.update({
         where: { id: customerProfileId },
         data: {
-          firstName: data.firstName?.trim(),
-          middleName: data.middleName?.trim(),
-          lastName: data.lastName?.trim(),
-          legalEntityName: data.legalEntityName !== undefined ? (data.legalEntityName?.trim() ?? null) : undefined,
-          emailAddress: data.emailId?.trim().toLowerCase(),
-          phoneNo: "+91" + removeCountryCode(data.phoneNo)?.trim(),
-          whatsAppNo: "+91" + removeCountryCode(data.whatsAppNo?.trim()),
-          userType: data.userType,
-          gender: data.gender,
-          kycStatus: data.kycStatus,
+          ...(data.firstName !== undefined && { firstName: data.firstName.trim() }),
+          ...(data.middleName !== undefined && { middleName: data.middleName.trim() }),
+          ...(data.lastName !== undefined && { lastName: data.lastName.trim() }),
+          ...(data.legalEntityName !== undefined && {
+            legalEntityName: data.legalEntityName?.trim() ?? null,
+          }),
+          ...(data.emailId !== undefined && {
+            emailAddress: data.emailId.trim().toLowerCase(),
+          }),
+          ...(data.phoneNo !== undefined && {
+            phoneNo: "+91" + removeCountryCode(data.phoneNo)?.trim(),
+          }),
+          ...(data.whatsAppNo !== undefined && {
+            whatsAppNo: "+91" + removeCountryCode(data.whatsAppNo?.trim()),
+          }),
+          ...(data.userType !== undefined && { userType: data.userType }),
+          ...(data.gender !== undefined && { gender: data.gender }),
+          ...(data.kycStatus !== undefined && { kycStatus: data.kycStatus }),
           utility: {
             update: {
-              accountStatus: data.status,
-              whatsAppNotificationAllow: data.whatsAppNotificationAllow,
-              termsAccepted: data.termsAccepted,
-              isEmailVerified: data.isEmailVerified,
-              isPhoneVerified: data.isPhoneVerified,
-              relationshipManager: data.relationshipManagerId
-                ? {
-                    connect: {
-                      id: data.relationshipManagerId,
-                    },
-                  }
-                : undefined,
+              ...(data.status !== undefined && { accountStatus: data.status }),
+              ...(data.whatsAppNotificationAllow !== undefined && {
+                whatsAppNotificationAllow: data.whatsAppNotificationAllow,
+              }),
+              ...(data.termsAccepted !== undefined && { termsAccepted: data.termsAccepted }),
+              ...(data.isEmailVerified !== undefined && {
+                isEmailVerified: data.isEmailVerified,
+              }),
+              ...(data.isPhoneVerified !== undefined && {
+                isPhoneVerified: data.isPhoneVerified,
+              }),
+              ...(data.relationshipManagerId !== undefined && {
+                relationshipManager: data.relationshipManagerId
+                  ? { connect: { id: data.relationshipManagerId } }
+                  : { disconnect: true },
+              }),
             },
           },
         },

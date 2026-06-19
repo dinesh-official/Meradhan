@@ -24,6 +24,28 @@ export class CustomerProfileService extends CustomerProfileManager {
     super();
   }
 
+  async assertRelationshipManagerCustomerAccess(
+    customerId: number,
+    session: Express.Request["session"],
+  ): Promise<void> {
+    if (session?.role !== "RELATIONSHIP_MANAGER" || !session.id) {
+      return;
+    }
+
+    const customer = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { id: customerId, isDeleted: false },
+      select: {
+        utility: { select: { cRMUserDataModelId: true } },
+      },
+    });
+
+    if (customer?.utility.cRMUserDataModelId !== session.id) {
+      throw new AppError("You can only access customers assigned to you", {
+        statusCode: HttpStatus.FORBIDDEN,
+      });
+    }
+  }
+
   getProfile(value: string | number) {
     if (typeof value === "number" || /^\d+$/.test(value.toString())) {
       // Numeric → likely an ID
@@ -49,11 +71,14 @@ export class CustomerProfileService extends CustomerProfileManager {
       isDeleted: false,
     };
 
-    if (payload.accountStatus) {
+    if (payload.accountStatus || payload.relationshipManagerId) {
       filters.utility = {
-        accountStatus: {
-          equals: payload.accountStatus,
-        },
+        ...(payload.accountStatus
+          ? { accountStatus: { equals: payload.accountStatus } }
+          : {}),
+        ...(payload.relationshipManagerId
+          ? { cRMUserDataModelId: payload.relationshipManagerId }
+          : {}),
       };
     }
 
@@ -135,6 +160,21 @@ export class CustomerProfileService extends CustomerProfileManager {
             lastLogin: true,
             isEmailVerified: true,
             isPhoneVerified: true,
+            relationshipManager: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                phoneNo: true,
+                avatar: true,
+                role: true,
+                accountStatus: true,
+                lastLogin: true,
+                createdAt: true,
+                updatedAt: true,
+                createdBy: true,
+              },
+            },
           },
         },
         createdAt: true,

@@ -1,0 +1,25 @@
+/// CRM-uploaded documents for a bond (ISIN), each with a display name.
+model BondDocument {
+    id Int @id @default(autoincrement())
+
+    bond Bonds @relation(fields: [isin], references: [isin], onDelete: Cascade)
+    isin String
+
+    /// User-facing document name (e.g. "Information Memorandum", "Trust Deed")
+    name String
+
+    /// S3 path returned from POST /api/files/upload
+    fileUrl String
+
+    /// Original uploaded filename (optional)
+    fileName String?
+
+    createdByCrmUserId Int?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([isin])
+    @@index([createdAt])
+    @@map("bond_documents")
+}
