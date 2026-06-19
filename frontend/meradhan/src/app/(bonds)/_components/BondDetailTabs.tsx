@@ -15,15 +15,6 @@ function hasText(v: string | null | undefined): boolean {
   return !/^(n\/?a|none|-+|null|undefined)$/i.test(t);
 }
 
-/** Centered "coming soon" placeholder for tabs whose content is not built yet. */
-function ComingSoon({ label }: { label: string }) {
-  return (
-    <div className="flex items-center justify-center py-16 text-gray-400 text-sm">
-      {label} details coming soon.
-    </div>
-  );
-}
-
 export default function BondDetailTabs({
   bond,
   session,

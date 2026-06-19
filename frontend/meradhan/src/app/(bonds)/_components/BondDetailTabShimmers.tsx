@@ -27,13 +27,6 @@ const CASHFLOW_ROW_WIDTHS = [
   ["w-8", "w-28", "w-10", "w-24", "w-8", "w-24"],
 ] as const;
 
-const DOCUMENT_ROW_WIDTHS = [
-  ["w-[72%] max-w-[200px]", "w-[60%] max-w-[160px]", "w-24", "w-[132px]"],
-  ["w-[55%] max-w-[180px]", "w-[70%] max-w-[200px]", "w-20", "w-[132px]"],
-  ["w-[65%] max-w-[190px]", "w-[50%] max-w-[140px]", "w-24", "w-[132px]"],
-  ["w-[58%] max-w-[170px]", "w-[62%] max-w-[175px]", "w-20", "w-[132px]"],
-] as const;
-
 export function BondCashflowTabShimmer() {
   return (
     <div
@@ -129,60 +122,28 @@ export function BondCashflowTabShimmer() {
 export function BondDocumentsTabShimmer() {
   return (
     <div
-      className="space-y-3 py-6"
+      className="py-6"
       role="status"
       aria-busy="true"
       aria-label="Loading bond documents"
     >
-      <ShimmerBlock className="h-4 w-56 max-w-[85%] rounded" />
-
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[520px] text-sm">
-          <thead>
-            <tr className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-              <th className="px-4 py-3">
-                <ShimmerBlock className="h-3 w-20 rounded" />
-              </th>
-              <th className="px-4 py-3">
-                <ShimmerBlock className="h-3 w-8 rounded" />
-              </th>
-              <th className="px-4 py-3">
-                <ShimmerBlock className="h-3 w-16 rounded" />
-              </th>
-              <th className="px-4 py-3 text-right">
-                <div className="flex justify-end">
-                  <ShimmerBlock className="h-3 w-20 rounded" />
-                </div>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {DOCUMENT_ROW_WIDTHS.map((widths, index) => (
-              <tr
-                key={index}
-                className={cn(
-                  "border-t border-slate-100",
-                  index % 2 === 0 ? "bg-sky-50/60" : "bg-white",
-                )}
-              >
-                <td className="px-4 py-3">
-                  <ShimmerLine className={widths[0]} />
-                </td>
-                <td className="px-4 py-3">
-                  <ShimmerLine className={widths[1]} />
-                </td>
-                <td className="px-4 py-3">
-                  <ShimmerLine className={widths[2]} />
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <div className="flex justify-end">
-                    <ShimmerBlock className={cn("h-9 rounded-md", widths[3])} />
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div
+            key={index}
+            className="flex h-full flex-col gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-none"
+          >
+            <div className="flex items-start gap-3">
+              <ShimmerBlock className="size-11 shrink-0 rounded-lg" />
+              <div className="min-w-0 flex-1 space-y-2">
+                <ShimmerBlock className="h-5 w-[85%] rounded" />
+                <ShimmerBlock className="h-4 w-[65%] rounded" />
+              </div>
+            </div>
+            <ShimmerBlock className="h-3 w-32 rounded" />
+            <ShimmerBlock className="mt-auto h-10 w-full rounded-md" />
+          </div>
+        ))}
       </div>
     </div>
   );

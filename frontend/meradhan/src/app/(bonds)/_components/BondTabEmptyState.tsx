@@ -22,7 +22,7 @@ export function BondTabEmptyState({
   const Icon = icon ?? FileText;
   return (
     <div className="py-6">
-      <Empty className="rounded-xl border border-slate-200 bg-slate-50/60 py-12 md:py-14">
+      <Empty className="rounded-xl border border-slate-200 bg-slate-50/60 py-12 shadow-none md:py-14">
         <EmptyMedia
           variant="icon"
           className="size-12 rounded-full bg-slate-100 text-slate-500 [&_svg]:size-6"

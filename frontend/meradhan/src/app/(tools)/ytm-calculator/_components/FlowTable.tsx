@@ -74,7 +74,7 @@ export default function FlowTable({
           {/* Table Body */}
           <tbody className="bg-white divide-y divide-gray-200">
             {cashflow.map((flow, index) => {
-              let total =
+              const total =
                 parseMoney(flow.totalCashflow) ??
                 (parseMoney(flow.coupon) ?? 0) + (parseMoney(flow.principal) ?? 0);
               return (
