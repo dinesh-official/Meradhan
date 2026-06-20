@@ -3,7 +3,7 @@ name: pre-prod crm deploy
 on:
   push:
     branches:
-      - dev-fixing-manul
+      - preprod
 jobs:
   deploy:
     runs-on: ubuntu-latest

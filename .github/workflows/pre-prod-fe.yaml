@@ -3,7 +3,7 @@ name: pre-prod fe deploy
 on:
   push:
     branches:
-      - dev-fixing-manul
+      - preprod
 
 jobs:
   deploy:
