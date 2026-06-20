@@ -37,6 +37,7 @@ import { RatingOrDelete } from "../RatingOrDelete";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useOrderActivityTracking } from "../../_hooks/useOrderActivityTracking";
 import { parseAsInteger, useQueryState } from "nuqs";
+import { useSearchParams } from "next/navigation";
 
 const WEEKEND_ONLY_HOLIDAYS = new Set<string>();
 function ReviewOrder({
@@ -53,6 +54,9 @@ function ReviewOrder({
   const [isChecked, setIsChecked] = useState(false);
   const [isCheckedRisk, setIsCheckedRisk] = useState(false);
   // set search params
+  const params = useSearchParams();
+  const searchParams = params.get('allowTrade')
+  const allowTrade = searchParams === 'true'
   const [paramsQuantity, setParamsQuantity] = useQueryState('quantity', parseAsInteger.withDefault(1))
 
 
@@ -454,10 +458,10 @@ function ReviewOrder({
           </div>
         </div>
         {
-          !orderPricing?.allowTrade && <p className="text-sm text-gray-600 mt-8">The market is currently closed. Your order will be placed now at the price and yield shown above, and submitted to the exchange on the next working day. The price will not change.</p>
+          !orderPricing?.allowTrade && <p className="text-sm text-red-500 mt-8">Trading is currently unavailable as the market is closed. Please try again during market hours or contact support for assistance.</p>
         }
         {
-          !outOfStock && <>
+          !outOfStock && (orderPricing?.allowTrade || allowTrade) && <>
             <label className="flex justify-start mt-5 gap-3">
               <Checkbox
                 className="mt-[2px]"

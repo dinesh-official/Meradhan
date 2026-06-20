@@ -26,8 +26,6 @@ jobs:
           echo "NEXT_PUBLIC_DIGIO=production" >> .env
           echo "STRAPI_API_URL=https://spyder.meradhan.co/api" >> .env
           echo "PORT=4000" >> .env
-          echo "INTERNAL_API_KEY=1da72b687ec308ed38ad29f8c1da3efb0b668194dd28a00a08216e576258267f" >> .env
-
 
           echo "RFQ_CBRICS_ENV=PROD" >> .env
           echo "CBRICS_ENV=PROD" >> .env
