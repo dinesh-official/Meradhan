@@ -225,13 +225,15 @@ export function WorkflowStatusBadge({ label }: { label: string }) {
         ? "bg-blue-100 text-blue-700"
         : u.includes("expired") || u.includes("cancel")
           ? "bg-slate-100 text-slate-500"
-          : u.includes("pending")
+          : u.includes("pending") || u.includes("initiated")
             ? "bg-amber-100 text-amber-700"
-            : u.includes("rfq") || u.includes("proposed") || u.includes("created")
+            : u.includes("in progress") || u.includes("progress")
               ? "bg-violet-100 text-violet-700"
-              : u.includes("reject")
-                ? "bg-red-100 text-red-600"
-                : "bg-slate-100 text-slate-600";
+              : u.includes("rfq") || u.includes("proposed") || u.includes("created")
+                ? "bg-violet-100 text-violet-700"
+                : u.includes("reject")
+                  ? "bg-red-100 text-red-600"
+                  : "bg-slate-100 text-slate-600";
   return (
     <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium", className)}>
       {label}

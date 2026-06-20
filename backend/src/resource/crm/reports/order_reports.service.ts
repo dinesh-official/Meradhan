@@ -843,4 +843,155 @@ export class OrderReportsService {
       totalAmount: r.totalAmount.toString(),
     }));
   }
+
+  async getRmPerformance(filters: OrderReportFilters) {
+    const where = buildOrderWhere(filters);
+    const monthKeys = this.rmPerformanceMonthKeys(filters.from, filters.to);
+
+    const orders = await db.dataBase.order.findMany({
+      where,
+      select: {
+        id: true,
+        createdAt: true,
+        totalAmount: true,
+        status: true,
+        paymentStatus: true,
+        customerProfileId: true,
+        customerProfile: {
+          select: {
+            utility: {
+              select: {
+                relationshipManager: {
+                  select: { id: true, name: true, email: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    type Bucket = {
+      rmId: number | null;
+      name: string;
+      email: string | null;
+      orders: typeof orders;
+    };
+
+    const buckets = new Map<string, Bucket>();
+
+    const ensureBucket = (rmId: number | null, name: string, email: string | null) => {
+      const key = rmId == null ? "unassigned" : String(rmId);
+      let bucket = buckets.get(key);
+      if (!bucket) {
+        bucket = { rmId, name, email, orders: [] };
+        buckets.set(key, bucket);
+      }
+      return bucket;
+    };
+
+    for (const order of orders) {
+      const rm = order.customerProfile?.utility?.relationshipManager ?? null;
+      const bucket = ensureBucket(
+        rm?.id ?? null,
+        rm?.name ?? "Unassigned",
+        rm?.email ?? null,
+      );
+      bucket.orders.push(order);
+    }
+
+    const settledStatuses = new Set(["SETTLED", "APPLIED"]);
+
+    const data = [...buckets.values()]
+      .map((bucket) => {
+        const totalOrders = bucket.orders.length;
+        const settledCount = bucket.orders.filter((o) =>
+          settledStatuses.has(String(o.status).toUpperCase()),
+        ).length;
+        const paidOrders = bucket.orders.filter(
+          (o) => String(o.paymentStatus).toUpperCase() === "COMPLETED",
+        );
+        const settledPaid = paidOrders.filter((o) =>
+          String(o.status).toUpperCase() === "SETTLED",
+        ).length;
+
+        const revenue = bucket.orders.reduce(
+          (sum, o) => sum + Number(o.totalAmount),
+          0,
+        );
+        const customers = new Set(
+          bucket.orders
+            .map((o) => o.customerProfileId)
+            .filter((id): id is number => id != null),
+        );
+
+        const monthlyMap = new Map<string, { orders: number; revenue: number }>();
+        for (const key of monthKeys) {
+          monthlyMap.set(key, { orders: 0, revenue: 0 });
+        }
+        for (const order of bucket.orders) {
+          const monthKey = moment(order.createdAt).tz(TZ).format("YYYY-MM");
+          if (!monthlyMap.has(monthKey)) continue;
+          const entry = monthlyMap.get(monthKey)!;
+          entry.orders += 1;
+          entry.revenue += Number(order.totalAmount);
+        }
+
+        const monthlyTrend = monthKeys.map((monthKey) => {
+          const entry = monthlyMap.get(monthKey) ?? { orders: 0, revenue: 0 };
+          return {
+            month: moment.tz(`${monthKey}-01`, "YYYY-MM-DD", TZ).format("MMM"),
+            monthKey,
+            orders: entry.orders,
+            revenue: (entry.revenue / 1e7).toFixed(2),
+          };
+        });
+
+        return {
+          rmId: bucket.rmId,
+          name: bucket.name,
+          email: bucket.email,
+          ordersHandled: totalOrders,
+          conversionRate:
+            totalOrders > 0
+              ? Number(((settledCount / totalOrders) * 100).toFixed(1))
+              : 0,
+          revenueGenerated: revenue.toString(),
+          customersAcquired: customers.size,
+          avgTicket:
+            totalOrders > 0 ? (revenue / totalOrders).toString() : "0",
+          followUpEfficiency:
+            paidOrders.length > 0
+              ? Number(((settledPaid / paidOrders.length) * 100).toFixed(1))
+              : 0,
+          monthlyTrend,
+        };
+      })
+      .sort(
+        (a, b) =>
+          Number(b.revenueGenerated) - Number(a.revenueGenerated) ||
+          b.ordersHandled - a.ordersHandled,
+      );
+
+    return {
+      data,
+      meta: {
+        from: filters.from,
+        to: filters.to,
+        totalRms: data.length,
+      },
+    };
+  }
+
+  private rmPerformanceMonthKeys(from: string, to: string): string[] {
+    const { startUtc, endUtc } = istDateRangeToUtcBounds(from, to);
+    const keys: string[] = [];
+    let cursor = moment(startUtc).tz(TZ).startOf("month");
+    const end = moment(endUtc).tz(TZ).startOf("month");
+    while (cursor.isSameOrBefore(end, "month")) {
+      keys.push(cursor.format("YYYY-MM"));
+      cursor = cursor.clone().add(1, "month");
+    }
+    return keys;
+  }
 }

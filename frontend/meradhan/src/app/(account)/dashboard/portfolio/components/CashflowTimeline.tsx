@@ -7,6 +7,7 @@ import apiGateway from "@root/apiGateway";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { CashflowTimelineTabShimmer } from "./PortfolioTabShimmers";
 import TimelineFilters from "./TimelineFilters";
+import PortfolioCashflowDisclaimer from "./PortfolioCashflowDisclaimer";
 import { useState, useEffect } from "react";
 import {
   DEFAULT_CASHFLOW_PERIOD,
@@ -111,6 +112,12 @@ export default function CashflowTimelinePage() {
           </div>
         </div>
       )}
+
+      <div className="w-full min-w-0 px-1 pb-6">
+        <div className="mx-auto w-full max-w-[1200px]">
+          <PortfolioCashflowDisclaimer />
+        </div>
+      </div>
     </div>
   );
 }

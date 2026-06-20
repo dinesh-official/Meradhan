@@ -108,18 +108,24 @@ function clip(text: string, max: number): string {
   return text.length <= max ? text : `${text.slice(0, max)}...`;
 }
 
-/** Renders a SortInfoBox card only when `condition` is truthy. */
+/**
+ * Renders a card from the fixed field set: shows the value when `condition` is
+ * truthy, otherwise "N/A". Pass `hideWhenEmpty` to instead drop the card
+ * entirely when it has no value (used for Perpetual).
+ */
 function InfoCard({
   title,
   condition,
+  hideWhenEmpty,
   children,
 }: {
   title: string;
   condition: boolean;
+  hideWhenEmpty?: boolean;
   children: React.ReactNode;
 }) {
-  if (!condition) return null;
-  return <SortInfoBox title={title}>{children}</SortInfoBox>;
+  if (!condition && hideWhenEmpty) return null;
+  return <SortInfoBox title={title}>{condition ? children : "N/A"}</SortInfoBox>;
 }
 
 export default function BondOverview({
@@ -135,7 +141,7 @@ export default function BondOverview({
   const category = deriveCategory(bond);
 
   return (
-    <div className="gap-8 grid lg:grid-cols-3 py-10">
+    <div className="gap-8 grid lg:grid-cols-3 pt-3 pb-10">
       <div className="lg:col-span-3">
         <div className="gap-5 grid md:grid-cols-3">
           {/* ── Pricing & size ─────────────────────────────────────── */}
@@ -209,9 +215,6 @@ export default function BondOverview({
           <InfoCard title="Tax Status" condition={hasValue(taxStatus)}>
             {taxStatus}
           </InfoCard>
-          <InfoCard title="Perpetual" condition={typeof bond.isPerpetual === "boolean"}>
-            {yesNo(bond.isPerpetual)}
-          </InfoCard>
           <InfoCard title="Listed" condition={hasValue(bond.isListed)}>
             {yesNo(bond.isListed)}
           </InfoCard>
@@ -249,6 +252,15 @@ export default function BondOverview({
                 </Tooltip>
               )}
             </span>
+          </InfoCard>
+
+          {/* Perpetual — rendered last, and only when it has a value */}
+          <InfoCard
+            title="Perpetual"
+            condition={typeof bond.isPerpetual === "boolean"}
+            hideWhenEmpty
+          >
+            {yesNo(bond.isPerpetual)}
           </InfoCard>
         </div>
 
