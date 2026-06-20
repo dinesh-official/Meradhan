@@ -15,6 +15,7 @@ import React, { memo } from "react";
 import ErrorBox from "../_components/ErrorBox";
 import PasswordInput from "../_components/PasswordInput";
 import VerifyOtpPopUp from "./_components/VerifyOtpPopUp";
+import SignUpHandyChecklist from "./_components/SignUpHandyChecklist";
 
 import { cn } from "@/lib/utils";
 import { useSignUpAuthFlow } from "./_hooks/useSignUpAuthFlow";
@@ -117,6 +118,18 @@ function SignUpForm() {
     });
     return !res.success;
   };
+
+  const agreeAll =
+    signUpFormData.isAcceptedTerms && signUpFormData.isAcceptedWhatsapp;
+
+  const handleAgreeAllChange = () => {
+    const next = !agreeAll;
+    handleSignUpFormChange("isAcceptedTerms", next);
+    handleSignUpFormChange("isAcceptedWhatsapp", next);
+  };
+
+  const checkboxClass =
+    "data-[state=checked]:bg-secondary border border-gray-300 data-[state=checked]:border-secondary data-[state=checked]:text-white";
 
   return (
     <>
@@ -239,8 +252,18 @@ function SignUpForm() {
         </p>
 
         {/* --- Terms Section --- */}
-        <section className="flex flex-col gap-2 text-sm">
-          <label className="flex gap-2">
+        <section className="flex flex-col gap-3 text-sm">
+          <label className="flex items-start gap-2 font-medium">
+            <Checkbox
+              checkClass="text-white"
+              checked={agreeAll}
+              onClick={handleAgreeAllChange}
+              className={cn(checkboxClass, "shrink-0 mt-0.5")}
+            />
+            <span className="leading-snug">Agree to all</span>
+          </label>
+
+          <label className="flex items-start gap-2">
             <Checkbox
               checkClass="text-white"
               checked={signUpFormData.isAcceptedTerms}
@@ -251,12 +274,16 @@ function SignUpForm() {
                 )
               }
               className={cn(
-                "data-[state=checked]:bg-secondary mt-[2px] border border-gray-300 data-[state=checked]:border-secondary data-[state=checked]:text-white",
+                checkboxClass,
+                "shrink-0 mt-0.5",
                 signUpFormError.isAcceptedTerms && "border-red-500",
               )}
             />
             <span
-              className={signUpFormError.isAcceptedTerms ? "text-red-500" : ""}
+              className={cn(
+                "leading-snug",
+                signUpFormError.isAcceptedTerms && "text-red-500",
+              )}
             >
               By continuing, I certify that I am 18 years of age or older, and
               agree to the{" "}
@@ -279,7 +306,7 @@ function SignUpForm() {
             </span>
           </label>
 
-          <label className="flex gap-2">
+          <label className="flex items-start gap-2">
             <Checkbox
               checkClass="text-white"
               checked={signUpFormData.isAcceptedWhatsapp}
@@ -289,10 +316,14 @@ function SignUpForm() {
                   !signUpFormData.isAcceptedWhatsapp,
                 )
               }
-              className="data-[state=checked]:bg-secondary mt-0.5 border border-gray-300 data-[state=checked]:border-secondary data-[state=checked]:text-white"
+              className={cn(checkboxClass, "shrink-0 mt-0.5")}
             />
-            <span>I agree to receive communications via WhatsApp and RCS</span>
+            <span className="leading-snug">
+              I agree to receive communications via WhatsApp and RCS
+            </span>
           </label>
+
+          <SignUpHandyChecklist />
         </section>
 
         {/* --- Actions --- */}

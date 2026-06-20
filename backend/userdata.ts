@@ -1,29 +1,63 @@
-// import { revalidateBonds } from "@jobs/cron/scrap_bonds/revalidate_bonds";
+// src/s3-init.ts
 
-import { db } from "@core/database/database";
+import {
+    S3Client,
+    HeadBucketCommand,
+    CreateBucketCommand,
+    ListBucketsCommand,
+} from "@aws-sdk/client-s3";
 
-db.dataBase.nseDataSet.deleteMany({
-    where: {
-        participant: {
-            userId: 142,
-        },
+const BUCKET_NAME =
+    process.env.S3_BUCKET_NAME || "staging-meradhan-storage";
+
+const s3 = new S3Client({
+    region: process.env.S3_REGION || "us-east-1",
+    endpoint: process.env.S3_ENDPOINT || "http://localhost:4566",
+    forcePathStyle: true,
+    credentials: {
+        accessKeyId: process.env.S3_ACCESS_KEY_ID || "test",
+        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || "test",
     },
-}).then(async () => {
-    db.dataBase.nseCbricsParticipantModel.deleteMany({
-        where: {
-            userId: 142,
-        },
-    }).then(async () => {
-
-    }).then(async () => {
-        console.log("Deleted nseRfqParticipantInfoModel");
-    }).catch(async (error) => {
-        console.error(error);
-        console.log("Failed to delete nseRfqParticipantInfoModel");
-    });
-    console.log("Deleted nseCbricsParticipantModel");
-    console.log("Deleted nse DataSet and nseCbricsParticipantModel");
-}).catch(async (error) => {
-    console.error(error);
-    console.log("Failed to delete nseCbricsParticipantModel");
 });
+
+export async function ensureBucketExists() {
+    try {
+        await s3.send(
+            new HeadBucketCommand({
+                Bucket: BUCKET_NAME,
+            })
+        );
+
+        console.log(`✅ Bucket exists: ${BUCKET_NAME}`);
+    } catch (error: any) {
+        if (
+            error?.name === "NotFound" ||
+            error?.$metadata?.httpStatusCode === 404
+        ) {
+            console.log(`📦 Creating bucket: ${BUCKET_NAME}`);
+
+            await s3.send(
+                new CreateBucketCommand({
+                    Bucket: BUCKET_NAME,
+                })
+            );
+
+            console.log(`✅ Bucket created: ${BUCKET_NAME}`);
+        } else {
+            throw error;
+        }
+    }
+}
+
+async function bootstrap() {
+    await ensureBucketExists();
+
+    const buckets = await s3.send(new ListBucketsCommand({}));
+
+    console.log(
+        "Buckets:",
+        buckets.Buckets?.map((b) => b.Name)
+    );
+}
+
+bootstrap().catch(console.error);

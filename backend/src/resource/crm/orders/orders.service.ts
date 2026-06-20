@@ -18,7 +18,7 @@ import { getDpName } from "dp-id-lookup";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import crypto from "crypto";
 import { env } from "@packages/config/src/env";
-import { computeBondOrderPricingData, getLastNextCouponDateBasedOnSettlementDate, getPayoutDates } from "@services/order/order-pricing-helper";
+import { getPayoutDates } from "@services/order/order-pricing-helper";
 import { sendBackOfficeEmail } from "@communication/email_communication";
 import {
   dateOfBirthToPdfPassword,
@@ -974,6 +974,20 @@ export class CrmOrdersService {
       );
     }
 
+    const settlementDt = parseLooseDate(input.settlementDate);
+    if (!settlementDt) {
+      throw new AppError("Invalid settlementDate. Expected YYYY-MM-DD.", {
+        statusCode: HttpStatus.BAD_REQUEST,
+        code: "BAD_REQUEST",
+      });
+    }
+
+    const settlementDateStr = [
+      settlementDt.getFullYear(),
+      String(settlementDt.getMonth() + 1).padStart(2, "0"),
+      String(settlementDt.getDate()).padStart(2, "0"),
+    ].join("-");
+
     const bondService = new BondService();
     const bond = await bondService.getBondDetails(order.isin);
     if (!bond) {
@@ -983,73 +997,41 @@ export class CrmOrdersService {
       });
     }
 
-    const recordDays =
-      typeof bond.recordDays === "number" && !Number.isNaN(bond.recordDays)
-        ? bond.recordDays
-        : 7;
-    console.log(bond.maturityDate);
+    const pricingYield =
+      bond.yield != null && Number.isFinite(Number(bond.yield))
+        ? String(bond.yield)
+        : bond.buyYield != null && Number.isFinite(Number(bond.buyYield))
+          ? String(bond.buyYield)
+          : undefined;
 
-    const couponDates = await getLastNextCouponDateBasedOnSettlementDate(bond.isin, bond.maturityDate!)
-    console.log(couponDates);
-
-    const pricingData = await computeBondOrderPricingData({
-      isin: bond.isin,
-      faceValue: bond.faceValue,
+    const bondData = await getBondInfoCalcData(order.isin, {
+      settlementDate: settlementDateStr,
       quantity: order.quantity,
-      cleanPrice: order.unitPrice,
-      couponRate: bond.couponRate,
-      lastCouponDate: (couponDates?.lastCouponDate || "").toString(),
-      recordDays: recordDays,
-      nextCouponDate: couponDates?.nextCouponDate || "",
-    })
+      yeild: pricingYield,
+    });
 
-    const bondData = await getBondInfoCalcData(order.isin);
+    const interestPaymentDates = await getPayoutDates(bond.isin, settlementDt);
 
-    console.log(pricingData);
-
-
-    const settlementDt = parseLooseDate(input.settlementDate);
-    if (!settlementDt) {
-      throw new AppError("Invalid settlementDate. Expected YYYY-MM-DD.", {
-        statusCode: HttpStatus.BAD_REQUEST,
-        code: "BAD_REQUEST",
-      });
+    const lastIpRaw = bondData.payload.Last_IP_Date?.trim() || null;
+    let lastInterestPaymentDateRaw: string | null = lastIpRaw;
+    let lastInterestPaymentDate: string | null = null;
+    if (lastIpRaw) {
+      const lastIpDt = parseLooseDate(lastIpRaw);
+      if (lastIpDt) {
+        lastInterestPaymentDateRaw = toYyyyMmDd(lastIpDt);
+        lastInterestPaymentDate = formatDateWithDayNameForPdfOption(lastIpDt);
+      } else {
+        lastInterestPaymentDate = lastIpRaw;
+      }
     }
 
-    const negotiation = settleOrder?.orderNumber
-      ? await db.dataBase.rFQNegotiation.findFirst({
-        where: { tradeNumber: settleOrder.orderNumber },
-      })
-      : null;
-    const rfqDetails = negotiation?.rfqNumber
-      ? await db.dataBase.rFQMasterISIN.findFirst({
-        where: { number: negotiation.rfqNumber },
-      })
-      : null;
-
-    const fallbackOrderDate = order.createdAt;
-    const orderDateForPdf = parseRfqMasterDateTime(
-      rfqDetails?.date,
-      rfqDetails?.quoteTime,
-      fallbackOrderDate,
-    );
-
-
-
-    // Latest coupon date on/before settlement date.
-    let lastPayment = couponDates.lastCouponDate ? new Date(couponDates.lastCouponDate || '') : undefined;
-    if (!lastPayment) lastPayment = orderDateForPdf;
-    console.log("DATE", (input.settlementDate));
-
-    const interestPaymentDates = await getPayoutDates(bond.isin, new Date(input.settlementDate));
-    console.log(interestPaymentDates);
-
     return {
-      accruedInterestDays: pricingData.recordDays,
-      settlementNumber: settleOrder?.settlementNo || "",
-      lastInterestPaymentDateRaw: bondData.payload.Last_IP_Date,
-      lastInterestPaymentDate: bondData.payload.Last_IP_Date,
-      interestPaymentDates: interestPaymentDates || null,
+      accruedInterestDays: Number(bondData.calc.accrued_days),
+      settlementNumber: settleOrder?.settlementNo?.trim() || null,
+      lastInterestPaymentDateRaw,
+      lastInterestPaymentDate,
+      interestPaymentDates:
+        interestPaymentDates.length > 0 ? interestPaymentDates : null,
     };
   }
 
@@ -1771,6 +1753,7 @@ export class CrmOrdersService {
         metadata: {
           dealId: (metadata.dealId as string) ?? undefined,
           clientOrderSide: (metadata.clientOrderSide as "BUY" | "SELL") ?? undefined,
+          ...(actor.kind === "rfqParticipant" ? { isRfqParticipant: true } : {}),
           rfqNumber: (metadata.rfqNumber as string) ?? negotation?.tradeNumber ?? undefined,
           orderType: accessTypeText ?? "One To One (OTO) on RFQ Platform of the Exchange",
           interestPaymentDates:
@@ -2025,6 +2008,7 @@ export class CrmOrdersService {
           settlementType: rfqDetails?.settlementType ?? 0,
           dealId: (metadata.dealId as string) ?? undefined,
           clientOrderSide: (metadata.clientOrderSide as "BUY" | "SELL") ?? undefined,
+          ...(actor.kind === "rfqParticipant" ? { isRfqParticipant: true } : {}),
           rfqNumber: (metadata.rfqNumber as string) ?? negotation?.tradeNumber ?? undefined,
           orderType: accessTypeText ?? "One To One (OTO) on RFQ Platform of the Exchange",
           interestPaymentDates:
