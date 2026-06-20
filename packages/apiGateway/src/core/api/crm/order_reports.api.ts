@@ -11,6 +11,7 @@ import type {
   OrderReportsLogFailuresResponse,
   OrderReportsRegisterResponse,
   OrderReportsRevenueResponse,
+  OrderReportsRmPerformanceResponse,
   OrderReportsSettlementResponse,
   OrderReportsSummaryResponse,
 } from "./order_reports.response";
@@ -188,6 +189,28 @@ export class CrmOrderReportsApi {
   ): Promise<OrderReportsLifecycleResponse> {
     const { data } = await this.apiClient.get<OrderReportsLifecycleResponse>(
       "/crm/reports/orders/lifecycle",
+      mergeParams(config, query as Record<string, unknown>),
+    );
+    return data;
+  }
+
+  async getRmPerformance(
+    query: Pick<
+      ReportsQuery,
+      | "from"
+      | "to"
+      | "paymentStatus"
+      | "status"
+      | "isin"
+      | "customerId"
+      | "email"
+      | "userType"
+      | "kycStatus"
+    >,
+    config?: AxiosRequestConfig,
+  ): Promise<OrderReportsRmPerformanceResponse> {
+    const { data } = await this.apiClient.get<OrderReportsRmPerformanceResponse>(
+      "/crm/reports/orders/rm-performance",
       mergeParams(config, query as Record<string, unknown>),
     );
     return data;

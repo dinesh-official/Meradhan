@@ -238,6 +238,7 @@ function compStatusCodeToEnum(code: string | null | undefined):
   | "LLP"
   | "PARTNERSHIP"
   | "TRUST"
+  | "HUF"
   | "OTHER"
   | undefined {
   if (!code) return undefined;
@@ -255,6 +256,8 @@ function compStatusCodeToEnum(code: string | null | undefined):
       return "PARTNERSHIP";
     case "05":
       return "TRUST";
+    case "08":
+      return "HUF";
     case "16":
       return "LLP";
     default:
@@ -282,6 +285,7 @@ export interface CorporateKycAutofillFormPatch {
     | "LLP"
     | "PARTNERSHIP"
     | "TRUST"
+    | "HUF"
     | "OTHER";
   annualIncome?: string;
 

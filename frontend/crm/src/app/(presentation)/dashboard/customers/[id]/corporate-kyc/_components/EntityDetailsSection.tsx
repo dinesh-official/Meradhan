@@ -14,6 +14,7 @@ const ENTITY_CONSTITUTION_OPTIONS: SelectOption[] = [
   { value: "LLP", label: "LLP" },
   { value: "PARTNERSHIP", label: "Partnership" },
   { value: "TRUST", label: "Trust" },
+  { value: "HUF", label: "HUF" },
   { value: "OTHER", label: "Other" },
 ];
 

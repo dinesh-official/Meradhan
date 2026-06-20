@@ -53,6 +53,7 @@ import {
   formatDateForDateInput,
   parseApiDateStringToLocalDate,
 } from "../../_utils/bondCalendarDates";
+import { BondLogoField } from "../../_components/BondLogoField";
 
 const OPTIONAL_ENUM_NONE = "__none__" as const;
 
@@ -122,6 +123,7 @@ type BondDetailsResponse = {
   recordDate?: string | null;
   recordDays?: number | null;
   imDocumentLink?: string | null;
+  logoUrl?: string | null;
   exchangeListedOn?: string | null;
   lastCouponDate?: string | null;
   isPerpetual?: boolean | null;
@@ -630,6 +632,13 @@ function BondForm({ initialData, isin }: BondFormProps) {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {isUpdateMode && isin ? (
+                  <BondLogoField
+                    isin={isin}
+                    initialLogoUrl={initialData?.logoUrl}
+                  />
+                ) : null}
+
                 <FormField
                   control={form.control}
                   name="isin"

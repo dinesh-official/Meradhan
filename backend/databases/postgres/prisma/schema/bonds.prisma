@@ -88,6 +88,9 @@ model Bonds {
 
     imDocumentLink String?
 
+    /// Issuer/bond logo URL for listings and detail pages
+    logoUrl String?
+
     exchangeListedOn STOCK_EXCHANGE?
 
     lastCouponDate    DateTime?
@@ -113,6 +116,8 @@ model Bonds {
     endDateIst DateTime? @db.Date
 
     autofillSavedAt DateTime?
+
+    documents BondDocument[]
 
     @@index([isin])
     @@index([sortedAt])

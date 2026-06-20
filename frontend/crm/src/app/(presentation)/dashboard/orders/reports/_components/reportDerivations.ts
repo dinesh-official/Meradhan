@@ -48,16 +48,50 @@ export function mapOrderWorkflowStatus(
   orderStatus: string,
   paymentStatus: string,
 ): string {
-  const o = orderStatus.toUpperCase();
-  const p = paymentStatus.toUpperCase();
+  const o = String(orderStatus ?? "").toUpperCase();
+  const p = String(paymentStatus ?? "").toUpperCase();
+
   if (o === "SETTLED") return "Settled";
   if (o === "APPLIED") return "In Settlement";
+  if (o === "EXPIRED") return "Expired";
+  if (o === "CANCELLED") return "Cancelled";
   if (o === "REJECTED") return "Expired";
+
   if (p === "CANCELLED" || p === "REFUNDED") return "Expired";
-  if (o === "PENDING" && p === "COMPLETED") return "In Settlement";
+
+  if (o === "IN_PROGRESS") return "In Progress";
+
+  if (o === "PENDING") {
+    if (p === "COMPLETED") return "In Settlement";
+    return "Order Initiated";
+  }
+
   if (p === "COMPLETED") return "Deals Confirmed";
-  if (p === "PENDING") return "Order Initiated";
-  return orderStatus;
+
+  return o
+    .toLowerCase()
+    .split("_")
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+export function orderBelongsToCustomerProfile(
+  order: { customerProfileId: number | null; customerProfile?: { id: number } | null },
+  customerProfileId: number,
+): boolean {
+  if (order.customerProfileId === customerProfileId) return true;
+  return order.customerProfile?.id === customerProfileId;
+}
+
+export function isActiveWorkflowStatus(label: string): boolean {
+  const u = label.toLowerCase();
+  return !(
+    u.includes("settled") ||
+    u.includes("expired") ||
+    u.includes("cancelled") ||
+    u.includes("reject")
+  );
 }
 
 export function parseYieldFromBondDetails(bondDetails: unknown): string | null {

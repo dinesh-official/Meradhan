@@ -102,3 +102,36 @@ export const allowAccessMiddleware =
         });
       }
     };
+
+/** Public routes: attach `req.customer` when a valid USER token is present; never block. */
+export function optionalCustomerAuth(
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+) {
+  const authHeader = req.headers.authorization?.startsWith("Bearer ")
+    ? req.headers.authorization.split(" ")[1]
+    : undefined;
+  const token = authHeader || req.cookies?.token;
+  if (!token) {
+    return next();
+  }
+  try {
+    const data = tokenUtils.verifyToken<{
+      id: number;
+      email: string;
+      role: Exclude<Role, "PUBLIC">;
+    }>(token);
+    if (data.role === "USER") {
+      req.customer = {
+        id: data.id,
+        email: data.email,
+        token,
+        role: "USER",
+      };
+    }
+  } catch {
+    // Expired / CRM / invalid token — still allow public read
+  }
+  return next();
+}

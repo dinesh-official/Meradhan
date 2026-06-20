@@ -11,6 +11,8 @@ import commonApiRoutes from "@resource/common/routes";
 import crmAuditlogsRoutes from "@resource/crm/auditlogs/auditlogs.routes";
 import crmAuthRoutes from "@resource/crm/auth/auth.routes";
 import crmBondMarginRoutes from "@resource/crm/bonds/bond_margin.routes";
+import crmBondDocumentsRoutes from "@resource/crm/bonds/bond_documents.routes";
+import crmBondLogoRoutes from "@resource/crm/bonds/bond_logo.routes";
 import crmBondReferenceDataRoutes from "@resource/crm/bonds/bond_reference_data.routes";
 import cbricsManagerRoutes from "@resource/crm/cbrics_manager/cbrics_manager.routes";
 import crmCustomersRoutes from "@resource/crm/customers/customers.routes";
@@ -71,6 +73,8 @@ server.addRoutes([
   crmBondPricedListRoutes,
   crmBondReferenceDataRoutes,
   crmBondMarginRoutes,
+  crmBondDocumentsRoutes,
+  crmBondLogoRoutes,
   leadsRoutes,
   followUpRouter,
   partnershipRoutes,
