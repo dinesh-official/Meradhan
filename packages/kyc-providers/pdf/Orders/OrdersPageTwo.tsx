@@ -3,6 +3,7 @@ import type { CustomerByIdPayload } from "@root/apiGateway";
 import { tw } from "../MdPdf";
 import { CheckOnlyIcon } from "../elements/CheckIcon";
 import TextList from "../elements/TextList";
+import { ClientSettlementDetailsSection } from "./ClientSettlementDetailsSection";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -66,6 +67,7 @@ interface OrdersPageTwoOrderData {
     /** Settlement Date & Time shown in confirmation line */
     settlementDateTime?: string;
     settlementType: number;
+    isRfqParticipant?: boolean;
   };
 }
 
@@ -78,24 +80,6 @@ function OrdersPageTwo({
   releasedOrder?: boolean;
   orderData?: OrdersPageTwoOrderData;
 }) {
-  const settlementBank = orderData?.metadata?.settlementBank;
-  const settlementDemat = orderData?.metadata?.settlementDemat;
-  const bank = settlementBank
-    ? {
-      bankName: settlementBank.bankName ?? "—",
-      ifscCode: settlementBank.ifscCode ?? "—",
-      accountNumber: settlementBank.accountNo ?? "—",
-    }
-    : user.bankAccounts?.find((e) => e.isPrimary);
-  const demat = settlementDemat
-    ? {
-      depositoryParticipantName: settlementDemat.dpName ?? "—",
-      dpId: settlementDemat.dpId ?? "—",
-      clientId: settlementDemat.benId ?? "—",
-    }
-    : user.dematAccounts?.find((e) => e.isPrimary);
-  const confirmationDateTime = orderData?.metadata?.settlementDateTime;
-
   return (
     <View
       style={{
@@ -138,20 +122,7 @@ Settlement No.: ${orderData?.metadata?.settlementNumber ?? "—"}`}
         </View>
       </View>
 
-      <View style={tw(`flex flex-row border-b border-gray-300 `)}>
-        <View style={tw(`text-[9px] flex w-[20%] flex-row gap-2`)}>
-          <Text>Client Settlement Details (Buyer)</Text>
-        </View>
-        <View style={tw(`text-[9px] flex w-[40%] border-l border-gray-300 pl-2 flex-row gap-2`)}>
-          <Text>{`Bank Name: ${bank?.bankName}
-IFSC Code: ${bank?.ifscCode}
-Bank Account Number: ${bank?.accountNumber}`}</Text>
-        </View>
-        <View style={tw(`text-[9px] flex w-[40%] border-l border-gray-300 pl-2 flex-row gap-2`)}>
-          // min dp id length is 5
-          <Text>{`DP Name: ${demat?.depositoryParticipantName}${demat?.dpId?.length && demat?.dpId?.length >= 5 ? `\nDP ID: ${demat?.dpId}` : ""}\nClient ID: ${demat?.clientId}`}</Text>
-        </View>
-      </View>
+      <ClientSettlementDetailsSection user={user} orderData={orderData} />
 
       {/* Order Receipt notice */}
       <Text style={tw(`text-[6.5px] mt-3`)}>
