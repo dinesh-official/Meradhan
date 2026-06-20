@@ -23,6 +23,8 @@ jobs:
             echo "NEXT_PUBLIC_STRAPI_HOST_URL=https://spyder.meradhan.co"
             echo "NEXT_PUBLIC_DIGIO=production"
             echo "STRAPI_API_URL=https://spyder.meradhan.co/api"
+            echo "INTERNAL_API_KEY=1da72b687ec308ed38ad29f8c1da3efb0b668194dd28a00a08216e576258267f" >> .env
+
 
             echo "GRAPHQL_KEY=${{ secrets.NEXT_PUBLIC_GRAPHQL_KEY }}"
             echo "STRAPI_API_TOKEN=${{ secrets.STRAPI_API_TOKEN }}"
