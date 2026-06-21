@@ -3,7 +3,11 @@ import type {
   BondDetailsResponse,
   CustomerByIdPayload,
 } from "@root/apiGateway";
-import { formatDate } from "../helper";
+import {
+  formatDate,
+  formatLastInterestPaymentDateDisplay,
+  getPdfDearGreeting,
+} from "../helper";
 import { getInterestPaymentSchedule } from "./interestPaymentSchedule";
 
 const styles = StyleSheet.create({
@@ -76,6 +80,7 @@ interface OrderData {
     };
     /** CRM / RFQ: customer buy vs sell for wording */
     clientOrderSide?: "BUY" | "SELL";
+    isRfqParticipant?: boolean;
   };
 }
 
@@ -99,8 +104,7 @@ export default function OrdersPage({
     `${user.middleName ? `${user.middleName} ` : " "}` +
     user.lastName;
 
-  const genderRaw = String(user?.gender ?? "").trim().toUpperCase();
-  const salutation = genderRaw === "FEMALE" ? "Ms." : "Mr.";
+  const dearGreeting = getPdfDearGreeting(user, orderData);
 
   // Calculate dates
   const now = new Date();
@@ -252,7 +256,7 @@ ${getInterestPaymentDatesDisplay()}`,
       "Last Interest Payment Date",
       (() => {
         const raw = orderData?.metadata?.lastInterestPaymentDate?.trim();
-        if (raw) return raw;
+        if (raw) return formatLastInterestPaymentDateDisplay(raw);
         const d = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
         const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         return formatDate(d.toISOString(), "DD-MMM-YYYY") + ` (${dayNames[d.getDay()]})`;
@@ -341,7 +345,7 @@ ${getInterestPaymentDatesDisplay()}`,
       </View> */}
 
       <View style={styles.section}>
-        <Text style={{ fontSize: 9 }}>Dear {salutation} {fullname},</Text>
+        <Text style={{ fontSize: 9 }}>{dearGreeting}</Text>
         <Text style={{
           fontSize: 9,
         }} >

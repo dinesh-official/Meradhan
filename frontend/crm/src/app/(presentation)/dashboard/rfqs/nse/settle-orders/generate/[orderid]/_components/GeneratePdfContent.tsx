@@ -571,12 +571,15 @@ function GeneratePdfContent() {
   }, [customerOrder?.customerProfile?.emailAddress, emailTo]);
 
   const applyEmailTemplate = (type: "order" | "deal") => {
+    const dearLine = linkedParticipantCode
+      ? "Dear Sir / Madam,"
+      : null;
     if (type === "deal") {
       setEmailSubject(
         `Deal Sheet for ISIN ${isin} - Security Name ${securityName} - Deal Date ${dealDateText}`
       );
       setEmailBody(
-        `Dear ${emailSalutation} ${clientFullName || "CUSTOMER"},
+        `${dearLine ?? `Dear ${emailSalutation} ${clientFullName || "CUSTOMER"},`}
 
 Thank you for investing with MeraDhan. We truly value your trust and remain committed to providing you with a seamless bond investment experience.
 
@@ -603,7 +606,7 @@ MeraDhan Team`
 
     setEmailSubject(`Order Confirmation & Receipt – Order ID ${orderIdTpl}`);
     setEmailBody(
-      `Dear ${emailSalutation} ${displayName},
+      `${dearLine ?? `Dear ${emailSalutation} ${displayName},`}
 
 Your ${buySellLower} order has been successfully placed through MeraDhan and has been executed on the exchange.
 
@@ -742,10 +745,20 @@ BSE Member ID: 6963`
         rawLast != null && String(rawLast).trim() !== "" ? String(rawLast).trim() : "";
       if (rawLastTrimmed !== "") {
         setPdfLastInterestPaymentDateRaw(rawLastTrimmed);
-        const formatted =
+        const apiDisplay =
           d.lastInterestPaymentDate != null && String(d.lastInterestPaymentDate).trim() !== ""
             ? String(d.lastInterestPaymentDate).trim()
-            : formatDateWithDayNameFromPicker(rawLastTrimmed);
+            : "";
+        const formatted =
+          apiDisplay && !/^\d{4}-\d{2}-\d{2}$/.test(apiDisplay)
+            ? apiDisplay
+            : formatDateWithDayNameFromPicker(
+                /^\d{4}-\d{2}-\d{2}$/.test(rawLastTrimmed)
+                  ? rawLastTrimmed
+                  : /^\d{4}-\d{2}-\d{2}$/.test(apiDisplay)
+                    ? apiDisplay
+                    : rawLastTrimmed,
+              );
         setPdfLastInterestPaymentDate(formatted);
       } else if (
         d.lastInterestPaymentDate != null &&
