@@ -39,8 +39,8 @@ type BondOrderPricingData = {
 ========================= */
 
 // ✅ UPDATED MARKET WINDOW (UTC)
-const DEFAULT_TRADING_START = 3 * 60 + 45;// 16:45 IST == 11:15 UTC
-const DEFAULT_TRADING_CUTOFF = 11 * 60 + 15; // 11:15 UTC
+const DEFAULT_TRADING_START = 3 * 60 + 45;   // 09:15 IST == 03:45 UTC
+const DEFAULT_TRADING_CUTOFF = 11 * 60 + 15; // 16:45 IST == 11:15 UTC
 
 export const DEFAULT_BOND_MARKET_HOLIDAYS: readonly string[] = [
     "2026-01-15", "2026-01-26", "2026-02-19", "2026-03-03", "2026-03-19",
@@ -148,8 +148,8 @@ function computeBondSettlement(
     options: BondSettlementOptions = {}
 ): BondSettlementResult {
 
-    const start = options.tradingStartMinutes ?? DEFAULT_TRADING_START; // 03:30
-    const end = options.tradingCutoffMinutes ?? DEFAULT_TRADING_CUTOFF; // 12:00
+    const start = options.tradingStartMinutes ?? DEFAULT_TRADING_START; // 03:45 UTC
+    const end = options.tradingCutoffMinutes ?? DEFAULT_TRADING_CUTOFF; // 11.15 UTC
 
     const holidays = new Set([
         ...DEFAULT_BOND_MARKET_HOLIDAYS,
@@ -209,6 +209,50 @@ function computeBondSettlement(
         settlementOrder: "T+1",
         allowSettlement: dealOrder === "T+0" ? ["T+0", "T+1"] : ["T+1"],
     };
+}
+
+/* =========================
+   MARKET OPEN / NEXT OPEN
+========================= */
+
+/**
+ * Authoritative "is the bond market open right now" check, used server-side to
+ * decide whether a paid order is submitted to NSE immediately or scheduled for
+ * the next market open. Mirrors the working-day + trading-window logic used by
+ * computeBondSettlement so scheduling and the locked-in price stay consistent.
+ */
+export function isMarketOpen(
+    at: Date,
+    options: BondSettlementOptions = {}
+): boolean {
+    const start = options.tradingStartMinutes ?? DEFAULT_TRADING_START;
+    const end = options.tradingCutoffMinutes ?? DEFAULT_TRADING_CUTOFF;
+
+    const holidays = new Set([
+        ...DEFAULT_BOND_MARKET_HOLIDAYS,
+        ...(options.holidays ?? []),
+    ]);
+
+    return isWorkingDay(at, holidays) && isWithinTradingHoursUTC(at, start, end);
+}
+
+/**
+ * The instant of the next market open (09:15 IST / 03:45 UTC) on the working day
+ * an order placed at `at` should be executed. Reuses computeBondSettlement's
+ * dealDate so the scheduled execution day always matches the day the captured
+ * price was computed for:
+ *   - before open on a working day    -> that same day's open
+ *   - after close / weekend / holiday -> the next working day's open
+ */
+export function nextMarketOpen(
+    at: Date,
+    options: BondSettlementOptions = {}
+): Date {
+    const start = options.tradingStartMinutes ?? DEFAULT_TRADING_START;
+    const { dealDate } = computeBondSettlement(at, options);
+    const hh = pad2(Math.floor(start / 60));
+    const mm = pad2(start % 60);
+    return new Date(`${dealDate}T${hh}:${mm}:00.000Z`);
 }
 
 /* =========================

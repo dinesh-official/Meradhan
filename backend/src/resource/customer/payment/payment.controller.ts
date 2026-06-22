@@ -4,7 +4,7 @@ import { AppError, HttpStatus } from "@utils/error/AppError";
 import { db } from "@core/database/database";
 import logger from "@utils/logger/logger";
 import { PaymentService } from "./payment.service";
-import { orderSettlementQueue } from "@jobs/queue/worker_queues";
+import { dispatchOrScheduleSettlement } from "@services/order/settlement_dispatch";
 
 export class PaymentController {
   private paymentService = new PaymentService();
@@ -137,24 +137,18 @@ export class PaymentController {
 
           await this.orderService.updateOrderStatus(order.id, "APPLIED");
           await this.orderService.updateOrderMetadata(order.id, paymentEntity);
-          const job = await orderSettlementQueue.add(
-            {
-              type: "orderSettlement",
-              id: order.id,
-              paymentOrderId,
-              paymentId,
-              paymentEntity,
-              isNetBanking,
 
-            }
-          );
-          console.log(job);
-          logger.logInfo(
-            `Payment captured and settlement job queued for order: ${paymentOrderId}`,
-            {
-              jobId: job.id,
-            }
-          );
+          // 24/7 trading: inventory is already decremented at capture time.
+          // Submit to NSE now if the market is open, otherwise schedule for the
+          // next market open. Centralised so every settlement entry point (this
+          // webhook + the payment reconciliation cron) honours the same gate.
+          await dispatchOrScheduleSettlement({
+            orderId: order.id,
+            paymentOrderId,
+            paymentId,
+            paymentEntity,
+            isNetBanking,
+          });
         }
       } catch (error) {
         logger.logError("Error processing payment.captured webhook:", error);

@@ -466,6 +466,21 @@ export class OrderService {
     });
   }
 
+  /**
+   * 24/7 trading: mark a paid order to be submitted to NSE at the next market
+   * open instead of immediately. The scheduler cron enqueues the settlement job
+   * once `scheduledExecutionAt` is due and clears it. Status stays APPLIED.
+   */
+  async scheduleOrderExecution(
+    orderId: number,
+    scheduledExecutionAt: Date,
+  ): Promise<void> {
+    await db.dataBase.order.update({
+      where: { id: orderId },
+      data: { scheduledExecutionAt },
+    });
+  }
+
   async updateOrderStatusByOrderNo(
     orderNumber: string,
     status: "PENDING" | "SETTLED" | "APPLIED" | "REJECTED",
