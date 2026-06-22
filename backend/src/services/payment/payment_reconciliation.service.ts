@@ -1,7 +1,7 @@
 import { db } from "@core/database/database";
 import type { Prisma } from "@databases/generated/prisma/postgres";
 import { PaymentStatus } from "@databases/generated/prisma/postgres";
-import { dispatchOrScheduleSettlement } from "@services/order/settlement_dispatch";
+import { orderSettlementQueue } from "@jobs/queue/worker_queues";
 import { SettlementStatus, SettlementStep } from "@packages/config/constants";
 import { env } from "@packages/config/src/env";
 import { OrderService } from "@resource/customer/order/order.service";
@@ -331,10 +331,9 @@ export class PaymentReconciliationService {
               const isNetBanking =
                 typeof payment?.method === "string" ? payment.method === "netbanking" : false;
 
-              // 24/7 trading: honour market hours — settle now if open, otherwise
-              // schedule for the next market open (same gate as the webhook).
-              await dispatchOrScheduleSettlement({
-                orderId: order.id,
+              await orderSettlementQueue.add({
+                type: "orderSettlement",
+                id: order.id,
                 paymentOrderId: order.paymentOrderId,
                 paymentId,
                 paymentEntity: payment,
@@ -539,10 +538,9 @@ export class PaymentReconciliationService {
             { razorpayPayment: payment },
           );
 
-          // 24/7 trading: honour market hours — settle now if open, otherwise
-          // schedule for the next market open (same gate as the webhook).
-          await dispatchOrScheduleSettlement({
-            orderId: order.id,
+          await orderSettlementQueue.add({
+            type: "orderSettlement",
+            id: order.id,
             paymentOrderId,
             paymentId: payment.id,
             paymentEntity: payment,
