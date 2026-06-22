@@ -8,7 +8,9 @@ export type IAuthCompleteResponse = BaseResponseData<{
   id: number;
   email: string;
   avatar: string | null;
-  token: string;
+  token?: string;
+  requiresTwoFactor?: boolean;
+  challengeToken?: string;
 }>;
 
 export type ISignInRequestResponse = BaseResponseData<{
@@ -17,6 +19,7 @@ export type ISignInRequestResponse = BaseResponseData<{
   lastName: string;
   email?: string;
   token?: string;
+  allowOtpLogin?: boolean;
   requiresAccountActivation?: boolean;
   channel?: "phone" | "email";
   activationOtpSent?: boolean;
@@ -32,6 +35,13 @@ export type ISignInSendOtpResponse = BaseResponseData<{
 
 export type IResetPasswordResponse = BaseResponseData<{
   message: string;
+}>;
+
+export type ICustomerTwoFactorSettingsResponse = BaseResponseData<{
+  enabled: boolean;
+  hasPasscodeSet: boolean;
+  hasPasswordSet: boolean;
+  signinWith: "CREDENTIALS" | "GOOGLE" | "MICROSOFT" | "FACEBOOK";
 }>;
 
 export type ISessionResponse = BaseResponseData<{

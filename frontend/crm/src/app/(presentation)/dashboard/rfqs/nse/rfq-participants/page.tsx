@@ -10,7 +10,7 @@ function page() {
       <Workspace>
         <PageInfoBar
           title="NSE RFQ Participants"
-          description="All NSE RFQ participants pulled live from the NSE /participants/all endpoint."
+          description="All NSE RFQ participants from CBRICS /participant/find."
         />
         <RfqParticipantsAllView />
       </Workspace>

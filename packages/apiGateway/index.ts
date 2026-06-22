@@ -43,6 +43,7 @@ export type {
   NseRfqParticipantBankAccountData,
   NseRfqParticipantDpAccountData,
   NseRfqParticipantInfoSummary,
+  NseRfqParticipantListItem,
 } from "./src/core/api/crm/RFQ/nse/participants.api";
 import { RfqIsinApi } from "./src/core/api/crm/RFQ/nse/isin.api";
 import { CbricsManagerApi } from "./src/core/api/crm/cbrics_manager.api";

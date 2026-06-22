@@ -79,7 +79,7 @@ function AcceptQuate({ data }: { data: CreateRfqResponseItem }) {
           Accept
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Accept Quote</DialogTitle>
           <DialogDescription>
@@ -87,7 +87,7 @@ function AcceptQuate({ data }: { data: CreateRfqResponseItem }) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="gap-5 grid grid-cols-3">
+        <div className="gap-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           <LabelView title="RFQ Number">{data.number}</LabelView>
           <LabelView title="ISIN">{data.isin}</LabelView>
           <LabelView title="Participant Code">{data.participantCode}</LabelView>
@@ -96,7 +96,7 @@ function AcceptQuate({ data }: { data: CreateRfqResponseItem }) {
             <DealTypeBadge type={`${data.dealType}`} />
           </LabelView>
           <LabelView title="Settlement Date">{data.settlementDate}</LabelView>
-          <LabelView title="Value">{data.value}</LabelView>
+          <LabelView title="Value (Crores)">{data.value}</LabelView>
           <LabelView title="Yield">{data.yield}</LabelView>
           <LabelView title="Yield Type">
             <YieldTypeBadge type={`${data.yieldType}`} />

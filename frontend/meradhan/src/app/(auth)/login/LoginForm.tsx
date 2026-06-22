@@ -12,6 +12,7 @@ import ErrorBox from "../_components/ErrorBox";
 import PasswordInput from "../_components/PasswordInput";
 import SignInOtpInput from "./_components/SignInOtpInput";
 import LoginAccountActivationPopUp from "./_components/LoginAccountActivationPopUp";
+import LoginTwoFactorDialog from "./_components/LoginTwoFactorDialog";
 
 import { useLoginDataStore } from "./_hooks/useLoginDataStore";
 import { ILoginFormHook, useLoginFormHook } from "./_hooks/useLoginFormHook";
@@ -153,7 +154,6 @@ const VerifyModeSection = ({
         </label>
 
         {state.type === "password" ? (
-          // Password mode options
           <div className="flex gap-3 text-primary">
             <Link href="/forgot-password">Reset Password</Link> |
             <p className="cursor-pointer" onClick={handleSwitchToOtp}>
@@ -161,11 +161,9 @@ const VerifyModeSection = ({
             </p>
           </div>
         ) : (
-          // OTP mode options
           <p
-            className={`text-primary cursor-pointer ${
-              !state.allowedResend && "opacity-60"
-            }`}
+            className={`text-primary cursor-pointer ${!state.allowedResend && "opacity-60"
+              }`}
             onClick={state.allowedResend ? handleResendOtp : undefined}
           >
             {state.allowedResend ? "Resend OTP" : formManager.timer.time}
@@ -193,7 +191,6 @@ function LoginForm() {
     handleVerifyOtp,
   } = formManager;
 
-  // Derived state
   const isVerifyMode = state.mode === "verify";
   const isActivationMode = state.mode === "account_activation";
   const isPasswordLogin = state.type === "password";
@@ -257,12 +254,8 @@ function LoginForm() {
             onEnter={handleContinue}
           />
 
-          {/* Verification Section (Password / OTP) */}
           {isVerifyMode && <VerifyModeSection formManager={formManager} />}
 
-          {/* ---------------------------------------------------
-           * Action Buttons
-           * --------------------------------------------------- */}
           {isActivationMode ? null : isVerifyMode ? (
             <>
               {/* OTP Login */}
@@ -306,7 +299,7 @@ function LoginForm() {
           {/* ---------------------------------------------------
            * Status Messages
            * --------------------------------------------------- */}
-          {!isActivationMode && state.errorMessage && (
+          {!isActivationMode && !state.twoFactorDialogOpen && state.errorMessage && (
             <p
               className="text-red-600 text-sm"
               dangerouslySetInnerHTML={{
@@ -314,7 +307,7 @@ function LoginForm() {
               }}
             />
           )}
-          {!isActivationMode && state.successMessage && (
+          {!isActivationMode && !state.twoFactorDialogOpen && state.successMessage && (
             <p
               className="text-green-600 text-sm"
               dangerouslySetInnerHTML={{
@@ -351,6 +344,7 @@ function LoginForm() {
       {/* <SocialLoginButtons /> */}
 
       <LoginAccountActivationPopUp formManager={formManager} />
+      <LoginTwoFactorDialog formManager={formManager} />
     </div>
   );
 }

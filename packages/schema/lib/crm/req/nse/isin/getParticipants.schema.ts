@@ -73,6 +73,14 @@ export const GetParticipantsZ = z.object({
 
 export type GetParticipantsParams = z.infer<typeof GetParticipantsZ>;
 
+/** Optional filters for CBRICS `POST /participant/find` on the RFQ participants list. */
+export const RfqParticipantsListQueryZ = z.object({
+  loginId: z.string().optional(),
+  panNo: z.string().optional(),
+});
+
+export type RfqParticipantsListQuery = z.infer<typeof RfqParticipantsListQueryZ>;
+
 export {
   ResyncKraFromCbricsParticipantsBodyZ,
   type ResyncKraFromCbricsParticipantsBody,

@@ -68,8 +68,15 @@ function ParticipantsTableList({
 
         { key: "firstName", label: "Name" },
         {
+          key: "actualStatus",
+          label: "Actual status",
+          cell: (row) => {
+            return <WorkflowStatusBadge statusCode={row.actualStatus} />;
+          },
+        },
+        {
           key: "workflowStatus",
-          label: "Workflow Status",
+          label: "Workflow status",
           cell: (row) => {
             return <WorkflowStatusBadge statusCode={row.workflowStatus} />;
           },
