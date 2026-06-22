@@ -244,7 +244,7 @@ export class BondService {
         recordDays,
         nextCouponDate: nextCouponDateStr,
       },
-      { settlementType, useCleanPrice: true },
+      { settlementType },
     );
 
     const yieldRaw = bond.yield ?? bond.buyYield;
