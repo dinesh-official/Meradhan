@@ -47,6 +47,11 @@ model Order {
     metadata       Json?
     reqOrderNumber String?
 
+    // 24/7 trading: when set, the trade is submitted to NSE at this instant
+    // (next market open) by the scheduler cron instead of immediately on payment.
+    // Cleared once the settlement job has been enqueued.
+    scheduledExecutionAt DateTime?
+
     // Timestamps
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -54,6 +59,7 @@ model Order {
     @@index([paymentOrderId])
     @@index([paymentId])
     @@index([orderNumber])
+    @@index([scheduledExecutionAt])
     @@index([linkedRfqParticipantCode])
     @@map("orders")
 }
