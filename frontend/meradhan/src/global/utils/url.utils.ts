@@ -1,6 +1,9 @@
 import { BASES_URLS } from "@/core/config/base.urls";
 import { ASSETS_URL } from "../constants/domains";
 
+/** Same token as backend `GET /files-public/*` (see packages/kyc-providers/pdf/helper.ts). */
+const FILES_PUBLIC_TOKEN = "meradhan24873284sadsrFAD";
+
 export function genMediaUrl(mediaPath?: string | null): string {
   if (!mediaPath) return "/noimage.jpg";
 
@@ -57,4 +60,25 @@ export function generatePageUrl({
 
   const queryString = searchParams.toString();
   return queryString ? `${basePath}?${queryString}` : basePath;
+}
+
+/**
+ * Public URL for bond issuer logos (S3 paths or full https URLs).
+ * Uses `/files-public` so `<img>` loads work without auth cookies.
+ */
+export function genBondLogoUrl(logoUrl?: string | null): string | null {
+  if (!logoUrl) return null;
+  const trimmed = logoUrl.trim();
+  if (!trimmed || /^(n\/?a|none|-+|null|undefined)$/i.test(trimmed)) {
+    return null;
+  }
+
+  if (/^(https?:\/\/|data:|urn:)/i.test(trimmed)) {
+    return trimmed;
+  }
+
+  const key = trimmed.replace(/^\/+/, "").replace(/^files-public\//, "");
+  if (!key) return null;
+
+  return `${ASSETS_URL}/files-public/${key}?token=${FILES_PUBLIC_TOKEN}`;
 }

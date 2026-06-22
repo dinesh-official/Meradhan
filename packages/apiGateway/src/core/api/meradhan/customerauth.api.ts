@@ -5,6 +5,7 @@ import type z from "zod";
 import type { IApiCaller } from "../../connection/apiCaller.interface";
 import type {
   IAuthCompleteResponse,
+  ICustomerTwoFactorSettingsResponse,
   IResetPasswordResponse,
   ISessionResponse,
   ISignInRequestResponse,
@@ -157,6 +158,38 @@ export class CustomerAuthApi {
       "/auth/customer/signin/account-activation/verify",
       payload,
       config
+    );
+    return data;
+  }
+
+  async getTwoFactorSettings(config?: AxiosRequestConfig) {
+    const { data } = await this.apiClient.get<ICustomerTwoFactorSettingsResponse>(
+      "/auth/customer/2fa/settings",
+      config,
+    );
+    return data;
+  }
+
+  async updateTwoFactorSettings(
+    payload: z.infer<typeof this.schema.customerTwoFactorSettingsUpdateSchema>,
+    config?: AxiosRequestConfig,
+  ) {
+    const { data } = await this.apiClient.patch<ICustomerTwoFactorSettingsResponse>(
+      "/auth/customer/2fa/settings",
+      payload,
+      config,
+    );
+    return data;
+  }
+
+  async verifySignInTwoFactor(
+    payload: z.infer<typeof this.schema.signInVerifyTwoFactorSchema>,
+    config?: AxiosRequestConfig,
+  ) {
+    const { data } = await this.apiClient.post<IAuthCompleteResponse>(
+      "/auth/customer/signin/2fa/verify",
+      payload,
+      config,
     );
     return data;
   }

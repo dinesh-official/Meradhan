@@ -218,8 +218,8 @@ export class NseCBRICS {
   public async findParticipants(payload?: ParticipantFindRequest) {
     return this.withReLoginRetry(async (loginKey) => {
       const { data } = await this.client.post<ParticipantFindResponse>(
-        "/participants/find",
-        payload,
+        "/participant/find",
+        payload ?? {},
         { headers: { loginKey } }
       );
       return data;

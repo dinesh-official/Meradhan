@@ -308,6 +308,23 @@ export class CustomerAuthService {
       });
     }
 
+    if (user.utility.twoFactorEnabled) {
+      if (!user.utility.twoFactorPasscodeHash) {
+        throw new AppError(
+          "Two-factor authentication is misconfigured. Please update your 2FA settings.",
+          { code: "TWO_FACTOR_PASSCODE_NOT_SET" },
+        );
+      }
+      const challengeToken = this.createTwoFactorPasscodeChallengeToken(user.id);
+      return {
+        id: user.id,
+        email: user.emailAddress,
+        avatar: user.avatar,
+        requiresTwoFactor: true as const,
+        challengeToken,
+      };
+    }
+
     const authToken = tokenUtils.generateToken(
       {
         email: user.emailAddress,
@@ -414,6 +431,23 @@ export class CustomerAuthService {
       throw new AppError("Invalid OTP. Please try again.");
     }
 
+    if (user.utility.twoFactorEnabled) {
+      if (!user.utility.twoFactorPasscodeHash) {
+        throw new AppError(
+          "Two-factor authentication is misconfigured. Please update your 2FA settings.",
+          { code: "TWO_FACTOR_PASSCODE_NOT_SET" },
+        );
+      }
+      const challengeToken = this.createTwoFactorPasscodeChallengeToken(user.id);
+      return {
+        id: user.id,
+        email: user.emailAddress,
+        avatar: user.avatar,
+        requiresTwoFactor: true as const,
+        challengeToken,
+      };
+    }
+
     const authToken = tokenUtils.generateToken(
       {
         email: user.emailAddress,
@@ -422,6 +456,121 @@ export class CustomerAuthService {
         role: "USER",
       },
       "1d"
+    );
+    await this.customerProfileService.setLatestLoginTime(user.id);
+    return {
+      id: user.id,
+      email: user.emailAddress,
+      avatar: user.avatar,
+      token: authToken,
+    };
+  }
+
+  async getTwoFactorSettings(customerId: number) {
+    const user = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { id: customerId, isDeleted: false },
+      include: { utility: true },
+    });
+    if (!user) {
+      throw new AppError("Customer not found.", { code: "CUSTOMER_NOT_FOUND" });
+    }
+
+    return {
+      enabled: user.utility.twoFactorEnabled,
+      hasPasscodeSet: Boolean(user.utility.twoFactorPasscodeHash),
+      hasPasswordSet: Boolean(user.utility.password),
+      signinWith: user.utility.signinWith,
+    };
+  }
+
+  async updateTwoFactorSettings(
+    customerId: number,
+    data: z.infer<typeof appSchema.customer.customerTwoFactorSettingsUpdateSchema>,
+  ) {
+    const user = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { id: customerId, isDeleted: false },
+      include: { utility: true },
+    });
+    if (!user) {
+      throw new AppError("Customer not found.", { code: "CUSTOMER_NOT_FOUND" });
+    }
+
+    this.assertCanManageTwoFactor(user);
+
+    if (data.enabled) {
+      let passcodeHash = user.utility.twoFactorPasscodeHash;
+      if (data.passcode) {
+        passcodeHash = await hashingUtils.hashPassword(data.passcode);
+      } else if (!passcodeHash) {
+        throw new AppError("Set a 6-digit passcode to enable 2FA.", {
+          code: "TWO_FACTOR_PASSCODE_REQUIRED",
+        });
+      }
+
+      await db.dataBase.customersAuthDataModel.update({
+        where: { id: user.customersAuthDataModelId },
+        data: {
+          twoFactorEnabled: true,
+          twoFactorPasscodeHash: passcodeHash,
+        },
+      });
+    } else {
+      await db.dataBase.customersAuthDataModel.update({
+        where: { id: user.customersAuthDataModelId },
+        data: {
+          twoFactorEnabled: false,
+          twoFactorPasscodeHash: null,
+        },
+      });
+    }
+
+    return this.getTwoFactorSettings(customerId);
+  }
+
+  async verifyTwoFactorSignin(
+    data: z.infer<typeof appSchema.customer.signInVerifyTwoFactorSchema>,
+  ) {
+    const { userId } = this.parseTwoFactorChallengeToken(data.challengeToken);
+    const user = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { id: userId, isDeleted: false },
+      include: { utility: true },
+    });
+    if (!user) {
+      throw new AppError("User not found.", { code: "USER_NOT_FOUND" });
+    }
+    this.checkUserSigninWith(
+      user,
+      user.utility.isEmailVerified ? "email" : "phoneNo",
+    );
+    if (!user.utility.twoFactorEnabled) {
+      throw new AppError("Two-factor authentication is not enabled for this account.", {
+        code: "TWO_FACTOR_NOT_ENABLED",
+      });
+    }
+    if (!user.utility.twoFactorPasscodeHash) {
+      throw new AppError("Two-factor authentication is misconfigured.", {
+        code: "TWO_FACTOR_PASSCODE_NOT_SET",
+      });
+    }
+
+    const isPasscodeValid = await hashingUtils.comparePassword(
+      data.passcode,
+      user.utility.twoFactorPasscodeHash,
+    );
+    if (!isPasscodeValid) {
+      throw new AppError("Invalid passcode. Please try again.", {
+        code: "INVALID_TWO_FACTOR_PASSCODE",
+      });
+    }
+
+    const authToken = tokenUtils.generateToken(
+      {
+        email: user.emailAddress,
+        mobile: user.phoneNo,
+        id: user.id,
+        role: "USER",
+      },
+      "1d",
     );
     await this.customerProfileService.setLatestLoginTime(user.id);
     return {
@@ -552,6 +701,43 @@ export class CustomerAuthService {
     }>,
   ) {
     return user.utility.signinWith === "CREDENTIALS";
+  }
+
+  private assertCanManageTwoFactor(
+    user: DataBaseSchema.CustomerProfileDataModelGetPayload<{
+      include: { utility: true };
+    }>,
+  ) {
+    if (user.utility.signinWith !== "CREDENTIALS") {
+      throw new AppError(
+        "Two-factor authentication is currently available only for password-based accounts.",
+        { code: "TWO_FACTOR_CREDENTIALS_ONLY" },
+      );
+    }
+  }
+
+  private createTwoFactorPasscodeChallengeToken(userId: number): string {
+    return tokenUtils.generateToken(
+      { identifier: `CUSTOMER_2FA_PASSCODE:${userId}` },
+      "10m",
+    );
+  }
+
+  private parseTwoFactorChallengeToken(token: string): { userId: number } {
+    const payload = tokenUtils.verifyToken<{ identifier: string }>(token);
+    const identifier = payload.identifier;
+    if (!identifier?.startsWith("CUSTOMER_2FA_PASSCODE:")) {
+      throw new AppError("Invalid 2FA challenge. Please login again.", {
+        code: "INVALID_TWO_FACTOR_CHALLENGE",
+      });
+    }
+    const userId = Number(identifier.split(":")[1]);
+    if (Number.isNaN(userId)) {
+      throw new AppError("Invalid 2FA challenge. Please login again.", {
+        code: "INVALID_TWO_FACTOR_CHALLENGE",
+      });
+    }
+    return { userId };
   }
 
   private needsPhoneActivation(

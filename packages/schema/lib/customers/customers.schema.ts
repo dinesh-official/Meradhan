@@ -111,6 +111,32 @@ export const accountActivationVerifySchema = z.object({
   token: z.string().min(1, "Token is required."),
 });
 
+export const sixDigitPasscodeSchema = z
+  .string()
+  .regex(/^\d{6}$/, "Passcode must be exactly 6 digits.");
+
+export const customerTwoFactorSettingsUpdateSchema = z
+  .object({
+    enabled: z.boolean(),
+    passcode: sixDigitPasscodeSchema.optional(),
+    confirmPasscode: sixDigitPasscodeSchema.optional(),
+  })
+  .refine(
+    (data) => {
+      if (!data.passcode || !data.confirmPasscode) return true;
+      return data.passcode === data.confirmPasscode;
+    },
+    {
+      message: "Passcodes do not match.",
+      path: ["confirmPasscode"],
+    },
+  );
+
+export const signInVerifyTwoFactorSchema = z.object({
+  passcode: sixDigitPasscodeSchema,
+  challengeToken: z.string().min(1, "Challenge token is required."),
+});
+
 const ProviderEnum = z.enum(["GOOGLE", "MICROSOFT", "FACEBOOK"]);
 export const SocialLoginUserSchema = z.object({
   email: z.email(),

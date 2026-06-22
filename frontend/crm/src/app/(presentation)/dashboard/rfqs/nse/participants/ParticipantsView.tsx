@@ -100,8 +100,10 @@ function ParticipantsView() {
         <ParticipantsTableFilter
           onSearchChange={state.setSearch}
           searchValue={state.search}
-          statusChange={state.setWorkflowStatus}
-          statusValue={state.workflowStatus}
+          workflowStatusChange={state.setWorkflowStatus}
+          workflowStatusValue={state.workflowStatus}
+          actualStatusChange={state.setActualStatus}
+          actualStatusValue={state.actualStatus}
         />
         <CardContent className="space-y-2">
           <p className="text-xs text-muted-foreground">

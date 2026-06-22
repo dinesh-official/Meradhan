@@ -28,15 +28,6 @@ function formatWhen(iso: string) {
   }).format(d);
 }
 
-function displayFileName(doc: BondDocumentItem) {
-  if (doc.fileName?.trim()) return doc.fileName.trim();
-  if (doc.fileUrl) {
-    const parts = doc.fileUrl.split("/");
-    return parts[parts.length - 1] || doc.fileUrl;
-  }
-  return "Document";
-}
-
 function BondDocumentCard({
   doc,
   onDownload,
@@ -45,35 +36,29 @@ function BondDocumentCard({
   onDownload: () => void;
 }) {
   return (
-    <div className="flex h-full flex-col gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-none">
-      <div className="flex items-start gap-3">
-        <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
-          <FileText className="size-5" aria-hidden />
-        </div>
-        <div className="min-w-0 flex-1 space-y-1">
-          <h3 className="line-clamp-2 text-base font-semibold text-slate-900">
-            {doc.name}
-          </h3>
-          <p className="truncate text-sm text-slate-500">
-            {displayFileName(doc)}
-          </p>
-        </div>
+    <div className="flex items-center gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-none transition-colors hover:bg-slate-50">
+      <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+        <FileText className="size-5" aria-hidden />
       </div>
 
-      <div className="flex items-center gap-1.5 text-xs text-slate-500">
-        <Calendar className="size-3.5 shrink-0" aria-hidden />
-        <span>Uploaded {formatWhen(doc.createdAt)}</span>
+      <div className="min-w-0 flex-1">
+        <h3 className="line-clamp-2 text-base font-semibold text-slate-900">
+          {doc.name}
+        </h3>
+        <p className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500">
+          <Calendar className="size-3.5 shrink-0" aria-hidden />
+          Uploaded {formatWhen(doc.createdAt)}
+        </p>
       </div>
 
-      <Button
+      <button
         type="button"
-        variant="outline"
-        className="mt-auto w-full"
         onClick={onDownload}
+        className="flex shrink-0 items-center gap-1.5 text-sm font-medium text-secondary transition-colors hover:text-secondary/80"
       >
-        <Download className="mr-2 size-4" aria-hidden />
+        <Download className="size-4" aria-hidden />
         Download
-      </Button>
+      </button>
     </div>
   );
 }
@@ -143,7 +128,7 @@ export default function BondDocumentsTab({
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-4 py-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="flex flex-col gap-3 py-6">
         {documents.map((doc) => (
           <BondDocumentCard
             key={doc.id}
