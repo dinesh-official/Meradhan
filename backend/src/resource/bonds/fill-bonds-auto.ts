@@ -142,7 +142,7 @@ function collectAllCouponDatesYmd(
     return [...set].sort();
 }
 
-export const getBondInfoCalcData = async (isin: string, { yeild, settlementDate, quantity, stampDuty }: { yeild?: string, settlementDate?: string, quantity?: number, stampDuty?: number } = {}) => {
+export const getBondInfoCalcData = async (isin: string, { yeild, settlementDate, quantity, stampDuty, useCleanPrice = false }: { yeild?: string, settlementDate?: string, quantity?: number, stampDuty?: number, useCleanPrice?: boolean } = {}) => {
     const bond = await db.dataBase.bondReferenceMetadata.findFirst({ where: { isin: isin } });
     const bondData = await db.dataBase.bonds.findFirst({ where: { isin: isin } });
     const couponRows = await db.dataBase.bondReferenceCouponPaymentDate.findMany({
@@ -201,8 +201,8 @@ export const getBondInfoCalcData = async (isin: string, { yeild, settlementDate,
         Next_IP_Date: nextCouponDate ?? "",
         Maturity_Date: maturityDate,
         Period_Status: pricing.isUnderShutPeriod ? "Shut Period" : "Normal",
-        Input_Type: "Calculate from Yield",
-        Pricing_Input: pricingYield != null ? String(pricingYield) : "0",
+        Input_Type: useCleanPrice ? "Calculate from Clean Price" : "Calculate from Yield",
+        Pricing_Input: useCleanPrice ? String(bondData?.sellPrice ?? 0) : pricingYield != null ? String(pricingYield) : "0",
         Is_End_Of_Month_Bond: "No",
         Price_Rounding_Decimals: "4",
         Stamp_Duty: stampDuty != null ? String(stampDuty) : "0",
@@ -238,7 +238,7 @@ export const getBondInfoCalcData = async (isin: string, { yeild, settlementDate,
         total_consideration: string
     }
 
-    >("https://stagecalc.meradhan.co/api/calculate", payload);
+    >("https://calc.meradhan.co/api/calculate", payload);
     const allCouponDates = collectAllCouponDatesYmd(
         couponRows,
         response.data.cf_rows,

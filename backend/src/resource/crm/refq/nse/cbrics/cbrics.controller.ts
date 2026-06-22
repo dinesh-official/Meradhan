@@ -1,11 +1,11 @@
 import { appSchema } from "@root/schema";
 import { HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
+import type { ParticipantRecord } from "@modules/RFQ/nse/cbrics.types";
 import { CbricsKraResyncService } from "./cbrics.kra_resync.service";
 import { CbricsParticipantService } from "./cbrics.service";
 import { NseRfqParticipantInfoService } from "./rfqParticipantInfo.service";
 import { NseCBRICS } from "@modules/RFQ/nse/nse_CBRICS";
-import { NseRfq } from "@modules/RFQ/nse/nse_RFQ";
 
 const workflowLabelLookup = Object.fromEntries(
   appSchema.crm.rfq.nse.getParticipants.CBRICS_UNREG_WORKFLOW_STATUS_OPTIONS.map(
@@ -16,7 +16,6 @@ const workflowLabelLookup = Object.fromEntries(
 export class CbricsParticipantController {
   private participantService = new CbricsParticipantService();
   private nseCbrics = new NseCBRICS();
-  private nseRfq = new NseRfq();
   private cbricsKraResync = new CbricsKraResyncService();
   private rfqParticipantInfo = new NseRfqParticipantInfoService();
 
@@ -125,9 +124,25 @@ export class CbricsParticipantController {
   };
 
   async handleGetParticipantsRfq(req: Request, res: Response) {
-    appSchema.crm.rfq.nse.getParticipants.GetParticipantsZ.parse(req.query);
+    const query =
+      appSchema.crm.rfq.nse.getParticipants.RfqParticipantsListQueryZ.parse(
+        req.query,
+      );
 
-    const data = await this.nseRfq.getAllParticipants();
+    const participants = await this.nseCbrics.findParticipants({
+      type: 2,
+      ...(query.loginId?.trim() ? { loginId: query.loginId.trim() } : {}),
+      ...(query.panNo?.trim() ? { panNo: query.panNo.trim() } : {}),
+    });
+
+    const data = participants.map((p: ParticipantRecord) => ({
+      code: p.loginId,
+      name: p.firstName,
+      panNo: p.panNo ?? null,
+      custodian: p.custodian ?? null,
+      actualStatus: p.actualStatus,
+      type: p.type,
+    }));
 
     res.sendResponse({
       statusCode: HttpStatus.OK,

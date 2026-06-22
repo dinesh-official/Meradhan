@@ -21,6 +21,9 @@ export type LoginDataStoreType = {
     activationStep: ActivationStep;
     activationToken: string;
     activationMaskedTarget: string;
+    twoFactorDialogOpen: boolean;
+    twoFactorChallengeToken: string;
+    twoFactorPasscode: string;
   };
 
   reset: () => void;
@@ -39,6 +42,10 @@ export type LoginDataStoreType = {
   setActivationStep: (step: ActivationStep) => void;
   setActivationToken: (token: string) => void;
   setActivationMaskedTarget: (maskedTarget: string) => void;
+  setTwoFactorDialogOpen: (open: boolean) => void;
+  setTwoFactorChallengeToken: (token: string) => void;
+  setTwoFactorPasscode: (passcode: string) => void;
+  resetTwoFactorDialog: () => void;
 };
 
 const initialState: LoginDataStoreType["state"] = {
@@ -57,6 +64,9 @@ const initialState: LoginDataStoreType["state"] = {
   activationStep: "prompt",
   activationToken: "",
   activationMaskedTarget: "",
+  twoFactorDialogOpen: false,
+  twoFactorChallengeToken: "",
+  twoFactorPasscode: "",
 };
 
 export const useLoginDataStore = create<LoginDataStoreType>((set) => ({
@@ -139,5 +149,30 @@ export const useLoginDataStore = create<LoginDataStoreType>((set) => ({
   setActivationMaskedTarget: (activationMaskedTarget: string) =>
     set((store) => ({
       state: { ...store.state, activationMaskedTarget },
+    })),
+
+  setTwoFactorDialogOpen: (twoFactorDialogOpen: boolean) =>
+    set((store) => ({
+      state: { ...store.state, twoFactorDialogOpen },
+    })),
+
+  setTwoFactorChallengeToken: (twoFactorChallengeToken: string) =>
+    set((store) => ({
+      state: { ...store.state, twoFactorChallengeToken },
+    })),
+
+  setTwoFactorPasscode: (twoFactorPasscode: string) =>
+    set((store) => ({
+      state: { ...store.state, twoFactorPasscode },
+    })),
+
+  resetTwoFactorDialog: () =>
+    set((store) => ({
+      state: {
+        ...store.state,
+        twoFactorDialogOpen: false,
+        twoFactorChallengeToken: "",
+        twoFactorPasscode: "",
+      },
     })),
 }));

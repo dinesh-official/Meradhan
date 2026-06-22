@@ -205,6 +205,7 @@ export class BondService {
     }
 
     const cleanPrice = sellPrice || bond.sellPrice;
+    console.log(cleanPrice);
 
     let lastCouponDateStr = bond.lastCouponDateIst?.toISOString() ?? null;
     let nextCouponDateStr = bond.nextCouponDateIst?.toISOString() ?? null;

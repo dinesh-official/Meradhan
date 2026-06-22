@@ -358,6 +358,7 @@ export const computeBondOrderPricingData = async (
     options?: {
         executionDateTime?: Date;
         settlementType?: "T+0" | "T+1";
+        useCleanPrice?: boolean;
     },
 ) => {
     const settlement = computeBondSettlement(options?.executionDateTime ?? new Date());
@@ -393,6 +394,7 @@ export const computeBondOrderPricingData = async (
         settlementDate: settlement.settlementDate,
         quantity: params.quantity,
         stampDuty: stampDuty,
+        useCleanPrice: options?.useCleanPrice ?? false,
     });
 
 

@@ -79,6 +79,11 @@ customerAuthRoutes.post(
   (req, res) => controller.signInWithOtpVerify(req, res)
 );
 customerAuthRoutes.post(
+  "/api/auth/customer/signin/2fa/verify",
+  withRateLimit({ max: 5 }),
+  (req, res) => controller.verifySigninTwoFactor(req, res)
+);
+customerAuthRoutes.post(
   "/api/auth/customer/signin/account-activation/verify",
   withRateLimit({ max: 5 }),
   (req, res) => controller.verifyAccountActivationAtLogin(req, res)
@@ -116,6 +121,18 @@ customerAuthRoutes.post(
   "/api/auth/customer/resend-email-verification",
   withRateLimit({ max: 5 }),
   (req, res) => controller.resendEmailVerificationForUnverifiedUser(req, res)
+);
+
+customerAuthRoutes.get(
+  "/api/auth/customer/2fa/settings",
+  allowAccessMiddleware("USER"),
+  (req, res) => controller.getTwoFactorSettings(req, res)
+);
+customerAuthRoutes.patch(
+  "/api/auth/customer/2fa/settings",
+  allowAccessMiddleware("USER"),
+  withRateLimit({ max: 10 }),
+  (req, res) => controller.updateTwoFactorSettings(req, res)
 );
 
 export default customerAuthRoutes;

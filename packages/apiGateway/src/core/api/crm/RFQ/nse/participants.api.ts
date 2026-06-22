@@ -67,6 +67,15 @@ export interface NseRfqParticipantInfoData {
  * extra columns (contact / PAN / banks / demats / notes) without
  * fetching each row's full payload.
  */
+export interface NseRfqParticipantListItem {
+  code: string;
+  name: string;
+  panNo?: string | null;
+  custodian?: string | null;
+  actualStatus?: 1 | 2 | 3 | 4;
+  type?: 2 | 13;
+}
+
 export interface NseRfqParticipantInfoSummary {
   code: string;
   nameOverride: string | null;
@@ -133,11 +142,15 @@ export class RfqParticipantsApi {
     return data;
   }
 
-  async getAllRfqParticipants(config?: AxiosRequestConfig) {
+  async getAllRfqParticipants(
+    params?: { loginId?: string; panNo?: string },
+    config?: AxiosRequestConfig,
+  ) {
     const data = await this.apiClient.get<
-      BaseResponseData<{ code: string; name: string }[]>
+      BaseResponseData<NseRfqParticipantListItem[]>
     >("/crm/rfq/nse/rfq/participants", {
       ...config,
+      params,
     });
     return data;
   }

@@ -20,6 +20,7 @@ import crypto from "crypto";
 import { env } from "@packages/config/src/env";
 import { getPayoutDates } from "@services/order/order-pricing-helper";
 import { sendBackOfficeEmail } from "@communication/email_communication";
+import { buildOrderEmailHtmlBody } from "@communication/order_email_disclaimer";
 import {
   dateOfBirthToPdfPassword,
   getCustomerDobRawForPdf,
@@ -2259,10 +2260,7 @@ export class CrmOrdersService {
       );
     }
 
-    const htmlBody = messageBody
-      .split("\n")
-      .map((line) => line.trim())
-      .join("<br/>");
+    const htmlBody = buildOrderEmailHtmlBody(messageBody);
     const messageId = await sendBackOfficeEmail({
       to: recipientEmail,
       from: fromEmail,
