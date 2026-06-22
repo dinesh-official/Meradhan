@@ -235,8 +235,15 @@ export const useLoginFormHook = () => {
       dataStore.setSuccessMessage("");
       return;
     }
+    if (!responseData.token) {
+      dataStore.setErrorMessage(
+        "Sign-in succeeded but no session token was returned. Please try again.",
+      );
+      toast.error("Could not complete sign-in. Please try again.");
+      return;
+    }
     await completeLoginAndRedirect({
-      token: responseData.token!,
+      token: responseData.token,
       id: responseData.id.toString(),
     });
   };
@@ -310,10 +317,7 @@ export const useLoginFormHook = () => {
     onSuccess: async (data) => {
       trackActivity("login", { reason: "Sign in with 2FA passcode" });
       dataStore.resetTwoFactorDialog();
-      await completeLoginAndRedirect({
-        token: data.responseData.token!,
-        id: data.responseData.id.toString(),
-      });
+      await handlePostAuthSuccess(data.responseData);
     },
     onError: (error) => {
       if (error instanceof ApiError) {
@@ -344,10 +348,7 @@ export const useLoginFormHook = () => {
     onSuccess: async (data) => {
       trackActivity("login", { reason: "Account activation verified" });
       try {
-        await completeLoginAndRedirect({
-          token: data.responseData.token,
-          id: data.responseData.id.toString(),
-        });
+        await handlePostAuthSuccess(data.responseData);
       } catch {
         dataStore.setErrorMessage(
           "Verification succeeded but sign-in failed. Please try logging in again.",
