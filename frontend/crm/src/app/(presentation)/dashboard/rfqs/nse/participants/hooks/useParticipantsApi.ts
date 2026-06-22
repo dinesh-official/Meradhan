@@ -10,6 +10,7 @@ import { useMemo, useState } from "react";
 export const useParticipantsApi = () => {
   const [search, setSearch] = useState("");
   const [workflowStatus, setWorkflowStatus] = useState<string>("ALL");
+  const [actualStatus, setActualStatus] = useState<string>("ALL");
 
   const participantsApi = useMemo(
     () => new apiGateway.crm.rfq.participants.RfqParticipantsApi(apiClientCaller),
@@ -17,9 +18,11 @@ export const useParticipantsApi = () => {
   );
 
   const fetchParticipantsQuery = useQuery({
-    queryKey: ["fetchParticipantsQuery", search.trim(), workflowStatus],
+    queryKey: ["fetchParticipantsQuery", search.trim(), workflowStatus, actualStatus],
     queryFn: async (): Promise<ParticipantData[]> => {
       const q = { search: search.trim() || undefined };
+
+      let rows: ParticipantData[];
 
       if (workflowStatus === "ALL") {
         const results = await Promise.all(
@@ -33,16 +36,23 @@ export const useParticipantsApi = () => {
             byId.set(row.id, row);
           }
         }
-        return Array.from(byId.values()).sort((a, b) => {
+        rows = Array.from(byId.values()).sort((a, b) => {
           const ta = new Date(String(a.updatedAt)).getTime();
           const tb = new Date(String(b.updatedAt)).getTime();
           return (Number.isFinite(tb) ? tb : 0) - (Number.isFinite(ta) ? ta : 0);
         });
+      } else {
+        const wf = Number(workflowStatus) as CbricsUnregisteredWorkflowStatus;
+        const res = await participantsApi.getCbricsParticipantsByWorkflow(wf, q);
+        rows = res.data.responseData?.participants ?? [];
       }
 
-      const wf = Number(workflowStatus) as CbricsUnregisteredWorkflowStatus;
-      const res = await participantsApi.getCbricsParticipantsByWorkflow(wf, q);
-      return res.data.responseData?.participants ?? [];
+      if (actualStatus !== "ALL") {
+        const code = Number(actualStatus);
+        rows = rows.filter((row) => row.actualStatus === code);
+      }
+
+      return rows;
     },
   });
 
@@ -53,6 +63,8 @@ export const useParticipantsApi = () => {
       setSearch,
       workflowStatus,
       setWorkflowStatus,
+      actualStatus,
+      setActualStatus,
     },
   };
 };

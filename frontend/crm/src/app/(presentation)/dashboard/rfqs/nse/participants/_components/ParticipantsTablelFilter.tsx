@@ -7,38 +7,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SelectOption } from "@/global/elements/inputs/SelectField";
+import { CBRICS_APPROVAL_STATUS_OPTIONS } from "@/app/(presentation)/dashboard/rfqs/nse/_constants/cbricsApprovalStatus";
 import { Search } from "lucide-react";
 import React from "react";
 
 interface ParticipantsTableFilterProps {
   searchValue?: string;
   onSearchChange?: (e: string) => void;
-  statusValue?: string;
-  statusChange?: (value: string) => void;
-  statusOptions?: typeof filterStatusOptions;
+  workflowStatusValue?: string;
+  workflowStatusChange?: (value: string) => void;
+  actualStatusValue?: string;
+  actualStatusChange?: (value: string) => void;
   placeholder?: string;
 }
 
-const filterStatusOptions: SelectOption[] = [
-  { label: "All Status", value: "ALL" },
-
-  // --- Added workflow statuses ---
-  { label: "Pending With Checker", value: "100" },
-  { label: "Returned by Checker", value: "16" },
-  { label: "Rejected by Checker", value: "15" },
-  { label: "Pending With Exchange - code 0", value: "0" },
-  { label: "Pending With Exchange - code 10", value: "10" },
-  { label: "Approved", value: "1" },
-  { label: "Rejected", value: "5" },
-  { label: "Returned", value: "6" },
-];
 const ParticipantsTableFilter: React.FC<ParticipantsTableFilterProps> = ({
   searchValue,
   onSearchChange,
-  statusValue,
-  statusChange,
-  statusOptions = filterStatusOptions,
+  workflowStatusValue,
+  workflowStatusChange,
+  actualStatusValue,
+  actualStatusChange,
   placeholder = "Search...",
 }) => {
   return (
@@ -57,15 +46,27 @@ const ParticipantsTableFilter: React.FC<ParticipantsTableFilterProps> = ({
           <Search size={16} aria-hidden="true" />
         </div>
       </div>
-      <CardAction className="flex flex-row gap-3">
-        <Select value={statusValue} onValueChange={statusChange}>
-          <SelectTrigger className="w-[250px] bg-secondary border-none">
-            <SelectValue placeholder="Status" />
+      <CardAction className="flex flex-row flex-wrap gap-3">
+        <Select value={workflowStatusValue} onValueChange={workflowStatusChange}>
+          <SelectTrigger className="w-[min(100%,240px)] bg-secondary border-none">
+            <SelectValue placeholder="Workflow status" />
           </SelectTrigger>
           <SelectContent>
-            {statusOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
+            {CBRICS_APPROVAL_STATUS_OPTIONS.map((option) => (
+              <SelectItem key={`wf-${option.value}`} value={option.value}>
+                Workflow: {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={actualStatusValue} onValueChange={actualStatusChange}>
+          <SelectTrigger className="w-[min(100%,240px)] bg-secondary border-none">
+            <SelectValue placeholder="Actual status" />
+          </SelectTrigger>
+          <SelectContent>
+            {CBRICS_APPROVAL_STATUS_OPTIONS.map((option) => (
+              <SelectItem key={`as-${option.value}`} value={option.value}>
+                Actual: {option.label}
               </SelectItem>
             ))}
           </SelectContent>

@@ -109,7 +109,7 @@ export const useLoginFormHook = () => {
     dataStore.setErrorMessage("");
     dataStore.setSuccessMessage("");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.password, state.otp, state.emailOrPhoneNo, state.type]);
+  }, [state.password, state.otp, state.emailOrPhoneNo, state.type, state.twoFactorPasscode]);
 
   // Determine identity type (email or phone)
   const identity = state.emailOrPhoneNo.includes("@") ? "email" : "phoneNo";
@@ -221,6 +221,26 @@ export const useLoginFormHook = () => {
   // -------------------------------
   // 🔹 3. Sign in with Password
   // -------------------------------
+  const handlePostAuthSuccess = async (responseData: {
+    id: number;
+    token?: string;
+    requiresTwoFactor?: boolean;
+    challengeToken?: string;
+  }) => {
+    if (responseData.requiresTwoFactor && responseData.challengeToken) {
+      dataStore.setTwoFactorChallengeToken(responseData.challengeToken);
+      dataStore.setTwoFactorPasscode("");
+      dataStore.setTwoFactorDialogOpen(true);
+      dataStore.setErrorMessage("");
+      dataStore.setSuccessMessage("");
+      return;
+    }
+    await completeLoginAndRedirect({
+      token: responseData.token!,
+      id: responseData.id.toString(),
+    });
+  };
+
   const signInWithPasswordMutation = useMutation({
     mutationKey: ["signInWithPassword"],
     retry: false,
@@ -232,10 +252,7 @@ export const useLoginFormHook = () => {
       }),
     onSuccess: async (data) => {
       trackActivity("login", { reason: "Sign in with password" });
-      await completeLoginAndRedirect({
-        token: data.responseData.token,
-        id: data.responseData.id.toString(),
-      });
+      await handlePostAuthSuccess(data.responseData);
     },
     onError: (error) => {
       if (error instanceof ApiError) {
@@ -264,8 +281,37 @@ export const useLoginFormHook = () => {
         value: state.emailOrPhoneNo,
       }),
     onSuccess: async (data) => {
+      await handlePostAuthSuccess(data.responseData);
+    },
+    onError: (error) => {
+      if (error instanceof ApiError) {
+        dataStore.setErrorMessage(
+          error.response?.data?.message ||
+          error.message ||
+          "Something went wrong",
+        );
+      } else {
+        toast.error(error.message);
+      }
+    },
+  });
+
+  // -------------------------------
+  // 🔹 4b. Verify 2FA passcode after login
+  // -------------------------------
+  const verifyTwoFactorMutation = useMutation({
+    mutationKey: ["verifyTwoFactorLogin"],
+    retry: false,
+    mutationFn: () =>
+      signinApi.verifySignInTwoFactor({
+        challengeToken: state.twoFactorChallengeToken,
+        passcode: state.twoFactorPasscode,
+      }),
+    onSuccess: async (data) => {
+      trackActivity("login", { reason: "Sign in with 2FA passcode" });
+      dataStore.resetTwoFactorDialog();
       await completeLoginAndRedirect({
-        token: data.responseData.token,
+        token: data.responseData.token!,
         id: data.responseData.id.toString(),
       });
     },
@@ -313,8 +359,8 @@ export const useLoginFormHook = () => {
       if (error instanceof ApiError) {
         dataStore.setErrorMessage(
           error.response?.data?.message ||
-            error.message ||
-            "Something went wrong",
+          error.message ||
+          "Something went wrong",
         );
       } else {
         toast.error(error.message);
@@ -353,8 +399,8 @@ export const useLoginFormHook = () => {
       if (error instanceof ApiError) {
         dataStore.setErrorMessage(
           error.response?.data?.message ||
-            error.message ||
-            "Something went wrong",
+          error.message ||
+          "Something went wrong",
         );
       }
     },
@@ -391,8 +437,8 @@ export const useLoginFormHook = () => {
       if (error instanceof ApiError) {
         dataStore.setErrorMessage(
           error.response?.data?.message ||
-            error.message ||
-            "Something went wrong",
+          error.message ||
+          "Something went wrong",
         );
       }
     },
@@ -543,6 +589,20 @@ export const useLoginFormHook = () => {
   /**
    * Handle Resend Email Verification
    */
+  const handleVerifyTwoFactor = () => {
+    if (state.twoFactorPasscode.length !== 6) {
+      dataStore.setErrorMessage("Please enter a valid 6-digit passcode");
+      return;
+    }
+    if (!state.twoFactorChallengeToken) {
+      dataStore.setErrorMessage("Session expired. Please login again.");
+      dataStore.resetTwoFactorDialog();
+      return;
+    }
+    dataStore.setErrorMessage("");
+    verifyTwoFactorMutation.mutate();
+  };
+
   const handleResendEmailVerification = () => {
     const { valid, message } = validateIfEmailOrPhoneNo(state.emailOrPhoneNo);
     if (!valid) return setErrors({ ...errors, emailOrPhone: message });
@@ -598,6 +658,7 @@ export const useLoginFormHook = () => {
     sendOtpMutation,
     signInWithPasswordMutation,
     verifyOtpMutation,
+    verifyTwoFactorMutation,
     verifyAccountActivationMutation,
     sendActivationOtpMutation,
     resendActivationOtpMutation,
@@ -607,6 +668,7 @@ export const useLoginFormHook = () => {
     handleSignInRequest,
     handleSendOtp,
     handleVerifyOtp,
+    handleVerifyTwoFactor,
     handleSignInWithPassword,
     handleResendEmailVerification,
     handleStartAccountActivation,

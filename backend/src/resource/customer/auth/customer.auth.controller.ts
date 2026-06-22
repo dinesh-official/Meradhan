@@ -222,6 +222,13 @@ export class CustomerAuthController {
       password,
       value,
     });
+    if (data.requiresTwoFactor) {
+      res.sendResponse({
+        statusCode: HttpStatus.OK,
+        responseData: data,
+      });
+      return;
+    }
     await addMeradhanLoginBasedAuditLog(req, {
       userId: data.id,
       sessionType: "SIGNIN_CREDENTIALS_PASSWORD",
@@ -233,7 +240,7 @@ export class CustomerAuthController {
       userId: data.id,
       sessionId: req.cookies["meradhan_tracking_session"],
     });
-    res.cookie("token", data.token, cookieOptions);
+    res.cookie("token", data.token!, cookieOptions);
     res.cookie("userId", data.id.toString(), cookieOptions);
     res.sendResponse({
       statusCode: HttpStatus.OK,
@@ -266,6 +273,14 @@ export class CustomerAuthController {
       otp,
       token,
     });
+    if (data.requiresTwoFactor) {
+      await trackRateLimitSuccess(req, "otp-verify");
+      res.sendResponse({
+        statusCode: HttpStatus.OK,
+        responseData: data,
+      });
+      return;
+    }
     await addMeradhanLoginBasedAuditLog(req, {
       userId: data.id,
       sessionType: "SIGNIN_OTP",
@@ -277,9 +292,31 @@ export class CustomerAuthController {
       userId: data.id,
       sessionId: req.cookies["meradhan_tracking_session"],
     });
-    // Track successful OTP verification for rate limiting
     await trackRateLimitSuccess(req, "otp-verify");
     res.cookie("token", data.token, cookieOptions);
+    res.cookie("userId", data.id.toString(), cookieOptions);
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: data,
+    });
+  }
+
+  async verifySigninTwoFactor(req: Request, res: Response) {
+    const payload = appSchema.customer.signInVerifyTwoFactorSchema.parse(req.body);
+    const data = await this.customerAuthService.verifyTwoFactorSignin(payload);
+    await addMeradhanLoginBasedAuditLog(req, {
+      userId: data.id,
+      sessionType: "SIGNIN_2FA",
+      success: true,
+      entityType: "Auth",
+      email: data.email,
+    });
+    await revalidateMeradhanTrackingSession(req, {
+      userId: data.id,
+      sessionId: req.cookies["meradhan_tracking_session"],
+    });
+    await trackRateLimitSuccess(req, "otp-verify");
+    res.cookie("token", data.token!, cookieOptions);
     res.cookie("userId", data.id.toString(), cookieOptions);
     res.sendResponse({
       statusCode: HttpStatus.OK,
@@ -437,6 +474,31 @@ export class CustomerAuthController {
     res.sendResponse({
       statusCode: HttpStatus.OK,
       message: "Verification email sent successfully.",
+    });
+  }
+
+  async getTwoFactorSettings(req: Request, res: Response): Promise<void> {
+    const id = req.customer!.id;
+    const response = await this.customerAuthService.getTwoFactorSettings(id);
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      responseData: response,
+    });
+  }
+
+  async updateTwoFactorSettings(req: Request, res: Response): Promise<void> {
+    const id = req.customer!.id;
+    const payload = appSchema.customer.customerTwoFactorSettingsUpdateSchema.parse(
+      req.body,
+    );
+    const response = await this.customerAuthService.updateTwoFactorSettings(
+      id,
+      payload,
+    );
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      message: "2FA settings updated successfully.",
+      responseData: response,
     });
   }
 }

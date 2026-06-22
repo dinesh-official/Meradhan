@@ -17,6 +17,8 @@ model CustomersAuthDataModel {
     isEmailVerified           Boolean   @default(false)
     whatsAppNotificationAllow Boolean   @default(false)
     termsAccepted             Boolean   @default(false)
+    twoFactorEnabled          Boolean   @default(false)
+    twoFactorPasscodeHash     String?
     lastLogin                 DateTime?
 
     relationshipManager CRMUserDataModel? @relation(fields: [cRMUserDataModelId], references: [id])
