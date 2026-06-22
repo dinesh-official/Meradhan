@@ -2,9 +2,11 @@
 
 import { cn } from "@/lib/utils";
 import type { BondCashflowRow } from "@root/apiGateway";
-import { IndianRupee } from "lucide-react";
+import { ChevronDown, ChevronUp, IndianRupee } from "lucide-react";
+import { useState } from "react";
 
 const TDS_RATE = 0.1;
+const INITIAL_VISIBLE_ROWS = 8;
 
 function applyTdsToInterest(interest: number, applyTds: boolean): number {
   if (!applyTds || interest <= 0) return interest;
@@ -60,8 +62,14 @@ export default function BondCashflowTable({
   applyTds?: boolean;
   tdsToggle?: React.ReactNode;
 }) {
+  const [expanded, setExpanded] = useState(false);
   const paymentRows = rows.filter((row) => resolveTotal(row) >= 0);
   const displayRows = paymentRows.length > 0 ? paymentRows : rows;
+  const isCollapsible = displayRows.length > INITIAL_VISIBLE_ROWS;
+  const visibleRows =
+    isCollapsible && !expanded
+      ? displayRows.slice(0, INITIAL_VISIBLE_ROWS)
+      : displayRows;
   const grandTotal = displayRows.reduce((sum, row) => {
     const coupon = parseMoney(row.coupon) ?? 0;
     const principalAmount = parseMoney(row.principal);
@@ -102,7 +110,7 @@ export default function BondCashflowTable({
             </tr>
           </thead>
           <tbody>
-            {displayRows.map((row, index) => {
+            {visibleRows.map((row, index) => {
               const coupon = parseMoney(row.coupon) ?? 0;
               const principalAmount = parseMoney(row.principal);
               const hasPrincipal =
@@ -146,18 +154,40 @@ export default function BondCashflowTable({
               );
             })}
           </tbody>
-          <tfoot>
-            <tr className="border-t border-slate-200 bg-slate-50 font-semibold text-slate-900">
-              <td className="px-4 py-3" colSpan={5}>
-                Total
-              </td>
-              <td className="px-4 py-3 text-right">
-                <MoneyCell value={grandTotal} />
-              </td>
-            </tr>
-          </tfoot>
+          {!isCollapsible || expanded ? (
+            <tfoot>
+              <tr className="border-t border-slate-200 bg-slate-50 font-semibold text-slate-900">
+                <td className="px-4 py-3" colSpan={5}>
+                  Total
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <MoneyCell value={grandTotal} />
+                </td>
+              </tr>
+            </tfoot>
+          ) : null}
         </table>
       </div>
+
+      {isCollapsible ? (
+        <button
+          type="button"
+          onClick={() => setExpanded((prev) => !prev)}
+          className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+        >
+          {expanded ? (
+            <>
+              Show Less
+              <ChevronUp className="h-4 w-4" />
+            </>
+          ) : (
+            <>
+              Show All {displayRows.length} Payments
+              <ChevronDown className="h-4 w-4" />
+            </>
+          )}
+        </button>
+      ) : null}
     </div>
   );
 }

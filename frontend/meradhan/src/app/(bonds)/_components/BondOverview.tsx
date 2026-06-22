@@ -160,9 +160,9 @@ export default function BondOverview({
           <InfoCard title="Coupon Rate" condition={hasValue(bond.couponRate, { hideIfZero: true })}>
             {formatPercent(bond.couponRate)}
           </InfoCard>
-          <InfoCard title="Yield" condition={hasValue(bond.yield, { hideIfZero: true })}>
+          {/* <InfoCard title="Yield" condition={hasValue(bond.yield, { hideIfZero: true })}>
             {formatPercent(bond.yield as number)}
-          </InfoCard>
+          </InfoCard> */}
 
           <InfoCard title="Coupon Type" condition={hasValue(bond.couponType)}>
             {String(bond.couponType)}
