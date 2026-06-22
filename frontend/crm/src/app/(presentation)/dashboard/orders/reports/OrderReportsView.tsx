@@ -134,6 +134,11 @@ export default function OrderReportsView() {
         .then((r) => r.responseData),
   });
 
+  const rmPerformanceQuery = useQuery({
+    queryKey: ["orderReports", "rmPerformance", baseQuery],
+    queryFn: () => reportsApi.getRmPerformance(baseQuery).then((r) => r.responseData),
+  });
+
   const logFailuresQuery = useQuery({
     queryKey: ["orderReports", "logFailures", from, to],
     queryFn: () =>
@@ -304,10 +309,8 @@ export default function OrderReportsView() {
 
         <TabsContent value="rm-performance" className="space-y-4">
           <RmPerformancePanel
-            orderCount={summaryQuery.data?.kpis.orderCount ?? 0}
-            totalRevenue={Number(summaryQuery.data?.kpis.sumTotalAmount ?? 0)}
-            customerCount={summaryQuery.data?.kpis.distinctCustomers ?? 0}
-            isLoading={summaryQuery.isLoading}
+            data={rmPerformanceQuery.data?.data ?? []}
+            isLoading={rmPerformanceQuery.isLoading}
           />
         </TabsContent>
 

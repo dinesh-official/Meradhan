@@ -76,6 +76,145 @@ export function formatDate(
   }
 }
 
+/** Receipt/deal PDF: show Last IP as DD-MMM-YYYY (DayName); accepts YYYY-MM-DD from calc API. */
+export function formatLastInterestPaymentDateDisplay(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) return trimmed;
+
+  if (/^\d{1,2}-[A-Za-z]{3}-\d{4}/.test(trimmed)) {
+    return trimmed;
+  }
+
+  const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmed);
+  if (iso) {
+    const dt = new Date(
+      Number(iso[1]),
+      Number(iso[2]) - 1,
+      Number(iso[3]),
+      12,
+      0,
+      0,
+      0,
+    );
+    if (!Number.isNaN(dt.getTime())) {
+      const dayNames = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ];
+      return `${formatDate(dt.toISOString(), "DD-MMM-YYYY")} (${dayNames[dt.getDay()]})`;
+    }
+  }
+
+  const parsed = new Date(trimmed);
+  if (!Number.isNaN(parsed.getTime())) {
+    const dayNames = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+    return `${formatDate(parsed.toISOString(), "DD-MMM-YYYY")} (${dayNames[parsed.getDay()]})`;
+  }
+
+  return trimmed;
+}
+
+type PdfGreetingUser = {
+  id: number;
+  gender?: string | null;
+  firstName?: string | null;
+  middleName?: string | null;
+  lastName?: string | null;
+};
+
+/** NSE RFQ participants use a shim user with a negative id. */
+export function isNseRfqParticipantUser(
+  user: Pick<PdfGreetingUser, "id">,
+  orderData?: { metadata?: { isRfqParticipant?: boolean } },
+): boolean {
+  return user.id < 0 || orderData?.metadata?.isRfqParticipant === true;
+}
+
+export function getPdfDearGreeting(
+  user: PdfGreetingUser,
+  orderData?: { metadata?: { isRfqParticipant?: boolean } },
+): string {
+  if (isNseRfqParticipantUser(user, orderData)) {
+    return "Dear Sir / Madam,";
+  }
+  const fullname =
+    (user.firstName ?? "") +
+    `${user.middleName ? `${user.middleName} ` : " "}` +
+    (user.lastName ?? "");
+  const genderRaw = String(user?.gender ?? "").trim().toUpperCase();
+  const salutation = genderRaw === "FEMALE" ? "Ms." : "Mr.";
+  return `Dear ${salutation} ${fullname},`;
+}
+
+export type ClientSettlementBankSource = {
+  bankName?: string | null;
+  ifscCode?: string | null;
+  accountNo?: string | null;
+  accountNumber?: string | null;
+};
+
+export type ClientSettlementDematSource = {
+  dpName?: string | null;
+  depositoryParticipantName?: string | null;
+  dpId?: string | null;
+  benId?: string | null;
+  clientId?: string | null;
+};
+
+function isProvidedSettlementValue(value: unknown): boolean {
+  const s = String(value ?? "").trim();
+  return s.length > 0 && s !== "—" && s !== "N/A" && s !== "undefined";
+}
+
+export function hasClientSettlementBankInfo(
+  bank: ClientSettlementBankSource | null | undefined,
+): boolean {
+  if (!bank) return false;
+  return (
+    isProvidedSettlementValue(bank.bankName) &&
+    isProvidedSettlementValue(bank.ifscCode) &&
+    isProvidedSettlementValue(bank.accountNo ?? bank.accountNumber)
+  );
+}
+
+export function hasClientSettlementDematInfo(
+  demat: ClientSettlementDematSource | null | undefined,
+): boolean {
+  if (!demat) return false;
+  return (
+    isProvidedSettlementValue(demat.dpName ?? demat.depositoryParticipantName) &&
+    isProvidedSettlementValue(demat.benId ?? demat.clientId)
+  );
+}
+
+/** NSE participants: show only when both bank and demat details are on file. */
+export function shouldShowClientSettlementDetails(
+  user: Pick<PdfGreetingUser, "id">,
+  orderData?: { metadata?: { isRfqParticipant?: boolean } },
+  bank?: ClientSettlementBankSource | null,
+  demat?: ClientSettlementDematSource | null,
+): boolean {
+  if (!isNseRfqParticipantUser(user, orderData)) {
+    return true;
+  }
+  return (
+    hasClientSettlementBankInfo(bank) && hasClientSettlementDematInfo(demat)
+  );
+}
+
 export function splitAddress(address: string): {
   addressLine1: string;
   addressLine2: string;

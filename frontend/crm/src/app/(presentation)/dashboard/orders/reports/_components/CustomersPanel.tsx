@@ -20,7 +20,9 @@ import {
   mapOrderWorkflowStatus,
   mapUserTypeLabel,
   maskPanPlaceholder,
+  orderBelongsToCustomerProfile,
   parseYieldFromBondDetails,
+  isActiveWorkflowStatus,
 } from "./reportDerivations";
 import { formatIndianCurrencyCompact } from "./orderReportFormatters";
 import { encodeId } from "@/global/utils/url.utils";
@@ -101,14 +103,20 @@ function CustomerDetail({
 
   /* Filter orders belonging to this customer */
   const custOrders = useMemo(
-    () => orders.filter((o) => o.customerProfile?.emailAddress === email),
-    [orders, email],
+    () => orders.filter((o) => orderBelongsToCustomerProfile(o, row.customerProfileId)),
+    [orders, row.customerProfileId],
   );
 
   const orderStats = useMemo(() => {
-    const settled  = custOrders.filter((o) => ["SETTLED", "APPLIED"].includes(o.status.toUpperCase())).length;
-    const pending  = custOrders.filter((o) => o.status.toUpperCase() === "PENDING").length;
-    const totalVal = custOrders.reduce((s, o) => s + Number(o.totalAmount), 0);
+    let settled = 0;
+    let pending = 0;
+    let totalVal = 0;
+    for (const o of custOrders) {
+      totalVal += Number(o.totalAmount);
+      const wf = mapOrderWorkflowStatus(o.status, o.paymentStatus);
+      if (wf === "Settled" || wf === "In Settlement") settled += 1;
+      else if (isActiveWorkflowStatus(wf)) pending += 1;
+    }
     return { settled, pending, totalVal };
   }, [custOrders]);
 
@@ -324,6 +332,10 @@ export function CustomersPanel({
       const invested = Number(r.lifetimeValue);
       const avgTicket = r.orderCount > 0 ? invested / r.orderCount : 0;
       const last     = r.lastOrderAt ? format(new Date(r.lastOrderAt), "dd MMM yyyy") : "—";
+      const pendingCount = orders.filter((o) => {
+        if (!orderBelongsToCustomerProfile(o, r.customerProfileId)) return false;
+        return isActiveWorkflowStatus(mapOrderWorkflowStatus(o.status, o.paymentStatus));
+      }).length;
       return {
         key: r.customerProfileId,
         onClick: () => setSelected(r),
@@ -341,13 +353,13 @@ export function CustomersPanel({
           <span key="ord" className="tabular-nums">{r.orderCount}</span>,
           <span key="inv" className="tabular-nums font-semibold">{formatValueCr(invested)}</span>,
           <span key="avg" className="tabular-nums text-xs text-muted-foreground">{formatIndianCurrencyCompact(avgTicket)} Cr</span>,
-          <span key="pen" className="tabular-nums text-amber-500">—</span>,
+          <span key="pen" className="tabular-nums text-amber-500">{pendingCount || "—"}</span>,
           <span key="rm"  className="text-xs text-muted-foreground">—</span>,
           <span key="last" className="whitespace-nowrap text-xs text-muted-foreground">{last}</span>,
         ],
       };
     }),
-  [filtered]);
+  [filtered, orders]);
 
   const selectedName = selected
     ? [selected.customer?.firstName, selected.customer?.lastName].filter(Boolean).join(" ") || "Customer"

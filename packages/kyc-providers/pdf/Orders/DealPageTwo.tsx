@@ -2,6 +2,7 @@ import { Text, View } from "@react-pdf/renderer";
 import type { CustomerByIdPayload } from "@root/apiGateway";
 import { tw } from "../MdPdf";
 import TextList from "../elements/TextList";
+import { ClientSettlementDetailsSection } from "./ClientSettlementDetailsSection";
 
 interface SettlementBank {
   bankName?: string;
@@ -23,6 +24,7 @@ interface OrdersPageTwoOrderData {
     /** Settlement No. e.g. 2602020 */
     settlementNumber?: string;
     settlementType: number;
+    isRfqParticipant?: boolean;
   };
 }
 
@@ -76,7 +78,7 @@ Settlement No.: ${orderData?.metadata?.settlementNumber ?? "—"}`}
         </View>
       </View>
 
-
+      <ClientSettlementDetailsSection user={user} orderData={orderData} />
 
       {/* Order Receipt notice */}
       <Text style={tw(`text-[6.5px] mt-3`)}>

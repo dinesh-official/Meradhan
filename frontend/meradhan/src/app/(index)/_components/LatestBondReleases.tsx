@@ -130,9 +130,13 @@ function LatestBondReleases({
           description="Browse curated bond opportunities and choose what suits your investment needs."
         />
         <Tabs defaultValue={visibleTabs[0].value} className="gap-5">
-          <TabsList className="bg-muted mx-auto h-10 p-1">
+          <TabsList className="bg-muted mx-auto h-10 max-w-full justify-start overflow-x-auto p-1 scrollbar-hide">
             {visibleTabs.map((tab) => (
-              <TabsTrigger key={tab.value} value={tab.value} className="px-4">
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className="shrink-0 px-4"
+              >
                 {tab.label}
               </TabsTrigger>
             ))}
