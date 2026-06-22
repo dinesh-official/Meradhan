@@ -4,6 +4,7 @@ import "./cron/kyc_reports.cron";
 import "./cron/payment_reconciliation.cron";
 import "./cron/bond_reminders.cron";
 import "./cron/order_execution.cron";
+import "./cron/bond_reference_schedules.cron";
 
 // Queue Worker - queues are initialized at startup in main.ts
 import "./sms_worker";

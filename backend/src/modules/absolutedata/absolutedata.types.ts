@@ -34,6 +34,28 @@ export type AbsoluteDataPagination = z.infer<
 const nullableString = z.string().nullable();
 const nullableNumber = z.number().nullable();
 
+export const absoluteDataCouponPaymentRowSchema = z.object({
+  sequence: z.number(),
+  payment_date: nullableString,
+  record_date: nullableString,
+  record_days: nullableNumber,
+});
+
+export type AbsoluteDataCouponPaymentRow = z.infer<typeof absoluteDataCouponPaymentRowSchema>;
+
+export const absoluteDataRedemptionScheduleRowSchema = z.object({
+  sequence: z.number(),
+  type: nullableString,
+  start_date: nullableString,
+  end_date: nullableString,
+  price: nullableNumber,
+  amount: nullableNumber,
+  option_type: nullableString,
+  option_frequency: nullableString,
+});
+
+export type AbsoluteDataRedemptionScheduleRow = z.infer<typeof absoluteDataRedemptionScheduleRowSchema>;
+
 export const absoluteDataInstrumentIdentifiersSchema = z.object({
   isin: z.string(),
   figi: nullableString,
@@ -105,11 +127,13 @@ export const absoluteDataCouponSchema = z.object({
   previous_coupon_date: nullableString,
   next_coupon_date: nullableString,
   last_coupon_date: nullableString,
+  payment_schedule: z.array(absoluteDataCouponPaymentRowSchema).optional().default([]),
 });
 
 export const absoluteDataRedemptionFeaturesSchema = z.object({
   call: z.object({ call_indicator: z.boolean() }),
   put: z.object({ put_indicator: z.boolean() }),
+  schedule: z.array(absoluteDataRedemptionScheduleRowSchema).optional().default([]),
 });
 
 export const absoluteDataFigiBlockSchema = z.object({
