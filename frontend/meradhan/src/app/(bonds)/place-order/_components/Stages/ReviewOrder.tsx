@@ -44,11 +44,13 @@ function ReviewOrder({
   customer,
   orderId,
   orderPricing,
+  isPricingFetching = false,
 }: {
   bond: BondDetailsResponse;
   customer: CustomerByIdPayload;
   orderId: string;
   orderPricing: BondOrderPricingData | null;
+  isPricingFetching?: boolean;
 }) {
   const [isChecked, setIsChecked] = useState(false);
   const [isCheckedRisk, setIsCheckedRisk] = useState(false);
@@ -84,22 +86,6 @@ function ReviewOrder({
       void setParamsQuantity(clamped);
     }
   }, [maxOrderQuantity, paramsQuantity, setParamsQuantity]);
-
-  const [isFirstRender, setIsFirstRender] = useState(true);
-  useEffect(() => {
-    if (isFirstRender) {
-      setIsFirstRender(false);
-      return;
-    }
-    if (suppressQuantityReloadRef.current) {
-      suppressQuantityReloadRef.current = false;
-      return;
-    }
-    const timmer = setTimeout(() => {
-      window.location.reload();
-    }, 1000);
-    return () => clearTimeout(timmer);
-  }, [paramsQuantity]);
 
   const {
     trackQuantityChange,
@@ -373,7 +359,7 @@ function ReviewOrder({
           <div>
             <p className="text-lg text-black flex items-center gap-1 font-medium">
               <PiCurrencyInrBold />{" "}
-              {formatNumberTS(settlementAmount)}
+              {isPricingFetching ? "…" : formatNumberTS(settlementAmount)}
             </p>
             <Dialog>
               <DialogTrigger asChild>

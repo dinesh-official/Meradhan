@@ -196,19 +196,27 @@ export function resolveBondCalcInputs(
     cleanPrice: number | undefined;
     pricingYield: number | undefined;
 } {
-    const overrideQty = overrides?.providerQuantity ?? overrides?.quantity;
-    const bondQty = bondRow?.providerQuantity;
-    const quantityRaw = overrideQty ?? bondQty ?? 1;
+    // Explicit order/customer quantity wins over CRM provider lot size.
+    const explicitQty =
+        overrides?.quantity != null && Number(overrides.quantity) > 0
+            ? Number(overrides.quantity)
+            : null;
+    const providerQty =
+        overrides?.providerQuantity != null && Number(overrides.providerQuantity) > 0
+            ? Number(overrides.providerQuantity)
+            : null;
+    const bondQty =
+        bondRow?.providerQuantity != null && Number(bondRow.providerQuantity) > 0
+            ? Number(bondRow.providerQuantity)
+            : null;
+    const quantityRaw = explicitQty ?? providerQty ?? bondQty ?? 1;
     const quantity =
         Number.isFinite(Number(quantityRaw)) && Number(quantityRaw) > 0
             ? Number(quantityRaw)
             : 1;
 
-    const usedProviderQuantity = Boolean(
-        (overrides?.providerQuantity != null &&
-            Number(overrides.providerQuantity) > 0) ||
-            (bondRow?.providerQuantity != null && Number(bondRow.providerQuantity) > 0),
-    );
+    const usedProviderQuantity =
+        explicitQty == null && (providerQty != null || bondQty != null);
 
     const provDateFromOverride = overrides?.automatedSettlement
         ? undefined
@@ -452,7 +460,11 @@ export const getBondInfoCalcData = async (
             couponType: bondData?.couponType ?? null,
             categories: bondData?.categories ?? [],
         },
-        calc: response.data,
+        calc: {
+            ...response.data,
+            /** Days from last coupon to settlement (display); calc API value can differ in shut period. */
+            accrued_days: pricing.noOfAccrualDays,
+        },
         inputSources: {
             usedProviderPrice: resolved.usedProviderPrice,
             usedProviderQuantity: resolved.usedProviderQuantity,

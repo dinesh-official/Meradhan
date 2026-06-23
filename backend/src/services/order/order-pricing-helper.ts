@@ -327,21 +327,21 @@ export const accruedInterest = (params: {
     const quantum = params.faceValue * params.quantity;
     const annual = quantum * (params.couponRate / 100);
 
-    const daysAccrued = daysBetween(
+    const daysAccruedSinceLast = daysBetween(
         toUTCISODate(params.lastCouponDate),
-        toUTCISODate(params.settlementDate)
+        toUTCISODate(params.settlementDate),
     );
+    const displayAccrualDays = Math.max(0, daysAccruedSinceLast);
 
-
-    const days = shut.isUnderShutPeriod
+    const interestAccrualDays = shut.isUnderShutPeriod
         ? shut.noOfAccrualDays
-        : daysAccrued;
+        : displayAccrualDays;
 
-    const raw = annual * (days / 365);
+    const raw = annual * (interestAccrualDays / 365);
 
     return {
         accruedInterest: shut.isUnderShutPeriod ? -raw : raw,
-        noOfAccrualDays: shut.isUnderShutPeriod ? -days : days,
+        noOfAccrualDays: displayAccrualDays,
         isUnderShutPeriod: shut.isUnderShutPeriod,
         recordDate: shut.recordDate,
     };
@@ -395,7 +395,6 @@ export const computeBondOrderPricingData = async (
         stampDuty,
         automatedSettlement: true,
         providerPrice: bondInfo?.providerPrice ?? undefined,
-        providerQuantity: bondInfo?.providerQuantity ?? undefined,
     });
 
     const calcSettleYmd =
@@ -431,7 +430,7 @@ export const computeBondOrderPricingData = async (
         accruedInterest: calcAccrued,
         stampDuty: calcStamp,
         settlementAmount: calcSettlement,
-        noOfAccrualDays: Number(bondData.calc.accrued_days) || 0,
+        noOfAccrualDays: accrued.noOfAccrualDays,
         isUnderShutPeriod: bondData.calc.period_status === "Shut Period",
         recordDate: accrued.recordDate,
         recordDays: bondData.suggested.recordDays ?? accrued.noOfAccrualDays,
@@ -481,14 +480,25 @@ export async function computeLocalProviderBondPricing(opts: {
         settlementDt,
     );
 
+    const scheduleLast = await getLastCouponDateFromReferenceData(
+        opts.isin,
+        settlementDt,
+    );
+    const scheduleNext = await getNextCouponDate(opts.isin, settlementDt);
+
+    // Coupon schedule wins over bond-row snapshots (often stale vs settlement).
     let lastCouponDate =
-        bond.lastCouponDateIst instanceof Date && !Number.isNaN(bond.lastCouponDateIst.getTime())
+        scheduleLast ??
+        (bond.lastCouponDateIst instanceof Date &&
+        !Number.isNaN(bond.lastCouponDateIst.getTime())
             ? toUTCISODate(bond.lastCouponDateIst)
-            : couponMeta.lastCouponDate;
+            : couponMeta.lastCouponDate);
     let nextCouponDate =
-        bond.nextCouponDateIst instanceof Date && !Number.isNaN(bond.nextCouponDateIst.getTime())
+        scheduleNext ??
+        (bond.nextCouponDateIst instanceof Date &&
+        !Number.isNaN(bond.nextCouponDateIst.getTime())
             ? toUTCISODate(bond.nextCouponDateIst)
-            : couponMeta.nextCouponDate;
+            : couponMeta.nextCouponDate);
     let recordDays =
         couponMeta.recordDays != null && Number.isFinite(couponMeta.recordDays)
             ? couponMeta.recordDays
@@ -535,7 +545,7 @@ export async function computeLocalProviderBondPricing(opts: {
         stampDuty,
         totalConsideration,
         settlementAmount,
-        noOfAccrualDays: Math.abs(accrued.noOfAccrualDays),
+        noOfAccrualDays: accrued.noOfAccrualDays,
         isUnderShutPeriod: accrued.isUnderShutPeriod,
         cleanPrice,
         sellPrice: cleanPrice,
@@ -786,22 +796,18 @@ export const getLastNextCouponDateBasedOnSettlementDate = async (isin: string, s
         | null = null;
 
     for (const row of couponRows) {
-        // Treat a coupon date equal to settlement as "already paid" for last payment date.
         if (row.dueDate.getTime() <= settlementDt.getTime()) {
             lastCouponDate = row.dueDate;
-
-        } else {
             continue;
         }
-
         nextCouponRow = row;
         break;
     }
-    console.log({ nextCouponRow });
-
 
     if (!lastCouponDate && nextCouponRow) {
-        const nextIdx = couponRows.findIndex((row) => row.dueDate.getTime() === nextCouponRow?.dueDate.getTime());
+        const nextIdx = couponRows.findIndex(
+            (row) => row.dueDate.getTime() === nextCouponRow?.dueDate.getTime(),
+        );
         if (nextIdx > 0) {
             lastCouponDate = couponRows[nextIdx - 1]?.dueDate ?? null;
         }

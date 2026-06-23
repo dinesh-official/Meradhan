@@ -75,6 +75,9 @@ interface PaymentParams {
   orderId?: string;
 }
 
+/** Razorpay UPI is allowed only for orders up to ₹1,00,000 (INR). */
+const RAZORPAY_UPI_MAX_ORDER_AMOUNT_INR = 100_000;
+
 /* -----------------------------------------------------
                  useRazorpay Hook
 ----------------------------------------------------- */
@@ -160,6 +163,8 @@ export function useRazorpay() {
         return;
       }
 
+      const allowUpi = amount <= RAZORPAY_UPI_MAX_ORDER_AMOUNT_INR;
+
       const options: RazorpayOptions = {
         key,
         amount: Math.round(amount * 100),
@@ -169,7 +174,7 @@ export function useRazorpay() {
         name: "MeraDhan",
         image: "https://www.meradhan.co/favicon/apple-icon-76x76.png",
         method: {
-          upi: true, // ENABLE
+          upi: allowUpi,
           netbanking: true, // ENABLE
           card: false,
           wallet: false,
