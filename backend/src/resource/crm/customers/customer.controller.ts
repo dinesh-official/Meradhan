@@ -276,6 +276,37 @@ export class CustomerProfileController {
     });
   }
 
+  /**
+   * Persists the CRM PDF editor JSON payload on the corporate KYC row.
+   */
+  async setCorporateKycPdfPayload(req: Request, res: Response): Promise<void> {
+    const customerId = Number(req.params.customerId);
+    if (Number.isNaN(customerId)) {
+      res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid customer id",
+      });
+      return;
+    }
+
+    const payload = z
+      .object({
+        payload: z.record(z.string(), z.unknown()),
+      })
+      .parse(req.body);
+
+    const result = await this.corporateKycService.setLastPdfPayload(
+      customerId,
+      payload.payload,
+    );
+
+    res.sendResponse({
+      statusCode: HttpStatus.OK,
+      message: "Corporate KYC PDF form saved.",
+      responseData: result,
+    });
+  }
+
   async saveCorporateKyc(req: Request, res: Response): Promise<void> {
     const customerId = req.params.customerId;
     const payload = appSchema.customer.createCorporateKycSchema.parse(req.body);

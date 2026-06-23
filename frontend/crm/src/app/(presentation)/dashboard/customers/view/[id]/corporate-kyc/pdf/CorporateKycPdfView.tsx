@@ -3,11 +3,6 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
@@ -34,6 +29,7 @@ import {
   History,
   Loader2,
   RotateCcw,
+  Save,
   Settings2,
 } from "lucide-react";
 import { useCorporateKycFileUpload } from "@/app/(presentation)/dashboard/customers/[id]/corporate-kyc/_hooks/useCorporateKycFileUpload";
@@ -169,8 +165,6 @@ export default function CorporateKycPdfView({
   const [jsonText, setJsonText] = useState<string>("");
   const [jsonError, setJsonError] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
   // "Saving to S3" inflight indicator. Decoupled from `generating` because
   // the S3 upload happens *after* we hand the file to the browser, so we
   // can show "Saved last PDF" success without blocking the download button.
@@ -179,12 +173,22 @@ export default function CorporateKycPdfView({
   // `fetch` + Blob so the download uses a clean filename instead of the
   // S3 key.
   const [downloadingLast, setDownloadingLast] = useState(false);
+  const [savingDraft, setSavingDraft] = useState(false);
   const initialized = useRef(false);
 
-  const initialPayload = useMemo<CorporateKycData | null>(() => {
+  const crmMappedPayload = useMemo<CorporateKycData | null>(() => {
     if (!corporateKyc) return null;
     return mapCorporateKycToPdfPayload(corporateKyc, customer ?? null);
   }, [corporateKyc, customer]);
+
+  const initialPayload = useMemo<CorporateKycData | null>(() => {
+    if (!corporateKyc) return null;
+    const saved = corporateKyc.lastPdfPayload;
+    if (saved && typeof saved === "object" && !Array.isArray(saved)) {
+      return saved as CorporateKycData;
+    }
+    return crmMappedPayload;
+  }, [corporateKyc, crmMappedPayload]);
 
   useEffect(() => {
     if (initialized.current) return;
@@ -193,12 +197,6 @@ export default function CorporateKycPdfView({
     setJsonText(JSON.stringify(initialPayload, null, 2));
     initialized.current = true;
   }, [initialPayload]);
-
-  useEffect(() => {
-    return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-    };
-  }, [previewUrl]);
 
   const updatePayload = (next: CorporateKycData) => {
     setPayload(next);
@@ -224,11 +222,32 @@ export default function CorporateKycPdfView({
   };
 
   const resetFromData = () => {
-    if (!initialPayload) return;
-    setPayload(initialPayload);
-    setJsonText(JSON.stringify(initialPayload, null, 2));
+    if (!crmMappedPayload) return;
+    setPayload(crmMappedPayload);
+    setJsonText(JSON.stringify(crmMappedPayload, null, 2));
     setJsonError(null);
     toast.success("Form reset from CRM data.");
+  };
+
+  const saveDraft = async () => {
+    if (!payload) {
+      toast.error(jsonError ?? "Payload is empty or invalid JSON.");
+      return;
+    }
+    setSavingDraft(true);
+    try {
+      await api.setCorporateKycPdfPayload(profileId, {
+        payload: payload as Record<string, unknown>,
+      });
+      await queryClient.invalidateQueries({ queryKey: ["corporateKyc", profileId] });
+      toast.success("PDF form saved to database.");
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to save PDF form";
+      toast.error(message);
+    } finally {
+      setSavingDraft(false);
+    }
   };
 
   /**
@@ -265,11 +284,6 @@ export default function CorporateKycPdfView({
       return;
     }
     setGenerating(true);
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-      setPreviewUrl(null);
-      setPreviewOpen(false);
-    }
     try {
       const url = `${serviceUrl}${mode === "download" ? "?download=1" : ""}`;
       const res = await fetch(url, {
@@ -298,9 +312,12 @@ export default function CorporateKycPdfView({
         // Fire-and-forget — we already gave the file to the user above.
         void persistLastPdf(blob, filename);
       } else {
-        setPreviewUrl(blobUrl);
-        setPreviewOpen(true);
-        toast.success("Corporate KYC PDF generated.");
+        const opened = window.open(blobUrl, "_blank", "noopener,noreferrer");
+        window.setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+        if (!opened) {
+          throw new Error("Popup blocked. Allow popups for this site and try again.");
+        }
+        toast.success("Corporate KYC PDF opened in a new tab.");
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to generate PDF";
@@ -413,7 +430,7 @@ export default function CorporateKycPdfView({
               type="button"
               variant="outline"
               onClick={resetFromData}
-              disabled={generating}
+              disabled={generating || savingDraft}
               title="Rebuild form from latest CRM data"
             >
               <RotateCcw className="h-4 w-4" />
@@ -421,30 +438,34 @@ export default function CorporateKycPdfView({
             </Button>
             <Button
               type="button"
+              variant="secondary"
+              onClick={() => void saveDraft()}
+              disabled={
+                savingDraft || generating || !!jsonError || !payload
+              }
+              title="Save the current PDF form edits to the database"
+            >
+              {savingDraft ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              Save form
+            </Button>
+            <Button
+              type="button"
               variant="outline"
               onClick={() => void generate("preview")}
               disabled={generating || !!jsonError || !payload}
-              title="Generate the PDF and open the full-screen preview"
+              title="Generate the PDF and open it in a new tab"
             >
               {generating ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <Eye className="h-4 w-4" />
               )}
-              Preview
+              Open preview
             </Button>
-            {previewUrl && !previewOpen ? (
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => setPreviewOpen(true)}
-                disabled={generating}
-                title="Reopen the latest preview without regenerating"
-              >
-                <Eye className="h-4 w-4" />
-                View preview
-              </Button>
-            ) : null}
             {/*
              * Download the most recent PDF previously saved to S3. Hidden
              * when there's nothing saved yet (cleaner first-run UX).
@@ -491,23 +512,37 @@ export default function CorporateKycPdfView({
        * indicator while a new save is in flight). Kept light-weight so it
        * doesn't dominate the layout — sits right under PageInfoBar.
        */}
-      {(corporateKyc?.lastGeneratedPdfAt || savingLastPdf) && (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+      {(corporateKyc?.lastGeneratedPdfAt ||
+        corporateKyc?.lastPdfPayloadAt ||
+        savingLastPdf ||
+        savingDraft) && (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          {savingDraft ? (
+            <span className="flex items-center gap-2">
+              <Save className="h-3.5 w-3.5 animate-pulse" />
+              Saving form to database…
+            </span>
+          ) : corporateKyc?.lastPdfPayloadAt ? (
+            <span className="flex items-center gap-2">
+              <Save className="h-3.5 w-3.5" />
+              Form saved:{" "}
+              {new Date(corporateKyc.lastPdfPayloadAt).toLocaleString()} (
+              {formatRelativeTime(corporateKyc.lastPdfPayloadAt)})
+            </span>
+          ) : null}
           {savingLastPdf ? (
-            <>
+            <span className="flex items-center gap-2">
               <CloudUpload className="h-3.5 w-3.5 animate-pulse" />
-              <span>Saving latest PDF on S3…</span>
-            </>
-          ) : (
-            <>
+              Saving latest PDF on S3…
+            </span>
+          ) : corporateKyc?.lastGeneratedPdfAt ? (
+            <span className="flex items-center gap-2">
               <Cloud className="h-3.5 w-3.5" />
-              <span>
-                Last saved on S3:{" "}
-                {new Date(corporateKyc!.lastGeneratedPdfAt!).toLocaleString()}{" "}
-                ({formatRelativeTime(corporateKyc!.lastGeneratedPdfAt!)})
-              </span>
-            </>
-          )}
+              Last saved on S3:{" "}
+              {new Date(corporateKyc.lastGeneratedPdfAt).toLocaleString()} (
+              {formatRelativeTime(corporateKyc.lastGeneratedPdfAt)})
+            </span>
+          ) : null}
         </div>
       )}
 
@@ -656,43 +691,6 @@ export default function CorporateKycPdfView({
           </Card>
         </TabsContent>
       </Tabs>
-
-
-      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent
-          className="flex h-screen w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 rounded-none border-none p-0 left-0 top-0 sm:max-w-none"
-          style={{ maxHeight: "100vh" }}
-        >
-          <div className="flex items-center justify-between border-b bg-background px-4 py-2">
-            <DialogTitle className="text-sm font-medium">
-              PDF preview — {corporateKyc.entityName ?? "Corporate KYC"}
-            </DialogTitle>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => void generate("download")}
-              disabled={generating || !!jsonError || !payload}
-              title="Download the generated PDF"
-              className="mr-8"
-            >
-              {generating ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <FileDown className="h-4 w-4" />
-              )}
-              Download
-            </Button>
-          </div>
-          {previewUrl ? (
-            <iframe
-              title="Corporate KYC PDF preview"
-              src={previewUrl}
-              className="h-full w-full flex-1 border-0"
-            />
-          ) : null}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

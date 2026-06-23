@@ -111,15 +111,19 @@ export default function RelatedPersonTab({ value, onChange, disabled }: Props) {
             <SelectField
               label="Gender"
               value={rp.gender}
-              onChange={(v) => update({ gender: v as Gender })}
+              onChange={(v) => update({ gender: v })}
               options={GENDERS}
+              placeholder="—"
+              clearable
               disabled={disabled}
             />
             <SelectField
               label="Marital status"
               value={rp.maritalStatus}
-              onChange={(v) => update({ maritalStatus: v as MaritalStatus })}
+              onChange={(v) => update({ maritalStatus: v })}
               options={MARITAL_STATUSES}
+              placeholder="—"
+              clearable
               disabled={disabled}
             />
             <SelectField
