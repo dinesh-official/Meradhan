@@ -1,6 +1,6 @@
 
 import { db } from "@core/database/database";
-import { EmailCommunication } from "@communication/email_communication";
+import { sendBackOfficeEmail } from "@communication/email_communication";
 import logger from "@utils/logger/logger";
 
 /**
@@ -168,7 +168,7 @@ export async function sendOrderReceivedEmail(params: {
       </p>
     `;
 
-    const messageId = await new EmailCommunication().sendEmail({
+    const messageId = await sendBackOfficeEmail({
       to: recipientEmail,
       subject,
       text,
