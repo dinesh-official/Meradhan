@@ -212,6 +212,9 @@ export interface BondDealAutofillResponse {
     usedReferenceMetadata: boolean;
     usedCouponSchedule: boolean;
     yieldSource: "override" | "consolidated" | "bonds";
+    usedProviderPrice?: boolean;
+    usedProviderQuantity?: boolean;
+    usedProviderSettlementDate?: boolean;
   };
   suggested: BondDealAutofillSuggestions;
   pricing: {

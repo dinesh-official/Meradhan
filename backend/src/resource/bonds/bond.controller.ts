@@ -4,8 +4,9 @@ import { BondService, parseHomepageBondLimit } from "./bond.service";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import { appSchema } from "@root/schema";
 import { createCrmActivityLog } from "@resource/crm/auditlogs/auditlog.repo";
-import { getBondDealAutofill } from "./bond_clac";
+import { getBondDealAutofill, parseCalcFormattedDecimal } from "./bond_clac";
 import { getBondInfoCalcData } from "./fill-bonds-auto";
+import { buildLocalManualProviderAutofillResponse } from "@services/order/order-pricing-helper";
 import { BondCashflowService } from "./bond_cashflow.service";
 import { BondDocumentsService } from "@resource/crm/bonds/bond_documents.service";
 import logger from "@utils/logger/logger";
@@ -250,8 +251,8 @@ export class BondController {
    * CRM bond auto-update (sale-ready): simpler calc-based autofill.
    * Uses `getBondInfoCalcData` and returns a `BondDealAutofillResponse`-compatible payload.
    *
-   * GET query: quantity, pricingYield (optional).
-   * POST JSON body: { quantity?, pricingYield? } — preferred when sending custom yield.
+   * GET query: quantity, settlementDate, pricingYield, providerPrice, providerQuantity, providerInterestDate, automatedSettlement.
+   * POST JSON body: same fields — preferred when sending custom yield or unsaved provider values.
    */
   async getBondDealAutofillCalc(req: Request, res: Response) {
     const isin = req.params.isin?.toString() ?? "";
@@ -269,62 +270,134 @@ export class BondController {
       typeof req.body === "object" &&
       !Array.isArray(req.body);
 
+    const readNum = (raw: unknown): number | undefined => {
+      if (raw == null || String(raw).trim() === "") return undefined;
+      const n = Number(raw);
+      return Number.isFinite(n) ? n : undefined;
+    };
+
+    const readStr = (raw: unknown): string | undefined => {
+      if (raw == null) return undefined;
+      const s = String(raw).trim();
+      return s ? s : undefined;
+    };
+
+    const readBool = (raw: unknown): boolean | undefined => {
+      if (raw == null || String(raw).trim() === "") return undefined;
+      const s = String(raw).trim().toLowerCase();
+      if (s === "true" || s === "1" || s === "yes") return true;
+      if (s === "false" || s === "0" || s === "no") return false;
+      return undefined;
+    };
+
     let quantity = 1;
+    let settlementDate: string | undefined;
     let pricingYield: number | undefined;
+    let providerPrice: number | undefined;
+    let providerQuantity: number | undefined;
+    let providerInterestDate: string | undefined;
+    let automatedSettlement: boolean | undefined;
+    let useLocalCalc: boolean | undefined;
 
     if (fromBody) {
       const b = req.body as Record<string, unknown>;
-      const qRaw = b.quantity;
-      const q = qRaw != null && String(qRaw).trim() !== "" ? Number(qRaw) : 1;
-      quantity = Number.isFinite(q) && q > 0 ? q : 1;
-      const pyRaw = b.pricingYield;
-      if (pyRaw != null && String(pyRaw).trim() !== "") {
-        const n = Number(pyRaw);
-        pricingYield = Number.isFinite(n) ? n : undefined;
-      }
+      const q = readNum(b.quantity);
+      quantity = q != null && q > 0 ? q : 1;
+      settlementDate = readStr(b.settlementDate);
+      pricingYield = readNum(b.pricingYield);
+      providerPrice = readNum(b.providerPrice);
+      providerQuantity = readNum(b.providerQuantity);
+      providerInterestDate = readStr(b.providerInterestDate);
+      automatedSettlement = readBool(b.automatedSettlement);
+      useLocalCalc = readBool(b.useLocalCalc);
     } else {
       const q = req.query.quantity ? Number(req.query.quantity) : 1;
       quantity = Number.isFinite(q) && q > 0 ? q : 1;
-      const pyRaw = req.query.pricingYield;
-      pricingYield =
-        pyRaw != null && String(pyRaw).trim() !== ""
-          ? Number(pyRaw)
-          : undefined;
-      pricingYield =
-        pricingYield != null && Number.isFinite(pricingYield)
-          ? pricingYield
-          : undefined;
+      settlementDate = readStr(req.query.settlementDate);
+      pricingYield = readNum(req.query.pricingYield);
+      providerPrice = readNum(req.query.providerPrice);
+      providerQuantity = readNum(req.query.providerQuantity);
+      providerInterestDate = readStr(req.query.providerInterestDate);
+      automatedSettlement = readBool(req.query.automatedSettlement);
+      useLocalCalc = readBool(req.query.useLocalCalc);
     }
 
     try {
+      if (useLocalCalc) {
+        if (providerPrice == null || !Number.isFinite(providerPrice) || providerPrice <= 0) {
+          return res.sendResponse({
+            statusCode: HttpStatus.BAD_REQUEST,
+            success: false,
+            message: "Provider price is required for local manual calc",
+          });
+        }
+        const qty =
+          providerQuantity != null && providerQuantity > 0
+            ? providerQuantity
+            : quantity;
+        const localRes = await buildLocalManualProviderAutofillResponse(isin, {
+          quantity: qty,
+          providerPrice,
+          providerQuantity,
+        });
+        return res.sendResponse({
+          statusCode: HttpStatus.OK,
+          responseData: localRes,
+        });
+      }
+
       const calcRes = await getBondInfoCalcData(isin, {
-        yeild:
-          pricingYield != null && Number.isFinite(pricingYield)
-            ? String(pricingYield)
-            : undefined,
+        quantity,
+        settlementDate,
+        pricingYield,
+        providerPrice,
+        providerQuantity,
+        providerInterestDate,
+        automatedSettlement,
       });
 
       const suggested = calcRes.suggested;
+      const calc = calcRes.calc;
+      const finalPrice =
+        parseCalcFormattedDecimal(calc.final_price) ??
+        (suggested.sellPrice != null && Number(suggested.sellPrice)
+          ? suggested.sellPrice
+          : null);
 
       return res.sendResponse({
         statusCode: HttpStatus.OK,
         responseData: {
           isin,
-          quantity,
+          quantity: calcRes.payload.Quantity
+            ? Number(calcRes.payload.Quantity)
+            : quantity,
           sources: {
             usedReferenceMetadata: true,
             usedCouponSchedule: true,
-            yieldSource: pricingYield != null && Number.isFinite(pricingYield) ? "override" : "bonds",
+            yieldSource:
+              pricingYield != null && Number.isFinite(pricingYield)
+                ? "override"
+                : "bonds",
+            usedProviderPrice: calcRes.inputSources.usedProviderPrice,
+            usedProviderQuantity: calcRes.inputSources.usedProviderQuantity,
+            usedProviderSettlementDate:
+              calcRes.inputSources.usedProviderSettlementDate,
           },
           suggested,
           pricing: {
-            finalPrice: suggested.sellPrice != null && Number(suggested.sellPrice) ? suggested.sellPrice : null,
-            finalYieldRaw: suggested.yield != null && Number(suggested.yield) ? suggested.yield : 0,
-            settlementAmount: null,
-            totalAccruedInterest: null,
-            principalAmount: null,
-            totalConsideration: null,
-            calc: calcRes.calc,
+            finalPrice,
+            finalYieldRaw:
+              calc.final_yield_raw ??
+              (suggested.yield != null && Number(suggested.yield)
+                ? suggested.yield
+                : 0),
+            settlementAmount: parseCalcFormattedDecimal(calc.settlement_amount),
+            totalAccruedInterest: parseCalcFormattedDecimal(calc.total_ai),
+            principalAmount: parseCalcFormattedDecimal(calc.principal_amount),
+            totalConsideration: parseCalcFormattedDecimal(
+              calc.total_consideration,
+            ),
+            calc,
           },
           margin: {},
         },

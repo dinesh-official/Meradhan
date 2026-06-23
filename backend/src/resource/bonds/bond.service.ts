@@ -203,8 +203,8 @@ export class BondService {
       throw new Error("No Bond Found")
     }
 
-    const cleanPrice = sellPrice || bond.sellPrice;
-    console.log(cleanPrice);
+    const cleanPrice =
+      bond.providerPrice ?? sellPrice ?? bond.sellPrice ?? bond.issuePrice ?? 0;
 
     let lastCouponDateStr = bond.lastCouponDateIst?.toISOString() ?? null;
     let nextCouponDateStr = bond.nextCouponDateIst?.toISOString() ?? null;
@@ -247,9 +247,12 @@ export class BondService {
       { settlementType },
     );
 
-    const yieldRaw = bond.yield ?? bond.buyYield;
+    const yieldRaw =
+      pricingData.yield ?? bond.yield ?? bond.buyYield;
     const yieldNum =
-      yieldRaw != null && Number.isFinite(Number(yieldRaw)) ? Number(yieldRaw) : null;
+      yieldRaw != null && Number.isFinite(Number(yieldRaw))
+        ? Number(yieldRaw)
+        : null;
 
     return {
       ok: true,

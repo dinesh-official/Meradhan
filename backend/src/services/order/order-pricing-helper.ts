@@ -5,6 +5,7 @@
 
 import { db } from "@core/database/database";
 import { getBondInfoCalcData } from "@resource/bonds/fill-bonds-auto";
+import { parseCalcFormattedDecimal } from "@resource/bonds/bond_clac";
 
 type BondSettlementResult = {
     dealDate: string;
@@ -388,34 +389,227 @@ export const computeBondOrderPricingData = async (
     const stampDuty = calculateStampDuty(principal);
     const bondInfo = await db.dataBase.bonds.findUnique({ where: { isin: params.isin } });
 
-
     const bondData = await getBondInfoCalcData(params.isin, {
-        yeild: bondInfo?.yield?.toString(),
-        settlementDate: settlement.settlementDate,
         quantity: params.quantity,
-        stampDuty: stampDuty,
-        useCleanPrice: options?.useCleanPrice ?? false,
+        settlementDate: settlement.settlementDate,
+        stampDuty,
+        automatedSettlement: true,
+        providerPrice: bondInfo?.providerPrice ?? undefined,
+        providerQuantity: bondInfo?.providerQuantity ?? undefined,
     });
 
+    const calcSettleYmd =
+        typeof bondData.calc.settle_dt === "string" &&
+        /^\d{4}-\d{2}-\d{2}$/.test(bondData.calc.settle_dt.trim())
+            ? bondData.calc.settle_dt.trim()
+            : settlement.settlementDate;
 
-    // const total = principal + accrued.accruedInterest + stampDuty;
-
-    console.log(params, settlement);
+    const calcCleanPrice =
+        parseCalcFormattedDecimal(bondData.calc.final_price) ?? params.cleanPrice;
+    const calcPrincipal =
+        parseCalcFormattedDecimal(bondData.calc.principal_amount) ?? principal;
+    const calcAccrued =
+        parseCalcFormattedDecimal(bondData.calc.total_ai) ?? accrued.accruedInterest;
+    const calcStamp =
+        parseCalcFormattedDecimal(bondData.calc.stamp_duty) ?? stampDuty;
+    const calcSettlement =
+        parseCalcFormattedDecimal(bondData.calc.settlement_amount) ??
+        calcPrincipal + calcAccrued + calcStamp;
+    const calcYieldRaw = bondData.calc.final_yield_raw;
+    const calcYield =
+        calcYieldRaw != null && Number.isFinite(Number(calcYieldRaw))
+            ? Number(calcYieldRaw)
+            : undefined;
 
     return {
         ...params,
         ...settlement,
-        cleanPrice: Number(bondData.calc.final_price),
-        principalAmount: Number(bondData.calc.principal_amount.replace(/,/g, "")),
-        accruedInterest: Number(bondData.calc.total_ai.replace(/,/g, "")),
-        stampDuty: Number(bondData.calc.stamp_duty.replace(/,/g, "")),
-        settlementAmount: Number(bondData.calc.settlement_amount.replace(/,/g, "")),
-        noOfAccrualDays: Number(bondData.calc.accrued_days),
+        settlementDate: calcSettleYmd,
+        settlementDay: utcDayName(calcSettleYmd) ?? settlement.settlementDay,
+        cleanPrice: calcCleanPrice,
+        principalAmount: calcPrincipal,
+        accruedInterest: calcAccrued,
+        stampDuty: calcStamp,
+        settlementAmount: calcSettlement,
+        noOfAccrualDays: Number(bondData.calc.accrued_days) || 0,
         isUnderShutPeriod: bondData.calc.period_status === "Shut Period",
         recordDate: accrued.recordDate,
-        recordDays: accrued.noOfAccrualDays,
+        recordDays: bondData.suggested.recordDays ?? accrued.noOfAccrualDays,
+        ...(calcYield != null ? { yield: calcYield } : {}),
     };
 };
+
+function fmtLocalCalcMoney(n: number): string {
+    return n.toLocaleString("en-IN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    });
+}
+
+/**
+ * In-house manual provider pricing (no external calc API).
+ * Principal + accrued interest + stamp duty using bond schedule and T+1 IST settlement.
+ */
+export async function computeLocalProviderBondPricing(opts: {
+    isin: string;
+    quantity: number;
+    cleanPricePct: number;
+}) {
+    const bond = await db.dataBase.bonds.findUnique({ where: { isin: opts.isin } });
+    if (!bond) {
+        throw new Error(`Bond not found: ${opts.isin}`);
+    }
+
+    const quantity =
+        Number.isFinite(opts.quantity) && opts.quantity > 0 ? opts.quantity : 1;
+    const cleanPrice =
+        Number.isFinite(opts.cleanPricePct) && opts.cleanPricePct > 0
+            ? opts.cleanPricePct
+            : 0;
+    if (cleanPrice <= 0) {
+        throw new Error("Provider clean price is required for local manual calc");
+    }
+
+    const faceValue = Number(bond.faceValue);
+    const couponRate = Number(bond.couponRate);
+    const settlement = computeBondSettlement(new Date());
+    const settlementDate = settlement.settlementDate;
+    const settlementDt = utcMidnightForISODate(settlementDate);
+
+    const couponMeta = await getLastNextCouponDateBasedOnSettlementDate(
+        opts.isin,
+        settlementDt,
+    );
+
+    let lastCouponDate =
+        bond.lastCouponDateIst instanceof Date && !Number.isNaN(bond.lastCouponDateIst.getTime())
+            ? toUTCISODate(bond.lastCouponDateIst)
+            : couponMeta.lastCouponDate;
+    let nextCouponDate =
+        bond.nextCouponDateIst instanceof Date && !Number.isNaN(bond.nextCouponDateIst.getTime())
+            ? toUTCISODate(bond.nextCouponDateIst)
+            : couponMeta.nextCouponDate;
+    let recordDays =
+        couponMeta.recordDays != null && Number.isFinite(couponMeta.recordDays)
+            ? couponMeta.recordDays
+            : typeof bond.recordDays === "number" && Number.isFinite(bond.recordDays)
+              ? bond.recordDays
+              : 7;
+
+    if (!lastCouponDate || !nextCouponDate) {
+        throw new Error(
+            "Bond is missing lastCouponDate or nextCouponDate required for local pricing",
+        );
+    }
+
+    const principal = principalAmount(faceValue, quantity, cleanPrice);
+    const accrued = accruedInterest({
+        faceValue,
+        quantity,
+        couponRate,
+        lastCouponDate: utcMidnightForISODate(lastCouponDate),
+        nextCouponDate: utcMidnightForISODate(nextCouponDate),
+        settlementDate: settlementDt,
+        recordDays,
+    });
+    const stampDuty = calculateStampDuty(principal);
+    const totalConsideration = principal + accrued.accruedInterest;
+    const settlementAmount = totalConsideration + stampDuty;
+    const yieldNum =
+        bond.yield != null && Number.isFinite(bond.yield)
+            ? bond.yield
+            : bond.buyYield != null && Number.isFinite(bond.buyYield)
+              ? bond.buyYield
+              : 0;
+
+    return {
+        quantity,
+        settlement,
+        settlementDate,
+        lastCouponDate,
+        nextCouponDate,
+        recordDate: accrued.recordDate ? toUTCISODate(accrued.recordDate) : null,
+        recordDays,
+        principalAmount: principal,
+        totalAccruedInterest: accrued.accruedInterest,
+        stampDuty,
+        totalConsideration,
+        settlementAmount,
+        noOfAccrualDays: Math.abs(accrued.noOfAccrualDays),
+        isUnderShutPeriod: accrued.isUnderShutPeriod,
+        cleanPrice,
+        sellPrice: cleanPrice,
+        yield: yieldNum,
+        faceValue,
+        couponRate,
+    };
+}
+
+export async function buildLocalManualProviderAutofillResponse(
+    isin: string,
+    opts: {
+        quantity: number;
+        providerPrice: number;
+        providerQuantity?: number;
+    },
+) {
+    const local = await computeLocalProviderBondPricing({
+        isin,
+        quantity: opts.quantity,
+        cleanPricePct: opts.providerPrice,
+    });
+
+    const calcSnapshot = {
+        accrued_days: local.noOfAccrualDays,
+        final_price: fmtLocalCalcMoney(local.cleanPrice),
+        final_yield: `${local.yield.toFixed(4)}%`,
+        final_yield_raw: local.yield,
+        total_ai: fmtLocalCalcMoney(local.totalAccruedInterest),
+        settlement_amount: fmtLocalCalcMoney(local.settlementAmount),
+        principal_amount: fmtLocalCalcMoney(local.principalAmount),
+        total_consideration: fmtLocalCalcMoney(local.totalConsideration),
+        stamp_duty: fmtLocalCalcMoney(local.stampDuty),
+        settle_dt: local.settlementDate,
+        period_status: local.isUnderShutPeriod ? "Shut Period" : "Normal",
+    };
+
+    return {
+        isin,
+        quantity: local.quantity,
+        sources: {
+            usedReferenceMetadata: true,
+            usedCouponSchedule: true,
+            yieldSource: "bonds" as const,
+            usedProviderPrice: true,
+            usedProviderQuantity: Boolean(
+                opts.providerQuantity != null && opts.providerQuantity > 0,
+            ),
+            usedProviderSettlementDate: false,
+        },
+        suggested: {
+            lastCouponDate: local.lastCouponDate,
+            nextCouponDate: local.nextCouponDate,
+            recordDate: local.recordDate,
+            recordDays: local.recordDays,
+            faceValue: local.faceValue,
+            couponRate: local.couponRate,
+            buyYield: local.yield,
+            yield: local.yield,
+            sellPrice: local.sellPrice,
+            isUnderShutPeriod: local.isUnderShutPeriod,
+        },
+        pricing: {
+            finalPrice: local.cleanPrice,
+            finalYieldRaw: local.yield,
+            settlementAmount: local.settlementAmount,
+            totalAccruedInterest: local.totalAccruedInterest,
+            principalAmount: local.principalAmount,
+            totalConsideration: local.totalConsideration,
+            calc: calcSnapshot,
+        },
+        margin: {},
+    };
+}
 
 
 /**
