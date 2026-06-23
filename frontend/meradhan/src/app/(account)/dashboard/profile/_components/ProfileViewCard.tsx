@@ -3,7 +3,7 @@ import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { makeFullname } from "@/global/utils/formate";
 import { genMediaUrl } from "@/global/utils/url.utils";
 import { cn } from "@/lib/utils";
-import { GetCustomerResponseById } from "@root/apiGateway";
+import { CorporateKycResponse, GetCustomerResponseById } from "@root/apiGateway";
 import { Download } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -14,11 +14,31 @@ import { RiArrowRightSFill } from "react-icons/ri";
 
 function ProfileViewCard({
   profile,
+  corporateKyc,
 }: {
   profile: GetCustomerResponseById["responseData"];
+  corporateKyc?: CorporateKycResponse | null;
 }) {
   const hasKycStarted =
     profile.kycStatus == "PENDING" && profile.kycProgress?.hasStarted;
+  const isCorporate = profile.userType === "CORPORATE";
+  const displayName = isCorporate
+    ? profile.legalEntityName ||
+      corporateKyc?.entityName ||
+      makeFullname({
+        firstName: profile.firstName,
+        middleName: profile.middleName,
+        lastName: profile.lastName,
+      })
+    : makeFullname({
+        firstName: profile.firstName,
+        middleName: profile.middleName,
+        lastName: profile.lastName,
+      });
+  const kycPdfUrl = isCorporate
+    ? corporateKyc?.lastGeneratedPdfUrl ||
+      profile.personalInformation?.signPdfUrl
+    : profile.personalInformation?.signPdfUrl;
 
   return (
     <div>
@@ -38,11 +58,7 @@ function ProfileViewCard({
 
           <div className="flex flex-col gap-1 md:text-left text-center">
             <p className="flex justify-center md:justify-start items-center gap-3 font-semibold text-lg uppercase">
-              {makeFullname({
-                firstName: profile.firstName,
-                middleName: profile.middleName,
-                lastName: profile.lastName,
-              })}
+              {displayName}
               {(profile.kycStatus == "VERIFIED" ||
                 profile.kycStatus == "RE_KYC") && (
                   <FaCheckSquare className="text-green-600" />
@@ -164,12 +180,10 @@ function ProfileViewCard({
 
           {/* KYC Copy / Download PDF: show when verified, rekyc, or in review (if PDF available) */}
           {(profile.kycStatus == "VERIFIED" ||
-            (profile.kycStatus == "RE_KYC" &&
-              profile.personalInformation?.signPdfUrl) ||
-            (profile.kycStatus == "UNDER_REVIEW" &&
-              profile.personalInformation?.signPdfUrl)) && (
+            (profile.kycStatus == "RE_KYC" && kycPdfUrl) ||
+            (profile.kycStatus == "UNDER_REVIEW" && kycPdfUrl)) && (
               <Link
-                href={genMediaUrl(profile.personalInformation?.signPdfUrl || "#")}
+                href={genMediaUrl(kycPdfUrl || "#")}
                 target="_blank"
               >
                 <Button variant={`defaultLight`}>

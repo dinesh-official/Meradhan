@@ -142,9 +142,178 @@ function collectAllCouponDatesYmd(
     return [...set].sort();
 }
 
-export const getBondInfoCalcData = async (isin: string, { yeild, settlementDate, quantity, stampDuty, useCleanPrice = false }: { yeild?: string, settlementDate?: string, quantity?: number, stampDuty?: number, useCleanPrice?: boolean } = {}) => {
+export type BondCalcInputOverrides = {
+    quantity?: number;
+    settlementDate?: string;
+    pricingYield?: number;
+    providerPrice?: number | null;
+    providerQuantity?: number | null;
+    providerInterestDate?: string | null;
+};
+
+export type BondCalcInputSources = {
+    usedProviderPrice: boolean;
+    usedProviderQuantity: boolean;
+    usedProviderSettlementDate: boolean;
+};
+
+export type GetBondInfoCalcDataOptions = BondCalcInputOverrides & {
+    yeild?: string;
+    stampDuty?: number;
+    /** Legacy order-pricing path: force clean price from bond sell price. */
+    useCleanPrice?: boolean;
+    /** When true, ignore bond/request provider dates and use T+1 IST working settlement. */
+    automatedSettlement?: boolean;
+};
+
+type BondRowForCalc = {
+    providerPrice?: number | null;
+    providerQuantity?: number | null;
+    providerInterestDate?: Date | null;
+    providerInterestDateIst?: Date | null;
+    sellPrice?: number | null;
+    buyYield?: number | null;
+    yield?: number | null;
+};
+
+function ymdToUtcNoon(ymd: string): Date {
+    const [y, m, d] = ymd.split("-").map(Number);
+    return new Date(Date.UTC(y!, (m ?? 1) - 1, d ?? 1, 12, 0, 0));
+}
+
+function defaultT1IstSettlementYmd(): string {
+    const holidays = new Set(DEFAULT_BOND_MARKET_HOLIDAYS);
+    return toYyyyMmDd(firstWorkingDayAfter(new Date(), holidays))!;
+}
+
+export function resolveBondCalcInputs(
+    bondRow: BondRowForCalc | null | undefined,
+    overrides?: GetBondInfoCalcDataOptions,
+): BondCalcInputSources & {
+    quantity: number;
+    settlementDateYmd: string;
+    useCleanPrice: boolean;
+    cleanPrice: number | undefined;
+    pricingYield: number | undefined;
+} {
+    // Explicit order/customer quantity wins over CRM provider lot size.
+    const explicitQty =
+        overrides?.quantity != null && Number(overrides.quantity) > 0
+            ? Number(overrides.quantity)
+            : null;
+    const providerQty =
+        overrides?.providerQuantity != null && Number(overrides.providerQuantity) > 0
+            ? Number(overrides.providerQuantity)
+            : null;
+    const bondQty =
+        bondRow?.providerQuantity != null && Number(bondRow.providerQuantity) > 0
+            ? Number(bondRow.providerQuantity)
+            : null;
+    const quantityRaw = explicitQty ?? providerQty ?? bondQty ?? 1;
+    const quantity =
+        Number.isFinite(Number(quantityRaw)) && Number(quantityRaw) > 0
+            ? Number(quantityRaw)
+            : 1;
+
+    const usedProviderQuantity =
+        explicitQty == null && (providerQty != null || bondQty != null);
+
+    const provDateFromOverride = overrides?.automatedSettlement
+        ? undefined
+        : overrides?.providerInterestDate?.trim();
+    const provDateFromBond = overrides?.automatedSettlement
+        ? undefined
+        : bondRow?.providerInterestDateIst instanceof Date &&
+            !Number.isNaN(bondRow.providerInterestDateIst.getTime())
+          ? toYyyyMmDd(bondRow.providerInterestDateIst)
+          : bondRow?.providerInterestDate instanceof Date &&
+              !Number.isNaN(bondRow.providerInterestDate.getTime())
+            ? toYyyyMmDd(bondRow.providerInterestDate)
+            : undefined;
+
+    const provDate = provDateFromOverride || provDateFromBond;
+    let settlementDateYmd: string;
+    let usedProviderSettlementDate = false;
+
+    if (
+        !overrides?.automatedSettlement &&
+        provDate &&
+        /^\d{4}-\d{2}-\d{2}$/.test(provDate)
+    ) {
+        settlementDateYmd = provDate;
+        usedProviderSettlementDate = true;
+    } else if (
+        overrides?.settlementDate?.trim() &&
+        /^\d{4}-\d{2}-\d{2}$/.test(overrides.settlementDate.trim())
+    ) {
+        settlementDateYmd = overrides.settlementDate.trim();
+    } else {
+        settlementDateYmd = defaultT1IstSettlementYmd();
+    }
+
+    const pricingYieldOverride =
+        overrides?.pricingYield != null && Number.isFinite(overrides.pricingYield)
+            ? overrides.pricingYield
+            : overrides?.yeild != null && String(overrides.yeild).trim() !== ""
+              ? Number(overrides.yeild)
+              : undefined;
+
+    const overridePrice = overrides?.providerPrice;
+    const bondProvPrice = bondRow?.providerPrice;
+    const hasProviderPrice =
+        pricingYieldOverride == null &&
+        ((overridePrice != null &&
+            Number.isFinite(Number(overridePrice)) &&
+            Number(overridePrice) > 0) ||
+            (bondProvPrice != null &&
+                Number.isFinite(Number(bondProvPrice)) &&
+                Number(bondProvPrice) > 0));
+
+    const usedProviderPrice = Boolean(hasProviderPrice);
+
+    const cleanPrice = hasProviderPrice
+        ? Number(overridePrice ?? bondProvPrice)
+        : undefined;
+
+    const pricingYield =
+        pricingYieldOverride != null && Number.isFinite(pricingYieldOverride)
+            ? pricingYieldOverride
+            : bondRow?.buyYield != null && Number.isFinite(bondRow.buyYield)
+              ? bondRow.buyYield
+              : bondRow?.yield != null && Number.isFinite(bondRow.yield)
+                ? bondRow.yield
+                : undefined;
+
+    return {
+        quantity,
+        settlementDateYmd,
+        useCleanPrice: hasProviderPrice,
+        cleanPrice,
+        pricingYield: hasProviderPrice ? undefined : pricingYield,
+        usedProviderPrice,
+        usedProviderQuantity,
+        usedProviderSettlementDate,
+    };
+}
+
+export const getBondInfoCalcData = async (
+    isin: string,
+    options: GetBondInfoCalcDataOptions = {},
+) => {
     const bond = await db.dataBase.bondReferenceMetadata.findFirst({ where: { isin: isin } });
     const bondData = await db.dataBase.bonds.findFirst({ where: { isin: isin } });
+    const resolved = resolveBondCalcInputs(bondData, options);
+    const useCleanPrice = options.useCleanPrice === true || resolved.useCleanPrice;
+    const cleanPriceInput = options.useCleanPrice === true
+        ? bondData?.sellPrice ?? 0
+        : resolved.cleanPrice ?? bondData?.sellPrice ?? 0;
+    const pricingYieldStr = useCleanPrice
+        ? undefined
+        : resolved.pricingYield != null
+          ? String(resolved.pricingYield)
+          : options.yeild;
+    const quantity = resolved.quantity;
+    const stampDuty = options.stampDuty;
     const couponRows = await db.dataBase.bondReferenceCouponPaymentDate.findMany({
         where: { isin },
         orderBy: { id: "asc" },
@@ -155,9 +324,7 @@ export const getBondInfoCalcData = async (isin: string, { yeild, settlementDate,
             ? toYyyyMmDd(couponPayRow.dueDateIst)
             : null;
 
-    const settlementDateObj = settlementDate
-        ? new Date(settlementDate)
-        : firstWorkingDayAfter(new Date(), new Set(DEFAULT_BOND_MARKET_HOLIDAYS));
+    const settlementDateObj = ymdToUtcNoon(resolved.settlementDateYmd);
 
     const couponDate = await getLastNextCouponDateBasedOnSettlementDate(isin, settlementDateObj);
     const lastCouponDate = await getLastCouponDateFromReferenceData(isin, settlementDateObj);
@@ -177,7 +344,6 @@ export const getBondInfoCalcData = async (isin: string, { yeild, settlementDate,
     const faceValue = Number(bond?.faceValue ?? bondData?.faceValue ?? 10000);
     const couponRate = Number(bond?.couponRate ?? bondData?.couponRate ?? 0);
     const bondType = toCalcBondType(bondData?.bondType ?? bond?.bondType);
-    const pricingYield = yeild ?? bondData?.yield ?? bondData?.buyYield;
     const datedDate =
         bond?.issueDateIst instanceof Date && !Number.isNaN(bond.issueDateIst.getTime())
             ? toISTISODate(bond.issueDateIst)
@@ -194,15 +360,19 @@ export const getBondInfoCalcData = async (isin: string, { yeild, settlementDate,
         Payment_Frequency: toCalcPaymentFrequency(
             bond?.interestPaymentFrequency ?? bondData?.interestPaymentFrequency,
         ),
-        Quantity: String(quantity ?? 1),
-        Settlement_Date: toYyyyMmDd(settlementDateObj),
+        Quantity: String(quantity),
+        Settlement_Date: resolved.settlementDateYmd,
         Dated_Date: datedDate,
         Last_IP_Date: lastCouponDate ?? "",
         Next_IP_Date: nextCouponDate ?? "",
         Maturity_Date: maturityDate,
         Period_Status: pricing.isUnderShutPeriod ? "Shut Period" : "Normal",
         Input_Type: useCleanPrice ? "Calculate from Clean Price" : "Calculate from Yield",
-        Pricing_Input: useCleanPrice ? String(bondData?.sellPrice ?? 0) : pricingYield != null ? String(pricingYield) : "0",
+        Pricing_Input: useCleanPrice
+            ? String(cleanPriceInput)
+            : pricingYieldStr != null
+              ? String(pricingYieldStr)
+              : "0",
         Is_End_Of_Month_Bond: "No",
         Price_Rounding_Decimals: "4",
         Stamp_Duty: stampDuty != null ? String(stampDuty) : "0",
@@ -290,6 +460,15 @@ export const getBondInfoCalcData = async (isin: string, { yeild, settlementDate,
             couponType: bondData?.couponType ?? null,
             categories: bondData?.categories ?? [],
         },
-        calc: response.data,
-    }
-}
+        calc: {
+            ...response.data,
+            /** Days from last coupon to settlement (display); calc API value can differ in shut period. */
+            accrued_days: pricing.noOfAccrualDays,
+        },
+        inputSources: {
+            usedProviderPrice: resolved.usedProviderPrice,
+            usedProviderQuantity: resolved.usedProviderQuantity,
+            usedProviderSettlementDate: resolved.usedProviderSettlementDate,
+        },
+    };
+};

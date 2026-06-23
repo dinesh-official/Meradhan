@@ -54,7 +54,7 @@ const emptyResidency = (): TaxResidencyRow => ({
 const emptyUBO = (): UBO => ({
   name: "",
   fatherName: "",
-  gender: "M",
+  gender: "",
   address: "",
   dateOfBirth: "",
   countryOfBirth: "India",

@@ -113,7 +113,15 @@ export function BondListCard({
                 </p>
               </BondInfoLabel>
               <BondInfoLabel title="Yield">
-                <p>{data.yield !== null && data.yield !== undefined ? `${Number(data.yield).toFixed(2)}%` : "Coming Soon"}</p>
+                <p>
+                  {data.yield !== null && data.yield !== undefined ? (
+                    <span className="font-bold text-primary">
+                      {`${Number(data.yield).toFixed(2)}%`}
+                    </span>
+                  ) : (
+                    "Coming Soon"
+                  )}
+                </p>
               </BondInfoLabel>
               <BondInfoLabel title="Face Value">
                 <p className="flex items-center">

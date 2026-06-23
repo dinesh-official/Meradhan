@@ -47,7 +47,9 @@ import { useRouter } from "nextjs-toploader/app";
 import { useForm, type Resolver } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Loader2, Sparkles } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Calculator, Loader2, Sparkles } from "lucide-react";
 import { AxiosError } from "axios";
 import {
   formatDateForDateInput,
@@ -56,6 +58,8 @@ import {
 import { BondLogoField } from "../../_components/BondLogoField";
 
 const OPTIONAL_ENUM_NONE = "__none__" as const;
+
+type PricingFillMode = "auto" | "manual";
 
 /** Buy yield must exist before deal autofill — margin/yield chain needs it on the bond row. */
 function hasBondBuyYield(v: unknown): boolean {
@@ -388,8 +392,113 @@ function BondForm({ initialData, isin }: BondFormProps) {
   const [buyYieldPromptOpen, setBuyYieldPromptOpen] = useState(false);
   const [buyYieldDraft, setBuyYieldDraft] = useState("");
   const [buyYieldError, setBuyYieldError] = useState<string | null>(null);
+  const [lastAutofillSummary, setLastAutofillSummary] =
+    useState<BondDealAutofillResponse | null>(null);
+  const [pricingFillMode, setPricingFillMode] =
+    useState<PricingFillMode>("auto");
+
+  const watchedProviderPrice = form.watch("providerPrice");
+  const watchedProviderQty = form.watch("providerQuantity");
+  const watchedFaceValue = form.watch("faceValue");
+  const watchedCouponRate = form.watch("couponRate");
+
+  const parseCalcAmount = (s: string | null | undefined): number | null => {
+    if (s == null || !String(s).trim()) return null;
+    const n = Number(String(s).replace(/,/g, "").trim());
+    return Number.isFinite(n) ? n : null;
+  };
+
+  const formatInr = (n: number | null | undefined) =>
+    n != null && Number.isFinite(n)
+      ? `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`
+      : "—";
+
+  const buildDealAutofillParams = (opts?: {
+    pricingYield?: number;
+    mode?: PricingFillMode;
+  }) => {
+    const v = form.getValues();
+    const providerQuantity =
+      v.providerQuantity != null && Number(v.providerQuantity) > 0
+        ? Number(v.providerQuantity)
+        : undefined;
+    const providerPrice =
+      v.providerPrice != null && Number(v.providerPrice) > 0
+        ? Number(v.providerPrice)
+        : undefined;
+
+    return {
+      quantity: providerQuantity ?? 1,
+      ...(opts?.mode === "manual"
+        ? { useLocalCalc: true as const }
+        : { automatedSettlement: true as const }),
+      ...(providerPrice != null ? { providerPrice } : {}),
+      ...(providerQuantity != null ? { providerQuantity } : {}),
+      ...(opts?.pricingYield != null && Number.isFinite(opts.pricingYield)
+        ? { pricingYield: opts.pricingYield }
+        : {}),
+    };
+  };
+
+  const calcResultToast = (
+    data: BondDealAutofillResponse,
+    prefix: string,
+    s: BondDealAutofillResponse["suggested"],
+  ) => {
+    const sale =
+      s.sellPrice != null
+        ? `₹${s.sellPrice.toLocaleString("en-IN", { maximumFractionDigits: 4 })}`
+        : "—";
+    const dueHint = s.dueDate ? ` Due ${s.dueDate}.` : "";
+    const settlementAmt =
+      data.pricing.settlementAmount ??
+      parseCalcAmount(data.pricing.calc?.settlement_amount);
+    const accruedAmt =
+      data.pricing.totalAccruedInterest ??
+      parseCalcAmount(data.pricing.calc?.total_ai);
+    const providerHints: string[] = [];
+    if (data.sources.usedProviderPrice) providerHints.push("provider price");
+    if (data.sources.usedProviderQuantity) providerHints.push("provider qty");
+    if (data.sources.usedProviderSettlementDate) providerHints.push("provider date");
+    const providerHint =
+      providerHints.length > 0 ? ` Used ${providerHints.join(", ")}.` : "";
+    toast.success(
+      `${prefix} sale price (clean) ${sale}, yield ${Number.isFinite(s.yield) ? `${s.yield}%` : "—"}.${dueHint} Settlement ${formatInr(settlementAmt)}, accrued ${formatInr(accruedAmt)} (${data.sources.yieldSource} yield).${providerHint}`,
+    );
+  };
+
+  const applyManualProviderCalcResult = (data: BondDealAutofillResponse) => {
+    setLastAutofillSummary(data);
+    const s = data.suggested;
+    const toDate = (ymd: string | null | undefined) => {
+      if (!ymd?.trim()) return undefined;
+      const raw = ymd.trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+        const [y, m, d] = raw.split("-").map(Number);
+        const dt = new Date(y, m - 1, d);
+        return Number.isNaN(dt.getTime()) ? undefined : dt;
+      }
+      const d = new Date(raw);
+      return Number.isNaN(d.getTime()) ? undefined : d;
+    };
+    if (s.sellPrice != null && Number.isFinite(s.sellPrice)) {
+      form.setValue("sellPrice", s.sellPrice);
+    }
+    if (Number.isFinite(s.yield)) form.setValue("yield", s.yield);
+    const lc = toDate(s.lastCouponDate);
+    if (lc) form.setValue("lastCouponDate", lc);
+    const nc = toDate(s.nextCouponDate);
+    if (nc) form.setValue("nextCouponDate", nc);
+    const rec = toDate(s.recordDate ?? undefined);
+    if (rec) form.setValue("recordDate", rec);
+    if (s.recordDays != null && Number.isFinite(s.recordDays)) {
+      form.setValue("recordDays", s.recordDays);
+    }
+    calcResultToast(data, "Manual calc:", s);
+  };
 
   const applyDealAutofillResult = (data: BondDealAutofillResponse) => {
+    setLastAutofillSummary(data);
     const s = data.suggested;
     if (s.bondName?.trim()) form.setValue("bondName", s.bondName.trim());
     if (s.creditRating?.trim()) form.setValue("creditRating", s.creditRating.trim());
@@ -457,12 +566,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
     if (s.sellPrice != null && Number.isFinite(s.sellPrice)) {
       form.setValue("sellPrice", s.sellPrice);
     }
-    const sale = s.sellPrice != null ? `₹${s.sellPrice.toLocaleString("en-IN", { maximumFractionDigits: 4 })}` : "—";
-    const dueHint = s.dueDate ? ` Due ${s.dueDate}.` : "";
-    toast.success(
-      `Filled: sale price (clean) ${sale}, yield ${Number.isFinite(s.yield) ? `${s.yield}%` : "—"}.${dueHint} Settlement ₹${data.pricing.settlementAmount?.toLocaleString("en-IN") ?? "—"
-      }, accrued ₹${data.pricing.totalAccruedInterest?.toLocaleString("en-IN") ?? "—"} (${data.sources.yieldSource} yield).`,
-    );
+    calcResultToast(data, "Filled:", s);
   };
 
   const autofillErrorToast = (error: AxiosError) => {
@@ -474,17 +578,23 @@ function BondForm({ initialData, isin }: BondFormProps) {
   };
 
   const dealAutofillMutation = useMutation({
-    mutationFn: async (opts?: { pricingYield?: number }) => {
-      const res = await apiCaller.getBondDealAutofillCalc(isin!, {
-        quantity: 1,
-        ...(opts?.pricingYield != null && Number.isFinite(opts.pricingYield)
-          ? { pricingYield: opts.pricingYield }
-          : {}),
-      });
-      return res.responseData;
+    mutationFn: async (opts?: {
+      pricingYield?: number;
+      mode?: PricingFillMode;
+    }) => {
+      const res = await apiCaller.getBondDealAutofillCalc(
+        isin!,
+        buildDealAutofillParams({
+          pricingYield: opts?.pricingYield,
+          mode: opts?.mode,
+        }),
+      );
+      return { data: res.responseData, mode: opts?.mode ?? "auto" };
     },
-    onSuccess: (data) => {
-      if (data) applyDealAutofillResult(data);
+    onSuccess: ({ data, mode }) => {
+      if (!data) return;
+      if (mode === "manual") applyManualProviderCalcResult(data);
+      else applyDealAutofillResult(data);
     },
     onError: autofillErrorToast,
   });
@@ -495,7 +605,10 @@ function BondForm({ initialData, isin }: BondFormProps) {
       form.setValue("buyYield", buyYield);
       await queryClient.invalidateQueries({ queryKey: ["bond", isin] });
       await queryClient.invalidateQueries({ queryKey: ["bonds"] });
-      const res = await apiCaller.getBondDealAutofillCalc(isin!, { quantity: 1 });
+      const res = await apiCaller.getBondDealAutofillCalc(
+        isin!,
+        buildDealAutofillParams(),
+      );
       return res.responseData;
     },
     onSuccess: (data) => {
@@ -527,7 +640,20 @@ function BondForm({ initialData, isin }: BondFormProps) {
       setBuyYieldPromptOpen(true);
       return;
     }
-    dealAutofillMutation.mutate({});
+    dealAutofillMutation.mutate({ mode: "auto" });
+  };
+
+  const onManualProviderCalcClick = () => {
+    const v = form.getValues();
+    const providerPrice =
+      v.providerPrice != null && Number(v.providerPrice) > 0
+        ? Number(v.providerPrice)
+        : null;
+    if (providerPrice == null) {
+      toast.error("Enter provider price to run manual provider calc.");
+      return;
+    }
+    dealAutofillMutation.mutate({ mode: "manual" });
   };
 
   const parseYieldPercent = (v: unknown): number | undefined => {
@@ -549,7 +675,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
       toast.error("Enter a valid sell yield (%) first.");
       return;
     }
-    dealAutofillMutation.mutate({ pricingYield: py });
+    dealAutofillMutation.mutate({ pricingYield: py, mode: pricingFillMode });
   };
 
   const submitBuyYieldThenAutofill = () => {
@@ -580,6 +706,185 @@ function BondForm({ initialData, isin }: BondFormProps) {
   const dealAutofillBusy =
     dealAutofillMutation.isPending || saveBuyYieldAndAutofillMutation.isPending;
 
+  const renderManualCalcFormula = () => {
+    const cleanPct =
+      watchedProviderPrice != null && Number(watchedProviderPrice) > 0
+        ? Number(watchedProviderPrice)
+        : null;
+    const qty =
+      watchedProviderQty != null && Number(watchedProviderQty) > 0
+        ? Number(watchedProviderQty)
+        : 1;
+    const face =
+      watchedFaceValue != null && Number(watchedFaceValue) > 0
+        ? Number(watchedFaceValue)
+        : null;
+
+    const calc = lastAutofillSummary?.pricing.calc;
+    const principal =
+      lastAutofillSummary?.pricing.principalAmount ??
+      parseCalcAmount(calc?.principal_amount);
+    const accrued =
+      lastAutofillSummary?.pricing.totalAccruedInterest ??
+      parseCalcAmount(calc?.total_ai);
+    const stamp = parseCalcAmount(
+      typeof calc?.stamp_duty === "string" ? calc.stamp_duty : undefined,
+    );
+    const settlement =
+      lastAutofillSummary?.pricing.settlementAmount ??
+      parseCalcAmount(calc?.settlement_amount);
+    const offeredYield = calc?.final_yield_raw;
+
+    return (
+      <div className="rounded-md border border-dashed border-primary/30 bg-muted/40 px-4 py-3 text-sm sm:col-span-2">
+        <p className="font-semibold text-foreground">Manual calc formula</p>
+        <p className="text-muted-foreground mt-1 text-xs">
+          Computed in-house from provider clean price, quantity, and bond schedule (T+1 IST
+          settlement). No external pricing API is called.
+        </p>
+
+        <div className="mt-3 space-y-1.5 rounded-md bg-background/70 px-3 py-2 font-mono text-xs leading-relaxed">
+          <p>
+            <span className="text-muted-foreground">Clean price</span> ={" "}
+            {cleanPct != null ? cleanPct : "—"}{" "}
+            <span className="font-sans text-muted-foreground">(% of face value)</span>
+          </p>
+          <p>
+            <span className="text-muted-foreground">Quantity</span> = {qty}
+          </p>
+          <p>
+            <span className="text-muted-foreground">Settlement date</span> = T+1 IST working day{" "}
+            <span className="font-sans text-muted-foreground">(automated)</span>
+          </p>
+          <p>
+            <span className="text-muted-foreground">Face value</span> ={" "}
+            {face != null ? face.toLocaleString("en-IN") : "—"}
+          </p>
+          <p>
+            <span className="text-muted-foreground">Coupon rate</span> ={" "}
+            {watchedCouponRate != null && Number.isFinite(Number(watchedCouponRate))
+              ? Number(watchedCouponRate)
+              : "—"}
+            <span className="font-sans text-muted-foreground"> %</span>
+          </p>
+          <p>
+            <span className="text-muted-foreground">Last / next IP dates</span> = from bond
+            schedule
+          </p>
+        </div>
+
+        <div className="mt-4 space-y-1.5 border-t border-primary/10 pt-3">
+          <p className="text-xs font-medium text-foreground">Output formulas</p>
+          <div className="space-y-1 font-mono text-xs leading-relaxed text-foreground/90">
+            <p>Principal = Face Value × Quantity × (Clean Price ÷ 100)</p>
+            <p>
+              Accrued Interest = coupon accrual from last IP date → settlement (day convention)
+            </p>
+            <p>Total Consideration = Principal + Accrued Interest</p>
+            <p>Settlement amount = Principal + Accrued interest + Stamp duty</p>
+            <p>
+              Offered yield = from bond listing{" "}
+              <span className="font-sans text-muted-foreground">
+                (not re-solved from clean price locally)
+              </span>
+            </p>
+          </div>
+        </div>
+
+        {lastAutofillSummary && principal != null ? (
+          <div className="mt-4 space-y-2 border-t border-primary/10 pt-3">
+            <p className="text-xs font-medium text-foreground">Last run (substituted values)</p>
+            <div className="space-y-1 font-mono text-xs leading-relaxed">
+              <p>
+                Principal = {face?.toLocaleString("en-IN") ?? "FV"} × {qty} × (
+                {cleanPct ?? parseCalcAmount(calc?.final_price) ?? "clean"} ÷ 100) ={" "}
+                <span className="font-semibold">{formatInr(principal)}</span>
+              </p>
+              <p>
+                Accrued Interest ({calc?.accrued_days ?? "—"} days) ={" "}
+                <span className="font-semibold">{formatInr(accrued)}</span>
+              </p>
+              <p>
+                Stamp Duty = <span className="font-semibold">{formatInr(stamp)}</span>
+              </p>
+              <p className="pt-1 font-semibold text-foreground">
+                Settlement = {formatInr(principal)} + {formatInr(accrued)} + {formatInr(stamp)} ={" "}
+                {formatInr(settlement)}
+              </p>
+              {offeredYield != null && Number.isFinite(Number(offeredYield)) ? (
+                <p>
+                  Offered Yield ={" "}
+                  <span className="font-semibold">
+                    {Number(offeredYield).toFixed(4)}%
+                  </span>
+                </p>
+              ) : null}
+              {calc?.settle_dt ? (
+                <p className="text-muted-foreground font-sans">
+                  Settlement date used: {String(calc.settle_dt)}
+                </p>
+              ) : null}
+            </div>
+          </div>
+        ) : (
+          <p className="text-muted-foreground mt-3 text-xs">
+            Run Calc from provider to fill substituted values from the latest response.
+          </p>
+        )}
+      </div>
+    );
+  };
+
+  const renderProviderCalcFields = () => (
+    <>
+      <FormField
+        control={form.control}
+        name="providerPrice"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Provider price (clean, ₹)</FormLabel>
+            <FormControl>
+              <DecimalInput
+                {...field}
+                value={field.value}
+                onChange={field.onChange}
+                placeholder="0.00"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name="providerQuantity"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Provider quantity</FormLabel>
+            <FormControl>
+              <Input
+                type="number"
+                step="1"
+                placeholder="1"
+                value={field.value ?? ""}
+                onChange={(e) =>
+                  field.onChange(
+                    e.target.value ? parseInt(e.target.value, 10) : undefined,
+                  )
+                }
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <p className="text-muted-foreground text-sm sm:col-span-2">
+        Settlement date is automated (T+1 IST). See calc formula panel for inputs and output
+        breakdown.
+      </p>
+    </>
+  );
+
   return (
     <div className="container mx-auto py-6">
       <Form {...form}>
@@ -587,37 +892,177 @@ function BondForm({ initialData, isin }: BondFormProps) {
           {isUpdateMode && isin ? (
             <Card className="border-primary/25 bg-primary/5 shadow-sm">
               <CardHeader className="space-y-3 pb-2">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="space-y-1">
-                    <CardTitle className="text-lg">Pricing calculator — auto-fill</CardTitle>
-                    <CardDescription className="text-sm leading-relaxed">
-                      One click loads data from your database (schedules, margins, consolidated yield) and calls{" "}
-                      <span className="font-medium text-foreground">calc.meradhan.co</span> to compute{" "}
-                      <span className="font-medium text-foreground">offered yield</span>,{" "}
-                      <span className="font-medium text-foreground">last &amp; next coupon dates</span>, and{" "}
-                      <span className="font-medium text-foreground">sale price (clean, ₹)</span>,{" "}
-                      <span className="font-medium text-foreground">record date</span> &amp;{" "}
-                      <span className="font-medium text-foreground">record days</span> (from DB / reference when
-                      available) — plus settlement and accrued amounts in the toast.{" "}
-                      <span className="font-medium text-foreground">Buy yield</span> must be set on the bond; if it is
-                      missing, you will be asked to enter it first (it is saved, then this runs again).
-                    </CardDescription>
-                  </div>
-                  <Button
-                    type="button"
-                    disabled={dealAutofillBusy}
-                    className="h-11 shrink-0 gap-2 px-5 font-medium shadow-sm"
-                    onClick={onDealAutofillButtonClick}
-                    aria-label="Auto-fill bond fields from calculator and database"
-                  >
-                    {dealAutofillBusy ? (
-                      <Loader2 className="size-4 animate-spin" aria-hidden />
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="space-y-2">
+                      <CardTitle className="text-lg">Pricing calculator</CardTitle>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Fill mode</Label>
+                        <RadioGroup
+                          value={pricingFillMode}
+                          onValueChange={(v) =>
+                            setPricingFillMode(v as PricingFillMode)
+                          }
+                          className="flex flex-col gap-2 sm:flex-row sm:gap-6"
+                        >
+                          <div className="flex items-center gap-2">
+                            <RadioGroupItem value="auto" id="pricing-fill-auto" />
+                            <Label
+                              htmlFor="pricing-fill-auto"
+                              className="cursor-pointer font-normal"
+                            >
+                              Auto-fill (DB + calc)
+                            </Label>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <RadioGroupItem value="manual" id="pricing-fill-manual" />
+                            <Label
+                              htmlFor="pricing-fill-manual"
+                              className="cursor-pointer font-normal"
+                            >
+                              Manual (provider calc)
+                            </Label>
+                          </div>
+                        </RadioGroup>
+                      </div>
+                      <CardDescription className="text-sm leading-relaxed">
+                        {pricingFillMode === "auto" ? (
+                          <>
+                            Loads schedules, margins, and consolidated yield from your database and calls{" "}
+                            <span className="font-medium text-foreground">calc.meradhan.co</span> to fill{" "}
+                            <span className="font-medium text-foreground">sale price</span>, coupon dates, record
+                            date, and related fields. Provider price and quantity are used when set. Settlement
+                            date is always automated (T+1 IST working day). Qty defaults to 1 when not set.{" "}
+                            <span className="font-medium text-foreground">Buy yield</span> must be set first.
+                          </>
+                        ) : (
+                          <>
+                            Enter provider clean price and quantity, then run calc. Uses in-house
+                            formulas (principal, accrual, stamp duty) with T+1 IST settlement. Only
+                            pricing fields are updated — bond metadata is left unchanged.
+                          </>
+                        )}
+                      </CardDescription>
+                    </div>
+                    {pricingFillMode === "auto" ? (
+                      <Button
+                        type="button"
+                        disabled={dealAutofillBusy}
+                        className="h-11 shrink-0 gap-2 px-5 font-medium shadow-sm"
+                        onClick={onDealAutofillButtonClick}
+                        aria-label="Auto-fill bond fields from calculator and database"
+                      >
+                        {dealAutofillBusy ? (
+                          <Loader2 className="size-4 animate-spin" aria-hidden />
+                        ) : (
+                          <Sparkles className="size-4" aria-hidden />
+                        )}
+                        Fill sale price &amp; dates
+                      </Button>
                     ) : (
-                      <Sparkles className="size-4" aria-hidden />
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        disabled={dealAutofillBusy}
+                        className="h-11 shrink-0 gap-2 px-5 font-medium shadow-sm"
+                        onClick={onManualProviderCalcClick}
+                        aria-label="Calculate pricing from provider inputs"
+                      >
+                        {dealAutofillBusy ? (
+                          <Loader2 className="size-4 animate-spin" aria-hidden />
+                        ) : (
+                          <Calculator className="size-4" aria-hidden />
+                        )}
+                        Calc from provider
+                      </Button>
                     )}
-                    Fill sale price &amp; dates
-                  </Button>
+                  </div>
+                  {pricingFillMode === "manual" ? (
+                    <div className="grid grid-cols-1 gap-4 rounded-md border border-primary/15 bg-background/80 p-4 sm:grid-cols-2">
+                      {renderProviderCalcFields()}
+                      {renderManualCalcFormula()}
+                    </div>
+                  ) : null}
                 </div>
+                {lastAutofillSummary ? (
+                  <div className="rounded-md border border-primary/15 bg-background/80 px-4 py-3 text-sm">
+                    <p className="font-medium text-foreground">Last calc summary (IST)</p>
+                    <dl className="mt-2 grid gap-x-4 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
+                      <div>
+                        <dt className="text-muted-foreground">Settlement date (T+1 IST)</dt>
+                        <dd className="font-medium">
+                          {lastAutofillSummary.pricing.calc?.settle_dt ?? "—"}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-muted-foreground">Quantity</dt>
+                        <dd className="font-medium">{lastAutofillSummary.quantity}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-muted-foreground">Settlement amount</dt>
+                        <dd className="font-medium">
+                          {formatInr(
+                            lastAutofillSummary.pricing.settlementAmount ??
+                              parseCalcAmount(
+                                lastAutofillSummary.pricing.calc?.settlement_amount,
+                              ),
+                          )}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-muted-foreground">Accrued interest</dt>
+                        <dd className="font-medium">
+                          {formatInr(
+                            lastAutofillSummary.pricing.totalAccruedInterest ??
+                              parseCalcAmount(lastAutofillSummary.pricing.calc?.total_ai),
+                          )}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-muted-foreground">Principal</dt>
+                        <dd className="font-medium">
+                          {formatInr(
+                            lastAutofillSummary.pricing.principalAmount ??
+                              parseCalcAmount(
+                                lastAutofillSummary.pricing.calc?.principal_amount,
+                              ),
+                          )}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-muted-foreground">Accrual days</dt>
+                        <dd className="font-medium">
+                          {lastAutofillSummary.pricing.calc?.accrued_days ?? "—"}
+                        </dd>
+                      </div>
+                    </dl>
+                    {lastAutofillSummary.suggested.isUnderShutPeriod ? (
+                      <p className="mt-2 text-amber-700 dark:text-amber-400">
+                        Bond is under shut period for this settlement date.
+                      </p>
+                    ) : null}
+                    {(lastAutofillSummary.sources.usedProviderPrice ||
+                      lastAutofillSummary.sources.usedProviderQuantity ||
+                      lastAutofillSummary.sources.usedProviderSettlementDate) ? (
+                      <p className="text-muted-foreground mt-2 text-xs">
+                        Inputs:{" "}
+                        {[
+                          lastAutofillSummary.sources.usedProviderPrice
+                            ? "provider price"
+                            : null,
+                          lastAutofillSummary.sources.usedProviderQuantity
+                            ? "provider quantity"
+                            : null,
+                          lastAutofillSummary.sources.usedProviderSettlementDate
+                            ? "provider settlement date"
+                            : null,
+                        ]
+                          .filter(Boolean)
+                          .join(", ")}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
               </CardHeader>
             </Card>
           ) : null}
@@ -1866,7 +2311,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
                         />
                       </FormControl>
                       <FormMessage />
-                      {isUpdateMode && isin ? (
+                      {isUpdateMode && isin && pricingFillMode === "auto" ? (
                         <button
                           type="button"
                           className="text-primary hover:underline text-left text-sm font-medium disabled:pointer-events-none disabled:opacity-50"
@@ -2008,6 +2453,11 @@ function BondForm({ initialData, isin }: BondFormProps) {
               <CardTitle>Provider Information</CardTitle>
               <CardDescription>
                 Provider details and ongoing deal information
+                {pricingFillMode === "manual" ? (
+                  <span className="mt-1 block text-xs">
+                    Price and quantity are configured in the pricing calculator card above (settlement date is automated).
+                  </span>
+                ) : null}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -2030,76 +2480,85 @@ function BondForm({ initialData, isin }: BondFormProps) {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="providerPrice"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Provider Price</FormLabel>
-                      <FormControl>
-                        <DecimalInput
-                          {...field}
-                          value={field.value}
-                          onChange={field.onChange}
-                          placeholder="0.00"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {pricingFillMode !== "manual" ? (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="providerPrice"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Provider Price</FormLabel>
+                          <FormControl>
+                            <DecimalInput
+                              {...field}
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="0.00"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                <FormField
-                  control={form.control}
-                  name="providerQuantity"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Provider Quantity</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          step="1"
-                          placeholder="0"
-                          value={field.value ?? ""}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value
-                                ? parseInt(e.target.value, 10)
-                                : undefined
-                            )
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    <FormField
+                      control={form.control}
+                      name="providerQuantity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Provider Quantity</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              step="1"
+                              placeholder="0"
+                              value={field.value ?? ""}
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value
+                                    ? parseInt(e.target.value, 10)
+                                    : undefined,
+                                )
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                <FormField
-                  control={form.control}
-                  name="providerInterestDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Provider Interest Date</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="date"
-                          value={
-                            field.value
-                              ? formatDateForDateInput(field.value as Date)
-                              : ""
-                          }
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value ? parseApiDateStringToLocalDate(e.target.value) : null
-                            )
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    <FormField
+                      control={form.control}
+                      name="providerInterestDate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Provider interest date (reference)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="date"
+                              value={
+                                field.value
+                                  ? formatDateForDateInput(field.value as Date)
+                                  : ""
+                              }
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value
+                                    ? parseApiDateStringToLocalDate(e.target.value)
+                                    : null,
+                                )
+                              }
+                            />
+                          </FormControl>
+                          <FormDescription className="text-xs">
+                            Stored on the bond for reference. Pricing calc uses automated T+1 IST settlement.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                ) : null}
 
                 <FormField
                   control={form.control}

@@ -12,6 +12,8 @@ export const useOrderState = create<{
   /** Set when payment order is created (final MeraDhan Order ID from server). */
   meradhanOrderNumber: string | null;
   setMeradhanOrderNumber: (v: string | null) => void;
+  /** Reset checkout flow when (re)entering place-order for a bond. */
+  resetOrderFlow: () => void;
 }>((set) => ({
   quantity: 1,
   setQuantity: (quantity: number) => {
@@ -24,7 +26,6 @@ export const useOrderState = create<{
   // current step in the order process
   step: 1,
   setStep: (step: number) => {
-    // mai 1
     set({ step });
   },
   // settlement date for the order
@@ -33,4 +34,10 @@ export const useOrderState = create<{
   meradhanOrderNumber: null,
   setMeradhanOrderNumber: (meradhanOrderNumber: string | null) =>
     set({ meradhanOrderNumber }),
+  resetOrderFlow: () =>
+    set({
+      step: 1,
+      meradhanOrderNumber: null,
+      settlementDate: "1",
+    }),
 }));

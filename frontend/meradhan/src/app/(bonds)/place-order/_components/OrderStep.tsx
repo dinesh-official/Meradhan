@@ -18,8 +18,10 @@ import {
 import OrderReceipt from "./Stages/OrderReceipt";
 import Payment from "./Stages/Payment";
 import { useOrderState } from "../store/useOrderState";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useOrderActivityTracking } from "../_hooks/useOrderActivityTracking";
+import { useSearchParams } from "next/navigation";
+import { useBondOrderPricing } from "../_hooks/useBondOrderPricing";
 
 const stepNames = ["Place Order", "Order Receipt", "Confirmation"];
 
@@ -27,17 +29,39 @@ function OrderStep({
   bond,
   customer,
   orderId,
-  orderPricing,
+  orderPricing: initialOrderPricing,
 }: {
   bond: BondDetailsResponse;
   customer: CustomerByIdPayload;
   orderId: string;
   orderPricing: BondOrderPricingData | null;
 }) {
-  const { step } = useOrderState();
+  const searchParams = useSearchParams();
+  const quantityParam = searchParams.get("quantity");
+  const quantityForPricing = useMemo(() => {
+    const q = Number(quantityParam ?? 1);
+    return Number.isFinite(q) && q >= 1 ? Math.floor(q) : 1;
+  }, [quantityParam]);
+  const { step, resetOrderFlow, setQuantity } = useOrderState();
+  const { data: orderPricing, isFetching: isPricingFetching } =
+    useBondOrderPricing({
+      isin: bond.isin,
+      quantity: quantityForPricing,
+      bond,
+      initialPricing: initialOrderPricing,
+    });
   const { trackPageView, trackStepChange } = useOrderActivityTracking();
   const previousStep = useRef(step);
   const hasTrackedPageView = useRef(false);
+
+  // Fresh flow when opening place-order (or returning after leaving the page).
+  useEffect(() => {
+    resetOrderFlow();
+    const q = Number(quantityParam ?? 1);
+    setQuantity(Number.isFinite(q) && q >= 1 ? Math.floor(q) : 1);
+    previousStep.current = 1;
+    hasTrackedPageView.current = false;
+  }, [bond.isin, quantityParam, resetOrderFlow, setQuantity]);
 
   // Track page view on mount
   useEffect(() => {
@@ -85,14 +109,15 @@ function OrderStep({
               bond={bond}
               customer={customer}
               orderId={orderId}
-              orderPricing={orderPricing}
+              orderPricing={orderPricing ?? null}
+              isPricingFetching={isPricingFetching}
               key={"Review-Order"}
             />,
             <OrderReceipt
               bond={bond}
               customer={customer}
               orderId={orderId}
-              orderPricing={orderPricing}
+              orderPricing={orderPricing ?? null}
               key={"Order-Receipt"}
             />,
             <Payment
