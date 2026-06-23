@@ -369,6 +369,18 @@ export const computeBondOrderPricingData = async (
         settlement.settlementOrder = "T+0";
     }
 
+    const settlementDt = utcMidnightForISODate(settlement.settlementDate);
+    const bondInfo = await db.dataBase.bonds.findUnique({
+        where: { isin: params.isin },
+    });
+    const couponDates = await resolveCouponDatesForSettlement(
+        params.isin,
+        settlementDt,
+        bondInfo,
+    );
+    const lastCouponYmd = couponDates.lastCouponDate ?? params.lastCouponDate;
+    const nextCouponYmd = couponDates.nextCouponDate ?? params.nextCouponDate;
+    const recordDaysResolved = couponDates.recordDays ?? params.recordDays;
 
     const principal = principalAmount(
         params.faceValue,
@@ -380,14 +392,13 @@ export const computeBondOrderPricingData = async (
         faceValue: params.faceValue,
         quantity: params.quantity,
         couponRate: params.couponRate,
-        lastCouponDate: utcMidnightForISODate(params.lastCouponDate),
-        nextCouponDate: utcMidnightForISODate(params.nextCouponDate),
-        settlementDate: utcMidnightForISODate(settlement.settlementDate),
-        recordDays: params.recordDays,
+        lastCouponDate: utcMidnightForISODate(lastCouponYmd),
+        nextCouponDate: utcMidnightForISODate(nextCouponYmd),
+        settlementDate: settlementDt,
+        recordDays: recordDaysResolved,
     });
 
     const stampDuty = calculateStampDuty(principal);
-    const bondInfo = await db.dataBase.bonds.findUnique({ where: { isin: params.isin } });
 
     const bondData = await getBondInfoCalcData(params.isin, {
         quantity: params.quantity,
@@ -420,6 +431,8 @@ export const computeBondOrderPricingData = async (
             ? Number(calcYieldRaw)
             : undefined;
 
+    const calcAccrualDays = Number(bondData.calc.accrued_days);
+
     return {
         ...params,
         ...settlement,
@@ -430,10 +443,14 @@ export const computeBondOrderPricingData = async (
         accruedInterest: calcAccrued,
         stampDuty: calcStamp,
         settlementAmount: calcSettlement,
-        noOfAccrualDays: accrued.noOfAccrualDays,
+        noOfAccrualDays: Number.isFinite(calcAccrualDays)
+            ? calcAccrualDays
+            : accrued.noOfAccrualDays,
         isUnderShutPeriod: bondData.calc.period_status === "Shut Period",
         recordDate: accrued.recordDate,
-        recordDays: bondData.suggested.recordDays ?? accrued.noOfAccrualDays,
+        recordDays: bondData.suggested.recordDays ?? recordDaysResolved,
+        lastCouponDate: lastCouponYmd,
+        nextCouponDate: nextCouponYmd,
         ...(calcYield != null ? { yield: calcYield } : {}),
     };
 };
@@ -474,37 +491,14 @@ export async function computeLocalProviderBondPricing(opts: {
     const settlement = computeBondSettlement(new Date());
     const settlementDate = settlement.settlementDate;
     const settlementDt = utcMidnightForISODate(settlementDate);
-
-    const couponMeta = await getLastNextCouponDateBasedOnSettlementDate(
+    const couponDates = await resolveCouponDatesForSettlement(
         opts.isin,
         settlementDt,
+        bond,
     );
-
-    const scheduleLast = await getLastCouponDateFromReferenceData(
-        opts.isin,
-        settlementDt,
-    );
-    const scheduleNext = await getNextCouponDate(opts.isin, settlementDt);
-
-    // Coupon schedule wins over bond-row snapshots (often stale vs settlement).
-    let lastCouponDate =
-        scheduleLast ??
-        (bond.lastCouponDateIst instanceof Date &&
-        !Number.isNaN(bond.lastCouponDateIst.getTime())
-            ? toUTCISODate(bond.lastCouponDateIst)
-            : couponMeta.lastCouponDate);
-    let nextCouponDate =
-        scheduleNext ??
-        (bond.nextCouponDateIst instanceof Date &&
-        !Number.isNaN(bond.nextCouponDateIst.getTime())
-            ? toUTCISODate(bond.nextCouponDateIst)
-            : couponMeta.nextCouponDate);
-    let recordDays =
-        couponMeta.recordDays != null && Number.isFinite(couponMeta.recordDays)
-            ? couponMeta.recordDays
-            : typeof bond.recordDays === "number" && Number.isFinite(bond.recordDays)
-              ? bond.recordDays
-              : 7;
+    const lastCouponDate = couponDates.lastCouponDate;
+    const nextCouponDate = couponDates.nextCouponDate;
+    const recordDays = couponDates.recordDays;
 
     if (!lastCouponDate || !nextCouponDate) {
         throw new Error(
@@ -835,6 +829,62 @@ export const getLastNextCouponDateBasedOnSettlementDate = async (isin: string, s
         recordDays,
     };
 };
+
+/**
+ * Resolve last/next coupon dates for pricing at a settlement anchor.
+ * Coupon schedule wins over bond-row snapshots (often stale vs settlement).
+ */
+export async function resolveCouponDatesForSettlement(
+    isin: string,
+    settlement: Date,
+    bondRow?: {
+        lastCouponDateIst?: Date | null;
+        nextCouponDateIst?: Date | null;
+        recordDays?: number | null;
+    } | null,
+) {
+    const settlementDt = Number.isNaN(settlement.getTime())
+        ? utcMidnightForISODate(toISTISODate(new Date()))
+        : settlement;
+
+    const couponMeta = await getLastNextCouponDateBasedOnSettlementDate(
+        isin,
+        settlementDt,
+    );
+    const scheduleLast = await getLastCouponDateFromReferenceData(
+        isin,
+        settlementDt,
+    );
+    const scheduleNext = await getNextCouponDate(isin, settlementDt);
+
+    const bondLast =
+        bondRow?.lastCouponDateIst instanceof Date &&
+        !Number.isNaN(bondRow.lastCouponDateIst.getTime())
+            ? toUTCISODate(bondRow.lastCouponDateIst)
+            : null;
+    const bondNext =
+        bondRow?.nextCouponDateIst instanceof Date &&
+        !Number.isNaN(bondRow.nextCouponDateIst.getTime())
+            ? toUTCISODate(bondRow.nextCouponDateIst)
+            : null;
+
+    const lastCouponDate = scheduleLast ?? bondLast ?? couponMeta.lastCouponDate;
+    const nextCouponDate = scheduleNext ?? bondNext ?? couponMeta.nextCouponDate;
+    const recordDays =
+        couponMeta.recordDays != null && Number.isFinite(couponMeta.recordDays)
+            ? couponMeta.recordDays
+            : typeof bondRow?.recordDays === "number" &&
+                Number.isFinite(bondRow.recordDays)
+              ? bondRow.recordDays
+              : 7;
+
+    return {
+        lastCouponDate,
+        nextCouponDate,
+        recordDays,
+        isUnderShutPeriod: couponMeta.isUnderShutPeriod,
+    };
+}
 
 /**
  * Returns the last coupon due date (YYYY-MM-DD) on/before the settlement date.
