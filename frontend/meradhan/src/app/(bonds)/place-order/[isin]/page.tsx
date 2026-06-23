@@ -97,7 +97,7 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
 
   if (!kycOk || !kraOk) {
     return (
-      <ViewPort>
+      <ViewPort hideNewsLetter>
         <div className="mb-4 container">
           <SectionWrapper>
             <div className="text-center py-20 flex justify-center items-center flex-col gap-5">
@@ -144,7 +144,7 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
 
   if (!responseData) {
     return (
-      <ViewPort>
+      <ViewPort hideNewsLetter>
         <div className="container">
           <SectionWrapper>
             <div className="text-center py-20 flex justify-center items-center flex-col gap-5">
@@ -186,7 +186,7 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
 
   if (!responseData.allowForPurchase) {
     return (
-      <ViewPort>
+      <ViewPort hideNewsLetter>
         <div className="container">
           <SectionWrapper>
             <div className="text-center py-20 flex justify-center items-center flex-col gap-5">
@@ -214,7 +214,7 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
     const missingFields = purchase.missingFields.join(", ");
 
     return (
-      <ViewPort>
+      <ViewPort hideNewsLetter>
         <div className="container">
           <SectionWrapper>
             <div className="text-center py-20 flex justify-center items-center flex-col gap-5">
@@ -244,7 +244,7 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
 
   if (!hasCrmInventoryAvailable(responseData)) {
     return (
-      <ViewPort>
+      <ViewPort hideNewsLetter>
         <div className="container">
           <SectionWrapper>
             <div className="text-center py-20 flex justify-center items-center flex-col gap-5">
@@ -276,7 +276,7 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
 
   if (!customerPayload) {
     return (
-      <ViewPort>
+      <ViewPort hideNewsLetter>
         <div className="container">
           <SectionWrapper>
             <div className="text-center py-20 flex justify-center items-center flex-col gap-5">
@@ -308,7 +308,7 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
   }
 
   return (
-    <ViewPort>
+    <ViewPort hideNewsLetter>
       <OrderStep
         bond={responseData}
         customer={customerPayload}

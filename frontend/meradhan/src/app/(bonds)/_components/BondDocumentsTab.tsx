@@ -5,7 +5,7 @@ import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { genMediaUrl } from "@/global/utils/url.utils";
 import apiGateway, { type BondDocumentItem } from "@root/apiGateway";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Download, FileText } from "lucide-react";
+import { Download, FileText /*, Calendar */ } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,15 +18,15 @@ import { BondDocumentsTabShimmer } from "./BondDetailTabShimmers";
 import { BondTabErrorState } from "./BondTabErrorState";
 import { BondTabEmptyState } from "./BondTabEmptyState";
 
-function formatWhen(iso: string) {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return new Intl.DateTimeFormat("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(d);
-}
+// function formatWhen(iso: string) {
+//   const d = new Date(iso);
+//   if (Number.isNaN(d.getTime())) return iso;
+//   return new Intl.DateTimeFormat("en-IN", {
+//     day: "2-digit",
+//     month: "short",
+//     year: "numeric",
+//   }).format(d);
+// }
 
 function BondDocumentCard({
   doc,
@@ -45,10 +45,10 @@ function BondDocumentCard({
         <h3 className="line-clamp-2 text-base font-semibold text-slate-900">
           {doc.name}
         </h3>
-        <p className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500">
+        {/* <p className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500">
           <Calendar className="size-3.5 shrink-0" aria-hidden />
           Uploaded {formatWhen(doc.createdAt)}
-        </p>
+        </p> */}
       </div>
 
       <button
