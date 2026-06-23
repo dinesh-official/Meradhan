@@ -27,7 +27,6 @@ import {
 import Image from "next/image";
 import { IoMdArrowDropright } from "react-icons/io";
 import { PiCurrencyInrBold } from "react-icons/pi";
-import { calculateSettlementAmount } from "../../_utils/calcAmount";
 import { getPlaceOrderBusinessDates } from "../../_utils/businessDates";
 import { getMaxOrderQuantityFromBond } from "../../_utils/quantity";
 import { hasCrmInventoryAvailable } from "@/global/utils/bondPurchaseEligibility";
@@ -167,13 +166,27 @@ function ReviewOrder({
           </p>
         </div>
       )}
+      {!orderPricing && !outOfStock && (
+        <div
+          className="mt-5 rounded-md border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-900 dark:text-amber-200"
+          role="alert"
+        >
+          <p className="font-semibold">Pricing unavailable</p>
+          <p className="mt-1">
+            Settlement amounts could not be loaded from the calculator. Change quantity or refresh
+            the page to retry.
+          </p>
+        </div>
+      )}
       <div className="mt-5 border-t md:border md:p-8 pt-5 border-gray-200 md:rounded-[10px]">
         <div className="grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2  md:gap-y-10 gap-y-5 gap-x-6">
           <BondInfoLabel title="Yield to Maturity">
             <p className="text-black">
-              {bond.yield != null && bond.yield !== ""
-                ? `${Number(bond.yield).toFixed(2)}%`
-                : "—"}
+              {orderPricing?.yield != null && Number.isFinite(orderPricing.yield)
+                ? `${Number(orderPricing.yield).toFixed(2)}%`
+                : bond.yield != null && bond.yield !== ""
+                  ? `${Number(bond.yield).toFixed(2)}%`
+                  : "—"}
             </p>
           </BondInfoLabel>
 

@@ -159,25 +159,55 @@ export class BondsApi {
     isin: string,
     params?: {
       quantity?: number;
+      settlementDate?: string;
       pricingYield?: number;
+      providerPrice?: number;
+      providerQuantity?: number;
+      providerInterestDate?: string;
+      automatedSettlement?: boolean;
+      useLocalCalc?: boolean;
     },
     config?: AxiosRequestConfig,
   ) {
     const safeIsin = encodeURIComponent(isin);
-    const quantity = params?.quantity ?? 1;
-    const pricingYield = params?.pricingYield;
+    const body = {
+      quantity: params?.quantity ?? 1,
+      ...(params?.settlementDate != null && params.settlementDate !== ""
+        ? { settlementDate: params.settlementDate }
+        : {}),
+      ...(params?.pricingYield != null && Number.isFinite(params.pricingYield)
+        ? { pricingYield: params.pricingYield }
+        : {}),
+      ...(params?.providerPrice != null && Number.isFinite(params.providerPrice)
+        ? { providerPrice: params.providerPrice }
+        : {}),
+      ...(params?.providerQuantity != null &&
+      Number.isFinite(params.providerQuantity)
+        ? { providerQuantity: params.providerQuantity }
+        : {}),
+      ...(params?.providerInterestDate != null &&
+      params.providerInterestDate !== ""
+        ? { providerInterestDate: params.providerInterestDate }
+        : {}),
+      ...(params?.automatedSettlement === true
+        ? { automatedSettlement: true }
+        : {}),
+      ...(params?.useLocalCalc === true ? { useLocalCalc: true } : {}),
+    };
 
-    if (pricingYield != null && Number.isFinite(pricingYield)) {
+    const hasPostBody =
+      params?.pricingYield != null ||
+      params?.providerPrice != null ||
+      params?.providerQuantity != null ||
+      params?.providerInterestDate != null ||
+      params?.settlementDate != null ||
+      params?.automatedSettlement === true ||
+      params?.useLocalCalc === true;
+
+    if (hasPostBody) {
       const response = await this.apiClient.post<
         BaseResponseData<BondDealAutofillResponse>
-      >(
-        `/bonds/${safeIsin}/deal-autofill-calc`,
-        {
-          quantity,
-          pricingYield,
-        },
-        config,
-      );
+      >(`/bonds/${safeIsin}/deal-autofill-calc`, body, config);
       return response.data;
     }
 
@@ -185,7 +215,7 @@ export class BondsApi {
       `/bonds/${safeIsin}/deal-autofill-calc`,
       {
         ...config,
-        params: { quantity },
+        params: body,
       },
     );
     return response.data;

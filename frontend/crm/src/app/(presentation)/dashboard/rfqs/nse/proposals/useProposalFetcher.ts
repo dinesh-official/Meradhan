@@ -28,11 +28,6 @@ export function useProposalFetcher() {
   const bondsApi = new apiGateway.bondsApi.BondsApi(apiClientCaller);
 
   const toIstYmd = (d: Date) => d.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
-  const addUtcDays = (isoDate: string, days: number) => {
-    const [y, m, d] = isoDate.split("-").map(Number);
-    const dt = new Date(Date.UTC(y!, (m ?? 1) - 1, (d ?? 1) + days, 12, 0, 0));
-    return toIstYmd(dt);
-  };
 
   const extractApiMessage = (error: unknown) => {
     const axiosError = error as AxiosError<{ message?: string }>;
@@ -47,37 +42,39 @@ export function useProposalFetcher() {
     mutationFn: async ({
       isin,
       quantity,
-      side,
       settlementType,
       pricingYield,
     }: ProposalPayload): Promise<ProposalFetchResult> => {
       const normalizedIsin = isin.trim().toUpperCase();
-      const settlementDate =
-        settlementType === "T+0"
-          ? toIstYmd(new Date())
-          : addUtcDays(toIstYmd(new Date()), 1);
+      const manualYield =
+        pricingYield != null && Number.isFinite(pricingYield) ? pricingYield : undefined;
 
-      const [bondResponse, previewResponse, dealAutofillResponse] = await Promise.all([
+      const calcParams = {
+        quantity,
+        ...(settlementType === "T+0"
+          ? { settlementDate: toIstYmd(new Date()) }
+          : { automatedSettlement: true as const }),
+        ...(manualYield != null ? { pricingYield: manualYield } : {}),
+      };
+
+      const [bondResponse, pricingResponse, dealAutofillResponse] = await Promise.all([
         bondsApi.getBondDetailsByIsin(normalizedIsin),
-        apiClientCaller
-          .post("/customer/order/preview", { isin: normalizedIsin, quantity })
-          .then((r) => ({ data: r.data as { responseData?: { pricing?: BondOrderPricingData | null } }, error: null as unknown }))
+        bondsApi
+          .getBondOrderPricing(normalizedIsin, quantity, {
+            params: { settlementType },
+          })
+          .then((r) => ({ data: r.responseData ?? null, error: null as unknown }))
           .catch((error: unknown) => ({ data: null as null, error })),
-        // Fetch calc/YTM pricing for both BUY & SELL so proposal has complete pricing fields.
-        bondsApi.getBondDealAutofill(normalizedIsin, {
-          quantity,
-          settlementDate,
-          pricingYield: pricingYield != null && Number.isFinite(pricingYield) ? pricingYield : undefined,
-        }),
+        bondsApi.getBondDealAutofillCalc(normalizedIsin, calcParams),
       ]);
 
-      const pricingError = previewResponse.error
-        ? extractApiMessage(previewResponse.error)
+      const pricingError = pricingResponse.error
+        ? extractApiMessage(pricingResponse.error)
         : null;
 
       return {
         bond: bondResponse.responseData,
-        pricing: previewResponse.data?.responseData?.pricing ?? null,
+        pricing: pricingResponse.data,
         dealAutofill: dealAutofillResponse?.responseData ?? null,
         pricingError,
       };

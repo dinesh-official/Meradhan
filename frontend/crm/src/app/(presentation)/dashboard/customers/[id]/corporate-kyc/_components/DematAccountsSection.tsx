@@ -24,9 +24,8 @@ export function DematAccountsSection({
 }: {
   hook: CorporateKycFormHook;
   /**
-   * When `true`, the customer is KYC/KRA verified and demat accounts are
-   * sealed: no add, no remove, no field edits. Backend enforces the same
-   * lock; this is just the UX layer.
+   * When `true`, the customer is KYC/KRA verified: account fields are
+   * read-only, but demat proof upload remains editable for CBRICS.
    */
   locked?: boolean;
 }) {
@@ -60,9 +59,10 @@ export function DematAccountsSection({
           <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
             <Lock className="h-3.5 w-3.5 mt-0.5 shrink-0" />
             <p>
-              This customer is KYC/KRA verified. Demat accounts cannot be
-              added, edited, or deleted from the corporate KYC form. Use the
-              dedicated demat-account modify flow if changes are needed.
+              This customer is KYC/KRA verified. Demat account details cannot
+              be added, edited, or deleted here. You may still update the{" "}
+              <strong>demat proof file</strong> for CBRICS. Use the dedicated
+              demat-account modify flow for other changes.
             </p>
           </div>
         )}
@@ -141,7 +141,6 @@ export function DematAccountsSection({
               onUpload={(file) => uploadFile(file, "corporate-kyc")}
               accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
               placeholder="Select file or paste URL"
-              disabled={locked}
             />
             <div className="flex items-center gap-2">
               <Switch

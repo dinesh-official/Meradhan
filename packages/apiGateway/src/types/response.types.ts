@@ -509,6 +509,10 @@ export type CorporateKycResponse = {
    */
   lastGeneratedPdfUrl?: string | null;
   lastGeneratedPdfAt?: string | null;
+
+  /** Saved CRM PDF editor form JSON + timestamp. */
+  lastPdfPayload?: Record<string, unknown> | null;
+  lastPdfPayloadAt?: string | null;
 };
 
 export type CorporateKycLastPdfResponseData = {
@@ -517,6 +521,14 @@ export type CorporateKycLastPdfResponseData = {
 };
 
 export type SetCorporateKycLastPdfResponse = BaseResponseData<CorporateKycLastPdfResponseData>;
+
+export type CorporateKycPdfPayloadResponseData = {
+  lastPdfPayload: Record<string, unknown> | null;
+  lastPdfPayloadAt: string | null;
+};
+
+export type SetCorporateKycPdfPayloadResponse =
+  BaseResponseData<CorporateKycPdfPayloadResponseData>;
 
 export type GetCorporateKycResponse = BaseResponseData<CorporateKycResponse | null>;
 export type SaveCorporateKycResponse = BaseResponseData<CorporateKycResponse>;

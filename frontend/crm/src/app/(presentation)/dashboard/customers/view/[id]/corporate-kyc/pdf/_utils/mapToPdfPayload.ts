@@ -743,8 +743,6 @@ export function mapCorporateKycToPdfPayload(
       fatherOrSpouseName: "",
       motherName: "",
       dateOfBirth: "",
-      gender: "Male",
-      maritalStatus: "Married",
       nationality: "IN - Indian",
       residentialStatus: "Resident Individual",
       occupationType: "Private Sector",
@@ -924,7 +922,7 @@ export function mapCorporateKycToPdfPayload(
       ubos: promoterRows.slice(0, 2).map((p) => ({
         name: p.name ?? "",
         fatherName: "",
-        gender: "M",
+        gender: "",
         address: p.address ?? "",
         dateOfBirth: "",
         countryOfBirth: "India",

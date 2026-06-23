@@ -20,6 +20,7 @@ import Payment from "./Stages/Payment";
 import { useOrderState } from "../store/useOrderState";
 import { useEffect, useRef } from "react";
 import { useOrderActivityTracking } from "../_hooks/useOrderActivityTracking";
+import { useSearchParams } from "next/navigation";
 
 const stepNames = ["Place Order", "Order Receipt", "Confirmation"];
 
@@ -34,10 +35,21 @@ function OrderStep({
   orderId: string;
   orderPricing: BondOrderPricingData | null;
 }) {
-  const { step } = useOrderState();
+  const searchParams = useSearchParams();
+  const quantityParam = searchParams.get("quantity");
+  const { step, resetOrderFlow, setQuantity } = useOrderState();
   const { trackPageView, trackStepChange } = useOrderActivityTracking();
   const previousStep = useRef(step);
   const hasTrackedPageView = useRef(false);
+
+  // Fresh flow when opening place-order (or returning after leaving the page).
+  useEffect(() => {
+    resetOrderFlow();
+    const q = Number(quantityParam ?? 1);
+    setQuantity(Number.isFinite(q) && q >= 1 ? Math.floor(q) : 1);
+    previousStep.current = 1;
+    hasTrackedPageView.current = false;
+  }, [bond.isin, quantityParam, resetOrderFlow, setQuantity]);
 
   // Track page view on mount
   useEffect(() => {

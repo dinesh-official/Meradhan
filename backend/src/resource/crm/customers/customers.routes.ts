@@ -111,6 +111,15 @@ crmCustomersRoutes.post(
   (req, res) => controller.setCorporateKycLastPdf(req, res),
 );
 
+/**
+ * Persist the CRM PDF editor JSON form payload on the corporate KYC row.
+ */
+crmCustomersRoutes.put(
+  "/api/crm/customer/:customerId/corporate-kyc/pdf-payload",
+  allowAccessMiddleware("ADMIN", "USER"),
+  (req, res) => controller.setCorporateKycPdfPayload(req, res),
+);
+
 crmCustomersRoutes.get(
   "/api/crm/customer/:customerId/corporate-kyc",
   allowAccessMiddleware("ADMIN", "USER"),

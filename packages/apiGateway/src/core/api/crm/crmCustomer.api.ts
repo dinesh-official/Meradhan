@@ -12,6 +12,7 @@ import type {
   GetCustomerResponseById,
   SaveCorporateKycResponse,
   SetCorporateKycLastPdfResponse,
+  SetCorporateKycPdfPayloadResponse,
   UpdateCustomerResponse,
   VerifyCorporateCustomerResponse,
 } from "../../../types/response.types";
@@ -419,6 +420,15 @@ export interface TCrmCustomerInterface {
     config?: AxiosRequestConfig,
   ): Promise<AxiosResponse<SetCorporateKycLastPdfResponse>>;
 
+  /**
+   * Persists the CRM PDF editor JSON form on the corporate KYC row.
+   */
+  setCorporateKycPdfPayload(
+    customerId: number,
+    payload: { payload: Record<string, unknown> },
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<SetCorporateKycPdfPayloadResponse>>;
+
   corporateKraStatus(
     customerId: number,
     config?: AxiosRequestConfig,
@@ -721,6 +731,18 @@ export class CrmCustomerApi implements TCrmCustomerInterface {
   ): ReturnType<TCrmCustomerInterface["setCorporateKycLastPdf"]> {
     return this.apiClient.post<SetCorporateKycLastPdfResponse>(
       `/crm/customer/${customerId}/corporate-kyc/last-pdf`,
+      payload,
+      config,
+    );
+  }
+
+  async setCorporateKycPdfPayload(
+    customerId: number,
+    payload: { payload: Record<string, unknown> },
+    config?: AxiosRequestConfig,
+  ): ReturnType<TCrmCustomerInterface["setCorporateKycPdfPayload"]> {
+    return this.apiClient.put<SetCorporateKycPdfPayloadResponse>(
+      `/crm/customer/${customerId}/corporate-kyc/pdf-payload`,
       payload,
       config,
     );

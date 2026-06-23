@@ -119,6 +119,8 @@ export function CheckField({
   );
 }
 
+const SELECT_EMPTY_VALUE = "__none__";
+
 export function SelectField<T extends string>({
   label,
   value,
@@ -127,28 +129,46 @@ export function SelectField<T extends string>({
   placeholder,
   className,
   disabled,
+  clearable = false,
 }: Disabled & {
   label: string;
   value: T | undefined;
-  onChange: (v: T) => void;
+  onChange: (v: T | undefined) => void;
   options: readonly T[];
   placeholder?: string;
   className?: string;
+  clearable?: boolean;
 }) {
+  const resolvedValue =
+    value && options.includes(value)
+      ? value
+      : clearable
+        ? SELECT_EMPTY_VALUE
+        : "";
+
   return (
     <div className={cn("space-y-1", className)}>
       <Label className="text-xs font-medium text-muted-foreground">
         {label}
       </Label>
       <Select
-        value={value ?? ""}
-        onValueChange={(v) => onChange(v as T)}
+        value={resolvedValue}
+        onValueChange={(v) => {
+          if (clearable && v === SELECT_EMPTY_VALUE) {
+            onChange(undefined);
+            return;
+          }
+          onChange(v as T);
+        }}
         disabled={disabled}
       >
         <SelectTrigger className="w-full">
           <SelectValue placeholder={placeholder ?? "Select..."} />
         </SelectTrigger>
         <SelectContent>
+          {clearable ? (
+            <SelectItem value={SELECT_EMPTY_VALUE}>—</SelectItem>
+          ) : null}
           {options.map((opt) => (
             <SelectItem key={opt} value={opt}>
               {opt}
