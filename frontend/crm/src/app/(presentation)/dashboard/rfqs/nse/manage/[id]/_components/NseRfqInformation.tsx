@@ -56,7 +56,7 @@ const NseRfqInformation = (RfqInformationData: RfqInformationDataProps) => {
 
             <LabelView title="RFQ Size (Value in Crores)">
               <p className="font-medium text-sm">
-                {(Number(RfqInformationData.rfqSizeCrores) || 0).toFixed(2)} Cr
+                {(Number(RfqInformationData.rfqSizeCrores) || 0)} Cr
               </p>
             </LabelView>
             <LabelView title="Settlement Date">
