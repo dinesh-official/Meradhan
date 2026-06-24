@@ -19,7 +19,7 @@ export class BondController {
   private bondDocumentsService = new BondDocumentsService();
 
   async listBondDocuments(req: Request, res: Response) {
-    const isin = req.params.isin?.trim() ?? "";
+    const isin = req.params.isin?.toString().trim() ?? "";
     if (!isin) {
       return res.sendResponse({
         statusCode: HttpStatus.BAD_REQUEST,
@@ -54,7 +54,7 @@ export class BondController {
           message: err.message,
         });
       }
-      logger.error("listBondDocuments failed", err);
+      logger.logError("listBondDocuments failed", err);
       return res.sendResponse({
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         success: false,
@@ -107,7 +107,7 @@ export class BondController {
           message: err.message,
         });
       }
-      logger.error("getBondCashflow failed", err);
+      logger.logError("getBondCashflow failed", err);
       return res.sendResponse({
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         success: false,
