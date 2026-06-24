@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import RichTextEditor from "@/components/ui/rich-text-editor";
 import {
   Dialog,
   DialogContent,
@@ -1126,13 +1127,17 @@ function BondForm({ initialData, isin }: BondFormProps) {
                     <FormItem>
                       <FormLabel>Issuer Description</FormLabel>
                       <FormControl>
-                        <Textarea
-                          {...field}
+                        <RichTextEditor
                           value={field.value || ""}
+                          onChange={field.onChange}
                           placeholder="About the issuer — shown under the Issuer tab on the bond detail page"
-                          rows={3}
                         />
                       </FormControl>
+                      <FormDescription>
+                        Use the toolbar to add headings (e.g. “Positives”,
+                        “Monitorables”), bullet/numbered lists, bold text, and
+                        links. This is shown on the public Issuer tab.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
