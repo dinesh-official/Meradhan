@@ -11,7 +11,7 @@ export default function BondAutoUpdatePage() {
       <Workspace>
         <PageInfoBar
           title="Bond auto-update (sale-ready)"
-          description="Bonds with “Allow for purchase” enabled. Load deal autofill from the calculator API, review and edit suggested fields, then accept or reject per bond."
+          description="Bonds with “Allow for purchase” enabled. Load autofill from the calculator API, review and edit suggested fields, then accept or reject per bond."
           showBack
         />
         <div className="container mx-auto max-w-6xl py-6 px-4">
