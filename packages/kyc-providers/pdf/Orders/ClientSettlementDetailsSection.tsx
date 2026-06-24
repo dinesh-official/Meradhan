@@ -25,6 +25,7 @@ interface ClientSettlementDetailsSectionProps {
       isRfqParticipant?: boolean;
       settlementBank?: SettlementBank;
       settlementDemat?: SettlementDemat;
+      clientOrderSide?: "BUY" | "SELL";
     };
   };
 }
@@ -73,10 +74,15 @@ export function ClientSettlementDetailsSection({
       }
     : primaryDemat;
 
+  // On a customer SELL the client is the seller, so label the section
+  // accordingly; defaults to Buyer for BUY / unset.
+  const partyLabel =
+    orderData?.metadata?.clientOrderSide === "SELL" ? "Seller" : "Buyer";
+
   return (
     <View style={tw(`flex flex-row border-b border-gray-300 `)}>
       <View style={tw(`text-[9px] flex w-[20%] flex-row gap-2`)}>
-        <Text>Client Settlement Details (Buyer)</Text>
+        <Text>{`Client Settlement Details (${partyLabel})`}</Text>
       </View>
       <View
         style={tw(

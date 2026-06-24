@@ -503,12 +503,24 @@ function GeneratePdfContent() {
 
 
   useEffect(() => {
-    const bs = String((rfq as { buySell?: string } | null)?.buySell ?? "")
-      .trim()
-      .toUpperCase();
-    if (bs === "S") setOrderSide("SELL");
-    else setOrderSide("BUY");
-  }, [rfq?.buySell]);
+    if (!rfq) return;
+    // `settle_order` has no `buySell` column — that flag lives on
+    // `rfq_negotiable`. Derive the customer's side from which side of the NSE
+    // trade carries the Meradhan (MD-prefixed) login id: broker / backoffice
+    // / participant. If the MD code is the seller, the customer is selling.
+    const isMd = (v?: string | null) =>
+      String(v ?? "").trim().toUpperCase().startsWith("MD");
+    const onBuy =
+      isMd(rfq.buyBrokerLoginId) ||
+      isMd(rfq.buyBackofficeLoginId) ||
+      isMd(rfq.buyParticipantLoginId);
+    const onSell =
+      isMd(rfq.sellBrokerLoginId) ||
+      isMd(rfq.sellBackofficeLoginId) ||
+      isMd(rfq.sellParticipantLoginId);
+    if (onSell && !onBuy) setOrderSide("SELL");
+    else if (onBuy && !onSell) setOrderSide("BUY");
+  }, [rfq]);
 
   useEffect(() => {
     const m = customerOrder?.metadata as { clientOrderSide?: string } | undefined;

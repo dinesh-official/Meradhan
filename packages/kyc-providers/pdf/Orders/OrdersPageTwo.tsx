@@ -68,6 +68,7 @@ interface OrdersPageTwoOrderData {
     settlementDateTime?: string;
     settlementType: number;
     isRfqParticipant?: boolean;
+    clientOrderSide?: "BUY" | "SELL";
   };
 }
 
@@ -80,6 +81,11 @@ function OrdersPageTwo({
   releasedOrder?: boolean;
   orderData?: OrdersPageTwoOrderData;
 }) {
+  // On a customer SELL the client is the seller; the T&C and settlement
+  // section are written from that party's perspective. Defaults to Buyer.
+  const partyLabel =
+    orderData?.metadata?.clientOrderSide === "SELL" ? "Seller" : "Buyer";
+
   return (
     <View
       style={{
@@ -131,7 +137,7 @@ Settlement No.: ${orderData?.metadata?.settlementNumber ?? "—"}`}
 
       <Text style={tw(`text-[6.5px] mt-3 font-semibold`)}>Terms & Conditions</Text>
       <Text style={tw(`text-[6.5px] mt-1 mb-1 leading-5`)}>
-        These terms and conditions (“Terms”) form an essential part of the Order Receipt issued by BondNest Capital India Securities Private Limited (“MeraDhan”) to the Buyer for the {releasedOrder ? "" : "proposed"} transaction(s) listed above:
+        These terms and conditions (“Terms”) form an essential part of the Order Receipt issued by BondNest Capital India Securities Private Limited (“MeraDhan”) to the {partyLabel} for the {releasedOrder ? "" : "proposed"} transaction(s) listed above:
       </Text>
       <View style={tw(`mt-1`)}>
         <TextList countFontSize={7} countWidth={10} className="text-[6.5px]" count="1.">
@@ -171,16 +177,16 @@ Settlement No.: ${orderData?.metadata?.settlementNumber ?? "—"}`}
           </Text>
         </View>
         <TextList countFontSize={7} countWidth={10} className="text-[6.5px]" count="6.">
-          Deal cancellation and refund of funds/securities will follow SEBI guidelines, Stock Exchange policies, Clearing Corporation rules, and payment-gateway procedures. If the deal does not get settled for any reason after funds are transferred, the Buyer will receive a refund directly from the Clearing Corporation.
+          Deal cancellation and refund of funds/securities will follow SEBI guidelines, Stock Exchange policies, Clearing Corporation rules, and payment-gateway procedures. If the deal does not get settled for any reason after funds are transferred, the {partyLabel} will receive a refund directly from the Clearing Corporation.
         </TextList>
         <TextList countFontSize={7} countWidth={10} className="text-[6.5px]" count="7.">
-          The Buyer agrees—irrevocably and unconditionally—to transfer funds to the Clearing Corporation’s designated bank account before the cut-off time on the settlement day.
+          The {partyLabel} agrees—irrevocably and unconditionally—to transfer funds to the Clearing Corporation’s designated bank account before the cut-off time on the settlement day.
         </TextList>
         <TextList countFontSize={7} countWidth={10} className="text-[6.5px]" count="8.">
           MeraDhan is not responsible for any errors or missing information. For any queries or discrepancies, please write to: <Text style={tw(`text-[6.5px] underline text-[#1D4ED8]`)}>support@meradhan.co</Text>
         </TextList>
         <TextList countFontSize={7} countWidth={10} className="text-[6.5px]" count="9.">
-          The Buyer confirms—irrevocably and unconditionally—that he/she has accepted the terms of the transaction (price, yield, etc.) by their own choice, without any influence from MeraDhan or the counter-party, and understands the risks involved.
+          The {partyLabel} confirms—irrevocably and unconditionally—that he/she has accepted the terms of the transaction (price, yield, etc.) by their own choice, without any influence from MeraDhan or the counter-party, and understands the risks involved.
         </TextList>
       </View>
       <Text style={tw(`text-[6.5px] mt-3 font-semibold`)}>Disclaimer</Text>
