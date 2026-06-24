@@ -140,6 +140,38 @@ export function getInterestPaymentSchedule(params: GetInterestPaymentSchedulePar
     current = addMonths(current, config.monthsBetween);
   }
 
+  // Maturity day is not a separate coupon when that month already has a payment (e.g. 20-Dec + 31-Dec).
+  const matY = maturity.getFullYear();
+  const matM = maturity.getMonth();
+  const matD = maturity.getDate();
+  const monthHasOtherPayment = dateStrings.some((iso) => {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return false;
+    return (
+      d.getFullYear() === matY &&
+      d.getMonth() === matM &&
+      d.getDate() !== matD
+    );
+  });
+  if (monthHasOtherPayment) {
+    const keepIndices = dateStrings
+      .map((iso, i) => {
+        const d = new Date(iso);
+        if (Number.isNaN(d.getTime())) return i;
+        const isMaturityOnlyDay =
+          d.getFullYear() === matY &&
+          d.getMonth() === matM &&
+          d.getDate() === matD;
+        return isMaturityOnlyDay ? -1 : i;
+      })
+      .filter((i) => i >= 0);
+    return {
+      frequencyLabel: config.label,
+      dates: keepIndices.map((i) => dates[i]!),
+      dateStrings: keepIndices.map((i) => dateStrings[i]!),
+    };
+  }
+
   return {
     frequencyLabel: config.label,
     dates,

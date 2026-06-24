@@ -119,6 +119,9 @@ export interface BondCashflowData {
   summary: BondCashflowSummary;
   cashflow: BondCashflowRow[];
   warnings: string[];
+  totalSchedulePayments?: number;
+  cashflowWindowMonths?: number;
+  maturityDate?: string | null;
 }
 
 export type BondCashflowResponse = BaseResponseData<BondCashflowData>;
