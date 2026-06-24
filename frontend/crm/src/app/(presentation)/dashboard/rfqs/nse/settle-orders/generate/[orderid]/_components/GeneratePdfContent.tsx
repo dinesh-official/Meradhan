@@ -753,12 +753,12 @@ BSE Member ID: 6963`
           apiDisplay && !/^\d{4}-\d{2}-\d{2}$/.test(apiDisplay)
             ? apiDisplay
             : formatDateWithDayNameFromPicker(
-                /^\d{4}-\d{2}-\d{2}$/.test(rawLastTrimmed)
-                  ? rawLastTrimmed
-                  : /^\d{4}-\d{2}-\d{2}$/.test(apiDisplay)
-                    ? apiDisplay
-                    : rawLastTrimmed,
-              );
+              /^\d{4}-\d{2}-\d{2}$/.test(rawLastTrimmed)
+                ? rawLastTrimmed
+                : /^\d{4}-\d{2}-\d{2}$/.test(apiDisplay)
+                  ? apiDisplay
+                  : rawLastTrimmed,
+            );
         setPdfLastInterestPaymentDate(formatted);
       } else if (
         d.lastInterestPaymentDate != null &&
@@ -893,7 +893,7 @@ BSE Member ID: 6963`
       ?.bondDetails;
     const pricingSnap =
       bondDetails &&
-      typeof (bondDetails as { pricing?: Record<string, unknown> }).pricing === "object"
+        typeof (bondDetails as { pricing?: Record<string, unknown> }).pricing === "object"
         ? (bondDetails as { pricing?: Record<string, unknown> }).pricing
         : undefined;
     const principalFromBond =
@@ -1380,8 +1380,8 @@ BSE Member ID: 6963`
                   value={
                     (
                       customerOrder.metadata as
-                        | { dealId?: string }
-                        | undefined
+                      | { dealId?: string }
+                      | undefined
                     )?.dealId ?? "—"
                   }
                 />
@@ -1445,124 +1445,124 @@ BSE Member ID: 6963`
                   {isAutoFetchedCustomer && selectedCustomer && (
                     <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
                       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Auto-fetched from participant code</p>
-                  <div className="grid gap-2 text-sm">
-                    <div className="grid grid-cols-[100px_1fr] gap-2">
-                      <span className="text-muted-foreground">Name</span>
-                      <span className="font-medium">
-                        {[selectedCustomer.firstName, selectedCustomer.middleName, selectedCustomer.lastName].filter(Boolean).join(" ").trim() || "—"}
-                      </span>
+                      <div className="grid gap-2 text-sm">
+                        <div className="grid grid-cols-[100px_1fr] gap-2">
+                          <span className="text-muted-foreground">Name</span>
+                          <span className="font-medium">
+                            {[selectedCustomer.firstName, selectedCustomer.middleName, selectedCustomer.lastName].filter(Boolean).join(" ").trim() || "—"}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-[100px_1fr] gap-2">
+                          <span className="text-muted-foreground">Pan No</span>
+                          <span className="font-mono">
+                            {maskPanLast4((selectedCustomer as { panCard?: { panCardNo?: string } }).panCard?.panCardNo)}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-[100px_1fr] gap-2">
+                          <span className="text-muted-foreground">UCCNO</span>
+                          <span className="font-mono">{selectedCustomer.userName ?? "—"}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="grid grid-cols-[100px_1fr] gap-2">
-                      <span className="text-muted-foreground">Pan No</span>
-                      <span className="font-mono">
-                        {maskPanLast4((selectedCustomer as { panCard?: { panCardNo?: string } }).panCard?.panCardNo)}
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-[100px_1fr] gap-2">
-                      <span className="text-muted-foreground">UCCNO</span>
-                      <span className="font-mono">{selectedCustomer.userName ?? "—"}</span>
-                    </div>
-                  </div>
-                </div>
-              )}
+                  )}
 
-              {!participantCode && (
-                <div className="rounded-lg border border-amber-200 bg-amber-50/70 dark:border-amber-900 dark:bg-amber-950/40 p-4 mt-2">
-                  <p className="text-xs font-medium text-amber-900 dark:text-amber-100 mb-1">
-                    Participant code not found.
-                  </p>
-                  <p className="text-sm text-amber-900/90 dark:text-amber-100/90">
-                    Please verify the order before proceeding. You can still manually select a Customer
-                    below and assign this order to them — only Customers with verified KYC can be assigned.
-                  </p>
-                </div>
-              )}
-
-
-              <div className="flex flex-wrap items-end gap-4">
-                <p className="text-sm text-muted-foreground pb-2">
-                  Order side:{" "}
-                  <span className="font-medium text-foreground">
-                    {orderSide === "SELL" ? "Sell" : "Buy"}
-                  </span>
-                  <span className="text-muted-foreground"> (from RFQ)</span>
-                </p>
-                <div className="min-w-[220px]">
-                  <SelectCustomerUser
-                    placeholder={
-                      participantCode
-                        ? "Search and select Customer..."
-                        : "Optional — search and select a Customer to assign manually..."
-                    }
-                    value={selectedCustomer ?? undefined}
-                    onSelect={(customer) => {
-                      setSelectedCustomer(customer);
-                      setIsAutoFetchedCustomer(false);
-                    }}
-                    disabled={isAutoFetchedCustomer}
-                  />
-                </div>
-                <Button
-                  size="sm"
-                  disabled={
-                    !selectedCustomer ||
-                    assignOrderMutation.isPending ||
-                    String(selectedCustomer?.kycStatus) !== "VERIFIED"
-                  }
-                  onClick={() => assignOrderMutation.mutate()}
-                >
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  {assignOrderMutation.isPending ? "Assigning..." : "Assign order to Customer"}
-                </Button>
-              </div>
-              {selectedCustomer && !isAutoFetchedCustomer && (
-                <div className="rounded-lg border bg-muted/30 p-4 mt-2">
-                  <p className="text-xs font-medium text-muted-foreground mb-3">Selected customer</p>
-                  <div className="flex items-start gap-4">
-                    <Avatar className="h-14 w-14 shrink-0">
-                      <AvatarImage
-                        src={(selectedCustomer as { avatar?: string | null }).avatar ? genMediaUrl((selectedCustomer as { avatar?: string | null }).avatar) : undefined}
-                        alt={`${selectedCustomer.firstName} ${selectedCustomer.lastName}`.trim()}
-                      />
-                      <AvatarFallback className="text-base bg-muted">
-                        {[selectedCustomer.firstName, selectedCustomer.lastName]
-                          .map((n) => (n ?? "").charAt(0))
-                          .filter(Boolean)
-                          .join("")
-                          .toUpperCase() || "?"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="grid gap-1 min-w-0 flex-1">
-                      <p className="font-semibold">
-                        {[selectedCustomer.firstName, selectedCustomer.middleName, selectedCustomer.lastName].filter(Boolean).join(" ").trim() || "—"}
+                  {!participantCode && (
+                    <div className="rounded-lg border border-amber-200 bg-amber-50/70 dark:border-amber-900 dark:bg-amber-950/40 p-4 mt-2">
+                      <p className="text-xs font-medium text-amber-900 dark:text-amber-100 mb-1">
+                        Participant code not found.
                       </p>
-                      <p className="text-sm text-muted-foreground">{selectedCustomer.emailAddress || "—"}</p>
-                      {selectedCustomer.phoneNo && (
-                        <p className="text-sm text-muted-foreground">{selectedCustomer.phoneNo}</p>
-                      )}
-                      {selectedCustomer.kycStatus != null && (
-                        <Badge
-                          variant={
-                            String(selectedCustomer.kycStatus).toUpperCase() === "VERIFIED" || String(selectedCustomer.kycStatus).toUpperCase() === "APPROVED"
-                              ? "default"
-                              : String(selectedCustomer.kycStatus).toUpperCase() === "PENDING"
-                                ? "secondary"
-                                : String(selectedCustomer.kycStatus).toUpperCase() === "REJECTED"
-                                  ? "destructive"
-                                  : "outline"
-                          }
-                          className="mt-1 w-fit"
-                        >
-                          {selectedCustomer.kycStatus}
-                        </Badge>
-                      )}
+                      <p className="text-sm text-amber-900/90 dark:text-amber-100/90">
+                        Please verify the order before proceeding. You can still manually select a Customer
+                        below and assign this order to them — only Customers with verified KYC can be assigned.
+                      </p>
                     </div>
+                  )}
+
+
+                  <div className="flex flex-wrap items-end gap-4">
+                    <p className="text-sm text-muted-foreground pb-2">
+                      Order side:{" "}
+                      <span className="font-medium text-foreground">
+                        {orderSide === "SELL" ? "Sell" : "Buy"}
+                      </span>
+                      <span className="text-muted-foreground"> (from RFQ)</span>
+                    </p>
+                    <div className="min-w-[220px]">
+                      <SelectCustomerUser
+                        placeholder={
+                          participantCode
+                            ? "Search and select Customer..."
+                            : "Optional — search and select a Customer to assign manually..."
+                        }
+                        value={selectedCustomer ?? undefined}
+                        onSelect={(customer) => {
+                          setSelectedCustomer(customer);
+                          setIsAutoFetchedCustomer(false);
+                        }}
+                        disabled={isAutoFetchedCustomer}
+                      />
+                    </div>
+                    <Button
+                      size="sm"
+                      disabled={
+                        !selectedCustomer ||
+                        assignOrderMutation.isPending ||
+                        String(selectedCustomer?.kycStatus) !== "VERIFIED"
+                      }
+                      onClick={() => assignOrderMutation.mutate()}
+                    >
+                      <UserPlus className="mr-2 h-4 w-4" />
+                      {assignOrderMutation.isPending ? "Assigning..." : "Assign order to Customer"}
+                    </Button>
                   </div>
-                </div>
-              )}
-              {selectedCustomer && String(selectedCustomer.kycStatus) !== "VERIFIED" && (
-                <p className="text-destructive text-sm">Selected Customer KYC is not verified. Only VERIFIED Customers can be assigned.</p>
-              )}
+                  {selectedCustomer && !isAutoFetchedCustomer && (
+                    <div className="rounded-lg border bg-muted/30 p-4 mt-2">
+                      <p className="text-xs font-medium text-muted-foreground mb-3">Selected customer</p>
+                      <div className="flex items-start gap-4">
+                        <Avatar className="h-14 w-14 shrink-0">
+                          <AvatarImage
+                            src={(selectedCustomer as { avatar?: string | null }).avatar ? genMediaUrl((selectedCustomer as { avatar?: string | null }).avatar) : undefined}
+                            alt={`${selectedCustomer.firstName} ${selectedCustomer.lastName}`.trim()}
+                          />
+                          <AvatarFallback className="text-base bg-muted">
+                            {[selectedCustomer.firstName, selectedCustomer.lastName]
+                              .map((n) => (n ?? "").charAt(0))
+                              .filter(Boolean)
+                              .join("")
+                              .toUpperCase() || "?"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="grid gap-1 min-w-0 flex-1">
+                          <p className="font-semibold">
+                            {[selectedCustomer.firstName, selectedCustomer.middleName, selectedCustomer.lastName].filter(Boolean).join(" ").trim() || "—"}
+                          </p>
+                          <p className="text-sm text-muted-foreground">{selectedCustomer.emailAddress || "—"}</p>
+                          {selectedCustomer.phoneNo && (
+                            <p className="text-sm text-muted-foreground">{selectedCustomer.phoneNo}</p>
+                          )}
+                          {selectedCustomer.kycStatus != null && (
+                            <Badge
+                              variant={
+                                String(selectedCustomer.kycStatus).toUpperCase() === "VERIFIED" || String(selectedCustomer.kycStatus).toUpperCase() === "APPROVED"
+                                  ? "default"
+                                  : String(selectedCustomer.kycStatus).toUpperCase() === "PENDING"
+                                    ? "secondary"
+                                    : String(selectedCustomer.kycStatus).toUpperCase() === "REJECTED"
+                                      ? "destructive"
+                                      : "outline"
+                              }
+                              className="mt-1 w-fit"
+                            >
+                              {selectedCustomer.kycStatus}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {selectedCustomer && String(selectedCustomer.kycStatus) !== "VERIFIED" && (
+                    <p className="text-destructive text-sm">Selected Customer KYC is not verified. Only VERIFIED Customers can be assigned.</p>
+                  )}
                 </>
               )}
 

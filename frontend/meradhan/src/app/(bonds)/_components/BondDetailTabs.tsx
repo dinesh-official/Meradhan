@@ -5,6 +5,7 @@ import { BondDetailResponse, ISessionResponse } from "@root/apiGateway";
 import BondOverview from "./BondOverview";
 import BondCashflowTab from "./BondCashflowTab";
 import BondDocumentsTab from "./BondDocumentsTab";
+import { sanitizeStrapiHTML } from "@/global/utils/html-sanitizer";
 
 type Bond = BondDetailResponse["responseData"];
 
@@ -13,6 +14,12 @@ function hasText(v: string | null | undefined): boolean {
   const t = v.trim();
   if (!t) return false;
   return !/^(n\/?a|none|-+|null|undefined)$/i.test(t);
+}
+
+// New issuer descriptions are HTML (from the CRM rich-text editor); legacy
+// rows are plain text. Detect HTML so legacy text keeps its line breaks.
+function looksLikeHtml(v: string): boolean {
+  return /<[a-z][\s\S]*>/i.test(v);
 }
 
 export default function BondDetailTabs({
@@ -51,9 +58,18 @@ export default function BondDetailTabs({
                 About {bond.bondName}
               </h3>
             )}
-            <p className="text-base text-gray-700 leading-relaxed whitespace-pre-line">
-              {bond.issuerDescription}
-            </p>
+            {looksLikeHtml(bond.issuerDescription!) ? (
+              <div
+                className="article text-base text-gray-700 leading-relaxed"
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeStrapiHTML(bond.issuerDescription),
+                }}
+              />
+            ) : (
+              <p className="text-base text-gray-700 leading-relaxed whitespace-pre-line">
+                {bond.issuerDescription}
+              </p>
+            )}
           </div>
         ) : (
           <div className="flex items-center justify-center py-16 text-gray-400 text-sm">

@@ -60,17 +60,17 @@ export function ClientSettlementDetailsSection({
 
   const bank = settlementBank
     ? {
-        bankName: settlementBank.bankName ?? "—",
-        ifscCode: settlementBank.ifscCode ?? "—",
-        accountNumber: settlementBank.accountNo ?? "—",
-      }
+      bankName: settlementBank.bankName ?? "—",
+      ifscCode: settlementBank.ifscCode ?? "—",
+      accountNumber: settlementBank.accountNo ?? "—",
+    }
     : primaryBank;
   const demat = settlementDemat
     ? {
-        depositoryParticipantName: settlementDemat.dpName ?? "—",
-        dpId: settlementDemat.dpId ?? "—",
-        clientId: settlementDemat.benId ?? "—",
-      }
+      depositoryParticipantName: settlementDemat.dpName ?? "—",
+      dpId: settlementDemat.dpId ?? "—",
+      clientId: settlementDemat.benId ?? "—",
+    }
     : primaryDemat;
 
   return (
