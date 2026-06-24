@@ -144,6 +144,11 @@ export const bondCreateUpdateSchema = z.object({
   recordDays: z
     .number({ error: () => "Record days is required" })
     .int("Record days must be a whole number"),
+  accruedInterestDays: z
+    .number()
+    .int("Accrued interest days must be a whole number")
+    .optional()
+    .nullable(),
   imDocumentLink: z.string().trim().optional().nullable(),
   exchangeListedOn: STOCK_EXCHANGE_ENUM.optional().nullable(),
   lastCouponDate: z.coerce.date().optional().nullable(),

@@ -225,11 +225,11 @@ export function resolveBondCalcInputs(
         ? undefined
         : bondRow?.providerInterestDateIst instanceof Date &&
             !Number.isNaN(bondRow.providerInterestDateIst.getTime())
-          ? toYyyyMmDd(bondRow.providerInterestDateIst)
-          : bondRow?.providerInterestDate instanceof Date &&
-              !Number.isNaN(bondRow.providerInterestDate.getTime())
-            ? toYyyyMmDd(bondRow.providerInterestDate)
-            : undefined;
+            ? toYyyyMmDd(bondRow.providerInterestDateIst)
+            : bondRow?.providerInterestDate instanceof Date &&
+                !Number.isNaN(bondRow.providerInterestDate.getTime())
+                ? toYyyyMmDd(bondRow.providerInterestDate)
+                : undefined;
 
     const provDate = provDateFromOverride || provDateFromBond;
     let settlementDateYmd: string;
@@ -255,8 +255,8 @@ export function resolveBondCalcInputs(
         overrides?.pricingYield != null && Number.isFinite(overrides.pricingYield)
             ? overrides.pricingYield
             : overrides?.yeild != null && String(overrides.yeild).trim() !== ""
-              ? Number(overrides.yeild)
-              : undefined;
+                ? Number(overrides.yeild)
+                : undefined;
 
     const overridePrice = overrides?.providerPrice;
     const bondProvPrice = bondRow?.providerPrice;
@@ -279,10 +279,10 @@ export function resolveBondCalcInputs(
         pricingYieldOverride != null && Number.isFinite(pricingYieldOverride)
             ? pricingYieldOverride
             : bondRow?.buyYield != null && Number.isFinite(bondRow.buyYield)
-              ? bondRow.buyYield
-              : bondRow?.yield != null && Number.isFinite(bondRow.yield)
-                ? bondRow.yield
-                : undefined;
+                ? bondRow.buyYield
+                : bondRow?.yield != null && Number.isFinite(bondRow.yield)
+                    ? bondRow.yield
+                    : undefined;
 
     return {
         quantity,
@@ -310,8 +310,8 @@ export const getBondInfoCalcData = async (
     const pricingYieldStr = useCleanPrice
         ? undefined
         : resolved.pricingYield != null
-          ? String(resolved.pricingYield)
-          : options.yeild;
+            ? String(resolved.pricingYield)
+            : options.yeild;
     const quantity = resolved.quantity;
     const stampDuty = options.stampDuty;
     const couponRows = await db.dataBase.bondReferenceCouponPaymentDate.findMany({
@@ -371,8 +371,8 @@ export const getBondInfoCalcData = async (
         Pricing_Input: useCleanPrice
             ? String(cleanPriceInput)
             : pricingYieldStr != null
-              ? String(pricingYieldStr)
-              : "0",
+                ? String(pricingYieldStr)
+                : "0",
         Is_End_Of_Month_Bond: "No",
         Price_Rounding_Decimals: "4",
         Stamp_Duty: stampDuty != null ? String(stampDuty) : "0",
@@ -422,6 +422,12 @@ export const getBondInfoCalcData = async (
         mapNatureOfInstrument(bondData?.natureOfInstrument ?? bond?.natureOfInstrument) ??
         null;
 
+    const calcAccruedDaysFromApi = Number(response.data.accrued_days);
+    const accruedDaysResolved =
+        pricing.isUnderShutPeriod && Number.isFinite(calcAccruedDaysFromApi)
+            ? calcAccruedDaysFromApi
+            : pricing.noOfAccrualDays;
+
     return {
         payload,
         suggested: {
@@ -462,8 +468,7 @@ export const getBondInfoCalcData = async (
         },
         calc: {
             ...response.data,
-            /** Days from last coupon to settlement (display); calc API value can differ in shut period. */
-            accrued_days: pricing.noOfAccrualDays,
+            accrued_days: accruedDaysResolved,
         },
         inputSources: {
             usedProviderPrice: resolved.usedProviderPrice,

@@ -86,6 +86,9 @@ model Bonds {
     /// Business days before record date for shut period (e.g. 7, 15, 20)
     recordDays Int?
 
+    /// Accrued-interest day count from calc API (`accrued_days`) at last autofill save
+    accruedInterestDays Int?
+
     imDocumentLink String?
 
     /// Issuer/bond logo URL for listings and detail pages

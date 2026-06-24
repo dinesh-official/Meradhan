@@ -54,6 +54,7 @@ export interface BondDetailsResponse {
   dayConvention?: string | null
   recordDate?: string | null
   recordDays?: number | null
+  accruedInterestDays?: number | null
   imDocumentLink?: string | null
   exchangeListedOn?: string | null
   lastCouponDate?: string | null
@@ -119,6 +120,9 @@ export interface BondCashflowData {
   summary: BondCashflowSummary;
   cashflow: BondCashflowRow[];
   warnings: string[];
+  totalSchedulePayments?: number;
+  cashflowWindowMonths?: number;
+  maturityDate?: string | null;
 }
 
 export type BondCashflowResponse = BaseResponseData<BondCashflowData>;
@@ -177,6 +181,8 @@ export interface BondDealAutofillSuggestions {
   nextCouponDate: string;
   recordDate: string | null;
   recordDays: number | null;
+  /** Accrued-interest day count from calc API (`accrued_days`). */
+  accruedInterestDays?: number | null;
   /** Reference coupon-payment `dueDate` (YYYY-MM-DD) */
   dueDate: string | null;
   dayConvention: string | null;

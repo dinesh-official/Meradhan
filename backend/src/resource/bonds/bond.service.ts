@@ -206,7 +206,7 @@ export class BondService {
     }
 
     const cleanPrice =
-      bond.providerPrice ?? sellPrice ?? bond.sellPrice ?? bond.issuePrice ?? 0;
+      sellPrice ?? bond.sellPrice ?? bond.providerPrice ?? bond.issuePrice ?? 0;
 
     let lastCouponDateStr = bond.lastCouponDateIst?.toISOString() ?? null;
     let nextCouponDateStr = bond.nextCouponDateIst?.toISOString() ?? null;
@@ -893,6 +893,7 @@ export class BondService {
         dayConvention: bondData.dayConvention || null,
         recordDate: bondData.recordDate || null,
         recordDays: bondData.recordDays ?? null,
+        accruedInterestDays: bondData.accruedInterestDays ?? null,
         imDocumentLink: bondData.imDocumentLink || null,
         exchangeListedOn: bondData.exchangeListedOn ?? null,
         lastCouponDate: bondData.lastCouponDate || null,
@@ -991,6 +992,7 @@ export class BondService {
         dayConvention: bondData.dayConvention || null,
         recordDate: bondData.recordDate || null,
         recordDays: bondData.recordDays ?? null,
+        accruedInterestDays: bondData.accruedInterestDays ?? null,
         imDocumentLink: bondData.imDocumentLink || null,
         exchangeListedOn: bondData.exchangeListedOn ?? null,
         lastCouponDate: bondData.lastCouponDate || null,
