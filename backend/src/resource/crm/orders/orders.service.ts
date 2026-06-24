@@ -1185,36 +1185,6 @@ export class CrmOrdersService {
     };
     const action = resolveAction();
     const idAction = action === "BOTH" ? "BUY" : action;
-    const isSell = idAction === "SELL";
-    const tradeQuantity = Number(rfq.modQuantity) || 0;
-
-    // On a customer SELL the customer is giving up bonds, not acquiring them.
-    // Validate they actually hold enough BEFORE we mutate anything, so we
-    // never half-create an order for an impossible sell. Holdings are stored
-    // as per-purchase lots (one CustomerBonds row per buy order), so we read
-    // them oldest-first for a FIFO drawdown performed after the order exists.
-    let sellDrawdownLots: { id: number; quantity: number }[] = [];
-    if (isSell) {
-      if (tradeQuantity <= 0) {
-        throw new Error(
-          "Cannot create a SELL order with a non-positive quantity",
-        );
-      }
-      sellDrawdownLots = await db.dataBase.customerBonds.findMany({
-        where: { customerProfileId: customerId, isin: bondDetails.isin },
-        orderBy: { purchaseDate: "asc" },
-        select: { id: true, quantity: true },
-      });
-      const totalHeld = sellDrawdownLots.reduce(
-        (sum, lot) => sum + lot.quantity,
-        0,
-      );
-      if (totalHeld < tradeQuantity) {
-        throw new Error(
-          `Insufficient holdings to sell: customer ${customerId} holds ${totalHeld} unit(s) of ${bondDetails.isin} but the sell order is for ${tradeQuantity}.`,
-        );
-      }
-    }
 
     const tempOrderNumber = `MD-ASSIST-TEMP-${crypto.randomUUID().replace(/-/g, "").slice(0, 32)}`;
 
@@ -1238,23 +1208,16 @@ export class CrmOrdersService {
         paymentStatus: PaymentStatus.PENDING,
         paymentProvider: "CUSTOM",
         status: OrderStatus.SETTLED,
-        // A BUY adds a holding lot for the customer. A SELL must NOT — it
-        // reduces existing holdings instead, handled by the FIFO drawdown
-        // below once the order row exists.
-        ...(isSell
-          ? {}
-          : {
-            customerBonds: {
-              create: {
-                customerProfileId: customerId,
-                isin: bondDetails.isin,
-                bondName: bondDetails.bondName,
-                faceValue: bondDetails.faceValue,
-                quantity: Number(rfq.modQuantity) || 0,
-                purchasePrice: rfq.price.toNumber(),
-              },
-            },
-          }),
+        customerBonds: {
+          create: {
+            customerProfileId: customerId,
+            isin: bondDetails.isin,
+            bondName: bondDetails.bondName,
+            faceValue: bondDetails.faceValue,
+            quantity: Number(rfq.modQuantity) || 0,
+            purchasePrice: rfq.price.toNumber(),
+          },
+        },
       },
     });
 
@@ -1286,36 +1249,6 @@ export class CrmOrdersService {
         } as Prisma.InputJsonValue,
       },
     });
-
-    // FIFO drawdown for a SELL: consume the sold quantity from the customer's
-    // existing holding lots, oldest first. Fully-consumed lots are deleted;
-    // the final partially-consumed lot is reduced. Run as one transaction so
-    // holdings never end up partially decremented.
-    if (isSell) {
-      let remaining = tradeQuantity;
-      const drawdownOps: Prisma.PrismaPromise<unknown>[] = [];
-      for (const lot of sellDrawdownLots) {
-        if (remaining <= 0) break;
-        if (lot.quantity <= remaining) {
-          remaining -= lot.quantity;
-          drawdownOps.push(
-            db.dataBase.customerBonds.delete({ where: { id: lot.id } }),
-          );
-        } else {
-          drawdownOps.push(
-            db.dataBase.customerBonds.update({
-              where: { id: lot.id },
-              data: { quantity: lot.quantity - remaining },
-            }),
-          );
-          remaining = 0;
-        }
-      }
-      if (drawdownOps.length > 0) {
-        await db.dataBase.$transaction(drawdownOps);
-      }
-    }
-
     return updated;
   }
 
@@ -1915,70 +1848,6 @@ export class CrmOrdersService {
    * Builds the CRM deal sheet PDF (draft / pre-settlement) as a buffer.
    * @throws AppError NOT_FOUND when order or bond is missing
    */
-  /**
-   * Resolves the buyer / seller identities printed on the Deal Sheet PDF.
-   *
-   * The "actor" (the party the PDF is generated for — a Meradhan customer or
-   * an NSE RFQ participant) sits on the side given by `clientOrderSide`:
-   * BUY → actor is the buyer, SELL → actor is the seller. The counterparty is
-   * BondNest (the OBPP acting as principal) for the customer flow; for the
-   * participant flow we surface the other login id recorded on the settle
-   * order when it is a genuinely different participant (best-effort — the
-   * login id stands in for the name until a richer lookup is wired in).
-   */
-  private resolveDealParties(
-    actor: {
-      kind: "customer" | "rfqParticipant";
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      user: any;
-      rfqParticipantCode?: string;
-    },
-    settleOrder: {
-      buyParticipantLoginId?: string | null;
-      sellParticipantLoginId?: string | null;
-    } | null,
-    clientOrderSide: "BUY" | "SELL" | undefined,
-  ): {
-    buyer: { name: string; nclCode: string };
-    seller: { name: string; nclCode: string };
-  } {
-    const u = actor.user ?? {};
-    const actorName =
-      [u.firstName, u.middleName, u.lastName]
-        .filter(Boolean)
-        .join(" ")
-        .trim() ||
-      u.legalEntityName ||
-      "—";
-    const actorParty = {
-      name: String(actorName).toUpperCase(),
-      nclCode: u.userName ?? "—",
-    };
-
-    const bondnest = {
-      name: "BONDNEST CAPITAL INDIA SECURITIES PRIVATE LIMITED",
-      nclCode: "BCISLP",
-    };
-
-    // Counterparty defaults to BondNest (principal). For a participant actor,
-    // surface the *other* login id on the settle order when it is a different,
-    // non-BondNest participant.
-    let counterparty = bondnest;
-    if (actor.kind === "rfqParticipant" && settleOrder) {
-      const ownCode = String(actor.rfqParticipantCode ?? "").trim();
-      const buyCode = String(settleOrder.buyParticipantLoginId ?? "").trim();
-      const sellCode = String(settleOrder.sellParticipantLoginId ?? "").trim();
-      const otherCode = buyCode === ownCode ? sellCode : buyCode;
-      if (otherCode && otherCode !== bondnest.nclCode) {
-        counterparty = { name: otherCode, nclCode: otherCode };
-      }
-    }
-
-    return clientOrderSide === "SELL"
-      ? { seller: actorParty, buyer: counterparty }
-      : { buyer: actorParty, seller: counterparty };
-  }
-
   async generateDealSheetPdfBuffer(
     orderNumber: string,
     pdfQuery: Record<string, string | undefined>,
@@ -2140,23 +2009,6 @@ export class CrmOrdersService {
           settlementType: rfqDetails?.settlementType ?? 0,
           dealId: (metadata.dealId as string) ?? undefined,
           clientOrderSide: (metadata.clientOrderSide as "BUY" | "SELL") ?? undefined,
-          // Buyer / seller identities flipped by side so a customer SELL
-          // prints Seller = customer, Buyer = counterparty (BondNest / other
-          // participant) instead of the old hardcoded customer-as-buyer.
-          parties: this.resolveDealParties(
-            {
-              kind: actor.kind,
-              user,
-              rfqParticipantCode: actor.rfqParticipantCode,
-            },
-            settleOrder
-              ? {
-                buyParticipantLoginId: settleOrder.buyParticipantLoginId,
-                sellParticipantLoginId: settleOrder.sellParticipantLoginId,
-              }
-              : null,
-            (metadata.clientOrderSide as "BUY" | "SELL") ?? undefined,
-          ),
           ...(actor.kind === "rfqParticipant" ? { isRfqParticipant: true } : {}),
           rfqNumber: (metadata.rfqNumber as string) ?? negotation?.tradeNumber ?? undefined,
           orderType: accessTypeText ?? "One To One (OTO) on RFQ Platform of the Exchange",

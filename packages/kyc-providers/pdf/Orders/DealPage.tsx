@@ -78,11 +78,6 @@ interface OrderData {
     };
     clientOrderSide?: "BUY" | "SELL";
     isRfqParticipant?: boolean;
-    /** Buyer / seller identities resolved by side (BUY vs SELL). */
-    parties?: {
-      buyer?: { name?: string; nclCode?: string };
-      seller?: { name?: string; nclCode?: string };
-    };
   };
 }
 
@@ -183,27 +178,15 @@ export default function DealPage({
     (releasedOrder ? "—" : "Pending assignment");
 
 
-  // Buyer / seller come from the backend party resolver (flipped by side for
-  // a customer SELL). Fall back to the legacy customer-as-buyer layout when
-  // `parties` is absent so older payloads still render unchanged.
-  const buyerParty = orderData?.metadata?.parties?.buyer ?? {
-    name: fullname.toUpperCase(),
-    nclCode: user.userName,
-  };
-  const sellerParty = orderData?.metadata?.parties?.seller ?? {
-    name: "BONDNEST CAPITAL INDIA SECURITIES PRIVATE LIMITED",
-    nclCode: "BCISLP",
-  };
-
   const topList = [
-    [`Buyer: ${buyerParty.name}`, `Seller: ${sellerParty.name}`],
+    [`Buyer: ${fullname.toUpperCase()}`, "Seller: BONDNEST CAPITAL INDIA SECURITIES PRIVATE LIMITED"],
     [
-      `NCL Code: ${buyerParty.nclCode}`,
-      `NCL Code: ${sellerParty.nclCode}`
+      `NCL Code: ${user.userName}`,
+      "NCL Code: BCISLP"
     ],
     [
-      `Kind Attention: ${buyerParty.name}`,
-      `Kind Attention: ${sellerParty.name}`
+      `Kind Attention: ${fullname.toUpperCase()}`,
+      "Kind Attention: BONDNEST CAPITAL INDIA SECURITIES PRIVATE LIMITED"
     ],
   ]
 
