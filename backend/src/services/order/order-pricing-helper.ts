@@ -333,15 +333,22 @@ export const accruedInterest = (params: {
     );
     const displayAccrualDays = Math.max(0, daysAccruedSinceLast);
 
+    const daysToNextCoupon = shut.noOfAccrualDays;
     const interestAccrualDays = shut.isUnderShutPeriod
-        ? shut.noOfAccrualDays
+        ? daysToNextCoupon
         : displayAccrualDays;
 
     const raw = annual * (interestAccrualDays / 365);
 
     return {
         accruedInterest: shut.isUnderShutPeriod ? -raw : raw,
-        noOfAccrualDays: displayAccrualDays,
+        /**
+         * Normal: days since last coupon (positive).
+         * Shut period: days to next coupon as negative (ex-interest / calc convention).
+         */
+        noOfAccrualDays: shut.isUnderShutPeriod
+            ? -daysToNextCoupon
+            : displayAccrualDays,
         isUnderShutPeriod: shut.isUnderShutPeriod,
         recordDate: shut.recordDate,
     };
@@ -446,7 +453,9 @@ export const computeBondOrderPricingData = async (
         noOfAccrualDays: Number.isFinite(calcAccrualDays)
             ? calcAccrualDays
             : accrued.noOfAccrualDays,
-        isUnderShutPeriod: bondData.calc.period_status === "Shut Period",
+        isUnderShutPeriod:
+            bondData.calc.period_status === "Shut Period" ||
+            accrued.isUnderShutPeriod,
         recordDate: accrued.recordDate,
         recordDays: bondData.suggested.recordDays ?? recordDaysResolved,
         lastCouponDate: lastCouponYmd,
@@ -617,7 +626,41 @@ export async function buildLocalManualProviderAutofillResponse(
 
 
 /**
- * Returns coupon due dates (as `YYYY-MM-DD`) from settlement → maturity (or next 1 year).
+ * Drop maturity calendar day when that month already has another coupon due date.
+ * e.g. monthly 20-Dec + maturity 31-Dec → keep 20-Dec only.
+ */
+export function dropMaturityDayIfMonthHasCoupon(
+    dates: Date[],
+    maturity: Date | null,
+): Date[] {
+    if (!maturity || dates.length === 0) return dates;
+
+    const matY = maturity.getUTCFullYear();
+    const matM = maturity.getUTCMonth();
+    const matD = maturity.getUTCDate();
+
+    const monthHasOtherCoupon = dates.some((d) => {
+        return (
+            d.getUTCFullYear() === matY &&
+            d.getUTCMonth() === matM &&
+            d.getUTCDate() !== matD
+        );
+    });
+    if (!monthHasOtherCoupon) return dates;
+
+    return dates.filter(
+        (d) =>
+            !(
+                d.getUTCFullYear() === matY &&
+                d.getUTCMonth() === matM &&
+                d.getUTCDate() === matD
+            ),
+    );
+}
+
+/**
+ * Returns coupon due dates (as `DD-Mon`) from settlement for the next 12 months
+ * (or until maturity if earlier).
  *
  * Shut-period rule:
  * - If settlement is within shut period for the *next* coupon (recordDate ≤ settlement < dueDate),
@@ -654,7 +697,9 @@ export const getPayoutDates = async (isin: string, settlement: Date) => {
             12,
         ),
     );
-    const endLimit = maturityDate ? maturityDate : oneYearLater;
+    const endLimit = maturityDate
+        ? new Date(Math.min(maturityDate.getTime(), oneYearLater.getTime()))
+        : oneYearLater;
 
     const dueDates = rows
         .map((r) => (r.dueDateIst instanceof Date ? r.dueDateIst : null))
@@ -698,7 +743,10 @@ export const getPayoutDates = async (isin: string, settlement: Date) => {
         }
     }
 
-    const out = skipNext ? dueDates.slice(1) : dueDates;
+    const out = dropMaturityDayIfMonthHasCoupon(
+        skipNext ? dueDates.slice(1) : dueDates,
+        maturityDate,
+    );
     const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
     return out.map((d) => {
         // ✅ FIX: Use UTC date parts directly to match the date stored in DB.

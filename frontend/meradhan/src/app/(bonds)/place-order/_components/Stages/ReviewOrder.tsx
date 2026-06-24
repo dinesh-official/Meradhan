@@ -120,7 +120,7 @@ function ReviewOrder({
   const otherCharges = 0;
 
   const principalScaled = orderPricing?.principalAmount
-  const accruedScaled = orderPricing?.accruedInterest||0;
+  const accruedScaled = orderPricing?.accruedInterest || 0;
   const stampScaled = orderPricing?.stampDuty
   const settlementAmount = orderPricing?.settlementAmount ?? 0
 
@@ -395,6 +395,7 @@ function ReviewOrder({
                           Rs. {formatNumberTS(accruedScaled ?? 0)}
                         </span>
                       </div>
+
                       <div className="flex justify-between">
                         <span>Total Consideration w/o Stamp Duty</span>
                         <span className="font-medium">
@@ -409,7 +410,9 @@ function ReviewOrder({
                       </div>
                       <div className="flex justify-between ">
                         <span>Accrued Interest Days</span>
-                        <span>{orderPricing.noOfAccrualDays}</span>
+                        <span>
+                          {orderPricing.noOfAccrualDays}
+                        </span>
                       </div>
                     </>
                   ) : (

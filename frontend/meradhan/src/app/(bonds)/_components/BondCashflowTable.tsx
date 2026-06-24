@@ -54,14 +54,21 @@ function MoneyCell({ value }: { value: number }) {
 export default function BondCashflowTable({
   rows,
   applyTds = false,
+  cashflowWindowMonths,
+  totalSchedulePayments,
   tdsToggle,
 }: {
   rows: BondCashflowRow[];
   applyTds?: boolean;
+  cashflowWindowMonths?: number;
+  totalSchedulePayments?: number;
   tdsToggle?: React.ReactNode;
 }) {
   const paymentRows = rows.filter((row) => resolveTotal(row) >= 0);
   const displayRows = paymentRows.length > 0 ? paymentRows : rows;
+  const isTruncated =
+    typeof totalSchedulePayments === "number" &&
+    totalSchedulePayments > displayRows.length;
   const grandTotal = displayRows.reduce((sum, row) => {
     const coupon = parseMoney(row.coupon) ?? 0;
     const principalAmount = parseMoney(row.principal);
@@ -80,6 +87,9 @@ export default function BondCashflowTable({
         <h3 className="text-lg font-semibold text-slate-900">
           Cash Flow — {displayRows.length} payment
           {displayRows.length === 1 ? "" : "s"}
+          {isTruncated && cashflowWindowMonths
+            ? ` (next ${cashflowWindowMonths} months)`
+            : ""}
         </h3>
         {tdsToggle}
       </div>
@@ -149,7 +159,7 @@ export default function BondCashflowTable({
           <tfoot>
             <tr className="border-t border-slate-200 bg-slate-50 font-semibold text-slate-900">
               <td className="px-4 py-3" colSpan={5}>
-                Total
+                {isTruncated ? "Total (shown period)" : "Total"}
               </td>
               <td className="px-4 py-3 text-right">
                 <MoneyCell value={grandTotal} />
