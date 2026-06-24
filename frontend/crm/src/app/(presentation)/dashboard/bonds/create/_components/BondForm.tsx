@@ -640,7 +640,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                 {isUpdateMode && isin ? (
                   <BondLogoField
                     isin={isin}
@@ -687,7 +687,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
                   control={form.control}
                   name="issuerDescription"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="md:col-span-2">
                       <FormLabel>Issuer Description</FormLabel>
                       <FormControl>
                         <RichTextEditor
@@ -696,11 +696,6 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           placeholder="About the issuer — shown under the Issuer tab on the bond detail page"
                         />
                       </FormControl>
-                      <FormDescription>
-                        Use the toolbar to add headings (e.g. “Positives”,
-                        “Monitorables”), bullet/numbered lists, bold text, and
-                        links. This is shown on the public Issuer tab.
-                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
