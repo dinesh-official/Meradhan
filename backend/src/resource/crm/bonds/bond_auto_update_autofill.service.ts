@@ -22,6 +22,7 @@ export type BondDealAutofillResponse = {
     usedProviderPrice?: boolean;
     usedProviderQuantity?: boolean;
     usedProviderSettlementDate?: boolean;
+    usedCalcBondApi?: boolean;
   };
   suggested: {
     bondName?: string | null;
@@ -107,8 +108,12 @@ export class BondAutoUpdateAutofillService {
     );
 
     const bondName =
-      (bondData?.bondName?.trim() || bond?.issuerName?.trim() || "").trim() ||
-      null;
+      (
+        bondData?.bondName?.trim() ||
+        bond?.issuerName?.trim() ||
+        ctx.calcBond?.issuer_name?.trim() ||
+        ""
+      ).trim() || null;
     const creditRating = bondData?.creditRating?.trim() || "UnRated";
     const natureOfInstrument =
       mapNatureOfInstrument(
@@ -119,7 +124,7 @@ export class BondAutoUpdateAutofillService {
     const finalYieldRaw = Number(calcResponse.final_yield_raw ?? 0);
 
     const isUnderShutPeriodFromCalc = /shut/i.test(
-      String(calcResponse.period_status ?? ""),
+      String(ctx.periodStatus ?? calcResponse.period_status ?? ""),
     );
 
     const sellPriceResolved =
@@ -139,8 +144,14 @@ export class BondAutoUpdateAutofillService {
       allCouponDates,
       allCouponDatesIst: allCouponDates,
       natureOfInstrument,
-      maturityDate: toYyyyMmDd(bond?.maturityDate) ?? null,
-      dateOfAllotment: toYyyyMmDd(bond?.issueDateIst) ?? null,
+      maturityDate:
+        toYyyyMmDd(ctx.calcBond?.Maturity_Date) ??
+        toYyyyMmDd(bond?.maturityDate) ??
+        null,
+      dateOfAllotment:
+        toYyyyMmDd(ctx.calcBond?.Dated_Date) ??
+        toYyyyMmDd(bond?.issueDateIst) ??
+        null,
       lastCouponDate: String(ctx.payload.Last_IP_Date ?? ""),
       nextCouponDate: String(ctx.payload.Next_IP_Date ?? ""),
       recordDate: toYyyyMmDd(ctx.pricing.recordDate) ?? null,
@@ -155,8 +166,10 @@ export class BondAutoUpdateAutofillService {
       interestPaymentMode: paymentFrequencyToDbEnum(
         ctx.payload.Payment_Frequency,
       ),
-      faceValue: Number(bond?.faceValue ?? bondData?.faceValue ?? 0),
-      couponRate: Number(Number(bond?.couponRate ?? bondData?.couponRate ?? 0).toFixed(2)),
+      faceValue: Number(ctx.payload.Face_Value ?? bond?.faceValue ?? bondData?.faceValue ?? 0),
+      couponRate: Number(
+        Number(ctx.payload.Coupon_Rate_Pct ?? bond?.couponRate ?? bondData?.couponRate ?? 0).toFixed(2),
+      ),
       buyYield: (() => {
         const raw =
           bondData?.buyYield ??
@@ -192,6 +205,7 @@ export class BondAutoUpdateAutofillService {
         usedProviderPrice: false,
         usedProviderQuantity: false,
         usedProviderSettlementDate: false,
+        usedCalcBondApi: ctx.calcBond != null,
       },
       suggested,
       pricing: {
@@ -205,6 +219,9 @@ export class BondAutoUpdateAutofillService {
         ),
         calc: {
           ...calcResponse,
+          ...(ctx.calcBond?.Period_Status_Note
+            ? { period_status_note: ctx.calcBond.Period_Status_Note }
+            : {}),
         },
       },
       margin: {},
