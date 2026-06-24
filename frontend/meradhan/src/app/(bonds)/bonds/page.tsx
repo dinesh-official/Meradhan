@@ -22,6 +22,7 @@ async function BondPage({
   const filters = await searchParams;
   const queryFilter = validateBondsFilters(filters);
   const pageParams = await params;
+  const sort = typeof filters.sort === "string" ? filters.sort : undefined;
 
   const apiCaller = new apiGateway.bondsApi.BondsApi(apiServerCaller);
   const { responseData } = await apiCaller.getListedBonds({
@@ -29,6 +30,7 @@ async function BondPage({
     params: {
       page: pageParams.page ? parseInt(pageParams?.page as string, 10) : 1,
       category: "all",
+      sort,
     },
   });
 

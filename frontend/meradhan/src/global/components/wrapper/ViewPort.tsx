@@ -8,9 +8,11 @@ export const revalidate = 0;
 export async function ViewPort({
   children,
   headerOnly,
+  hideNewsLetter,
 }: {
   children?: React.ReactNode;
   headerOnly?: boolean;
+  hideNewsLetter?: boolean;
 }) {
   const session = await getSession();
 
@@ -20,7 +22,7 @@ export async function ViewPort({
       {children}
       {!headerOnly && (
         <>
-          <NewsLetter />
+          {!hideNewsLetter && <NewsLetter />}
           <Footer />
         </>
       )}

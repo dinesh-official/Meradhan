@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { db } from "@core/database/database";
+import type { AbsoluteDataBondItem } from "@modules/absolutedata/absolutedata.types";
 
 function isDate(value: unknown): value is Date {
   return value instanceof Date && !Number.isNaN(value.getTime());
@@ -243,6 +244,62 @@ export class BondReferenceDataService {
       data: items,
       meta: { page, limit, total, totalPages },
     };
+  }
+
+  async upsertSchedulesFromAdItem(
+    isin: string,
+    adItem: AbsoluteDataBondItem,
+  ): Promise<{ isin: string; couponRowsInserted: number; redemptionRowsInserted: number }> {
+    const now = new Date();
+
+    const couponRows = (adItem.coupon.payment_schedule ?? []).map((row) => {
+      const dueDate = ymdToDate(row.payment_date);
+      const recordDate = ymdToDate(row.record_date);
+      return {
+        isin,
+        interestPaymentDates: toNullableString(row.payment_date),
+        recordDays: toFloat(row.record_days),
+        recordDate,
+        recordDateIst: recordDate,
+        dueDate,
+        dueDateIst: dueDate,
+        raw: sanitizeJsonValue(row) as object,
+        updatedAt: now,
+      };
+    });
+
+    const redemptionRows = (adItem.redemption_features.schedule ?? []).map((row) => {
+      const startDate = ymdToDate(row.start_date);
+      const endDate = ymdToDate(row.end_date);
+      return {
+        isin,
+        redemptionType: toNullableString(row.type),
+        startDate,
+        startDateIst: startDate,
+        endDate,
+        endDateIst: endDate,
+        price: toFloat(row.price),
+        amount: toFloat(row.amount),
+        optionType: toNullableString(row.option_type),
+        optionFrequency: toNullableString(row.option_frequency),
+        raw: sanitizeJsonValue(row) as object,
+        updatedAt: now,
+      };
+    });
+
+    await db.dataBase.$transaction(async (tx) => {
+      await tx.bondReferenceCouponPaymentDate.deleteMany({ where: { isin } });
+      await tx.bondReferenceRedemptionSchedule.deleteMany({ where: { isin } });
+
+      if (couponRows.length) {
+        await tx.bondReferenceCouponPaymentDate.createMany({ data: couponRows });
+      }
+      if (redemptionRows.length) {
+        await tx.bondReferenceRedemptionSchedule.createMany({ data: redemptionRows });
+      }
+    });
+
+    return { isin, couponRowsInserted: couponRows.length, redemptionRowsInserted: redemptionRows.length };
   }
 
   async getSchedulesByIsin(isin: string) {

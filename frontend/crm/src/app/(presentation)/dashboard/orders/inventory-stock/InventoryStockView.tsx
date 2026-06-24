@@ -37,7 +37,7 @@ import { hasOneOfPermission } from "@/global/utils/role.utils";
 import useAppCookie from "@/hooks/useAppCookie.hook";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
-import { Calendar, FileSpreadsheet, Minus, Pencil, Plus, Trash2, Upload } from "lucide-react";
+import { AlertTriangle, Calendar, FileSpreadsheet, FileText, Minus, Pencil, Plus, Trash2, Upload } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -57,6 +57,35 @@ type BatchRow = {
 };
 
 type LineRow = { id: number; isin: string; quantity: number };
+
+type ReconciledLine = {
+  isin: string;
+  companyName?: string;
+  pdfBalance: number;
+  inFlight: number;
+  correctedQty: number;
+};
+
+type DematPreview = {
+  lines: ReconciledLine[];
+  anomalies: { isin: string; pdfBalance: number; inFlight: number }[];
+  disappearedIsins: string[];
+  parseWarnings: string[];
+  summary: {
+    pdfRowCount: number;
+    adjustedCount: number;
+    anomalyCount: number;
+    disappearedCount: number;
+  };
+};
+
+function errMessage(err: unknown, fallback: string): string {
+  if (err && typeof err === "object" && "response" in err) {
+    const m = (err as { response?: { data?: { message?: string } } }).response?.data?.message;
+    if (m) return m;
+  }
+  return err instanceof Error ? err.message : fallback;
+}
 
 function formatYmdLong(ymd: string): string {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return ymd;
@@ -262,6 +291,72 @@ export default function InventoryStockView() {
     },
   });
 
+  // --- Demat statement PDF → inventory reconciliation (preview then commit) ---
+  const [dematOpen, setDematOpen] = useState(false);
+  const [dematFile, setDematFile] = useState<File | null>(null);
+  const [dematPreview, setDematPreview] = useState<DematPreview | null>(null);
+  const dematFileRef = useRef<HTMLInputElement>(null);
+
+  const previewDematMutation = useMutation({
+    mutationFn: async (f: File) => {
+      const fd = new FormData();
+      fd.append("file", f);
+      const res = await apiClientCaller.post<{ responseData: DematPreview }>(
+        "/crm/orders/inventory-stock/demat-pdf/preview",
+        fd
+      );
+      return res.data.responseData;
+    },
+    onSuccess: (data) => setDematPreview(data),
+    onError: (err: unknown) => toast.error(errMessage(err, "Could not read PDF")),
+  });
+
+  const commitDematMutation = useMutation({
+    mutationFn: async (f: File) => {
+      const fd = new FormData();
+      fd.append("file", f);
+      const res = await apiClientCaller.post<{
+        responseData: {
+          batchId: number;
+          dayKey: string;
+          lineCount: number;
+          anomalies?: { isin: string }[];
+          parseWarnings?: string[];
+        };
+      }>("/crm/orders/inventory-stock/demat-pdf/commit", fd);
+      return res.data.responseData;
+    },
+    onSuccess: (d) => {
+      toast.success(`Inventory updated — batch #${d.batchId}, ${d.lineCount} line(s).`);
+      if (d.anomalies?.length) {
+        toast.warning(`${d.anomalies.length} ISIN(s) had in-flight exceeding the PDF balance (set to 0).`);
+      }
+      setDematFile(null);
+      setDematPreview(null);
+      setDematOpen(false);
+      void queryClient.invalidateQueries({ queryKey: ["crm-inventory-stock-days"] });
+      void queryClient.invalidateQueries({ queryKey: ["crm-inventory-stock-batches"] });
+      void queryClient.invalidateQueries({ queryKey: ["crm-inventory-stock-lines"] });
+      setSelectedDay(d.dayKey);
+      setSelectedBatchId(d.batchId);
+    },
+    onError: (err: unknown) => toast.error(errMessage(err, "Update failed")),
+  });
+
+  const onPickDematFile = useCallback(
+    (f: File | null) => {
+      if (!f) return;
+      if (!f.name.toLowerCase().endsWith(".pdf")) {
+        toast.error("Please choose a .pdf Demat statement");
+        return;
+      }
+      setDematFile(f);
+      setDematPreview(null);
+      previewDematMutation.mutate(f);
+    },
+    [previewDematMutation]
+  );
+
   const onPickFile = useCallback((f: File | null) => {
     if (!f) return;
     const n = f.name.toLowerCase();
@@ -293,6 +388,12 @@ export default function InventoryStockView() {
           <Upload className="h-4 w-4 mr-2" />
           Upload CSV / Excel
         </Button>
+        {canEditStock ? (
+          <Button type="button" variant="secondary" onClick={() => setDematOpen(true)}>
+            <FileText className="h-4 w-4 mr-2" />
+            Upload Demat PDF
+          </Button>
+        ) : null}
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-[240px_1fr]">
@@ -609,6 +710,161 @@ export default function InventoryStockView() {
               onClick={() => file && uploadMutation.mutate(file)}
             >
               {uploadMutation.isPending ? "Uploading…" : "Upload"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={dematOpen}
+        onOpenChange={(open) => {
+          setDematOpen(open);
+          if (!open) {
+            setDematFile(null);
+            setDematPreview(null);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto overflow-x-hidden">
+          <DialogHeader>
+            <DialogTitle>Update inventory from Demat statement</DialogTitle>
+            <DialogDescription>
+              Available quantity = PDF balance − customer orders paid but not yet settled. Review the
+              adjustments below, then confirm to write a new batch.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <input
+                ref={dematFileRef}
+                type="file"
+                accept=".pdf,application/pdf"
+                className="hidden"
+                onChange={(e) => onPickDematFile(e.target.files?.[0] ?? null)}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => dematFileRef.current?.click()}
+                disabled={previewDematMutation.isPending || commitDematMutation.isPending}
+              >
+                {dematFile ? "Choose a different PDF" : "Choose PDF"}
+              </Button>
+              {dematFile && (
+                <p className="text-sm text-muted-foreground truncate max-w-[260px]" title={dematFile.name}>
+                  {dematFile.name}
+                </p>
+              )}
+            </div>
+
+            {previewDematMutation.isPending && (
+              <p className="text-sm text-muted-foreground">Reading PDF and computing adjustments…</p>
+            )}
+
+            {dematPreview && (
+              <>
+                <div className="text-sm text-muted-foreground">
+                  {dematPreview.summary.pdfRowCount} holding(s) parsed ·{" "}
+                  {dematPreview.summary.adjustedCount} adjusted for in-flight orders
+                </div>
+
+                {dematPreview.anomalies.length > 0 && (
+                  <div className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/5 p-2 text-sm text-destructive">
+                    <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                    <span>
+                      {dematPreview.anomalies.length} ISIN(s) have in-flight orders exceeding the PDF
+                      balance — these will be set to 0:{" "}
+                      <span className="font-mono break-all">
+                        {dematPreview.anomalies.map((a) => a.isin).join(", ")}
+                      </span>
+                    </span>
+                  </div>
+                )}
+
+                {dematPreview.disappearedIsins.length > 0 && (
+                  <div className="flex items-start gap-2 rounded-md border border-amber-400/40 bg-amber-50 p-2 text-sm text-amber-700">
+                    <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                    <span>
+                      {dematPreview.disappearedIsins.length} ISIN(s) in the latest batch are absent
+                      from this PDF and will no longer be available:{" "}
+                      <span className="font-mono break-all">
+                        {dematPreview.disappearedIsins.join(", ")}
+                      </span>
+                    </span>
+                  </div>
+                )}
+
+                {dematPreview.parseWarnings.length > 0 && (
+                  <div className="rounded-md border bg-muted/40 p-2 text-xs text-muted-foreground max-h-24 overflow-y-auto">
+                    {dematPreview.parseWarnings.map((w, i) => (
+                      <div key={i}>{w}</div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="overflow-x-auto rounded-md border">
+                  <Table className="w-full table-fixed">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[44%]">ISIN</TableHead>
+                        <TableHead className="text-right">PDF bal.</TableHead>
+                        <TableHead className="text-right">In-flight</TableHead>
+                        <TableHead className="text-right">Corrected</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {dematPreview.lines.map((l) => (
+                        <TableRow key={l.isin}>
+                          <TableCell className="align-top">
+                            <span className="font-mono text-sm">{l.isin}</span>
+                            {l.companyName ? (
+                              <span
+                                className="block truncate text-xs text-muted-foreground"
+                                title={l.companyName}
+                              >
+                                {l.companyName}
+                              </span>
+                            ) : null}
+                          </TableCell>
+                          <TableCell className="text-right tabular-nums">
+                            {qtyFmt.format(l.pdfBalance)}
+                          </TableCell>
+                          <TableCell
+                            className={cn(
+                              "text-right tabular-nums",
+                              l.inFlight > 0 ? "text-amber-600" : "text-muted-foreground"
+                            )}
+                          >
+                            {l.inFlight > 0 ? `−${qtyFmt.format(l.inFlight)}` : "—"}
+                          </TableCell>
+                          <TableCell className="text-right tabular-nums font-medium">
+                            {qtyFmt.format(l.correctedQty)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setDematOpen(false)}
+              disabled={commitDematMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              disabled={!dematFile || !dematPreview || commitDematMutation.isPending}
+              onClick={() => dematFile && commitDematMutation.mutate(dematFile)}
+            >
+              {commitDematMutation.isPending ? "Updating…" : "Confirm & update inventory"}
             </Button>
           </DialogFooter>
         </DialogContent>

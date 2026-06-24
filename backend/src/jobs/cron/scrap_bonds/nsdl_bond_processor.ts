@@ -675,7 +675,8 @@ export class NsdlBondProcessor {
     try {
       const api = absoluteDataApiFromEnv();
       return await api.getBondByIsin(isin);
-    } catch {
+    } catch (error) {
+      console.error("Error getting bond data from Absolute Data:", error);
       return null;
     }
   }

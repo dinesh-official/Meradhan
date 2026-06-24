@@ -29,6 +29,8 @@ export class BondsApi {
         limit?: number | string;
         category?: string;
         all?: string;
+        /** User "Sort by" token, e.g. "yield_desc" | "rating_asc" | "tenure_desc". */
+        sort?: string;
       };
     },
     config?: AxiosRequestConfig

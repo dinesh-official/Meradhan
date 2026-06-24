@@ -1,4 +1,5 @@
 import { db } from "@core/database/database";
+import type { DataBaseSchema } from "@core/database/database";
 import type { appSchema } from "@root/schema";
 import type z from "zod";
 import { BondQueryBuilder } from "./bond_query_builder";
@@ -271,9 +272,16 @@ export class BondService {
       sortBy?: keyof ReturnType<typeof BondQueryBuilder.getSortingOptions>;
       category?: string;
       all?: string;
+      /** User-facing "Sort by" token, e.g. "yield_desc" | "rating_asc" | "tenure_desc". */
+      sort?: string | string[];
     },
   ) {
     const whereQuery = BondQueryBuilder.generateFilterQuery(filters);
+
+    // User-facing sort (Yield / Rating / Tenure). When present it overrides the
+    // default/category ordering, but only for the *intra-tier* order — the
+    // Buy-Now-first grouping below is preserved.
+    const userSort = BondQueryBuilder.parseUserSort(options?.sort);
 
     const sortingOptions = BondQueryBuilder.getSortingOptions();
     // Convert page and limit to numbers for calculations
@@ -395,47 +403,70 @@ export class BondService {
         },
       };
 
-      const [countBuyNow, countOther] = await Promise.all([
-        db.dataBase.bonds.count({ where: whereBuyNow }),
-        db.dataBase.bonds.count({ where: whereOther }),
-      ]);
-      total = countBuyNow + countOther;
+      if (userSort) {
+        // Sort within each tier (Buy Now first, then others), then page across
+        // the merged order. Keeps the grouping intact while honouring the sort.
+        const sorted = await this.paginateBondsByUserSort(
+          [whereBuyNow, whereOther],
+          userSort,
+          paginationOptions.skip,
+          paginationOptions.take,
+        );
+        data = sorted.data;
+        total = sorted.total;
+      } else {
+        const [countBuyNow, countOther] = await Promise.all([
+          db.dataBase.bonds.count({ where: whereBuyNow }),
+          db.dataBase.bonds.count({ where: whereOther }),
+        ]);
+        total = countBuyNow + countOther;
 
-      const skip = paginationOptions.skip;
-      const take = paginationOptions.take;
+        const skip = paginationOptions.skip;
+        const take = paginationOptions.take;
 
-      if (skip < countBuyNow) {
-        // Offset starts within buy now bonds
-        const buyNowBonds = await db.dataBase.bonds.findMany({
-          where: whereBuyNow,
-          orderBy,
-          skip,
-          take,
-        });
-        data.push(...buyNowBonds);
+        if (skip < countBuyNow) {
+          // Offset starts within buy now bonds
+          const buyNowBonds = await db.dataBase.bonds.findMany({
+            where: whereBuyNow,
+            orderBy,
+            skip,
+            take,
+          });
+          data.push(...buyNowBonds);
 
-        if (data.length < take) {
-          // Fill the remaining spots with other bonds (starting from index 0)
-          const remaining = take - data.length;
+          if (data.length < take) {
+            // Fill the remaining spots with other bonds (starting from index 0)
+            const remaining = take - data.length;
+            const otherBonds = await db.dataBase.bonds.findMany({
+              where: whereOther,
+              orderBy,
+              skip: 0,
+              take: remaining,
+            });
+            data.push(...otherBonds);
+          }
+        } else {
+          // Offset is entirely within other bonds
+          const otherOffset = skip - countBuyNow;
           const otherBonds = await db.dataBase.bonds.findMany({
             where: whereOther,
             orderBy,
-            skip: 0,
-            take: remaining,
+            skip: otherOffset,
+            take,
           });
           data.push(...otherBonds);
         }
-      } else {
-        // Offset is entirely within other bonds
-        const otherOffset = skip - countBuyNow;
-        const otherBonds = await db.dataBase.bonds.findMany({
-          where: whereOther,
-          orderBy,
-          skip: otherOffset,
-          take,
-        });
-        data.push(...otherBonds);
       }
+    } else if (userSort) {
+      // Single-tier (all-bonds / no-inventory) listing with a user sort.
+      const sorted = await this.paginateBondsByUserSort(
+        [whereQuery],
+        userSort,
+        paginationOptions.skip,
+        paginationOptions.take,
+      );
+      data = sorted.data;
+      total = sorted.total;
     } else {
       const [rawBonds, countAll] = await Promise.all([
         db.dataBase.bonds.findMany({
@@ -472,6 +503,48 @@ export class BondService {
         totalPages: Math.ceil(total / limitNum),
       },
     };
+  }
+
+  /**
+   * Pages a result set by a user-chosen sort (Yield / Rating / Tenure) that
+   * can't be expressed as a Prisma `orderBy`.
+   *
+   * `whereTiers` is ordered by priority — each tier is sorted independently and
+   * the tiers are concatenated in order, so e.g. Buy-Now bonds stay above the
+   * rest while still being sorted internally. Only lightweight sort-key columns
+   * are fetched for the whole set; full rows are loaded for just the page.
+   */
+  private async paginateBondsByUserSort(
+    whereTiers: DataBaseSchema.BondsWhereInput[],
+    userSort: NonNullable<ReturnType<typeof BondQueryBuilder.parseUserSort>>,
+    skip: number,
+    take: number,
+  ): Promise<{ data: any[]; total: number }> {
+    const comparator = BondQueryBuilder.getUserSortComparator(userSort);
+    const select = BondQueryBuilder.getUserSortSelect();
+
+    const tierKeyLists = await Promise.all(
+      whereTiers.map((where) =>
+        db.dataBase.bonds.findMany({ where, select }),
+      ),
+    );
+
+    // Sort each tier independently, then concat preserving tier priority.
+    const orderedKeys = tierKeyLists.flatMap((keys) => keys.slice().sort(comparator));
+    const total = orderedKeys.length;
+
+    const pageIds = orderedKeys.slice(skip, skip + take).map((k) => k.id);
+    if (pageIds.length === 0) return { data: [], total };
+
+    const rows = await db.dataBase.bonds.findMany({
+      where: { id: { in: pageIds } },
+    });
+    const byId = new Map(rows.map((r) => [r.id, r]));
+    const data = pageIds
+      .map((id) => byId.get(id))
+      .filter((r): r is NonNullable<typeof r> => Boolean(r));
+
+    return { data, total };
   }
 
   async autocompleteBondSearch(query: string) {

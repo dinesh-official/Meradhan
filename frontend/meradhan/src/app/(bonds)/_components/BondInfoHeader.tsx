@@ -54,7 +54,7 @@ function BondInfoHeader({
               </h2>
               {formatYield(bond.yield) && (
                 <span className="inline-flex items-center rounded-full bg-green-100 px-4 py-1.5 text-base md:text-lg font-bold text-green-700">
-                  Yield {formatYield(bond.yield)}
+                  Yield ({formatYield(bond.yield)})
                 </span>
               )}
             </div>

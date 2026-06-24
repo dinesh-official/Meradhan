@@ -180,8 +180,13 @@ function ReviewOrder({
             </p>
           </BondInfoLabel>
 
-          <BondInfoLabel title="Coupon Rate">
-            <p className="text-black">{Number(bond.couponRate).toFixed(2)}%</p>
+          <BondInfoLabel title="Coupon Rate / Frequency">
+            <p className="text-black">
+              {Number(bond.couponRate).toFixed(2)}%
+              {bond.interestPaymentFrequency
+                ? ` / ${bond.interestPaymentFrequency.replaceAll("_", " ")}`
+                : ""}
+            </p>
           </BondInfoLabel>
 
           <BondInfoLabel title="Face Value">
