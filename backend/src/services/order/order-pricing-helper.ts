@@ -4,8 +4,6 @@
 ========================= */
 
 import { db } from "@core/database/database";
-import { getBondInfoCalcData } from "@resource/bonds/fill-bonds-auto";
-import { parseCalcFormattedDecimal } from "@resource/bonds/bond_clac";
 
 type BondSettlementResult = {
     dealDate: string;
@@ -406,61 +404,30 @@ export const computeBondOrderPricingData = async (
     });
 
     const stampDuty = calculateStampDuty(principal);
-
-    const bondData = await getBondInfoCalcData(params.isin, {
-        quantity: params.quantity,
-        settlementDate: settlement.settlementDate,
-        stampDuty,
-        automatedSettlement: true,
-        providerPrice: bondInfo?.providerPrice ?? undefined,
-    });
-
-    const calcSettleYmd =
-        typeof bondData.calc.settle_dt === "string" &&
-        /^\d{4}-\d{2}-\d{2}$/.test(bondData.calc.settle_dt.trim())
-            ? bondData.calc.settle_dt.trim()
-            : settlement.settlementDate;
-
-    const calcCleanPrice =
-        parseCalcFormattedDecimal(bondData.calc.final_price) ?? params.cleanPrice;
-    const calcPrincipal =
-        parseCalcFormattedDecimal(bondData.calc.principal_amount) ?? principal;
-    const calcAccrued =
-        parseCalcFormattedDecimal(bondData.calc.total_ai) ?? accrued.accruedInterest;
-    const calcStamp =
-        parseCalcFormattedDecimal(bondData.calc.stamp_duty) ?? stampDuty;
-    const calcSettlement =
-        parseCalcFormattedDecimal(bondData.calc.settlement_amount) ??
-        calcPrincipal + calcAccrued + calcStamp;
-    const calcYieldRaw = bondData.calc.final_yield_raw;
-    const calcYield =
-        calcYieldRaw != null && Number.isFinite(Number(calcYieldRaw))
-            ? Number(calcYieldRaw)
+    const settlementAmount = principal + accrued.accruedInterest + stampDuty;
+    const yieldRaw = bondInfo?.buyYield ?? bondInfo?.yield;
+    const yieldNum =
+        yieldRaw != null && Number.isFinite(Number(yieldRaw))
+            ? Number(yieldRaw)
             : undefined;
-
-    const calcAccrualDays = Number(bondData.calc.accrued_days);
 
     return {
         ...params,
         ...settlement,
-        settlementDate: calcSettleYmd,
-        settlementDay: utcDayName(calcSettleYmd) ?? settlement.settlementDay,
-        cleanPrice: calcCleanPrice,
-        principalAmount: calcPrincipal,
-        accruedInterest: calcAccrued,
-        stampDuty: calcStamp,
-        settlementAmount: calcSettlement,
-        noOfAccrualDays: Number.isFinite(calcAccrualDays)
-            ? calcAccrualDays
-            : accrued.noOfAccrualDays,
-        isUnderShutPeriod:
-            bondData.calc.period_status === "Shut Period" ||
-            accrued.isUnderShutPeriod,
+        settlementDate: settlement.settlementDate,
+        settlementDay: utcDayName(settlement.settlementDate) ?? settlement.settlementDay,
+        cleanPrice: params.cleanPrice,
+        principalAmount: principal,
+        accruedInterest: accrued.accruedInterest,
+        stampDuty,
+        settlementAmount,
+        noOfAccrualDays: accrued.noOfAccrualDays,
+        isUnderShutPeriod: accrued.isUnderShutPeriod,
         recordDate: accrued.recordDate,
-        recordDays: bondData.suggested.recordDays ?? recordDaysResolved,
+        recordDays: recordDaysResolved,
         lastCouponDate: lastCouponYmd,
         nextCouponDate: nextCouponYmd,
-        ...(calcYield != null ? { yield: calcYield } : {}),
+        ...(yieldNum != null ? { yield: yieldNum } : {}),
     };
 };
 

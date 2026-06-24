@@ -12,6 +12,7 @@ export const AUTOFILL_MERGE_KEYS = [
   "nextCouponDate",
   "recordDate",
   "recordDays",
+  "accruedInterestDays",
   "dayConvention",
   "interestPaymentFrequency",
   "interestPaymentMode",
@@ -98,6 +99,13 @@ export function mergeAutofillIntoForm(
   }
   if (include.recordDays && suggested.recordDays != null && Number.isFinite(suggested.recordDays)) {
     out.recordDays = Math.round(suggested.recordDays);
+  }
+  if (
+    include.accruedInterestDays &&
+    suggested.accruedInterestDays != null &&
+    Number.isFinite(suggested.accruedInterestDays)
+  ) {
+    out.accruedInterestDays = Math.round(suggested.accruedInterestDays);
   }
   if (include.dayConvention && suggested.dayConvention != null) {
     out.dayConvention = suggested.dayConvention;

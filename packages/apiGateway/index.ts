@@ -51,6 +51,7 @@ export type { CbricsWorkflowStatus } from "./src/core/api/crm/cbrics_manager.api
 
 import * as customerAuthApi from "./src/core/api/meradhan/customerauth.api";
 import * as bondsApi from "./src/core/api/bonds/bonds.api";
+import * as crmBondAutoUpdateApi from "./src/core/api/crm/crmBondAutoUpdate.api";
 import * as auditlog from "./src/core/api/auditlogs/auditlogs.api";
 export type * from "./src/core/api/auditlogs/auditlog.response";
 
@@ -112,6 +113,7 @@ export default {
     commonApi,
   },
   bondsApi,
+  crmBondAutoUpdateApi,
   trash,
   auditlog,
 };
