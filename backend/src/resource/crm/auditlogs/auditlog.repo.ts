@@ -125,20 +125,25 @@ export async function addCrmLoginBasedAuditLog(
 
     return;
   }
-  await db.dataBase.loginLogsCrm.create({
-    data: {
-      email: user?.email || "",
-      ipAddress: ipAddress,
-      browserName: infoBrowser.browserName,
-      deviceType: infoBrowser.deviceType,
-      sessionType: data.sessionType,
-      operatingSystem: infoBrowser.operatingSystem,
-      userAgent: req.headers["user-agent"] || "",
-      userId: data.userId,
-      name: user?.name,
-      success: data.success,
-    },
-  });
+  try {
+    await db.dataBase.loginLogsCrm.create({
+      data: {
+        email: user?.email || "",
+        ipAddress: ipAddress,
+        browserName: infoBrowser.browserName,
+        deviceType: infoBrowser.deviceType,
+        sessionType: data.sessionType,
+        operatingSystem: infoBrowser.operatingSystem,
+        userAgent: req.headers["user-agent"] || "",
+        userId: data.userId,
+        name: user?.name,
+        success: data.success,
+      },
+    });
+  } catch (error) {
+    console.error("Failed to create CRM login audit log:", error);
+    return;
+  }
   await createCrmActivityLog(req, {
     userId: data.userId,
     details: {
