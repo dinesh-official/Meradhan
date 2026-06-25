@@ -285,12 +285,16 @@ export function resolveAutoUpdateCalcInputs(
   };
 }
 
+// curl 'https://stagecalc.meradhan.co/api/bond/INE818W08131?settlement_date=2026-06-26'
 export async function fetchCalcBondInfo(
   isin: string,
+  settlementDateYmd: string,
 ): Promise<CalcBondApiResponse | null> {
+  console.log(`fetchCalcBondInfo: ${isin} ${settlementDateYmd}`);
   try {
     const response = await axios.get<CalcBondApiResponse>(
       `${CALC_BOND_API_BASE}/${encodeURIComponent(isin)}`,
+      { params: { settlement_date: settlementDateYmd } },
     );
     return response.data;
   } catch {
@@ -360,7 +364,7 @@ export async function buildCalcPayloadAndContext(
   }>,
   resolved: ReturnType<typeof resolveAutoUpdateCalcInputs>,
 ) {
-  const calcBond = await fetchCalcBondInfo(isin);
+  const calcBond = await fetchCalcBondInfo(isin, resolved.settlementDateYmd);
 
   const settlementDateYmd = resolved.settlementDateOverridden
     ? resolved.settlementDateYmd
