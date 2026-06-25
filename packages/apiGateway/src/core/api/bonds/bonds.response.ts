@@ -54,6 +54,11 @@ export interface BondDetailsResponse {
   dayConvention?: string | null
   recordDate?: string | null
   recordDays?: number | null
+  accruedInterestDays?: number | null
+  accruedInterest?: number | null
+  settlementAmount?: number | null
+  principalAmount?: number | null
+  totalConsideration?: number | null
   imDocumentLink?: string | null
   exchangeListedOn?: string | null
   lastCouponDate?: string | null
@@ -119,6 +124,9 @@ export interface BondCashflowData {
   summary: BondCashflowSummary;
   cashflow: BondCashflowRow[];
   warnings: string[];
+  totalSchedulePayments?: number;
+  cashflowWindowMonths?: number;
+  maturityDate?: string | null;
 }
 
 export type BondCashflowResponse = BaseResponseData<BondCashflowData>;
@@ -177,6 +185,16 @@ export interface BondDealAutofillSuggestions {
   nextCouponDate: string;
   recordDate: string | null;
   recordDays: number | null;
+  /** Accrued-interest day count from calc API (`accrued_days`). */
+  accruedInterestDays?: number | null;
+  /** Accrued interest amount (₹) per unit at qty=1 from calc API (`total_ai`). */
+  accruedInterest?: number | null;
+  /** Settlement amount (₹) per unit at qty=1 from calc API (`settlement_amount`). */
+  settlementAmount?: number | null;
+  /** Principal amount (₹) per unit at qty=1 from calc API (`principal_amount`). */
+  principalAmount?: number | null;
+  /** Total consideration w/o stamp (₹) per unit at qty=1 from calc API (`total_consideration`). */
+  totalConsideration?: number | null;
   /** Reference coupon-payment `dueDate` (YYYY-MM-DD) */
   dueDate: string | null;
   dayConvention: string | null;

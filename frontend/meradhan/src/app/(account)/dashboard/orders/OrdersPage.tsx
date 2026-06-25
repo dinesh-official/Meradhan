@@ -19,7 +19,7 @@ import { statusOptions, bondTypeOptions } from "@/constants/order";
 
 function OrdersPage() {
   const [page, setPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const [statusFilter, setStatusFilter] = useState<string>("SETTLED");
   const [bondTypeFilter, setBondTypeFilter] = useState<string>("ALL");
   const limit = 10;
 

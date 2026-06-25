@@ -11,6 +11,16 @@ function num(v: unknown, fallback = 0): number {
   return Number.isFinite(n) ? n : fallback;
 }
 
+function optionalBool(v: unknown): boolean | undefined {
+  if (v == null || v === "") return undefined;
+  if (typeof v === "boolean") return v;
+  if (typeof v === "number") return v !== 0;
+  const s = String(v).trim().toLowerCase();
+  if (s === "true" || s === "1") return true;
+  if (s === "false" || s === "0") return false;
+  return undefined;
+}
+
 /** Maps API bond detail to full create/update payload (same shape as BondForm defaultValues). */
 export function bondDetailsResponseToFormData(
   initialData: BondDetailsResponse,
@@ -56,7 +66,7 @@ export function bondDetailsResponseToFormData(
       ? parseApiDateStringToLocalDate(String(initialData.maturityDate))
       : undefined,
     sortedAt: initialData.sortedAt || 0,
-    isConvertedDeal: initialData.isConvertedDeal ?? undefined,
+    isConvertedDeal: optionalBool(initialData.isConvertedDeal),
     yield: initialData.yield != null ? num(initialData.yield) : undefined,
     lastTradePrice:
       initialData.lastTradePrice != null ? num(initialData.lastTradePrice) : undefined,
@@ -83,17 +93,33 @@ export function bondDetailsResponseToFormData(
       initialData.providerPrice != null ? num(initialData.providerPrice) : undefined,
     ignoreAutoUpdate: initialData.ignoreAutoUpdate ?? false,
     allCouponDates: (initialData.allCouponDates ?? []).map((d) =>
-      typeof d === "string"
-        ? parseApiDateStringToLocalDate(d)
-        : d instanceof Date
-          ? d
-          : parseApiDateStringToLocalDate(String(d)),
+      parseApiDateStringToLocalDate(d),
     ),
     dayConvention: initialData.dayConvention || undefined,
     recordDate: initialData.recordDate
       ? parseApiDateStringToLocalDate(String(initialData.recordDate))
       : undefined,
     recordDays: num(initialData.recordDays, 0),
+    accruedInterestDays:
+      initialData.accruedInterestDays != null
+        ? num(initialData.accruedInterestDays)
+        : undefined,
+    accruedInterest:
+      initialData.accruedInterest != null
+        ? num(initialData.accruedInterest)
+        : undefined,
+    settlementAmount:
+      initialData.settlementAmount != null
+        ? num(initialData.settlementAmount)
+        : undefined,
+    principalAmount:
+      initialData.principalAmount != null
+        ? num(initialData.principalAmount)
+        : undefined,
+    totalConsideration:
+      initialData.totalConsideration != null
+        ? num(initialData.totalConsideration)
+        : undefined,
     imDocumentLink: initialData.imDocumentLink || undefined,
     exchangeListedOn:
       (initialData.exchangeListedOn as BondFormData["exchangeListedOn"]) || undefined,
