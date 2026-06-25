@@ -17,9 +17,13 @@ export function sanitizeIssuerHtml(
       "strong", "b", "em", "i", "u", "s",
       "ul", "ol", "li",
       "a",
+      // Tables (authored via the CRM rich-text editor)
+      "table", "thead", "tbody", "tfoot", "tr", "th", "td",
     ],
     allowedAttributes: {
       a: ["href", "title", "target", "rel"],
+      th: ["colspan", "rowspan"],
+      td: ["colspan", "rowspan"],
     },
     allowedSchemes: ["http", "https", "mailto", "tel"],
     transformTags: {
