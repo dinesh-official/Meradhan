@@ -462,7 +462,7 @@ export async function buildCalcPayloadAndContext(
       bond?.dayConvention ?? bondData?.dayConvention,
     ),
     Bond_Type: bondType,
-    amort_schedule: bondType === "Amortizing" ? "" : "",
+    amort_schedule: bondType === "Amortizing" ? JSON.stringify(calcBond?.amort_schedule ?? []) : "",
   };
 
   const couponPayRow = couponRows[0] ?? null;
