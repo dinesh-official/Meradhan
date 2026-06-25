@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import RichTextEditor from "@/components/ui/rich-text-editor";
 import {
   Dialog,
   DialogContent,
@@ -47,7 +48,7 @@ import { useRouter } from "nextjs-toploader/app";
 import { useForm, type Resolver } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { AxiosError } from "axios";
 import {
   formatDateForDateInput,
@@ -389,6 +390,66 @@ function BondForm({ initialData, isin }: BondFormProps) {
   const [buyYieldDraft, setBuyYieldDraft] = useState("");
   const [buyYieldError, setBuyYieldError] = useState<string | null>(null);
 
+  const parseCalcAmount = (s: string | null | undefined): number | null => {
+    if (s == null || !String(s).trim()) return null;
+    const n = Number(String(s).replace(/,/g, "").trim());
+    return Number.isFinite(n) ? n : null;
+  };
+
+  const formatInr = (n: number | null | undefined) =>
+    n != null && Number.isFinite(n)
+      ? `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`
+      : "—";
+
+  const buildDealAutofillParams = (opts?: { pricingYield?: number }) => {
+    const v = form.getValues();
+    const providerQuantity =
+      v.providerQuantity != null && Number(v.providerQuantity) > 0
+        ? Number(v.providerQuantity)
+        : undefined;
+    const providerPrice =
+      v.providerPrice != null && Number(v.providerPrice) > 0
+        ? Number(v.providerPrice)
+        : undefined;
+
+    return {
+      quantity: providerQuantity ?? 1,
+      automatedSettlement: true as const,
+      ...(providerPrice != null ? { providerPrice } : {}),
+      ...(providerQuantity != null ? { providerQuantity } : {}),
+      ...(opts?.pricingYield != null && Number.isFinite(opts.pricingYield)
+        ? { pricingYield: opts.pricingYield }
+        : {}),
+    };
+  };
+
+  const calcResultToast = (
+    data: BondDealAutofillResponse,
+    prefix: string,
+    s: BondDealAutofillResponse["suggested"],
+  ) => {
+    const sale =
+      s.sellPrice != null
+        ? `₹${s.sellPrice.toLocaleString("en-IN", { maximumFractionDigits: 4 })}`
+        : "—";
+    const dueHint = s.dueDate ? ` Due ${s.dueDate}.` : "";
+    const settlementAmt =
+      data.pricing.settlementAmount ??
+      parseCalcAmount(data.pricing.calc?.settlement_amount);
+    const accruedAmt =
+      data.pricing.totalAccruedInterest ??
+      parseCalcAmount(data.pricing.calc?.total_ai);
+    const providerHints: string[] = [];
+    if (data.sources.usedProviderPrice) providerHints.push("provider price");
+    if (data.sources.usedProviderQuantity) providerHints.push("provider qty");
+    if (data.sources.usedProviderSettlementDate) providerHints.push("provider date");
+    const providerHint =
+      providerHints.length > 0 ? ` Used ${providerHints.join(", ")}.` : "";
+    toast.success(
+      `${prefix} sale price (clean) ${sale}, yield ${Number.isFinite(s.yield) ? `${s.yield}%` : "—"}.${dueHint} Settlement ${formatInr(settlementAmt)}, accrued ${formatInr(accruedAmt)} (${data.sources.yieldSource} yield).${providerHint}`,
+    );
+  };
+
   const applyDealAutofillResult = (data: BondDealAutofillResponse) => {
     const s = data.suggested;
     if (s.bondName?.trim()) form.setValue("bondName", s.bondName.trim());
@@ -457,12 +518,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
     if (s.sellPrice != null && Number.isFinite(s.sellPrice)) {
       form.setValue("sellPrice", s.sellPrice);
     }
-    const sale = s.sellPrice != null ? `₹${s.sellPrice.toLocaleString("en-IN", { maximumFractionDigits: 4 })}` : "—";
-    const dueHint = s.dueDate ? ` Due ${s.dueDate}.` : "";
-    toast.success(
-      `Filled: sale price (clean) ${sale}, yield ${Number.isFinite(s.yield) ? `${s.yield}%` : "—"}.${dueHint} Settlement ₹${data.pricing.settlementAmount?.toLocaleString("en-IN") ?? "—"
-      }, accrued ₹${data.pricing.totalAccruedInterest?.toLocaleString("en-IN") ?? "—"} (${data.sources.yieldSource} yield).`,
-    );
+    calcResultToast(data, "Filled:", s);
   };
 
   const autofillErrorToast = (error: AxiosError) => {
@@ -475,12 +531,10 @@ function BondForm({ initialData, isin }: BondFormProps) {
 
   const dealAutofillMutation = useMutation({
     mutationFn: async (opts?: { pricingYield?: number }) => {
-      const res = await apiCaller.getBondDealAutofillCalc(isin!, {
-        quantity: 1,
-        ...(opts?.pricingYield != null && Number.isFinite(opts.pricingYield)
-          ? { pricingYield: opts.pricingYield }
-          : {}),
-      });
+      const res = await apiCaller.getBondDealAutofillCalc(
+        isin!,
+        buildDealAutofillParams({ pricingYield: opts?.pricingYield }),
+      );
       return res.responseData;
     },
     onSuccess: (data) => {
@@ -495,7 +549,10 @@ function BondForm({ initialData, isin }: BondFormProps) {
       form.setValue("buyYield", buyYield);
       await queryClient.invalidateQueries({ queryKey: ["bond", isin] });
       await queryClient.invalidateQueries({ queryKey: ["bonds"] });
-      const res = await apiCaller.getBondDealAutofillCalc(isin!, { quantity: 1 });
+      const res = await apiCaller.getBondDealAutofillCalc(
+        isin!,
+        buildDealAutofillParams(),
+      );
       return res.responseData;
     },
     onSuccess: (data) => {
@@ -519,16 +576,6 @@ function BondForm({ initialData, isin }: BondFormProps) {
       );
     },
   });
-
-  const onDealAutofillButtonClick = () => {
-    if (!hasBondBuyYield(form.getValues("buyYield"))) {
-      setBuyYieldDraft("");
-      setBuyYieldError(null);
-      setBuyYieldPromptOpen(true);
-      return;
-    }
-    dealAutofillMutation.mutate({});
-  };
 
   const parseYieldPercent = (v: unknown): number | undefined => {
     if (v == null || v === "") return undefined;
@@ -584,44 +631,6 @@ function BondForm({ initialData, isin }: BondFormProps) {
     <div className="container mx-auto py-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {isUpdateMode && isin ? (
-            <Card className="border-primary/25 bg-primary/5 shadow-sm">
-              <CardHeader className="space-y-3 pb-2">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="space-y-1">
-                    <CardTitle className="text-lg">Pricing calculator — auto-fill</CardTitle>
-                    <CardDescription className="text-sm leading-relaxed">
-                      One click loads data from your database (schedules, margins, consolidated yield) and calls{" "}
-                      <span className="font-medium text-foreground">calc.meradhan.co</span> to compute{" "}
-                      <span className="font-medium text-foreground">offered yield</span>,{" "}
-                      <span className="font-medium text-foreground">last &amp; next coupon dates</span>, and{" "}
-                      <span className="font-medium text-foreground">sale price (clean, ₹)</span>,{" "}
-                      <span className="font-medium text-foreground">record date</span> &amp;{" "}
-                      <span className="font-medium text-foreground">record days</span> (from DB / reference when
-                      available) — plus settlement and accrued amounts in the toast.{" "}
-                      <span className="font-medium text-foreground">Buy yield</span> must be set on the bond; if it is
-                      missing, you will be asked to enter it first (it is saved, then this runs again).
-                    </CardDescription>
-                  </div>
-                  <Button
-                    type="button"
-                    disabled={dealAutofillBusy}
-                    className="h-11 shrink-0 gap-2 px-5 font-medium shadow-sm"
-                    onClick={onDealAutofillButtonClick}
-                    aria-label="Auto-fill bond fields from calculator and database"
-                  >
-                    {dealAutofillBusy ? (
-                      <Loader2 className="size-4 animate-spin" aria-hidden />
-                    ) : (
-                      <Sparkles className="size-4" aria-hidden />
-                    )}
-                    Fill sale price &amp; dates
-                  </Button>
-                </div>
-              </CardHeader>
-            </Card>
-          ) : null}
-
           {/* Basic Information */}
           <Card>
             <CardHeader>
@@ -631,7 +640,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                 {isUpdateMode && isin ? (
                   <BondLogoField
                     isin={isin}
@@ -678,14 +687,13 @@ function BondForm({ initialData, isin }: BondFormProps) {
                   control={form.control}
                   name="issuerDescription"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="md:col-span-2">
                       <FormLabel>Issuer Description</FormLabel>
                       <FormControl>
-                        <Textarea
-                          {...field}
+                        <RichTextEditor
                           value={field.value || ""}
+                          onChange={field.onChange}
                           placeholder="About the issuer — shown under the Issuer tab on the bond detail page"
-                          rows={3}
                         />
                       </FormControl>
                       <FormMessage />
@@ -2065,7 +2073,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
                             field.onChange(
                               e.target.value
                                 ? parseInt(e.target.value, 10)
-                                : undefined
+                                : undefined,
                             )
                           }
                         />
@@ -2080,7 +2088,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
                   name="providerInterestDate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Provider Interest Date</FormLabel>
+                      <FormLabel>Provider interest date (reference)</FormLabel>
                       <FormControl>
                         <Input
                           type="date"
@@ -2091,11 +2099,16 @@ function BondForm({ initialData, isin }: BondFormProps) {
                           }
                           onChange={(e) =>
                             field.onChange(
-                              e.target.value ? parseApiDateStringToLocalDate(e.target.value) : null
+                              e.target.value
+                                ? parseApiDateStringToLocalDate(e.target.value)
+                                : null,
                             )
                           }
                         />
                       </FormControl>
+                      <FormDescription className="text-xs">
+                        Stored on the bond for reference.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -2177,7 +2190,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
           <DialogHeader>
             <DialogTitle>Enter buy yield</DialogTitle>
             <DialogDescription>
-              Buy yield is required before we can run the pricing calculator. It will be saved on this bond, then sale price and dates will load.
+              Buy yield is required before we can run pricing calc. It will be saved on this bond, then sale price and dates will load.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2 py-1">

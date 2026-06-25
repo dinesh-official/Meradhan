@@ -10,10 +10,9 @@ function parseDate(s: string | undefined): Date | undefined {
 }
 
 /**
- * `true` when the linked customer is KYC-verified or KRA-verified. Once
- * either status is "VERIFIED" the bank/demat accounts have been sent to
- * NDML/CBRICS and cannot be mutated from the CRM corporate-KYC form — any
- * change must go through a dedicated modify flow with full audit.
+ * `true` when the linked customer is KYC-verified or KRA-verified. Bank/demat
+ * account details are sealed, but proof file URLs may still be updated for
+ * CBRICS attachment workflows.
  */
 function isAccountsLocked(
   customer?: { kycStatus?: string | null; kraStatus?: string | null } | null,
@@ -25,29 +24,19 @@ function isAccountsLocked(
 }
 
 /**
- * Returns a stable, sorted signature for a list of bank accounts so two
- * snapshots can be compared by value. Field choice intentionally covers
- * everything the CRM form can mutate, so any visible edit triggers a diff.
+ * Returns a stable, sorted signature for bank account identity fields only.
  */
-function bankAccountsSignature(
+function bankAccountsStructuralSignature(
   rows: ReadonlyArray<{
     accountHolderName?: string | null;
     accountNumber?: string | null;
     branch?: string | null;
     bankName?: string | null;
     ifscCode?: string | null;
-    bankProofFileUrls?: unknown;
     isPrimaryAccount?: boolean | null;
   }>,
 ): string {
-  const norm = (v: unknown) =>
-    String(v ?? "").trim().toUpperCase();
-  const urls = (u: unknown): string => {
-    if (!Array.isArray(u)) return "[]";
-    return JSON.stringify(
-      (u as unknown[]).map((s) => String(s ?? "").trim()).sort(),
-    );
-  };
+  const norm = (v: unknown) => String(v ?? "").trim().toUpperCase();
   return rows
     .map((a) =>
       [
@@ -57,22 +46,20 @@ function bankAccountsSignature(
         norm(a.accountHolderName),
         norm(a.branch),
         a.isPrimaryAccount ? "1" : "0",
-        urls(a.bankProofFileUrls),
       ].join("|"),
     )
     .sort()
     .join("\n");
 }
 
-/** Same idea for demat accounts. */
-function dematAccountsSignature(
+/** Demat account identity fields only (proof URL excluded). */
+function dematAccountsStructuralSignature(
   rows: ReadonlyArray<{
     depository?: string | null;
     accountType?: string | null;
     dpId?: string | null;
     clientId?: string | null;
     accountHolderName?: string | null;
-    dematProofFileUrl?: string | null;
     isPrimary?: boolean | null;
   }>,
 ): string {
@@ -85,12 +72,147 @@ function dematAccountsSignature(
         norm(d.clientId),
         norm(d.accountType),
         norm(d.accountHolderName),
-        norm(d.dematProofFileUrl),
         d.isPrimary ? "1" : "0",
       ].join("|"),
     )
     .sort()
     .join("\n");
+}
+
+function bankAccountMatchKey(row: {
+  ifscCode?: string | null;
+  accountNumber?: string | null;
+}): string {
+  const norm = (v: unknown) => String(v ?? "").trim().toUpperCase();
+  return `${norm(row.ifscCode)}|${norm(row.accountNumber)}`;
+}
+
+function dematAccountMatchKey(row: {
+  depository?: string | null;
+  dpId?: string | null;
+  clientId?: string | null;
+}): string {
+  const norm = (v: unknown) => String(v ?? "").trim().toUpperCase();
+  return `${norm(row.depository)}|${norm(row.dpId)}|${norm(row.clientId)}`;
+}
+
+function findPayloadBank<
+  T extends {
+    id?: number;
+    ifscCode?: string;
+    accountNumber?: string;
+  },
+>(existing: { id: number; ifscCode: string; accountNumber: string }, payload: T[]): T | undefined {
+  const byId = payload.find((p) => p.id === existing.id);
+  if (byId) return byId;
+  const key = bankAccountMatchKey(existing);
+  return payload.find((p) => bankAccountMatchKey(p) === key);
+}
+
+function findPayloadDemat<
+  T extends {
+    id?: number;
+    depository?: string;
+    dpId?: string;
+    clientId?: string;
+  },
+>(existing: {
+  id: number;
+  depository: string;
+  dpId: string;
+  clientId: string;
+}, payload: T[]): T | undefined {
+  const byId = payload.find((p) => p.id === existing.id);
+  if (byId) return byId;
+  const key = dematAccountMatchKey(existing);
+  return payload.find((p) => dematAccountMatchKey(p) === key);
+}
+
+async function applyLockedAccountProofUpdates(
+  existing: {
+    bankAccounts: Array<{
+      id: number;
+      ifscCode: string;
+      accountNumber: string;
+    }>;
+    dematAccounts: Array<{
+      id: number;
+      depository: string;
+      dpId: string;
+      clientId: string;
+    }>;
+  },
+  payload: CreateCorporateKycPayload,
+) {
+  const bankStructuralExisting = bankAccountsStructuralSignature(
+    existing.bankAccounts,
+  );
+  const bankStructuralPayload = bankAccountsStructuralSignature(
+    payload.bankAccounts ?? [],
+  );
+  if (bankStructuralExisting !== bankStructuralPayload) {
+    throw new AppError(
+      "Verified customers: bank account details cannot be changed. Only bank proof files may be updated.",
+      {
+        code: "CORPORATE_KYC_BANK_LOCKED",
+        statusCode: HttpStatus.FORBIDDEN,
+      },
+    );
+  }
+
+  const dematStructuralExisting = dematAccountsStructuralSignature(
+    existing.dematAccounts,
+  );
+  const dematStructuralPayload = dematAccountsStructuralSignature(
+    payload.dematAccounts ?? [],
+  );
+  if (dematStructuralExisting !== dematStructuralPayload) {
+    throw new AppError(
+      "Verified customers: demat account details cannot be changed. Only demat proof files may be updated.",
+      {
+        code: "CORPORATE_KYC_DEMAT_LOCKED",
+        statusCode: HttpStatus.FORBIDDEN,
+      },
+    );
+  }
+
+  const prisma = db.dataBase;
+  const ops: Parameters<typeof prisma.$transaction>[0] extends (infer U)[]
+    ? U[]
+    : never = [];
+
+  for (const row of existing.bankAccounts) {
+    const incoming = findPayloadBank(row, payload.bankAccounts ?? []);
+    if (!incoming) continue;
+    ops.push(
+      prisma.corporateKycBankAccountModel.update({
+        where: { id: row.id },
+        data: {
+          bankProofFileUrls: (incoming.bankProofFileUrls ??
+            []) as unknown as object,
+        },
+      }),
+    );
+  }
+
+  for (const row of existing.dematAccounts) {
+    const incoming = findPayloadDemat(row, payload.dematAccounts ?? []);
+    if (!incoming) continue;
+    ops.push(
+      prisma.corporateKycDematAccountModel.update({
+        where: { id: row.id },
+        data: {
+          dematProofFileUrl: incoming.dematProofFileUrl?.trim()
+            ? incoming.dematProofFileUrl.trim()
+            : null,
+        },
+      }),
+    );
+  }
+
+  if (ops.length > 0) {
+    await prisma.$transaction(ops);
+  }
 }
 
 function mapPayloadToPrismaCreate(customerId: number, payload: CreateCorporateKycPayload) {
@@ -280,36 +402,25 @@ export class CorporateKycService {
     const existing = await this.repo.findByCustomerId(customerId);
 
     if (existing) {
-      // When the customer is KYC/KRA-verified the bank + demat lists are
-      // sealed (already sent to NDML / CBRICS). The CRM form is rendered
-      // read-only on the frontend, so any bank/demat payload arriving here
-      // is either a round-trip echo (form state ↔ payload normalisation
-      // drift) or a tampered request. Either way the resolution is the
-      // same: leave the stored rows untouched.
-      //
-      // We deliberately do NOT throw here. Earlier we compared signatures
-      // and 403'd on diff, but legitimate round-trip drift (e.g. `branch:
-      // null` in DB ↔ `branch: ""` in payload, or JSON-vs-array shapes
-      // for `bankProofFileUrls`) caused false positives that blocked
-      // unrelated field edits on the same form. Silently dropping the
-      // bank/demat sections from the update payload is the safer
-      // behaviour: the rest of the form saves, and the protected rows
-      // stay verbatim.
+      // When the customer is KYC/KRA-verified, bank + demat account details
+      // are sealed (already sent to NDML / CBRICS). Proof file URLs may still
+      // be updated via `applyLockedAccountProofUpdates` after the main save.
       const locked = isAccountsLocked(customer);
 
-      // Lightweight audit so anomalies are still visible if they ever
-      // occur — fire-and-forget; we don't want a logger failure to break
-      // the save.
       if (locked) {
-        const banksDiffer =
-          bankAccountsSignature(existing.bankAccounts ?? []) !==
-          bankAccountsSignature(payload.bankAccounts ?? []);
-        const dematsDiffer =
-          dematAccountsSignature(existing.dematAccounts ?? []) !==
-          dematAccountsSignature(payload.dematAccounts ?? []);
-        if (banksDiffer || dematsDiffer) {
-          console.warn(
-            `[CorporateKycService.save] Ignoring bank/demat changes for verified customer #${customerId} (banksDiffer=${banksDiffer}, dematsDiffer=${dematsDiffer}). Frontend lock should have prevented this.`,
+        const banksStructuralDiffer =
+          bankAccountsStructuralSignature(existing.bankAccounts ?? []) !==
+          bankAccountsStructuralSignature(payload.bankAccounts ?? []);
+        const dematsStructuralDiffer =
+          dematAccountsStructuralSignature(existing.dematAccounts ?? []) !==
+          dematAccountsStructuralSignature(payload.dematAccounts ?? []);
+        if (banksStructuralDiffer || dematsStructuralDiffer) {
+          throw new AppError(
+            "Verified customers: bank/demat account details cannot be changed from this form. Only proof files may be updated.",
+            {
+              code: "CORPORATE_KYC_ACCOUNTS_LOCKED",
+              statusCode: HttpStatus.FORBIDDEN,
+            },
           );
         }
       }
@@ -390,10 +501,8 @@ export class CorporateKycService {
         taxResidencyOfEntity: payload.taxResidencyOfEntity ?? undefined,
         declarationByAuthorisedSignatory:
           payload.declarationByAuthorisedSignatory ?? false,
-        // When locked, skip the wipe-and-recreate so existing row IDs are
-        // preserved (the equality check above already proved nothing
-        // changed). When unlocked, the form is the source of truth and we
-        // replace the lists as before.
+        // When locked, skip wipe-and-recreate; proof URLs are patched after
+        // the main update. When unlocked, replace lists from the form.
         ...(locked
           ? {}
           : {
@@ -518,6 +627,27 @@ export class CorporateKycService {
           authorisedSignatories: true,
         },
       });
+
+      if (locked) {
+        await applyLockedAccountProofUpdates(existing, payload);
+        const refreshed = await prisma.corporateKycModel.findUnique({
+          where: { id: existing.id },
+          include: {
+            bankAccounts: true,
+            dematAccounts: true,
+            directors: true,
+            promoters: true,
+            partners: true,
+            trustees: true,
+            authorisedSignatories: true,
+            customerProfileDataModel: {
+              select: { kycStatus: true, kraStatus: true },
+            },
+          },
+        });
+        return this.mapToResponse(refreshed ?? updated);
+      }
+
       return this.mapToResponse(updated);
     }
 
@@ -705,6 +835,10 @@ export class CorporateKycService {
       lastGeneratedPdfAt: row.lastGeneratedPdfAt
         ? row.lastGeneratedPdfAt.toISOString()
         : null,
+      lastPdfPayload: row.lastPdfPayload ?? null,
+      lastPdfPayloadAt: row.lastPdfPayloadAt
+        ? row.lastPdfPayloadAt.toISOString()
+        : null,
     };
   }
 
@@ -744,6 +878,55 @@ export class CorporateKycService {
       lastGeneratedPdfUrl: updated.lastGeneratedPdfUrl ?? null,
       lastGeneratedPdfAt: updated.lastGeneratedPdfAt
         ? updated.lastGeneratedPdfAt.toISOString()
+        : null,
+    };
+  }
+
+  /**
+   * Persists the CRM PDF editor JSON payload on the corporate KYC row so
+   * operators can resume edits across sessions without re-mapping from CRM.
+   */
+  async setLastPdfPayload(customerId: number, payload: unknown) {
+    await this.repo.ensureCustomerExists(customerId);
+    const existing = await this.repo.findByCustomerId(customerId);
+    if (!existing) {
+      throw new AppError("Corporate KYC not found for this customer.", {
+        code: "CORPORATE_KYC_NOT_FOUND",
+        statusCode: HttpStatus.NOT_FOUND,
+      });
+    }
+    if (
+      payload === null ||
+      payload === undefined ||
+      (typeof payload === "object" &&
+        !Array.isArray(payload) &&
+        Object.keys(payload as object).length === 0)
+    ) {
+      throw new AppError("PDF form payload is required.", {
+        code: "CORPORATE_KYC_PDF_PAYLOAD_REQUIRED",
+        statusCode: HttpStatus.BAD_REQUEST,
+      });
+    }
+    if (typeof payload !== "object" || Array.isArray(payload)) {
+      throw new AppError("PDF form payload must be a JSON object.", {
+        code: "CORPORATE_KYC_PDF_PAYLOAD_INVALID",
+        statusCode: HttpStatus.BAD_REQUEST,
+      });
+    }
+
+    const updated = await db.dataBase.corporateKycModel.update({
+      where: { id: existing.id },
+      data: {
+        lastPdfPayload: payload as object,
+        lastPdfPayloadAt: new Date(),
+      },
+      select: { lastPdfPayload: true, lastPdfPayloadAt: true },
+    });
+
+    return {
+      lastPdfPayload: updated.lastPdfPayload ?? null,
+      lastPdfPayloadAt: updated.lastPdfPayloadAt
+        ? updated.lastPdfPayloadAt.toISOString()
         : null,
     };
   }

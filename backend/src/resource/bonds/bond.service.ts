@@ -16,6 +16,7 @@ import {
 } from "./place-order-email";
 import { AppConfigService } from "@resource/app-config/app-config.service";
 import { AppError } from "@utils/error/AppError";
+import { sanitizeIssuerHtml } from "@utils/html-sanitizer";
 import { env } from "@packages/config/src/env";
 import { OrderPdfService } from "@resource/customer/order/order-pdf.service";
 import { OrderService } from "@resource/customer/order/order.service";
@@ -204,8 +205,8 @@ export class BondService {
       throw new Error("No Bond Found")
     }
 
-    const cleanPrice = sellPrice || bond.sellPrice;
-    console.log(cleanPrice);
+    const cleanPrice =
+      sellPrice ?? bond.sellPrice ?? bond.providerPrice ?? bond.issuePrice ?? 0;
 
     let lastCouponDateStr = bond.lastCouponDateIst?.toISOString() ?? null;
     let nextCouponDateStr = bond.nextCouponDateIst?.toISOString() ?? null;
@@ -248,9 +249,12 @@ export class BondService {
       { settlementType },
     );
 
-    const yieldRaw = bond.yield ?? bond.buyYield;
+    const yieldRaw =
+      pricingData.yield ?? bond.yield ?? bond.buyYield;
     const yieldNum =
-      yieldRaw != null && Number.isFinite(Number(yieldRaw)) ? Number(yieldRaw) : null;
+      yieldRaw != null && Number.isFinite(Number(yieldRaw))
+        ? Number(yieldRaw)
+        : null;
 
     return {
       ok: true,
@@ -836,7 +840,7 @@ export class BondService {
         bondName: bondData.bondName,
         instrumentName: bondData.instrumentName,
         description: bondData.description,
-        issuerDescription: bondData.issuerDescription || null,
+        issuerDescription: sanitizeIssuerHtml(bondData.issuerDescription),
         issuePrice: bondData.issuePrice,
         faceValue: bondData.faceValue,
         stampDutyPercentage: bondData.stampDutyPercentage ?? 0,
@@ -889,6 +893,11 @@ export class BondService {
         dayConvention: bondData.dayConvention || null,
         recordDate: bondData.recordDate || null,
         recordDays: bondData.recordDays ?? null,
+        accruedInterestDays: bondData.accruedInterestDays ?? null,
+        accruedInterest: bondData.accruedInterest ?? null,
+        settlementAmount: bondData.settlementAmount ?? null,
+        principalAmount: bondData.principalAmount ?? null,
+        totalConsideration: bondData.totalConsideration ?? null,
         imDocumentLink: bondData.imDocumentLink || null,
         exchangeListedOn: bondData.exchangeListedOn ?? null,
         lastCouponDate: bondData.lastCouponDate || null,
@@ -934,7 +943,7 @@ export class BondService {
         bondName: bondData.bondName,
         instrumentName: bondData.instrumentName,
         description: bondData.description,
-        issuerDescription: bondData.issuerDescription || null,
+        issuerDescription: sanitizeIssuerHtml(bondData.issuerDescription),
         issuePrice: bondData.issuePrice,
         faceValue: bondData.faceValue,
         stampDutyPercentage: bondData.stampDutyPercentage ?? 0,
@@ -987,6 +996,11 @@ export class BondService {
         dayConvention: bondData.dayConvention || null,
         recordDate: bondData.recordDate || null,
         recordDays: bondData.recordDays ?? null,
+        accruedInterestDays: bondData.accruedInterestDays ?? null,
+        accruedInterest: bondData.accruedInterest ?? null,
+        settlementAmount: bondData.settlementAmount ?? null,
+        principalAmount: bondData.principalAmount ?? null,
+        totalConsideration: bondData.totalConsideration ?? null,
         imDocumentLink: bondData.imDocumentLink || null,
         exchangeListedOn: bondData.exchangeListedOn ?? null,
         lastCouponDate: bondData.lastCouponDate || null,

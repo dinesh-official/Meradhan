@@ -39,7 +39,8 @@ export default function BondCashflowTab({ isin }: { isin: string }) {
     );
   }
 
-  const { cashflow, warnings } = query.data;
+  const { cashflow, warnings, totalSchedulePayments, cashflowWindowMonths } =
+    query.data;
 
   if (cashflow.length === 0) {
     return (
@@ -60,6 +61,8 @@ export default function BondCashflowTab({ isin }: { isin: string }) {
       <BondCashflowTable
         rows={cashflow}
         applyTds={applyTds}
+        cashflowWindowMonths={cashflowWindowMonths}
+        totalSchedulePayments={totalSchedulePayments}
         tdsToggle={
           <div className="flex items-center gap-2">
             <Switch

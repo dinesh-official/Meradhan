@@ -78,7 +78,9 @@ const BOND_LISTING_CATEGORY_OPTIONS = [
   { value: "latest-release", label: "Latest release" },
 ] as const;
 
-const api = new apiGateway.bondsApi.BondsApi(apiClientCaller);
+const bondsApi = new apiGateway.bondsApi.BondsApi(apiClientCaller);
+const autoUpdateAutofillApi =
+  new apiGateway.crmBondAutoUpdateApi.CrmBondAutoUpdateApi(apiClientCaller);
 
 /** Empty draft → default autofill; non-empty → must parse as % or fail. */
 function autofillParamsFromCustomYieldDraft(draft: string | undefined):
@@ -108,6 +110,18 @@ function formatDisplayValue(v: unknown): string {
   }
   if (typeof v === "number") return Number.isFinite(v) ? String(v) : "—";
   return String(v);
+}
+
+function parseCalcAmount(s: string | null | undefined): number | null {
+  if (s == null || !String(s).trim()) return null;
+  const n = Number(String(s).replace(/,/g, "").trim());
+  return Number.isFinite(n) ? n : null;
+}
+
+function formatInr(n: number | null | undefined): string {
+  return n != null && Number.isFinite(n)
+    ? `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`
+    : "—";
 }
 
 function autofillWarnings(res: BondDealAutofillResponse): string[] {
@@ -171,7 +185,7 @@ export default function BondAutoUpdateView() {
   const listQuery = useQuery({
     queryKey: ["bonds", "auto-update", "sale-ready"],
     queryFn: async () => {
-      const { responseData } = await api.getListedBonds({
+      const { responseData } = await bondsApi.getListedBonds({
         filters: { allowForPurchase: true },
         params: { page: 1, limit: 200, category: "all", all: "YES" },
       });
@@ -215,7 +229,7 @@ export default function BondAutoUpdateView() {
   const autofillMutation = useMutation({
     mutationFn: async (args: { isin: string; pricingYield?: number }) => {
       const { isin, pricingYield } = args;
-      const res = await api.getBondDealAutofillCalc(isin, {
+      const res = await autoUpdateAutofillApi.postBondAutoUpdateAutofill(isin, {
         quantity: 1,
         ...(pricingYield != null && Number.isFinite(pricingYield)
           ? { pricingYield }
@@ -283,8 +297,8 @@ export default function BondAutoUpdateView() {
   >({
     mutationFn: async ({ isin, payload }) => {
       // Pass autofillSave: true so the backend stamps autofillSavedAt on this bond.
-      await api.updateBond(isin, payload, { autofillSave: true });
-      const detail = await api.getBondDetailsByIsin(isin);
+      await bondsApi.updateBond(isin, payload, { autofillSave: true });
+      const detail = await bondsApi.getBondDetailsByIsin(isin);
       if (!detail.responseData) {
         throw new Error("Bond details missing after update");
       }
@@ -361,7 +375,10 @@ export default function BondAutoUpdateView() {
           });
           continue;
         }
-        const res = await api.getBondDealAutofillCalc(b.isin, parsed.params);
+        const res = await autoUpdateAutofillApi.postBondAutoUpdateAutofill(
+          b.isin,
+          parsed.params,
+        );
         if (!res.responseData) {
           fail++;
           setRows((prev) => {
@@ -447,8 +464,8 @@ export default function BondAutoUpdateView() {
       try {
         const payload = mergeAutofillIntoForm(row.formBase, row.draft, row.include);
         // Pass autofillSave: true so the backend stamps autofillSavedAt on this bond.
-        await api.updateBond(isin, payload, { autofillSave: true });
-        const detail = await api.getBondDetailsByIsin(isin);
+        await bondsApi.updateBond(isin, payload, { autofillSave: true });
+        const detail = await bondsApi.getBondDetailsByIsin(isin);
         if (!detail.responseData) throw new Error("Bond details missing after update");
         const fresh = detail.responseData;
         setRows((prev) => ({
@@ -572,7 +589,7 @@ export default function BondAutoUpdateView() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-muted-foreground text-sm max-w-3xl">
           Bonds with <span className="font-medium text-foreground">Allow for purchase</span> (sale-ready).
-          Load deal autofill from the same API as the bond form, review each field, uncheck what you do not want
+          Load autofill from calc.meradhan.co, review each field, uncheck what you do not want
           to overwrite, edit values, then accept to save or reject to discard.{" "}
           <span className="font-medium text-foreground">Load all</span> uses each row&apos;s optional custom yield
           when filled.
@@ -786,7 +803,7 @@ export default function BondAutoUpdateView() {
                       <p className="text-muted-foreground text-sm py-4">
                         Optionally enter <span className="font-medium text-foreground">Custom yield %</span>, then
                         click <span className="font-medium text-foreground">Load autofill</span> to use it; leave the
-                        field empty for default pricing. Same API as the bond form.
+                        field empty for default pricing.
                       </p>
                     ) : (
                       <>
@@ -866,6 +883,74 @@ export default function BondAutoUpdateView() {
                           </p>
                         )}
 
+                        {model.autofill.pricing ? (
+                          <div className="rounded-md border border-primary/15 bg-muted/30 px-3 py-2.5 text-sm">
+                            <p className="font-medium text-foreground">Calc summary</p>
+                            <dl className="mt-2 grid gap-x-4 gap-y-1 sm:grid-cols-2 lg:grid-cols-4">
+                              <div>
+                                <dt className="text-muted-foreground text-xs">Settlement (T+1 IST)</dt>
+                                <dd className="font-medium font-mono text-xs">
+                                  {String(model.autofill.pricing.calc?.settle_dt ?? "—")}
+                                </dd>
+                              </div>
+                              <div>
+                                <dt className="text-muted-foreground text-xs">Settlement amount</dt>
+                                <dd className="font-medium">
+                                  {formatInr(
+                                    parseCalcAmount(
+                                      model.autofill.pricing.calc?.settlement_amount as
+                                        | string
+                                        | undefined,
+                                    ),
+                                  )}
+                                </dd>
+                              </div>
+                              <div>
+                                <dt className="text-muted-foreground text-xs">Accrued interest</dt>
+                                <dd className="font-medium">
+                                  {formatInr(
+                                    parseCalcAmount(
+                                      model.autofill.pricing.calc?.total_ai as string | undefined,
+                                    ),
+                                  )}
+                                </dd>
+                              </div>
+                              <div>
+                                <dt className="text-muted-foreground text-xs">Principal amount</dt>
+                                <dd className="font-medium">
+                                  {formatInr(
+                                    parseCalcAmount(
+                                      model.autofill.pricing.calc?.principal_amount as
+                                        | string
+                                        | undefined,
+                                    ),
+                                  )}
+                                </dd>
+                              </div>
+                              <div>
+                                <dt className="text-muted-foreground text-xs">
+                                  Total consideration (w/o stamp)
+                                </dt>
+                                <dd className="font-medium">
+                                  {formatInr(
+                                    parseCalcAmount(
+                                      model.autofill.pricing.calc?.total_consideration as
+                                        | string
+                                        | undefined,
+                                    ),
+                                  )}
+                                </dd>
+                              </div>
+                              <div>
+                                <dt className="text-muted-foreground text-xs">Accrued days</dt>
+                                <dd className="font-medium">
+                                  {model.autofill.pricing.calc?.accrued_days ?? "—"}
+                                </dd>
+                              </div>
+                            </dl>
+                          </div>
+                        ) : null}
+
                         <div className="rounded-md border overflow-x-auto">
                           <Table>
                             <TableHeader>
@@ -873,7 +958,7 @@ export default function BondAutoUpdateView() {
                                 <TableHead className="w-10">Use</TableHead>
                                 <TableHead>Field</TableHead>
                                 <TableHead>Current (saved)</TableHead>
-                                <TableHead>New (editable)</TableHead>
+                                <TableHead className="min-w-[220px]">New (editable)</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -930,9 +1015,16 @@ export default function BondAutoUpdateView() {
                                           typeof curVal === "number" &&
                                           Number.isFinite(curVal)
                                         ? formatDecimalWithMinFractionDigits(curVal, 4)
+                                        : (key === "settlementAmount" ||
+                                            key === "accruedInterest" ||
+                                            key === "principalAmount" ||
+                                            key === "totalConsideration") &&
+                                          typeof curVal === "number" &&
+                                          Number.isFinite(curVal)
+                                        ? formatInr(curVal)
                                         : formatDisplayValue(curVal)}
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell className="min-w-[220px] align-top">
                                       {key === "bondName" || key === "creditRating" ? (
                                         <Input
                                           className="h-9 text-sm"
@@ -975,7 +1067,7 @@ export default function BondAutoUpdateView() {
                                             });
                                           }}
                                         />
-                                      ) : key === "recordDays" ? (
+                                      ) : key === "recordDays" || key === "accruedInterestDays" ? (
                                         <Input
                                           type="number"
                                           className="h-9 font-mono text-sm"
@@ -983,10 +1075,37 @@ export default function BondAutoUpdateView() {
                                           onChange={(e) => {
                                             const v = e.target.value;
                                             updateDraft(b.isin, {
-                                              recordDays:
+                                              [key]:
                                                 v === "" ? null : Math.round(parseFloat(v)),
-                                            });
+                                            } as Partial<DraftSuggestions>);
                                           }}
+                                        />
+                                      ) : key === "settlementAmount" ||
+                                        key === "accruedInterest" ||
+                                        key === "principalAmount" ||
+                                        key === "totalConsideration" ? (
+                                        <DecimalInput
+                                          className="h-9 font-mono text-sm"
+                                          minFractionDigits={2}
+                                          maxFractionDigits={2}
+                                          value={
+                                            sug == null
+                                              ? undefined
+                                              : (() => {
+                                                const n =
+                                                  typeof sug === "number"
+                                                    ? sug
+                                                    : Number(sug);
+                                                return Number.isFinite(n)
+                                                  ? n
+                                                  : undefined;
+                                              })()
+                                          }
+                                          onChange={(n) =>
+                                            updateDraft(b.isin, {
+                                              [key]: n ?? null,
+                                            } as Partial<DraftSuggestions>)
+                                          }
                                         />
                                       ) : key === "couponRate" ||
                                         key === "buyYield" ||

@@ -51,6 +51,98 @@ function toYyyyMmDd(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
+type SettleOrderPdfRow = {
+  modQuantity?: number | string | null;
+  modAccrInt?: number | string | null;
+  modConsideration?: number | string | null;
+  stampDutyAmount?: number | string | null;
+};
+
+function orderPricingSnapshot(bondDetails: unknown): {
+  accruedInterest?: number;
+  noOfAccrualDays?: number;
+} | null {
+  if (!bondDetails || typeof bondDetails !== "object" || Array.isArray(bondDetails)) {
+    return null;
+  }
+  const p = (bondDetails as Record<string, unknown>).pricing;
+  if (!p || typeof p !== "object" || Array.isArray(p)) return null;
+  const snap = p as Record<string, unknown>;
+  const accruedInterest =
+    typeof snap.accruedInterest === "number"
+      ? snap.accruedInterest
+      : Number(snap.accruedInterest);
+  const noOfAccrualDays =
+    typeof snap.noOfAccrualDays === "number"
+      ? snap.noOfAccrualDays
+      : Number(snap.noOfAccrualDays);
+  return {
+    ...(Number.isFinite(accruedInterest) ? { accruedInterest } : {}),
+    ...(Number.isFinite(noOfAccrualDays) ? { noOfAccrualDays } : {}),
+  };
+}
+
+function buildPdfFinancialFields(
+  order: {
+    subTotal: unknown;
+    stampDuty: unknown;
+    quantity: number;
+    bondDetails: unknown;
+  },
+  bond: {
+    accruedInterest?: number | null;
+    accruedInterestDays?: number | null;
+  },
+  settleOrder: SettleOrderPdfRow | null | undefined,
+  pdfAccruedInterestDays?: number,
+): {
+  quantity: number;
+  subTotal: number;
+  stampDuty: number;
+  totalConsideration: number;
+  accruedInterest?: number;
+  accruedInterestDays?: number;
+} {
+  const quantity =
+    settleOrder?.modQuantity != null
+      ? Number(settleOrder.modQuantity)
+      : order.quantity;
+  const snap = orderPricingSnapshot(order.bondDetails);
+  const principal = Number(order.subTotal);
+  const accruedInterest =
+    settleOrder?.modAccrInt != null
+      ? Number(settleOrder.modAccrInt)
+      : bond.accruedInterest != null && Number.isFinite(Number(bond.accruedInterest))
+        ? Number(bond.accruedInterest) * quantity
+        : snap?.accruedInterest;
+  const accruedInterestDays =
+    pdfAccruedInterestDays ??
+    (bond.accruedInterestDays != null && Number.isFinite(bond.accruedInterestDays)
+      ? bond.accruedInterestDays
+      : snap?.noOfAccrualDays);
+  const stampDuty =
+    settleOrder?.stampDutyAmount != null
+      ? Number(settleOrder.stampDutyAmount)
+      : Number(order.stampDuty);
+  const totalConsideration =
+    settleOrder?.modConsideration != null
+      ? Number(settleOrder.modConsideration)
+      : principal + (accruedInterest ?? 0);
+
+  return {
+    quantity,
+    subTotal: principal,
+    stampDuty,
+    totalConsideration,
+    ...(accruedInterest != null && Number.isFinite(accruedInterest)
+      ? { accruedInterest }
+      : {}),
+    ...(accruedInterestDays != null && Number.isFinite(accruedInterestDays)
+      ? { accruedInterestDays }
+      : {}),
+  };
+}
+
 function formatDateWithDayNameForPdfOption(d: Date): string {
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -1727,30 +1819,25 @@ export class CrmOrdersService {
         ? pdfQuery.amortizedPrincipalPaymentDates.trim()
         : undefined;
 
+    const pdfFinancials = buildPdfFinancialFields(
+      order,
+      bond,
+      settleOrder,
+      accruedInterestDaysParam,
+    );
+
     const buffer = await generateOrderPdfBuffer({
       user,
       orderId: order.orderNumber,
       bond,
-      qun:
-        settleOrder?.modQuantity != null
-          ? Number(settleOrder.modQuantity)
-          : order.quantity,
+      qun: pdfFinancials.quantity,
       isReleased: true,
       orderData: {
         createdAt: orderDateForPdf.toISOString(),
-        subTotal:
-          settleOrder?.value != null
-            ? Number(settleOrder.value)
-            : Number(order.totalAmount),
-        stampDuty:
-          settleOrder?.stampDutyAmount != null
-            ? Number(settleOrder.stampDutyAmount)
-            : Number(order.stampDuty),
-        totalAmount:
-          settleOrder?.modConsideration != null
-            ? Number(settleOrder.modConsideration)
-            : Number(order.totalAmount),
-        price: Number(settleOrder?.price ?? 0),
+        subTotal: pdfFinancials.subTotal,
+        stampDuty: pdfFinancials.stampDuty,
+        totalAmount: pdfFinancials.totalConsideration,
+        price: Number(settleOrder?.price ?? bond.sellPrice ?? 0),
         metadata: {
           dealId: (metadata.dealId as string) ?? undefined,
           clientOrderSide: (metadata.clientOrderSide as "BUY" | "SELL") ?? undefined,
@@ -1771,8 +1858,8 @@ export class CrmOrdersService {
           valueDate: bond.maturityDate
             ? new Date(bond.maturityDate).toISOString()
             : undefined,
-          accruedInterest: settleOrder?.modAccrInt != null ? Number(settleOrder.modAccrInt) : undefined,
-          accruedInterestDays: accruedInterestDaysParam,
+          accruedInterest: pdfFinancials.accruedInterest,
+          accruedInterestDays: pdfFinancials.accruedInterestDays,
           settlementNumber:
             settlementNumberParam ?? (settleOrder as { settlementNo?: string } | undefined)?.settlementNo,
           settlementDateTime: settlementDateTimeParam,
@@ -1981,30 +2068,25 @@ export class CrmOrdersService {
         ? pdfQuery.amortizedPrincipalPaymentDates.trim()
         : undefined;
 
+    const pdfFinancials = buildPdfFinancialFields(
+      order,
+      bond,
+      settleOrder,
+      accruedInterestDaysParam,
+    );
+
     const buffer = await generateDealPdfBuffer({
       user,
       orderId: order.orderNumber,
       bond,
-      qun:
-        settleOrder?.modQuantity != null
-          ? Number(settleOrder.modQuantity)
-          : order.quantity,
+      qun: pdfFinancials.quantity,
       isReleased: false,
       orderData: {
         createdAt: orderDateForPdf.toISOString(),
-        subTotal:
-          settleOrder?.value != null
-            ? Number(settleOrder.value)
-            : Number(order.totalAmount),
-        stampDuty:
-          settleOrder?.stampDutyAmount != null
-            ? Number(settleOrder.stampDutyAmount)
-            : Number(order.stampDuty),
-        totalAmount:
-          settleOrder?.modConsideration != null
-            ? Number(settleOrder.modConsideration)
-            : Number(order.totalAmount),
-        price: Number(settleOrder?.price ?? 0),
+        subTotal: pdfFinancials.subTotal,
+        stampDuty: pdfFinancials.stampDuty,
+        totalAmount: pdfFinancials.totalConsideration,
+        price: Number(settleOrder?.price ?? bond.sellPrice ?? 0),
         metadata: {
           settlementType: rfqDetails?.settlementType ?? 0,
           dealId: (metadata.dealId as string) ?? undefined,
@@ -2025,8 +2107,8 @@ export class CrmOrdersService {
           valueDate: bond.maturityDate
             ? new Date(bond.maturityDate).toISOString()
             : undefined,
-          accruedInterest: settleOrder?.modAccrInt != null ? Number(settleOrder.modAccrInt) : undefined,
-          accruedInterestDays: accruedInterestDaysParam,
+          accruedInterest: pdfFinancials.accruedInterest,
+          accruedInterestDays: pdfFinancials.accruedInterestDays,
           settlementNumber:
             settlementNumberParam ??
             (settleOrder as { settlementNo?: string } | undefined)?.settlementNo,
@@ -2106,7 +2188,7 @@ export class CrmOrdersService {
   async sendPdfEmailToClient(
     orderNumber: string,
     body: {
-      pdfType: "order" | "deal";
+      pdfType: "order" | "deal" | "both";
       subject: string;
       messageBody: string;
       toEmail?: string;
@@ -2120,10 +2202,10 @@ export class CrmOrdersService {
       nonAmortizedBond?: boolean;
       amortizedPrincipalPaymentDates?: string;
     },
-  ): Promise<{ messageId: string }> {
+  ): Promise<{ messageId?: string; messageIds?: string[] }> {
     const pdfType = body.pdfType;
-    if (pdfType !== "order" && pdfType !== "deal") {
-      throw new AppError("pdfType must be either 'order' or 'deal'", {
+    if (pdfType !== "order" && pdfType !== "deal" && pdfType !== "both") {
+      throw new AppError("pdfType must be 'order', 'deal', or 'both'", {
         statusCode: HttpStatus.BAD_REQUEST,
         code: "BAD_REQUEST",
       });
@@ -2216,14 +2298,14 @@ export class CrmOrdersService {
     const user = await customerRepo.getFullCustomerProfile(order.customerProfileId);
     console.log(pdfQuery);
 
-    let buffer: Buffer;
-    let filename: string;
-    const generated =
-      pdfType === "deal"
-        ? await this.generateDealSheetPdfBuffer(orderNumber, pdfQuery)
-        : await this.generateOrderReceiptPdfBuffer(orderNumber, pdfQuery);
-    buffer = generated.buffer;
-    filename = generated.filename;
+    const attachments: Array<{
+      filename: string;
+      content: Buffer;
+      contentType: string;
+    }> = [];
+
+    const pdfTypesToGenerate =
+      pdfType === "both" ? (["order", "deal"] as const) : ([pdfType] as const);
 
     const recipientEmail =
       String(body.toEmail ?? "").trim() || order.customerProfile?.emailAddress;
@@ -2245,19 +2327,36 @@ export class CrmOrdersService {
         },
       );
     }
-    try {
-      buffer = encryptPdfBufferWithPassword(buffer, pdfPassword);
-    } catch (encErr) {
-      console.error("PDF encryption failed:", encErr);
-      throw new AppError(
-        encErr instanceof Error
-          ? encErr.message
-          : "Failed to encrypt PDF. Install qpdf (e.g. brew install qpdf) or set QPDF_BIN.",
-        {
-          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-          code: "PDF_ENCRYPT_FAILED",
-        },
-      );
+    for (const pdfTypeToGenerate of pdfTypesToGenerate) {
+      const generated =
+        pdfTypeToGenerate === "deal"
+          ? await this.generateDealSheetPdfBuffer(orderNumber, pdfQuery)
+          : await this.generateOrderReceiptPdfBuffer(orderNumber, pdfQuery);
+
+      let encryptedBuffer: Buffer;
+      try {
+        encryptedBuffer = encryptPdfBufferWithPassword(
+          generated.buffer,
+          pdfPassword,
+        );
+      } catch (encErr) {
+        console.error("PDF encryption failed:", encErr);
+        throw new AppError(
+          encErr instanceof Error
+            ? encErr.message
+            : "Failed to encrypt PDF. Install qpdf (e.g. brew install qpdf) or set QPDF_BIN.",
+          {
+            statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+            code: "PDF_ENCRYPT_FAILED",
+          },
+        );
+      }
+
+      attachments.push({
+        filename: generated.filename,
+        content: encryptedBuffer,
+        contentType: "application/pdf",
+      });
     }
 
     const htmlBody = buildOrderEmailHtmlBody(messageBody);
@@ -2267,16 +2366,13 @@ export class CrmOrdersService {
       subject,
       html: htmlBody,
       text: messageBody,
-      attachments: [
-        {
-          filename,
-          content: buffer,
-          contentType: "application/pdf",
-        },
-      ],
+      attachments,
     });
 
-    return { messageId };
+    return {
+      messageId,
+      messageIds: [messageId],
+    };
   }
 
   /** Meradhan checkout drafts (`draft_orders`) for CRM inspection of stored pricing JSON. */

@@ -1,0 +1,191 @@
+---
+description: Strict Cursor/LLM workflow for safe, narrow fixes on the MeraDhan OBPP platform
+alwaysApply: true
+---
+
+# MeraDhan — Cursor / LLM Development Guidelines
+
+**Golden rule:** The LLM may suggest broadly, but it must **edit narrowly**.
+
+Selected-file or selected-code fixes reduce risk, but they do **not** fully prevent breakage. One file may depend on shared APIs, hooks, components, utilities, database queries, types, or CSS used elsewhere. Follow this guide on every AI-assisted change.
+
+---
+
+## Core Principles
+
+1. **Diagnose first, edit second** — understand root cause before writing code.
+2. **Smallest possible change** — fix only what the issue requires.
+3. **No shared changes without approval** — stop and explain before touching shared code.
+4. **No contract changes without approval** — APIs, schemas, routes, and env vars need explicit sign-off.
+5. **Regression checklist after every fix** — list affected modules and test cases.
+6. **Git diff review before accepting** — review every changed file before merge.
+
+---
+
+## Mandatory 3-Step Workflow
+
+### Step 1 — Diagnosis only (no edits)
+
+Use when starting any bug fix or change:
+
+```
+Analyze the selected code and identify the likely root cause of this issue.
+Do not make any code changes yet.
+Tell me whether the fix can be safely done in this file only,
+or whether another file, API, shared component, or database layer is involved.
+```
+
+The AI must answer:
+- Likely root cause
+- Whether a single-file fix is sufficient
+- Which other files/modules may be involved if not
+
+### Step 2 — Restricted fix
+
+Use after diagnosis is confirmed:
+
+```
+Apply the smallest possible fix.
+Modify only the selected file unless absolutely necessary.
+If another file must be changed, stop and explain why before making the change.
+Do not refactor unrelated logic.
+Preserve all existing behaviour unless directly related to the issue.
+```
+
+### Step 3 — Impact review
+
+Use after the fix is applied:
+
+```
+Review your changes.
+Confirm whether any shared function, API response, route, global state, CSS,
+reusable component, or database query was changed.
+List all modules that may be affected and the exact test cases to run.
+```
+
+---
+
+## Strict Rules for the AI
+
+When working on this codebase, the AI **must**:
+
+1. **Not modify files outside the selected context** unless the developer explicitly approves.
+2. **Not refactor unrelated code** — no drive-by cleanups, renames, or style sweeps.
+3. **Not change** API contracts, response structures, database schema, routes, environment variables, shared utilities, global CSS, or reusable components **unless absolutely necessary** — and must stop to explain first.
+4. **Make the smallest possible change** that fixes the described issue.
+5. **Preserve existing behaviour** except where the issue requires a change.
+6. **Identify root cause and dependencies before editing** — explain what will change and why.
+7. **Stop and report** if the issue cannot be fixed safely within the selected file — name the file(s) that must change and why.
+8. **Provide regression test cases** for the impacted module after every fix.
+
+### Before editing
+
+- State the root cause.
+- State which file(s) will be changed and why.
+- Confirm the change stays within approved scope.
+
+### After editing
+
+- List every file changed.
+- List possible side effects.
+- List exact test cases to run.
+
+---
+
+## Scope by Situation
+
+Limit AI access to the minimum needed. Do not give the whole codebase unless diagnosis requires it.
+
+| Situation | Allowed scope |
+|-----------|----------------|
+| Simple UI text / style fix | Selected component only |
+| Page-level bug | Page + directly related component(s) |
+| API issue | Specific route / controller / service only |
+| Search / filter issue | Frontend page + backend API query file |
+| Payment / KYC / RFQ issue | Diagnose first; approve files one by one |
+| Database / schema change | Diagnosis + explicit approval before any migration |
+
+If the visible page is wrong but the root cause is elsewhere (e.g. Bond Directory search showing wrong ISINs may be in the search component, API query builder, backend endpoint, DB filter, pagination state, or shared bond card), **do not apply a frontend workaround**. Diagnose the real layer first, then fix narrowly at the source.
+
+---
+
+## Reusable Developer Prompt
+
+Copy and adapt for production fixes:
+
+```
+You are working on the MeraDhan production OBPP platform.
+Your task is to fix only the specific issue described below.
+
+Rules:
+1. Do not modify files outside the selected context unless I explicitly approve.
+2. Do not refactor unrelated code.
+3. Do not change API contracts, response structures, database schema, routes,
+   environment variables, shared utilities, global CSS, or reusable components
+   unless absolutely necessary.
+4. Make the smallest possible change.
+5. Preserve all existing behaviour unless directly related to the issue.
+6. Before changing code, identify the root cause and affected dependencies.
+7. If the issue cannot be fixed safely within the selected file, stop and explain
+   which file needs to be changed and why.
+8. After the fix, provide regression test cases for the impacted module.
+
+Issue:
+[describe the bug here]
+```
+
+### Narrow fix prompt (selected code only)
+
+```
+Fix this issue only within the selected file/code.
+Do not modify any other file.
+Do not refactor unrelated logic.
+Do not change shared components, API contracts, database schema,
+environment variables, routes, or global styles.
+Make the smallest possible change.
+Before editing, explain what you are changing and why.
+After editing, list the possible side effects and test cases.
+```
+
+---
+
+## Forbidden Prompts
+
+Do **not** use open-ended prompts that give the LLM too much freedom:
+
+- ❌ "Fix this across the codebase."
+- ❌ "Refactor and improve this."
+- ❌ "Make it production ready."
+- ❌ "Check and fix all related issues."
+
+These often cause unrelated breakage and hidden regressions.
+
+---
+
+## Regression Checklist (after every AI fix)
+
+Before accepting changes, verify:
+
+- [ ] Git diff reviewed — only expected files changed
+- [ ] No unintended API / type / schema changes
+- [ ] Happy path for the reported issue works
+- [ ] Adjacent flows on the same page still work
+- [ ] Shared components still behave correctly where used elsewhere
+- [ ] Backend contract unchanged (or change was explicitly approved and coordinated)
+- [ ] No new env vars or route changes without approval
+
+Document test cases in the PR or task comment when the fix touches anything beyond a single isolated component.
+
+---
+
+## Summary
+
+| Do | Don't |
+|----|--------|
+| Diagnose broadly | Edit the whole codebase on vague prompts |
+| Fix narrowly at the true root cause | Patch symptoms in the wrong layer |
+| Smallest possible diff | Refactor while fixing |
+| Approve shared changes explicitly | Change APIs/schema/routes silently |
+| List side effects and tests | Merge without reviewing the diff |
+
+**LLM may suggest broadly. LLM must edit narrowly.**

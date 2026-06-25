@@ -18,10 +18,8 @@ export function BankAccountsSection({
 }: {
   hook: CorporateKycFormHook;
   /**
-   * When `true`, the customer is KYC/KRA verified and bank accounts are
-   * sealed: no add, no remove, no field edits. Renders as read-only with
-   * a banner explaining why. Backend enforces the same lock; this is just
-   * the UX layer.
+   * When `true`, the customer is KYC/KRA verified: account fields are
+   * read-only, but bank proof uploads remain editable for CBRICS.
    */
   locked?: boolean;
 }) {
@@ -56,9 +54,10 @@ export function BankAccountsSection({
           <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
             <Lock className="h-3.5 w-3.5 mt-0.5 shrink-0" />
             <p>
-              This customer is KYC/KRA verified. Bank accounts cannot be added,
-              edited, or deleted from the corporate KYC form. Use the dedicated
-              bank-account modify flow if changes are needed.
+              This customer is KYC/KRA verified. Bank account details cannot
+              be added, edited, or deleted here. You may still upload or remove{" "}
+              <strong>bank proof files</strong> for CBRICS. Use the dedicated
+              bank-account modify flow for other changes.
             </p>
           </div>
         )}
@@ -148,9 +147,8 @@ export function BankAccountsSection({
                 type="button"
                 variant="outline"
                 size="sm"
-                disabled={uploading || locked}
+                disabled={uploading}
                 onClick={() => fileInputRefs.current[index]?.click()}
-                title={locked ? "Locked: customer is KYC/KRA verified." : undefined}
               >
                 <Upload className="h-4 w-4" /> Select file to upload
               </Button>
@@ -183,7 +181,6 @@ export function BankAccountsSection({
                           );
                           setBankAccount(index, { bankProofFileUrls: next });
                         }}
-                        disabled={locked}
                       >
                         <Trash2 className="h-3.5 w-3.5 text-destructive" />
                       </Button>

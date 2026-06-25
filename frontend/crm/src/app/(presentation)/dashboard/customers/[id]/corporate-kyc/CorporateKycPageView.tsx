@@ -619,10 +619,9 @@ export default function CorporateKycPageView({
         <DocumentsSection hook={hook} />
         <FatcaSection hook={hook} />
         {/*
-         * Once the customer is KYC- or KRA-verified, bank + demat lists are
-         * sealed (NDML / CBRICS already received them). Pass `locked` so the
-         * sections render as read-only and the backend's hard guard is just
-         * a defence-in-depth.
+         * Once the customer is KYC- or KRA-verified, bank + demat account
+         * fields are sealed (NDML / CBRICS already received them). Proof
+         * file uploads remain editable for CBRICS attachment updates.
          */}
         <BankAccountsSection
           hook={hook}

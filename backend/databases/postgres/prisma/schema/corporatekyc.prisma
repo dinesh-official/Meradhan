@@ -81,6 +81,12 @@ model CorporateKycModel {
   /// "Download last PDF" artifact is before sending it out.
   lastGeneratedPdfAt  DateTime?
 
+  /// JSON snapshot of the CRM PDF editor form (`CorporateKycData`).
+  /// Operators can save in-progress edits here without generating a PDF.
+  lastPdfPayload Json?
+  /// When `lastPdfPayload` was last saved from the PDF editor.
+  lastPdfPayloadAt DateTime?
+
   // ---------- Attachments / verifications (uploads) ----------
   termsAndConditionsUrl String?
 

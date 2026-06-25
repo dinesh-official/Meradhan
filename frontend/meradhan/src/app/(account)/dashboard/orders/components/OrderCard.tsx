@@ -10,6 +10,8 @@ import {
   formatOrderHistoryDate,
   formatOrderYieldPercent,
   getOrderSettlementDateInput,
+  getOrderAccruedInterest,
+  getOrderSettlementAmount,
 } from "../_utils";
 import { OrderPdfDownloads } from "./OrderPdfDownloads";
 import { SecurityNameCell } from "./SecurityNameCell";
@@ -30,7 +32,12 @@ function OrderCard({ order, showSeparator = false }: OrderCardProps) {
   const tradeDate = formatOrderHistoryDate(order.createdAt);
   const settlementDate = formatOrderHistoryDate(getOrderSettlementDateInput(order));
   const faceValue = formatAmount(parseFloat(order.faceValue));
-  const totalValue = formatAmount(parseFloat(order.totalAmount));
+  const accruedInterest = getOrderAccruedInterest(order);
+  const settlementAmount = getOrderSettlementAmount(order);
+  const accruedDisplay =
+    accruedInterest != null ? formatAmount(accruedInterest) : "—";
+  const settlementDisplay =
+    settlementAmount != null ? formatAmount(settlementAmount) : "—";
 
   return (
     <>
@@ -44,20 +51,27 @@ function OrderCard({ order, showSeparator = false }: OrderCardProps) {
         {/* Middle: Value, Face Value, then Yield + Status */}
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
-            <div className="mb-1 text-xs text-gray-500">Value</div>
-            <div className="text-sm text-gray-900">₹ {totalValue}</div>
+            <div className="mb-1 text-xs text-gray-500">Accrued interest</div>
+            <div className="text-sm text-gray-900">₹ {accruedDisplay}</div>
           </div>
           <div>
-            <div className="mb-1 text-xs text-gray-500">Face Value</div>
-            <div className="text-sm text-gray-900">₹ {faceValue}</div>
+            <div className="mb-1 text-xs text-gray-500">Settlement amount</div>
+            <div className="text-sm text-gray-900">₹ {settlementDisplay}</div>
           </div>
         </div>
 
-        <div className="mb-4 grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <div className="mb-1 text-xs text-gray-500">Face value</div>
+            <div className="text-sm text-gray-900">₹ {faceValue}</div>
+          </div>
           <div>
             <div className="mb-1 text-xs text-gray-500">Yield</div>
             <div className="text-sm text-gray-900">{formatOrderYieldPercent(order)}</div>
           </div>
+        </div>
+
+        <div className="mb-4 grid grid-cols-2 gap-4">
           <div>
             <div className="mb-1 text-xs text-gray-500">Status</div>
             <div className={`text-sm ${statusDisplay.className}`}>

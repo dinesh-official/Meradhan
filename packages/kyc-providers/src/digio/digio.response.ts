@@ -137,6 +137,7 @@ export type DigioFaceDataResponse = {
       type: string;
       status: string;
       details?: {
+        address?: string;
         longitude_from_input_address: number;
         latitude: number;
         accuracy: number;
