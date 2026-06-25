@@ -149,6 +149,10 @@ export const bondCreateUpdateSchema = z.object({
     .int("Accrued interest days must be a whole number")
     .optional()
     .nullable(),
+  accruedInterest: z.number().nonnegative().optional().nullable(),
+  settlementAmount: z.number().nonnegative().optional().nullable(),
+  principalAmount: z.number().nonnegative().optional().nullable(),
+  totalConsideration: z.number().nonnegative().optional().nullable(),
   imDocumentLink: z.string().trim().optional().nullable(),
   exchangeListedOn: STOCK_EXCHANGE_ENUM.optional().nullable(),
   lastCouponDate: z.coerce.date().optional().nullable(),

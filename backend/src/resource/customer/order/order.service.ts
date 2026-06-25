@@ -156,6 +156,26 @@ export class OrderService {
     return null;
   }
 
+  private pricingNumberFromBondDetailsSnapshot(
+    bondDetails: unknown,
+    key: "accruedInterest" | "settlementAmount",
+  ): number | null {
+    if (!bondDetails || typeof bondDetails !== "object" || Array.isArray(bondDetails)) {
+      return null;
+    }
+    const p = (bondDetails as Record<string, unknown>).pricing;
+    if (!p || typeof p !== "object" || Array.isArray(p)) return null;
+    const raw = (p as Record<string, unknown>)[key];
+    const n = typeof raw === "number" ? raw : Number(raw);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  private parseOrderMoney(value: unknown): number | null {
+    if (value == null) return null;
+    const n = typeof value === "number" ? value : Number(String(value).replace(/,/g, "").trim());
+    return Number.isFinite(n) ? n : null;
+  }
+
   private async assertCrmInventoryForOrder(
     bondService: BondService,
     isin: string,
@@ -610,18 +630,37 @@ export class OrderService {
 
     const settleByRfq = new Map<
       string,
-      { settleStatus: number; modSettleDate: string | null }
+      {
+        settleStatus: number;
+        modSettleDate: string | null;
+        modAccrInt: number | null;
+        modConsideration: number | null;
+        stampDutyAmount: number | null;
+      }
     >();
     if (rfqKeys.length > 0) {
       const settleRows = await db.dataBase.settleOrderModel.findMany({
         where: { orderNumber: { in: rfqKeys } },
-        select: { orderNumber: true, settleStatus: true, modSettleDate: true },
+        select: {
+          orderNumber: true,
+          settleStatus: true,
+          modSettleDate: true,
+          modAccrInt: true,
+          modConsideration: true,
+          stampDutyAmount: true,
+        },
       });
       for (const row of settleRows) {
         if (!settleByRfq.has(row.orderNumber)) {
           settleByRfq.set(row.orderNumber, {
             settleStatus: row.settleStatus,
             modSettleDate: row.modSettleDate ?? null,
+            modAccrInt:
+              row.modAccrInt != null ? Number(row.modAccrInt) : null,
+            modConsideration:
+              row.modConsideration != null ? Number(row.modConsideration) : null,
+            stampDutyAmount:
+              row.stampDutyAmount != null ? Number(row.stampDutyAmount) : null,
           });
         }
       }
@@ -637,7 +676,38 @@ export class OrderService {
           : null;
       const snapshotSettle = this.settlementDateFromBondDetailsSnapshot(order.bondDetails);
       const settlementDate = nseSettle ?? snapshotSettle;
-      return { ...order, settleStatus, settlementDate };
+
+      const snapshotAccrued = this.pricingNumberFromBondDetailsSnapshot(
+        order.bondDetails,
+        "accruedInterest",
+      );
+      const snapshotSettlement = this.pricingNumberFromBondDetailsSnapshot(
+        order.bondDetails,
+        "settlementAmount",
+      );
+      const accruedInterest =
+        info?.modAccrInt != null && Number.isFinite(info.modAccrInt)
+          ? info.modAccrInt
+          : snapshotAccrued;
+      const nseSettlement =
+        info?.modConsideration != null && Number.isFinite(info.modConsideration)
+          ? info.modConsideration +
+            (info.stampDutyAmount != null && Number.isFinite(info.stampDutyAmount)
+              ? info.stampDutyAmount
+              : 0)
+          : null;
+      const settlementAmount =
+        nseSettlement ??
+        snapshotSettlement ??
+        this.parseOrderMoney(order.totalAmount);
+
+      return {
+        ...order,
+        settleStatus,
+        settlementDate,
+        accruedInterest,
+        settlementAmount,
+      };
     });
 
     return {

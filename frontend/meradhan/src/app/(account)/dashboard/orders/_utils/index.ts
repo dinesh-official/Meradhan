@@ -234,6 +234,35 @@ export function getOrderSettlementDateInput(order: Order): string | undefined {
   return undefined;
 }
 
+/** Accrued interest (₹): API field, then checkout `bondDetails.pricing` snapshot. */
+export function getOrderAccruedInterest(order: Order): number | null {
+  if (order.accruedInterest != null && Number.isFinite(order.accruedInterest)) {
+    return order.accruedInterest;
+  }
+  const b = bondDetailsRecord(order);
+  const p = b.pricing;
+  if (p && typeof p === "object" && !Array.isArray(p)) {
+    return parseNumericUnknown((p as Record<string, unknown>).accruedInterest);
+  }
+  return null;
+}
+
+/** Settlement amount (₹): API field, then pricing snapshot, then `totalAmount`. */
+export function getOrderSettlementAmount(order: Order): number | null {
+  if (order.settlementAmount != null && Number.isFinite(order.settlementAmount)) {
+    return order.settlementAmount;
+  }
+  const b = bondDetailsRecord(order);
+  const p = b.pricing;
+  if (p && typeof p === "object" && !Array.isArray(p)) {
+    const fromPricing = parseNumericUnknown(
+      (p as Record<string, unknown>).settlementAmount,
+    );
+    if (fromPricing != null) return fromPricing;
+  }
+  return parseNumericUnknown(order.totalAmount);
+}
+
 function getBondIssuerDisplayName(b: Record<string, unknown>): string {
   const issuerName = getBondDetailString(b, "issuerName");
   if (issuerName?.trim()) return issuerName.trim();

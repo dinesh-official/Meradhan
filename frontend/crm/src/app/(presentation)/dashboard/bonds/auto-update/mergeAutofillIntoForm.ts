@@ -13,6 +13,10 @@ export const AUTOFILL_MERGE_KEYS = [
   "recordDate",
   "recordDays",
   "accruedInterestDays",
+  "accruedInterest",
+  "settlementAmount",
+  "principalAmount",
+  "totalConsideration",
   "dayConvention",
   "interestPaymentFrequency",
   "interestPaymentMode",
@@ -106,6 +110,34 @@ export function mergeAutofillIntoForm(
     Number.isFinite(suggested.accruedInterestDays)
   ) {
     out.accruedInterestDays = Math.round(suggested.accruedInterestDays);
+  }
+  if (
+    include.accruedInterest &&
+    suggested.accruedInterest != null &&
+    Number.isFinite(suggested.accruedInterest)
+  ) {
+    out.accruedInterest = Number(suggested.accruedInterest.toFixed(2));
+  }
+  if (
+    include.settlementAmount &&
+    suggested.settlementAmount != null &&
+    Number.isFinite(suggested.settlementAmount)
+  ) {
+    out.settlementAmount = Number(suggested.settlementAmount.toFixed(2));
+  }
+  if (
+    include.principalAmount &&
+    suggested.principalAmount != null &&
+    Number.isFinite(suggested.principalAmount)
+  ) {
+    out.principalAmount = Number(suggested.principalAmount.toFixed(2));
+  }
+  if (
+    include.totalConsideration &&
+    suggested.totalConsideration != null &&
+    Number.isFinite(suggested.totalConsideration)
+  ) {
+    out.totalConsideration = Number(suggested.totalConsideration.toFixed(2));
   }
   if (include.dayConvention && suggested.dayConvention != null) {
     out.dayConvention = suggested.dayConvention;
