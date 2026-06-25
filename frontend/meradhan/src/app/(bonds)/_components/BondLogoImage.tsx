@@ -13,10 +13,12 @@ export default function BondLogoImage({
   logoUrl,
   alt,
   className,
+  imgClassName,
 }: {
   logoUrl?: string | null;
   alt: string;
   className?: string;
+  imgClassName?: string;
 }) {
   const src = getBondLogoSrc(logoUrl);
   const [failed, setFailed] = useState(false);
@@ -35,7 +37,7 @@ export default function BondLogoImage({
         alt={alt}
         width={96}
         height={96}
-        className="h-full w-full object-contain"
+        className={cn("h-full w-full object-contain", imgClassName)}
         unoptimized
         onError={() => setFailed(true)}
       />
