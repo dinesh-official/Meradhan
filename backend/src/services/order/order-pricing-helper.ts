@@ -434,6 +434,17 @@ export const computeBondOrderPricingData = async (
         params.cleanPrice,
     );
 
+    const storedPrincipalPerUnit =
+        typeof bondInfo?.principalAmount === "number" &&
+            Number.isFinite(bondInfo.principalAmount)
+            ? bondInfo.principalAmount
+            : null;
+    const storedConsiderationPerUnit =
+        typeof bondInfo?.totalConsideration === "number" &&
+            Number.isFinite(bondInfo.totalConsideration)
+            ? bondInfo.totalConsideration
+            : null;
+
     const accrued = accruedInterest({
         faceValue,
         quantity: params.quantity,
@@ -450,16 +461,24 @@ export const computeBondOrderPricingData = async (
             ? bondInfo.accruedInterestDays
             : accrued.noOfAccrualDays;
 
+    const storedAccruedPerUnit =
+        typeof bondInfo?.accruedInterest === "number" &&
+            Number.isFinite(bondInfo.accruedInterest)
+            ? bondInfo.accruedInterest
+            : null;
+
     const accruedInterestResolved =
-        bondInfo?.accruedInterestDays != null &&
-            Number.isFinite(bondInfo.accruedInterestDays)
-            ? accruedInterestFromStoredDays({
-                faceValue,
-                quantity: params.quantity,
-                couponRate,
-                accrualDays: bondInfo.accruedInterestDays,
-            })
-            : accrued.accruedInterest;
+        storedAccruedPerUnit != null
+            ? storedAccruedPerUnit * params.quantity
+            : bondInfo?.accruedInterestDays != null &&
+                Number.isFinite(bondInfo.accruedInterestDays)
+                ? accruedInterestFromStoredDays({
+                    faceValue,
+                    quantity: params.quantity,
+                    couponRate,
+                    accrualDays: bondInfo.accruedInterestDays,
+                })
+                : accrued.accruedInterest;
 
     const isUnderShutPeriodResolved =
         bondInfo?.accruedInterestDays != null &&
@@ -476,8 +495,26 @@ export const computeBondOrderPricingData = async (
                 ? bondInfo.recordDate
                 : accrued.recordDate;
 
-    const stampDuty = calculateStampDuty(principal);
-    const settlementAmount = principal + accruedInterestResolved + stampDuty;
+    const stampDuty = calculateStampDuty(
+        storedPrincipalPerUnit != null
+            ? storedPrincipalPerUnit * params.quantity
+            : principal,
+    );
+    const principalResolved =
+        storedPrincipalPerUnit != null
+            ? storedPrincipalPerUnit * params.quantity
+            : principal;
+    const totalConsiderationResolved =
+        storedConsiderationPerUnit != null
+            ? storedConsiderationPerUnit * params.quantity
+            : principalResolved + accruedInterestResolved;
+    const settlementAmount =
+        typeof bondInfo?.settlementAmount === "number" &&
+            Number.isFinite(bondInfo.settlementAmount) &&
+            params.quantity === 1 &&
+            storedAccruedPerUnit != null
+            ? bondInfo.settlementAmount
+            : totalConsiderationResolved + stampDuty;
     const yieldRaw = bondInfo?.buyYield ?? bondInfo?.yield;
     const yieldNum =
         yieldRaw != null && Number.isFinite(Number(yieldRaw))
@@ -490,10 +527,11 @@ export const computeBondOrderPricingData = async (
         settlementDate: settlement.settlementDate,
         settlementDay: utcDayName(settlement.settlementDate) ?? settlement.settlementDay,
         cleanPrice: params.cleanPrice,
-        principalAmount: principal,
+        principalAmount: principalResolved,
         accruedInterest: accruedInterestResolved,
         stampDuty,
         settlementAmount,
+        totalConsideration: totalConsiderationResolved,
         noOfAccrualDays: noOfAccrualDaysResolved,
         isUnderShutPeriod: isUnderShutPeriodResolved,
         recordDate: recordDateResolved,

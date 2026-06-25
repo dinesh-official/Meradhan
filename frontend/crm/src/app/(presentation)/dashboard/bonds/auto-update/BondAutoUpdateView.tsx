@@ -916,6 +916,32 @@ export default function BondAutoUpdateView() {
                                 </dd>
                               </div>
                               <div>
+                                <dt className="text-muted-foreground text-xs">Principal amount</dt>
+                                <dd className="font-medium">
+                                  {formatInr(
+                                    parseCalcAmount(
+                                      model.autofill.pricing.calc?.principal_amount as
+                                        | string
+                                        | undefined,
+                                    ),
+                                  )}
+                                </dd>
+                              </div>
+                              <div>
+                                <dt className="text-muted-foreground text-xs">
+                                  Total consideration (w/o stamp)
+                                </dt>
+                                <dd className="font-medium">
+                                  {formatInr(
+                                    parseCalcAmount(
+                                      model.autofill.pricing.calc?.total_consideration as
+                                        | string
+                                        | undefined,
+                                    ),
+                                  )}
+                                </dd>
+                              </div>
+                              <div>
                                 <dt className="text-muted-foreground text-xs">Accrued days</dt>
                                 <dd className="font-medium">
                                   {model.autofill.pricing.calc?.accrued_days ?? "—"}
@@ -989,6 +1015,13 @@ export default function BondAutoUpdateView() {
                                           typeof curVal === "number" &&
                                           Number.isFinite(curVal)
                                         ? formatDecimalWithMinFractionDigits(curVal, 4)
+                                        : (key === "settlementAmount" ||
+                                            key === "accruedInterest" ||
+                                            key === "principalAmount" ||
+                                            key === "totalConsideration") &&
+                                          typeof curVal === "number" &&
+                                          Number.isFinite(curVal)
+                                        ? formatInr(curVal)
                                         : formatDisplayValue(curVal)}
                                     </TableCell>
                                     <TableCell className="min-w-[220px] align-top">
@@ -1046,6 +1079,33 @@ export default function BondAutoUpdateView() {
                                                 v === "" ? null : Math.round(parseFloat(v)),
                                             } as Partial<DraftSuggestions>);
                                           }}
+                                        />
+                                      ) : key === "settlementAmount" ||
+                                        key === "accruedInterest" ||
+                                        key === "principalAmount" ||
+                                        key === "totalConsideration" ? (
+                                        <DecimalInput
+                                          className="h-9 font-mono text-sm"
+                                          minFractionDigits={2}
+                                          maxFractionDigits={2}
+                                          value={
+                                            sug == null
+                                              ? undefined
+                                              : (() => {
+                                                const n =
+                                                  typeof sug === "number"
+                                                    ? sug
+                                                    : Number(sug);
+                                                return Number.isFinite(n)
+                                                  ? n
+                                                  : undefined;
+                                              })()
+                                          }
+                                          onChange={(n) =>
+                                            updateDraft(b.isin, {
+                                              [key]: n ?? null,
+                                            } as Partial<DraftSuggestions>)
+                                          }
                                         />
                                       ) : key === "couponRate" ||
                                         key === "buyYield" ||
