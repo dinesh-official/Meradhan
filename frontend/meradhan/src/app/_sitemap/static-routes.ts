@@ -17,6 +17,7 @@ export function getStaticRoutes(): SitemapEntry[] {
     "/terms-of-use",
     "/cookie-policy",
     "/disclaimer",
+    "/client-registration-documents",
 
     // Tools
     "/ytm-calculator",

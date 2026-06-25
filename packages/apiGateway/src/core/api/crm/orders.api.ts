@@ -274,7 +274,7 @@ export class CrmOrdersApi {
   async sendPdfEmailToClient(
     orderNumber: string,
     payload: {
-      pdfType: "order" | "deal";
+      pdfType: "order" | "deal" | "both";
       subject: string;
       messageBody: string;
       fromEmail?: string;

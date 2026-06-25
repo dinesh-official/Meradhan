@@ -130,6 +130,7 @@ export function getStatusDisplay(
   paymentStatus?: PaymentStatusInput,
   settleStatus?: number | null,
 ) {
+
   if (isCheckoutNotCompleted(paymentStatus, status)) {
     return { text: "Not completed", className: "text-slate-600" };
   }

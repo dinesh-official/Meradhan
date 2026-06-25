@@ -2106,7 +2106,7 @@ export class CrmOrdersService {
   async sendPdfEmailToClient(
     orderNumber: string,
     body: {
-      pdfType: "order" | "deal";
+      pdfType: "order" | "deal" | "both";
       subject: string;
       messageBody: string;
       toEmail?: string;
@@ -2120,10 +2120,10 @@ export class CrmOrdersService {
       nonAmortizedBond?: boolean;
       amortizedPrincipalPaymentDates?: string;
     },
-  ): Promise<{ messageId: string }> {
+  ): Promise<{ messageId?: string; messageIds?: string[] }> {
     const pdfType = body.pdfType;
-    if (pdfType !== "order" && pdfType !== "deal") {
-      throw new AppError("pdfType must be either 'order' or 'deal'", {
+    if (pdfType !== "order" && pdfType !== "deal" && pdfType !== "both") {
+      throw new AppError("pdfType must be 'order', 'deal', or 'both'", {
         statusCode: HttpStatus.BAD_REQUEST,
         code: "BAD_REQUEST",
       });
@@ -2216,14 +2216,14 @@ export class CrmOrdersService {
     const user = await customerRepo.getFullCustomerProfile(order.customerProfileId);
     console.log(pdfQuery);
 
-    let buffer: Buffer;
-    let filename: string;
-    const generated =
-      pdfType === "deal"
-        ? await this.generateDealSheetPdfBuffer(orderNumber, pdfQuery)
-        : await this.generateOrderReceiptPdfBuffer(orderNumber, pdfQuery);
-    buffer = generated.buffer;
-    filename = generated.filename;
+    const attachments: Array<{
+      filename: string;
+      content: Buffer;
+      contentType: string;
+    }> = [];
+
+    const pdfTypesToGenerate =
+      pdfType === "both" ? (["order", "deal"] as const) : ([pdfType] as const);
 
     const recipientEmail =
       String(body.toEmail ?? "").trim() || order.customerProfile?.emailAddress;
@@ -2245,19 +2245,36 @@ export class CrmOrdersService {
         },
       );
     }
-    try {
-      buffer = encryptPdfBufferWithPassword(buffer, pdfPassword);
-    } catch (encErr) {
-      console.error("PDF encryption failed:", encErr);
-      throw new AppError(
-        encErr instanceof Error
-          ? encErr.message
-          : "Failed to encrypt PDF. Install qpdf (e.g. brew install qpdf) or set QPDF_BIN.",
-        {
-          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-          code: "PDF_ENCRYPT_FAILED",
-        },
-      );
+    for (const pdfTypeToGenerate of pdfTypesToGenerate) {
+      const generated =
+        pdfTypeToGenerate === "deal"
+          ? await this.generateDealSheetPdfBuffer(orderNumber, pdfQuery)
+          : await this.generateOrderReceiptPdfBuffer(orderNumber, pdfQuery);
+
+      let encryptedBuffer: Buffer;
+      try {
+        encryptedBuffer = encryptPdfBufferWithPassword(
+          generated.buffer,
+          pdfPassword,
+        );
+      } catch (encErr) {
+        console.error("PDF encryption failed:", encErr);
+        throw new AppError(
+          encErr instanceof Error
+            ? encErr.message
+            : "Failed to encrypt PDF. Install qpdf (e.g. brew install qpdf) or set QPDF_BIN.",
+          {
+            statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+            code: "PDF_ENCRYPT_FAILED",
+          },
+        );
+      }
+
+      attachments.push({
+        filename: generated.filename,
+        content: encryptedBuffer,
+        contentType: "application/pdf",
+      });
     }
 
     const htmlBody = buildOrderEmailHtmlBody(messageBody);
@@ -2267,16 +2284,13 @@ export class CrmOrdersService {
       subject,
       html: htmlBody,
       text: messageBody,
-      attachments: [
-        {
-          filename,
-          content: buffer,
-          contentType: "application/pdf",
-        },
-      ],
+      attachments,
     });
 
-    return { messageId };
+    return {
+      messageId,
+      messageIds: [messageId],
+    };
   }
 
   /** Meradhan checkout drafts (`draft_orders`) for CRM inspection of stored pricing JSON. */

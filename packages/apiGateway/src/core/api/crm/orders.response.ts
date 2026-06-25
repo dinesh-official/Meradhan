@@ -372,6 +372,7 @@ export interface CustomerFullOrder {
     emailAddress: string;
     phoneNo: string | null;
     userName?: string;
+    userType?: string;
     kycStatus?: string;
     gender?: string;
     bankAccounts?: CustomerBankAccount[];
@@ -405,6 +406,7 @@ export interface SendOrderPdfEmailResponse {
   message?: string;
   responseData?: {
     messageId?: string;
+    messageIds?: string[];
   };
 }
 

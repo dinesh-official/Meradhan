@@ -782,7 +782,7 @@ export class CrmOrdersController {
     }
 
     const body = req.body as {
-      pdfType?: "order" | "deal";
+      pdfType?: "order" | "deal" | "both";
       subject?: string;
       messageBody?: string;
       toEmail?: string;
@@ -796,10 +796,10 @@ export class CrmOrdersController {
     };
 
     const pdfType = body.pdfType;
-    if (pdfType !== "order" && pdfType !== "deal") {
+    if (pdfType !== "order" && pdfType !== "deal" && pdfType !== "both") {
       return res.sendResponse({
         statusCode: HttpStatus.BAD_REQUEST,
-        message: "pdfType must be either 'order' or 'deal'",
+        message: "pdfType must be 'order', 'deal', or 'both'",
       });
     }
 
