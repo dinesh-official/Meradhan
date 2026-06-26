@@ -6,6 +6,14 @@ import { OrderStatus } from "@databases/generated/prisma/postgres";
 import { createCrmActivityLog } from "@resource/crm/auditlogs/auditlog.repo";
 import { sendBackOfficeEmail } from "@communication/email_communication";
 import { AppConfigService } from "@resource/app-config/app-config.service";
+import { db } from "@core/database/database";
+
+function getEmailSalutationFromGender(gender: unknown): "Mr." | "Ms." | "Mr. / Ms." {
+  const g = String(gender ?? "").trim().toUpperCase();
+  if (g === "FEMALE") return "Ms.";
+  if (g === "MALE") return "Mr.";
+  return "Mr. / Ms.";
+}
 
 function formatProposalDate(value: string | number | Date | null | undefined) {
   if (value == null || value === "") return "—";
@@ -128,6 +136,7 @@ function proposalNumberToWords(amount: number): string {
 
 function buildProposalEmailTemplate(payload: {
   customerName: string;
+  gender?: string | null;
   side: "BUY" | "SELL";
   bondName: string;
   isin: string;
@@ -205,9 +214,10 @@ function buildProposalEmailTemplate(payload: {
   ];
 
   const subject = `RFQ Order Confirmation Required – ${payload.isin} Deal Date ${formatProposalDateDdMmmYyyy(payload.dealDate)}`;
+  const salutation = getEmailSalutationFromGender(payload.gender);
 
   const html = `
-    <p>Dear Mr. / Ms. ${escapeHtml(payload.customerName)},</p>
+    <p>Dear ${salutation} ${escapeHtml(payload.customerName)},</p>
     <p>Thank you for placing your ${escapeHtml(orderSideWord)} order on BondNest Capital India Securities Private Limited (MeraDhan). Your order request has been recorded successfully and is currently pending confirmation.</p>
     <p>To proceed with the order placement, kindly reply to this email with the following confirmation text:</p>
     <p style="margin:12px 0;padding:12px 16px;border-left:4px solid #2563eb;background:#f8fafc;font-style:italic;">&ldquo;${escapeHtml(confirmationQuote)}&rdquo;</p>
@@ -245,7 +255,7 @@ function buildProposalEmailTemplate(payload: {
   `;
 
   const text = [
-    `Dear Mr. / Ms. ${payload.customerName},`,
+    `Dear ${salutation} ${payload.customerName},`,
     "",
     `Thank you for placing your ${orderSideWord} order on BondNest Capital India Securities Private Limited (MeraDhan). Your order request has been recorded successfully and is currently pending confirmation.`,
     "",
@@ -878,6 +888,7 @@ export class CrmOrdersController {
       faceValue?: number | string | null;
       cleanPrice?: number | string | null;
       couponRate?: number | string | null;
+      gender?: string | null;
     };
 
     const recipientEmail = String(body.toEmail ?? "").trim();
@@ -900,8 +911,24 @@ export class CrmOrdersController {
       });
     }
 
+    let gender =
+      typeof body.gender === "string" && body.gender.trim() !== ""
+        ? body.gender.trim()
+        : null;
+    if (!gender) {
+      const customerRow = await db.dataBase.customerProfileDataModel.findFirst({
+        where: {
+          emailAddress: { equals: recipientEmail, mode: "insensitive" },
+          isDeleted: false,
+        },
+        select: { gender: true },
+      });
+      gender = customerRow?.gender ?? null;
+    }
+
     const template = buildProposalEmailTemplate({
       customerName,
+      gender,
       side,
       bondName,
       isin,

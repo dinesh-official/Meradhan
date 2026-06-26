@@ -1362,6 +1362,7 @@ export class CrmOrdersService {
     address3: string | null;
     stateCode: string | null;
     panNo: string | null;
+    dobDoi?: string | null;
     bankAccounts: Array<{
       id: number;
       bankName: string;
@@ -1404,7 +1405,9 @@ export class CrmOrdersService {
           stateCode: participant.stateCode ?? null,
         }
         : null,
-      personalInformation: null,
+      personalInformation: participant.dobDoi?.trim()
+        ? { dateOfBirth: participant.dobDoi.trim() }
+        : null,
       riskProfile: { id: 0, data: [] },
       panCard: participant.panNo ? { panCardNo: participant.panNo } : null,
       bankAccounts: participant.bankAccounts.map((b, idx, arr) => ({
@@ -2283,19 +2286,36 @@ export class CrmOrdersService {
         code: "ORDER_NOT_FOUND",
       });
     }
-    // Participant-counterparty orders can't go through this email flow yet
-    // because the PDF is password-protected with the customer's DOB —
-    // participants have no DOB on file. Operators should download the PDF
-    // for participant orders and email manually.
-    if (order.customerProfileId == null) {
-      throw new AppError(
-        "Email PDF flow isn't supported for NSE-participant counterparties yet. Download the PDF and send it manually instead.",
-        { statusCode: HttpStatus.BAD_REQUEST, code: "PARTICIPANT_ORDER_EMAIL_UNSUPPORTED" },
-      );
+
+    const isParticipantOrder = order.customerProfileId == null;
+    let user: Awaited<ReturnType<CustomerProfileRepo["getFullCustomerProfile"]>> | Record<string, unknown>;
+    let defaultRecipientEmail: string | undefined;
+
+    if (isParticipantOrder) {
+      const actor = await this.resolveOrderPdfActor(orderNumber);
+      user = actor.user;
+      const email = String(
+        (actor.user as { emailAddress?: string | null })?.emailAddress ?? "",
+      ).trim();
+      defaultRecipientEmail = email || undefined;
+    } else {
+      const customerRepo = new CustomerProfileRepo();
+      user = await customerRepo.getFullCustomerProfile(order.customerProfileId);
+
+      const userType = String(
+        (user as { userType?: string }).userType ?? "INDIVIDUAL",
+      )
+        .trim()
+        .toUpperCase();
+      if (userType !== "INDIVIDUAL" && userType !== "INDIVIDUAL_NRI_NRO") {
+        throw new AppError(
+          "Email PDF flow is not supported for B2B/corporate customers. Download the PDF and send it manually instead.",
+          { statusCode: HttpStatus.BAD_REQUEST, code: "B2B_ORDER_EMAIL_UNSUPPORTED" },
+        );
+      }
+      defaultRecipientEmail = order.customerProfile?.emailAddress ?? undefined;
     }
 
-    const customerRepo = new CustomerProfileRepo();
-    const user = await customerRepo.getFullCustomerProfile(order.customerProfileId);
     console.log(pdfQuery);
 
     const attachments: Array<{
@@ -2308,7 +2328,7 @@ export class CrmOrdersService {
       pdfType === "both" ? (["order", "deal"] as const) : ([pdfType] as const);
 
     const recipientEmail =
-      String(body.toEmail ?? "").trim() || order.customerProfile?.emailAddress;
+      String(body.toEmail ?? "").trim() || defaultRecipientEmail;
     if (!recipientEmail || !emailPattern.test(recipientEmail)) {
       throw new AppError("Recipient email is missing or invalid", {
         statusCode: HttpStatus.BAD_REQUEST,
@@ -2318,7 +2338,7 @@ export class CrmOrdersService {
 
     const dobRaw = getCustomerDobRawForPdf(user);
     const pdfPassword = dateOfBirthToPdfPassword(dobRaw);
-    if (!pdfPassword) {
+    if (!pdfPassword && !isParticipantOrder) {
       throw new AppError(
         "Customer date of birth is required to password-protect the PDF. Ensure PAN/Aadhaar or personal info DOB is on file.",
         {
@@ -2333,28 +2353,30 @@ export class CrmOrdersService {
           ? await this.generateDealSheetPdfBuffer(orderNumber, pdfQuery)
           : await this.generateOrderReceiptPdfBuffer(orderNumber, pdfQuery);
 
-      let encryptedBuffer: Buffer;
-      try {
-        encryptedBuffer = encryptPdfBufferWithPassword(
-          generated.buffer,
-          pdfPassword,
-        );
-      } catch (encErr) {
-        console.error("PDF encryption failed:", encErr);
-        throw new AppError(
-          encErr instanceof Error
-            ? encErr.message
-            : "Failed to encrypt PDF. Install qpdf (e.g. brew install qpdf) or set QPDF_BIN.",
-          {
-            statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-            code: "PDF_ENCRYPT_FAILED",
-          },
-        );
+      let attachmentBuffer: Buffer = generated.buffer;
+      if (pdfPassword) {
+        try {
+          attachmentBuffer = encryptPdfBufferWithPassword(
+            generated.buffer,
+            pdfPassword,
+          );
+        } catch (encErr) {
+          console.error("PDF encryption failed:", encErr);
+          throw new AppError(
+            encErr instanceof Error
+              ? encErr.message
+              : "Failed to encrypt PDF. Install qpdf (e.g. brew install qpdf) or set QPDF_BIN.",
+            {
+              statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+              code: "PDF_ENCRYPT_FAILED",
+            },
+          );
+        }
       }
 
       attachments.push({
         filename: generated.filename,
-        content: encryptedBuffer,
+        content: attachmentBuffer,
         contentType: "application/pdf",
       });
     }

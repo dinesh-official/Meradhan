@@ -321,6 +321,7 @@ export class CrmOrdersApi {
       faceValue?: number | null;
       cleanPrice?: number | null;
       couponRate?: number | null;
+      gender?: string | null;
     },
     config?: AxiosRequestConfig
   ): Promise<SendOrderPdfEmailResponse> {

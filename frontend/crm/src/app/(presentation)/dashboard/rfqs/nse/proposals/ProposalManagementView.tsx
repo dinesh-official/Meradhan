@@ -165,6 +165,7 @@ function customerFullName(customer: CustomerProfile | null) {
 type SendProposalEmailPayload = {
   toEmail: string;
   customerName: string;
+  gender?: string | null;
   side: "BUY" | "SELL";
   bondName: string;
   isin: string;
@@ -192,7 +193,15 @@ function formatEmailSubject(isin: string, dealDate: string | undefined) {
   return `RFQ Order Confirmation Required – ${isin} Deal Date ${formatted}`;
 }
 
+function getEmailSalutationFromGender(gender: unknown): "Mr." | "Ms." | "Mr. / Ms." {
+  const g = String(gender ?? "").trim().toUpperCase();
+  if (g === "FEMALE") return "Ms.";
+  if (g === "MALE") return "Mr.";
+  return "Mr. / Ms.";
+}
+
 function buildEmailPreviewHtml(params: SendProposalEmailPayload) {
+  const salutation = getEmailSalutationFromGender(params.gender);
   const orderSideWord = params.side === "SELL" ? "sell" : "buy";
   const cleanPx = params.cleanPrice ?? params.rate;
   const cleanPriceDisplay =
@@ -244,7 +253,7 @@ function buildEmailPreviewHtml(params: SendProposalEmailPayload) {
     .join("");
 
   return `
-    <p>Dear Mr. / Ms. ${params.customerName},</p>
+    <p>Dear ${salutation} ${params.customerName},</p>
     <p>Thank you for placing your ${orderSideWord} order on BondNest Capital India Securities Private Limited (MeraDhan). Your order request has been recorded successfully and is currently pending confirmation.</p>
     <p>To proceed with the order placement, kindly reply to this email with the following confirmation text:</p>
     <p style="margin:10px 0;padding:10px 14px;border-left:4px solid #2563eb;background:#f8fafc;font-style:italic;">&ldquo;${confirmationQuote}&rdquo;</p>
@@ -309,6 +318,12 @@ function proposalRecipientEmail(draft: {
     rfqParticipantPrimaryEmail(draft.rfqParticipant) ||
     ""
   );
+}
+
+function proposalRecipientGender(draft: {
+  customer: CustomerProfile | null;
+}) {
+  return draft.customer?.gender ?? null;
 }
 
 /** Saved proposal targeted at an enriched NSE RFQ participant (not a Meradhan customer). */
@@ -925,6 +940,7 @@ function ProposalManagementView() {
     const payload: SendProposalEmailPayload = {
       toEmail: proposalRecipientEmail(draft),
       customerName: proposalRecipientName(draft),
+      gender: proposalRecipientGender(draft),
       side: draft.side,
       bondName: currentBond?.bondName || currentBond?.instrumentName || "Bond",
       isin: draft.isin,

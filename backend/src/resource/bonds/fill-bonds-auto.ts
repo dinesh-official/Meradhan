@@ -1,5 +1,10 @@
 import { db } from "@core/database/database";
-import { accruedInterest, DEFAULT_BOND_MARKET_HOLIDAYS, firstWorkingDayAfter, getBondLastCouponDate, getBondNextCouponDate, getLastCouponDate, getLastCouponDateFromReferenceData, getLastNextCouponDateBasedOnSettlementDate, getNextCouponDate, toISTISODate } from "@services/order/order-pricing-helper";
+import {
+    fetchCalcBondInfo,
+    parseApiDecimal,
+    pickYmd,
+} from "@resource/crm/bonds/bond_auto_update_autofill.calc";
+import { accruedInterest, DEFAULT_BOND_MARKET_HOLIDAYS, firstWorkingDayAfter, getBondLastCouponDate, getBondNextCouponDate, getLastCouponDate, getLastCouponDateFromReferenceData, getLastNextCouponDateBasedOnSettlementDate, getNextCouponDate, resolveCouponDatesForSettlement, toISTISODate } from "@services/order/order-pricing-helper";
 import axios from "axios";
 import moment from "moment";
 // Matches `enum INTEREST_MODE` in `bonds.prisma`
@@ -32,6 +37,53 @@ function toYyyyMmDd(input: string | number | Date | null | undefined): string | 
     const d = input instanceof Date ? input : new Date(input);
     if (Number.isNaN(d.getTime())) return undefined;
     return d.toISOString().slice(0, 10);
+}
+
+function frequencyToMonthStep(freq: string | null | undefined): number {
+    const v = String(freq ?? "").trim().toLowerCase();
+    if (v.includes("month")) return 1;
+    if (v.includes("quarter")) return 3;
+    if (v.includes("semi") || v.includes("half")) return 6;
+    if (v.includes("year") || v.includes("annual")) return 12;
+    return 1;
+}
+
+function inferNextCouponAfterSettlement(
+    lastYmd: string,
+    settlementYmd: string,
+    frequency: string | null | undefined,
+    maturityYmd?: string,
+): string | undefined {
+    const step = frequencyToMonthStep(frequency);
+    let cursor = moment(lastYmd, "YYYY-MM-DD", true);
+    if (!cursor.isValid()) return undefined;
+    const settlement = moment(settlementYmd, "YYYY-MM-DD", true);
+    const maturity = maturityYmd ? moment(maturityYmd, "YYYY-MM-DD", true) : null;
+    for (let i = 0; i < 360; i++) {
+        cursor = cursor.clone().add(step, "months");
+        if (cursor.isAfter(settlement, "day")) {
+            if (maturity?.isValid() && cursor.isAfter(maturity, "day")) return undefined;
+            return cursor.format("YYYY-MM-DD");
+        }
+    }
+    return undefined;
+}
+
+function inferLastCouponBeforeSettlement(
+    nextYmd: string,
+    settlementYmd: string,
+    frequency: string | null | undefined,
+): string | undefined {
+    const step = frequencyToMonthStep(frequency);
+    let next = moment(nextYmd, "YYYY-MM-DD", true);
+    if (!next.isValid()) return undefined;
+    const settlement = moment(settlementYmd, "YYYY-MM-DD", true);
+    let last = next.clone().subtract(step, "months");
+    while (last.isValid() && !last.isAfter(settlement, "day")) {
+        next = last;
+        last = next.clone().subtract(step, "months");
+    }
+    return next.format("YYYY-MM-DD");
 }
 
 /** Calc `final_price` strings may include commas; `Number("1,234.56")` is NaN. */
@@ -324,91 +376,212 @@ export const getBondInfoCalcData = async (
             ? toYyyyMmDd(couponPayRow.dueDateIst)
             : null;
 
-    const settlementDateObj = ymdToUtcNoon(resolved.settlementDateYmd);
+    const calcBond = await fetchCalcBondInfo(isin, resolved.settlementDateYmd);
+    const settlementDateYmd =
+        options.settlementDate?.trim() &&
+        /^\d{4}-\d{2}-\d{2}$/.test(options.settlementDate.trim())
+            ? resolved.settlementDateYmd
+            : pickYmd(calcBond?.Settlement_Date, resolved.settlementDateYmd) ??
+              resolved.settlementDateYmd;
+    const settlementDateObj = ymdToUtcNoon(settlementDateYmd);
 
     const couponDate = await getLastNextCouponDateBasedOnSettlementDate(isin, settlementDateObj);
-    const lastCouponDate = await getLastCouponDateFromReferenceData(isin, settlementDateObj);
-    const nextCouponDate = await getNextCouponDate(isin, settlementDateObj);
-    console.log(lastCouponDate, nextCouponDate);
+    const couponResolved = await resolveCouponDatesForSettlement(
+        isin,
+        settlementDateObj,
+        bond ?? {
+            lastCouponDateIst:
+                bondData?.lastCouponDateIst ?? bondData?.lastCouponDate ?? undefined,
+            nextCouponDateIst:
+                bondData?.nextCouponDateIst ?? bondData?.nextCouponDate ?? undefined,
+            recordDays: bondData?.recordDays ?? undefined,
+        },
+    );
+    const bondTableLast = await getBondLastCouponDate(isin);
+    const bondTableNext = await getBondNextCouponDate(isin);
+
+    const paymentFrequencyForInfer =
+        calcBond?.Payment_Frequency?.trim() ||
+        bond?.interestPaymentFrequency ||
+        bondData?.interestPaymentFrequency ||
+        "Monthly";
+
+    const maturityDateForInfer =
+        pickYmd(
+            calcBond?.Maturity_Date,
+            bond?.maturityDateIst instanceof Date &&
+                !Number.isNaN(bond.maturityDateIst.getTime())
+                ? toISTISODate(bond.maturityDateIst)
+                : toYyyyMmDd(bondData?.maturityDate ?? bond?.maturityDateIst),
+        ) ?? "";
+
+    let lastCouponDate =
+        pickYmd(
+            calcBond?.Last_IP_Date,
+            couponResolved.lastCouponDate,
+            bondTableLast,
+            toYyyyMmDd(bondData?.lastCouponDate),
+        ) ?? "";
+    let nextCouponDate =
+        pickYmd(
+            calcBond?.Next_IP_Date,
+            couponResolved.nextCouponDate,
+            bondTableNext,
+            toYyyyMmDd(bondData?.nextCouponDate),
+        ) ?? "";
+
+    if (!nextCouponDate && lastCouponDate) {
+        nextCouponDate =
+            inferNextCouponAfterSettlement(
+                lastCouponDate,
+                settlementDateYmd,
+                paymentFrequencyForInfer,
+                maturityDateForInfer || undefined,
+            ) ?? "";
+    }
+    if (!lastCouponDate && nextCouponDate) {
+        lastCouponDate =
+            inferLastCouponBeforeSettlement(
+                nextCouponDate,
+                settlementDateYmd,
+                paymentFrequencyForInfer,
+            ) ?? "";
+    }
+
+    if (!lastCouponDate || !nextCouponDate) {
+        throw new Error(
+            `Missing coupon schedule for ISIN ${isin}. Add bond reference coupon dates or last/next coupon on the bond.`,
+        );
+    }
+
+    const faceValue =
+        parseApiDecimal(calcBond?.Face_Value) ??
+        Number(bond?.faceValue ?? bondData?.faceValue ?? 10000);
+    const couponRate =
+        parseApiDecimal(calcBond?.Coupon_Rate_Pct) ??
+        Number(bond?.couponRate ?? bondData?.couponRate ?? 0);
+
     const pricing = accruedInterest({
-        couponRate: bond?.couponRate || 0,
-        faceValue: bond?.faceValue || 0,
-        lastCouponDate: new Date(lastCouponDate!),
-        nextCouponDate: new Date(nextCouponDate!),
+        couponRate,
+        faceValue,
+        lastCouponDate: new Date(lastCouponDate || settlementDateYmd),
+        nextCouponDate: new Date(nextCouponDate || settlementDateYmd),
         quantity: quantity || 1,
-        recordDays: couponDate.recordDays || 0,
+        recordDays: couponResolved.recordDays ?? couponDate.recordDays ?? 0,
         settlementDate: settlementDateObj,
     });
 
-
-    const faceValue = Number(bond?.faceValue ?? bondData?.faceValue ?? 10000);
-    const couponRate = Number(bond?.couponRate ?? bondData?.couponRate ?? 0);
-    const bondType = toCalcBondType(bondData?.bondType ?? bond?.bondType);
+    const bondType =
+        (calcBond?.amort_schedule?.length ?? 0) > 0
+            ? "Amortizing"
+            : toCalcBondType(bondData?.bondType ?? bond?.bondType);
     const datedDate =
-        bond?.issueDateIst instanceof Date && !Number.isNaN(bond.issueDateIst.getTime())
-            ? toISTISODate(bond.issueDateIst)
-            : toYyyyMmDd(bondData?.dateOfAllotment ?? bond?.issueDateIst);
-    const maturityDate =
-        bond?.maturityDateIst instanceof Date && !Number.isNaN(bond.maturityDateIst.getTime())
-            ? toISTISODate(bond.maturityDateIst)
-            : toYyyyMmDd(bondData?.maturityDate ?? bond?.maturityDateIst);
+        pickYmd(
+            calcBond?.Dated_Date,
+            bond?.issueDateIst instanceof Date && !Number.isNaN(bond.issueDateIst.getTime())
+                ? toISTISODate(bond.issueDateIst)
+                : toYyyyMmDd(bondData?.dateOfAllotment ?? bond?.issueDateIst),
+        ) ?? "";
+    const maturityDate = maturityDateForInfer;
+
+    const paymentFrequency =
+        calcBond?.Payment_Frequency?.trim() ||
+        toCalcPaymentFrequency(
+            bond?.interestPaymentFrequency ?? bondData?.interestPaymentFrequency,
+        );
+
+    const settlementDateOverridden = Boolean(
+        options.settlementDate?.trim() &&
+        /^\d{4}-\d{2}-\d{2}$/.test(options.settlementDate.trim()),
+    );
+    const periodStatus =
+        calcBond?.Period_Status?.trim() && !settlementDateOverridden
+            ? calcBond.Period_Status.trim()
+            : pricing.isUnderShutPeriod
+              ? "Shut Period"
+              : "Normal";
+
+    const calcYieldFallback =
+        calcBond?.yield != null
+            ? parseApiDecimal(String(calcBond.yield)) ?? undefined
+            : undefined;
+    const resolvedPricingInput = useCleanPrice
+        ? String(cleanPriceInput)
+        : pricingYieldStr != null
+          ? String(pricingYieldStr)
+          : calcYieldFallback != null
+            ? String(calcYieldFallback)
+            : "0";
 
     const payload = {
         ISIN: isin,
         Face_Value: formatCalcFaceValue(faceValue),
         Coupon_Rate_Pct: formatCalcCouponRate(couponRate),
-        Payment_Frequency: toCalcPaymentFrequency(
-            bond?.interestPaymentFrequency ?? bondData?.interestPaymentFrequency,
-        ),
+        Payment_Frequency: paymentFrequency,
         Quantity: String(quantity),
-        Settlement_Date: resolved.settlementDateYmd,
+        Settlement_Date: settlementDateYmd,
         Dated_Date: datedDate,
-        Last_IP_Date: lastCouponDate ?? "",
-        Next_IP_Date: nextCouponDate ?? "",
+        Last_IP_Date: lastCouponDate,
+        Next_IP_Date: nextCouponDate,
         Maturity_Date: maturityDate,
-        Period_Status: pricing.isUnderShutPeriod ? "Shut Period" : "Normal",
+        Period_Status: periodStatus,
         Input_Type: useCleanPrice ? "Calculate from Clean Price" : "Calculate from Yield",
-        Pricing_Input: useCleanPrice
-            ? String(cleanPriceInput)
-            : pricingYieldStr != null
-                ? String(pricingYieldStr)
-                : "0",
+        Pricing_Input: resolvedPricingInput,
         Is_End_Of_Month_Bond: "No",
         Price_Rounding_Decimals: "4",
         Stamp_Duty: stampDuty != null ? String(stampDuty) : "0",
         Day_Convention: toCalcDayConvention(bond?.dayConvention ?? bondData?.dayConvention),
         Bond_Type: bondType,
-        amort_schedule: bondType === "Amortizing" ? "" : "",
+        amort_schedule:
+            bondType === "Amortizing"
+                ? JSON.stringify(calcBond?.amort_schedule ?? [])
+                : "",
     };
-    console.log(payload);
 
-    const response = await axios.post<{
-        accrued_days: number
-        cf_count: number
-        cf_rows: Array<{
-            date: string
-            days: number
-            interest: string
-            num: number
-            principal: string
-            total: string
-            total_raw: number
-        }>
-        final_price: string
-        final_yield: string
-        final_yield_raw: number
-        period_status: string
-        principal_amount: string
-        quantity: string
-        running_total: string
-        settle_dt: string
-        settlement_amount: string
-        stamp_duty: string
-        total_ai: string
-        total_consideration: string
+    let response: {
+        data: {
+            accrued_days: number;
+            cf_count: number;
+            cf_rows: Array<{
+                date: string;
+                days: number;
+                interest: string;
+                num: number;
+                principal: string;
+                total: string;
+                total_raw: number;
+            }>;
+            final_price: string;
+            final_yield: string;
+            final_yield_raw: number;
+            period_status: string;
+            principal_amount: string;
+            quantity: string;
+            running_total: string;
+            settle_dt: string;
+            settlement_amount: string;
+            stamp_duty: string;
+            total_ai: string;
+            total_consideration: string;
+        };
+    };
+    try {
+        response = await axios.post(
+            "https://calc.meradhan.co/api/calculate",
+            payload,
+        );
+    } catch (err) {
+        if (axios.isAxiosError(err)) {
+            const apiError =
+                err.response?.data &&
+                typeof err.response.data === "object" &&
+                "error" in err.response.data
+                    ? String((err.response.data as { error: unknown }).error)
+                    : err.message;
+            throw new Error(`Bond calc failed: ${apiError}`);
+        }
+        throw err;
     }
-
-    >("https://calc.meradhan.co/api/calculate", payload);
     const allCouponDates = collectAllCouponDatesYmd(
         couponRows,
         response.data.cf_rows,
