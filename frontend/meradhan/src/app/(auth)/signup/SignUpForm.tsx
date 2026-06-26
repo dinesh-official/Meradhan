@@ -232,7 +232,7 @@ function SignUpForm() {
 
         {/* --- Terms Section --- */}
         <section className="flex flex-col gap-3 text-sm">
-          <label className="flex items-start gap-2 font-medium">
+          {/* <label className="flex items-start gap-2 font-medium">
             <Checkbox
               checkClass="text-white"
               checked={agreeAll}
@@ -240,7 +240,7 @@ function SignUpForm() {
               className={cn(checkboxClass, "shrink-0 mt-0.5")}
             />
             <span className="leading-snug">Agree to all</span>
-          </label>
+          </label> */}
 
           <label className="flex items-start gap-2">
             <Checkbox
@@ -302,7 +302,7 @@ function SignUpForm() {
             </span>
           </label>
 
-          <SignUpHandyChecklist />
+          {/* <SignUpHandyChecklist /> */}
         </section>
 
         {/* --- Actions --- */}
