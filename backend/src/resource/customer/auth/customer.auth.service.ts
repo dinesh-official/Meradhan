@@ -203,16 +203,10 @@ export class CustomerAuthService {
     }
 
     this.checkUserSigninWith(user, data.identifier);
-    if (data.identifier == "phoneNo") {
-      return await this.sendSigninWithOtp({ identifier: data.identifier, value: data.value });
-    }
-
-    return {
-      id: user.id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.emailAddress,
-    };
+    return await this.sendSigninWithOtp({
+      identifier: data.identifier,
+      value: data.value,
+    });
   }
 
   async verifyAccountActivationAtLogin(
@@ -265,80 +259,6 @@ export class CustomerAuthService {
       id: updated.id,
       email: updated.emailAddress,
       avatar: updated.avatar,
-      token: authToken,
-    };
-  }
-
-  async signInWithCredentials(data: {
-    identifier: I_IDENTIFIED;
-    value: string;
-    password: string;
-  }) {
-    const query: DataBaseSchema.CustomerProfileDataModelWhereUniqueInput =
-      data.identifier == "email"
-        ? {
-          emailAddress: data.value,
-        }
-        : {
-          phoneNo: "+91" + removeCountryCode(data.value),
-        };
-
-    const user = await db.dataBase.customerProfileDataModel.findUnique({
-      where: query,
-      include: {
-        utility: true,
-      },
-    });
-    if (!user) {
-      throw new AppError("Invalid email or mobile number", {
-        code: "USER_NOT_FOUND",
-      });
-    }
-
-    this.checkUserSigninWith(user, data.identifier);
-
-    // verify password
-    const isPasswordValid = await hashingUtils.comparePassword(
-      data.password,
-      user.utility.password || ""
-    );
-    if (!isPasswordValid) {
-      throw new AppError("Invalid password please try again", {
-        code: "INVALID_PASSWORD",
-      });
-    }
-
-    if (user.utility.twoFactorEnabled) {
-      if (!user.utility.twoFactorPasscodeHash) {
-        throw new AppError(
-          "Two-factor authentication is misconfigured. Please update your 2FA settings.",
-          { code: "TWO_FACTOR_PASSCODE_NOT_SET" },
-        );
-      }
-      const challengeToken = this.createTwoFactorPasscodeChallengeToken(user.id);
-      return {
-        id: user.id,
-        email: user.emailAddress,
-        avatar: user.avatar,
-        requiresTwoFactor: true as const,
-        challengeToken,
-      };
-    }
-
-    const authToken = tokenUtils.generateToken(
-      {
-        email: user.emailAddress,
-        mobile: user.phoneNo,
-        id: user.id,
-        role: "USER",
-      },
-      "1d"
-    );
-    await this.customerProfileService.setLatestLoginTime(user.id);
-    return {
-      id: user.id,
-      email: user.emailAddress,
-      avatar: user.avatar,
       token: authToken,
     };
   }
@@ -478,7 +398,6 @@ export class CustomerAuthService {
     return {
       enabled: user.utility.twoFactorEnabled,
       hasPasscodeSet: Boolean(user.utility.twoFactorPasscodeHash),
-      hasPasswordSet: Boolean(user.utility.password),
       signinWith: user.utility.signinWith,
     };
   }
@@ -710,7 +629,7 @@ export class CustomerAuthService {
   ) {
     if (user.utility.signinWith !== "CREDENTIALS") {
       throw new AppError(
-        "Two-factor authentication is currently available only for password-based accounts.",
+        "Two-factor passcode is available only for email or phone OTP accounts.",
         { code: "TWO_FACTOR_CREDENTIALS_ONLY" },
       );
     }

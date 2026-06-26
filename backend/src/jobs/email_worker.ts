@@ -1,6 +1,4 @@
 import { meraDhanEmailVerificationEmailText } from "@emails/text/meraDhanEmailVerificationEmailText";
-import { meraDhanForgotPasswordEmailText } from "@emails/text/meraDhanForgotPasswordEmailText";
-import { meraDhanPasswordResetSuccessEmailText } from "@emails/text/meraDhanPasswordResetSuccessEmailText";
 import { meraDhanWelcomeEmailText } from "@emails/text/meraDhanWelcomeEmailText";
 import { meraDhanKycSubmitAddClearingCorporationBankAccountsEmailText } from "@emails/text/meraDhanKycSubmitAddClearingCorporationBankAccountsEmailText";
 import { meraDhanKycSubmittedForVerificationEmailText } from "@emails/text/meraDhanKycSubmittedForVerificationEmailText";
@@ -21,9 +19,7 @@ import {
   kycReminderNotStartedEmailQueue,
   kycApprovedEmailQueue,
   emailVerificationQueue,
-  forgotPasswordLinkSenderQueue,
   kycSubmittedForVerificationEmailQueue,
-  successResetPasswordQueue,
   welcomeEmailSenderQueue,
 } from "./queue/worker_queues";
 
@@ -40,44 +36,6 @@ startQueueWorker(welcomeEmailSenderQueue, async (job: Job) => {
     subject: subject,
     // html: emailHtml,
     html: meraDhanWelcomeEmailText({ userName }),
-  });
-});
-
-startQueueWorker(forgotPasswordLinkSenderQueue, async (job: Job) => {
-  const emailSend = new EmailCommunication();
-  const { userName, link, email, subject } = job.data as {
-    email: string;
-    userName: string;
-    link: string;
-    subject: string;
-  };
-
-  // const emailHtml = await render(
-  //   MeraDhanForgotPasswordEmail({
-  //     userName,
-  //     resetLink: link,
-  //   })
-  // );
-  await emailSend.sendEmail({
-    to: email,
-    subject: subject,
-    html: meraDhanForgotPasswordEmailText({ userName, resetLink: link }),
-  });
-});
-
-startQueueWorker(successResetPasswordQueue, async (job: Job) => {
-  const emailSend = new EmailCommunication();
-  const { email, userName, subject } = job.data;
-
-  // const emailHtml = await render(
-  //   MeraDhanPasswordResetSuccessEmail({
-  //     userName,
-  //   })
-  // );
-  await emailSend.sendEmail({
-    to: email,
-    subject: subject,
-    html: meraDhanPasswordResetSuccessEmailText({ userName }),
   });
 });
 

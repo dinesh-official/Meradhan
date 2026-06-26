@@ -86,12 +86,6 @@ export const signInWithEmailPhoneRequestSchema = z.object({
   sendActivationOtp: z.boolean().optional(),
 });
 
-export const signInWithCredentialsSchema = z.object({
-  identity: z.enum(["email", "phoneNo"]),
-  value: z.string().min(1, "Enter your valid email or phone number."),
-  password: z.string().min(4, "Enter your valid password."),
-});
-
 export const sendSignInOtpSchema = z.object({
   identity: z.enum(["email", "phoneNo"]),
   value: z.string().min(1, "Enter email or phone number."),
@@ -144,15 +138,6 @@ export const SocialLoginUserSchema = z.object({
   name: z.string().min(1), // non-empty string
   id: z.string().min(1), // non-empty string (could be UUID pattern if needed)
   provider: ProviderEnum,
-});
-
-export const sendForgetPasswordSchema = z.object({
-  email: z.email(),
-});
-
-export const resetPasswordSchema = z.object({
-  password: z.string().min(4, "Enter your valid password."),
-  token: z.string().min(1, "Token is required."),
 });
 
 const createNewCustomerSchemaBase = z.object({
@@ -215,22 +200,6 @@ const createNewCustomerSchemaBase = z.object({
     .optional(),
   status: AccountStatusEnum.optional(),
   gender: GenderEnum.optional(),
-  password: z
-    .string({
-      error: "Password is required",
-    })
-    .min(6, { message: "Password must be at least 6 characters long" })
-    .regex(/[A-Z]/, {
-      message: "Password must contain at least one uppercase letter",
-    })
-    .max(20, { message: "Password must be at most 20 characters long" })
-    .regex(/[a-z]/, {
-      message: "Password must contain at least one lowercase letter",
-    })
-    .regex(/[0-9]/, { message: "Password must contain at least one number" })
-    .regex(/[^A-Za-z0-9]/, {
-      message: "Password must contain at least one special character",
-    }),
 
   relationshipManagerId: z.number().optional(),
 

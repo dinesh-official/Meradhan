@@ -895,7 +895,6 @@ export class CustomerKycManager {
           cRMUserDataModelId: null,
           createdAt: new Date(),
           updatedAt: new Date(),
-          password: "",
           socialLoginId: null,
         } as DataBaseSchema.CustomersAuthDataModelCreateInput),
 

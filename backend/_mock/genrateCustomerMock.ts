@@ -1,9 +1,7 @@
 import { db } from '@core/database/database';
 import { faker } from '@faker-js/faker';
-import { hashingUtils } from '@utils/hash/hashing_utils';
 
 const generateMockCustomer = async () => {
-    const password = await hashingUtils.hashPassword('123456');
     await db.dataBase.customerProfileDataModel.create({
         data: {
             // Basic info
@@ -26,7 +24,6 @@ const generateMockCustomer = async () => {
                     accountStatus: 'ACTIVE',
                     isEmailVerified: true,
                     isPhoneVerified: true,
-                    password: password,
                     termsAccepted: true,
                     whatsAppNotificationAllow: true,
                 },
