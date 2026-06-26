@@ -7,11 +7,9 @@ export type ActivationStep = "prompt" | "otp";
 export type LoginDataStoreType = {
   state: {
     emailOrPhoneNo: string;
-    password: string;
     otp: string;
     allowedResend: boolean;
     mode: LoginMode;
-    type: "password" | "otp";
     errorMessage: string;
     successMessage: string;
     maxOtpTry: number;
@@ -28,13 +26,11 @@ export type LoginDataStoreType = {
 
   reset: () => void;
   setEmailOrPhoneNo: (emailOrPhoneNo: string) => void;
-  setPassword: (password: string) => void;
   setOtp: (otp: string) => void;
   setErrorMessage: (message: string) => void;
   setSuccessMessage: (message: string) => void;
   setMaxOtpTry: (maxOtpTry: number) => void;
   setCurrentOtpTry: (currentOtpTry: number) => void;
-  setType: (type: "password" | "otp") => void;
   setMode: (mode: LoginMode) => void;
   setAllowedResend: (allowedResend: boolean) => void;
   setRememberMe: (rememberMe: boolean) => void;
@@ -50,11 +46,9 @@ export type LoginDataStoreType = {
 
 const initialState: LoginDataStoreType["state"] = {
   emailOrPhoneNo: "",
-  password: "",
   otp: "",
   allowedResend: false,
   mode: "pending",
-  type: "password",
   errorMessage: "",
   successMessage: "",
   currentOtpTry: 0,
@@ -81,11 +75,6 @@ export const useLoginDataStore = create<LoginDataStoreType>((set) => ({
       state: { ...store.state, emailOrPhoneNo },
     })),
 
-  setPassword: (password: string) =>
-    set((store) => ({
-      state: { ...store.state, password },
-    })),
-
   setOtp: (otp: string) =>
     set((store) => ({
       state: { ...store.state, otp },
@@ -109,11 +98,6 @@ export const useLoginDataStore = create<LoginDataStoreType>((set) => ({
   setCurrentOtpTry: (currentOtpTry: number) =>
     set((store) => ({
       state: { ...store.state, currentOtpTry },
-    })),
-
-  setType: (type: "password" | "otp") =>
-    set((store) => ({
-      state: { ...store.state, type },
     })),
 
   setMode: (mode: LoginMode) =>

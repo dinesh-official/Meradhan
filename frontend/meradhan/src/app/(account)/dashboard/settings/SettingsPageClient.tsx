@@ -26,7 +26,6 @@ import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import apiGateway from "@root/apiGateway";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -106,8 +105,7 @@ export default function SettingsPageClient() {
   });
 
   const isCredentialsAccount = settings?.signinWith === "CREDENTIALS";
-  const hasPasswordSet = settings?.hasPasswordSet ?? false;
-  const canUseTwoFactor = isCredentialsAccount && hasPasswordSet;
+  const canUseTwoFactor = isCredentialsAccount;
   const isFirstTimeSetup =
     canUseTwoFactor && !settings?.enabled && !settings?.hasPasscodeSet;
 
@@ -130,10 +128,6 @@ export default function SettingsPageClient() {
   };
 
   const handleToggle = (checked: boolean) => {
-    if (checked && !canUseTwoFactor) {
-      toast.error("Set a login password before enabling 2FA.");
-      return;
-    }
     setEnabled(checked);
     if (!checked) {
       resetPasscodeFields();
@@ -185,7 +179,8 @@ export default function SettingsPageClient() {
             <div className="space-y-1 flex-1">
               <h3 className="font-medium text-base">Two-Factor Authentication</h3>
               <p className="text-gray-600 text-sm">
-                After your password, enter a 6-digit passcode you set here to sign in.
+                After OTP sign-in, enter a 6-digit passcode you set here for an
+                extra security step.
               </p>
             </div>
             {canUseTwoFactor && !isFirstTimeSetup && (
@@ -200,19 +195,8 @@ export default function SettingsPageClient() {
 
           {!isCredentialsAccount && !isLoading && (
             <div className="rounded-lg bg-amber-50 p-4 text-amber-900 text-sm">
-              2FA is available only for password-based accounts. Social-login
-              accounts need a password login flow before 2FA can be enabled.
-            </div>
-          )}
-
-          {isCredentialsAccount && !hasPasswordSet && !isLoading && (
-            <div className="space-y-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
-              <p className="text-amber-900 text-sm">
-                Set a login password first. 2FA works after password sign-in.
-              </p>
-              <Button asChild variant="outlineGray" className="w-fit">
-                <Link href="/forgot-password">Set Password</Link>
-              </Button>
+              Two-factor passcode is available for email or phone OTP accounts.
+              Social-login accounts cannot enable this setting here.
             </div>
           )}
 

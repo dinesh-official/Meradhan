@@ -2,10 +2,7 @@
 model CustomersAuthDataModel {
     id Int @id @default(autoincrement())
 
-    /// Encrypted password (optional if using social login)
-    password String?
-
-    /// Type of sign-in used (e.g., EMAIL, GOOGLE, etc.)
+    /// Type of sign-in used (e.g., CREDENTIALS for OTP, GOOGLE, etc.)
     signinWith    SIGNIN_WITH
     socialLoginId String?
 

@@ -132,14 +132,14 @@ export function getStatusDisplay(
   paymentStatus?: PaymentStatusInput,
   settleStatus?: number | null,
 ) {
-
-  if (isCheckoutNotCompleted(paymentStatus, status)) {
-    return { text: "Not completed", className: "text-slate-600" };
-  }
-
+  // Prisma `Order.status` (e.g. SETTLED) is the source of truth for list filter + display.
   if (typeof status === "string") {
     const fromDb = displayFromDbOrderStatus(status.trim().toUpperCase());
     if (fromDb) return fromDb;
+  }
+
+  if (isCheckoutNotCompleted(paymentStatus, status)) {
+    return { text: "Not completed", className: "text-slate-600" };
   }
 
   if (settleStatus != null) {
@@ -160,13 +160,14 @@ export function getStatusDisplay(
   return { text: String(status), className: "text-gray-600" };
 }
 
-/** True when the dashboard Status column shows "Settled" (deal sheet is available). */
+/** True when `Order.status` is SETTLED (deal sheet is available). */
 export function isOrderSettled(
   status: OrderStatusInput,
-  paymentStatus?: PaymentStatusInput,
-  settleStatus?: number | null,
+  _paymentStatus?: PaymentStatusInput,
+  _settleStatus?: number | null,
 ): boolean {
-  return getStatusDisplay(status, paymentStatus, settleStatus).text === "Settled";
+  if (typeof status !== "string") return false;
+  return status.trim().toUpperCase() === "SETTLED";
 }
 
 /** Strip every leading coupon token (e.g. `10.00% ` then `10% `) from NSE-style instrument text. */

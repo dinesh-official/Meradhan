@@ -3,7 +3,6 @@ import { Router } from "express";
 import { allowAccessMiddleware } from "@middlewares/auth_middleware";
 import { withRateLimit } from "@middlewares/ratelimit_midddleare";
 import { CustomerAuthController } from "./customer.auth.controller";
-import { ForgetPasswordController } from "./password/forget_password.controller";
 
 const customerAuthRoutes = Router();
 const controller = new CustomerAuthController();
@@ -64,11 +63,6 @@ customerAuthRoutes.post(
   (req, res) => controller.signInRequest(req, res)
 );
 customerAuthRoutes.post(
-  "/api/auth/customer/signin/with-password",
-  withRateLimit({ max: 10 }),
-  (req, res) => controller.signInWithPassword(req, res)
-);
-customerAuthRoutes.post(
   "/api/auth/customer/signin/send-otp",
   withRateLimit({ max: 5 }),
   (req, res) => controller.signInWithOtpSend(req, res)
@@ -92,19 +86,6 @@ customerAuthRoutes.post(
 // logout
 customerAuthRoutes.all("/api/auth/customer/logout", (req, res) =>
   controller.logout(req, res)
-);
-
-// forget password
-const forgetPasswordController = new ForgetPasswordController();
-customerAuthRoutes.post(
-  "/api/auth/customer/send-forget-password",
-  withRateLimit({ max: 5 }),
-  (req, res) => forgetPasswordController.sendForgetPassword(req, res)
-);
-customerAuthRoutes.post(
-  "/api/auth/customer/reset-password",
-  withRateLimit({ max: 5 }),
-  (req, res) => forgetPasswordController.resetPassword(req, res)
 );
 
 customerAuthRoutes.get(
