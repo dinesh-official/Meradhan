@@ -200,7 +200,7 @@ export type Page1Props = {
   | "OTHERS";
   profilePic?: string;
   signature?: string;
-  /** When true (existing KRA path), Page1 omits photo & wet signature — not captured in that flow */
+  /** When true (existing KRA path), Page1 omits wet signature — photo still shown when available */
   omitPage1PhotoAndSignature?: boolean;
   kycNo: string;
   aadhaarNo: string;
@@ -939,10 +939,10 @@ export const mapDataForPage3 = (data: Root): Page3Props => ({
     data.step_5?.find((item) => item.index === 2)?.ans === "Low Risk & Low Returns"
       ? "LOW"
       : data.step_5?.find((item) => item.index === 2)?.ans ===
-            "Moderate Risk & Moderate Returns"
+        "Moderate Risk & Moderate Returns"
         ? "MODERATE"
         : data.step_5?.find((item) => item.index === 2)?.ans ===
-              "High Risk & High Returns"
+          "High Risk & High Returns"
           ? "HIGH"
           : null,
 });

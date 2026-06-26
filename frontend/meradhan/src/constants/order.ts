@@ -5,7 +5,7 @@
 export const statusOptions = [
   { title: "All orders", value: "ALL" },
   { title: "Not completed (checkout)", value: "NOT_COMPLETED" },
-  { title: "Pending", value: "PENDING" },
+  { title: "Not completed", value: "PENDING" },
   { title: "In progress", value: "IN_PROGRESS" },
   { title: "Applied", value: "APPLIED" },
   { title: "Settled", value: "SETTLED" },

@@ -70,14 +70,14 @@ export type OrderStatusInput = Order["status"] | number | string;
 
 export type PaymentStatusInput = Order["paymentStatus"] | string | undefined;
 
-/** Checkout never finished: user left / payment failed / cancel during Razorpay (see order.service). */
+/** Checkout never finished: payment pending / cancelled / rejected without successful payment. */
 function isCheckoutNotCompleted(
   paymentStatus: PaymentStatusInput,
   orderStatus: OrderStatusInput,
 ): boolean {
   const ps =
     paymentStatus == null ? "" : String(paymentStatus).trim().toUpperCase();
-  if (ps === "CANCELLED") return true;
+  if (ps === "PENDING" || ps === "CANCELLED") return true;
 
   const os =
     typeof orderStatus === "string"
@@ -86,6 +86,7 @@ function isCheckoutNotCompleted(
         ? String(orderStatus)
         : "";
   if (os === "REJECTED" && ps !== "COMPLETED" && ps !== "REFUNDED") return true;
+  if (os === "PENDING" && ps !== "COMPLETED" && ps !== "REFUNDED") return true;
 
   return false;
 }
@@ -108,7 +109,8 @@ function parseNumericOrderStatus(status: unknown): number | null {
 function displayFromDbOrderStatus(u: string): { text: string; className: string } | null {
   switch (u) {
     case "PENDING":
-      return { text: "Pending", className: "text-orange-500" };
+      // Unpaid checkout — payment capture moves the order to APPLIED.
+      return { text: "Not completed", className: "text-slate-600" };
     case "IN_PROGRESS":
     case "APPLIED":
       return { text: "In progress", className: "text-blue-600" };
