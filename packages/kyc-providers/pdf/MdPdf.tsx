@@ -139,7 +139,7 @@ const MdPdf = ({
     <Document>
       <Page size="A4" style={{ fontFamily: "Poppins" }}  >
         <LogoSvg showAll={true} />
-        {/* Page1: photo/signature omitted when mapDataForPage1 sets omitPage1PhotoAndSignature (existing KRA flow) */}
+        {/* Page1: signature omitted when mapDataForPage1 sets omitPage1PhotoAndSignature (existing KRA flow); photo shown when available */}
         <Page1 {...pageData.page1} />
         {pageData.page1.kraCallout ? (
           <KraRecordsCallout {...pageData.page1.kraCallout} />

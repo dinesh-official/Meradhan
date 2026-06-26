@@ -39,7 +39,7 @@ import { SelectCustomerUser } from "@/global/elements/autocomplete/SelectCustome
 import { genMediaUrl } from "@/global/utils/url.utils";
 import { queryClient } from "@/core/config/reactQuery";
 import { toast } from "sonner";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
@@ -76,6 +76,13 @@ function getEmailSalutationFromGender(gender: unknown): "Mr." | "Ms." | "Mr. / M
   if (g === "female" || g === "f" || g === "woman" || g === "w") return "Ms.";
   if (g === "male" || g === "m" || g === "man") return "Mr.";
   return "Mr. / Ms.";
+}
+
+const RETAIL_CUSTOMER_USER_TYPES = new Set(["INDIVIDUAL", "INDIVIDUAL_NRI_NRO"]);
+
+function isB2BCustomerUserType(userType: unknown): boolean {
+  const u = String(userType ?? "INDIVIDUAL").trim().toUpperCase();
+  return !RETAIL_CUSTOMER_USER_TYPES.has(u);
 }
 
 function getPreferredValue(
@@ -267,9 +274,7 @@ function GeneratePdfContent() {
   const [sendingPdfEmail, setSendingPdfEmail] = useState(false);
   const [proposalEmailOpen, setProposalEmailOpen] = useState(false);
   const [sendingProposalEmail, setSendingProposalEmail] = useState(false);
-  const [emailPdfType, setEmailPdfType] = useState<"order" | "deal" | "both">(
-    "order",
-  );
+  const [emailPdfType, setEmailPdfType] = useState<"order" | "deal">("order");
   const [emailTo, setEmailTo] = useState("");
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
@@ -489,10 +494,27 @@ function GeneratePdfContent() {
   // participant-tagged flows; treat them as "owner is assigned".
   const hasAssignedOwner =
     !!customerOrder?.customerProfile || !!linkedParticipantCode;
+  const isNseParticipantOrder =
+    !!linkedParticipantCode ||
+    (customerOrder != null && customerOrder.customerProfileId == null);
   const isB2BCustomer =
-    String(customerOrder?.customerProfile?.userType ?? "").trim().toUpperCase() ===
-    "CORPORATE";
-  const canEmailClientPdf = !!customerOrder?.customerProfile && !isB2BCustomer;
+    !!customerOrder?.customerProfile &&
+    isB2BCustomerUserType(customerOrder.customerProfile.userType);
+  const participantPrimaryEmail = useMemo(() => {
+    const emails = [
+      ...(linkedParticipant?.emailList ?? []),
+      ...(linkedParticipantInfo?.emailList ?? []),
+    ];
+    return emails.map((e) => e?.trim()).find(Boolean) ?? "";
+  }, [linkedParticipant?.emailList, linkedParticipantInfo?.emailList]);
+  const canEmailClientPdf =
+    hasAssignedOwner &&
+    !isB2BCustomer &&
+    (isNseParticipantOrder
+      ? !!participantPrimaryEmail
+      : !!customerOrder?.customerProfile);
+  const canEmailProposal =
+    canEmailClientPdf && !isNseParticipantOrder && !!customerOrder?.customerProfile;
   const emailSalutation = getEmailSalutationFromGender(customerOrder?.customerProfile?.gender);
   const clientFullName = `${customerOrder?.customerProfile?.firstName ?? ""} ${customerOrder?.customerProfile?.middleName ?? ""} ${customerOrder?.customerProfile?.lastName ?? ""}`
     .trim()
@@ -571,41 +593,22 @@ function GeneratePdfContent() {
   }, [rfq, pdfAutofillSettlementDate]);
 
   useEffect(() => {
-    if (!emailTo && customerOrder?.customerProfile?.emailAddress) {
+    if (emailTo) return;
+    if (customerOrder?.customerProfile?.emailAddress) {
       setEmailTo(customerOrder.customerProfile.emailAddress);
+    } else if (participantPrimaryEmail) {
+      setEmailTo(participantPrimaryEmail);
     }
-  }, [customerOrder?.customerProfile?.emailAddress, emailTo]);
+  }, [
+    customerOrder?.customerProfile?.emailAddress,
+    participantPrimaryEmail,
+    emailTo,
+  ]);
 
-  const applyEmailTemplate = (type: "order" | "deal" | "both") => {
+  const applyEmailTemplate = (type: "order" | "deal") => {
     const dearLine = linkedParticipantCode
       ? "Dear Sir / Madam,"
       : null;
-    if (type === "both") {
-      const displayName =
-        `${customerOrder?.customerProfile?.firstName ?? ""} ${customerOrder?.customerProfile?.lastName ?? ""}`.trim() ||
-        "CUSTOMER";
-      setEmailSubject(`Order Confirmation & Documents - Order ID ${customerOrderId}`);
-      setEmailBody(
-        `${dearLine ?? `Dear ${emailSalutation} ${displayName},`}
-
-Please find attached your Order Receipt and Deal Sheet for the transaction below.
-
-Bond Name: ${securityName}
-
-ISIN: ${isin}
-
-Order ID: ${customerOrderId}
-
-The attached PDFs are password protected. You may open them using your date of birth as the password. For example, if your date of birth is 3 April 1996, the password will be 03041996.
-
-If you require any assistance, please contact us at backoffice@meradhan.co.
-
-Warm regards,
-
-MeraDhan Team`
-      );
-      return;
-    }
     if (type === "deal") {
       setEmailSubject(
         `Deal Sheet for ISIN ${isin} - Security Name ${securityName} - Deal Date ${dealDateText}`
@@ -866,11 +869,7 @@ BSE Member ID: 6963`
         messageBody: emailBody.trim(),
       };
       await ordersApi.sendPdfEmailToClient(orderNumber, payload);
-      toast.success(
-        emailPdfType === "both"
-          ? "Email sent to client with order receipt and deal sheet."
-          : "Email sent to client with PDF attachment.",
-      );
+      toast.success("Email sent to client with PDF attachment.");
       void persistReceiptPdfOptions(accruedInterestDaysNum);
       setSendEmailOpen(false);
     } catch (err) {
@@ -1073,9 +1072,7 @@ BSE Member ID: 6963`
                 <FileDown className="mr-2 h-4 w-4" />
                 {downloadingDealPdf ? "Generating..." : "Download deal sheet PDF"}
               </Button>
-              {/* Email actions need a customer profile (template uses customer
-                  contact/email). Hide them for participant-tagged orders;
-                  PDF downloads still work from the buttons above. */}
+              {/* Email PDFs: retail customers or NSE participants with email on file. */}
               {canEmailClientPdf && (
                 <>
                   <Button
@@ -1102,31 +1099,26 @@ BSE Member ID: 6963`
                   >
                     Email deal sheet
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={downloadingOrderPdf || downloadingDealPdf || pdfAccruedInterestDays.trim() === ""}
-                    onClick={() => {
-                      setEmailPdfType("both");
-                      applyEmailTemplate("both");
-                      setSendEmailOpen(true);
-                    }}
-                  >
-                    Email receipt + deal sheet
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="default"
-                    disabled={downloadingOrderPdf || downloadingDealPdf}
-                    onClick={() => setProposalEmailOpen(true)}
-                  >
-                    Email proposal
-                  </Button>
+                  {canEmailProposal && (
+                    <Button
+                      size="sm"
+                      variant="default"
+                      disabled={downloadingOrderPdf || downloadingDealPdf}
+                      onClick={() => setProposalEmailOpen(true)}
+                    >
+                      Email proposal
+                    </Button>
+                  )}
                 </>
               )}
               {!!customerOrder?.customerProfile && isB2BCustomer && (
                 <p className="text-sm text-muted-foreground">
                   Send-to-email is hidden on this PDF page for B2B/corporate customers.
+                </p>
+              )}
+              {isNseParticipantOrder && !participantPrimaryEmail && (
+                <p className="text-sm text-muted-foreground">
+                  Add an email on the NSE participant profile to enable send-to-email.
                 </p>
               )}
             </>
@@ -1836,7 +1828,7 @@ BSE Member ID: 6963`
           <DialogHeader>
             <DialogTitle>Send PDF to client</DialogTitle>
             <DialogDescription>
-              Choose one or both PDFs, write message, and send them as attachments to the assigned client.
+              Choose the PDF type, write your message, and send it as an attachment to the assigned client.
             </DialogDescription>
           </DialogHeader>
 
@@ -1855,7 +1847,7 @@ BSE Member ID: 6963`
               <Select
                 value={emailPdfType}
                 onValueChange={(val) => {
-                  const pdfType = val as "order" | "deal" | "both";
+                  const pdfType = val as "order" | "deal";
                   setEmailPdfType(pdfType);
                   applyEmailTemplate(pdfType);
                 }}
@@ -1866,7 +1858,6 @@ BSE Member ID: 6963`
                 <SelectContent>
                   <SelectItem value="order">Order receipt PDF</SelectItem>
                   <SelectItem value="deal">Deal sheet PDF</SelectItem>
-                  <SelectItem value="both">Order receipt + deal sheet</SelectItem>
                 </SelectContent>
               </Select>
             </div>

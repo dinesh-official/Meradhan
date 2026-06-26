@@ -410,8 +410,8 @@ export class OrderService {
    * - returns `cancelled: 0` (instead of throwing) when there is nothing to cancel,
    *   so the frontend dismiss handler can fire-and-forget safely.
    *
-   * The resulting `paymentStatus: CANCELLED` is what the dashboard maps to
-   * "Not completed" (see frontend `isCheckoutNotCompleted`).
+   * Pending / cancelled payment maps to dashboard "Not completed"
+   * (see frontend `isCheckoutNotCompleted`).
    */
   async cancelOrder(
     customerId: number,
@@ -564,10 +564,17 @@ export class OrderService {
       if (u === "NOT_COMPLETED") {
         const notCompleted = {
           OR: [
+            { paymentStatus: "PENDING" as const },
             { paymentStatus: "CANCELLED" as const },
             {
               AND: [
                 { status: "REJECTED" as const },
+                { paymentStatus: { notIn: ["COMPLETED" as const, "REFUNDED" as const] } },
+              ],
+            },
+            {
+              AND: [
+                { status: "PENDING" as const },
                 { paymentStatus: { notIn: ["COMPLETED" as const, "REFUNDED" as const] } },
               ],
             },
