@@ -143,6 +143,7 @@ export class CustomerProfileService extends CustomerProfileManager {
         lastName: true,
         emailAddress: true,
         phoneNo: true,
+        gender: true,
         VerifiedBy: true,
         verifyDate: true,
         userType: true,

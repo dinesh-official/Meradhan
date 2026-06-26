@@ -302,7 +302,7 @@ export async function fetchCalcBondInfo(
   }
 }
 
-function pickYmd(
+export function pickYmd(
   ...candidates: Array<string | null | undefined>
 ): string | undefined {
   for (const c of candidates) {
@@ -312,7 +312,7 @@ function pickYmd(
   return undefined;
 }
 
-function parseApiDecimal(s: string | number | null | undefined): number | null {
+export function parseApiDecimal(s: string | number | null | undefined): number | null {
   if (s == null || s === "") return null;
   const n = Number(String(s).replace(/,/g, "").trim());
   return Number.isFinite(n) ? n : null;
