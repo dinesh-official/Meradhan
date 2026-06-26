@@ -13,7 +13,6 @@ import {
 import Link from "next/link";
 import React, { memo } from "react";
 import ErrorBox from "../_components/ErrorBox";
-import PasswordInput from "../_components/PasswordInput";
 import VerifyOtpPopUp from "./_components/VerifyOtpPopUp";
 import SignUpHandyChecklist from "./_components/SignUpHandyChecklist";
 
@@ -91,7 +90,6 @@ function SignUpForm() {
       firstName: signUpFormData.firstName,
       lastName: signUpFormData.lastName,
       emailId: signUpFormData.email,
-      password: signUpFormData.password,
       phoneNo: signUpFormData.mobile,
       termsAccepted: signUpFormData.isAcceptedTerms,
       whatsAppNo: signUpFormData.mobile,
@@ -108,7 +106,6 @@ function SignUpForm() {
       firstName: signUpFormData.firstName,
       lastName: signUpFormData.lastName,
       emailId: signUpFormData.email,
-      password: signUpFormData.password,
       phoneNo: signUpFormData.mobile,
       termsAccepted: signUpFormData.isAcceptedTerms,
       whatsAppNo: signUpFormData.mobile,
@@ -199,57 +196,39 @@ function SignUpForm() {
           <Field error={signUpFormError.userType}>
             <Select
               value={signUpFormData.userType}
-              onValueChange={(value) =>
-                handleSignUpFormChange("userType", value)
-              }
+              onValueChange={(value) => {
+                if (value === "INDIVIDUAL") {
+                  handleSignUpFormChange("userType", value);
+                }
+              }}
             >
               <SelectTrigger className="bg-muted shadow-none py-5 border-none w-full">
                 <SelectValue placeholder="User Type" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="INDIVIDUAL">Individual</SelectItem>
-                <SelectItem value="INDIVIDUAL_NRI_NRO">
+                <SelectItem value="INDIVIDUAL_NRI_NRO" disabled>
                   Individual (NRI-NRO)
                 </SelectItem>
-                <SelectItem value="TRUST">Trust</SelectItem>
-                <SelectItem value="CORPORATE">Corporate</SelectItem>
-                <SelectItem value="HUF">HUF</SelectItem>
-                <SelectItem value="LLP">LLP</SelectItem>
-                <SelectItem value="PARTNERSHIP_FIRM">
+                <SelectItem value="TRUST" disabled>
+                  Trust
+                </SelectItem>
+                <SelectItem value="CORPORATE" disabled>
+                  Corporate
+                </SelectItem>
+                <SelectItem value="HUF" disabled>
+                  HUF
+                </SelectItem>
+                <SelectItem value="LLP" disabled>
+                  LLP
+                </SelectItem>
+                <SelectItem value="PARTNERSHIP_FIRM" disabled>
                   Partnership Firm
                 </SelectItem>
               </SelectContent>
             </Select>
           </Field>
-
-          <Field error={signUpFormError.password}>
-            <PasswordInput
-              placeholder="Password*"
-              className="bg-muted py-4.5 border-none placeholder:text-[#7fabd2]"
-              value={signUpFormData.password}
-              onChange={(e) =>
-                handleSignUpFormChange("password", e.target.value)
-              }
-            />
-          </Field>
-
-          <Field error={signUpFormError.confirmPassword}>
-            <PasswordInput
-              placeholder="Confirm Password*"
-              className="bg-muted py-4.5 border-none placeholder:text-[#7fabd2]"
-              value={signUpFormData.confirmPassword}
-              onChange={(e) =>
-                handleSignUpFormChange("confirmPassword", e.target.value)
-              }
-            />
-          </Field>
         </section>
-
-        {/* Password rules */}
-        <p className="text-gray-500 text-sm">
-          *Password must be at least 8 characters and include one uppercase, one
-          lowercase, one special character, and one number.
-        </p>
 
         {/* --- Terms Section --- */}
         <section className="flex flex-col gap-3 text-sm">

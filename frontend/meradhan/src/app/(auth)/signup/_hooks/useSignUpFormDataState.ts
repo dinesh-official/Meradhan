@@ -1,33 +1,20 @@
 import { useState } from "react";
 import { z } from "zod";
 
-const formSchemaZod = z
-  .object({
-    firstName: z.string().min(1, { message: "Enter your first name" }),
-    lastName: z.string().min(1, { message: "Enter your last name" }),
-    email: z.email({ message: "Provide a valid email ID" }),
-    mobile: z
-      .string()
-      .min(10, { message: "Please provide a valid phone" })
-      .regex(/^\d+$/, { message: "Please provide a valid phone" }),
-    userType: z.string().min(1, { message: "Select correct user type" }),
-    password: z
-      .string()
-      .regex(/[A-Z]/, { message: "Password is not matching with rule" })
-      .regex(/[a-z]/, { message: "Password is not matching with rule" })
-      .regex(/\d/, { message: "Password is not matching with rule" })
-      .regex(/[@$!%*?&]/, { message: "Password is not matching with rule" })
-      .min(4, { message: "Please enter password" }),
-    confirmPassword: z.string().min(1, { message: "Enter confirm password" }),
-    isAcceptedTerms: z.boolean().refine((val) => val === true, {
-      message: "Must accept terms and conditions",
-    }),
-    isAcceptedWhatsapp: z.boolean().default(true),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
+const formSchemaZod = z.object({
+  firstName: z.string().min(1, { message: "Enter your first name" }),
+  lastName: z.string().min(1, { message: "Enter your last name" }),
+  email: z.email({ message: "Provide a valid email ID" }),
+  mobile: z
+    .string()
+    .min(10, { message: "Please provide a valid phone" })
+    .regex(/^\d+$/, { message: "Please provide a valid phone" }),
+  userType: z.string().min(1, { message: "Select correct user type" }),
+  isAcceptedTerms: z.boolean().refine((val) => val === true, {
+    message: "Must accept terms and conditions",
+  }),
+  isAcceptedWhatsapp: z.boolean().default(true),
+});
 
 export type SignUPFormSchemaType = z.infer<typeof formSchemaZod>;
 
@@ -42,8 +29,6 @@ export const useSignUpFormDataState = () => {
     lastName: "",
     email: "",
     mobile: "",
-    password: "",
-    confirmPassword: "",
     userType: "INDIVIDUAL",
     isAcceptedTerms: false,
     isAcceptedWhatsapp: true,
@@ -56,8 +41,6 @@ export const useSignUpFormDataState = () => {
     lastName: "",
     email: "",
     mobile: "",
-    password: "",
-    confirmPassword: "",
     userType: "",
     isAcceptedTerms: "",
     isAcceptedWhatsapp: "",
@@ -65,10 +48,10 @@ export const useSignUpFormDataState = () => {
 
   const handleSignUpFormChange = (
     key: keyof SignUPFormSchemaType | "id",
-    value: string | boolean | number
+    value: string | boolean | number,
   ) => {
     setSignUpFormData((prev) => ({ ...prev, [key]: value }));
-    setSignUpFormError((prev) => ({ ...prev, [key]: "" })); // clear field error on change
+    setSignUpFormError((prev) => ({ ...prev, [key]: "" }));
   };
 
   const resetSignUpFormData = () => {
@@ -77,8 +60,6 @@ export const useSignUpFormDataState = () => {
       lastName: "",
       email: "",
       mobile: "",
-      password: "",
-      confirmPassword: "",
       userType: "INDIVIDUAL",
       isAcceptedTerms: false,
       isAcceptedWhatsapp: false,
@@ -89,8 +70,6 @@ export const useSignUpFormDataState = () => {
       lastName: "",
       email: "",
       mobile: "",
-      password: "",
-      confirmPassword: "",
       userType: "",
       isAcceptedTerms: "",
       isAcceptedWhatsapp: "",
@@ -112,14 +91,11 @@ export const useSignUpFormDataState = () => {
       return false;
     }
 
-    // No errors — clear old ones
     setSignUpFormError({
       firstName: "",
       lastName: "",
       email: "",
       mobile: "",
-      password: "",
-      confirmPassword: "",
       userType: "",
       isAcceptedTerms: "",
       isAcceptedWhatsapp: "",
