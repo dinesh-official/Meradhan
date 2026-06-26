@@ -214,40 +214,6 @@ export class CustomerAuthController {
   }
 
   // signin with otp
-  async signInWithPassword(req: Request, res: Response) {
-    const { identity, password, value } =
-      appSchema.customer.signInWithCredentialsSchema.parse(req.body);
-    const data = await this.customerAuthService.signInWithCredentials({
-      identifier: identity,
-      password,
-      value,
-    });
-    if (data.requiresTwoFactor) {
-      res.sendResponse({
-        statusCode: HttpStatus.OK,
-        responseData: data,
-      });
-      return;
-    }
-    await addMeradhanLoginBasedAuditLog(req, {
-      userId: data.id,
-      sessionType: "SIGNIN_CREDENTIALS_PASSWORD",
-      success: true,
-      entityType: "Auth",
-      email: data.email,
-    });
-    await revalidateMeradhanTrackingSession(req, {
-      userId: data.id,
-      sessionId: req.cookies["meradhan_tracking_session"],
-    });
-    res.cookie("token", data.token!, cookieOptions);
-    res.cookie("userId", data.id.toString(), cookieOptions);
-    res.sendResponse({
-      statusCode: HttpStatus.OK,
-      responseData: data,
-    });
-  }
-
   async signInWithOtpSend(req: Request, res: Response) {
     const { identity, value } = appSchema.customer.sendSignInOtpSchema.parse(
       req.body,

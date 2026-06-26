@@ -41,10 +41,8 @@ import {
   emailAdminOtpSenderQueue,
   emailOtpSenderQueue,
   emailVerificationQueue,
-  forgotPasswordLinkSenderQueue,
   kycSubmittedForVerificationEmailQueue,
   rekycOtpSenderQueue,
-  successResetPasswordQueue,
   welcomeEmailSenderQueue,
 } from "@jobs/queue/worker_queues";
 
@@ -187,41 +185,6 @@ export const sendCustomerWelcomeEmail = async (data: {
     {
       ...data,
       subject: `Welcome to MeraDhan – Your Journey to Secure Investments Begins!`,
-    },
-    {
-      removeOnComplete: true,
-      attempts: 1,
-      removeOnFail: true,
-    },
-  );
-};
-
-export const sendForgetPasswordEmail = async (data: {
-  email: string;
-  userName: string;
-  link: string;
-}) => {
-  await forgotPasswordLinkSenderQueue.add(
-    {
-      ...data,
-      subject: `Reset Your Password – MeraDhan ${getFormattedTimestamp()}`,
-    },
-    {
-      removeOnComplete: true,
-      attempts: 1,
-      removeOnFail: true,
-    },
-  );
-};
-
-export const sendPasswordResetSuccessEmail = async (data: {
-  email: string;
-  userName: string;
-}) => {
-  await successResetPasswordQueue.add(
-    {
-      ...data,
-      subject: `Password Reset Successful – MeraDhan ${getFormattedTimestamp()}`,
     },
     {
       removeOnComplete: true,

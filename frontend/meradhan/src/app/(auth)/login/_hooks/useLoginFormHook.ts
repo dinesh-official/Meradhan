@@ -75,7 +75,6 @@ const resolvePostLoginRedirect = (): string | null => {
  * Handles all login form actions, including:
  * - Email/Phone validation
  * - Login request, OTP send/verify
- * - Password-based sign-in
  * - Timer management for OTP resend
  */
 export const useLoginFormHook = () => {
@@ -93,7 +92,6 @@ export const useLoginFormHook = () => {
   const [errors, setErrors] = useState({
     emailOrPhone: "",
     otp: "",
-    password: "",
   });
 
   // Timer setup for OTP resend coolDown
@@ -105,11 +103,11 @@ export const useLoginFormHook = () => {
 
   // Reset all errors and messages when inputs change
   useEffect(() => {
-    setErrors({ emailOrPhone: "", otp: "", password: "" });
+    setErrors({ emailOrPhone: "", otp: "" });
     dataStore.setErrorMessage("");
     dataStore.setSuccessMessage("");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.password, state.otp, state.emailOrPhoneNo, state.type, state.twoFactorPasscode]);
+  }, [state.otp, state.emailOrPhoneNo, state.twoFactorPasscode]);
 
   // Determine identity type (email or phone)
   const identity = state.emailOrPhoneNo.includes("@") ? "email" : "phoneNo";
@@ -151,13 +149,14 @@ export const useLoginFormHook = () => {
       }
 
       dataStore.setMode("verify");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if (isNaN(state.emailOrPhoneNo as any)) {
-        dataStore.setType("password");
-      } else {
-        dataStore.setType("otp");
+      dataStore.setOtp("");
+      if (response.token) {
+        dataStore.setSuccessMessage("OTP sent successfully");
+        timer.reset();
+        timer.start();
+        dataStore.setAllowedResend(false);
       }
-      trackActivity("login", { reason: "Create login request" });
+      trackActivity("login", { reason: "Login OTP sent" });
     },
     onError: (error) => {
       dataStore.setMode("pending");
@@ -219,7 +218,7 @@ export const useLoginFormHook = () => {
   };
 
   // -------------------------------
-  // 🔹 3. Sign in with Password
+  // 🔹 3. Post-auth success handler
   // -------------------------------
   const handlePostAuthSuccess = async (responseData: {
     id: number;
@@ -248,35 +247,6 @@ export const useLoginFormHook = () => {
     });
   };
 
-  const signInWithPasswordMutation = useMutation({
-    mutationKey: ["signInWithPassword"],
-    retry: false,
-    mutationFn: () =>
-      signinApi.signInWithPassword({
-        identity,
-        value: state.emailOrPhoneNo,
-        password: state.password,
-      }),
-    onSuccess: async (data) => {
-      trackActivity("login", { reason: "Sign in with password" });
-      await handlePostAuthSuccess(data.responseData);
-    },
-    onError: (error) => {
-      if (error instanceof ApiError) {
-        dataStore.setErrorMessage(
-          error.response?.data?.message ||
-          error.message ||
-          "Something went wrong",
-        );
-      } else {
-        toast.error(error.message);
-      }
-    },
-  });
-
-  // -------------------------------
-  // 🔹 4. Verify OTP and Login
-  // -------------------------------
   const verifyOtpMutation = useMutation({
     mutationKey: ["verifyOtpLogin"],
     retry: false,
@@ -284,7 +254,10 @@ export const useLoginFormHook = () => {
       signinApi.signInVerifyOtp({
         identity,
         otp: state.otp,
-        token: sendOtpMutation.data?.responseData?.token || requestLoginMutation.data?.responseData.token || "",
+        token:
+          sendOtpMutation.data?.responseData?.token ||
+          requestLoginMutation.data?.responseData?.token ||
+          "",
         value: state.emailOrPhoneNo,
       }),
     onSuccess: async (data) => {
@@ -527,18 +500,21 @@ export const useLoginFormHook = () => {
   };
 
   /**
-   * Handle Sign-In with Password
+   * Handle OTP resend
    */
-  const handleSignInWithPassword = () => {
+  const handleResendOtp = () => {
+    if (sendOtpMutation.isPending) return;
+    if (state.currentOtpTry >= state.maxOtpTry) {
+      dataStore.setErrorMessage(
+        "You have reached the maximum number of attempts. Please try again later.",
+      );
+      return;
+    }
     const { valid, message } = validateIfEmailOrPhoneNo(state.emailOrPhoneNo);
     if (!valid) return setErrors({ ...errors, emailOrPhone: message });
     dataStore.setErrorMessage("");
     dataStore.setSuccessMessage("");
-    if (state.otp.length !== 0) {
-      dataStore.setErrorMessage("Please enter valid OTP");
-      return;
-    }
-    signInWithPasswordMutation.mutate();
+    sendOtpMutation.mutate();
   };
 
   const persistAppSessionCookies = async (token: string, userId: string) => {
@@ -657,7 +633,6 @@ export const useLoginFormHook = () => {
     // Mutations
     requestLoginMutation,
     sendOtpMutation,
-    signInWithPasswordMutation,
     verifyOtpMutation,
     verifyTwoFactorMutation,
     verifyAccountActivationMutation,
@@ -668,9 +643,9 @@ export const useLoginFormHook = () => {
     // Handlers
     handleSignInRequest,
     handleSendOtp,
+    handleResendOtp,
     handleVerifyOtp,
     handleVerifyTwoFactor,
-    handleSignInWithPassword,
     handleResendEmailVerification,
     handleStartAccountActivation,
     handleVerifyAccountActivation,

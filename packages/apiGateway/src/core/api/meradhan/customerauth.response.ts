@@ -33,14 +33,9 @@ export type ISignInSendOtpResponse = BaseResponseData<{
   token: string;
 }>;
 
-export type IResetPasswordResponse = BaseResponseData<{
-  message: string;
-}>;
-
 export type ICustomerTwoFactorSettingsResponse = BaseResponseData<{
   enabled: boolean;
   hasPasscodeSet: boolean;
-  hasPasswordSet: boolean;
   signinWith: "CREDENTIALS" | "GOOGLE" | "MICROSOFT" | "FACEBOOK";
 }>;
 
