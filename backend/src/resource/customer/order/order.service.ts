@@ -435,7 +435,7 @@ export class OrderService {
     const result = await db.dataBase.order.updateMany({
       where,
       data: {
-        status: "REJECTED",
+        status: "CANCELLED",
         paymentStatus: PaymentStatus.CANCELLED,
       },
     });
@@ -699,9 +699,9 @@ export class OrderService {
       const nseSettlement =
         info?.modConsideration != null && Number.isFinite(info.modConsideration)
           ? info.modConsideration +
-            (info.stampDutyAmount != null && Number.isFinite(info.stampDutyAmount)
-              ? info.stampDutyAmount
-              : 0)
+          (info.stampDutyAmount != null && Number.isFinite(info.stampDutyAmount)
+            ? info.stampDutyAmount
+            : 0)
           : null;
       const settlementAmount =
         nseSettlement ??
