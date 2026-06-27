@@ -42,6 +42,21 @@ export {
 } from "./lib/customers/corporateKyc.schema";
 
 export {
+  getEmailSalutationFromGender,
+  resolveGenderForEmailSalutation,
+  type GenderSources,
+} from "./lib/customers/email_salutation";
+
+export {
+  CRM_ORDER_STATUS_VALUES,
+  ORDER_STATUS_CONFIG,
+  getCrmOrderStatusDisplay,
+  getOrderStatusLabel,
+  getPaymentStatusLabel,
+  type CrmOrderStatus,
+} from "./lib/crm/order_status_display";
+
+export {
   CBRICS_UNREG_WORKFLOW_STATUS_OPTIONS,
 } from "./lib/crm/req/nse/isin/getParticipants.schema";
 export type {

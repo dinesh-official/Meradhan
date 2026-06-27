@@ -26,7 +26,8 @@ import {
 } from "./reportDerivations";
 import { formatIndianCurrencyCompact } from "./orderReportFormatters";
 import { encodeId } from "@/global/utils/url.utils";
-import { KycStatusBadge, ReportDataTable, WorkflowStatusBadge } from "./reportUi";
+import OrderStatusBadge from "@/global/elements/wrapper/badges/OrderStatusBadge";
+import { KycStatusBadge, ReportDataTable } from "./reportUi";
 
 type Row = OrderReportsByCustomerResponse["responseData"]["data"][number];
 
@@ -114,7 +115,7 @@ function CustomerDetail({
     for (const o of custOrders) {
       totalVal += Number(o.totalAmount);
       const wf = mapOrderWorkflowStatus(o.status, o.paymentStatus);
-      if (wf === "Settled" || wf === "In Settlement") settled += 1;
+      if (wf === "Settled") settled += 1;
       else if (isActiveWorkflowStatus(wf)) pending += 1;
     }
     return { settled, pending, totalVal };
@@ -122,7 +123,6 @@ function CustomerDetail({
 
   const orderRows = useMemo(() =>
     custOrders.map((o) => {
-      const wf = mapOrderWorkflowStatus(o.status, o.paymentStatus);
       const yld = parseYieldFromBondDetails(o.bondDetails) ?? "—";
       return {
         key: o.id,
@@ -136,7 +136,7 @@ function CustomerDetail({
           <span key="d" className="whitespace-nowrap text-xs text-slate-500">{formatOrderDate(o.createdAt)}</span>,
           <span key="v" className="tabular-nums font-medium">{formatValueCr(Number(o.totalAmount))}</span>,
           <span key="y" className="tabular-nums text-xs">{yld}</span>,
-          <WorkflowStatusBadge key="s" label={wf} />,
+          <OrderStatusBadge key="s" status={o.status} paymentStatus={o.paymentStatus} />,
         ],
       };
     }),

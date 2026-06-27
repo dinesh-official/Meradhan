@@ -435,7 +435,7 @@ export class OrderService {
     const result = await db.dataBase.order.updateMany({
       where,
       data: {
-        status: "CANCELLED",
+        status: "PENDING",
         paymentStatus: PaymentStatus.CANCELLED,
       },
     });

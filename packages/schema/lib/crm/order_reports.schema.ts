@@ -6,7 +6,15 @@ const paymentStatusEnum = z.enum([
   "REFUNDED",
   "CANCELLED",
 ]);
-const orderStatusEnum = z.enum(["PENDING", "SETTLED", "APPLIED", "REJECTED"]);
+const orderStatusEnum = z.enum([
+  "PENDING",
+  "IN_PROGRESS",
+  "APPLIED",
+  "SETTLED",
+  "REJECTED",
+  "EXPIRED",
+  "CANCELLED",
+]);
 const groupByEnum = z.enum(["day", "week", "month"]);
 
 export const OrderReportsQuerySchema = z.object({
