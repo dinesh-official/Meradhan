@@ -1,19 +1,16 @@
 import { type Request, type Response } from "express";
 import { CrmOrdersService } from "./orders.service";
-import { appSchema } from "@root/schema";
+import {
+  appSchema,
+  getEmailSalutationFromGender,
+  resolveGenderForEmailSalutation,
+} from "@root/schema";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import { OrderStatus } from "@databases/generated/prisma/postgres";
 import { createCrmActivityLog } from "@resource/crm/auditlogs/auditlog.repo";
 import { sendBackOfficeEmail } from "@communication/email_communication";
 import { AppConfigService } from "@resource/app-config/app-config.service";
 import { db } from "@core/database/database";
-
-function getEmailSalutationFromGender(gender: unknown): "Mr." | "Ms." | "Mr. / Ms." {
-  const g = String(gender ?? "").trim().toUpperCase();
-  if (g === "FEMALE") return "Ms.";
-  if (g === "MALE") return "Mr.";
-  return "Mr. / Ms.";
-}
 
 function formatProposalDate(value: string | number | Date | null | undefined) {
   if (value == null || value === "") return "—";
@@ -461,8 +458,8 @@ export class CrmOrdersController {
         });
       }
 
-      const validStatuses = ["PENDING", "SETTLED", "APPLIED", "REJECTED"];
-      if (!validStatuses.includes(status)) {
+      const validStatuses = Object.values(OrderStatus);
+      if (!validStatuses.includes(status as OrderStatus)) {
         return res.sendResponse({
           statusCode: HttpStatus.BAD_REQUEST,
           message: `Invalid status. Must be one of: ${validStatuses.join(", ")}`,
@@ -889,6 +886,7 @@ export class CrmOrdersController {
       cleanPrice?: number | string | null;
       couponRate?: number | string | null;
       gender?: string | null;
+      customerProfileId?: number | string | null;
     };
 
     const recipientEmail = String(body.toEmail ?? "").trim();
@@ -911,19 +909,27 @@ export class CrmOrdersController {
       });
     }
 
-    let gender =
-      typeof body.gender === "string" && body.gender.trim() !== ""
-        ? body.gender.trim()
-        : null;
+    let gender = resolveGenderForEmailSalutation({ gender: body.gender });
     if (!gender) {
+      const customerProfileId =
+        body.customerProfileId != null && String(body.customerProfileId).trim() !== ""
+          ? Number(body.customerProfileId)
+          : null;
       const customerRow = await db.dataBase.customerProfileDataModel.findFirst({
-        where: {
-          emailAddress: { equals: recipientEmail, mode: "insensitive" },
-          isDeleted: false,
+        where:
+          customerProfileId != null && Number.isFinite(customerProfileId)
+            ? { id: customerProfileId, isDeleted: false }
+            : {
+                emailAddress: { equals: recipientEmail, mode: "insensitive" },
+                isDeleted: false,
+              },
+        select: {
+          gender: true,
+          panCard: { select: { gender: true } },
+          aadhaarCard: { select: { gender: true } },
         },
-        select: { gender: true },
       });
-      gender = customerRow?.gender ?? null;
+      gender = resolveGenderForEmailSalutation(customerRow);
     }
 
     const template = buildProposalEmailTemplate({

@@ -267,6 +267,73 @@ function parseRfqMasterDateTime(
   return fallback;
 }
 
+type AssignOrderDates = {
+  dealDate: Date;
+  settlementDate: Date;
+  purchaseDate: Date;
+  dealDateRaw: string | null;
+  settlementDateRaw: string | null;
+};
+
+function buildAssignOrderDateMetadata(
+  base: Record<string, unknown>,
+  dates: AssignOrderDates,
+): Record<string, unknown> {
+  const next = { ...base };
+  if (dates.dealDateRaw) {
+    next.dealDate = dates.dealDateRaw;
+  }
+  if (dates.settlementDateRaw) {
+    next.settlementDate = dates.settlementDateRaw;
+  }
+  return next;
+}
+
+/**
+ * Resolve business deal / settlement / purchase dates for CRM assign-order flows.
+ * Prefers `rfq_master_isin` (same source as `/crm/rfq/nse/find`), then negotiation
+ * accepted settlement, then settle_order.modSettleDate. Falls back to settle sync time.
+ */
+async function resolveAssignOrderDates(
+  settleOrder: { createdAt: Date | string; modSettleDate?: string | null },
+  negotiation: { rfqNumber: string; acceptedSettlementDate?: string | null },
+): Promise<AssignOrderDates> {
+  const fallbackDealDate =
+    settleOrder.createdAt instanceof Date
+      ? settleOrder.createdAt
+      : new Date(settleOrder.createdAt);
+
+  const rfqMaster = await db.dataBase.rFQMasterISIN.findFirst({
+    where: { number: negotiation.rfqNumber },
+    select: { date: true, quoteTime: true, settlementDate: true },
+  });
+
+  const dealDateRaw = rfqMaster?.date?.trim() || null;
+  const settlementDateRaw =
+    rfqMaster?.settlementDate?.trim() ||
+    negotiation.acceptedSettlementDate?.trim() ||
+    settleOrder.modSettleDate?.trim() ||
+    null;
+
+  const dealDate = parseRfqMasterDateTime(
+    dealDateRaw,
+    rfqMaster?.quoteTime,
+    fallbackDealDate,
+  );
+
+  const settlementDate = settlementDateRaw
+    ? parseRfqMasterDateTime(settlementDateRaw, undefined, fallbackDealDate)
+    : fallbackDealDate;
+
+  return {
+    dealDate,
+    settlementDate,
+    purchaseDate: settlementDate,
+    dealDateRaw,
+    settlementDateRaw,
+  };
+}
+
 export class CrmOrdersService {
   private readonly customerOrderService = new OrderService();
 
@@ -342,8 +409,8 @@ export class CrmOrdersService {
     const countWhereClause: Prisma.OrderWhereInput = {};
 
     if (status) {
-      const validOrderStatuses = ["PENDING", "SETTLED", "APPLIED", "REJECTED"];
-      if (validOrderStatuses.includes(status)) {
+      const validOrderStatuses = Object.values(OrderStatus);
+      if (validOrderStatuses.includes(status as OrderStatus)) {
         whereClause.status = status as OrderStatus;
         countWhereClause.status = status as OrderStatus;
       }
@@ -814,8 +881,8 @@ export class CrmOrdersService {
     };
     const action = resolveAction();
     const idAction = action === "BOTH" ? "BUY" : action;
-    const dealDate =
-      rfq.createdAt instanceof Date ? rfq.createdAt : new Date(rfq.createdAt);
+    const assignDates = await resolveAssignOrderDates(rfq, negotation);
+    const dealDate = assignDates.dealDate;
     const issuerName = bondDetails.bondName || bondDetails.instrumentName || "";
 
     const unitPrice = rfq.price.toNumber();
@@ -857,12 +924,15 @@ export class CrmOrdersService {
           where: { id: existingParticipantOrder.id },
           data: {
             linkedRfqParticipantCode: code,
-            metadata: {
-              ...baseMeta,
-              rfqNumber: rfq.orderNumber,
-              clientOrderSide: idAction,
-              participantName: participant.nameOverride ?? code,
-            } as Prisma.InputJsonValue,
+            metadata: buildAssignOrderDateMetadata(
+              {
+                ...baseMeta,
+                rfqNumber: rfq.orderNumber,
+                clientOrderSide: idAction,
+                participantName: participant.nameOverride ?? code,
+              },
+              assignDates,
+            ) as Prisma.InputJsonValue,
           },
           select: {
             id: true,
@@ -901,10 +971,13 @@ export class CrmOrdersService {
             paymentId: rfq.orderNumber,
             paymentOrderId: rfq.orderNumber,
             reqOrderNumber: rfq.orderNumber,
-            metadata: {
-              rfqNumber: rfq.orderNumber,
-              participantName: participant.nameOverride ?? code,
-            } as Prisma.InputJsonValue,
+            metadata: buildAssignOrderDateMetadata(
+              {
+                rfqNumber: rfq.orderNumber,
+                participantName: participant.nameOverride ?? code,
+              },
+              assignDates,
+            ) as Prisma.InputJsonValue,
             paymentStatus: PaymentStatus.PENDING,
             paymentProvider: "CUSTOM",
             status: OrderStatus.SETTLED,
@@ -946,11 +1019,14 @@ export class CrmOrdersService {
           where: { id: inserted.id },
           data: {
             orderNumber: finalOrderNumber,
-            metadata: {
-              ...((inserted.metadata as Record<string, unknown>) ?? {}),
-              dealId,
-              clientOrderSide: idAction,
-            } as Prisma.InputJsonValue,
+            metadata: buildAssignOrderDateMetadata(
+              {
+                ...((inserted.metadata as Record<string, unknown>) ?? {}),
+                dealId,
+                clientOrderSide: idAction,
+              },
+              assignDates,
+            ) as Prisma.InputJsonValue,
           },
           select: {
             id: true,
@@ -1264,8 +1340,8 @@ export class CrmOrdersService {
       throw new Error(`Negotiation not found for order number ${rfq.orderNumber}`);
     }
 
-    const dealDate =
-      rfq.createdAt instanceof Date ? rfq.createdAt : new Date(rfq.createdAt);
+    const assignDates = await resolveAssignOrderDates(rfq, negotation);
+    const dealDate = assignDates.dealDate;
 
     const resolveAction = (): "BUY" | "SELL" | "BOTH" => {
       if (options?.orderSide === "BUY" || options?.orderSide === "SELL") {
@@ -1296,7 +1372,10 @@ export class CrmOrdersService {
         paymentId: rfq.orderNumber,
         paymentOrderId: rfq.orderNumber,
         reqOrderNumber: rfq.orderNumber,
-        metadata: { rfqNumber: rfq.orderNumber } as Prisma.InputJsonValue,
+        metadata: buildAssignOrderDateMetadata(
+          { rfqNumber: rfq.orderNumber },
+          assignDates,
+        ) as Prisma.InputJsonValue,
         paymentStatus: PaymentStatus.PENDING,
         paymentProvider: "CUSTOM",
         status: OrderStatus.SETTLED,
@@ -1308,6 +1387,7 @@ export class CrmOrdersService {
             faceValue: bondDetails.faceValue,
             quantity: Number(rfq.modQuantity) || 0,
             purchasePrice: rfq.price.toNumber(),
+            purchaseDate: assignDates.purchaseDate,
           },
         },
       },
@@ -1333,12 +1413,15 @@ export class CrmOrdersService {
       where: { id: order.id },
       data: {
         orderNumber: finalOrderNumber,
-        metadata: {
-          ...((order.metadata as Record<string, unknown>) ?? {}),
-          dealId,
-          rfqNumber: rfq.orderNumber,
-          clientOrderSide: idAction,
-        } as Prisma.InputJsonValue,
+        metadata: buildAssignOrderDateMetadata(
+          {
+            ...((order.metadata as Record<string, unknown>) ?? {}),
+            dealId,
+            rfqNumber: rfq.orderNumber,
+            clientOrderSide: idAction,
+          },
+          assignDates,
+        ) as Prisma.InputJsonValue,
       },
     });
     return updated;
@@ -2290,6 +2373,7 @@ export class CrmOrdersService {
     const isParticipantOrder = order.customerProfileId == null;
     let user: Awaited<ReturnType<CustomerProfileRepo["getFullCustomerProfile"]>> | Record<string, unknown>;
     let defaultRecipientEmail: string | undefined;
+    let isCorporateCustomer = false;
 
     if (isParticipantOrder) {
       const actor = await this.resolveOrderPdfActor(orderNumber);
@@ -2307,7 +2391,12 @@ export class CrmOrdersService {
       )
         .trim()
         .toUpperCase();
-      if (userType !== "INDIVIDUAL" && userType !== "INDIVIDUAL_NRI_NRO") {
+      isCorporateCustomer = userType === "CORPORATE";
+      if (
+        userType !== "INDIVIDUAL" &&
+        userType !== "INDIVIDUAL_NRI_NRO" &&
+        !isCorporateCustomer
+      ) {
         throw new AppError(
           "Email PDF flow is not supported for B2B/corporate customers. Download the PDF and send it manually instead.",
           { statusCode: HttpStatus.BAD_REQUEST, code: "B2B_ORDER_EMAIL_UNSUPPORTED" },
@@ -2338,7 +2427,7 @@ export class CrmOrdersService {
 
     const dobRaw = getCustomerDobRawForPdf(user);
     const pdfPassword = dateOfBirthToPdfPassword(dobRaw);
-    if (!pdfPassword && !isParticipantOrder) {
+    if (!pdfPassword && !isParticipantOrder && !isCorporateCustomer) {
       throw new AppError(
         "Customer date of birth is required to password-protect the PDF. Ensure PAN/Aadhaar or personal info DOB is on file.",
         {

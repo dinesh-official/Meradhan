@@ -261,16 +261,31 @@ export async function sendDealSheetPdfByOrderId(params: DealSheetEmailParams) {
     const pricing = bondDetailsAny?.pricing ?? {};
     const dealDateText = formatDealDateText(pricing.dealDate ?? order.createdAt);
 
+    const userType = String((user as { userType?: string }).userType ?? "INDIVIDUAL")
+        .trim()
+        .toUpperCase();
+    const isCorporateCustomer = userType === "CORPORATE";
+    const dearLine = isCorporateCustomer
+        ? "Dear Sir / Madam,"
+        : `Dear ${salutation} ${customerName || "CUSTOMER"},`;
+    const pdfPasswordExample =
+        "You may open it using your date of birth as the password. For example, if your date of birth is 3 April 1996, the password will be 03041996.";
+    const dealSheetNote = isCorporateCustomer
+        ? "Please find the Deal Sheet enclosed for your records."
+        : `Please find the Deal Sheet enclosed for your records. The deal sheet is password protected. ${pdfPasswordExample}`;
+
     const securityName = String(order.bondName ?? "").trim() || "—";
     const subject = `Deal Sheet for ISIN ${order.isin} - Security Name ${securityName} - Deal Date ${dealDateText}`;
 
-    const messageBody = `Dear ${salutation} ${customerName || "CUSTOMER"},
+    const messageBody = `${dearLine}
 
 Thank you for investing with MeraDhan. We truly value your trust and remain committed to providing you with a seamless bond investment experience.
 
 We are pleased to inform you that your deal has been successfully settled. The Clearing Corporation has initiated the release of securities to your Demat account for this ${transactionLabel} transaction. We kindly request you to review your Demat account and confirm receipt of the securities.
 
-Please find the Deal Sheet enclosed for your records. Should you have any queries or notice any discrepancy, feel free to contact us at backoffice@meradhan.co.
+${dealSheetNote}
+
+Should you have any queries or notice any discrepancy, feel free to contact us at backoffice@meradhan.co.
 
 We look forward to serving you again.
 

@@ -25,8 +25,8 @@ import {
   ReportKpiGrid,
   ReportPageHeader,
   ReportPagination,
-  WorkflowStatusBadge,
 } from "./reportUi";
+import OrderStatusBadge from "@/global/elements/wrapper/badges/OrderStatusBadge";
 import { useMemo, useState } from "react";
 
 
@@ -169,7 +169,6 @@ export function OrdersPanel({
 
   const bookRows = useMemo(() => {
     return filtered.map((r) => {
-      const wf = mapOrderWorkflowStatus(r.status, r.paymentStatus);
       const yieldStr = parseYieldFromBondDetails(r.bondDetails) ?? "—";
       return {
         key: r.id,
@@ -181,7 +180,7 @@ export function OrdersPanel({
           <span key="q" className="tabular-nums">{r.quantity.toLocaleString("en-IN")}</span>,
           <span key="v" className="tabular-nums">{formatValueCr(Number(r.totalAmount))}</span>,
           <span key="y" className="tabular-nums text-sm">{yieldStr}</span>,
-          <WorkflowStatusBadge key="s" label={wf} />,
+          <OrderStatusBadge key="s" status={r.status} paymentStatus={r.paymentStatus} />,
           <span key="d" className="whitespace-nowrap text-xs text-muted-foreground">
             {formatOrderDate(r.createdAt)}
           </span>,

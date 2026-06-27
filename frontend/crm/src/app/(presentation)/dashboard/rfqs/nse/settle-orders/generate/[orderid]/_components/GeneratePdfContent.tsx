@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import Link from "next/link";
-import { ArrowLeft, UserPlus, FileDown } from "lucide-react";
+import { ArrowLeft, UserPlus, FileDown, UserRound } from "lucide-react";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -39,9 +39,14 @@ import { SelectCustomerUser } from "@/global/elements/autocomplete/SelectCustome
 import { genMediaUrl } from "@/global/utils/url.utils";
 import { queryClient } from "@/core/config/reactQuery";
 import { toast } from "sonner";
+import {
+  getEmailSalutationFromGender,
+  resolveGenderForEmailSalutation,
+} from "@root/schema";
 import { useState, useEffect, useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { RfqParticipantInfoDialog } from "@/app/(presentation)/dashboard/rfqs/nse/rfq-participants/_components/RfqParticipantInfoDialog";
 
 /** Backend `sendResponse` errors expose `message` on the JSON body; axios default `Error.message` is generic. */
 function getApiErrorMessage(err: unknown, fallback: string): string {
@@ -68,21 +73,41 @@ function maskPanLast4(pan: string | null | undefined): string {
   return "x".repeat(s.length - 4) + s.slice(-4);
 }
 
-function getEmailSalutationFromGender(gender: unknown): "Mr." | "Ms." | "Mr. / Ms." {
-  const g = String(gender ?? "")
-    .trim()
-    .toLowerCase();
-  if (!g) return "Mr. / Ms.";
-  if (g === "female" || g === "f" || g === "woman" || g === "w") return "Ms.";
-  if (g === "male" || g === "m" || g === "man") return "Mr.";
-  return "Mr. / Ms.";
-}
-
 const RETAIL_CUSTOMER_USER_TYPES = new Set(["INDIVIDUAL", "INDIVIDUAL_NRI_NRO"]);
+
+function isCorporateCustomerUserType(userType: unknown): boolean {
+  return String(userType ?? "").trim().toUpperCase() === "CORPORATE";
+}
 
 function isB2BCustomerUserType(userType: unknown): boolean {
   const u = String(userType ?? "INDIVIDUAL").trim().toUpperCase();
   return !RETAIL_CUSTOMER_USER_TYPES.has(u);
+}
+
+/** Matches backend `dateOfBirthToPdfPassword` — used to align email copy with encryption. */
+function dobRawToPdfPassword(dobRaw: string | null | undefined): string | null {
+  if (dobRaw == null || String(dobRaw).trim() === "") return null;
+  const s = String(dobRaw).trim();
+
+  const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (iso?.[1] != null && iso[2] != null && iso[3] != null) {
+    return `${iso[3]}${iso[2]}${iso[1]}`;
+  }
+
+  const slash = s.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
+  if (slash?.[1] != null && slash[2] != null && slash[3] != null) {
+    return `${slash[1].padStart(2, "0")}${slash[2].padStart(2, "0")}${slash[3]}`;
+  }
+
+  const d = new Date(s);
+  if (!Number.isNaN(d.getTime())) {
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const yyyy = String(d.getFullYear());
+    return `${dd}${mm}${yyyy}`;
+  }
+
+  return null;
 }
 
 function getPreferredValue(
@@ -306,6 +331,7 @@ function GeneratePdfContent() {
   const [selectedParticipantCode, setSelectedParticipantCode] = useState<
     string | null
   >(null);
+  const [participantInfoDialogOpen, setParticipantInfoDialogOpen] = useState(false);
 
   useEffect(() => {
     if (participantCode) {
@@ -500,6 +526,9 @@ function GeneratePdfContent() {
   const isB2BCustomer =
     !!customerOrder?.customerProfile &&
     isB2BCustomerUserType(customerOrder.customerProfile.userType);
+  const isCorporateCustomer =
+    !!customerOrder?.customerProfile &&
+    isCorporateCustomerUserType(customerOrder.customerProfile.userType);
   const participantPrimaryEmail = useMemo(() => {
     const emails = [
       ...(linkedParticipant?.emailList ?? []),
@@ -509,13 +538,21 @@ function GeneratePdfContent() {
   }, [linkedParticipant?.emailList, linkedParticipantInfo?.emailList]);
   const canEmailClientPdf =
     hasAssignedOwner &&
-    !isB2BCustomer &&
+    (!isB2BCustomer || isCorporateCustomer) &&
     (isNseParticipantOrder
       ? !!participantPrimaryEmail
-      : !!customerOrder?.customerProfile);
+      : !!customerOrder?.customerProfile?.emailAddress);
   const canEmailProposal =
     canEmailClientPdf && !isNseParticipantOrder && !!customerOrder?.customerProfile;
-  const emailSalutation = getEmailSalutationFromGender(customerOrder?.customerProfile?.gender);
+  const profile = customerOrder?.customerProfile;
+  const panCard = profile?.panCard as { gender?: unknown } | null | undefined;
+  const aadhaarCard = profile?.aadhaarCard as { gender?: unknown } | null | undefined;
+  const resolvedEmailGender = resolveGenderForEmailSalutation({
+    gender: profile?.gender,
+    panCard,
+    aadhaarCard,
+  });
+  const emailSalutation = getEmailSalutationFromGender(resolvedEmailGender);
   const clientFullName = `${customerOrder?.customerProfile?.firstName ?? ""} ${customerOrder?.customerProfile?.middleName ?? ""} ${customerOrder?.customerProfile?.lastName ?? ""}`
     .trim()
     .toUpperCase();
@@ -528,6 +565,24 @@ function GeneratePdfContent() {
     metaSide === "BUY" || metaSide === "SELL" ? metaSide : orderSide;
   const transactionLabel = effectiveOrderSide === "SELL" ? "sell" : "buy";
   const dealDateText = formatDealDateForEmail(rfq?.modSettleDate ?? rfq?.createdAt ?? null);
+
+  const openParticipantInfoDialog = () => {
+    if (!linkedParticipantCode) return;
+    setParticipantInfoDialogOpen(true);
+  };
+
+  const handleParticipantInfoDialogOpenChange = (open: boolean) => {
+    setParticipantInfoDialogOpen(open);
+    if (!open && orderNumber) {
+      void queryClient.invalidateQueries({ queryKey: ["customer-full-order", orderNumber] });
+      void queryClient.invalidateQueries({ queryKey: ["rfq-by-order", orderNumber] });
+      void queryClient.invalidateQueries({ queryKey: ["NseRfqParticipants:infoSummary"] });
+      void refetchCustomerOrder();
+    }
+  };
+
+  const showParticipantEmailFillCta =
+    isNseParticipantOrder && !participantPrimaryEmail && !!linkedParticipantCode;
 
 
   useEffect(() => {
@@ -606,21 +661,36 @@ function GeneratePdfContent() {
   ]);
 
   const applyEmailTemplate = (type: "order" | "deal") => {
-    const dearLine = linkedParticipantCode
-      ? "Dear Sir / Madam,"
-      : null;
+    const dearLine =
+      linkedParticipantCode || isCorporateCustomer
+        ? "Dear Sir / Madam,"
+        : `Dear ${emailSalutation} ${clientFullName || "CUSTOMER"},`;
+    const pdfPasswordExample =
+      "You may open it using your date of birth as the password. For example, if your date of birth is 3 April 1996, the password will be 03041996.";
+    const participantDobRaw =
+      linkedParticipantInfo?.dobDoi?.trim() ||
+      linkedParticipant?.dobDoi?.trim() ||
+      null;
+    const participantPdfWillBeEncrypted = !!dobRawToPdfPassword(participantDobRaw);
+    const showPdfPasswordLine =
+      !isNseParticipantOrder || participantPdfWillBeEncrypted;
     if (type === "deal") {
+      const dealSheetNote = showPdfPasswordLine
+        ? `Please find the Deal Sheet enclosed for your records. The deal sheet is password protected. ${pdfPasswordExample}`
+        : "Please find the Deal Sheet enclosed for your records.";
       setEmailSubject(
         `Deal Sheet for ISIN ${isin} - Security Name ${securityName} - Deal Date ${dealDateText}`
       );
       setEmailBody(
-        `${dearLine ?? `Dear ${emailSalutation} ${clientFullName || "CUSTOMER"},`}
+        `${dearLine}
 
 Thank you for investing with MeraDhan. We truly value your trust and remain committed to providing you with a seamless bond investment experience.
 
 We are pleased to inform you that your deal has been successfully settled. The Clearing Corporation has initiated the release of securities to your Demat account for this ${transactionLabel} transaction. We kindly request you to review your Demat account and confirm receipt of the securities.
 
-Please find the Deal Sheet enclosed for your records. Should you have any queries or notice any discrepancy, feel free to contact us at backoffice@meradhan.co.
+${dealSheetNote}
+
+Should you have any queries or notice any discrepancy, feel free to contact us at backoffice@meradhan.co.
 
 We look forward to serving you again.
 
@@ -635,13 +705,14 @@ MeraDhan Team`
       (customerOrder?.metadata as { dealId?: string } | undefined)?.dealId ?? "—";
     const buySellLower = effectiveOrderSide === "SELL" ? "sell" : "buy";
     const buySellYour = effectiveOrderSide === "SELL" ? "Sell" : "Buy";
-    const displayName =
-      `${customerOrder?.customerProfile?.firstName ?? ""} ${customerOrder?.customerProfile?.lastName ?? ""}`.trim() ||
-      "CUSTOMER";
+
+    const passwordNote = showPdfPasswordLine
+      ? `Please find the Order Receipt attached for your reference. The order receipt is password protected. ${pdfPasswordExample}`
+      : "Please find the Order Receipt attached for your reference.";
 
     setEmailSubject(`Order Confirmation & Receipt – Order ID ${orderIdTpl}`);
     setEmailBody(
-      `${dearLine ?? `Dear ${emailSalutation} ${displayName},`}
+      `${dearLine}
 
 Your ${buySellLower} order has been successfully placed through MeraDhan and has been executed on the exchange.
 
@@ -653,7 +724,7 @@ Deal ID: ${dealIdTpl}
 
 Order Type: Your ${buySellYour}
 
-Please find the Order Receipt attached for your reference. The order receipt is password protected. You may open it using your date of birth as the password. For example, if your date of birth is 3 April 1996, the password will be 03041996.
+${passwordNote}
 
 To proceed with settlement, please transfer the required amount from your bank account verified on MeraDhan to the designated NCL account, maintained with HDFC Bank or RBI as applicable, via NEFT / RTGS, in accordance with the instructions provided at the time of placing your order.
 
@@ -942,6 +1013,8 @@ BSE Member ID: 6963`
         `${customerOrder?.customerProfile?.firstName ?? ""} ${customerOrder?.customerProfile?.lastName ?? ""}`.trim() ||
         clientFullName ||
         "Customer",
+      gender: resolvedEmailGender,
+      customerProfileId: customerOrder?.customerProfile?.id ?? null,
       side: effectiveOrderSide,
       bondName: securityName,
       isin: String((rfq as unknown as { symbol?: string | null })?.symbol ?? ""),
@@ -1111,15 +1184,26 @@ BSE Member ID: 6963`
                   )}
                 </>
               )}
-              {!!customerOrder?.customerProfile && isB2BCustomer && (
+              {!!customerOrder?.customerProfile && isB2BCustomer && !isCorporateCustomer && (
                 <p className="text-sm text-muted-foreground">
-                  Send-to-email is hidden on this PDF page for B2B/corporate customers.
+                  Send-to-email is hidden on this PDF page for this B2B customer type.
                 </p>
               )}
-              {isNseParticipantOrder && !participantPrimaryEmail && (
-                <p className="text-sm text-muted-foreground">
-                  Add an email on the NSE participant profile to enable send-to-email.
-                </p>
+              {showParticipantEmailFillCta && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-sm text-muted-foreground">
+                    Add an email on the NSE participant profile to enable send-to-email.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={openParticipantInfoDialog}
+                  >
+                    <UserRound className="h-4 w-4 mr-1.5" />
+                    Fill participant info
+                  </Button>
+                </div>
               )}
             </>
           )}
@@ -1403,7 +1487,18 @@ BSE Member ID: 6963`
                     : null
                 }
               />
-              <div className="pt-3">
+              <div className="pt-3 flex flex-wrap gap-2">
+                {!participantPrimaryEmail && (
+                  <Button
+                    type="button"
+                    variant="default"
+                    size="sm"
+                    onClick={openParticipantInfoDialog}
+                  >
+                    <UserRound className="h-4 w-4 mr-1.5" />
+                    Fill participant info
+                  </Button>
+                )}
                 <Button asChild variant="outline" size="sm">
                   <Link
                     href={`/dashboard/rfqs/nse/rfq-participants`}
@@ -1950,6 +2045,17 @@ BSE Member ID: 6963`
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {linkedParticipantCode ? (
+        <RfqParticipantInfoDialog
+          open={participantInfoDialogOpen}
+          onOpenChange={handleParticipantInfoDialogOpenChange}
+          code={linkedParticipantCode}
+          nseName={
+            linkedParticipant?.nameOverride?.trim() || linkedParticipantCode
+          }
+        />
+      ) : null}
     </>
   );
 }
