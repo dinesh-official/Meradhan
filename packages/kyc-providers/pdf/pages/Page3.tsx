@@ -10,6 +10,7 @@ function Page3(data: {
   telephone2?: string;
   FATCAdeclaration: boolean;
   isAPep: "YES" | "RELATED" | "NO";
+  riskCategorization: "LOW" | "MODERATE" | "HIGH" | null;
 }) {
   return (
     <View style={tw("px-4")}>
@@ -113,7 +114,29 @@ function Page3(data: {
         style={tw("bg-main px-3 py-1.5 pb-1 w-[90%] mx-auto rounded  mt-3")}
       >
         <Text style={tw("text-xs text-white font-[500] leading-[1px]")}>
-          6. Remarks (if any)
+          6. Risk Categorization
+        </Text>
+      </View>
+      <View style={tw(`w-[90%] mx-auto py-3 flex flex-col gap-3`)}>
+        <CheckBoxRow
+          label="Low Risk & Low Returns"
+          checked={data.riskCategorization === "LOW"}
+        />
+        <CheckBoxRow
+          label="Moderate Risk & Moderate Returns"
+          checked={data.riskCategorization === "MODERATE"}
+        />
+        <CheckBoxRow
+          label="High Risk & High Returns"
+          checked={data.riskCategorization === "HIGH"}
+        />
+      </View>
+
+      <View
+        style={tw("bg-main px-3 py-1.5 pb-1 w-[90%] mx-auto rounded  mt-3")}
+      >
+        <Text style={tw("text-xs text-white font-[500] leading-[1px]")}>
+          7. Remarks (if any)
         </Text>
       </View>
     </View>

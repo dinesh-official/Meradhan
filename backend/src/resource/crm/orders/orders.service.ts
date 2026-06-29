@@ -51,6 +51,98 @@ function toYyyyMmDd(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
+type SettleOrderPdfRow = {
+  modQuantity?: number | string | null;
+  modAccrInt?: number | string | null;
+  modConsideration?: number | string | null;
+  stampDutyAmount?: number | string | null;
+};
+
+function orderPricingSnapshot(bondDetails: unknown): {
+  accruedInterest?: number;
+  noOfAccrualDays?: number;
+} | null {
+  if (!bondDetails || typeof bondDetails !== "object" || Array.isArray(bondDetails)) {
+    return null;
+  }
+  const p = (bondDetails as Record<string, unknown>).pricing;
+  if (!p || typeof p !== "object" || Array.isArray(p)) return null;
+  const snap = p as Record<string, unknown>;
+  const accruedInterest =
+    typeof snap.accruedInterest === "number"
+      ? snap.accruedInterest
+      : Number(snap.accruedInterest);
+  const noOfAccrualDays =
+    typeof snap.noOfAccrualDays === "number"
+      ? snap.noOfAccrualDays
+      : Number(snap.noOfAccrualDays);
+  return {
+    ...(Number.isFinite(accruedInterest) ? { accruedInterest } : {}),
+    ...(Number.isFinite(noOfAccrualDays) ? { noOfAccrualDays } : {}),
+  };
+}
+
+function buildPdfFinancialFields(
+  order: {
+    subTotal: unknown;
+    stampDuty: unknown;
+    quantity: number;
+    bondDetails: unknown;
+  },
+  bond: {
+    accruedInterest?: number | null;
+    accruedInterestDays?: number | null;
+  },
+  settleOrder: SettleOrderPdfRow | null | undefined,
+  pdfAccruedInterestDays?: number,
+): {
+  quantity: number;
+  subTotal: number;
+  stampDuty: number;
+  totalConsideration: number;
+  accruedInterest?: number;
+  accruedInterestDays?: number;
+} {
+  const quantity =
+    settleOrder?.modQuantity != null
+      ? Number(settleOrder.modQuantity)
+      : order.quantity;
+  const snap = orderPricingSnapshot(order.bondDetails);
+  const principal = Number(order.subTotal);
+  const accruedInterest =
+    settleOrder?.modAccrInt != null
+      ? Number(settleOrder.modAccrInt)
+      : bond.accruedInterest != null && Number.isFinite(Number(bond.accruedInterest))
+        ? Number(bond.accruedInterest) * quantity
+        : snap?.accruedInterest;
+  const accruedInterestDays =
+    pdfAccruedInterestDays ??
+    (bond.accruedInterestDays != null && Number.isFinite(bond.accruedInterestDays)
+      ? bond.accruedInterestDays
+      : snap?.noOfAccrualDays);
+  const stampDuty =
+    settleOrder?.stampDutyAmount != null
+      ? Number(settleOrder.stampDutyAmount)
+      : Number(order.stampDuty);
+  const totalConsideration =
+    settleOrder?.modConsideration != null
+      ? Number(settleOrder.modConsideration)
+      : principal + (accruedInterest ?? 0);
+
+  return {
+    quantity,
+    subTotal: principal,
+    stampDuty,
+    totalConsideration,
+    ...(accruedInterest != null && Number.isFinite(accruedInterest)
+      ? { accruedInterest }
+      : {}),
+    ...(accruedInterestDays != null && Number.isFinite(accruedInterestDays)
+      ? { accruedInterestDays }
+      : {}),
+  };
+}
+
 function formatDateWithDayNameForPdfOption(d: Date): string {
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -175,6 +267,73 @@ function parseRfqMasterDateTime(
   return fallback;
 }
 
+type AssignOrderDates = {
+  dealDate: Date;
+  settlementDate: Date;
+  purchaseDate: Date;
+  dealDateRaw: string | null;
+  settlementDateRaw: string | null;
+};
+
+function buildAssignOrderDateMetadata(
+  base: Record<string, unknown>,
+  dates: AssignOrderDates,
+): Record<string, unknown> {
+  const next = { ...base };
+  if (dates.dealDateRaw) {
+    next.dealDate = dates.dealDateRaw;
+  }
+  if (dates.settlementDateRaw) {
+    next.settlementDate = dates.settlementDateRaw;
+  }
+  return next;
+}
+
+/**
+ * Resolve business deal / settlement / purchase dates for CRM assign-order flows.
+ * Prefers `rfq_master_isin` (same source as `/crm/rfq/nse/find`), then negotiation
+ * accepted settlement, then settle_order.modSettleDate. Falls back to settle sync time.
+ */
+async function resolveAssignOrderDates(
+  settleOrder: { createdAt: Date | string; modSettleDate?: string | null },
+  negotiation: { rfqNumber: string; acceptedSettlementDate?: string | null },
+): Promise<AssignOrderDates> {
+  const fallbackDealDate =
+    settleOrder.createdAt instanceof Date
+      ? settleOrder.createdAt
+      : new Date(settleOrder.createdAt);
+
+  const rfqMaster = await db.dataBase.rFQMasterISIN.findFirst({
+    where: { number: negotiation.rfqNumber },
+    select: { date: true, quoteTime: true, settlementDate: true },
+  });
+
+  const dealDateRaw = rfqMaster?.date?.trim() || null;
+  const settlementDateRaw =
+    rfqMaster?.settlementDate?.trim() ||
+    negotiation.acceptedSettlementDate?.trim() ||
+    settleOrder.modSettleDate?.trim() ||
+    null;
+
+  const dealDate = parseRfqMasterDateTime(
+    dealDateRaw,
+    rfqMaster?.quoteTime,
+    fallbackDealDate,
+  );
+
+  const settlementDate = settlementDateRaw
+    ? parseRfqMasterDateTime(settlementDateRaw, undefined, fallbackDealDate)
+    : fallbackDealDate;
+
+  return {
+    dealDate,
+    settlementDate,
+    purchaseDate: settlementDate,
+    dealDateRaw,
+    settlementDateRaw,
+  };
+}
+
 export class CrmOrdersService {
   private readonly customerOrderService = new OrderService();
 
@@ -250,8 +409,8 @@ export class CrmOrdersService {
     const countWhereClause: Prisma.OrderWhereInput = {};
 
     if (status) {
-      const validOrderStatuses = ["PENDING", "SETTLED", "APPLIED", "REJECTED"];
-      if (validOrderStatuses.includes(status)) {
+      const validOrderStatuses = Object.values(OrderStatus);
+      if (validOrderStatuses.includes(status as OrderStatus)) {
         whereClause.status = status as OrderStatus;
         countWhereClause.status = status as OrderStatus;
       }
@@ -722,8 +881,8 @@ export class CrmOrdersService {
     };
     const action = resolveAction();
     const idAction = action === "BOTH" ? "BUY" : action;
-    const dealDate =
-      rfq.createdAt instanceof Date ? rfq.createdAt : new Date(rfq.createdAt);
+    const assignDates = await resolveAssignOrderDates(rfq, negotation);
+    const dealDate = assignDates.dealDate;
     const issuerName = bondDetails.bondName || bondDetails.instrumentName || "";
 
     const unitPrice = rfq.price.toNumber();
@@ -765,12 +924,15 @@ export class CrmOrdersService {
           where: { id: existingParticipantOrder.id },
           data: {
             linkedRfqParticipantCode: code,
-            metadata: {
-              ...baseMeta,
-              rfqNumber: rfq.orderNumber,
-              clientOrderSide: idAction,
-              participantName: participant.nameOverride ?? code,
-            } as Prisma.InputJsonValue,
+            metadata: buildAssignOrderDateMetadata(
+              {
+                ...baseMeta,
+                rfqNumber: rfq.orderNumber,
+                clientOrderSide: idAction,
+                participantName: participant.nameOverride ?? code,
+              },
+              assignDates,
+            ) as Prisma.InputJsonValue,
           },
           select: {
             id: true,
@@ -809,10 +971,13 @@ export class CrmOrdersService {
             paymentId: rfq.orderNumber,
             paymentOrderId: rfq.orderNumber,
             reqOrderNumber: rfq.orderNumber,
-            metadata: {
-              rfqNumber: rfq.orderNumber,
-              participantName: participant.nameOverride ?? code,
-            } as Prisma.InputJsonValue,
+            metadata: buildAssignOrderDateMetadata(
+              {
+                rfqNumber: rfq.orderNumber,
+                participantName: participant.nameOverride ?? code,
+              },
+              assignDates,
+            ) as Prisma.InputJsonValue,
             paymentStatus: PaymentStatus.PENDING,
             paymentProvider: "CUSTOM",
             status: OrderStatus.SETTLED,
@@ -854,11 +1019,14 @@ export class CrmOrdersService {
           where: { id: inserted.id },
           data: {
             orderNumber: finalOrderNumber,
-            metadata: {
-              ...((inserted.metadata as Record<string, unknown>) ?? {}),
-              dealId,
-              clientOrderSide: idAction,
-            } as Prisma.InputJsonValue,
+            metadata: buildAssignOrderDateMetadata(
+              {
+                ...((inserted.metadata as Record<string, unknown>) ?? {}),
+                dealId,
+                clientOrderSide: idAction,
+              },
+              assignDates,
+            ) as Prisma.InputJsonValue,
           },
           select: {
             id: true,
@@ -1172,8 +1340,8 @@ export class CrmOrdersService {
       throw new Error(`Negotiation not found for order number ${rfq.orderNumber}`);
     }
 
-    const dealDate =
-      rfq.createdAt instanceof Date ? rfq.createdAt : new Date(rfq.createdAt);
+    const assignDates = await resolveAssignOrderDates(rfq, negotation);
+    const dealDate = assignDates.dealDate;
 
     const resolveAction = (): "BUY" | "SELL" | "BOTH" => {
       if (options?.orderSide === "BUY" || options?.orderSide === "SELL") {
@@ -1204,7 +1372,10 @@ export class CrmOrdersService {
         paymentId: rfq.orderNumber,
         paymentOrderId: rfq.orderNumber,
         reqOrderNumber: rfq.orderNumber,
-        metadata: { rfqNumber: rfq.orderNumber } as Prisma.InputJsonValue,
+        metadata: buildAssignOrderDateMetadata(
+          { rfqNumber: rfq.orderNumber },
+          assignDates,
+        ) as Prisma.InputJsonValue,
         paymentStatus: PaymentStatus.PENDING,
         paymentProvider: "CUSTOM",
         status: OrderStatus.SETTLED,
@@ -1216,6 +1387,7 @@ export class CrmOrdersService {
             faceValue: bondDetails.faceValue,
             quantity: Number(rfq.modQuantity) || 0,
             purchasePrice: rfq.price.toNumber(),
+            purchaseDate: assignDates.purchaseDate,
           },
         },
       },
@@ -1241,12 +1413,15 @@ export class CrmOrdersService {
       where: { id: order.id },
       data: {
         orderNumber: finalOrderNumber,
-        metadata: {
-          ...((order.metadata as Record<string, unknown>) ?? {}),
-          dealId,
-          rfqNumber: rfq.orderNumber,
-          clientOrderSide: idAction,
-        } as Prisma.InputJsonValue,
+        metadata: buildAssignOrderDateMetadata(
+          {
+            ...((order.metadata as Record<string, unknown>) ?? {}),
+            dealId,
+            rfqNumber: rfq.orderNumber,
+            clientOrderSide: idAction,
+          },
+          assignDates,
+        ) as Prisma.InputJsonValue,
       },
     });
     return updated;
@@ -1270,6 +1445,7 @@ export class CrmOrdersService {
     address3: string | null;
     stateCode: string | null;
     panNo: string | null;
+    dobDoi?: string | null;
     bankAccounts: Array<{
       id: number;
       bankName: string;
@@ -1312,7 +1488,9 @@ export class CrmOrdersService {
           stateCode: participant.stateCode ?? null,
         }
         : null,
-      personalInformation: null,
+      personalInformation: participant.dobDoi?.trim()
+        ? { dateOfBirth: participant.dobDoi.trim() }
+        : null,
       riskProfile: { id: 0, data: [] },
       panCard: participant.panNo ? { panCardNo: participant.panNo } : null,
       bankAccounts: participant.bankAccounts.map((b, idx, arr) => ({
@@ -1727,30 +1905,25 @@ export class CrmOrdersService {
         ? pdfQuery.amortizedPrincipalPaymentDates.trim()
         : undefined;
 
+    const pdfFinancials = buildPdfFinancialFields(
+      order,
+      bond,
+      settleOrder,
+      accruedInterestDaysParam,
+    );
+
     const buffer = await generateOrderPdfBuffer({
       user,
       orderId: order.orderNumber,
       bond,
-      qun:
-        settleOrder?.modQuantity != null
-          ? Number(settleOrder.modQuantity)
-          : order.quantity,
+      qun: pdfFinancials.quantity,
       isReleased: true,
       orderData: {
         createdAt: orderDateForPdf.toISOString(),
-        subTotal:
-          settleOrder?.value != null
-            ? Number(settleOrder.value)
-            : Number(order.totalAmount),
-        stampDuty:
-          settleOrder?.stampDutyAmount != null
-            ? Number(settleOrder.stampDutyAmount)
-            : Number(order.stampDuty),
-        totalAmount:
-          settleOrder?.modConsideration != null
-            ? Number(settleOrder.modConsideration)
-            : Number(order.totalAmount),
-        price: Number(settleOrder?.price ?? 0),
+        subTotal: pdfFinancials.subTotal,
+        stampDuty: pdfFinancials.stampDuty,
+        totalAmount: pdfFinancials.totalConsideration,
+        price: Number(settleOrder?.price ?? bond.sellPrice ?? 0),
         metadata: {
           dealId: (metadata.dealId as string) ?? undefined,
           clientOrderSide: (metadata.clientOrderSide as "BUY" | "SELL") ?? undefined,
@@ -1771,8 +1944,8 @@ export class CrmOrdersService {
           valueDate: bond.maturityDate
             ? new Date(bond.maturityDate).toISOString()
             : undefined,
-          accruedInterest: settleOrder?.modAccrInt != null ? Number(settleOrder.modAccrInt) : undefined,
-          accruedInterestDays: accruedInterestDaysParam,
+          accruedInterest: pdfFinancials.accruedInterest,
+          accruedInterestDays: pdfFinancials.accruedInterestDays,
           settlementNumber:
             settlementNumberParam ?? (settleOrder as { settlementNo?: string } | undefined)?.settlementNo,
           settlementDateTime: settlementDateTimeParam,
@@ -1981,30 +2154,25 @@ export class CrmOrdersService {
         ? pdfQuery.amortizedPrincipalPaymentDates.trim()
         : undefined;
 
+    const pdfFinancials = buildPdfFinancialFields(
+      order,
+      bond,
+      settleOrder,
+      accruedInterestDaysParam,
+    );
+
     const buffer = await generateDealPdfBuffer({
       user,
       orderId: order.orderNumber,
       bond,
-      qun:
-        settleOrder?.modQuantity != null
-          ? Number(settleOrder.modQuantity)
-          : order.quantity,
+      qun: pdfFinancials.quantity,
       isReleased: false,
       orderData: {
         createdAt: orderDateForPdf.toISOString(),
-        subTotal:
-          settleOrder?.value != null
-            ? Number(settleOrder.value)
-            : Number(order.totalAmount),
-        stampDuty:
-          settleOrder?.stampDutyAmount != null
-            ? Number(settleOrder.stampDutyAmount)
-            : Number(order.stampDuty),
-        totalAmount:
-          settleOrder?.modConsideration != null
-            ? Number(settleOrder.modConsideration)
-            : Number(order.totalAmount),
-        price: Number(settleOrder?.price ?? 0),
+        subTotal: pdfFinancials.subTotal,
+        stampDuty: pdfFinancials.stampDuty,
+        totalAmount: pdfFinancials.totalConsideration,
+        price: Number(settleOrder?.price ?? bond.sellPrice ?? 0),
         metadata: {
           settlementType: rfqDetails?.settlementType ?? 0,
           dealId: (metadata.dealId as string) ?? undefined,
@@ -2025,8 +2193,8 @@ export class CrmOrdersService {
           valueDate: bond.maturityDate
             ? new Date(bond.maturityDate).toISOString()
             : undefined,
-          accruedInterest: settleOrder?.modAccrInt != null ? Number(settleOrder.modAccrInt) : undefined,
-          accruedInterestDays: accruedInterestDaysParam,
+          accruedInterest: pdfFinancials.accruedInterest,
+          accruedInterestDays: pdfFinancials.accruedInterestDays,
           settlementNumber:
             settlementNumberParam ??
             (settleOrder as { settlementNo?: string } | undefined)?.settlementNo,
@@ -2106,7 +2274,7 @@ export class CrmOrdersService {
   async sendPdfEmailToClient(
     orderNumber: string,
     body: {
-      pdfType: "order" | "deal";
+      pdfType: "order" | "deal" | "both";
       subject: string;
       messageBody: string;
       toEmail?: string;
@@ -2120,10 +2288,10 @@ export class CrmOrdersService {
       nonAmortizedBond?: boolean;
       amortizedPrincipalPaymentDates?: string;
     },
-  ): Promise<{ messageId: string }> {
+  ): Promise<{ messageId?: string; messageIds?: string[] }> {
     const pdfType = body.pdfType;
-    if (pdfType !== "order" && pdfType !== "deal") {
-      throw new AppError("pdfType must be either 'order' or 'deal'", {
+    if (pdfType !== "order" && pdfType !== "deal" && pdfType !== "both") {
+      throw new AppError("pdfType must be 'order', 'deal', or 'both'", {
         statusCode: HttpStatus.BAD_REQUEST,
         code: "BAD_REQUEST",
       });
@@ -2201,32 +2369,55 @@ export class CrmOrdersService {
         code: "ORDER_NOT_FOUND",
       });
     }
-    // Participant-counterparty orders can't go through this email flow yet
-    // because the PDF is password-protected with the customer's DOB —
-    // participants have no DOB on file. Operators should download the PDF
-    // for participant orders and email manually.
-    if (order.customerProfileId == null) {
-      throw new AppError(
-        "Email PDF flow isn't supported for NSE-participant counterparties yet. Download the PDF and send it manually instead.",
-        { statusCode: HttpStatus.BAD_REQUEST, code: "PARTICIPANT_ORDER_EMAIL_UNSUPPORTED" },
-      );
+
+    const isParticipantOrder = order.customerProfileId == null;
+    let user: Awaited<ReturnType<CustomerProfileRepo["getFullCustomerProfile"]>> | Record<string, unknown>;
+    let defaultRecipientEmail: string | undefined;
+    let isCorporateCustomer = false;
+
+    if (isParticipantOrder) {
+      const actor = await this.resolveOrderPdfActor(orderNumber);
+      user = actor.user;
+      const email = String(
+        (actor.user as { emailAddress?: string | null })?.emailAddress ?? "",
+      ).trim();
+      defaultRecipientEmail = email || undefined;
+    } else {
+      const customerRepo = new CustomerProfileRepo();
+      user = await customerRepo.getFullCustomerProfile(order.customerProfileId);
+
+      const userType = String(
+        (user as { userType?: string }).userType ?? "INDIVIDUAL",
+      )
+        .trim()
+        .toUpperCase();
+      isCorporateCustomer = userType === "CORPORATE";
+      if (
+        userType !== "INDIVIDUAL" &&
+        userType !== "INDIVIDUAL_NRI_NRO" &&
+        !isCorporateCustomer
+      ) {
+        throw new AppError(
+          "Email PDF flow is not supported for B2B/corporate customers. Download the PDF and send it manually instead.",
+          { statusCode: HttpStatus.BAD_REQUEST, code: "B2B_ORDER_EMAIL_UNSUPPORTED" },
+        );
+      }
+      defaultRecipientEmail = order.customerProfile?.emailAddress ?? undefined;
     }
 
-    const customerRepo = new CustomerProfileRepo();
-    const user = await customerRepo.getFullCustomerProfile(order.customerProfileId);
     console.log(pdfQuery);
 
-    let buffer: Buffer;
-    let filename: string;
-    const generated =
-      pdfType === "deal"
-        ? await this.generateDealSheetPdfBuffer(orderNumber, pdfQuery)
-        : await this.generateOrderReceiptPdfBuffer(orderNumber, pdfQuery);
-    buffer = generated.buffer;
-    filename = generated.filename;
+    const attachments: Array<{
+      filename: string;
+      content: Buffer;
+      contentType: string;
+    }> = [];
+
+    const pdfTypesToGenerate =
+      pdfType === "both" ? (["order", "deal"] as const) : ([pdfType] as const);
 
     const recipientEmail =
-      String(body.toEmail ?? "").trim() || order.customerProfile?.emailAddress;
+      String(body.toEmail ?? "").trim() || defaultRecipientEmail;
     if (!recipientEmail || !emailPattern.test(recipientEmail)) {
       throw new AppError("Recipient email is missing or invalid", {
         statusCode: HttpStatus.BAD_REQUEST,
@@ -2236,7 +2427,7 @@ export class CrmOrdersService {
 
     const dobRaw = getCustomerDobRawForPdf(user);
     const pdfPassword = dateOfBirthToPdfPassword(dobRaw);
-    if (!pdfPassword) {
+    if (!pdfPassword && !isParticipantOrder && !isCorporateCustomer) {
       throw new AppError(
         "Customer date of birth is required to password-protect the PDF. Ensure PAN/Aadhaar or personal info DOB is on file.",
         {
@@ -2245,19 +2436,38 @@ export class CrmOrdersService {
         },
       );
     }
-    try {
-      buffer = encryptPdfBufferWithPassword(buffer, pdfPassword);
-    } catch (encErr) {
-      console.error("PDF encryption failed:", encErr);
-      throw new AppError(
-        encErr instanceof Error
-          ? encErr.message
-          : "Failed to encrypt PDF. Install qpdf (e.g. brew install qpdf) or set QPDF_BIN.",
-        {
-          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-          code: "PDF_ENCRYPT_FAILED",
-        },
-      );
+    for (const pdfTypeToGenerate of pdfTypesToGenerate) {
+      const generated =
+        pdfTypeToGenerate === "deal"
+          ? await this.generateDealSheetPdfBuffer(orderNumber, pdfQuery)
+          : await this.generateOrderReceiptPdfBuffer(orderNumber, pdfQuery);
+
+      let attachmentBuffer: Buffer = generated.buffer;
+      if (pdfPassword) {
+        try {
+          attachmentBuffer = encryptPdfBufferWithPassword(
+            generated.buffer,
+            pdfPassword,
+          );
+        } catch (encErr) {
+          console.error("PDF encryption failed:", encErr);
+          throw new AppError(
+            encErr instanceof Error
+              ? encErr.message
+              : "Failed to encrypt PDF. Install qpdf (e.g. brew install qpdf) or set QPDF_BIN.",
+            {
+              statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+              code: "PDF_ENCRYPT_FAILED",
+            },
+          );
+        }
+      }
+
+      attachments.push({
+        filename: generated.filename,
+        content: attachmentBuffer,
+        contentType: "application/pdf",
+      });
     }
 
     const htmlBody = buildOrderEmailHtmlBody(messageBody);
@@ -2267,16 +2477,13 @@ export class CrmOrdersService {
       subject,
       html: htmlBody,
       text: messageBody,
-      attachments: [
-        {
-          filename,
-          content: buffer,
-          contentType: "application/pdf",
-        },
-      ],
+      attachments,
     });
 
-    return { messageId };
+    return {
+      messageId,
+      messageIds: [messageId],
+    };
   }
 
   /** Meradhan checkout drafts (`draft_orders`) for CRM inspection of stored pricing JSON. */

@@ -46,6 +46,10 @@ export type BondDealAutofillResponse = {
     buyYield: number | null;
     yield: number;
     sellPrice: number | null;
+    settlementAmount: number | null;
+    accruedInterest: number | null;
+    principalAmount: number | null;
+    totalConsideration: number | null;
     isUnderShutPeriod?: boolean;
     bondType?: string | null;
     seniority?: string | null;
@@ -138,6 +142,17 @@ export class BondAutoUpdateAutofillService {
         ? Math.round(Number(accruedDaysRaw))
         : null;
 
+    const settlementAmountResolved = parseCalcMoneyString(
+      calcResponse.settlement_amount,
+    );
+    const accruedInterestResolved = parseCalcMoneyString(calcResponse.total_ai);
+    const principalAmountResolved = parseCalcMoneyString(
+      calcResponse.principal_amount,
+    );
+    const totalConsiderationResolved = parseCalcMoneyString(
+      calcResponse.total_consideration,
+    );
+
     const suggested = {
       bondName,
       creditRating,
@@ -181,6 +196,10 @@ export class BondAutoUpdateAutofillService {
       })(),
       yield: Number(finalYieldRaw.toFixed(2)),
       sellPrice: sellPriceResolved,
+      settlementAmount: settlementAmountResolved,
+      accruedInterest: accruedInterestResolved,
+      principalAmount: principalAmountResolved,
+      totalConsideration: totalConsiderationResolved,
       isUnderShutPeriod: isUnderShutPeriodFromCalc,
       bondType: bondData?.bondType ?? null,
       seniority: bondData?.seniority ?? null,

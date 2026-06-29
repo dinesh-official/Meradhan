@@ -68,7 +68,7 @@ const PrivacyPolicyContent = () => {
             <strong>I. Personal Information:</strong> Data that can identify
             you, such as your name, email address, contact details, physical
             address, demographic details (e.g., gender, pin code), and sensitive
-            personal data, including passwords, nominee details, financial
+            personal data, including account credentials, nominee details, financial
             information (bank/demat account details, transactional data, etc.).
           </p>
           <p>
@@ -276,7 +276,7 @@ const PrivacyPolicyContent = () => {
           <ul className="list-disc list-inside space-y-1">
             <li>Use encryption and secure access controls</li>
             <li>Implement physical, managerial, and technical safeguards</li>
-            <li>Require OTP/password verification for account access</li>
+            <li>Require OTP and optional passcode verification for account access</li>
           </ul>
           <p>
             Users must maintain the confidentiality of their credentials and

@@ -1,4 +1,5 @@
 import { formatNumberTS } from "@/global/utils/formate";
+import { getOrderStatusLabel } from "@/global/constants/order";
 
 export const REPORT_CHART_COLORS = [
   "#2563eb",
@@ -120,7 +121,7 @@ export function buildStatusSlices(
   const total = list.reduce((s, r) => s + r.count, 0);
   if (total === 0) return [];
   return list.map((r, i) => ({
-    name: r.status,
+    name: getOrderStatusLabel(r.status),
     count: r.count,
     pct: (r.count / total) * 100,
     color:

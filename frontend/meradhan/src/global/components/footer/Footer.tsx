@@ -161,6 +161,14 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                       Investor Grievance
                     </Link>
                   </li>
+                  <li>
+                    <Link
+                      href="/client-registration-documents"
+                      className="hover:text-[#F25C4C] transition-colors duration-200"
+                    >
+                      Client Registration Documents
+                    </Link>
+                  </li>
                 </ul>
               </div>
               <div>

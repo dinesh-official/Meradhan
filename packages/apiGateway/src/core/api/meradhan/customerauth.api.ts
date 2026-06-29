@@ -6,7 +6,6 @@ import type { IApiCaller } from "../../connection/apiCaller.interface";
 import type {
   IAuthCompleteResponse,
   ICustomerTwoFactorSettingsResponse,
-  IResetPasswordResponse,
   ISessionResponse,
   ISignInRequestResponse,
   ISignInSendOtpResponse,
@@ -114,18 +113,6 @@ export class CustomerAuthApi {
     return data;
   }
 
-  async signInWithPassword(
-    payload: z.infer<typeof this.schema.signInWithCredentialsSchema>,
-    config?: AxiosRequestConfig
-  ) {
-    const { data } = await this.apiClient.post<IAuthCompleteResponse>(
-      "/auth/customer/signin/with-password",
-      payload,
-      config
-    );
-    return data;
-  }
-
   async signInSendOtp(
     payload: z.infer<typeof this.schema.sendSignInOtpSchema>,
     config?: AxiosRequestConfig
@@ -190,30 +177,6 @@ export class CustomerAuthApi {
       "/auth/customer/signin/2fa/verify",
       payload,
       config,
-    );
-    return data;
-  }
-
-  async sendForgetPasswordLink(
-    payload: z.infer<typeof this.schema.sendForgetPasswordSchema>,
-    config?: AxiosRequestConfig
-  ) {
-    const { data } = await this.apiClient.post<IResetPasswordResponse>(
-      "/auth/customer/send-forget-password",
-      payload,
-      config
-    );
-    return data;
-  }
-
-  async resetPassword(
-    payload: z.infer<typeof this.schema.resetPasswordSchema>,
-    config?: AxiosRequestConfig
-  ) {
-    const { data } = await this.apiClient.post<IResetPasswordResponse>(
-      "/auth/customer/reset-password",
-      payload,
-      config
     );
     return data;
   }

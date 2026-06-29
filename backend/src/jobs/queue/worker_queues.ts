@@ -37,14 +37,6 @@ export const mobileOtpSenderQueue = new Bull(
   QueueNames.mobileOtpSend,
   sharedRedisOpts,
 );
-export const forgotPasswordLinkSenderQueue = new Bull(
-  QueueNames.forgotPasswordEmail,
-  sharedRedisOpts,
-);
-export const successResetPasswordQueue = new Bull(
-  QueueNames.successResetPassword,
-  sharedRedisOpts,
-);
 export const emailVerificationQueue = new Bull(
   QueueNames.emailVerification,
   sharedRedisOpts,

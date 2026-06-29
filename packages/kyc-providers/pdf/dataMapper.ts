@@ -160,6 +160,7 @@ export type Root = {
     kycStatus: string;
     userName: string;
     phoneNo: string;
+    avatar?: string;
   };
 };
 
@@ -199,7 +200,7 @@ export type Page1Props = {
   | "OTHERS";
   profilePic?: string;
   signature?: string;
-  /** When true (existing KRA path), Page1 omits photo & wet signature — not captured in that flow */
+  /** When true (existing KRA path), Page1 omits wet signature — photo still shown when available */
   omitPage1PhotoAndSignature?: boolean;
   kycNo: string;
   aadhaarNo: string;
@@ -244,6 +245,7 @@ export type Page3Props = {
   email: string;
   isAPep: "YES" | "NO";
   mobile: string;
+  riskCategorization: "LOW" | "MODERATE" | "HIGH" | null;
 };
 
 export type Page4Props = {
@@ -570,6 +572,79 @@ type KraResponseInData = {
   appDnlddt?: string | null;
 };
 
+type FaceResponseWithGeo = {
+  actions?: Array<{
+    sub_actions?: Array<{
+      type?: string;
+      details?: { address?: string };
+      input_data?: string;
+    }>;
+  }>;
+};
+
+const getGeoTaggingAddress = (data: Root): string | null => {
+  const faceResponse = data.step_1?.face?.response as
+    | FaceResponseWithGeo
+    | undefined;
+  if (!faceResponse?.actions?.length) return null;
+
+  for (const action of faceResponse.actions) {
+    for (const sub of action.sub_actions ?? []) {
+      if (sub.type !== "GEO_TAGGING") continue;
+
+      const fromDetails = sub.details?.address?.trim();
+      if (fromDetails) return fromDetails;
+
+      if (typeof sub.input_data === "string") {
+        try {
+          const parsed = JSON.parse(sub.input_data) as { address?: string };
+          if (parsed.address?.trim()) return parsed.address.trim();
+        } catch {
+          // ignore invalid JSON
+        }
+      }
+    }
+  }
+  return null;
+};
+
+/** City / locality name from Digio reverse-geocoded selfie address. */
+const getPlaceNameFromGeoAddress = (address: string): string => {
+  const parts = address
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  if (parts.length === 0) return "";
+
+  while (parts.length > 0) {
+    const last = parts[parts.length - 1];
+    if (!last || !/^\d{6}$/.test(last)) break;
+    parts.pop();
+  }
+  const tail = parts[parts.length - 1];
+  if (tail?.toLowerCase() === "india") {
+    parts.pop();
+  }
+  if (parts.length === 0) return address.trim();
+
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const segment = parts[i];
+    if (!segment) continue;
+    const cityMatch = segment.match(/^(.+?)\s+City$/i);
+    if (cityMatch?.[1]?.trim()) return cityMatch[1].trim();
+  }
+
+  const statePart = parts[parts.length - 1] ?? "";
+  for (let i = parts.length - 2; i >= 0; i--) {
+    const part = parts[i];
+    if (!part || /division$/i.test(part) || part === statePart) continue;
+    return part;
+  }
+
+  return statePart || address.trim();
+};
+
 const getAddress = (data: Root) => {
   const step1 = data.step_1 as { usedExistingKra?: boolean; kraResponse?: KraResponseInData } | undefined;
   const usedKra = step1?.usedExistingKra && step1?.kraResponse;
@@ -596,6 +671,15 @@ const getAddress = (data: Root) => {
     combined: `${address?.district_or_city || ""} ${address?.state || ""} ${address?.pincode || ""
       }`.trim(),
   };
+};
+
+const getPlaceForPdf = (data: Root): string => {
+  const geoAddress = getGeoTaggingAddress(data);
+  if (geoAddress) {
+    const placeName = getPlaceNameFromGeoAddress(geoAddress);
+    if (placeName) return placeName;
+  }
+  return getAddress(data).city;
 };
 
 const getSignatureUrl = async (data: Root) =>
@@ -696,9 +780,9 @@ export const mapDataForPage1 = async (data: Root): Promise<Page1Props> => {
   const gender = resolveGenderForPdf(data, Boolean(usedKra), step1);
   const aadhaarNo = usedKra ? "" : (data.step_1?.pan?.response?.details?.aadhaar?.id_number ?? "");
 
-  const profilePic = usedKra
-    ? ""
-    : await getFileDataUri(data.step_1?.face?.url || "");
+  const profilePic = await getFileDataUri(
+    data.step_1?.face?.url || data.user?.avatar || "",
+  );
   const signature = usedKra
     ? ""
     : await getFileDataUri(data.step_1?.sign?.url || "");
@@ -851,15 +935,24 @@ export const mapDataForPage3 = (data: Root): Page3Props => ({
   email: data.user.emailAddress,
   isAPep: !data.step_1.pan.checkTerms1 ? "YES" : "NO",
   mobile: data.user.phoneNo,
+  riskCategorization:
+    data.step_5?.find((item) => item.index === 2)?.ans === "Low Risk & Low Returns"
+      ? "LOW"
+      : data.step_5?.find((item) => item.index === 2)?.ans ===
+        "Moderate Risk & Moderate Returns"
+        ? "MODERATE"
+        : data.step_5?.find((item) => item.index === 2)?.ans ===
+          "High Risk & High Returns"
+          ? "HIGH"
+          : null,
 });
 
 export const mapDataForPage4 = async (data: Root): Promise<Page4Props> => {
-  const address = getAddress(data);
   return {
     date: new Date().toLocaleDateString("en-GB"),
     name: getFullName(data),
     signatureUrl: await getFileDataUri(data.step_1?.sign?.url || ""),
-    place: address.city,
+    place: getPlaceForPdf(data),
   };
 };
 
@@ -947,7 +1040,7 @@ export const mapDataForPage13 = async (data: Root): Promise<Page13Props> => {
     email: data.user.emailAddress,
     firstName: data.step_1?.pan?.firstName || " ",
     lastName: data.step_1?.pan?.lastName || " ",
-    city: address.city,
+    city: getPlaceForPdf(data),
     state: address.state,
     signatureUrl: await getFileDataUri(data.step_1?.sign?.url || ""),
   };
@@ -1053,20 +1146,18 @@ export const mapDataForPage42 = async (data: Root): Promise<Page42Props> => ({
 });
 
 export const mapDataForPage47 = async (data: Root): Promise<Page47Props> => {
-  const address = getAddress(data);
   return {
     name: getFullName(data),
-    place: address.city,
+    place: getPlaceForPdf(data),
     date: new Date().toLocaleDateString("en-GB"),
     signatureUrl: await getSignatureUrl(data),
   };
 };
 
 export const mapDataForPage48 = async (data: Root): Promise<Page48Props> => {
-  const address = getAddress(data);
   return {
     name: getFullName(data),
-    place: address.city,
+    place: getPlaceForPdf(data),
     date: new Date().toLocaleDateString("en-GB"),
     signatureUrl: await getSignatureUrl(data),
   };

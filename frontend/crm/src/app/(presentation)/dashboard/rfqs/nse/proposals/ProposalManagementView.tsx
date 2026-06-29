@@ -23,6 +23,10 @@ import apiGateway, {
   type CustomerProfile,
   type NseRfqParticipantInfoSummary,
 } from "@root/apiGateway";
+import {
+  getEmailSalutationFromGender,
+  resolveGenderForEmailSalutation,
+} from "@root/schema";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -66,6 +70,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import { SelectCustomerUser } from "@/global/elements/autocomplete/SelectCustomerUser";
@@ -165,6 +170,8 @@ function customerFullName(customer: CustomerProfile | null) {
 type SendProposalEmailPayload = {
   toEmail: string;
   customerName: string;
+  gender?: string | null;
+  customerProfileId?: number | null;
   side: "BUY" | "SELL";
   bondName: string;
   isin: string;
@@ -192,7 +199,12 @@ function formatEmailSubject(isin: string, dealDate: string | undefined) {
   return `RFQ Order Confirmation Required – ${isin} Deal Date ${formatted}`;
 }
 
-function buildEmailPreviewHtml(params: SendProposalEmailPayload) {
+function buildEmailPreviewHtml(
+  params: SendProposalEmailPayload & { isNseParticipant?: boolean },
+) {
+  const dearLine = params.isNseParticipant
+    ? "Dear Sir / Madam,"
+    : `Dear ${getEmailSalutationFromGender(params.gender)} ${params.customerName},`;
   const orderSideWord = params.side === "SELL" ? "sell" : "buy";
   const cleanPx = params.cleanPrice ?? params.rate;
   const cleanPriceDisplay =
@@ -244,7 +256,7 @@ function buildEmailPreviewHtml(params: SendProposalEmailPayload) {
     .join("");
 
   return `
-    <p>Dear Mr. / Ms. ${params.customerName},</p>
+    <p>${dearLine}</p>
     <p>Thank you for placing your ${orderSideWord} order on BondNest Capital India Securities Private Limited (MeraDhan). Your order request has been recorded successfully and is currently pending confirmation.</p>
     <p>To proceed with the order placement, kindly reply to this email with the following confirmation text:</p>
     <p style="margin:10px 0;padding:10px 14px;border-left:4px solid #2563eb;background:#f8fafc;font-style:italic;">&ldquo;${confirmationQuote}&rdquo;</p>
@@ -308,6 +320,46 @@ function proposalRecipientEmail(draft: {
     draft.customer?.emailAddress?.trim() ||
     rfqParticipantPrimaryEmail(draft.rfqParticipant) ||
     ""
+  );
+}
+
+function proposalRecipientGender(draft: {
+  customer: CustomerProfile | null;
+}) {
+  return draft.customer?.gender ?? null;
+}
+
+async function resolveGenderForProposalPreview(
+  draft: ProposalDraft,
+  selectedCustomer: CustomerProfile | null,
+  customerApi: Pick<
+    InstanceType<typeof apiGateway.crm.customer.CrmCustomerApi>,
+    "customerInfoById"
+  >,
+): Promise<string | null> {
+  const customerId = draft.customer?.id ?? selectedCustomer?.id ?? null;
+  const fromDraft = resolveGenderForEmailSalutation({
+    gender: draft.customer?.gender,
+  });
+  if (fromDraft) return fromDraft;
+
+  if (customerId != null) {
+    try {
+      const res = await customerApi.customerInfoById(customerId);
+      const profile = res.data?.responseData;
+      const resolved = resolveGenderForEmailSalutation({
+        gender: profile?.gender,
+        panCard: profile?.panCard,
+        aadhaarCard: profile?.aadhaarCard,
+      });
+      if (resolved) return resolved;
+    } catch {
+      // Preview still works without gender; salutation falls back.
+    }
+  }
+
+  return (
+    resolveGenderForEmailSalutation({ gender: selectedCustomer?.gender }) ?? null
   );
 }
 
@@ -846,6 +898,7 @@ function ProposalManagementView() {
   // Confirmation dialog for queueing RFQ processing
   const [confirmProcessOpen, setConfirmProcessOpen] = useState(false);
   const [confirmProcessItem, setConfirmProcessItem] = useState<ProposalDraft | null>(null);
+  const [allowAutoRfqTrigger, setAllowAutoRfqTrigger] = useState(false);
 
   const handleAutoCreateRfqAndGoDealbook = async () => {
     if (!proposalDraft) {
@@ -862,13 +915,20 @@ function ProposalManagementView() {
     router.push(redirectTo);
   };
 
-  const openEmailPreviewForDraft = (draft: ProposalDraft) => {
+  const openEmailPreviewForDraft = async (draft: ProposalDraft) => {
     setEmailDraftId(Number.isFinite(Number(draft.id)) ? draft.id : null);
     const recipientEmail = proposalRecipientEmail(draft);
     if (!recipientEmail) {
       toast.error("No email on file for this recipient — add email on RFQ Participants or customer profile");
       return;
     }
+
+    const gender = await resolveGenderForProposalPreview(
+      draft,
+      selectedCustomer,
+      customerApi,
+    );
+    const isNseParticipant = isNseParticipantProposal(draft);
 
     const currentProposal = draft.fetched;
     const currentBond = currentProposal.bond;
@@ -925,6 +985,8 @@ function ProposalManagementView() {
     const payload: SendProposalEmailPayload = {
       toEmail: proposalRecipientEmail(draft),
       customerName: proposalRecipientName(draft),
+      gender,
+      customerProfileId: draft.customer?.id ?? null,
       side: draft.side,
       bondName: currentBond?.bondName || currentBond?.instrumentName || "Bond",
       isin: draft.isin,
@@ -950,7 +1012,7 @@ function ProposalManagementView() {
     setEmailPreview({
       toEmail: payload.toEmail,
       subject: formatEmailSubject(payload.isin, payload.dealDate),
-      html: buildEmailPreviewHtml(payload),
+      html: buildEmailPreviewHtml({ ...payload, isNseParticipant }),
       payload,
     });
     setIsEmailPreviewOpen(true);
@@ -961,11 +1023,11 @@ function ProposalManagementView() {
       toast.error("Create a proposal first");
       return;
     }
-    openEmailPreviewForDraft(proposalDraft);
+    void openEmailPreviewForDraft(proposalDraft);
   };
 
   const sendEmailForDraft = async (draft: ProposalDraft) => {
-    openEmailPreviewForDraft(draft);
+    await openEmailPreviewForDraft(draft);
   };
 
   const handleAutoCreateRfqFromSaved = async (draft: ProposalDraft) => {
@@ -980,16 +1042,29 @@ function ProposalManagementView() {
     router.push(redirectTo);
   };
 
-  const handleConfirmRfqProcessing = async (draft: ProposalDraft) => {
+  const handleConfirmRfqProcessing = async (
+    draft: ProposalDraft,
+    allowAutoTrigger: boolean,
+  ) => {
     const idNum = Number(draft.id);
     if (!Number.isFinite(idNum)) return;
 
     if (isNseParticipantProposal(draft)) {
-      await handleAutoCreateRfqFromSaved(draft);
+      if (allowAutoTrigger) {
+        await handleAutoCreateRfqFromSaved(draft);
+      } else {
+        await markWaitingMutation.mutateAsync(idNum);
+        toast.success("Proposal marked as awaiting approval");
+      }
       return;
     }
 
-    await queueProcessingMutation.mutateAsync(idNum);
+    if (allowAutoTrigger) {
+      await queueProcessingMutation.mutateAsync(idNum);
+    } else {
+      await markWaitingMutation.mutateAsync(idNum);
+      toast.success("Proposal marked as awaiting approval");
+    }
   };
 
   const openEditDialog = (item: ProposalDraft) => {
@@ -2376,7 +2451,16 @@ function ProposalManagementView() {
       </Dialog>
 
       {/* ── Confirm RFQ Processing Dialog ── */}
-      <Dialog open={confirmProcessOpen} onOpenChange={setConfirmProcessOpen}>
+      <Dialog
+        open={confirmProcessOpen}
+        onOpenChange={(open) => {
+          setConfirmProcessOpen(open);
+          if (!open) {
+            setAllowAutoRfqTrigger(false);
+            setConfirmProcessItem(null);
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -2387,8 +2471,12 @@ function ProposalManagementView() {
             </DialogTitle>
             <DialogDescription>
               {confirmProcessItem && isNseParticipantProposal(confirmProcessItem)
-                ? "Review the proposal below. Confirming will post the add-ISIN RFQ to NSE for this participant (first step only). Negotiation and deal steps are done separately on the RFQ manage screen."
-                : "Review the proposal details below. Confirming will queue this proposal for automated NSE RFQ execution."}
+                ? allowAutoRfqTrigger
+                  ? "Review the proposal below. Confirming will post the add-ISIN RFQ to NSE for this participant (first step only). Negotiation and deal steps are done separately on the RFQ manage screen."
+                  : "Review the proposal below. Confirming will mark this proposal as awaiting approval only — no RFQ will be created on NSE."
+                : allowAutoRfqTrigger
+                  ? "Review the proposal details below. Confirming will queue this proposal for automated NSE RFQ execution."
+                  : "Review the proposal details below. Confirming will mark this proposal as awaiting approval only — no automated RFQ execution will run."}
             </DialogDescription>
           </DialogHeader>
 
@@ -2461,6 +2549,29 @@ function ProposalManagementView() {
                     This proposal has not been saved to the database yet. Please save it first.
                   </p>
                 )}
+
+                <div className="flex items-start gap-3 rounded-lg border border-slate-200 bg-white px-3 py-3">
+                  <Checkbox
+                    id="allow-auto-rfq-trigger"
+                    checked={allowAutoRfqTrigger}
+                    onCheckedChange={(checked) => setAllowAutoRfqTrigger(checked === true)}
+                    disabled={
+                      queueProcessingMutation.isPending ||
+                      autoCreateRfqMutation.isPending ||
+                      markWaitingMutation.isPending
+                    }
+                  />
+                  <div className="space-y-1">
+                    <Label htmlFor="allow-auto-rfq-trigger" className="text-sm font-medium leading-none">
+                      Allow run auto RFQ process
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      {participantProposal
+                        ? "When enabled, posts the add-ISIN RFQ to NSE. When disabled, only updates proposal status."
+                        : "When enabled, queues full automated NSE RFQ execution. When disabled, only updates proposal status."}
+                    </p>
+                  </div>
+                </div>
               </div>
             );
           })()}
@@ -2470,7 +2581,9 @@ function ProposalManagementView() {
               variant="outline"
               onClick={() => setConfirmProcessOpen(false)}
               disabled={
-                queueProcessingMutation.isPending || autoCreateRfqMutation.isPending
+                queueProcessingMutation.isPending ||
+                autoCreateRfqMutation.isPending ||
+                markWaitingMutation.isPending
               }
             >
               Cancel
@@ -2480,33 +2593,43 @@ function ProposalManagementView() {
               disabled={
                 queueProcessingMutation.isPending ||
                 autoCreateRfqMutation.isPending ||
+                markWaitingMutation.isPending ||
                 !Number.isFinite(Number(confirmProcessItem?.id))
               }
               onClick={async () => {
                 if (!confirmProcessItem) return;
                 const idNum = Number(confirmProcessItem.id);
                 if (!Number.isFinite(idNum)) return;
-                await handleConfirmRfqProcessing(confirmProcessItem);
+                await handleConfirmRfqProcessing(confirmProcessItem, allowAutoRfqTrigger);
                 setConfirmProcessOpen(false);
+                setAllowAutoRfqTrigger(false);
               }}
             >
-              {queueProcessingMutation.isPending || autoCreateRfqMutation.isPending ? (
+              {queueProcessingMutation.isPending ||
+              autoCreateRfqMutation.isPending ||
+              markWaitingMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  {confirmProcessItem && isNseParticipantProposal(confirmProcessItem)
-                    ? "Creating ISIN RFQ…"
-                    : "Queuing…"}
+                  {allowAutoRfqTrigger
+                    ? confirmProcessItem && isNseParticipantProposal(confirmProcessItem)
+                      ? "Creating ISIN RFQ…"
+                      : "Queuing…"
+                    : "Updating…"}
                 </>
-              ) : confirmProcessItem && isNseParticipantProposal(confirmProcessItem) ? (
-                <>
-                  <Zap className="h-4 w-4" />
-                  Confirm & Create ISIN
-                </>
+              ) : allowAutoRfqTrigger ? (
+                confirmProcessItem && isNseParticipantProposal(confirmProcessItem) ? (
+                  <>
+                    <Zap className="h-4 w-4" />
+                    Confirm & Create ISIN
+                  </>
+                ) : (
+                  <>
+                    <Zap className="h-4 w-4" />
+                    Confirm & Queue
+                  </>
+                )
               ) : (
-                <>
-                  <Zap className="h-4 w-4" />
-                  Confirm & Queue
-                </>
+                "Confirm"
               )}
             </Button>
           </DialogFooter>

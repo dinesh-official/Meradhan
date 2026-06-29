@@ -9,6 +9,7 @@ import {
   getPdfDearGreeting,
 } from "../helper";
 import { getInterestPaymentSchedule } from "./interestPaymentSchedule";
+import { resolveOrderPdfFinancials } from "./resolveOrderPdfFinancials";
 
 const styles = StyleSheet.create({
   section: {
@@ -115,34 +116,16 @@ export default function DealPage({
       ? new Date(bond.maturityDate)
       : new Date(settlementDate.getTime()); // Fallback: day after deal date
 
-  // Calculate financials
+  const {
+    effectiveQty: effectiveQun,
+    principalAmount,
+    accruedInterest,
+    accruedInterestDays,
+    stampDutyAmount,
+    totalConsideration,
+    settlementAmount,
+  } = resolveOrderPdfFinancials({ bond, orderData, qun });
   const faceValue = Number(bond.faceValue) || 1000;
-  const settleOrder = orderData?.metadata?.settleOrder;
-  const effectiveQun =
-    settleOrder?.modQuantity != null ? Number(settleOrder.modQuantity) : qun;
-
-  const principalAmount = faceValue * effectiveQun; // Convert to actual amount
-  const accruedInterest =
-    Number(
-      settleOrder?.modAccrInt ??
-      orderData?.metadata?.accruedInterest ??
-      (principalAmount * 0.01 * 9) / 365
-    ); // Rough calculation if not provided
-  // const stampDutyAmount = orderData?.stampDuty || principalAmount * 0.0001; // 0.01% stamp duty
-  const stampDutyAmount = Number(
-    settleOrder?.stampDutyAmount ??
-    orderData?.stampDuty ??
-    principalAmount * 0.0001
-  );
-
-  const totalConsideration =
-    Number(
-      settleOrder?.modConsideration ??
-      orderData?.totalAmount ??
-      principalAmount + accruedInterest
-    );
-  const settlementAmount = totalConsideration + stampDutyAmount;
-
 
   // Format amounts
   const formatCurrency = (amount: number, fixed = 2) => {
@@ -262,7 +245,7 @@ ${getInterestPaymentDatesDisplay()} `,
     ["Principal Amount", `INR ${formatCurrency(totalConsideration - accruedInterest)}`],
     [
       "Accrued / Ex Interest",
-      `${accruedInterest >= 0 ? `INR ${formatCurrency(accruedInterest)} (No. of Days: ${orderData?.metadata?.accruedInterestDays || "N/A"})` : `${`INR (${formatCurrency(accruedInterest)})`.replaceAll("-", "")} (No. of Days: (${orderData?.metadata?.accruedInterestDays || "N/A"}))`}`,
+      `${accruedInterest >= 0 ? `INR ${formatCurrency(accruedInterest)} (No. of Days: ${accruedInterestDays ?? orderData?.metadata?.accruedInterestDays ?? "N/A"})` : `${`INR (${formatCurrency(accruedInterest)})`.replaceAll("-", "")} (No. of Days: (${accruedInterestDays ?? orderData?.metadata?.accruedInterestDays ?? "N/A"}))`}`,
     ],
     ["Total Consideration", `INR ${formatCurrency(totalConsideration)}`],
     [

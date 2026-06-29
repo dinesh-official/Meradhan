@@ -24,7 +24,7 @@ enum AccountStatus {
 
 /// Indicates the login/sign-in method used
 enum SIGNIN_WITH {
-  /// Default: Email and password-based login
+  /// Email or phone OTP-based login
   CREDENTIALS
   /// Google account sign-in
   GOOGLE

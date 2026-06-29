@@ -32,6 +32,10 @@ export interface Order {
   subTotal: string;
   stampDuty: string;
   totalAmount: string;
+  /** Accrued interest (₹) from NSE settlement when settled, else checkout pricing snapshot. */
+  accruedInterest?: number | null;
+  /** Settlement amount (₹) from NSE when settled, else checkout pricing snapshot / totalAmount. */
+  settlementAmount?: number | null;
   isin: string;
   bondName: string;
   faceValue: string;

@@ -1,11 +1,9 @@
 /**
- * Order list filters. `value` is sent as `status` query param except `ALL` and `NOT_COMPLETED`.
- * `NOT_COMPLETED` = checkout / payment never finished (special backend filter).
+ * Order list filters. `value` is sent as `status` query param except `ALL`.
  */
 export const statusOptions = [
   { title: "All orders", value: "ALL" },
-  { title: "Not completed (checkout)", value: "NOT_COMPLETED" },
-  { title: "Pending", value: "PENDING" },
+  { title: "Not completed", value: "PENDING" },
   { title: "In progress", value: "IN_PROGRESS" },
   { title: "Applied", value: "APPLIED" },
   { title: "Settled", value: "SETTLED" },

@@ -16,6 +16,8 @@ import {
   formatOrderHistoryDate,
   formatOrderYieldPercent,
   getOrderSettlementDateInput,
+  getOrderAccruedInterest,
+  getOrderSettlementAmount,
 } from "../_utils";
 import { OrderPdfDownloads } from "./OrderPdfDownloads";
 import { SecurityNameCell } from "./SecurityNameCell";
@@ -71,7 +73,8 @@ function OrdersTable({ orders, isLoading }: OrdersTableProps) {
                 </TableHead>
                 <TableHead className="bg-[#F5F5F5] py-4 px-6">Face Value</TableHead>
                 <TableHead className="bg-[#F5F5F5] py-4 px-6">Quantity</TableHead>
-                <TableHead className="bg-[#F5F5F5] py-4 px-6">Value</TableHead>
+                <TableHead className="bg-[#F5F5F5] py-4 px-6">Accrued int.</TableHead>
+                <TableHead className="bg-[#F5F5F5] py-4 px-6">Settlement</TableHead>
                 <TableHead className="whitespace-nowrap bg-[#F5F5F5] py-4 px-6">
                   Yield
                 </TableHead>
@@ -96,7 +99,12 @@ function OrdersTable({ orders, isLoading }: OrdersTableProps) {
                   getOrderSettlementDateInput(order),
                 );
                 const faceValue = formatAmount(parseFloat(order.faceValue));
-                const totalValue = formatAmount(parseFloat(order.totalAmount));
+                const accruedInterest = getOrderAccruedInterest(order);
+                const settlementAmount = getOrderSettlementAmount(order);
+                const accruedDisplay =
+                  accruedInterest != null ? formatAmount(accruedInterest) : "—";
+                const settlementDisplay =
+                  settlementAmount != null ? formatAmount(settlementAmount) : "—";
 
                 return (
                   <TableRow key={order.id} className="hover:bg-gray-50">
@@ -112,7 +120,12 @@ function OrdersTable({ orders, isLoading }: OrdersTableProps) {
                     <TableCell className="py-4 px-6">{order.quantity}</TableCell>
                     <TableCell className="py-4 px-6">
                       <div className="flex items-center">
-                        <PiCurrencyInrBold /> {totalValue}
+                        <PiCurrencyInrBold /> {accruedDisplay}
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-4 px-6">
+                      <div className="flex items-center">
+                        <PiCurrencyInrBold /> {settlementDisplay}
                       </div>
                     </TableCell>
                     <TableCell className="whitespace-nowrap py-4 px-6 text-sm text-gray-900">

@@ -1,4 +1,5 @@
 import type { OrderReportRegisterRow } from "@root/apiGateway";
+import { getCrmOrderStatusDisplay } from "@/global/constants/order";
 import { format } from "date-fns";
 
 export function formatValueCr(amount: number): string {
@@ -48,32 +49,12 @@ export function mapOrderWorkflowStatus(
   orderStatus: string,
   paymentStatus: string,
 ): string {
-  const o = String(orderStatus ?? "").toUpperCase();
-  const p = String(paymentStatus ?? "").toUpperCase();
+  return getCrmOrderStatusDisplay(orderStatus, paymentStatus).title;
+}
 
-  if (o === "SETTLED") return "Settled";
-  if (o === "APPLIED") return "In Settlement";
-  if (o === "EXPIRED") return "Expired";
-  if (o === "CANCELLED") return "Cancelled";
-  if (o === "REJECTED") return "Expired";
-
-  if (p === "CANCELLED" || p === "REFUNDED") return "Expired";
-
-  if (o === "IN_PROGRESS") return "In Progress";
-
-  if (o === "PENDING") {
-    if (p === "COMPLETED") return "In Settlement";
-    return "Order Initiated";
-  }
-
-  if (p === "COMPLETED") return "Deals Confirmed";
-
-  return o
-    .toLowerCase()
-    .split("_")
-    .filter(Boolean)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
+export function isActiveWorkflowStatus(label: string): boolean {
+  const inactive = new Set(["settled", "rejected", "expired", "cancelled"]);
+  return !inactive.has(label.trim().toLowerCase());
 }
 
 export function orderBelongsToCustomerProfile(
@@ -82,16 +63,6 @@ export function orderBelongsToCustomerProfile(
 ): boolean {
   if (order.customerProfileId === customerProfileId) return true;
   return order.customerProfile?.id === customerProfileId;
-}
-
-export function isActiveWorkflowStatus(label: string): boolean {
-  const u = label.toLowerCase();
-  return !(
-    u.includes("settled") ||
-    u.includes("expired") ||
-    u.includes("cancelled") ||
-    u.includes("reject")
-  );
 }
 
 export function parseYieldFromBondDetails(bondDetails: unknown): string | null {

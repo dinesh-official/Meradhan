@@ -27,7 +27,6 @@ const initData: CustomerFormData = {
   status: "ACTIVE",
   gender: gender[0],
   relationshipManagerId: undefined,
-  password: "",
 };
 
 export const useCustomerFromDataHook = (

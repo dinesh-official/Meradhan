@@ -166,6 +166,7 @@ export type CustomerBase = {
   lastName: string;
   emailAddress: string;
   phoneNo: string;
+  gender?: Gender;
   kycStatus: CustomerKycStatus;
   createdAt: string;
   updatedAt: string;

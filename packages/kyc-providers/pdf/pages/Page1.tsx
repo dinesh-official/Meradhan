@@ -7,7 +7,7 @@ import { formatDate } from "../helper";
 import type { Page1Props } from "../dataMapper";
 
 function Page1(data: Page1Props) {
-  const hidePhotoSign = Boolean(data.omitPage1PhotoAndSignature);
+  const hideSignature = Boolean(data.omitPage1PhotoAndSignature);
 
   return (
     <View style={tw("px-4")}>
@@ -229,7 +229,7 @@ function Page1(data: Page1Props) {
             `w-48 border border-gray-300 border-t-0 flex flex-col justify-start items-start`
           )}
         >
-          {!hidePhotoSign && data.profilePic ? (
+          {data.profilePic ? (
             <View
               style={{
                 width: 110,
@@ -250,41 +250,6 @@ function Page1(data: Page1Props) {
                 }}
               />
             </View>
-          ) : hidePhotoSign ? (
-            <View
-              style={{
-                width: 110,
-                height: 120,
-                paddingHorizontal: 4,
-                paddingVertical: 6,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 8,
-                  fontWeight: 700,
-                  textTransform: "uppercase",
-                  textAlign: "center",
-                  marginBottom: 4,
-                  color: "#374151",
-                }}
-              >
-                PHOTOGRAPH
-              </Text>
-              <Text
-                style={{
-                  fontSize: 7,
-                  textAlign: "center",
-                  lineHeight: 1.35,
-                  color: "#000000",
-                }}
-              >
-                Please affix your recent <br /> passport size photograph <br /> and sign
-                across it.
-              </Text>
-            </View>
           ) : (
             <View
               style={{
@@ -297,7 +262,7 @@ function Page1(data: Page1Props) {
             />
           )}
 
-          {!hidePhotoSign && data.signature ? (
+          {data.signature ? (
             <Image
               source={{
                 uri: data.signature,

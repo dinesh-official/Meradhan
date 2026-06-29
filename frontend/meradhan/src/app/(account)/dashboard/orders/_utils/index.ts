@@ -70,14 +70,14 @@ export type OrderStatusInput = Order["status"] | number | string;
 
 export type PaymentStatusInput = Order["paymentStatus"] | string | undefined;
 
-/** Checkout never finished: user left / payment failed / cancel during Razorpay (see order.service). */
+/** Checkout never finished: payment pending / cancelled / rejected without successful payment. */
 function isCheckoutNotCompleted(
   paymentStatus: PaymentStatusInput,
   orderStatus: OrderStatusInput,
 ): boolean {
   const ps =
     paymentStatus == null ? "" : String(paymentStatus).trim().toUpperCase();
-  if (ps === "CANCELLED") return true;
+  if (ps === "PENDING" || ps === "CANCELLED") return true;
 
   const os =
     typeof orderStatus === "string"
@@ -86,6 +86,7 @@ function isCheckoutNotCompleted(
         ? String(orderStatus)
         : "";
   if (os === "REJECTED" && ps !== "COMPLETED" && ps !== "REFUNDED") return true;
+  if (os === "PENDING" && ps !== "COMPLETED" && ps !== "REFUNDED") return true;
 
   return false;
 }
@@ -108,7 +109,8 @@ function parseNumericOrderStatus(status: unknown): number | null {
 function displayFromDbOrderStatus(u: string): { text: string; className: string } | null {
   switch (u) {
     case "PENDING":
-      return { text: "Pending", className: "text-orange-500" };
+      // Unpaid checkout — payment capture moves the order to APPLIED.
+      return { text: "Not completed", className: "text-slate-600" };
     case "IN_PROGRESS":
     case "APPLIED":
       return { text: "In progress", className: "text-blue-600" };
@@ -130,13 +132,14 @@ export function getStatusDisplay(
   paymentStatus?: PaymentStatusInput,
   settleStatus?: number | null,
 ) {
-  if (isCheckoutNotCompleted(paymentStatus, status)) {
-    return { text: "Not completed", className: "text-slate-600" };
-  }
-
+  // Prisma `Order.status` (e.g. SETTLED) is the source of truth for list filter + display.
   if (typeof status === "string") {
     const fromDb = displayFromDbOrderStatus(status.trim().toUpperCase());
     if (fromDb) return fromDb;
+  }
+
+  if (isCheckoutNotCompleted(paymentStatus, status)) {
+    return { text: "Not completed", className: "text-slate-600" };
   }
 
   if (settleStatus != null) {
@@ -157,13 +160,14 @@ export function getStatusDisplay(
   return { text: String(status), className: "text-gray-600" };
 }
 
-/** True when the dashboard Status column shows "Settled" (deal sheet is available). */
+/** True when `Order.status` is SETTLED (deal sheet is available). */
 export function isOrderSettled(
   status: OrderStatusInput,
-  paymentStatus?: PaymentStatusInput,
-  settleStatus?: number | null,
+  _paymentStatus?: PaymentStatusInput,
+  _settleStatus?: number | null,
 ): boolean {
-  return getStatusDisplay(status, paymentStatus, settleStatus).text === "Settled";
+  if (typeof status !== "string") return false;
+  return status.trim().toUpperCase() === "SETTLED";
 }
 
 /** Strip every leading coupon token (e.g. `10.00% ` then `10% `) from NSE-style instrument text. */
@@ -231,6 +235,35 @@ export function getOrderSettlementDateInput(order: Order): string | undefined {
     if (typeof sd === "string" && sd.trim()) return sd.trim();
   }
   return undefined;
+}
+
+/** Accrued interest (₹): API field, then checkout `bondDetails.pricing` snapshot. */
+export function getOrderAccruedInterest(order: Order): number | null {
+  if (order.accruedInterest != null && Number.isFinite(order.accruedInterest)) {
+    return order.accruedInterest;
+  }
+  const b = bondDetailsRecord(order);
+  const p = b.pricing;
+  if (p && typeof p === "object" && !Array.isArray(p)) {
+    return parseNumericUnknown((p as Record<string, unknown>).accruedInterest);
+  }
+  return null;
+}
+
+/** Settlement amount (₹): API field, then pricing snapshot, then `totalAmount`. */
+export function getOrderSettlementAmount(order: Order): number | null {
+  if (order.settlementAmount != null && Number.isFinite(order.settlementAmount)) {
+    return order.settlementAmount;
+  }
+  const b = bondDetailsRecord(order);
+  const p = b.pricing;
+  if (p && typeof p === "object" && !Array.isArray(p)) {
+    const fromPricing = parseNumericUnknown(
+      (p as Record<string, unknown>).settlementAmount,
+    );
+    if (fromPricing != null) return fromPricing;
+  }
+  return parseNumericUnknown(order.totalAmount);
 }
 
 function getBondIssuerDisplayName(b: Record<string, unknown>): string {

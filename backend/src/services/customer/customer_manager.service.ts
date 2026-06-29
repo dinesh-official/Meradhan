@@ -3,7 +3,6 @@ import type { appSchema } from "@root/schema";
 import { AppError } from "@utils/error/AppError";
 import { removeCountryCode } from "@utils/filters/convert";
 import { generateUsername } from "@utils/generate/generate_username";
-import { hashingUtils } from "@utils/hash/hashing_utils";
 import type z from "zod";
 
 export class CustomerProfileManager {
@@ -16,7 +15,6 @@ export class CustomerProfileManager {
       throw new AppError("Email is already used");
     }
 
-    const hashPassword = await hashingUtils.hashPassword(data.password);
     const createdCustomerResponse =
       await db.dataBase.customerProfileDataModel.create({
         data: {
@@ -38,7 +36,6 @@ export class CustomerProfileManager {
           utility: {
             create: {
               signinWith: "CREDENTIALS",
-              password: hashPassword,
               accountStatus: data.status,
               isEmailVerified: data.isEmailVerified,
               isPhoneVerified: data.isPhoneVerified,

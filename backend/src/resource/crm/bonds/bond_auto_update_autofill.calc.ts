@@ -285,12 +285,16 @@ export function resolveAutoUpdateCalcInputs(
   };
 }
 
+// curl 'https://stagecalc.meradhan.co/api/bond/INE818W08131?settlement_date=2026-06-26'
 export async function fetchCalcBondInfo(
   isin: string,
+  settlementDateYmd: string,
 ): Promise<CalcBondApiResponse | null> {
+  console.log(`fetchCalcBondInfo: ${isin} ${settlementDateYmd}`);
   try {
     const response = await axios.get<CalcBondApiResponse>(
       `${CALC_BOND_API_BASE}/${encodeURIComponent(isin)}`,
+      { params: { settlement_date: settlementDateYmd } },
     );
     return response.data;
   } catch {
@@ -298,7 +302,7 @@ export async function fetchCalcBondInfo(
   }
 }
 
-function pickYmd(
+export function pickYmd(
   ...candidates: Array<string | null | undefined>
 ): string | undefined {
   for (const c of candidates) {
@@ -308,7 +312,7 @@ function pickYmd(
   return undefined;
 }
 
-function parseApiDecimal(s: string | number | null | undefined): number | null {
+export function parseApiDecimal(s: string | number | null | undefined): number | null {
   if (s == null || s === "") return null;
   const n = Number(String(s).replace(/,/g, "").trim());
   return Number.isFinite(n) ? n : null;
@@ -360,7 +364,7 @@ export async function buildCalcPayloadAndContext(
   }>,
   resolved: ReturnType<typeof resolveAutoUpdateCalcInputs>,
 ) {
-  const calcBond = await fetchCalcBondInfo(isin);
+  const calcBond = await fetchCalcBondInfo(isin, resolved.settlementDateYmd);
 
   const settlementDateYmd = resolved.settlementDateOverridden
     ? resolved.settlementDateYmd
@@ -458,7 +462,7 @@ export async function buildCalcPayloadAndContext(
       bond?.dayConvention ?? bondData?.dayConvention,
     ),
     Bond_Type: bondType,
-    amort_schedule: bondType === "Amortizing" ? "" : "",
+    amort_schedule: bondType === "Amortizing" ? JSON.stringify(calcBond?.amort_schedule ?? []) : "",
   };
 
   const couponPayRow = couponRows[0] ?? null;

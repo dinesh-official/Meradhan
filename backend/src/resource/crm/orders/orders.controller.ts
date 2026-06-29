@@ -1,11 +1,16 @@
 import { type Request, type Response } from "express";
 import { CrmOrdersService } from "./orders.service";
-import { appSchema } from "@root/schema";
+import {
+  appSchema,
+  getEmailSalutationFromGender,
+  resolveGenderForEmailSalutation,
+} from "@root/schema";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import { OrderStatus } from "@databases/generated/prisma/postgres";
 import { createCrmActivityLog } from "@resource/crm/auditlogs/auditlog.repo";
 import { sendBackOfficeEmail } from "@communication/email_communication";
 import { AppConfigService } from "@resource/app-config/app-config.service";
+import { db } from "@core/database/database";
 
 function formatProposalDate(value: string | number | Date | null | undefined) {
   if (value == null || value === "") return "—";
@@ -128,6 +133,7 @@ function proposalNumberToWords(amount: number): string {
 
 function buildProposalEmailTemplate(payload: {
   customerName: string;
+  gender?: string | null;
   side: "BUY" | "SELL";
   bondName: string;
   isin: string;
@@ -205,9 +211,10 @@ function buildProposalEmailTemplate(payload: {
   ];
 
   const subject = `RFQ Order Confirmation Required – ${payload.isin} Deal Date ${formatProposalDateDdMmmYyyy(payload.dealDate)}`;
+  const salutation = getEmailSalutationFromGender(payload.gender);
 
   const html = `
-    <p>Dear Mr. / Ms. ${escapeHtml(payload.customerName)},</p>
+    <p>Dear ${salutation} ${escapeHtml(payload.customerName)},</p>
     <p>Thank you for placing your ${escapeHtml(orderSideWord)} order on BondNest Capital India Securities Private Limited (MeraDhan). Your order request has been recorded successfully and is currently pending confirmation.</p>
     <p>To proceed with the order placement, kindly reply to this email with the following confirmation text:</p>
     <p style="margin:12px 0;padding:12px 16px;border-left:4px solid #2563eb;background:#f8fafc;font-style:italic;">&ldquo;${escapeHtml(confirmationQuote)}&rdquo;</p>
@@ -245,7 +252,7 @@ function buildProposalEmailTemplate(payload: {
   `;
 
   const text = [
-    `Dear Mr. / Ms. ${payload.customerName},`,
+    `Dear ${salutation} ${payload.customerName},`,
     "",
     `Thank you for placing your ${orderSideWord} order on BondNest Capital India Securities Private Limited (MeraDhan). Your order request has been recorded successfully and is currently pending confirmation.`,
     "",
@@ -451,8 +458,8 @@ export class CrmOrdersController {
         });
       }
 
-      const validStatuses = ["PENDING", "SETTLED", "APPLIED", "REJECTED"];
-      if (!validStatuses.includes(status)) {
+      const validStatuses = Object.values(OrderStatus);
+      if (!validStatuses.includes(status as OrderStatus)) {
         return res.sendResponse({
           statusCode: HttpStatus.BAD_REQUEST,
           message: `Invalid status. Must be one of: ${validStatuses.join(", ")}`,
@@ -782,7 +789,7 @@ export class CrmOrdersController {
     }
 
     const body = req.body as {
-      pdfType?: "order" | "deal";
+      pdfType?: "order" | "deal" | "both";
       subject?: string;
       messageBody?: string;
       toEmail?: string;
@@ -796,10 +803,10 @@ export class CrmOrdersController {
     };
 
     const pdfType = body.pdfType;
-    if (pdfType !== "order" && pdfType !== "deal") {
+    if (pdfType !== "order" && pdfType !== "deal" && pdfType !== "both") {
       return res.sendResponse({
         statusCode: HttpStatus.BAD_REQUEST,
-        message: "pdfType must be either 'order' or 'deal'",
+        message: "pdfType must be 'order', 'deal', or 'both'",
       });
     }
 
@@ -878,6 +885,8 @@ export class CrmOrdersController {
       faceValue?: number | string | null;
       cleanPrice?: number | string | null;
       couponRate?: number | string | null;
+      gender?: string | null;
+      customerProfileId?: number | string | null;
     };
 
     const recipientEmail = String(body.toEmail ?? "").trim();
@@ -900,8 +909,32 @@ export class CrmOrdersController {
       });
     }
 
+    let gender = resolveGenderForEmailSalutation({ gender: body.gender });
+    if (!gender) {
+      const customerProfileId =
+        body.customerProfileId != null && String(body.customerProfileId).trim() !== ""
+          ? Number(body.customerProfileId)
+          : null;
+      const customerRow = await db.dataBase.customerProfileDataModel.findFirst({
+        where:
+          customerProfileId != null && Number.isFinite(customerProfileId)
+            ? { id: customerProfileId, isDeleted: false }
+            : {
+                emailAddress: { equals: recipientEmail, mode: "insensitive" },
+                isDeleted: false,
+              },
+        select: {
+          gender: true,
+          panCard: { select: { gender: true } },
+          aadhaarCard: { select: { gender: true } },
+        },
+      });
+      gender = resolveGenderForEmailSalutation(customerRow);
+    }
+
     const template = buildProposalEmailTemplate({
       customerName,
+      gender,
       side,
       bondName,
       isin,
