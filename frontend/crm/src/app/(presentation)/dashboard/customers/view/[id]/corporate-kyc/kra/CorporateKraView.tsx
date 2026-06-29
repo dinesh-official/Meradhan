@@ -1462,6 +1462,7 @@ const CODE_GROUPS: Array<{ key: keyof LoadedPreview["codeReference"]; title: str
   { key: "annualIncome", title: "APP_INCOME — Annual income range (Non-Individual)", description: "Free-text values get mapped to these codes." },
   { key: "relationship", title: "APP_ADDLDATA_RELATIONSHIP — Relationship with applicant", description: "Director / Promoter / Signatory codes for APP_ADDL_DATA rows." },
   { key: "addressProof", title: "APP_COR_ADD_PROOF / APP_PER_ADD_PROOF — Proof of address" },
+  { key: "states", title: "APP_COR_STATE / APP_PER_STATE — State / UT (India)", description: "Use the exact NDML label in the corporate KYC state dropdown." },
   { key: "idProof", title: "APP_EXMT_ID_PROOF — Proof of identity" },
   { key: "occupation", title: "APP_OCC — Occupation (used for individuals)" },
   { key: "politicalConnection", title: "APP_POL_CONN — Political connection (PEP)" },

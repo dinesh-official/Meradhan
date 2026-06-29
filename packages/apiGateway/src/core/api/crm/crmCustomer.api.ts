@@ -121,6 +121,7 @@ export type CorporateKraCodeReference = {
   politicalConnection: CorporateKraCodeEntry[];
   relationship: CorporateKraCodeEntry[];
   addressProof: CorporateKraCodeEntry[];
+  states: CorporateKraCodeEntry[];
   idProof: CorporateKraCodeEntry[];
   tinType: CorporateKraCodeEntry[];
   tinExemptReason: CorporateKraCodeEntry[];
