@@ -21,6 +21,19 @@ describe("sanitizeIssuerHtml", () => {
     expect(out).toContain("<li>");
   });
 
+  it("keeps tables with colspan/rowspan but drops unsafe attributes", () => {
+    const out =
+      sanitizeIssuerHtml(
+        '<table><thead><tr><th colspan="2" onclick="evil()">H</th></tr></thead>' +
+          "<tbody><tr><td>A</td><td>B</td></tr></tbody></table>",
+      ) ?? "";
+    expect(out).toContain("<table>");
+    expect(out).toContain("<th");
+    expect(out).toContain('colspan="2"');
+    expect(out).toContain("<td>");
+    expect(out.toLowerCase()).not.toContain("onclick");
+  });
+
   it("returns null for empty / whitespace / null input", () => {
     expect(sanitizeIssuerHtml("")).toBeNull();
     expect(sanitizeIssuerHtml("   ")).toBeNull();

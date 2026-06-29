@@ -26,8 +26,12 @@ function BondInfoHeader({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-        <BondLogoImage logoUrl={bond.logoUrl} alt={logoAlt} />
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+        <BondLogoImage
+          logoUrl={bond.logoUrl}
+          alt={logoAlt}
+          className="border-0 bg-transparent sm:h-32 sm:w-32"
+        />
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           <div className="flex md:flex-row flex-col justify-between md:items-center gap-5">
             <p className={cn("font-medium text-2xl", "quicksand-medium")}>
