@@ -1,4 +1,5 @@
-// Deridata merchant API — one table per endpoint + control tables for batch ingestion.
+// Deridata merchant API — one table per endpoint (6 data tables + child tables).
+// Scope: store Deridata data per ISIN for the Load Autofill feature.
 // See docs/superpowers/specs/2026-06-29-deridata-integration-design.md
 
 /// 1. Issue Detail — one row per ISIN.
@@ -51,7 +52,7 @@ model DeridataIssueDetail {
     @@map("deridata_issue_detail")
 }
 
-/// 2. Calculator — point-in-time snapshot per (isin, valueDate, mode, input).
+/// 2. Calculator — point-in-time snapshot per ISIN.
 model DeridataCalculator {
     id   Int    @id @default(autoincrement())
     isin String
@@ -241,70 +242,4 @@ model DeridataPressRelease {
 
     @@index([documentId])
     @@map("deridata_press_releases")
-}
-
-/// Control: the imported seed universe of ISINs.
-model DeridataIsinRegistry {
-    id          Int      @id @default(autoincrement())
-    isin        String   @unique
-    sourceBatch String?
-    isActive    Boolean  @default(true)
-    priority    Int      @default(100)
-    addedAt     DateTime @default(now())
-
-    @@index([isActive])
-    @@map("deridata_isin_registry")
-}
-
-/// Control: resumable work-list, one row per (isin, endpoint).
-model DeridataSyncTask {
-    id             Int                @id @default(autoincrement())
-    isin           String
-    endpoint       DeridataEndpoint
-    status         DeridataTaskStatus @default(PENDING)
-    attempts       Int                @default(0)
-    lastError      String?
-    lastStatusCode Int?
-    nextRunAfter   DateTime?
-    fetchedAt      DateTime?
-    priority       Int                @default(100)
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    @@unique([isin, endpoint], name: "deridata_sync_tasks_isin_endpoint_key")
-    @@index([status, priority])
-    @@index([isin])
-    @@map("deridata_sync_tasks")
-}
-
-/// Control: singleton daily-budget tracker.
-model DeridataSyncState {
-    id             Int       @id @default(1)
-    callsUsedToday Int       @default(0)
-    budgetDate     String? // IST calendar day "YYYY-MM-DD"
-    limitHitAt     DateTime?
-    lastResetAt    DateTime?
-
-    updatedAt DateTime @updatedAt
-
-    @@map("deridata_sync_state")
-}
-
-enum DeridataEndpoint {
-    ISSUE_DETAIL
-    CALCULATOR
-    EBP
-    SECONDARY_TRADES
-    SECURITY_COVENANT
-    DOCUMENTS
-}
-
-enum DeridataTaskStatus {
-    PENDING
-    IN_PROGRESS
-    DONE
-    FAILED
-    SKIPPED
-    NOT_FOUND
 }
