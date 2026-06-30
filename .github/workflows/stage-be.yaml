@@ -95,6 +95,15 @@ jobs:
 
           ABSOLUTE_DATA_API_KEY: ${{ vars.ABSOLUTE_DATA_API_KEY }}
 
+   
+          DERIDATA_ENABLED: ${{ vars.DERIDATA_ENABLED }}
+          DERIDATA_MERCHANT_ID: ${{ vars.DERIDATA_MERCHANT_ID }}
+          DERIDATA_SECRET_KEY: ${{ vars.DERIDATA_SECRET_KEY }}
+          DERIDATA_MERCHANT_NAME: ${{ vars.DERIDATA_MERCHANT_NAME }}
+          DERIDATA_MERCHANT_EMAIL: ${{ vars.DERIDATA_MERCHANT_EMAIL }}
+          DERIDATA_PUBLIC_IP: ${{ vars.DERIDATA_PUBLIC_IP }}
+          DERIDATA_BASE_URL: ${{ vars.DERIDATA_BASE_URL }}
+
         run: |
           echo "NEXT_PUBLIC_HOST_URL=https://aws.meradhan.co" > .env
           echo "NEXT_PUBLIC_CRM_HOST_URL=https://awscrm.meradhan.co" >> .env
@@ -189,6 +198,14 @@ jobs:
           echo "BACKOFFICE_SMTP_PASS=${BACKOFFICE_SMTP_PASS}" >> .env
 
           echo "ABSOLUTE_DATA_API_KEY=${ABSOLUTE_DATA_API_KEY}" >> .env
+
+          echo "DERIDATA_ENABLED=${DERIDATA_ENABLED}" >> .env
+          echo "DERIDATA_MERCHANT_ID=${DERIDATA_MERCHANT_ID}" >> .env
+          echo "DERIDATA_SECRET_KEY=${DERIDATA_SECRET_KEY}" >> .env
+          echo "DERIDATA_MERCHANT_NAME=${DERIDATA_MERCHANT_NAME}" >> .env
+          echo "DERIDATA_MERCHANT_EMAIL=${DERIDATA_MERCHANT_EMAIL}" >> .env
+          echo "DERIDATA_PUBLIC_IP=${DERIDATA_PUBLIC_IP}" >> .env
+          echo "DERIDATA_BASE_URL=${DERIDATA_BASE_URL}" >> .env
 
           echo "----------- FINAL .env -----------"
           cat .env
