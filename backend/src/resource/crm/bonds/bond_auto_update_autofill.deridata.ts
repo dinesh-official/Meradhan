@@ -2,6 +2,11 @@ import { deridataDateToIstIso } from "@modules/deridata/deridata.date";
 import type { CalculatorInput, CalculatorResponse } from "@modules/deridata/deridata.api";
 import type { DeridataResult } from "@modules/deridata/deridata.types";
 import {
+  mapSeniority,
+  mapListed,
+  mapTaxStatus,
+} from "@modules/deridata/deridata.issue-detail.mapper";
+import {
   parseCalcMoneyString,
   paymentFrequencyToDbEnum,
   mapNatureOfInstrument,
@@ -30,7 +35,37 @@ export type DeridataIssueRow = {
   redemptionType?: string | null;
   currentRating?: string[] | null;
   dayConvention?: string | null;
+  issuerIndustry?: string | null;
+  tags?: string[] | null;
 };
+
+/** First Deridata rating with the agency prefix stripped: "CARE: AA+" → "AA+". */
+export function parseDeridataCreditRating(ratings?: string[] | null): string | null {
+  const first = (ratings ?? []).map((r) => String(r ?? "").trim()).find(Boolean);
+  if (!first) return null;
+  const idx = first.indexOf(":");
+  const grade = (idx >= 0 ? first.slice(idx + 1) : first).trim();
+  return grade || null;
+}
+
+/**
+ * Derive MeraDhan listing categories from Deridata `issuer_industry` + `tags`.
+ * Only the cleanly-derivable slugs are returned; `latest-release` is editorial
+ * (not in Deridata) so it is never set here.
+ */
+export function deriveDeridataCategories(issue: DeridataIssueRow): string[] {
+  const cats = new Set<string>();
+  const industry = (issue.issuerIndustry ?? "").toLowerCase();
+  const tags = (issue.tags ?? []).map((t) => String(t ?? "").toUpperCase());
+  const seniority = (issue.seniority ?? "").toLowerCase();
+  if (industry.includes("nbfc")) cats.add("nbfc");
+  if (industry.includes("bank")) cats.add("banks");
+  if (industry.includes("psu")) cats.add("psu");
+  if ((issue.taxFree ?? "").toLowerCase() === "yes" || tags.includes("TAXFREE")) cats.add("tax-free");
+  if (tags.includes("ZERO COUPON")) cats.add("zero-coupon");
+  if (tags.some((t) => t.includes("PERPETUAL")) || seniority.includes("perpetual")) cats.add("perpetual");
+  return [...cats];
+}
 
 type BondDataRow = {
   bondName?: string | null;
@@ -86,7 +121,7 @@ export function mapDeridataAutofill(args: {
   bondData: BondDataRow;
   calc: CalculatorResponse;
 }): BondDealAutofillResponse {
-  const { isin, resolved, issue, bondData, calc } = args;
+  const { isin, resolved, issue, calc } = args;
   const summary = (calc.summary ?? {}) as Record<string, unknown>;
 
   const finalPrice = parseCalcMoneyString(summary.clean_price as string | null | undefined);
@@ -109,35 +144,53 @@ export function mapDeridataAutofill(args: {
     ),
   ].sort();
 
-  const faceValue = Number(issue.faceValue ?? bondData?.faceValue ?? 0);
+  // Derive last-coupon date + accrued days from the full cashflow schedule:
+  // Deridata returns past coupon rows (marked "-") too, so the most recent
+  // scheduled date strictly before the settlement date is the last coupon.
+  const settlementYmd = resolved.settlementDateYmd;
+  const scheduleDates = [
+    ...new Set(
+      (calc.cashflows ?? [])
+        .map((cf) => deridataDateToYmd((cf as { cash_flow_dates?: string | null }).cash_flow_dates))
+        .filter((d): d is string => Boolean(d)),
+    ),
+  ].sort();
+  const pastCouponDates = scheduleDates.filter((d) => d < settlementYmd);
+  const lastCouponDate = pastCouponDates.length ? pastCouponDates[pastCouponDates.length - 1]! : "";
+  const accruedInterestDays = lastCouponDate
+    ? Math.max(0, Math.round((Date.parse(settlementYmd) - Date.parse(lastCouponDate)) / 86_400_000))
+    : null;
+
+  const faceValue = Number(issue.faceValue ?? 0);
   const couponRate = round(Number(issue.couponFixed ?? 0), 2) ?? 0;
   const freqEnum = paymentFrequencyToDbEnum(issue.couponFrequency);
 
   const nextCouponDate =
     toYyyyMmDd(issue.couponDate ?? undefined) ?? allCouponDates[0] ?? "";
 
-  const buyYieldRaw = bondData?.buyYield ?? bondData?.yield ?? resolved.pricingYield ?? null;
-
   const suggested: BondDealAutofillResponse["suggested"] = {
-    bondName: issue.issuerName?.trim() || bondData?.bondName?.trim() || null,
-    creditRating: bondData?.creditRating?.trim() || issue.currentRating?.[0] || "UnRated",
+    bondName: issue.issuerName?.trim() || null,
+    creditRating: parseDeridataCreditRating(issue.currentRating) ?? "UnRated",
     allCouponDates,
     allCouponDatesIst: allCouponDates,
     natureOfInstrument: mapNatureOfInstrument(issue.security),
     maturityDate: toYyyyMmDd(issue.maturity ?? undefined) ?? null,
     dateOfAllotment: toYyyyMmDd(issue.allotmentDate ?? undefined) ?? null,
-    lastCouponDate: "", // Deridata calculator does not return an explicit last-coupon date
+    lastCouponDate, // derived from the calculator cashflow schedule
     nextCouponDate,
     recordDate: deridataDateToYmd(summary.record_date as string | null | undefined),
     recordDays: issue.recordDate ?? null,
-    accruedInterestDays: null, // Deridata calculator does not return an accrued-interest day count
+    accruedInterestDays, // derived: settlement date − last coupon date
     dueDate: null,
-    dayConvention: issue.dayConvention ?? bondData?.dayConvention ?? null,
+    // Hard field: no Deridata source — intentionally left blank.
+    dayConvention: null,
     interestPaymentFrequency: freqEnum,
     interestPaymentMode: freqEnum,
     faceValue,
     couponRate,
-    buyYield: round(buyYieldRaw, 2),
+    // buyYield is left blank (not Deridata reference data). `yield` echoes the
+    // operator's "Custom yield %" (resolved.pricingYield) that drives the calculator.
+    buyYield: null,
     yield: round(finalYieldRaw, 2) ?? 0,
     sellPrice: round(finalPrice, 4),
     settlementAmount,
@@ -145,13 +198,14 @@ export function mapDeridataAutofill(args: {
     principalAmount,
     totalConsideration,
     isUnderShutPeriod,
-    bondType: bondData?.bondType ?? null,
-    seniority: bondData?.seniority ?? issue.seniority ?? null,
-    redemptionType: issue.redemptionType ?? bondData?.redemptionType ?? null,
-    taxStatus: bondData?.taxStatus ?? null,
-    isListed: bondData?.isListed ?? issue.listed ?? null,
-    couponType: issue.couponType ?? bondData?.couponType ?? null,
-    categories: bondData?.categories ?? [],
+    // Hard field: no Deridata source — intentionally left blank.
+    bondType: null,
+    seniority: mapSeniority(issue.seniority) ?? null,
+    redemptionType: issue.redemptionType ?? null,
+    taxStatus: mapTaxStatus(issue.taxFree) ?? null,
+    isListed: mapListed(issue.listed).isListed,
+    couponType: issue.couponType ?? null,
+    categories: deriveDeridataCategories(issue),
   };
 
   return {

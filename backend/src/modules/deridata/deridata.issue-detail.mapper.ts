@@ -25,7 +25,7 @@ function mapInterestMode(freq: string | null | undefined): $Enums.INTEREST_MODE 
   return undefined;
 }
 
-function mapTaxStatus(taxFree: string | null | undefined): $Enums.TAX_TYPE | undefined {
+export function mapTaxStatus(taxFree: string | null | undefined): $Enums.TAX_TYPE | undefined {
   const t = pickStr(taxFree)?.toLowerCase();
   if (!t) return undefined;
   if (t === "yes" || t.includes("free")) return "TAX_FREE";
@@ -41,7 +41,7 @@ function mapNature(security: string | null | undefined): $Enums.INSTRUMENT_SECUR
   return "UNKNOWN";
 }
 
-function mapSeniority(s: string | null | undefined): $Enums.BOND_SENIORITY | undefined {
+export function mapSeniority(s: string | null | undefined): $Enums.BOND_SENIORITY | undefined {
   const v = pickStr(s)?.toLowerCase();
   if (!v) return undefined;
   if (v.startsWith("senior")) return "SENIOR";
@@ -51,7 +51,7 @@ function mapSeniority(s: string | null | undefined): $Enums.BOND_SENIORITY | und
 }
 
 /** Deridata `listed`: "NSE" | "BSE" | "NSE: BSE" | null (null ⇒ unlisted). */
-function mapListed(listed: string | null | undefined): {
+export function mapListed(listed: string | null | undefined): {
   isListed: $Enums.IS_LISTED;
   exchange: $Enums.STOCK_EXCHANGE;
 } {
