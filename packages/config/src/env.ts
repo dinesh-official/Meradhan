@@ -121,29 +121,6 @@ const EnvSchema = z.object(
       .optional()
       .default("https://api.absolutedata.ai"),
 
-    // Deridata (bonds merchant API) — optional; required only when DERIDATA_ENABLED.
-    // Booleans come from env strings, so do NOT use z.coerce.boolean()
-    // (Boolean("false") === true). Only "true"/"1" count as true.
-    DERIDATA_MERCHANT_ID: z.coerce.number().int().positive().optional(),
-    DERIDATA_SECRET_KEY: z.string().min(1).optional(),
-    DERIDATA_MERCHANT_NAME: z.string().min(1).optional(),
-    DERIDATA_MERCHANT_EMAIL: z.email().optional(),
-    DERIDATA_PUBLIC_IP: z.string().min(1).optional(),
-    DERIDATA_BASE_URL: z.url().optional().default("https://www.deridata.com"),
-    DERIDATA_DAILY_CALL_LIMIT: z.coerce.number().int().positive().default(10000),
-    DERIDATA_ENABLED: z
-      .union([z.boolean(), z.string()])
-      .optional()
-      .transform((v) => v === true || v === "true" || v === "1"),
-    USE_DERIDATA_CALCULATOR: z
-      .union([z.boolean(), z.string()])
-      .optional()
-      .transform((v) => v === true || v === "true" || v === "1"),
-    USE_DERIDATA_AS_CATALOG: z
-      .union([z.boolean(), z.string()])
-      .optional()
-      .transform((v) => v === true || v === "true" || v === "1"),
-
     // ✅ Password hashing pepper - (optional, but recommended for production)
     PASSWORD_PEPPER: z.string().min(16, { message: "PASSWORD_PEPPER must be at least 16 characters", }).optional(),
   },

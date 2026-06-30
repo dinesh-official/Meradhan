@@ -13,9 +13,6 @@
     "lint:fix": "eslint . --fix",
     "check": "npx tsc --noEmit",
     "test": "bun test",
-    "test:deridata": "bun test src/modules/deridata/",
-    "deridata:smoke": "bun run scripts/deridata-smoke.ts",
-    "deridata:populate": "bun run scripts/deridata-populate-isins.ts",
     "db:generate": "prisma generate --schema=databases/postgres/prisma/schema"
   },
   "exports": {
