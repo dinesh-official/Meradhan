@@ -78,28 +78,28 @@ function WhyMeraDhanSection() {
         <div className="bg-muted my-4 px-8 lg:px-0 py-6 rounded-lg">
           <div className="grid lg:grid-cols-4 text-center">
             <WhyPoints>
-              <FaSackDollar size={25} className="text-primary" />
+              <FaSackDollar size={25} className="text-primary" aria-hidden="true" />
               <span className="flex justify-center items-center mt-2 text-2xl">
-                <PiCurrencyInrBold /> 10,000
+                <PiCurrencyInrBold aria-hidden="true" /> 10,000
               </span>
               <p>Minimum Investment</p>
             </WhyPoints>
             <WhyPoints>
-              <FaUser size={25} className="text-primary" />
+              <FaUser size={25} className="text-primary" aria-hidden="true" />
               <span className="flex justify-center items-center mt-2 text-2xl">
                 7,600+
               </span>
               <p>Users</p>
             </WhyPoints>
             <WhyPoints>
-              <FaFileWaveform size={25} className="text-primary" />
+              <FaFileWaveform size={25} className="text-primary" aria-hidden="true" />
               <span className="flex justify-center items-center mt-2 text-2xl">
                 6200+
               </span>
               <p>Bonds</p>
             </WhyPoints>
             <WhyPoints isLast>
-              <FaMoneyBill size={25} className="text-primary" />
+              <FaMoneyBill size={25} className="text-primary" aria-hidden="true" />
               <span className="flex justify-center items-center mt-2 text-2xl">
                 0
               </span>

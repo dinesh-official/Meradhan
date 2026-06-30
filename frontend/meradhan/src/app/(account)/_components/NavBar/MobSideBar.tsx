@@ -43,14 +43,21 @@ function MobSideBar() {
         )}
       >
         {/* Header / Logo */}
-        <SheetHeader className="flex items-start px-6 py-4 border-gray-200 border-b">
+        <SheetHeader className="meradhan-logo flex items-start px-6 py-4 border-gray-200 border-b">
           <Image
             src={`/logo/mera-dhan-logo.svg`}
             width={160}
             height={50}
             alt="Mera Dhan"
-            className="w-auto h-8"
+            className="w-auto h-8 logo-default"
             priority
+          />
+          <Image
+            src={`/logo/meradhan-logo-white.svg`}
+            width={160}
+            height={50}
+            alt="Mera Dhan"
+            className="w-auto h-8 logo-white"
           />
         </SheetHeader>
 

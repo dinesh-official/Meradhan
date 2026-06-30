@@ -48,7 +48,7 @@ export function BondListCard({
               className="h-12 w-12 rounded-md sm:h-14 sm:w-14"
             />
             <div className="flex min-w-0 flex-1 flex-col gap-3">
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 min-w-0">
                 <p className="font-semibold text-primary text-sm">
                   {data.isin}
                 </p>
@@ -60,7 +60,7 @@ export function BondListCard({
                 {/* // make sure 2 buttons on that code deferent places */}
                 {!gridMode && (
                   <div className="hidden lg:flex gap-3 col-span-2 flex-wrap justify-end">
-                    <Link href={`/bonds/detail/` + data.isin}>
+                    <Link href={`/bonds/detail/` + data.isin} aria-label={`View details for ${data.bondName}`}>
                       <Button variant={`outline`} className="bg-transparent">
                         View Details
                       </Button>
@@ -106,11 +106,13 @@ export function BondListCard({
               )}
               <SharePopupTrigger
                 title="Share Bond"
+                aria-label="Share bond"
                 url={HOST_URL + "/bonds/detail/" + data.isin}
               >
                 <RiShareFill
                   className="text-gray-600 cursor-pointer"
                   size={18}
+                  aria-hidden="true"
                 />
               </SharePopupTrigger>
             </div>
@@ -122,7 +124,7 @@ export function BondListCard({
             >
               <BondInfoLabel title="Issue Price">
                 <p className="flex items-center">
-                  <PiCurrencyInrBold size={15} />{" "}
+                  <PiCurrencyInrBold size={15} aria-hidden="true" />{" "}
                   {formatNumberTS(data.issuePrice)}
                 </p>
               </BondInfoLabel>
@@ -139,7 +141,7 @@ export function BondListCard({
               </BondInfoLabel>
               <BondInfoLabel title="Face Value">
                 <p className="flex items-center">
-                  <PiCurrencyInrBold size={15} />{" "}
+                  <PiCurrencyInrBold size={15} aria-hidden="true" />{" "}
                   {formatNumberTS(data.faceValue)}
                 </p>
               </BondInfoLabel>
@@ -169,6 +171,7 @@ export function BondListCard({
               >
                 <Link
                   href={`/bonds/detail/${data.isin}`}
+                  aria-label={`View details for ${data.bondName}`}
                   className="block w-full"
                 >
                   <Button variant={`outline`} className="bg-transparent w-full">

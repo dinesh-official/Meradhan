@@ -42,7 +42,7 @@ function BondInfoHeader({
               <div className="flex items-center gap-5">
                 <div className="flex items-center gap-2 bg-muted px-2 py-0.5 rounded-sm max-w-[350px] text-primary">
                   <div className="w-5">
-                    <FaStar size={17} className="text-secondary" />
+                    <FaStar size={17} className="text-secondary" aria-hidden="true" />
                   </div>
                   <span className="text-sm line-clamp-1">
                     {bond.creditRatingInfo}
@@ -57,7 +57,7 @@ function BondInfoHeader({
                 {bond.bondName}
               </h2>
               {formatYield(bond.yield) && (
-                <span className="inline-flex items-center rounded-full bg-green-100 px-4 py-1.5 text-base md:text-lg font-bold text-green-700">
+                <span className="yield-badge inline-flex items-center rounded-full bg-green-100 px-4 py-1.5 text-base md:text-lg font-bold text-green-700">
                   Yield ({formatYield(bond.yield)})
                 </span>
               )}

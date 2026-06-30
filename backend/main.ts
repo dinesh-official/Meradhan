@@ -49,6 +49,22 @@ import kraRoutes from "@resource/kra/kra.routes";
 import logger from "@utils/logger/logger";
 import crmBondPricedListRoutes from "./src/resource/crm/bonds/bond_priced_list.routes";
 import bondPublicRouter from "@resource/bonds/bond.public.routes";
+
+// LOCAL DEV resilience: placeholder integrations (SMTP / S3 / the Bull email queue,
+// which fails to load its Lua scripts under Bun) raise unhandled rejections from
+// fire-and-forget calls — e.g. requesting a login OTP enqueues an email job that
+// throws after the 200 response. Outside production, log and keep the process alive
+// so local testing isn't interrupted. Production behavior is unchanged (no handler →
+// process exits so the orchestrator restarts it).
+if (process.env.NODE_ENV !== "production") {
+  process.on("unhandledRejection", (reason) => {
+    console.error("[dev] Unhandled promise rejection (server kept alive):", reason);
+  });
+  process.on("uncaughtException", (err) => {
+    console.error("[dev] Uncaught exception (server kept alive):", err);
+  });
+}
+
 const monitoring = new PrometheusMonitorProvider();
 const response_time_monitor = new PrometheusResponseTimeMonitor();
 
