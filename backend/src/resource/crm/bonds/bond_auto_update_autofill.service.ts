@@ -1,8 +1,5 @@
 import { db } from "@core/database/database";
-import { env } from "@packages/config/src/env";
 import { AppError, HttpStatus } from "@utils/error/AppError";
-import { deridataApiFromEnv } from "@modules/deridata/deridata.api";
-import { buildDeridataAutofill } from "./bond_auto_update_autofill.deridata";
 import {
   buildCalcPayloadAndContext,
   collectAllCouponDatesYmd,
@@ -26,7 +23,6 @@ export type BondDealAutofillResponse = {
     usedProviderQuantity?: boolean;
     usedProviderSettlementDate?: boolean;
     usedCalcBondApi?: boolean;
-    usedDeridata?: boolean;
   };
   suggested: {
     bondName?: string | null;
@@ -80,20 +76,6 @@ export class BondAutoUpdateAutofillService {
     isin: string,
     input: AutoUpdateAutofillInput = {},
   ): Promise<BondDealAutofillResponse> {
-    // Deridata-first: when the calculator flag is on AND this ISIN has Deridata
-    // reference data, build the autofill from Deridata + its Calculator API.
-    // Otherwise fall through to the existing calc.meradhan.co path unchanged.
-    if (env.USE_DERIDATA_CALCULATOR) {
-      const issueRow = await db.dataBase.deridataIssueDetail.findUnique({
-        where: { isin },
-      });
-      if (issueRow) {
-        const bondData = await db.dataBase.bonds.findFirst({ where: { isin } });
-        const api = deridataApiFromEnv();
-        return buildDeridataAutofill(isin, input, api, issueRow, bondData);
-      }
-    }
-
     const bond = await db.dataBase.bondReferenceMetadata.findFirst({
       where: { isin },
     });
