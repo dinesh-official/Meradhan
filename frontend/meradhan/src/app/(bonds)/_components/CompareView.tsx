@@ -24,7 +24,7 @@ const CompareView: React.FC = () => {
   }
 
   return (
-    <div className="bottom-0 left-0 z-50 fixed w-full">
+    <div className="compare-tray bottom-0 left-0 z-50 fixed w-full">
       <div className="flex flex-col justify-between items-center mx-auto px-4 py-3 max-w-7xl">
         {/* Cards Section */}
         <div className="flex lg:flex-row flex-col gap-3 bg-white shadow-sm p-2 rounded-xl overflow-x-auto">
@@ -90,9 +90,10 @@ const CompareViewCard: React.FC<CompareViewCardProps> = ({
       {/* Remove Button */}
       <button
         onClick={onRemove}
+        aria-label="Remove from comparison"
         className="top-2 right-2 absolute text-red-500 hover:text-red-700 transition"
       >
-        <X size={16} />
+        <X size={16} aria-hidden="true" />
       </button>
 
       {/* Title */}
@@ -109,7 +110,7 @@ const CompareViewCard: React.FC<CompareViewCardProps> = ({
         <div>
           <p className="text-gray-500">Face Value</p>
           <p className="flex items-center font-semibold text-gray-800">
-            <PiCurrencyInrBold size={13} className="mr-[2px]" />
+            <PiCurrencyInrBold size={13} className="mr-[2px]" aria-hidden="true" />
             {Number(faceValue).toLocaleString("en-IN")}
           </p>
         </div>

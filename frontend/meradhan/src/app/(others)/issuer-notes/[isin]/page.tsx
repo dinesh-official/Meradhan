@@ -208,7 +208,7 @@ async function page({ params }: { params: Promise<{ isin: string }> }) {
                   {data.bondDetails.creditRating}
                 </SortInfoBox>
                 <SortInfoBox title="Face Value">
-                  <PiCurrencyInrBold />{" "}
+                  <PiCurrencyInrBold aria-hidden="true" />{" "}
                   {data.bondDetails.faceValue.toLocaleString("en-IN", {
                     minimumFractionDigits: 2,
                   })}

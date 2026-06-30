@@ -21,6 +21,7 @@ import { IoIosArrowDown } from "react-icons/io";
 import { MdDashboard, MdLogout } from "react-icons/md";
 import { SideBarCollapseButton } from "./ActionSideBar";
 import MobSideBar from "./MobSideBar";
+import AccessibilityWidget from "@/global/components/AccessibilityWidget";
 
 function AccountNavBar({
   session,
@@ -39,7 +40,7 @@ function AccountNavBar({
 
   return (
     <nav
-      className="top-0 right-0 left-0 z-50 sticky bg-white shadow shadow-black/10 w-full h-16 md:h-18"
+      className="meradhan-navbar top-0 right-0 left-0 z-50 sticky bg-white shadow shadow-black/10 w-full h-16 md:h-18"
       aria-label="Main Navigation Bar"
     >
       <div className="flex justify-between items-center px-4 md:px-6 h-full">
@@ -53,15 +54,22 @@ function AccountNavBar({
           <Link
             href="/"
             aria-label="Go to homepage"
-            className="flex items-center"
+            className="flex items-center meradhan-logo"
           >
             <Image
               src="/logo/mera-dhan-logo.svg"
               width={400}
               height={200}
               alt="Mera Dhan Logo"
-              className="w-auto h-8 lg:h-10"
+              className="w-auto h-8 lg:h-10 logo-default"
               priority
+            />
+            <Image
+              src="/logo/meradhan-logo-white.svg"
+              width={400}
+              height={200}
+              alt="Mera Dhan Logo"
+              className="w-auto h-8 lg:h-10 logo-white"
             />
           </Link>
         </section>
@@ -150,6 +158,7 @@ function AccountNavBar({
             </div>
           </div>
 
+          <AccessibilityWidget />
           {/* Profile Dropdown */}
           {ShowUserBadge(session)}
         </section>

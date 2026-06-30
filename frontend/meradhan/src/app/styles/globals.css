@@ -7,6 +7,498 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Logo swap for dark mode and high contrast mode */
+.meradhan-logo .logo-white { display: none; }
+html.dark .meradhan-logo .logo-default,
+body.high-contrast .meradhan-logo .logo-default { display: none !important; }
+html.dark .meradhan-logo .logo-white,
+body.high-contrast .meradhan-logo .logo-white   { display: block !important; }
+
+/* Font scaling — scales all rem-based text */
+html { font-size: calc(var(--a11y-font-scale, 1) * 100%); }
+
+/* ════════════════════════════════════════════
+   HIGH CONTRAST MODE  (body.high-contrast)
+   ════════════════════════════════════════════ */
+
+/* Base page background + universal text */
+body.high-contrast,
+body.high-contrast #main-content {
+  background-color: #0d1117 !important;
+  color: #ffffff !important;
+}
+
+/* All text elements white by default */
+body.high-contrast h1, body.high-contrast h2, body.high-contrast h3,
+body.high-contrast h4, body.high-contrast h5, body.high-contrast h6,
+body.high-contrast p, body.high-contrast span, body.high-contrast li,
+body.high-contrast td, body.high-contrast th, body.high-contrast label,
+body.high-contrast a {
+  color: #ffffff !important;
+}
+
+/* All SVG icons white */
+body.high-contrast svg {
+  color: #ffffff !important;
+}
+
+/* ── Navbar ── */
+body.high-contrast .meradhan-navbar,
+body.high-contrast nav[role="navigation"] {
+  background-color: #001c37 !important;
+  border-bottom: 1px solid #1e3a5f !important;
+}
+body.high-contrast .meradhan-navbar span,
+body.high-contrast .meradhan-navbar a,
+body.high-contrast .meradhan-navbar button,
+body.high-contrast .meradhan-navbar svg {
+  color: #ffffff !important;
+}
+body.high-contrast .meradhan-navbar a[href*="sign"],
+body.high-contrast .meradhan-navbar button[class*="bg-"] {
+  background-color: #1a4a7a !important;
+  color: #ffffff !important;
+  border: 1px solid #4a8fd4 !important;
+  border-radius: 9999px !important;
+}
+
+/* ── Hero section — hide grid canvas so solid bg-primary blue shows ── */
+body.high-contrast section.bg-primary canvas,
+body.high-contrast section[class*="bg-primary"] canvas,
+body.high-contrast .hero-section canvas {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ── White/light backgrounds → dark ── */
+body.high-contrast [class*="bg-white"],
+body.high-contrast [class*="bg-gray"] {
+  background-color: #0d1117 !important;
+}
+
+/* ── bg-muted sections (Help? banner, stats row, tab list) → dark navy ── */
+body.high-contrast [class*="bg-muted"],
+body.high-contrast .bg-muted {
+  background-color: #0d2035 !important;
+  color: #ffffff !important;
+}
+body.high-contrast [class*="bg-muted"] *,
+body.high-contrast .bg-muted * {
+  color: #ffffff !important;
+}
+
+/* ── bg-accent sections (Tools section) → dark ── */
+body.high-contrast [class*="bg-accent"],
+body.high-contrast .bg-accent {
+  background-color: #0d1117 !important;
+}
+
+/* ── Cards (Why MeraDhan, Tools cards) ── */
+body.high-contrast .card,
+body.high-contrast [class*="rounded"][class*="border"],
+body.high-contrast [data-slot="card"] {
+  background-color: #111827 !important;
+  border-color: #1e3a5f !important;
+}
+
+/* ── Tabs (Explore Bonds) ── */
+body.high-contrast [role="tablist"] {
+  background-color: #0d2035 !important;
+}
+body.high-contrast [role="tab"] {
+  color: #a0b8cc !important;
+}
+body.high-contrast [role="tab"][data-state="active"] {
+  background-color: #1a4a7a !important;
+  color: #ffffff !important;
+}
+
+/* ── text-secondary (orange) spans — make white in high contrast ── */
+body.high-contrast [class*="text-secondary"],
+body.high-contrast .text-secondary {
+  color: #7eb8f7 !important;
+}
+
+/* ── text-black / text-primary overrides ── */
+body.high-contrast [class*="text-black"],
+body.high-contrast .text-black {
+  color: #ffffff !important;
+}
+body.high-contrast [class*="text-primary"],
+body.high-contrast .text-primary {
+  color: #7eb8f7 !important;
+}
+
+/* ── bg-primary panels (not buttons) — dark navy ── */
+body.high-contrast div[class*="bg-primary"],
+body.high-contrast section[class*="bg-primary"] {
+  background-color: #001c37 !important;
+}
+
+/* ── Buttons ── */
+body.high-contrast button[class*="bg-primary"],
+body.high-contrast a[class*="bg-primary"] {
+  background-color: #1a4a7a !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+}
+body.high-contrast button {
+  border-color: #4a8fd4 !important;
+}
+
+/* Contact-page social icons: plain white icons in HC (no bg bar / border that read as divider lines) */
+body.high-contrast a[class*="bg-primary"].social-icon {
+  background: transparent !important;
+  border: none !important;
+  color: #ffffff !important;
+}
+
+/* ── Form inputs ── */
+body.high-contrast input,
+body.high-contrast textarea,
+body.high-contrast select {
+  background-color: #0d2035 !important;
+  color: #ffffff !important;
+  border: 1px solid #4a8fd4 !important;
+}
+body.high-contrast input::placeholder,
+body.high-contrast textarea::placeholder {
+  color: #a0b8cc !important;
+}
+
+/* ── Newsletter section ── */
+body.high-contrast .newsletter-section {
+  background-color: #001c37 !important;
+}
+body.high-contrast .newsletter-section h3,
+body.high-contrast .newsletter-section p,
+body.high-contrast .newsletter-section span,
+body.high-contrast .newsletter-section label {
+  color: #ffffff !important;
+}
+body.high-contrast .newsletter-section button {
+  background-color: #1a4a7a !important;
+  color: #ffffff !important;
+  border: 1px solid #4a8fd4 !important;
+}
+
+/* ── Footer ── */
+body.high-contrast footer[role="contentinfo"],
+body.high-contrast footer[role="contentinfo"] div {
+  background-color: #262626 !important;
+}
+body.high-contrast footer[role="contentinfo"],
+body.high-contrast footer[role="contentinfo"] * {
+  color: #ffffff !important;
+}
+body.high-contrast footer[role="contentinfo"] a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+body.high-contrast footer[role="contentinfo"] a:hover {
+  color: #ffd23f !important;
+}
+body.high-contrast footer[role="contentinfo"] ul li,
+body.high-contrast footer[role="contentinfo"] ul li a {
+  border-color: transparent !important;
+}
+
+/* ── Contact cards (phone/email) ── */
+body.high-contrast .contact-card {
+  background-color: #0d1117 !important;
+  border-color: #4a8fd4 !important;
+  color: #ffffff !important;
+}
+body.high-contrast .contact-card svg {
+  color: #ffffff !important;
+}
+body.high-contrast .contact-card-label,
+body.high-contrast .contact-card span.bg-white {
+  background-color: #0d1117 !important;
+  color: #ffffff !important;
+}
+
+/* ── Contact query card (floating form) ── */
+body.high-contrast .contact-query-card {
+  background-color: #0d1117 !important;
+  border-color: #4a8fd4 !important;
+}
+body.high-contrast .contact-query-card label,
+body.high-contrast .contact-query-card p {
+  color: #ffffff !important;
+}
+body.high-contrast .contact-query-card input,
+body.high-contrast .contact-query-card textarea {
+  background-color: #0d2035 !important;
+  color: #ffffff !important;
+  border: 1px solid #4a8fd4 !important;
+}
+
+/* ── Bond category icons ── */
+body.high-contrast .bond-category-icon {
+  filter: brightness(0) invert(1) !important;
+}
+body.high-contrast .bond-category-circle {
+  background-color: #1a4a7a !important;
+  border: 1px solid #4a8fd4 !important;
+}
+
+/* ── Navbar dropdowns ── */
+body.high-contrast .nav-dropdown,
+body.high-contrast [class*="bg-white"][class*="border"][class*="rounded"] {
+  background-color: #001c37 !important;
+  border-color: #4a8fd4 !important;
+}
+body.high-contrast .nav-dropdown a,
+body.high-contrast .nav-dropdown span {
+  color: #ffffff !important;
+}
+
+/* ── Focus indicator ── */
+body.high-contrast *:focus-visible {
+  outline: 2px solid #ffd23f !important;
+  outline-offset: 2px !important;
+}
+
+/* ════════════════════════════════════════════
+   HIGH CONTRAST — Dashboard / account area
+   ════════════════════════════════════════════ */
+body.high-contrast .account-viewport {
+  background-color: #0d1117 !important;
+}
+body.high-contrast .account-sidebar {
+  background-color: #001c37 !important;
+  border-color: #1e3a5f !important;
+}
+body.high-contrast .account-sidebar a,
+body.high-contrast .account-sidebar span,
+body.high-contrast .account-sidebar svg {
+  color: #ffffff !important;
+}
+body.high-contrast .account-sidebar a:hover {
+  background-color: #1a4a7a !important;
+  color: #ffffff !important;
+}
+/* Active sidebar item keeps a distinct, accessible highlight (active item carries text-primary) */
+body.high-contrast .account-sidebar a[class*="text-primary"] {
+  background-color: #1a4a7a !important;
+  color: #ffffff !important;
+}
+/* Sidebar tooltip label (collapsed sidebar) — readable bordered box in high contrast */
+body.high-contrast [data-slot="tooltip-content"] {
+  background-color: #0d2035 !important;
+  color: #ffffff !important;
+  border: 1px solid #ffffff !important;
+}
+body.high-contrast [data-slot="tooltip-content"] svg {
+  fill: #0d2035 !important;
+}
+/* Dashboard charts (recharts) — hardcoded black fills are invisible on dark bg */
+body.high-contrast .recharts-layer text,
+body.high-contrast .recharts-cartesian-axis-tick text,
+body.high-contrast .recharts-legend-item-text {
+  fill: #ffffff !important;
+  color: #ffffff !important;
+}
+
+/* ── Yield badge (bond detail) ── */
+body.high-contrast .yield-badge {
+  background-color: #1a4a7a !important;   /* visible blue pill */
+  color: #ffffff !important;
+  border: 1px solid #ffffff !important;
+}
+
+/* ── Cash Flow table (bond detail) ── */
+body.high-contrast .cashflow-table thead tr,
+body.high-contrast .cashflow-table tfoot tr {
+  background-color: #001c37 !important;   /* dark navy header + footer */
+  border-color: #1e3a5f !important;
+}
+body.high-contrast .cashflow-table tbody tr {
+  background-color: #0d1117 !important;   /* base row */
+  border-color: #1e3a5f !important;
+}
+body.high-contrast .cashflow-table tbody tr:nth-child(even) {
+  background-color: #16263a !important;   /* lighter navy zebra */
+}
+body.high-contrast .cashflow-table th,
+body.high-contrast .cashflow-table td {
+  color: #ffffff !important;              /* white text everywhere */
+}
+
+/* ════════════════════════════════════════════
+   HIGH CONTRAST — Dashboard pages (settings, portfolio)
+   ════════════════════════════════════════════ */
+
+/* Cards → dark surface; whiten ALL descendants (card-title/description <div>s + hardcoded hex colors) */
+body.high-contrast .account-viewport [data-slot="card"] {
+  background-color: #111827 !important;
+  border-color: #1e3a5f !important;
+}
+body.high-contrast .account-viewport [data-slot="card"] *,
+body.high-contrast .account-viewport [data-slot="card-title"],
+body.high-contrast .account-viewport [data-slot="card-description"] {
+  color: #ffffff !important;
+}
+
+/* Whiten hardcoded dark text colours on ANY dashboard element (incl. <div>, which the generic rule skips) */
+body.high-contrast .account-viewport [class*="text-black"],
+body.high-contrast .account-viewport [class*="text-[#0"],
+body.high-contrast .account-viewport [class*="text-[#6"],
+body.high-contrast .account-viewport [class*="text-gray-"],
+body.high-contrast .account-viewport [class*="text-neutral-"],
+body.high-contrast .account-viewport [class*="text-slate-"] {
+  color: #ffffff !important;
+}
+
+/* Portfolio Details table (.common-table-wrapper) */
+body.high-contrast .common-table-wrapper table thead tr th {
+  background-color: #001c37 !important;
+  color: #ffffff !important;
+  border-color: #1e3a5f !important;
+}
+body.high-contrast .common-table-wrapper table tbody tr {
+  background-color: #0d1117 !important;
+  border-color: #1e3a5f !important;
+}
+body.high-contrast .common-table-wrapper table tbody tr:hover {
+  background-color: #16263a !important;
+}
+body.high-contrast .common-table-wrapper table td,
+body.high-contrast .common-table-wrapper table td * {
+  color: #ffffff !important;
+}
+
+/* Filter triggers + date inputs (inline) */
+body.high-contrast .account-viewport [data-slot="select-trigger"],
+body.high-contrast .account-viewport input[type="date"] {
+  background-color: #0d2035 !important;
+  color: #ffffff !important;
+  border-color: #4a8fd4 !important;
+}
+body.high-contrast .account-viewport input[type="date"] {
+  color-scheme: dark !important;
+}
+
+/* Dropdown menus (portaled at <body>) — Select + MultiSelect (Popover + Command) */
+body.high-contrast [data-slot="select-content"],
+body.high-contrast [data-slot="popover-content"],
+body.high-contrast [data-slot="command"] {
+  background-color: #0d2035 !important;
+  border: 1px solid #4a8fd4 !important;
+}
+body.high-contrast [data-slot="select-content"] *,
+body.high-contrast [data-slot="popover-content"] *,
+body.high-contrast [data-slot="command"] * {
+  color: #ffffff !important;
+}
+body.high-contrast [data-slot="select-item"][data-highlighted],
+body.high-contrast [data-slot="command-item"][data-selected="true"],
+body.high-contrast [data-slot="select-item"]:hover,
+body.high-contrast [data-slot="command-item"]:hover {
+  background-color: #1a4a7a !important;
+}
+
+/* Cashflow year-filter strip (1yr / 2yrs / 5yrs) */
+body.high-contrast .account-viewport [class*="bg-gray-100"] {
+  background-color: #0d2035 !important;
+}
+
+/* ════════════════════════════════════════════
+   HIGH CONTRAST — site-wide gaps (avatar + public-page text/bg)
+   ════════════════════════════════════════════ */
+
+/* Whiten hardcoded gray/slate/neutral/black text anywhere (covers <div>/<section> the element rule skips) */
+body.high-contrast [class*="text-gray-"],
+body.high-contrast [class*="text-slate-"],
+body.high-contrast [class*="text-neutral-"],
+body.high-contrast [class*="text-zinc-"],
+body.high-contrast [class*="text-black"] {
+  color: #ffffff !important;
+}
+
+/* Darken hardcoded light-blue hex background (About-us sections) */
+body.high-contrast [class*="bg-[#ebf6ff]"] {
+  background-color: #0d2035 !important;
+}
+
+/* Profile avatar — accent circle, white initials, visible border */
+body.high-contrast [data-slot="avatar"] {
+  border: 2px solid #ffffff !important;
+}
+body.high-contrast [data-slot="avatar-fallback"] {
+  background-color: #1a4a7a !important;
+  color: #ffffff !important;
+}
+
+/* ════════════════════════════════════════════
+   HIGH CONTRAST — Dashboard deep fixes (orders, cashflow timeline, charts)
+   ════════════════════════════════════════════ */
+
+/* Whiten every remaining hardcoded-hex / muted / colored-status text in the dashboard */
+body.high-contrast .account-viewport [class*="text-[#"],
+body.high-contrast .account-viewport [class*="text-muted"],
+body.high-contrast .account-viewport [class*="text-green-"],
+body.high-contrast .account-viewport [class*="text-orange-"],
+body.high-contrast .account-viewport [class*="text-blue-"],
+body.high-contrast .account-viewport [class*="text-red-"],
+body.high-contrast .account-viewport [class*="text-amber-"],
+body.high-contrast .account-viewport [class*="text-violet-"],
+body.high-contrast .account-viewport [class*="text-yellow-"] {
+  color: #ffffff !important;
+}
+
+/* Invisible light-gray hardcoded backgrounds → dark navy (orders / watchlist table headers) */
+body.high-contrast .account-viewport [class*="bg-[#F5F5F5]"],
+body.high-contrast .account-viewport [class*="bg-[#f5f5f5]"] {
+  background-color: #001c37 !important;
+}
+
+/* Timeline structural lines / dots (light gray / light blue) → visible blue */
+body.high-contrast .account-viewport [class*="bg-[#E1E6E8]"],
+body.high-contrast .account-viewport [class*="bg-[#9BC1E3]"] {
+  background-color: #4a8fd4 !important;
+}
+
+/* Timeline year / payout boxes (dark blue) → brighter accent so they stand out on dark */
+body.high-contrast .account-viewport [class*="bg-[#0C4580]"] {
+  background-color: #1a4a7a !important;
+}
+
+/* Hardcoded light borders → visible blue (timeline cards, popovers, inputs, dots, dividers) */
+body.high-contrast .account-viewport [class*="border-[#E1E6E8]"],
+body.high-contrast .account-viewport [class*="border-[#9BC1E3]"],
+body.high-contrast .account-viewport [class*="border-gray-"] {
+  border-color: #4a8fd4 !important;
+}
+
+/* Eye-icon row menu (Radix DropdownMenu, portaled) — dark surface + white text */
+body.high-contrast [data-slot="dropdown-menu-content"] {
+  background-color: #0d2035 !important;
+  border: 1px solid #4a8fd4 !important;
+}
+body.high-contrast [data-slot="dropdown-menu-content"] * {
+  color: #ffffff !important;
+}
+body.high-contrast [data-slot="dropdown-menu-item"]:hover,
+body.high-contrast [data-slot="dropdown-menu-item"][data-highlighted] {
+  background-color: #1a4a7a !important;
+}
+
+/* Charts (recharts): whiten ALL svg text — donut center/slice labels, bar LabelLists, axis ticks */
+body.high-contrast .account-viewport .recharts-wrapper text,
+body.high-contrast .account-viewport .recharts-surface text {
+  fill: #ffffff !important;
+}
+/* Recharts tooltip popup → dark surface + white text */
+body.high-contrast .account-viewport .recharts-tooltip-wrapper .recharts-default-tooltip {
+  background-color: #0d2035 !important;
+  border-color: #4a8fd4 !important;
+}
+body.high-contrast .account-viewport .recharts-tooltip-wrapper * {
+  color: #ffffff !important;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -48,6 +540,7 @@
 }
 
 :root {
+  --a11y-font-scale: 1;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.3211 0 0);
@@ -126,6 +619,29 @@
     font-family: "Poppins", sans-serif;
     font-weight: 400;
     font-style: normal;
+  }
+
+  /* Skip-to-content link — visible only on :focus */
+  .skip-to-content {
+    position: absolute; top: -100px; left: 16px; z-index: 9999;
+    padding: 12px 24px; background: var(--primary);
+    color: var(--primary-foreground); border-radius: 0 0 8px 8px;
+    font-size: 14px; font-weight: 600; text-decoration: none;
+    transition: top .2s ease;
+  }
+  .skip-to-content:focus, .skip-to-content:focus-visible { top: 0; }
+
+  /* Global keyboard focus indicator */
+  *:focus-visible {
+    outline: 2px solid var(--primary) !important;
+    outline-offset: 2px !important;
+  }
+
+  /* Screen-reader only utility */
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border-width: 0;
   }
   .title {
     font-family: "Quicksand", sans-serif;
@@ -332,4 +848,18 @@
     background-size: 200% 100%;
     animation: portfolio-shimmer-slide 1.35s ease-in-out infinite;
   }
+}
+
+/* ── Compare-bonds floating tray — readable in high contrast ── */
+body.high-contrast .compare-tray [class*="bg-white"],
+body.high-contrast .compare-tray [class*="bg-blue"] {
+  background-color: #0d2035 !important;
+  border: 1px solid #4a8fd4 !important;
+}
+body.high-contrast .compare-tray,
+body.high-contrast .compare-tray * {
+  color: #ffffff !important;
+}
+body.high-contrast .compare-tray button[aria-label="Remove from comparison"] svg {
+  color: #ff6b6b !important;
 }

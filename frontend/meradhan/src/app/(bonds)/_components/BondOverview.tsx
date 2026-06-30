@@ -146,13 +146,13 @@ export default function BondOverview({
         <div className="gap-5 grid md:grid-cols-3">
           {/* ── Pricing & size ─────────────────────────────────────── */}
           <InfoCard title="Issue Price" condition={hasValue(bond.issuePrice, { hideIfZero: true })}>
-            <PiCurrencyInrBold /> {formatNumberTS(bond.issuePrice)}
+            <PiCurrencyInrBold aria-hidden="true" /> {formatNumberTS(bond.issuePrice)}
           </InfoCard>
           <InfoCard title="Face Value" condition={hasValue(bond.faceValue, { hideIfZero: true })}>
-            <PiCurrencyInrBold /> {formatNumberTS(bond.faceValue)}
+            <PiCurrencyInrBold aria-hidden="true" /> {formatNumberTS(bond.faceValue)}
           </InfoCard>
           <InfoCard title="Issue Size" condition={hasValue(bond.totalIssueSize, { hideIfZero: true })}>
-            <PiCurrencyInrBold /> {formatNumberTS(bond.totalIssueSize ?? 0)}
+            <PiCurrencyInrBold aria-hidden="true" /> {formatNumberTS(bond.totalIssueSize ?? 0)}
           </InfoCard>
 
 
@@ -229,7 +229,7 @@ export default function BondOverview({
               {putText.length > 15 && (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <FaInfoCircle className="cursor-pointer" />
+                    <FaInfoCircle className="cursor-pointer" aria-label="Put option details" />
                   </TooltipTrigger>
                   <TooltipContent>
                     <p className="text-wrap max-w-48">{putText}</p>
@@ -244,7 +244,7 @@ export default function BondOverview({
               {callText.length > 15 && (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <FaInfoCircle className="cursor-pointer" />
+                    <FaInfoCircle className="cursor-pointer" aria-label="Call option details" />
                   </TooltipTrigger>
                   <TooltipContent>
                     <p className="text-wrap max-w-48">{callText}</p>
