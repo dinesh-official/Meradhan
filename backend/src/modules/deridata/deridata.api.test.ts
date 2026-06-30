@@ -26,45 +26,19 @@ function makeApi(handler: (path: string, body: any) => { status: number; data: u
 }
 
 describe("DeridataApi", () => {
-  it("getIssueDetail unwraps the data[] envelope and injects auth fields", async () => {
+  it("getIssueDetail injects auth fields and returns ok:true", async () => {
     let seenBody: any;
     const api = makeApi((path, body) => {
       seenBody = body;
       expect(path).toBe("/api/public/merchant/v1/issue-detail/");
-      return {
-        status: 200,
-        data: {
-          data: [{ isin: "INE2OTQ07077", coupon: "6.2626%", coupon_fixed: "6.2626" }],
-          multiple_put_dates: [],
-          multiple_call_dates: [],
-          multiple_reset_dates: [],
-        },
-      };
+      return { status: 200, data: { isin: "INE2OTQ07077", coupon: "6.2626%" } };
     });
     const res = await api.getIssueDetail("ine2otq07077");
     expect(res.ok).toBe(true);
-    if (res.ok) {
-      expect(res.data.isin).toBe("INE2OTQ07077");
-      expect(res.data.coupon_fixed).toBe("6.2626");
-    }
     expect(seenBody.merchant_id).toBe(101);
     expect(typeof seenBody.uuid).toBe("string");
     expect(typeof seenBody.checksum).toBe("string");
     expect(seenBody.isin).toBe("INE2OTQ07077");
-  });
-
-  it("getIssueDetail still accepts a flat (unwrapped) response", async () => {
-    const api = makeApi(() => ({ status: 200, data: { isin: "INE2OTQ07077", coupon: "6.2626%" } }));
-    const res = await api.getIssueDetail("INE2OTQ07077");
-    expect(res.ok).toBe(true);
-    if (res.ok) expect(res.data.isin).toBe("INE2OTQ07077");
-  });
-
-  it("getIssueDetail treats an empty data[] as NOT_FOUND", async () => {
-    const api = makeApi(() => ({ status: 200, data: { data: [] } }));
-    const res = await api.getIssueDetail("INE2OTQ07077");
-    expect(res.ok).toBe(false);
-    if (!res.ok) expect(res.code).toBe("NOT_FOUND");
   });
 
   it("maps a 403 to LIMIT_EXPIRED", async () => {

@@ -7,7 +7,6 @@ import {
   classifyError,
   parseEndpointResponse,
   IssueDetailSchema,
-  IssueDetailEnvelopeSchema,
   CalculatorResponseSchema,
   EbpResponseSchema,
   SecondaryTradesResponseSchema,
@@ -113,18 +112,8 @@ export class DeridataApi {
     }
   }
 
-  async getIssueDetail(isin: string): Promise<DeridataResult<IssueDetail>> {
-    const requested = assertDeridataIsin(isin);
-    // The live API wraps the bond fields under `data[0]`; unwrap before validating.
-    const res = await this.post(PATHS.issueDetail, IssueDetailEnvelopeSchema, { isin: requested });
-    if (!res.ok) return res;
-    if (Array.isArray(res.data.data) && res.data.data.length === 0) {
-      return { ok: false, error: "No issue-detail record for ISIN", code: "NOT_FOUND" };
-    }
-    const inner = (res.data.data?.[0] ?? res.data) as Record<string, unknown>;
-    const parsed = IssueDetailSchema.safeParse(inner);
-    if (!parsed.success) return { ok: false, error: parsed.error.message, code: "UNKNOWN" };
-    return { ok: true, data: { ...parsed.data, isin: parsed.data.isin ?? requested } };
+  getIssueDetail(isin: string) {
+    return this.post(PATHS.issueDetail, IssueDetailSchema, { isin: assertDeridataIsin(isin) });
   }
 
   calculate(input: CalculatorInput) {
