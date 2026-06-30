@@ -91,6 +91,14 @@ jobs:
           BACKOFFICE_SMTP_EMAIL: ${{ vars.BACKOFFICE_SMTP_EMAIL }}
           BACKOFFICE_SMTP_PASS: ${{ vars.BACKOFFICE_SMTP_PASS }}
           ABSOLUTE_DATA_API_KEY: ${{ vars.ABSOLUTE_DATA_API_KEY }}
+
+          ABSOLUTE_DATA_API_KEY: ${{ vars.DERIDATA_ENABLED }}
+          ABSOLUTE_DATA_API_KEY: ${{ vars.DERIDATA_MERCHANT_ID }}
+          ABSOLUTE_DATA_API_KEY: ${{ vars.DERIDATA_SECRET_KEY }}
+          ABSOLUTE_DATA_API_KEY: ${{ vars.DERIDATA_MERCHANT_NAME }}
+          ABSOLUTE_DATA_API_KEY: ${{ vars.DERIDATA_MERCHANT_EMAIL }}
+          ABSOLUTE_DATA_API_KEY: ${{ vars.DERIDATA_PUBLIC_IP }}
+          ABSOLUTE_DATA_API_KEY: ${{ vars.DERIDATA_BASE_URL }}
           
 
         run: |
@@ -183,6 +191,14 @@ jobs:
           echo "BACKOFFICE_SMTP_PASS=${BACKOFFICE_SMTP_PASS}" >> .env
 
           echo "ABSOLUTE_DATA_API_KEY=${ABSOLUTE_DATA_API_KEY}" >> .env
+
+          echo "DERIDATA_ENABLED=${DERIDATA_ENABLED}" >> .env
+          echo "DERIDATA_MERCHANT_ID=${DERIDATA_MERCHANT_ID}" >> .env
+          echo "DERIDATA_SECRET_KEY=${DERIDATA_SECRET_KEY}" >> .env
+          echo "DERIDATA_MERCHANT_NAME=${DERIDATA_MERCHANT_NAME}" >> .env
+          echo "DERIDATA_MERCHANT_EMAIL=${DERIDATA_MERCHANT_EMAIL}" >> .env
+          echo "DERIDATA_PUBLIC_IP=${DERIDATA_PUBLIC_IP}" >> .env
+          echo "DERIDATA_BASE_URL=${DERIDATA_BASE_URL}" >> .env
 
           echo "----------- FINAL .env -----------"
           cat .env
