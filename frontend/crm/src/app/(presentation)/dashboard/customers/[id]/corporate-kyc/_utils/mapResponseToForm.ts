@@ -119,6 +119,7 @@ export function mapCorporateKycResponseToForm(
       id: d.id,
       depository: d.depository as "NSDL" | "CDSL",
       accountType: d.accountType ?? "",
+      dpName: d.dpName ?? "",
       dpId: d.dpId,
       clientId: d.clientId,
       accountHolderName: d.accountHolderName,

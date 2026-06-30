@@ -41,6 +41,7 @@ export const corporateKycDematAccountSchema = z.object({
   id: z.number().optional(),
   depository: DepositoryNameEnum,
   accountType: z.string().optional(),
+  dpName: z.string().optional(),
   dpId: z.string().min(1, "DP ID is required"),
   clientId: z.string().min(1, "Client ID is required"),
   accountHolderName: z.string().min(1, "Demat account holder name is required"),

@@ -175,6 +175,7 @@ model CorporateKycDematAccountModel {
 
   depository        DepositoryName /// CDSL or NSDL
   accountType       String? /// e.g. SOLO, JOINT, CORPORATE
+  dpName            String? /// Depository participant name
   dpId              String
   clientId          String
   accountHolderName String

@@ -385,6 +385,7 @@ export type CorporateKycDematAccountResponse = {
   dpId: string;
   clientId: string;
   accountHolderName: string;
+  dpName?: string;
   dematProofFileUrl?: string;
   isPrimary: boolean;
 };

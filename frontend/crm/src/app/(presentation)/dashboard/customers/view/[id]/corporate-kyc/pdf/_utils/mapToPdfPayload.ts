@@ -623,7 +623,7 @@ export function mapCorporateKycToPdfPayload(
   const dematAccounts: DematAccount[] = (data.dematAccounts ?? []).map((acc) => ({
     isPrimary: acc.isPrimary ? "Yes" : "No",
     depository: mapDepository(acc.depository) ?? "NSDL",
-    dpName: acc.accountHolderName ?? "",
+    dpName: acc.dpName ?? acc.accountHolderName ?? "",
     dpId: acc.dpId ?? "",
     beneficiaryId: acc.clientId ?? "",
   }));

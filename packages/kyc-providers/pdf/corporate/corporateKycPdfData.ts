@@ -449,7 +449,7 @@ function mapDematAccounts(raw: unknown): CorporateKycPdfData["dematAccounts"] {
     const dep = String(x.depository ?? "").toUpperCase();
     return {
       isPrimary: x.isPrimary === true,
-      dpName: (x.accountHolderName as string) ?? undefined,
+      dpName: (x.dpName as string) ?? (x.accountHolderName as string) ?? undefined,
       dpId: (x.dpId as string) ?? undefined,
       depositoryCdsl: dep.includes("CDSL"),
       depositoryNsdl: dep.includes("NSDL"),
