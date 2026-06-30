@@ -108,7 +108,7 @@ export default function BondCashflowTable({
       ) : null}
 
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px] text-sm">
+        <table className="cashflow-table w-full min-w-[640px] text-sm">
           <thead>
             <tr className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
               <th className="px-4 py-3">Period</th>

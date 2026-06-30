@@ -191,7 +191,7 @@ function ReviewOrder({
 
           <BondInfoLabel title="Face Value">
             <p className="text-black flex items-center gap-1">
-              <PiCurrencyInrBold /> {formatNumberTS(bond.faceValue)}
+              <PiCurrencyInrBold aria-hidden="true" /> {formatNumberTS(bond.faceValue)}
             </p>
           </BondInfoLabel>
 
@@ -203,7 +203,7 @@ function ReviewOrder({
 
           <BondInfoLabel title="Issue Price">
             <p className="text-black flex items-center gap-1">
-              <PiCurrencyInrBold /> {formatNumberTS(bond.issuePrice)}
+              <PiCurrencyInrBold aria-hidden="true" /> {formatNumberTS(bond.issuePrice)}
             </p>
           </BondInfoLabel>
 
@@ -260,7 +260,7 @@ function ReviewOrder({
               </Button>
               <input
                 type="number"
-                className="w-full text-center border-0 border-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                className="quantity-input w-full text-center border-0 border-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 value={quantity}
                 min={1}
                 max={maxOrderQuantity}
@@ -363,7 +363,7 @@ function ReviewOrder({
           </div>
           <div>
             <p className="text-lg text-black flex items-center gap-1 font-medium">
-              <PiCurrencyInrBold />{" "}
+              <PiCurrencyInrBold aria-hidden="true" />{" "}
               {isPricingFetching ? "…" : formatNumberTS(settlementAmount)}
             </p>
             <Dialog>
@@ -524,8 +524,8 @@ function ReviewOrder({
                       I confirm that I have read and understood all the documents
                       related to this security. I am aware that the credit rating of
                       the selected security{" "}
-                      <b>{bond.description}</b> is{" "}
-                      <b>{bond.creditRating}</b>. I am investing in this bond after
+                      <strong>{bond.description}</strong> is{" "}
+                      <strong>{bond.creditRating}</strong>. I am investing in this bond after
                       fully understanding the risks involved. This investment
                       decision is my own and has not been influenced by any advice,
                       suggestion, or recommendation from MeraDhan.

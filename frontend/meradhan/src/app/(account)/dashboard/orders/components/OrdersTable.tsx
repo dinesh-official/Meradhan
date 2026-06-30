@@ -114,18 +114,18 @@ function OrdersTable({ orders, isLoading }: OrdersTableProps) {
                     </TableCell>
                     <TableCell className="py-4 px-6">
                       <div className="flex items-center">
-                        <PiCurrencyInrBold /> {faceValue}
+                        <PiCurrencyInrBold aria-hidden="true" /> {faceValue}
                       </div>
                     </TableCell>
                     <TableCell className="py-4 px-6">{order.quantity}</TableCell>
                     <TableCell className="py-4 px-6">
                       <div className="flex items-center">
-                        <PiCurrencyInrBold /> {accruedDisplay}
+                        <PiCurrencyInrBold aria-hidden="true" /> {accruedDisplay}
                       </div>
                     </TableCell>
                     <TableCell className="py-4 px-6">
                       <div className="flex items-center">
-                        <PiCurrencyInrBold /> {settlementDisplay}
+                        <PiCurrencyInrBold aria-hidden="true" /> {settlementDisplay}
                       </div>
                     </TableCell>
                     <TableCell className="whitespace-nowrap py-4 px-6 text-sm text-gray-900">

@@ -93,7 +93,6 @@ function LoginTwoFactorDialog({
             </p>
             <InputOTP
               maxLength={6}
-              autoFocus
               disabled={isVerifying}
               pattern={REGEXP_ONLY_DIGITS}
               value={state.twoFactorPasscode}

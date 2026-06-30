@@ -123,9 +123,9 @@ const SidebarItem: FC<SidebarItemProps> = ({ icon, label, href, isActive }) => {
         <Link
           href={href || "#"}
           className={cn(
-            `flex items-center hover:bg-white h-12 hover:text-primary transition-all duration-300 cursor-pointer`,
+            "flex items-center h-12 transition-all duration-300 cursor-pointer",
             collapsed ? "justify-center" : "gap-4 px-4",
-            isActive && "bg-white text-primary"
+            isActive ? "bg-white text-primary" : "text-white hover:bg-white/10"
           )}
         >
           <span className="flex justify-center items-center w-6">{icon}</span>
@@ -159,7 +159,7 @@ const ActionSideBar = ({ showSideBar = true }: { showSideBar?: boolean }) => {
 
   return (
     <div
-      className={`lg:flex hidden flex-col bg-primary text-white border-r shadow-sm z-40 border-gray-100 md:h-[calc(100vh-72px)] h-[calc(100vh-64px)] sticky md:top-18 top-16 transition-all duration-300 ${collapsed ? "min-w-[72px]" : "w-64"
+      className={`account-sidebar lg:flex hidden flex-col bg-primary text-white border-r shadow-sm z-40 border-gray-100 md:h-[calc(100vh-72px)] h-[calc(100vh-64px)] sticky md:top-18 top-16 transition-all duration-300 ${collapsed ? "min-w-[72px]" : "w-64"
         }`}
     >
       <div className="flex flex-col pt-2">

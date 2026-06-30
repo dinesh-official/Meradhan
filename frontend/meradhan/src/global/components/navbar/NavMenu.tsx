@@ -6,21 +6,21 @@ import { MENU_ITEMS } from "@/global/constants/menu.constants";
 
 function NavMenu() {
   return (
-    <nav className="flex items-center gap-7">
+    <div className="flex items-center gap-7">
       {MENU_ITEMS.map((item, i) => (
         <div key={i} className="group relative cursor-pointer">
           {/* Top-Level Menu */}
           <div className="flex items-center gap-2 hover:text-primary transition-all">
             <span>{item.title}</span>
             {item.children && (
-              <IoMdArrowDropdown className="group-hover:rotate-180 transition-all duration-200" />
+              <IoMdArrowDropdown aria-hidden="true" className="group-hover:rotate-180 transition-all duration-200" />
             )}
           </div>
           {/* Level 1 Dropdown */}
           {item.children && <NavMenuList item={item} />}
         </div>
       ))}
-    </nav>
+    </div>
   );
 }
 
@@ -64,7 +64,7 @@ function NavMenuList({
                   {subItem.title}
                 </Link>
                 {subItem.children && (
-                  <IoMdArrowDropdown className="text-gray-400 group-hover/item:text-primary rotate-[-90deg] transition-all duration-200" />
+                  <IoMdArrowDropdown aria-hidden="true" className="text-gray-400 group-hover/item:text-primary rotate-[-90deg] transition-all duration-200" />
                 )}
 
                 {/* Nested Dropdown — Opens to the Right */}

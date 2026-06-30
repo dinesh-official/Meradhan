@@ -57,7 +57,7 @@ function BondAddToWatchList({ isin }: { isin: string }) {
     return (
       <div className="flex items-center gap-2 cursor-pointer">
         <div className="rounded-sm p-[2px]">
-          <Eye size={15} />
+          <Eye size={15} aria-hidden="true" />
         </div>
         <p className="font-medium text-gray-500 text-sm">Watched</p>
       </div>
@@ -78,7 +78,7 @@ function BondAddToWatchList({ isin }: { isin: string }) {
         }}
       >
         <div className="bg-secondary rounded-sm p-0.5">
-          <Plus size={15} className="text-white" />
+          <Plus size={15} className="text-white" aria-hidden="true" />
         </div>
         <p className="font-medium text-gray-500 text-sm">WatchList</p>
       </div>

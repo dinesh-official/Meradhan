@@ -275,6 +275,10 @@ export class S3DailyLogger {
     }
 }
 
-const s3logger = new S3DailyLogger({ disableS3: false, s3Prefix: "logs" });
+// LOCAL DEV: S3 log-mirroring disabled — no real S3 endpoint locally, and the
+// fire-and-forget flush throws an unhandled ECONNREFUSED that crashes the process
+// on boot. Local file logging (log-files/) is unaffected. Revert to `false` for
+// environments with a reachable S3 endpoint.
+const s3logger = new S3DailyLogger({ disableS3: true, s3Prefix: "logs" });
 export default s3logger;
 
