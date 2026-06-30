@@ -103,6 +103,7 @@ jobs:
           DERIDATA_MERCHANT_EMAIL: ${{ vars.DERIDATA_MERCHANT_EMAIL }}
           DERIDATA_PUBLIC_IP: ${{ vars.DERIDATA_PUBLIC_IP }}
           DERIDATA_BASE_URL: ${{ vars.DERIDATA_BASE_URL }}
+          USE_DERIDATA_CALCULATOR: ${{ vars.USE_DERIDATA_CALCULATOR }}
 
         run: |
           echo "NEXT_PUBLIC_HOST_URL=https://aws.meradhan.co" > .env
@@ -206,6 +207,8 @@ jobs:
           echo "DERIDATA_MERCHANT_EMAIL=${DERIDATA_MERCHANT_EMAIL}" >> .env
           echo "DERIDATA_PUBLIC_IP=${DERIDATA_PUBLIC_IP}" >> .env
           echo "DERIDATA_BASE_URL=${DERIDATA_BASE_URL}" >> .env
+          echo "USE_DERIDATA_CALCULATOR=${USE_DERIDATA_CALCULATOR}" >> .env
+
 
           echo "----------- FINAL .env -----------"
           cat .env
