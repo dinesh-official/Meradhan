@@ -48,7 +48,7 @@ export function BondListCard({
               className="h-12 w-12 rounded-md sm:h-14 sm:w-14"
             />
             <div className="flex min-w-0 flex-1 flex-col gap-3">
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 min-w-0">
                 <p className="font-semibold text-primary text-sm">
                   {data.isin}
                 </p>

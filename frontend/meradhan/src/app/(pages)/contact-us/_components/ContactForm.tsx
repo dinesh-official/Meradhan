@@ -79,43 +79,61 @@ function ContactForm() {
       </CardHeader>
       <CardContent className="pt-0">
         <div className="flex flex-col gap-2">
-          <ContactInput
-            placeholder="Your Name"
-            value={watch("fullName")}
-            onChange={(e) => {
-              setValue("fullName", e.target.value);
-              setError("fullName", { message: "" });
-            }}
-            error={errors.fullName?.message}
-          />
-          <ContactInput
-            placeholder="Email"
-            value={watch("email")}
-            onChange={(e) => {
-              setValue("email", e.target.value);
-              setError("email", { message: "" });
-            }}
-            error={errors.email?.message}
-          />
-          <ContactInput
-            placeholder="Phone"
-            value={watch("phone")}
-            onChange={(e) => {
-              setValue("phone", e.target.value);
-              setError("phone", { message: "" });
-            }}
-            error={errors.phone?.message}
-          />
-          <ContactInput
-            placeholder="Enquiry Type"
-            value={watch("enquiryType")}
-            onChange={(e) => {
-              setValue("enquiryType", e.target.value);
-              setError("enquiryType", { message: "" });
-            }}
-          />
-          <div>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="contact-fullName" className="text-sm font-medium">Full Name</label>
+            <ContactInput
+              id="contact-fullName"
+              placeholder="Your Name"
+              value={watch("fullName")}
+              onChange={(e) => {
+                setValue("fullName", e.target.value);
+                setError("fullName", { message: "" });
+              }}
+              error={errors.fullName?.message}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="contact-email" className="text-sm font-medium">Email</label>
+            <ContactInput
+              id="contact-email"
+              placeholder="Email"
+              value={watch("email")}
+              onChange={(e) => {
+                setValue("email", e.target.value);
+                setError("email", { message: "" });
+              }}
+              error={errors.email?.message}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="contact-phone" className="text-sm font-medium">Phone</label>
+            <ContactInput
+              id="contact-phone"
+              placeholder="Phone"
+              value={watch("phone")}
+              onChange={(e) => {
+                setValue("phone", e.target.value);
+                setError("phone", { message: "" });
+              }}
+              error={errors.phone?.message}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="contact-enquiryType" className="text-sm font-medium">Enquiry Type</label>
+            <ContactInput
+              id="contact-enquiryType"
+              placeholder="Enquiry Type"
+              value={watch("enquiryType")}
+              onChange={(e) => {
+                setValue("enquiryType", e.target.value);
+                setError("enquiryType", { message: "" });
+              }}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="contact-message" className="text-sm font-medium">Message</label>
             <Textarea
+              id="contact-message"
               className="bg-muted shadow-none px-3 border-none rounded-sm placeholder:text-gray-500"
               placeholder="Message"
               value={watch("message")}

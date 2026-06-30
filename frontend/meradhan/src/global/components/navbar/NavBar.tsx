@@ -62,8 +62,8 @@ function NavBar({
           {/* Menu Items */}
           <div className="hidden lg:flex justify-center items-center gap-7 shrink-0">
             <NavMenu />
-            <AuthActions session={session} />
             <AccessibilityWidget />
+            <AuthActions session={session} />
           </div>
           <div className="flex lg:hidden items-center gap-2">
             <AccessibilityWidget />

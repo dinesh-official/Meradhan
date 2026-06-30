@@ -39,7 +39,7 @@ export default function StepperOrder() {
             <StepperTrigger className="flex-col gap-3 rounded text-center">
               <StepperIndicator />
               <div className="space-y-0.5 px-2 text-center">
-                <StepperTitle className="text-sm font-normal max-w-14 text-center flex-col justify-center items-center">
+                <StepperTitle className="text-sm font-normal max-w-24 text-center flex-col justify-center items-center">
                   {title}
                 </StepperTitle>
               </div>

@@ -36,7 +36,7 @@ export default async function RootLayout({
   const pathname = header.get("x-pathname");
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -133,6 +133,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <meta name="theme-color" content="#ffffff" />
       </head>
       <body className={`antialiased`} suppressHydrationWarning>
+        {/* Apply saved accessibility prefs before first paint (no flash of normal mode on navigation/redirect) */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{if(localStorage.getItem('a11y-high-contrast')==='1'){document.documentElement.classList.add('dark');document.body.classList.add('high-contrast');}var f=localStorage.getItem('a11y-font-scale');if(f){document.documentElement.style.setProperty('--a11y-font-scale',f);}}catch(e){}})();`,
+          }}
+        />
         <a href="#main-content" className="skip-to-content">Skip to main content</a>
         <noscript>
           <iframe

@@ -59,7 +59,6 @@ body.high-contrast .meradhan-navbar button[class*="bg-"] {
   background-color: #1a4a7a !important;
   color: #ffffff !important;
   border: 1px solid #4a8fd4 !important;
-  border-radius: 9999px !important;
 }
 
 /* ── Hero section — hide grid canvas so solid bg-primary blue shows ── */
@@ -862,4 +861,15 @@ body.high-contrast .compare-tray * {
 }
 body.high-contrast .compare-tray button[aria-label="Remove from comparison"] svg {
   color: #ff6b6b !important;
+}
+
+/* ── Doc/empty-state slate surfaces → dark in high contrast (so whitened icons stay visible) ── */
+body.high-contrast [class*="bg-slate-"] {
+  background-color: #0d2035 !important;
+}
+
+/* ── Quantity stepper number field: no boxed bg/border in high contrast (it lives inside the − / + control) ── */
+body.high-contrast input.quantity-input {
+  background-color: transparent !important;
+  border: none !important;
 }

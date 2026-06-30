@@ -260,7 +260,7 @@ function ReviewOrder({
               </Button>
               <input
                 type="number"
-                className="w-full text-center border-0 border-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                className="quantity-input w-full text-center border-0 border-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 value={quantity}
                 min={1}
                 max={maxOrderQuantity}
