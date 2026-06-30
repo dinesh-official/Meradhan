@@ -55,6 +55,7 @@ const HOMEPAGE_ELIGIBLE_CREDIT_RATINGS = [
   "AAA",
   "AA+",
   "AA",
+  "AA-",
   "A+",
   "A",
   "A-",

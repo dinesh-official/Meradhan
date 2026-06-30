@@ -3,6 +3,7 @@
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
+import { TableKit } from "@tiptap/extension-table";
 import { useEffect } from "react";
 import {
   Bold,
@@ -12,8 +13,15 @@ import {
   List,
   ListOrdered,
   Link as LinkIcon,
+  Table as TableIcon,
+  Columns3,
+  Rows3,
+  Trash2,
+  Plus,
+  Minus,
 } from "lucide-react";
 import { Toggle } from "@/components/ui/toggle";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
 interface RichTextEditorProps {
@@ -104,6 +112,86 @@ function Toolbar({ editor }: { editor: Editor }) {
       >
         <LinkIcon className="h-4 w-4" />
       </Toggle>
+      <Separator orientation="vertical" className="mx-1 h-6" />
+      <Button
+        type="button"
+        size="sm"
+        variant="ghost"
+        className="h-8 px-2"
+        onClick={() =>
+          editor
+            .chain()
+            .focus()
+            .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+            .run()
+        }
+        aria-label="Insert table"
+      >
+        <TableIcon className="h-4 w-4" />
+      </Button>
+      {editor.isActive("table") && (
+        <>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            className="h-8 gap-0.5 px-2"
+            onClick={() => editor.chain().focus().addColumnAfter().run()}
+            aria-label="Add column"
+            title="Add column"
+          >
+            <Columns3 className="h-4 w-4" />
+            <Plus className="h-3 w-3" />
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            className="h-8 gap-0.5 px-2"
+            onClick={() => editor.chain().focus().deleteColumn().run()}
+            aria-label="Delete column"
+            title="Delete column"
+          >
+            <Columns3 className="h-4 w-4" />
+            <Minus className="h-3 w-3" />
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            className="h-8 gap-0.5 px-2"
+            onClick={() => editor.chain().focus().addRowAfter().run()}
+            aria-label="Add row"
+            title="Add row"
+          >
+            <Rows3 className="h-4 w-4" />
+            <Plus className="h-3 w-3" />
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            className="h-8 gap-0.5 px-2"
+            onClick={() => editor.chain().focus().deleteRow().run()}
+            aria-label="Delete row"
+            title="Delete row"
+          >
+            <Rows3 className="h-4 w-4" />
+            <Minus className="h-3 w-3" />
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            className="h-8 px-2"
+            onClick={() => editor.chain().focus().deleteTable().run()}
+            aria-label="Delete table"
+            title="Delete entire table"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </>
+      )}
     </div>
   );
 }
@@ -118,6 +206,7 @@ export default function RichTextEditor({
     extensions: [
       StarterKit.configure({ heading: { levels: [2, 3] } }),
       Link.configure({ openOnClick: false, autolink: true }),
+      TableKit.configure({ table: { resizable: true } }),
     ],
     content: value || "",
     editorProps: {
@@ -127,7 +216,10 @@ export default function RichTextEditor({
           "[&_h2]:text-xl [&_h2]:font-semibold [&_h2]:mt-3 [&_h2]:mb-1 " +
           "[&_h3]:text-lg [&_h3]:font-semibold [&_h3]:mt-2 [&_h3]:mb-1 " +
           "[&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 " +
-          "[&_li]:my-0.5 [&_a]:text-blue-600 [&_a]:underline [&_p]:my-1",
+          "[&_li]:my-0.5 [&_a]:text-blue-600 [&_a]:underline [&_p]:my-1 " +
+          "[&_table]:border-collapse [&_table]:w-full [&_table]:my-2 " +
+          "[&_th]:border [&_th]:border-gray-300 [&_th]:bg-gray-100 [&_th]:p-2 [&_th]:text-left " +
+          "[&_td]:border [&_td]:border-gray-300 [&_td]:p-2",
       },
     },
     onUpdate: ({ editor }) => onChange(normalize(editor.getHTML())),

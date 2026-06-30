@@ -1,6 +1,8 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import apiGateway from "@root/apiGateway";
@@ -9,6 +11,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import StatusBadge from "@/global/elements/wrapper/badges/StatusBadge";
+import OrderStatusBadge from "@/global/elements/wrapper/badges/OrderStatusBadge";
+import {
+  CRM_ORDER_STATUS_VALUES,
+  ORDER_STATUS_CONFIG,
+  type CrmOrderStatus,
+} from "@/global/constants/order";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -29,6 +37,8 @@ import {
   ArrowRight,
   FileText,
   ChevronDown,
+  Mail,
+  FileDown,
 } from "lucide-react";
 import {
   Collapsible,
@@ -36,6 +46,8 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
+import { payinDateTimeToPickerValue } from "@/global/utils/receiptPdfOptions.utils";
+import { OrderPdfDownloadDialog } from "../_components/OrderPdfDownloadDialog";
 
 // Helper functions to safely extract values from Record<string, unknown>
 const getBondDetail = (
@@ -73,11 +85,22 @@ const getBondDetailNumber = (
   return isNaN(parsed) ? undefined : parsed;
 };
 
+function formatBusinessDateLabel(value: unknown): string {
+  if (value == null || String(value).trim() === "") return "—";
+  const s = String(value).trim();
+  if (/^\d{1,2}-[A-Za-z]{3}-\d{4}$/i.test(s)) return s;
+  const formatted = dateTimeUtils.formatDateTime(s, "DD MMM YYYY");
+  return formatted && formatted !== "Invalid Date" ? formatted : s;
+}
+
 function OrderDetailsView() {
   const params = useParams();
   const router = useRouter();
   const queryClient = useQueryClient();
   const orderId = decodeId(params.id as string);
+
+  const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
+  const [pdfDialogType, setPdfDialogType] = useState<"order" | "deal">("order");
 
   const apiCaller = new apiGateway.crm.crmOrdersApi(apiClientCaller);
 
@@ -88,7 +111,7 @@ function OrderDetailsView() {
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: (status: "PENDING" | "SETTLED" | "APPLIED" | "REJECTED") =>
+    mutationFn: (status: CrmOrderStatus) =>
       apiCaller.updateOrderStatus(orderId, status),
     onSuccess: () => {
       toast.success("Order status updated successfully");
@@ -107,14 +130,36 @@ function OrderDetailsView() {
 
   const order = data?.responseData;
 
+  const openPdfDialog = (type: "order" | "deal") => {
+    setPdfDialogType(type);
+    setPdfDialogOpen(true);
+  };
+
+  const orderMetadata = order?.metadata as Record<string, unknown> | undefined;
+  const defaultSettlementNumber =
+    orderMetadata?.settlementNumber != null
+      ? String(orderMetadata.settlementNumber)
+      : orderMetadata?.settlementNo != null
+        ? String(orderMetadata.settlementNo)
+        : null;
+  const metadataSettlement =
+    orderMetadata?.settlementDate != null ? String(orderMetadata.settlementDate) : null;
+  const defaultAutofillSettlementDate =
+    payinDateTimeToPickerValue(metadataSettlement) ||
+    payinDateTimeToPickerValue(order?.createdAt ?? null);
+
+  const dealDateLabel = formatBusinessDateLabel(orderMetadata?.dealDate);
+  const settlementDateLabel = formatBusinessDateLabel(orderMetadata?.settlementDate);
+  const orderDateLabel =
+    dealDateLabel !== "—"
+      ? dealDateLabel
+      : order?.createdAt
+        ? dateTimeUtils.formatDateTime(order.createdAt, "DD MMM YYYY")
+        : "—";
+
   const handleStatusChange = (newStatus: string) => {
-    if (
-      newStatus === "PENDING" ||
-      newStatus === "SETTLED" ||
-      newStatus === "APPLIED" ||
-      newStatus === "REJECTED"
-    ) {
-      updateStatusMutation.mutate(newStatus);
+    if (CRM_ORDER_STATUS_VALUES.includes(newStatus as CrmOrderStatus)) {
+      updateStatusMutation.mutate(newStatus as CrmOrderStatus);
     }
   };
 
@@ -155,14 +200,54 @@ function OrderDetailsView() {
           </Button>
           <h1 className="text-3xl font-bold">Order Details</h1>
           <p className="text-muted-foreground mt-1">
-            Order Number: XXXXXXXX
+            Order Number: {order.orderNumber}
           </p>
         </div>
-        <div className="flex items-center gap-4">
-          <StatusBadge value={order.status} />
+        <div className="flex items-center gap-4 flex-wrap justify-end">
+          {order.orderNumber && (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => openPdfDialog("order")}
+              >
+                <FileDown className="mr-2 h-4 w-4" />
+                Order receipt PDF
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => openPdfDialog("deal")}
+              >
+                <FileDown className="mr-2 h-4 w-4" />
+                Deal sheet PDF
+              </Button>
+            </>
+          )}
+          {order.customerProfile?.userType?.toUpperCase() === "CORPORATE" &&
+            order.orderNumber && (
+              <Button variant="outline" asChild>
+                <Link
+                  href={`/dashboard/rfqs/nse/settle-orders/generate/${encodeURIComponent(order.orderNumber)}`}
+                >
+                  <Mail className="mr-2 h-4 w-4" />
+                  Send email
+                </Link>
+              </Button>
+            )}
+          <OrderStatusBadge status={order.status} paymentStatus={order.paymentStatus} />
           <Badge variant="outline">{order.paymentStatus}</Badge>
         </div>
       </div>
+
+      {order.orderNumber ? (
+        <OrderPdfDownloadDialog
+          open={pdfDialogOpen}
+          onOpenChange={setPdfDialogOpen}
+          orderNumber={order.orderNumber}
+          pdfType={pdfDialogType}
+          defaultSettlementNumber={defaultSettlementNumber}
+          defaultAutofillSettlementDate={defaultAutofillSettlementDate}
+        />
+      ) : null}
 
       {/* Status Update Section - Admin Only */}
       <AllowOnlyView permissions={['edit:orders']} >
@@ -179,10 +264,11 @@ function OrderDetailsView() {
               <SelectValue placeholder="Select status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="PENDING">PENDING</SelectItem>
-              <SelectItem value="SETTLED">SETTLED</SelectItem>
-              <SelectItem value="APPLIED">APPLIED</SelectItem>
-              <SelectItem value="REJECTED">REJECTED</SelectItem>
+              {CRM_ORDER_STATUS_VALUES.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {ORDER_STATUS_CONFIG[status].title}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           {updateStatusMutation.isPending && (
@@ -1375,12 +1461,24 @@ function OrderDetailsView() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Purchase Date</p>
+                  <p className="text-sm text-muted-foreground">Order Date</p>
+                  <p className="font-medium">{orderDateLabel}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Deal Date</p>
+                  <p className="font-medium">{dealDateLabel}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Settlement Date</p>
                   <p className="font-medium">
-                    {dateTimeUtils.formatDateTime(
-                      order.customerBonds.purchaseDate,
-                      "DD MMM YYYY hh:mm AA"
-                    )}
+                    {settlementDateLabel !== "—"
+                      ? settlementDateLabel
+                      : order.customerBonds.purchaseDate
+                        ? dateTimeUtils.formatDateTime(
+                            order.customerBonds.purchaseDate,
+                            "DD MMM YYYY",
+                          )
+                        : "—"}
                   </p>
                 </div>
                 <div>

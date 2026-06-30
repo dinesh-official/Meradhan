@@ -3,6 +3,7 @@ import { userSessionStore } from "@/core/auth/userSessionStore";
 import { ISessionResponse } from "@root/apiGateway";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import AuthActions from "./AuthActions";
 import MobMenu from "./MobMenu";
@@ -15,6 +16,18 @@ function NavBar({
 }) {
   // save data on session store
   const { setSession } = userSessionStore();
+
+  // Hide the navbar search on the bond listing pages (they have their own search)
+  const pathname = usePathname();
+  const hideNavbarSearch = [
+    "/bonds",
+    "/bonds/latest-release",
+    "/bonds/bank",
+    "/bonds/corporate",
+    "/bonds/psu",
+    "/bonds/nbfc",
+    "/bonds/zero-coupon",
+  ].includes(pathname);
 
   useEffect(() => {
     setSession(session);
@@ -36,7 +49,7 @@ function NavBar({
           </Link>
 
           {/* Global Bond Search */}
-          <NavbarBondSearch />
+          {!hideNavbarSearch && <NavbarBondSearch />}
 
           {/* Menu Items */}
           <div className="hidden lg:flex justify-center items-center gap-7 shrink-0">
