@@ -21,7 +21,7 @@ function ToolsOfferedByMeraDhan() {
           <Card className="border-none">
             <CardContent>
               <div className="flex flex-col gap-5">
-                <FaBrain size={30} className="text-secondary" />
+                <FaBrain size={30} className="text-secondary" aria-hidden="true" />
                 <p className="text-2xl quicksand-medium">MeraDhan-GPT</p>
                 <p>
                   Meet MeraDhan-GPT—your friendly, AI-powered learning companion for
@@ -39,7 +39,7 @@ function ToolsOfferedByMeraDhan() {
           <Card className="border-none">
             <CardContent>
               <div className="flex flex-col gap-5">
-                <FaCalculator size={30} className="text-secondary" />
+                <FaCalculator size={30} className="text-secondary" aria-hidden="true" />
                 <p className="text-2xl quicksand-medium">
                   Yield to Maturity Calculator
                 </p>

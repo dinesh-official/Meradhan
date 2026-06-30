@@ -35,6 +35,7 @@ const WhyChooseUsSection = () => {
                     size={20}
                     className="text-[#7FABD2]"
                     strokeWidth={2}
+                    aria-hidden="true"
                   />
                   <p className="text-[16px] text-slate-800 md:text-[17px]">
                     {item}
@@ -68,7 +69,7 @@ const WhyChooseUsSection = () => {
             {/* Contact Section */}
             <div className="flex flex-col gap-3 mt-4 text-gray-800">
               <div className="flex items-center gap-3">
-                <Globe size={18} />
+                <Globe size={18} aria-hidden="true" />
                 <a
                   href="https://www.meradhan.co"
                   target="_blank"
@@ -80,7 +81,7 @@ const WhyChooseUsSection = () => {
               </div>
 
               <div className="flex items-center gap-3">
-                <Mail size={18} />
+                <Mail size={18} aria-hidden="true" />
                 <a
                   href="mailto:support@meradhan.co"
                   className="hover:underline"
@@ -90,7 +91,7 @@ const WhyChooseUsSection = () => {
               </div>
 
               <div className="flex items-center gap-3">
-                <Phone size={18} />
+                <Phone size={18} aria-hidden="true" />
                 <a href="tel:+919873373195" className="hover:underline">
                   +91 9873373195
                 </a>

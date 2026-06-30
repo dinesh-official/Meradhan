@@ -133,7 +133,7 @@ function ReturnsCalculation() {
           <div className="gap-5 grid md:grid-cols-2">
             <div className="flex flex-col gap-6">
               <h1 className="flex items-center text-3xl">
-                <PiCurrencyInrBold />{" "}
+                <PiCurrencyInrBold aria-hidden="true" />{" "}
                 {inr.format(total).replace("₹", "").trim()}
               </h1>
               <p className="text-lg">
@@ -144,7 +144,7 @@ function ReturnsCalculation() {
                   Investment Amount
                 </Label>
                 <p className="flex items-center text-lg">
-                  <PiCurrencyInrBold />
+                  <PiCurrencyInrBold aria-hidden="true" />
                   {inr.format(amount).replace("₹", "").trim()}
                 </p>
               </div>
@@ -153,7 +153,7 @@ function ReturnsCalculation() {
                   Interest Amount
                 </Label>
                 <p className="flex items-center text-lg">
-                  <PiCurrencyInrBold />{" "}
+                  <PiCurrencyInrBold aria-hidden="true" />{" "}
                   {inr.format(interest).replace("₹", "").trim()}
                 </p>
               </div>

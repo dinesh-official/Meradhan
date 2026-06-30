@@ -3,8 +3,10 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 import Client from "./client";
 
 import { SharePopupViewProvider } from "@/global/module/share/SharePopupView";
+import ScrollToTop from "@/global/components/ScrollToTop";
 import { headers } from "next/headers";
 import Script from "next/script";
+import type { Metadata, Viewport } from "next";
 
 import "./styles/datepicker.css";
 import "./styles/globals.css";
@@ -12,6 +14,19 @@ import "./styles/globals.css";
 import "./styles/override.css";
 
 export const revalidate = 0;
+
+export const metadata: Metadata = {
+  title: "MeraDhan - India's Trusted Bond Investment Platform",
+  description: "Invest in bonds securely with MeraDhan. Access 26000+ bonds with fixed returns of 8-12%.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+};
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -21,7 +36,7 @@ export default async function RootLayout({
   const pathname = header.get("x-pathname");
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -117,7 +132,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         />
         <meta name="theme-color" content="#ffffff" />
       </head>
-      <body className={`antialiased`}>
+      <body className={`antialiased`} suppressHydrationWarning>
+        {/* Apply saved accessibility prefs before first paint (no flash of normal mode on navigation/redirect) */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{if(localStorage.getItem('a11y-high-contrast')==='1'){document.documentElement.classList.add('dark');document.body.classList.add('high-contrast');}var f=localStorage.getItem('a11y-font-scale');if(f){document.documentElement.style.setProperty('--a11y-font-scale',f);}}catch(e){}})();`,
+          }}
+        />
+        <a href="#main-content" className="skip-to-content">Skip to main content</a>
         <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-PDZ7WFGD"
@@ -129,8 +151,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <NextTopLoader color="#002c59" />
         <NuqsAdapter>
           <Client>
-            {children}
+            <main id="main-content">{children}</main>
             <SharePopupViewProvider />
+            <ScrollToTop />
           </Client>
         </NuqsAdapter>
         <Script

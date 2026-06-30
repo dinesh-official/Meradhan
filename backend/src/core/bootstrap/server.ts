@@ -74,6 +74,9 @@ export class ExpressServer implements IServer, IExpressRoute {
       "https://preprod.meradhan.co",
       "https://preprodfe.meradhan.co",
       "https://preprod-crm.meradhan.co",
+      "https://axs-fe.meradhan.co",
+      "https://axs-be.meradhan.co",
+      "https://axs-crm.meradhan.co",
       ...(isDevelopment
         ? [
           "http://localhost:3000",

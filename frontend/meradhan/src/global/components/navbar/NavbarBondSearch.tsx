@@ -30,7 +30,7 @@ export function NavbarBondSearch() {
     <div ref={containerRef} className="hidden lg:block relative w-full max-w-sm">
       {/* Search input */}
       <div className="relative flex items-center">
-        <Search className="left-3 absolute w-4 h-4 text-muted-foreground pointer-events-none shrink-0" />
+        <Search aria-hidden="true" className="left-3 absolute w-4 h-4 text-muted-foreground pointer-events-none shrink-0" />
         <Input
           placeholder="Search by ISIN or Issuer Name"
           value={inputValue}

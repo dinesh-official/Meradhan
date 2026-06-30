@@ -80,7 +80,7 @@ function IWantToQus() {
               className="flex items-center gap-1 transition-colors cursor-pointer"
               onClick={handlePrev}
             >
-              <MdArrowLeft size={24} className="text-secondary" /> Previous
+              <MdArrowLeft size={24} className="text-secondary" aria-hidden="true" /> Previous
             </button>
           )}
         </div>
@@ -91,14 +91,14 @@ function IWantToQus() {
               className="flex items-center gap-1 transition-colors cursor-pointer"
               onClick={handleNext}
             >
-              Next <MdArrowRight size={24} className="text-secondary" />
+              Next <MdArrowRight size={24} className="text-secondary" aria-hidden="true" />
             </button>
           ) : (
             <button
               className="flex items-center gap-1 text-white cursor-pointer"
               onClick={() => console.log("Submitted Answers:", answers)}
             >
-              Submit <MdArrowRight size={24} className="text-secondary" />
+              Submit <MdArrowRight size={24} className="text-secondary" aria-hidden="true" />
             </button>
           )}
         </div>
