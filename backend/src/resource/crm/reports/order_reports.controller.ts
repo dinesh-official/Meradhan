@@ -1,5 +1,5 @@
 import { type Request, type Response } from "express";
-import { appSchema } from "@root/schema";
+import { appSchema, getOrderStatusLabel, getPaymentStatusLabel } from "@root/schema";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import { OrderReportsService } from "./order_reports.service";
 
@@ -299,17 +299,17 @@ export class OrderReportsController {
   getRegisterExport = async (req: Request, res: Response) => {
     const { filters } = parseFilters(req);
     const rows = await this.service.getRegisterCsvRows(filters, MAX_CSV_ROWS);
-    const header = [
-      "orderNumber",
-      "createdAt",
-      "paymentStatus",
-      "status",
-      "customerId",
-      "customerEmail",
-      "isin",
-      "bondName",
-      "quantity",
-      "totalAmount",
+    const headerLabels = [
+      "Order Number",
+      "Created At",
+      "Payment Status",
+      "Status",
+      "Customer ID",
+      "Customer Email",
+      "ISIN",
+      "Bond Name",
+      "Quantity",
+      "Total Amount",
     ];
     const esc = (v: string | number) => {
       const s = String(v);
@@ -317,13 +317,13 @@ export class OrderReportsController {
       return s;
     };
     const lines = [
-      header.join(","),
+      headerLabels.join(","),
       ...rows.map((r) =>
         [
           esc(r.orderNumber),
           esc(r.createdAt),
-          esc(r.paymentStatus),
-          esc(r.status),
+          esc(getPaymentStatusLabel(r.paymentStatus)),
+          esc(getOrderStatusLabel(r.status, r.paymentStatus)),
           r.customerId,
           esc(r.customerEmail),
           esc(r.isin),

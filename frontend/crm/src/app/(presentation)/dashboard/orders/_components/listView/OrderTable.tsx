@@ -5,7 +5,7 @@ import { CrmOrder } from "@root/apiGateway";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { getBondRating, getBondType } from "../../utils/orderUtils";
 import { FaEye } from "react-icons/fa6";
-import StatusBadge from "@/global/elements/wrapper/badges/StatusBadge";
+import OrderStatusBadge from "@/global/elements/wrapper/badges/OrderStatusBadge";
 import { useRouter } from "next/navigation";
 import { encodeId } from "@/global/utils/url.utils";
 
@@ -116,7 +116,7 @@ function OrderTable({ data, pageSize = 10, isLoading }: OrderTableProps) {
         {
           key: "status",
           label: "Status",
-          cell: (row) => <StatusBadge value={row.status} />,
+          cell: (row) => <OrderStatusBadge status={row.status} />,
         },
         {
           key: "actions",

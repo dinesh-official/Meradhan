@@ -17,6 +17,7 @@ import type {
   GetPaymentGatewaySettingsResponse,
   GetPaymentProcessLogsResponse,
   PaymentGatewayMode,
+  CrmOrderStatus,
 } from "./orders.response";
 import type { IApiCaller } from "../../connection/apiCaller.interface";
 
@@ -124,7 +125,7 @@ export class CrmOrdersApi {
 
   async updateOrderStatus(
     orderId: number,
-    status: "PENDING" | "SETTLED" | "APPLIED" | "REJECTED",
+    status: CrmOrderStatus,
     config?: AxiosRequestConfig
   ): Promise<GetCrmOrderDetailsResponse> {
     const { data } = await this.apiClient.patch<GetCrmOrderDetailsResponse>(
@@ -322,6 +323,7 @@ export class CrmOrdersApi {
       cleanPrice?: number | null;
       couponRate?: number | null;
       gender?: string | null;
+      customerProfileId?: number | null;
     },
     config?: AxiosRequestConfig
   ): Promise<SendOrderPdfEmailResponse> {

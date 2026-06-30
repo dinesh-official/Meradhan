@@ -27,14 +27,11 @@ type TabValue =
   | "min-10000";
 
 const TAB_DEFS: Array<{ value: TabValue; label: string }> = [
-  { value: "all", label: "All Bonds" },
-  { value: "latest", label: "Latest Release" },
-  { value: "high-yield", label: "11+ Yield" },
-  { value: "zero-coupon", label: "Zero Coupon" },
-  { value: "aaa", label: "AAA Bonds" },
-  { value: "secured", label: "Secured" },
-  { value: "monthly-income", label: "Monthly Income" },
-  { value: "min-10000", label: "Minimum ₹10,000" },
+  { value: "high-yield", label: "HIGH YIELD BONDS" },
+  { value: "secured", label: "SECURED" },
+  { value: "monthly-income", label: "MONTHLY INTEREST BONDS" },
+  { value: "min-10000", label: "BONDS WITH ₹10,000 MINIMUM INVESTMENT" },
+  { value: "zero-coupon", label: "ZERO COUPON BONDS" },
 ];
 
 function dedupe(bonds: BondDetailsResponse[]): BondDetailsResponse[] {
@@ -141,20 +138,20 @@ function LatestBondReleases({
               </TabsTrigger>
             ))}
           </TabsList>
+          <div className="flex justify-center">
+            <Link
+              href="/bonds"
+              className="inline-flex items-center justify-center gap-1 rounded-md border bg-background px-6 py-2 text-sm font-medium text-foreground shadow-sm transition-all hover:bg-muted active:scale-95"
+            >
+              View All Bonds <span aria-hidden>→</span>
+            </Link>
+          </div>
           {visibleTabs.map((tab) => (
             <TabsContent key={tab.value} value={tab.value} className="-mx-2">
               <BondsCarousel bonds={bondsByTab[tab.value]} />
             </TabsContent>
           ))}
         </Tabs>
-        <div className="flex justify-center pt-4">
-          <Link
-            href="/bonds"
-            className="inline-flex items-center justify-center rounded-lg bg-[#002a54] px-12 py-3.5 text-base font-semibold text-white shadow-sm transition-all hover:bg-[#001e3d] hover:shadow active:scale-95"
-          >
-            View All Bonds
-          </Link>
-        </div>
       </div>
     </SectionWrapper>
   );

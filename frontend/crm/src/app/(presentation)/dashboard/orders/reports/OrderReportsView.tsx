@@ -23,8 +23,11 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import { ApiError } from "@root/apiGateway";
 import OrdersSectionTabs from "../_components/OrdersSectionTabs";
+import { statusOptions } from "@/global/constants/order";
 import { CompliancePanel } from "./_components/CompliancePanel";
 import { CustomersPanel } from "./_components/CustomersPanel";
 import { ExceptionsPanel } from "./_components/ExceptionsPanel";
@@ -96,6 +99,10 @@ export default function OrderReportsView() {
     [from, to, paymentStatus, status, isin, email],
   );
 
+  useEffect(() => {
+    setRegisterPage(1);
+  }, [baseQuery]);
+
   const summaryQuery = useQuery({
     queryKey: ["orderReports", "summary", baseQuery, groupBy],
     queryFn: () =>
@@ -159,13 +166,30 @@ export default function OrderReportsView() {
   }, [summaryQuery.data]);
 
   const exportCsv = async () => {
-    const blob = await reportsApi.downloadRegisterExport(baseQuery);
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `order-register-${from}-to-${to}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    try {
+      const blob = await reportsApi.downloadRegisterExport(baseQuery);
+      if (blob.type.includes("application/json")) {
+        const text = await blob.text();
+        const parsed = JSON.parse(text) as { message?: string };
+        toast.error(parsed.message ?? "Export failed");
+        return;
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `order-register-${from}-to-${to}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      const message =
+        err instanceof ApiError
+          ? ((err.response?.data as { message?: string } | undefined)?.message ??
+            err.message)
+          : err instanceof Error
+            ? err.message
+            : "Export failed";
+      toast.error(message);
+    }
   };
 
   return (
@@ -215,10 +239,13 @@ export default function OrderReportsView() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="__all__">Status: All</SelectItem>
-            <SelectItem value="PENDING">PENDING</SelectItem>
-            <SelectItem value="SETTLED">SETTLED</SelectItem>
-            <SelectItem value="APPLIED">APPLIED</SelectItem>
-            <SelectItem value="REJECTED">REJECTED</SelectItem>
+            {statusOptions
+              .filter((option) => option.value !== "ALL")
+              .map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.title}
+                </SelectItem>
+              ))}
           </SelectContent>
         </Select>
         <div className="h-4 w-px shrink-0 bg-border/60" />
