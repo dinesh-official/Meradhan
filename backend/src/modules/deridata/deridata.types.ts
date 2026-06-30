@@ -50,6 +50,12 @@ export const IssueDetailSchema = z
   })
   .passthrough();
 
+// Issue Detail envelope — the live API wraps the bond fields under `data[0]`
+// (with sibling `multiple_*` arrays). Older/flat responses are handled as-is.
+export const IssueDetailEnvelopeSchema = z
+  .object({ data: z.array(z.record(z.string(), z.unknown())).nullish() })
+  .passthrough();
+
 // 2. Calculator
 export const CalculatorResponseSchema = z
   .object({
