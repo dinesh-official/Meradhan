@@ -221,6 +221,9 @@ export function DematAccountsSection({ data }: { data: CorporateKycResponse }) {
             <LabelView title="Account holder name">
               <p>{formatOptional(acc.accountHolderName)}</p>
             </LabelView>
+            <LabelView title="DP Name">
+              <p>{formatOptional(acc.dpName)}</p>
+            </LabelView>
             <LabelView title="DP ID">
               <p>{formatOptional(acc.dpId)}</p>
             </LabelView>

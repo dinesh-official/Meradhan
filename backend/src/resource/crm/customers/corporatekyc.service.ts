@@ -57,6 +57,7 @@ function dematAccountsStructuralSignature(
   rows: ReadonlyArray<{
     depository?: string | null;
     accountType?: string | null;
+    dpName?: string | null;
     dpId?: string | null;
     clientId?: string | null;
     accountHolderName?: string | null;
@@ -68,6 +69,7 @@ function dematAccountsStructuralSignature(
     .map((d) =>
       [
         norm(d.depository),
+        norm(d.dpName),
         norm(d.dpId),
         norm(d.clientId),
         norm(d.accountType),
@@ -300,6 +302,7 @@ function mapPayloadToPrismaCreate(customerId: number, payload: CreateCorporateKy
       create: (payload.dematAccounts ?? []).map((d) => ({
         depository: d.depository,
         accountType: d.accountType ?? undefined,
+        dpName: d.dpName?.trim() ? d.dpName.trim() : undefined,
         dpId: d.dpId,
         clientId: d.clientId,
         accountHolderName: d.accountHolderName,
@@ -523,6 +526,7 @@ export class CorporateKycService {
                 create: (payload.dematAccounts ?? []).map((d) => ({
                   depository: d.depository,
                   accountType: d.accountType ?? undefined,
+                  dpName: d.dpName?.trim() ? d.dpName.trim() : undefined,
                   dpId: d.dpId,
                   clientId: d.clientId,
                   accountHolderName: d.accountHolderName,
@@ -748,6 +752,7 @@ export class CorporateKycService {
         id: d.id,
         depository: d.depository,
         accountType: d.accountType ?? undefined,
+        dpName: d.dpName ?? undefined,
         dpId: d.dpId,
         clientId: d.clientId,
         accountHolderName: d.accountHolderName,

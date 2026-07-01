@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { CreateCorporateKycPayload } from "@root/schema";
+import { normalizeKraStateName } from "@root/schema";
 import { defaultCorporateKycForm } from "./_utils/defaultForm";
 import { mapCorporateKycResponseToForm } from "./_utils/mapResponseToForm";
 import { useCorporateKycForm } from "./_hooks/useCorporateKycForm";
@@ -146,7 +147,12 @@ export default function CorporateKycPageView({
         correspondenceLine3: scalarPick("correspondenceLine3", patch.correspondenceLine3),
         correspondenceCity: scalarPick("correspondenceCity", patch.correspondenceCity),
         correspondencePinCode: scalarPick("correspondencePinCode", patch.correspondencePinCode),
-        correspondenceState: scalarPick("correspondenceState", patch.correspondenceState),
+        correspondenceState: scalarPick(
+          "correspondenceState",
+          patch.correspondenceState
+            ? normalizeKraStateName(patch.correspondenceState)
+            : undefined,
+        ),
         correspondenceAddressProofType: scalarPick(
           "correspondenceAddressProofType",
           patch.correspondenceAddressProofType,
@@ -157,7 +163,12 @@ export default function CorporateKycPageView({
         registeredLine3: scalarPick("registeredLine3", patch.registeredLine3),
         registeredCity: scalarPick("registeredCity", patch.registeredCity),
         registeredPinCode: scalarPick("registeredPinCode", patch.registeredPinCode),
-        registeredState: scalarPick("registeredState", patch.registeredState),
+        registeredState: scalarPick(
+          "registeredState",
+          patch.registeredState
+            ? normalizeKraStateName(patch.registeredState)
+            : undefined,
+        ),
         registeredAddressProofType: scalarPick(
           "registeredAddressProofType",
           patch.registeredAddressProofType,

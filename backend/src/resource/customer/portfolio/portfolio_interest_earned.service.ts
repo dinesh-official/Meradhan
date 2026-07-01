@@ -3,6 +3,10 @@ import {
   enumerateBondPortfolioCashflows,
   isBulletCouponSchedule,
 } from "./portfolio.utils";
+import {
+  buildShutFallbackFromBond,
+  type PortfolioCouponScheduleRow,
+} from "./portfolio_cashflow_shut";
 
 /** Bond fields required to project coupon cashflows (same shape as Prisma `bonds` select). */
 export type BondInterestScheduleRow = {
@@ -15,6 +19,9 @@ export type BondInterestScheduleRow = {
   maturityDate: Date | null;
   maturityDateIst?: Date | null;
   allCouponDates?: Date[] | null;
+  recordDate?: Date | null;
+  recordDateIst?: Date | null;
+  recordDays?: number | null;
 };
 
 export type HoldingInterestRow = {
@@ -34,6 +41,7 @@ export function computePortfolioInterestEarned(
   holdings: HoldingInterestRow[],
   bondByIsin: Map<string, BondInterestScheduleRow>,
   asOf: Date,
+  couponScheduleByIsin?: Map<string, PortfolioCouponScheduleRow[]>,
 ): number {
   const asOfDay = new Date(asOf);
   asOfDay.setUTCHours(0, 0, 0, 0);
@@ -84,6 +92,8 @@ export function computePortfolioInterestEarned(
       interestPaymentMode: bond.interestPaymentMode,
       interestPaymentFrequency: bond.interestPaymentFrequency,
       allCouponDates: bond.allCouponDates ?? undefined,
+      couponSchedule: couponScheduleByIsin?.get(h.isin),
+      shutFallback: buildShutFallbackFromBond(bond),
     });
 
     for (const ev of schedule) {

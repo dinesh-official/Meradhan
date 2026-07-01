@@ -13,6 +13,8 @@
  * Whenever NDML updates the master, regenerate from the XLSX above.
  */
 
+import { getKraStateCodeReferenceRows } from "@root/schema";
+
 export interface CodeEntry {
   code: string;
   label: string;
@@ -586,4 +588,5 @@ export const NDML_CODE_REFERENCE = {
   tinType: NDML_TIN_TYPE,
   tinExemptReason: NDML_TIN_EXEMPT_REASON,
   fatcaOtherServices: NDML_FATCA_OTHER_SERVICES,
+  states: getKraStateCodeReferenceRows(),
 } as const;
