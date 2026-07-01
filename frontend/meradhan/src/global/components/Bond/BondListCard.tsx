@@ -32,6 +32,10 @@ export function BondListCard({
 }) {
   const { addItem, removeItem, selectedItems } = useCompareSelectStore();
   const showBuy = canShowBuyNow(data);
+  const listYield =
+    data.yield != null && Number.isFinite(Number(data.yield))
+      ? Number(data.yield)
+      : null;
 
   return (
     <Card
@@ -130,9 +134,9 @@ export function BondListCard({
               </BondInfoLabel>
               <BondInfoLabel title="Yield">
                 <p>
-                  {data.yield !== null && data.yield !== undefined ? (
+                  {listYield != null ? (
                     <span className="font-bold text-primary">
-                      {`${Number(data.yield).toFixed(2)}%`}
+                      {`${listYield.toFixed(2)}%`}
                     </span>
                   ) : (
                     "Coming Soon"
