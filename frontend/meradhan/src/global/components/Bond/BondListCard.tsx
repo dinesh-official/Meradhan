@@ -59,11 +59,11 @@ export function BondListCard({
                   {data.isin}
                 </p>
                 <CreditRatingBadge creditRating={data.creditRating} />
-                {listingYieldLabel ? (
+                {/* {listingYieldLabel ? (
                   <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-bold text-green-700">
                     Yield {listingYieldLabel}
                   </span>
-                ) : null}
+                ) : null} */}
                 <BondAddToWatchList isin={data.isin} />
               </div>
               <div className="flex justify-between">
