@@ -365,7 +365,7 @@ export class OrderService {
         where: { id: order.id },
         data: {
           paymentStatus: PaymentStatus.COMPLETED,
-          status: "APPLIED",
+          status: "IN_PROGRESS",
           paymentId,
           paymentMetadata: {
             signature: signature || null,

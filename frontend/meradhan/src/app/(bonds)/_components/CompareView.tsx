@@ -4,12 +4,14 @@ import { X } from "lucide-react";
 import React from "react";
 import { PiCurrencyInrBold } from "react-icons/pi";
 import { useCompareSelectStore } from "../_hooks/useCompareSelectStore";
+import { formatBondListingYieldLabel } from "@/global/utils/bondListingYield";
 
 interface CompareItem {
   name: string;
   issuePrice: string;
   faceValue: string;
   coupon: string;
+  yield: string | number | null | undefined;
 }
 
 const CompareView: React.FC = () => {
@@ -36,6 +38,7 @@ const CompareView: React.FC = () => {
                 faceValue={item.faceValue.toString()}
                 issuePrice={item.issuePrice.toString()}
                 name={item.bondName}
+                yield={item.yield}
                 onRemove={() => removeItem(item.id)}
               />
             ))
@@ -83,6 +86,7 @@ const CompareViewCard: React.FC<CompareViewCardProps> = ({
   issuePrice,
   faceValue,
   coupon,
+  yield: listingYield,
   onRemove,
 }) => {
   return (
@@ -102,7 +106,7 @@ const CompareViewCard: React.FC<CompareViewCardProps> = ({
       </h2>
 
       {/* Info Grid */}
-      <div className="grid grid-cols-3 text-gray-700 text-xs">
+      <div className="grid grid-cols-2 gap-3 text-gray-700 text-xs sm:grid-cols-4">
         <div>
           <p className="text-gray-600">Issue Price</p>
           <p className="font-medium">{issuePrice}</p>
@@ -113,6 +117,10 @@ const CompareViewCard: React.FC<CompareViewCardProps> = ({
             <PiCurrencyInrBold size={13} className="mr-[2px]" aria-hidden="true" />
             {Number(faceValue).toLocaleString("en-IN")}
           </p>
+        </div>
+        <div>
+          <p className="text-gray-600">Yield</p>
+          <p className="font-medium">{formatBondListingYieldLabel(listingYield, "--")}</p>
         </div>
         <div>
           <p className="text-gray-600">Coupon</p>

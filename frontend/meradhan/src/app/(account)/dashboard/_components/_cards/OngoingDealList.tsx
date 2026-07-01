@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { BondInfoLabel } from "@/global/components/Bond/BondInfoLabel";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { formatNumberTS } from "@/global/utils/formate";
+import { formatBondListingYieldLabel } from "@/global/utils/bondListingYield";
 import { BondDetailsResponse } from "@root/apiGateway";
 import { PiCurrencyInrBold } from "react-icons/pi";
 import Link from "next/link";
@@ -38,7 +39,7 @@ export function OngoingDealList({ bond }: OngoingDealListProps) {
         </BondInfoLabel>
         <BondInfoLabel title="Yield">
           <p className="flex items-center font-bold">
-            {bond.yield != null ? `${Number(bond.yield).toFixed(2)}%` : "--"}
+            {formatBondListingYieldLabel(bond.yield, "--")}
           </p>
         </BondInfoLabel>
         <BondInfoLabel title="Maturity Date">
