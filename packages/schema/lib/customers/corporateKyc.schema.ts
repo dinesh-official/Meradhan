@@ -295,15 +295,17 @@ export const ESignRequestStatusEnum = z.enum([
 export type ESignRequestStatusValue = z.infer<typeof ESignRequestStatusEnum>;
 
 /**
- * Body for `POST /corporate-kyc/e-sign-requests`. The CRM operator uploads a
- * PDF (`eSignDocumentUrl`) and picks one authorised signatory whose name +
- * (optional) contact details are snapshotted into the request row.
+ * Body for `POST /corporate-kyc/e-sign-requests`. The CRM operator picks one
+ * authorised signatory. `eSignDocumentUrl` is optional — when omitted the
+ * meradhan customer completes risk profile and the backend generates the PDF.
  */
 export const createCorporateESignRequestSchema = z.object({
   eSignDocumentUrl: z
     .string()
     .trim()
-    .min(1, "Please upload the document to be signed"),
+    .min(1, "Please upload the document to be signed")
+    .optional()
+    .or(z.literal("")),
   personName: z.string().trim().min(1, "Signatory name is required"),
   authorisedSignatoryId: z.number().int().positive().optional(),
   signatoryEmail: z
@@ -330,14 +332,16 @@ export const updateCorporateESignRequestSchema = z
   .object({
     status: ESignRequestStatusEnum.optional(),
     signFileUrl: z.string().trim().optional().or(z.literal("")),
+    eSignDocumentUrl: z.string().trim().optional().or(z.literal("")),
     notes: z.string().trim().max(2000).optional().or(z.literal("")),
   })
   .refine(
     (v) =>
       v.status !== undefined ||
       (v.signFileUrl !== undefined && v.signFileUrl !== "") ||
+      (v.eSignDocumentUrl !== undefined && v.eSignDocumentUrl !== "") ||
       v.notes !== undefined,
-    "Pass at least one of: status, signFileUrl, notes",
+    "Pass at least one of: status, signFileUrl, eSignDocumentUrl, notes",
   );
 
 export type UpdateCorporateESignRequestPayload = z.infer<

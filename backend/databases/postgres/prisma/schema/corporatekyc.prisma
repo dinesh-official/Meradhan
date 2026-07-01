@@ -327,16 +327,14 @@ model CorporateKycAuthorisedSignatoryModel {
 }
 
 // ---------------------------------------------------------------------------
-// E-Sign requests against a Corporate KYC. An operator uploads a PDF to be
-// signed by a chosen authorised signatory and tracks the resulting signed
-// file + status. Snapshots the signatory's display name (`personName`) at
-// create-time so later edits to the signatory list don't lose history.
+// E-Sign requests against a Corporate KYC. An operator may upload a PDF or
+// leave it blank so Meradhan generates the document after risk-profile capture.
 // ---------------------------------------------------------------------------
 model CorporateESignRequestModel {
   id                  Int                @id @default(autoincrement())
   corporateKycModel   CorporateKycModel  @relation(fields: [corporateKycModelId], references: [id], onDelete: Cascade)
   corporateKycModelId Int
-  eSignDocumentUrl    String /// Source PDF the CRM operator uploaded for signing
+  eSignDocumentUrl    String? /// Source PDF: CRM upload or backend-generated after risk profile
   personName          String /// Snapshot of the chosen authorised signatory's name at request time
   /// Optional FK-like reference to the authorised signatory row used at request
   /// time. Stored as a loose Int (no FK) so deleting/renaming the signatory

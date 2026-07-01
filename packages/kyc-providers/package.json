@@ -4,7 +4,8 @@
   "type": "module",
   "private": true,
   "exports": {
-    ".": "./index.ts"
+    ".": "./index.ts",
+    "./corporate-pdf-payload": "./pdf/corporate/corporatePdfServicePayload.ts"
   },
   "scripts": {
     "lint": "eslint .",

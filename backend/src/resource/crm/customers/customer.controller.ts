@@ -1201,7 +1201,10 @@ export class CustomerProfileController {
 
     const created = await this.corporateESignRequestsRepo.create({
       corporateKycModelId: corporateKyc.id,
-      eSignDocumentUrl: payload.eSignDocumentUrl,
+      eSignDocumentUrl:
+        payload.eSignDocumentUrl && payload.eSignDocumentUrl !== ""
+          ? payload.eSignDocumentUrl
+          : null,
       personName: payload.personName,
       authorisedSignatoryId: payload.authorisedSignatoryId ?? null,
       signatoryEmail:
@@ -1274,6 +1277,12 @@ export class CustomerProfileController {
             ? payload.signFileUrl === ""
               ? null
               : payload.signFileUrl
+            : undefined,
+        eSignDocumentUrl:
+          payload.eSignDocumentUrl !== undefined
+            ? payload.eSignDocumentUrl === ""
+              ? null
+              : payload.eSignDocumentUrl
             : undefined,
         notes:
           payload.notes !== undefined

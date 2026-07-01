@@ -12,7 +12,6 @@ import {
   type AdditionalInfo,
   type CorporateKycData,
   type ExistingClientRelationship,
-  type RiskProfile,
   type SettlementAgency,
   type YesNo,
 } from "../_utils/mapToPdfPayload";
@@ -21,9 +20,11 @@ type Props = {
   value: CorporateKycData;
   onChange: (next: CorporateKycData) => void;
   disabled?: boolean;
+  /** Customer username — NCL participant code for Page 15 row 2. */
+  customerUserName?: string | null;
 };
 
-export default function AdditionalInfoTab({ value, onChange, disabled }: Props) {
+export default function AdditionalInfoTab({ value, onChange, disabled, customerUserName }: Props) {
   const ai = value.additionalInfo ?? {};
   const update = (patch: Partial<AdditionalInfo>) =>
     onChange({ ...value, additionalInfo: { ...ai, ...patch } });
@@ -54,10 +55,12 @@ export default function AdditionalInfoTab({ value, onChange, disabled }: Props) 
             disabled={disabled}
           />
           <SelectField
-            label="Risk profile"
+            label="Risk profile (Page 8 — Please confirm your risk profile)"
             value={ai.riskProfile}
-            onChange={(v) => update({ riskProfile: v as RiskProfile })}
+            onChange={(v) => update({ riskProfile: v })}
             options={RISK_PROFILES}
+            placeholder="Select risk profile"
+            clearable
             disabled={disabled}
           />
           <TextField
@@ -81,10 +84,11 @@ export default function AdditionalInfoTab({ value, onChange, disabled }: Props) 
             disabled={disabled}
           />
           <TextField
-            label="NCL code"
+            label="NCL code (Page 8 — settlement agency)"
             value={ai.settlementAgency?.nclCode}
             onChange={(nclCode) => updateAgency({ nclCode })}
             disabled={disabled}
+            placeholder={customerUserName ?? undefined}
           />
           <CheckField
             label="ICCL"

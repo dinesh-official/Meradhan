@@ -34,7 +34,7 @@ import {
 } from "lucide-react";
 import { useCorporateKycFileUpload } from "@/app/(presentation)/dashboard/customers/[id]/corporate-kyc/_hooks/useCorporateKycFileUpload";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import AdditionalInfoTab from "./_components/AdditionalInfoTab";
 import DocumentsTab from "./_components/DocumentsTab";
@@ -49,6 +49,7 @@ import { BankTab, DematTab } from "./_components/BankDematTabs";
 import RelatedPersonTab from "./_components/RelatedPersonTab";
 import { ApplicationTab, Page2Tab } from "./_components/Sections";
 import {
+  hydrateCorporatePdfPayload,
   mapCorporateKycToPdfPayload,
   type CorporateKycData,
 } from "./_utils/mapToPdfPayload";
@@ -176,6 +177,12 @@ export default function CorporateKycPdfView({
   const [savingDraft, setSavingDraft] = useState(false);
   const initialized = useRef(false);
 
+  const updatePayload = useCallback((next: CorporateKycData) => {
+    setPayload(next);
+    setJsonText(JSON.stringify(next, null, 2));
+    setJsonError((prev) => (prev ? null : prev));
+  }, []);
+
   const crmMappedPayload = useMemo<CorporateKycData | null>(() => {
     if (!corporateKyc) return null;
     return mapCorporateKycToPdfPayload(corporateKyc, customer ?? null);
@@ -184,11 +191,15 @@ export default function CorporateKycPdfView({
   const initialPayload = useMemo<CorporateKycData | null>(() => {
     if (!corporateKyc) return null;
     const saved = corporateKyc.lastPdfPayload;
-    if (saved && typeof saved === "object" && !Array.isArray(saved)) {
-      return saved as CorporateKycData;
-    }
-    return crmMappedPayload;
-  }, [corporateKyc, crmMappedPayload]);
+    const base =
+      saved && typeof saved === "object" && !Array.isArray(saved)
+        ? (saved as CorporateKycData)
+        : crmMappedPayload;
+    if (!base) return null;
+    return hydrateCorporatePdfPayload(base, {
+      participantCodeFallback: customer?.userName,
+    });
+  }, [corporateKyc, crmMappedPayload, customer?.userName]);
 
   useEffect(() => {
     if (initialized.current) return;
@@ -198,11 +209,35 @@ export default function CorporateKycPdfView({
     initialized.current = true;
   }, [initialPayload]);
 
-  const updatePayload = (next: CorporateKycData) => {
-    setPayload(next);
-    setJsonText(JSON.stringify(next, null, 2));
-    if (jsonError) setJsonError(null);
-  };
+  // Backfill Page 15 participant code when customer profile loads after the draft.
+  useEffect(() => {
+    const userName = customer?.userName?.trim();
+    if (!userName || !payload) return;
+    const currentCode = payload.nclAnnexure?.values?.participantCode?.trim();
+    if (currentCode) return;
+    const hydrated = hydrateCorporatePdfPayload(payload, {
+      participantCodeFallback: userName,
+    });
+    updatePayload(hydrated);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only when userName arrives
+  }, [customer?.userName, payload, updatePayload]);
+
+  // Backfill UBO DOB on Page 14 when Related Person DOB is set (Page 6).
+  useEffect(() => {
+    if (!payload?.relatedPerson?.dateOfBirth?.trim()) return;
+    if (payload.annexure12?.ubos?.[0]?.dateOfBirth?.trim()) return;
+    updatePayload(
+      hydrateCorporatePdfPayload(payload, {
+        participantCodeFallback: customer?.userName,
+      }),
+    );
+  }, [
+    customer?.userName,
+    payload?.relatedPerson?.dateOfBirth,
+    payload?.annexure12?.ubos?.[0]?.dateOfBirth,
+    payload,
+    updatePayload,
+  ]);
 
   const onJsonChange = (text: string) => {
     setJsonText(text);
@@ -289,7 +324,11 @@ export default function CorporateKycPdfView({
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(
+          hydrateCorporatePdfPayload(payload, {
+            participantCodeFallback: customer?.userName,
+          }),
+        ),
       });
       if (!res.ok) {
         const message = await readErrorMessage(res);
@@ -634,7 +673,12 @@ export default function CorporateKycPdfView({
               <RelatedPersonTab value={payload} onChange={updatePayload} disabled={generating} />
             </TabsContent>
             <TabsContent value="additional" className="mt-3">
-              <AdditionalInfoTab value={payload} onChange={updatePayload} disabled={generating} />
+              <AdditionalInfoTab
+                value={payload}
+                onChange={updatePayload}
+                disabled={generating}
+                customerUserName={customer?.userName}
+              />
             </TabsContent>
             <TabsContent value="bank" className="mt-3">
               <BankTab value={payload} onChange={updatePayload} disabled={generating} />
@@ -655,7 +699,12 @@ export default function CorporateKycPdfView({
               <UboTab value={payload} onChange={updatePayload} disabled={generating} />
             </TabsContent>
             <TabsContent value="ncl" className="mt-3">
-              <NclTab value={payload} onChange={updatePayload} disabled={generating} />
+              <NclTab
+                value={payload}
+                onChange={updatePayload}
+                disabled={generating}
+                customerUserName={customer?.userName}
+              />
             </TabsContent>
             <TabsContent value="docs" className="mt-3">
               <DocumentsTab

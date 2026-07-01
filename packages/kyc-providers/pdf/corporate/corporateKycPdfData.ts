@@ -1,4 +1,8 @@
 import { formatDate } from "../helper";
+import {
+  mapCorporateRiskProfileToPdfCheckboxes,
+  type CorporateRiskProfileAnswer,
+} from "./corporateRiskProfilePdfMap";
 
 /** Display string for PDF fields — blank space when no value (React-PDF shows empty line). */
 export function pdfStr(v: string | number | undefined | null): string {
@@ -131,6 +135,8 @@ export type CorporateKycPdfData = {
   settlementIccl?: boolean;
   nclDirectCode?: string;
   icclDirectCode?: string;
+  /** NCL participant code (customer userName / broker code) for NCL Annexure row 2 */
+  nclParticipantCode?: string;
   riskAggressive?: boolean;
   riskModerate?: boolean;
   riskConservative?: boolean;
@@ -264,11 +270,18 @@ export type PoiKey =
   | "otherPoi";
 
 /** Map API corporate KYC response → optional PDF fields (blank / unchecked when missing). */
-export function mapCorporateKycResponseToPdfData(kyc: unknown): CorporateKycPdfData {
+export function mapCorporateKycResponseToPdfData(
+  kyc: unknown,
+  riskProfileAnswers?: CorporateRiskProfileAnswer[],
+): CorporateKycPdfData {
   if (!kyc || typeof kyc !== "object") return {};
 
   const k = kyc as Record<string, unknown>;
   const customerId = typeof k.customerId === "number" ? k.customerId : undefined;
+  const nclParticipantCode =
+    typeof k.nclParticipantCode === "string" && k.nclParticipantCode.trim()
+      ? k.nclParticipantCode.trim()
+      : undefined;
 
   const pan = (k.panNumber as string) ?? undefined;
   const entityName = (k.entityName as string) ?? undefined;
@@ -344,6 +357,11 @@ export function mapCorporateKycResponseToPdfData(kyc: unknown): CorporateKycPdfD
     trueCopiesAttested: false,
   };
 
+  const riskCheckboxes =
+    riskProfileAnswers && riskProfileAnswers.length > 0
+      ? mapCorporateRiskProfileToPdfCheckboxes(riskProfileAnswers)
+      : {};
+
   return {
     customerId,
     applicationNumber: customerId != null ? String(customerId) : undefined,
@@ -382,6 +400,8 @@ export function mapCorporateKycResponseToPdfData(kyc: unknown): CorporateKycPdfD
     officeUse,
     nameOfApplicantPart3: entityName,
     part3Pan: pan,
+    nclParticipantCode,
+    ...riskCheckboxes,
   };
 }
 
@@ -447,13 +467,23 @@ function mapDematAccounts(raw: unknown): CorporateKycPdfData["dematAccounts"] {
   return raw.slice(0, 5).map((d) => {
     const x = d as Record<string, unknown>;
     const dep = String(x.depository ?? "").toUpperCase();
+    const dpName =
+      [x.dpName, x.accountHolderName]
+        .map((v) => (typeof v === "string" ? v.trim() : ""))
+        .find(Boolean) || undefined;
+    const dpId =
+      typeof x.dpId === "string" && x.dpId.trim() ? x.dpId.trim() : undefined;
+    const clientId =
+      typeof x.clientId === "string" && x.clientId.trim()
+        ? x.clientId.trim()
+        : undefined;
     return {
       isPrimary: x.isPrimary === true,
-      dpName: (x.dpName as string) ?? (x.accountHolderName as string) ?? undefined,
-      dpId: (x.dpId as string) ?? undefined,
+      dpName,
+      dpId,
       depositoryCdsl: dep.includes("CDSL"),
       depositoryNsdl: dep.includes("NSDL"),
-      beneficiaryId: (x.clientId as string) ?? undefined,
+      beneficiaryId: clientId,
     };
   });
 }
