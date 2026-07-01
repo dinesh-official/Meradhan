@@ -34,6 +34,7 @@
     "@packages/config": "file:../config",
     "@react-pdf/renderer": "^4.3.0",
     "@root/apiGateway": "file:../apiGateway",
+    "@root/schema": "file:../schema",
     "axios": "^1.13.1",
     "node-forge": "^1.3.3",
     "pdf-poppler": "^0.2.1",
