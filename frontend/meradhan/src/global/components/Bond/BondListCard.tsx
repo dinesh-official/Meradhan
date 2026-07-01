@@ -7,6 +7,10 @@ import { HOST_URL } from "@/global/constants/domains";
 import { SharePopupTrigger } from "@/global/module/share/SharePopupView";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { formatNumberTS } from "@/global/utils/formate";
+import {
+  formatBondListingYield,
+  formatBondListingYieldLabel,
+} from "@/global/utils/bondListingYield";
 import { cn } from "@/lib/utils";
 import { BondDetailsResponse } from "@root/apiGateway";
 import Link from "next/link";
@@ -32,6 +36,8 @@ export function BondListCard({
 }) {
   const { addItem, removeItem, selectedItems } = useCompareSelectStore();
   const showBuy = canShowBuyNow(data);
+  const listingYieldLabel = formatBondListingYield(data.yield);
+  const yieldDisplay = formatBondListingYieldLabel(data.yield);
 
   return (
     <Card
@@ -53,6 +59,11 @@ export function BondListCard({
                   {data.isin}
                 </p>
                 <CreditRatingBadge creditRating={data.creditRating} />
+                {listingYieldLabel ? (
+                  <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-bold text-green-700">
+                    Yield {listingYieldLabel}
+                  </span>
+                ) : null}
                 <BondAddToWatchList isin={data.isin} />
               </div>
               <div className="flex justify-between">
@@ -130,13 +141,11 @@ export function BondListCard({
               </BondInfoLabel>
               <BondInfoLabel title="Yield">
                 <p>
-                  {data.yield !== null && data.yield !== undefined ? (
-                    <span className="font-bold text-primary">
-                      {`${Number(data.yield).toFixed(2)}%`}
-                    </span>
-                  ) : (
-                    "Coming Soon"
-                  )}
+                  <span
+                    className={listingYieldLabel ? "font-bold text-primary" : undefined}
+                  >
+                    {yieldDisplay}
+                  </span>
                 </p>
               </BondInfoLabel>
               <BondInfoLabel title="Face Value">

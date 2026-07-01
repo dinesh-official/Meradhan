@@ -52,7 +52,7 @@ export type ESignRequestStatus = "PENDING" | "COMPLETED" | "REJECTED";
 export type CorporateESignRequest = {
   id: number;
   corporateKycModelId: number;
-  eSignDocumentUrl: string;
+  eSignDocumentUrl: string | null;
   personName: string;
   authorisedSignatoryId?: number | null;
   signatoryEmail?: string | null;
@@ -78,7 +78,7 @@ export type CorporateESignRequest = {
 };
 
 export type CreateCorporateESignRequestPayload = {
-  eSignDocumentUrl: string;
+  eSignDocumentUrl?: string;
   personName: string;
   authorisedSignatoryId?: number;
   signatoryEmail?: string;
@@ -89,6 +89,7 @@ export type CreateCorporateESignRequestPayload = {
 export type UpdateCorporateESignRequestPayload = {
   status?: ESignRequestStatus;
   signFileUrl?: string;
+  eSignDocumentUrl?: string;
   notes?: string;
 };
 
@@ -121,6 +122,7 @@ export type CorporateKraCodeReference = {
   politicalConnection: CorporateKraCodeEntry[];
   relationship: CorporateKraCodeEntry[];
   addressProof: CorporateKraCodeEntry[];
+  states: CorporateKraCodeEntry[];
   idProof: CorporateKraCodeEntry[];
   tinType: CorporateKraCodeEntry[];
   tinExemptReason: CorporateKraCodeEntry[];

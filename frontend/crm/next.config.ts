@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
   typedRoutes: true,
   trailingSlash: false,
   reactStrictMode: false,
-  transpilePackages: ["@root/apiGateway", "@root/schema"],
+  transpilePackages: ["@root/apiGateway", "@root/schema", "kyc-providers"],
   experimental: {
     // Increase request-body buffering limit (default 10mb) for large uploads proxied through Next.js.
     // Docs: https://nextjs.org/docs/15/pages/api-reference/config/next-config-js/middlewareClientMaxBodySize

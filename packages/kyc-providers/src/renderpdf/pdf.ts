@@ -191,12 +191,40 @@ export async function generateDealPdfBuffer({
 
 /** Renders corporate (non-individual) KYC PDF to a buffer. */
 export async function generateCorporateRatePdfBuffer(
-  data: unknown
+  data: unknown,
+  riskProfileAnswers?: Array<{ index: number; ans: string }>,
 ): Promise<Buffer> {
-  const pdfData = mapCorporateKycResponseToPdfData(data);
+  const pdfData = mapCorporateKycResponseToPdfData(data, riskProfileAnswers);
   const buffer = await renderToBuffer(
     // CorpoRatePdf renders <Document>; react-pdf typings are overly strict on createElement.
     createElement(CorpoRatePdf, { data: pdfData }) as Parameters<typeof renderToBuffer>[0]
   );
   return Buffer.from(buffer);
+}
+
+const DEFAULT_CORPORATE_PDF_SERVICE_URL =
+  "https://pdf-service.meradhan.co/api/corporate/pdf";
+
+/**
+ * Renders the full 19-page corporate KYC PDF via the external pdf-service
+ * from a saved `CorporateKycData` JSON payload (CRM `lastPdfPayload`).
+ */
+export async function generateCorporatePdfFromServicePayload(
+  payload: Record<string, unknown>,
+  options?: { serviceUrl?: string },
+): Promise<Buffer> {
+  const axios = (await import("axios")).default;
+  const base =
+    options?.serviceUrl?.trim() ||
+    process.env.CORPORATE_PDF_SERVICE_URL?.trim() ||
+    DEFAULT_CORPORATE_PDF_SERVICE_URL;
+  const url = `${base.replace(/\/$/, "")}?download=1`;
+
+  const { data } = await axios.post<ArrayBuffer>(url, payload, {
+    responseType: "arraybuffer",
+    timeout: 120_000,
+    headers: { "Content-Type": "application/json" },
+  });
+
+  return Buffer.from(data);
 }

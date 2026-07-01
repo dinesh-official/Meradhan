@@ -93,6 +93,13 @@ const EnvSchema = z.object(
     NEXT_PUBLIC_DIGIO: z.string().optional(),
     DIGIO_USERNAME_PASS: z.string().min(1, { message: "DIGIO_USERNAME_PASS is required" }),
 
+    /// External 19-page corporate KYC PDF renderer (CRM + e-sign generation).
+    CORPORATE_PDF_SERVICE_URL: z
+      .string()
+      .url()
+      .optional()
+      .default("https://pdf-service.meradhan.co/api/corporate/pdf"),
+
     // NDSL / NSDL
     NDSL_REQUESTOR_ID: z.string().min(1, { message: "NDSL_REQUESTOR_ID is required" }),
     NSDL_SECRET_KEY: z.string().min(1, { message: "NSDL_SECRET_KEY is required" }),

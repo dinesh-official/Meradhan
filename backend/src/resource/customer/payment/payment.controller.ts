@@ -135,7 +135,7 @@ export class PaymentController {
             });
           }
 
-          await this.orderService.updateOrderStatus(order.id, "APPLIED");
+          await this.orderService.updateOrderStatus(order.id, "IN_PROGRESS");
           await this.orderService.updateOrderMetadata(order.id, paymentEntity);
           const job = await orderSettlementQueue.add(
             {

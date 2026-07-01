@@ -3,7 +3,7 @@ import type { ESignRequestStatus } from "@databases/generated/prisma/postgres";
 
 export type CreateCorporateESignRequestInput = {
   corporateKycModelId: number;
-  eSignDocumentUrl: string;
+  eSignDocumentUrl: string | null;
   personName: string;
   authorisedSignatoryId?: number | null;
   signatoryEmail?: string | null;
@@ -15,6 +15,7 @@ export type CreateCorporateESignRequestInput = {
 export type UpdateCorporateESignRequestInput = {
   status?: ESignRequestStatus;
   signFileUrl?: string | null;
+  eSignDocumentUrl?: string | null;
   /** Pass `true` to stamp `submittedAt = now()`. Useful when the operator
    *  uploads the signed PDF and moves the row to COMPLETED. */
   markSubmittedNow?: boolean;
@@ -65,6 +66,7 @@ export class CorporateESignRequestsRepo {
       data: {
         status: input.status ?? undefined,
         signFileUrl: input.signFileUrl ?? undefined,
+        eSignDocumentUrl: input.eSignDocumentUrl ?? undefined,
         notes: input.notes ?? undefined,
         submittedAt: input.markSubmittedNow
           ? new Date()

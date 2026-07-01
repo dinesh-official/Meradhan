@@ -111,6 +111,13 @@ export function DematAccountsSection({
               disabled={locked}
             />
             <InputField
+              label="DP Name"
+              value={acc.dpName ?? ""}
+              onChangeAction={(v) => setDematAccount(index, { dpName: v })}
+              error={rowErrors(index).dpName?.[0]}
+              disabled={locked}
+            />
+            <InputField
               label="DP ID"
               required
               value={acc.dpId}

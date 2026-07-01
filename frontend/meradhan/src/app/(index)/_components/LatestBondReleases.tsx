@@ -1,14 +1,13 @@
 "use client";
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SectionTitleDesc from "@/global/components/basic/section/SectionTitleDesc";
 import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
 import { BondListCard } from "@/global/components/Bond/BondListCard";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BondDetailsResponse } from "@root/apiGateway";
 import Link from "next/link";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
-import { canShowBuyNow } from "@/global/utils/bondPurchaseEligibility";
 
 type LatestBondReleasesProps = {
   latest: BondDetailsResponse[];

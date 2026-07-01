@@ -36,7 +36,7 @@ function UpcomingBonds() {
       const { responseData } = await apiGate.getUpcomingBonds(6);
       return responseData;
     },
-    staleTime: 1000 * 60 * 10,
+    staleTime: 0,
   });
 
   if (!data || data.length === 0) return null;

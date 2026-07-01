@@ -9,6 +9,10 @@ import {
   enumerateBondPortfolioCashflows,
 } from "./portfolio.utils";
 import { computePortfolioInterestEarned } from "./portfolio_interest_earned.service";
+import {
+  buildShutFallbackFromBond,
+  loadCouponSchedulesByIsin,
+} from "./portfolio_cashflow_shut";
 
 /** Portfolio summary, details, and charts use only fully settled orders (no date cutoff). */
 const PORTFOLIO_ORDER_STATUS = OrderStatus.SETTLED;
@@ -279,9 +283,13 @@ export class PortfolioService {
         maturityDate: true,
         maturityDateIst: true,
         allCouponDates: true,
+        recordDate: true,
+        recordDateIst: true,
+        recordDays: true,
       },
     });
     const bondByIsin = new Map(bonds.map((b) => [b.isin, b]));
+    const couponScheduleByIsin = await loadCouponSchedulesByIsin(this.uniqueIsins(valid));
 
     const rows = valid.map((h) => ({
       isin: h.isin,
@@ -292,7 +300,12 @@ export class PortfolioService {
           : new Date(h.cashflowAnchorDate!),
     }));
 
-    return computePortfolioInterestEarned(rows, bondByIsin, istTodayUtcCalendarDate());
+    return computePortfolioInterestEarned(
+      rows,
+      bondByIsin,
+      istTodayUtcCalendarDate(),
+      couponScheduleByIsin,
+    );
   }
 
   private async getSettledOrdersWithAmount(customerId: number) {
@@ -841,8 +854,9 @@ export class PortfolioService {
       : validOrders;
     if (!ordersInScope.length) return { years: [] };
 
+    const isinsInScope = Array.from(new Set(ordersInScope.map((o) => o.isin)));
     const bonds = await db.dataBase.bonds.findMany({
-      where: { isin: { in: Array.from(new Set(ordersInScope.map((o) => o.isin))) } },
+      where: { isin: { in: isinsInScope } },
       select: {
         isin: true,
         bondName: true,
@@ -854,10 +868,14 @@ export class PortfolioService {
         maturityDate: true,
         bondType: true,
         allCouponDates: true,
+        recordDate: true,
+        recordDateIst: true,
+        recordDays: true,
       },
     });
 
     const bondByIsin = new Map(bonds.map((b) => [b.isin, b]));
+    const couponScheduleByIsin = await loadCouponSchedulesByIsin(isinsInScope);
 
     const filteredByType = bondTypes?.length
       ? ordersInScope.filter((o) => {
@@ -895,6 +913,8 @@ export class PortfolioService {
         interestPaymentMode: bond.interestPaymentMode as unknown as string,
         interestPaymentFrequency: bond.interestPaymentFrequency,
         allCouponDates: bond.allCouponDates ?? undefined,
+        couponSchedule: couponScheduleByIsin.get(order.isin),
+        shutFallback: buildShutFallbackFromBond(bond),
       });
 
       const maturityDateStr = formatDateStr(maturity);
@@ -1002,8 +1022,9 @@ export class PortfolioService {
       }));
     if (!validOrders.length) return empty;
 
+    const isinsInScope = Array.from(new Set(validOrders.map((o) => o.isin)));
     const bonds = await db.dataBase.bonds.findMany({
-      where: { isin: { in: Array.from(new Set(validOrders.map((o) => o.isin))) } },
+      where: { isin: { in: isinsInScope } },
       select: {
         isin: true,
         bondName: true,
@@ -1014,10 +1035,14 @@ export class PortfolioService {
         dateOfAllotment: true,
         maturityDate: true,
         allCouponDates: true,
+        recordDate: true,
+        recordDateIst: true,
+        recordDays: true,
       },
     });
 
     const bondByIsin = new Map(bonds.map((b) => [b.isin, b]));
+    const couponScheduleByIsin = await loadCouponSchedulesByIsin(isinsInScope);
     type CashflowEvent = {
       type: "INTEREST" | "MATURITY";
       month: string;
@@ -1054,6 +1079,8 @@ export class PortfolioService {
         interestPaymentMode: bond.interestPaymentMode as unknown as string,
         interestPaymentFrequency: bond.interestPaymentFrequency,
         allCouponDates: bond.allCouponDates ?? undefined,
+        couponSchedule: couponScheduleByIsin.get(order.isin),
+        shutFallback: buildShutFallbackFromBond(bond),
       });
 
       for (const ev of schedule) {
