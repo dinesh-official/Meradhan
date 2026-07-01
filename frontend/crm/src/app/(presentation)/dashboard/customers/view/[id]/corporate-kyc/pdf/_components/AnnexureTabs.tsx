@@ -34,6 +34,8 @@ type Props = {
   value: CorporateKycData;
   onChange: (next: CorporateKycData) => void;
   disabled?: boolean;
+  /** Customer username — NCL participant code for Page 15 row 2. */
+  customerUserName?: string | null;
 };
 
 const emptyPromoter = (): Promoter => ({
@@ -667,11 +669,20 @@ export function UboTab({ value, onChange, disabled }: Props) {
                   disabled={disabled}
                 />
                 <TextField
-                  label="Date of birth"
+                  label="Date of birth (Page 14 — annexure12.ubos[].dateOfBirth)"
                   value={u.dateOfBirth}
                   onChange={(dateOfBirth) => updateUbo(idx, { dateOfBirth })}
                   disabled={disabled}
+                  placeholder="DD / MM / YYYY"
                 />
+                {idx === 0 ? (
+                  <p className="text-muted-foreground text-xs md:col-span-2">
+                    Page 14 only reads DOB from this UBO row — not Related Person
+                    (Page 6). If blank, it is auto-copied from{" "}
+                    <code className="text-xs">relatedPerson.dateOfBirth</code> on
+                    generate.
+                  </p>
+                ) : null}
                 <TextField
                   label="Country of birth"
                   value={u.countryOfBirth}
@@ -748,7 +759,7 @@ export function UboTab({ value, onChange, disabled }: Props) {
 
 /* ------------------- NCL Annexure ------------------- */
 
-export function NclTab({ value, onChange, disabled }: Props) {
+export function NclTab({ value, onChange, disabled, customerUserName }: Props) {
   const a = value.nclAnnexure ?? {};
   const v = a.values ?? {};
   const update = (patch: Partial<typeof a>) =>
@@ -795,7 +806,20 @@ export function NclTab({ value, onChange, disabled }: Props) {
         </CardHeader>
         <CardContent className="grid gap-3 px-4 py-4 md:grid-cols-2">
           <TextField label="1. Participant name" value={v.participantName} onChange={(participantName) => updateValues({ participantName })} disabled={disabled} />
-          <TextField label="2. Participant code" value={v.participantCode} onChange={(participantCode) => updateValues({ participantCode })} disabled={disabled} />
+          <TextField
+            label="2. Participant code (Page 15 row 2)"
+            value={v.participantCode}
+            onChange={(participantCode) => updateValues({ participantCode })}
+            disabled={disabled}
+            placeholder={customerUserName ?? undefined}
+          />
+          {customerUserName ? (
+            <p className="text-muted-foreground text-xs md:col-span-2">
+              Auto-filled from customer username (@{customerUserName}) into{" "}
+              <code className="text-xs">nclAnnexure.values.participantCode</code> on
+              generate. Page 8 NCL code does not fill this row.
+            </p>
+          ) : null}
           <TextField label="3. Contact person" value={v.contactPerson} onChange={(contactPerson) => updateValues({ contactPerson })} disabled={disabled} />
           <TextField label="4. Contact email" value={v.contactEmail} onChange={(contactEmail) => updateValues({ contactEmail })} type="email" disabled={disabled} />
           <TextAreaField label="5. Communication address (incl. PIN)" value={v.communicationAddress} onChange={(communicationAddress) => updateValues({ communicationAddress })} className="md:col-span-2" rows={2} disabled={disabled} />

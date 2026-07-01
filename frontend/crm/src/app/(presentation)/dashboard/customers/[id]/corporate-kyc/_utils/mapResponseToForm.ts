@@ -1,5 +1,6 @@
 import type { CorporateKycResponse } from "@root/apiGateway";
 import type { CreateCorporateKycPayload } from "@root/schema";
+import { normalizeKraStateName } from "@root/schema";
 
 /** Normalize API date (ISO or YYYY-MM-DD) to YYYY-MM-DD for input type="date" */
 function toDateOnly(value: string | undefined | null): string {
@@ -44,7 +45,7 @@ export function mapCorporateKycResponseToForm(
     correspondenceCity: data.correspondenceCity ?? "",
     correspondenceDistrict: data.correspondenceDistrict ?? "",
     correspondencePinCode: data.correspondencePinCode ?? "",
-    correspondenceState: data.correspondenceState ?? "",
+    correspondenceState: normalizeKraStateName(data.correspondenceState) ?? "",
     correspondenceAddressProofType:
       (data as unknown as { correspondenceAddressProofType?: string | null })
         .correspondenceAddressProofType ?? "",
@@ -65,8 +66,9 @@ export function mapCorporateKycResponseToForm(
       (data as unknown as { registeredDistrict?: string | null }).registeredDistrict ?? "",
     registeredPinCode:
       (data as unknown as { registeredPinCode?: string | null }).registeredPinCode ?? "",
-    registeredState:
-      (data as unknown as { registeredState?: string | null }).registeredState ?? "",
+    registeredState: normalizeKraStateName(
+      (data as unknown as { registeredState?: string | null }).registeredState,
+    ),
     registeredAddressProofType:
       (data as unknown as { registeredAddressProofType?: string | null })
         .registeredAddressProofType ?? "",
@@ -117,6 +119,7 @@ export function mapCorporateKycResponseToForm(
       id: d.id,
       depository: d.depository as "NSDL" | "CDSL",
       accountType: d.accountType ?? "",
+      dpName: d.dpName ?? "",
       dpId: d.dpId,
       clientId: d.clientId,
       accountHolderName: d.accountHolderName,

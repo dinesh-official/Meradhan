@@ -37,16 +37,27 @@ export function CorporateESignFlowView({
           <span className="font-medium text-foreground">
             {request.personName}
           </span>
-          .{" "}
-          <a
-            href={request.eSignDocumentUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-secondary underline-offset-2 hover:underline"
-          >
-            View document
-          </a>
-          {" — "}please review before signing.
+          .
+          {request.eSignDocumentUrl ? (
+            <>
+              {" "}
+              <a
+                href={request.eSignDocumentUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-secondary underline-offset-2 hover:underline"
+              >
+                View document
+              </a>
+              {" — "}please review before signing.
+            </>
+          ) : (
+            <>
+              {" "}
+              Complete the risk profile below — your document will be prepared
+              when you proceed to sign.
+            </>
+          )}
         </p>
       </div>
 

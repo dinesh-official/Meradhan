@@ -349,10 +349,6 @@ export default function ESignRequestsCard({ customerId, corporateKyc }: Props) {
       );
       return;
     }
-    if (!pdfFile) {
-      toast.error("Please upload the document to be signed.");
-      return;
-    }
     if (!signatoryId) {
       toast.error("Please select an authorised signatory.");
       return;
@@ -362,10 +358,14 @@ export default function ESignRequestsCard({ customerId, corporateKyc }: Props) {
       toast.error("Selected signatory not found.");
       return;
     }
-    const url = await uploadFile(pdfFile, "corporate-kyc/e-sign");
-    if (!url) return;
+    let eSignDocumentUrl: string | undefined;
+    if (pdfFile) {
+      const url = await uploadFile(pdfFile, "corporate-kyc/e-sign");
+      if (!url) return;
+      eSignDocumentUrl = url;
+    }
     createMutation.mutate({
-      eSignDocumentUrl: url,
+      ...(eSignDocumentUrl ? { eSignDocumentUrl } : {}),
       personName: chosen.fullName,
       authorisedSignatoryId: chosen.id,
       signatoryEmail: chosen.email || undefined,
@@ -423,9 +423,9 @@ export default function ESignRequestsCard({ customerId, corporateKyc }: Props) {
                 ) : null}
               </CardTitle>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Send documents to authorised signatories and track signed
-                returns. Customers can also sign themselves via the Meradhan
-                dashboard.
+                Request e-sign from authorised signatories. Upload a PDF
+                optionally, or let Meradhan generate it after the customer
+                completes their risk profile.
               </p>
             </div>
           </div>
@@ -493,8 +493,8 @@ export default function ESignRequestsCard({ customerId, corporateKyc }: Props) {
             <div>
               <p className="text-sm font-medium">No e-sign requests yet</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Upload a PDF and pick an authorised signatory to start the
-                workflow.
+                Pick an authorised signatory to start. Optionally attach a
+                PDF, or leave blank for auto-generation on Meradhan.
               </p>
             </div>
             <AllowOnlyView permissions={["edit:customer"]}>
@@ -629,11 +629,19 @@ export default function ESignRequestsCard({ customerId, corporateKyc }: Props) {
 
                     {/* File rows */}
                     <div className="space-y-2">
-                      <FileRow
-                        variant="unsigned"
-                        fileUrl={item.eSignDocumentUrl}
-                        requestId={item.id}
-                      />
+                      {item.eSignDocumentUrl ? (
+                        <FileRow
+                          variant="unsigned"
+                          fileUrl={item.eSignDocumentUrl}
+                          requestId={item.id}
+                        />
+                      ) : item.status === "PENDING" ? (
+                        <div className="flex items-center gap-3 rounded-lg border border-dashed bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+                          <FileText className="h-4 w-4 shrink-0" />
+                          PDF pending — customer will complete risk profile
+                          and sign on Meradhan.
+                        </div>
+                      ) : null}
                       {item.signFileUrl ? (
                         <FileRow
                           variant="signed"
@@ -700,7 +708,9 @@ export default function ESignRequestsCard({ customerId, corporateKyc }: Props) {
               Request E-Sign
             </DialogTitle>
             <DialogDescription>
-              Upload the PDF to be signed and pick an authorised signatory.
+              Pick an authorised signatory. PDF upload is optional — when
+              omitted, Meradhan generates the document after the customer
+              completes their risk profile.
             </DialogDescription>
           </DialogHeader>
 
@@ -745,7 +755,7 @@ export default function ESignRequestsCard({ customerId, corporateKyc }: Props) {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="esign-pdf">Document to sign (PDF) *</Label>
+              <Label htmlFor="esign-pdf">Document to sign (PDF, optional)</Label>
               <Input
                 id="esign-pdf"
                 type="file"
@@ -758,7 +768,11 @@ export default function ESignRequestsCard({ customerId, corporateKyc }: Props) {
                   <FileText className="h-3 w-3" />
                   {pdfFile.name}
                 </p>
-              ) : null}
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Leave empty to auto-generate on Meradhan after risk profile.
+                </p>
+              )}
             </div>
 
             <div className="space-y-1.5">

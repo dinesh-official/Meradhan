@@ -118,6 +118,7 @@ function ReviewOrder({
   const stampDutyRate = 0.0001; // 0.01%
   const stampDutyAmount = totalConsideration * stampDutyRate;
   const otherCharges = 0;
+  const indicativeYield = orderPricing?.yield ?? bond.yield;
 
   const principalScaled = orderPricing?.principalAmount
   const accruedScaled = orderPricing?.accruedInterest || 0;
@@ -172,11 +173,9 @@ function ReviewOrder({
         <div className="grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2  md:gap-y-10 gap-y-5 gap-x-6">
           <BondInfoLabel title="Yield to Maturity">
             <p className="text-black">
-              {orderPricing?.yield != null && Number.isFinite(orderPricing.yield)
-                ? `${Number(orderPricing.yield).toFixed(2)}%`
-                : bond.yield != null && bond.yield !== ""
-                  ? `${Number(bond.yield).toFixed(2)}%`
-                  : "—"}
+              {indicativeYield != null && indicativeYield !== "" && Number.isFinite(Number(indicativeYield))
+                ? `${Number(indicativeYield).toFixed(2)}%`
+                : "—"}
             </p>
           </BondInfoLabel>
 

@@ -40,8 +40,6 @@ export type GetBondOrderPricingResult =
 // every homepage render fails in lockstep.
 const INVENTORY_BATCH_CACHE_TTL_MS = 60_000;
 const INVENTORY_ENRICH_TIMEOUT_MS = 2_500;
-/** Homepage bond lists change infrequently; cache avoids 3× DB hits per SSR. */
-const HOMEPAGE_BONDS_CACHE_TTL_MS = 60_000;
 const HOMEPAGE_BONDS_MAX_LIMIT = 50;
 
 const HOMEPAGE_ELIGIBLE_CREDIT_RATINGS = [
@@ -65,30 +63,10 @@ const HOMEPAGE_ELIGIBLE_CREDIT_RATINGS = [
 
 let cachedLatestBatchId: { id: number | null; expiresAt: number } | null = null;
 
-type HomepageBondsCacheEntry<T> = { data: T; expiresAt: number };
-const homepageBondsCache = new Map<string, HomepageBondsCacheEntry<unknown>>();
-
 export function parseHomepageBondLimit(raw: unknown, fallback = 3): number {
   const n = raw != null ? parseInt(String(raw), 10) : fallback;
   if (!Number.isFinite(n) || n < 1) return fallback;
   return Math.min(n, HOMEPAGE_BONDS_MAX_LIMIT);
-}
-
-async function cachedHomepageBonds<T>(
-  key: string,
-  fetcher: () => Promise<T>,
-): Promise<T> {
-  const now = Date.now();
-  const hit = homepageBondsCache.get(key);
-  if (hit && hit.expiresAt > now) {
-    return hit.data as T;
-  }
-  const data = await fetcher();
-  homepageBondsCache.set(key, {
-    data,
-    expiresAt: now + HOMEPAGE_BONDS_CACHE_TTL_MS,
-  });
-  return data;
 }
 
 async function getCachedLatestInventoryBatchId(): Promise<number | null> {
@@ -250,8 +228,7 @@ export class BondService {
       { settlementType },
     );
 
-    const yieldRaw =
-      pricingData.yield ?? bond.yield ?? bond.buyYield;
+    const yieldRaw = bond.yield
     const yieldNum =
       yieldRaw != null && Number.isFinite(Number(yieldRaw))
         ? Number(yieldRaw)
@@ -575,113 +552,156 @@ export class BondService {
 
   async getLatestBonds(limit: number = 3) {
     const safeLimit = parseHomepageBondLimit(limit);
-    return cachedHomepageBonds(`latest:${safeLimit}`, async () => {
-      const data = await db.dataBase.bonds.findMany({
-        where: {
-          isListed: { equals: "YES" },
-          allowForPurchase: { equals: true },
-          dateOfAllotment: { lte: new Date() },
-          creditRating: {
-            in: [
-              "AAA",
-              "AA",
-              "AA+",
-              "AAA(CE)",
-              "AA+(CE)",
-              "AA(CE)",
-              "A+(CE)",
-              "AAA",
-              "AA+",
-              "AA",
-              "A+",
-              "A",
-              "A-",
-              "BBB+",
-              "BBB",
-            ],
-          },
+    const data = await db.dataBase.bonds.findMany({
+      where: {
+        isListed: { equals: "YES" },
+        allowForPurchase: { equals: true },
+        dateOfAllotment: { lte: new Date() },
+        creditRating: {
+          in: [
+            "AAA",
+            "AA",
+            "AA+",
+            "AAA(CE)",
+            "AA+(CE)",
+            "AA(CE)",
+            "A+(CE)",
+            "AAA",
+            "AA+",
+            "AA",
+            "A+",
+            "A",
+            "A-",
+            "BBB+",
+            "BBB",
+          ],
         },
+      },
+      orderBy: [
+        { allowForPurchase: "desc" },
+        { dateOfAllotment: "desc" },
+        { creditRating: "asc" },
+      ],
+      take: safeLimit,
+    });
+
+    return this.enrichBondsWithCrmInventory(data);
+  }
+
+  async getHighYieldBonds(limit: number = 3) {
+    const safeLimit = parseHomepageBondLimit(limit);
+    const data = await db.dataBase.bonds.findMany({
+      where: {
+        isListed: { equals: "YES" },
+        allowForPurchase: { equals: true },
+        dateOfAllotment: { lte: new Date() },
+        yield: { gte: 11 },
+        creditRating: {
+          in: [
+            "AAA",
+            "AA",
+            "AA+",
+            "AAA(CE)",
+            "AA+(CE)",
+            "AA(CE)",
+            "A+(CE)",
+            "AAA",
+            "AA+",
+            "AA",
+            "A+",
+            "A",
+            "A-",
+            "BBB+",
+            "BBB",
+          ],
+        },
+      },
+      orderBy: [
+        { allowForPurchase: "desc" },
+        { yield: "desc" },
+        { dateOfAllotment: "desc" },
+      ],
+      take: safeLimit,
+    });
+
+    return this.enrichBondsWithCrmInventory(data);
+  }
+
+  async getZeroCouponBonds(limit: number = 3) {
+    const safeLimit = parseHomepageBondLimit(limit);
+    const data = await db.dataBase.bonds.findMany({
+      where: {
+        isListed: { equals: "YES" },
+        allowForPurchase: { equals: true },
+        dateOfAllotment: { lte: new Date() },
+        categories: { has: "zero-coupon" },
+        creditRating: {
+          in: [
+            "AAA",
+            "AA",
+            "AA+",
+            "AAA(CE)",
+            "AA+(CE)",
+            "AA(CE)",
+            "A+(CE)",
+            "AAA",
+            "AA+",
+            "AA",
+            "A+",
+            "A",
+            "A-",
+            "BBB+",
+            "BBB",
+          ],
+        },
+      },
+      orderBy: [
+        { allowForPurchase: "desc" },
+        { dateOfAllotment: "desc" },
+        { creditRating: "asc" },
+      ],
+      take: safeLimit,
+    });
+
+    return this.enrichBondsWithCrmInventory(data);
+  }
+
+  /**
+   * Single round-trip for the meradhan homepage: three bond lists + one shared
+   * inventory enrichment pass.
+   */
+  async getHomepageBonds(limit: number = 40) {
+    const safeLimit = parseHomepageBondLimit(limit);
+    const baseWhere = {
+      isListed: { equals: "YES" as const },
+      allowForPurchase: { equals: true },
+      dateOfAllotment: { lte: new Date() },
+      creditRating: { in: [...HOMEPAGE_ELIGIBLE_CREDIT_RATINGS] },
+    };
+
+    const [latestRaw, highYieldRaw, zeroCouponRaw] = await Promise.all([
+      db.dataBase.bonds.findMany({
+        where: baseWhere,
         orderBy: [
           { allowForPurchase: "desc" },
           { dateOfAllotment: "desc" },
           { creditRating: "asc" },
         ],
         take: safeLimit,
-      });
-
-      return this.enrichBondsWithCrmInventory(data);
-    });
-  }
-
-  async getHighYieldBonds(limit: number = 3) {
-    const safeLimit = parseHomepageBondLimit(limit);
-    return cachedHomepageBonds(`high-yield:${safeLimit}`, async () => {
-      const data = await db.dataBase.bonds.findMany({
-        where: {
-          isListed: { equals: "YES" },
-          allowForPurchase: { equals: true },
-          dateOfAllotment: { lte: new Date() },
-          yield: { gte: 11 },
-          creditRating: {
-            in: [
-              "AAA",
-              "AA",
-              "AA+",
-              "AAA(CE)",
-              "AA+(CE)",
-              "AA(CE)",
-              "A+(CE)",
-              "AAA",
-              "AA+",
-              "AA",
-              "A+",
-              "A",
-              "A-",
-              "BBB+",
-              "BBB",
-            ],
-          },
-        },
+      }),
+      db.dataBase.bonds.findMany({
+        where: { ...baseWhere, yield: { gte: 11 } },
         orderBy: [
           { allowForPurchase: "desc" },
           { yield: "desc" },
           { dateOfAllotment: "desc" },
         ],
         take: safeLimit,
-      });
-
-      return this.enrichBondsWithCrmInventory(data);
-    });
-  }
-
-  async getZeroCouponBonds(limit: number = 3) {
-    const safeLimit = parseHomepageBondLimit(limit);
-    return cachedHomepageBonds(`zero-coupon:${safeLimit}`, async () => {
-      const data = await db.dataBase.bonds.findMany({
+      }),
+      db.dataBase.bonds.findMany({
         where: {
-          isListed: { equals: "YES" },
-          allowForPurchase: { equals: true },
-          dateOfAllotment: { lte: new Date() },
+          ...baseWhere,
           categories: { has: "zero-coupon" },
-          creditRating: {
-            in: [
-              "AAA",
-              "AA",
-              "AA+",
-              "AAA(CE)",
-              "AA+(CE)",
-              "AA(CE)",
-              "A+(CE)",
-              "AAA",
-              "AA+",
-              "AA",
-              "A+",
-              "A",
-              "A-",
-              "BBB+",
-              "BBB",
-            ],
-          },
         },
         orderBy: [
           { allowForPurchase: "desc" },
@@ -689,74 +709,21 @@ export class BondService {
           { creditRating: "asc" },
         ],
         take: safeLimit,
-      });
+      }),
+    ]);
 
-      return this.enrichBondsWithCrmInventory(data);
-    });
-  }
+    const allEnriched = await this.enrichBondsWithCrmInventory([
+      ...latestRaw,
+      ...highYieldRaw,
+      ...zeroCouponRaw,
+    ]);
 
-  /**
-   * Single round-trip for the meradhan homepage: three bond lists + one shared
-   * inventory enrichment pass. Cached as one bundle so ISR revalidation does
-   * not open three HTTP connections to stage-be (a common ECONNRESET source
-   * during ECS rolling deploys).
-   */
-  async getHomepageBonds(limit: number = 40) {
-    const safeLimit = parseHomepageBondLimit(limit);
-    return cachedHomepageBonds(`homepage-bundle:${safeLimit}`, async () => {
-      const baseWhere = {
-        isListed: { equals: "YES" as const },
-        allowForPurchase: { equals: true },
-        dateOfAllotment: { lte: new Date() },
-        creditRating: { in: [...HOMEPAGE_ELIGIBLE_CREDIT_RATINGS] },
-      };
+    let offset = 0;
+    const latest = allEnriched.slice(offset, (offset += latestRaw.length));
+    const highYield = allEnriched.slice(offset, (offset += highYieldRaw.length));
+    const zeroCoupon = allEnriched.slice(offset);
 
-      const [latestRaw, highYieldRaw, zeroCouponRaw] = await Promise.all([
-        db.dataBase.bonds.findMany({
-          where: baseWhere,
-          orderBy: [
-            { allowForPurchase: "desc" },
-            { dateOfAllotment: "desc" },
-            { creditRating: "asc" },
-          ],
-          take: safeLimit,
-        }),
-        db.dataBase.bonds.findMany({
-          where: { ...baseWhere, yield: { gte: 11 } },
-          orderBy: [
-            { allowForPurchase: "desc" },
-            { yield: "desc" },
-            { dateOfAllotment: "desc" },
-          ],
-          take: safeLimit,
-        }),
-        db.dataBase.bonds.findMany({
-          where: {
-            ...baseWhere,
-            categories: { has: "zero-coupon" },
-          },
-          orderBy: [
-            { allowForPurchase: "desc" },
-            { dateOfAllotment: "desc" },
-            { creditRating: "asc" },
-          ],
-          take: safeLimit,
-        }),
-      ]);
-
-      const allEnriched = await this.enrichBondsWithCrmInventory([
-        ...latestRaw,
-        ...highYieldRaw,
-        ...zeroCouponRaw,
-      ]);
-
-      let offset = 0;
-      const latest = allEnriched.slice(offset, (offset += latestRaw.length));
-      const highYield = allEnriched.slice(offset, (offset += highYieldRaw.length));
-      const zeroCoupon = allEnriched.slice(offset);
-
-      return { latest, highYield, zeroCoupon };
-    });
+    return { latest, highYield, zeroCoupon };
   }
 
   async getLatestBondsTop3(limit: number = 3) {

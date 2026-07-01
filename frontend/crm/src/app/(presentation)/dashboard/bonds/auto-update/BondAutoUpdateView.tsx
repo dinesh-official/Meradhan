@@ -39,6 +39,8 @@ import {
 } from "@/components/ui/table";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
+import { hasOneOfPermission } from "@/global/utils/role.utils";
+import useAppCookie from "@/hooks/useAppCookie.hook";
 import { cn } from "@/lib/utils";
 import apiGateway from "@root/apiGateway";
 import type {
@@ -169,6 +171,8 @@ function createInitialRow(b: BondDetailsResponse): BondRowModel {
 
 export default function BondAutoUpdateView() {
   const queryClient = useQueryClient();
+  const { cookies } = useAppCookie();
+  const canEditBonds = hasOneOfPermission(cookies.role, ["edit:bonds"]);
   const [rows, setRows] = useState<Record<string, BondRowModel>>({});
   const rowsRef = useRef(rows);
   useEffect(() => {
@@ -589,32 +593,41 @@ export default function BondAutoUpdateView() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-muted-foreground text-sm max-w-3xl">
           Bonds with <span className="font-medium text-foreground">Allow for purchase</span> (sale-ready).
-          Load autofill from calc.meradhan.co, review each field, uncheck what you do not want
-          to overwrite, edit values, then accept to save or reject to discard.{" "}
-          <span className="font-medium text-foreground">Load all</span> uses each row&apos;s optional custom yield
-          when filled.
+          {canEditBonds ? (
+            <>
+              {" "}
+              Load autofill from calc.meradhan.co, review each field, uncheck what you do not want
+              to overwrite, edit values, then accept to save or reject to discard.{" "}
+              <span className="font-medium text-foreground">Load all</span> uses each row&apos;s optional custom yield
+              when filled.
+            </>
+          ) : (
+            " You have view-only access on this page."
+          )}
         </p>
         <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:flex-wrap sm:justify-end">
-          <Button
-            type="button"
-            variant="default"
-            size="sm"
-            className="shrink-0 gap-2"
-            onClick={() => void loadAllAutofill()}
-            disabled={
-              bulkBusy ||
-              listQuery.isFetching ||
-              listQuery.isLoading ||
-              bonds.length === 0
-            }
-          >
-            {bulkProgress?.kind === "load" ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Sparkles className="size-4" />
-            )}
-            Load all
-          </Button>
+          {canEditBonds ? (
+            <Button
+              type="button"
+              variant="default"
+              size="sm"
+              className="shrink-0 gap-2"
+              onClick={() => void loadAllAutofill()}
+              disabled={
+                bulkBusy ||
+                listQuery.isFetching ||
+                listQuery.isLoading ||
+                bonds.length === 0
+              }
+            >
+              {bulkProgress?.kind === "load" ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Sparkles className="size-4" />
+              )}
+              Load all
+            </Button>
+          ) : null}
           <AllowOnlyView permissions={["edit:bonds"]}>
             <Button
               type="button"
@@ -743,50 +756,54 @@ export default function BondAutoUpdateView() {
                     </div>
                   </CollapsibleTrigger>
                   <div className="flex flex-wrap items-center gap-2 pl-7 sm:pl-0">
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="text-muted-foreground text-xs whitespace-nowrap">
-                        Custom yield %
-                      </span>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
-                        autoComplete="off"
-                        placeholder="optional"
-                        className="h-9 w-[92px] font-mono text-sm"
-                        value={customYieldByIsin[b.isin] ?? ""}
-                        onChange={(e) =>
-                          setCustomYieldByIsin((prev) => ({
-                            ...prev,
-                            [b.isin]: e.target.value,
-                          }))
-                        }
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            loadBondAutofill(b);
-                          }
-                        }}
-                        disabled={loading}
-                        aria-label={`Optional custom pricing yield percent for ${b.isin}; leave empty for default`}
-                      />
-                    </div>
-                    <Button
-                      type="button"
-                      size="sm"
-                      className="gap-1"
-                      disabled={loading}
-                      onClick={() => loadBondAutofill(b)}
-                    >
-                      {loading ? (
-                        <Loader2 className="size-4 animate-spin" />
-                      ) : (
-                        <Sparkles className="size-4" />
-                      )}
-                      Load autofill
-                    </Button>
-                    <Button type="button" size="sm" variant="secondary" className="gap-1" asChild>
-                      <Link href={`/dashboard/bonds/update/${encodeURIComponent(b.isin)}`}>Edit bond</Link>
-                    </Button>
+                    {canEditBonds ? (
+                      <>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="text-muted-foreground text-xs whitespace-nowrap">
+                            Custom yield %
+                          </span>
+                          <Input
+                            type="text"
+                            inputMode="decimal"
+                            autoComplete="off"
+                            placeholder="optional"
+                            className="h-9 w-[92px] font-mono text-sm"
+                            value={customYieldByIsin[b.isin] ?? ""}
+                            onChange={(e) =>
+                              setCustomYieldByIsin((prev) => ({
+                                ...prev,
+                                [b.isin]: e.target.value,
+                              }))
+                            }
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                loadBondAutofill(b);
+                              }
+                            }}
+                            disabled={loading}
+                            aria-label={`Optional custom pricing yield percent for ${b.isin}; leave empty for default`}
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="gap-1"
+                          disabled={loading}
+                          onClick={() => loadBondAutofill(b)}
+                        >
+                          {loading ? (
+                            <Loader2 className="size-4 animate-spin" />
+                          ) : (
+                            <Sparkles className="size-4" />
+                          )}
+                          Load autofill
+                        </Button>
+                        <Button type="button" size="sm" variant="secondary" className="gap-1" asChild>
+                          <Link href={`/dashboard/bonds/update/${encodeURIComponent(b.isin)}`}>Edit bond</Link>
+                        </Button>
+                      </>
+                    ) : null}
                   </div>
                 </div>
 
@@ -958,7 +975,9 @@ export default function BondAutoUpdateView() {
                                 <TableHead className="w-10">Use</TableHead>
                                 <TableHead>Field</TableHead>
                                 <TableHead>Current (saved)</TableHead>
-                                <TableHead className="min-w-[220px]">New (editable)</TableHead>
+                                <TableHead className="min-w-[220px]">
+                                  New{canEditBonds ? " (editable)" : ""}
+                                </TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -980,6 +999,7 @@ export default function BondAutoUpdateView() {
                                     <TableCell>
                                       <Checkbox
                                         checked={model.include[key]}
+                                        disabled={!canEditBonds}
                                         onCheckedChange={(c) =>
                                           toggleInclude(b.isin, key, Boolean(c))
                                         }
@@ -1025,7 +1045,13 @@ export default function BondAutoUpdateView() {
                                         : formatDisplayValue(curVal)}
                                     </TableCell>
                                     <TableCell className="min-w-[220px] align-top">
-                                      {key === "bondName" || key === "creditRating" ? (
+                                      {!canEditBonds ? (
+                                        <span className="text-sm break-all">
+                                          {key === "categories" && Array.isArray(sug)
+                                            ? (sug as string[]).join(", ") || "—"
+                                            : formatDisplayValue(sug)}
+                                        </span>
+                                      ) : key === "bondName" || key === "creditRating" ? (
                                         <Input
                                           className="h-9 text-sm"
                                           value={typeof sug === "string" ? sug : ""}
@@ -1310,33 +1336,35 @@ export default function BondAutoUpdateView() {
                           </Table>
                         </div>
 
-                        <div className="flex flex-wrap gap-2 justify-end">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="gap-1"
-                            onClick={() => rejectRow(b.isin)}
-                            disabled={saving}
-                          >
-                            <X className="size-4" />
-                            Reject
-                          </Button>
-                          <AllowOnlyView permissions={["edit:bonds"]}>
+                        {canEditBonds ? (
+                          <div className="flex flex-wrap gap-2 justify-end">
                             <Button
                               type="button"
+                              variant="outline"
                               className="gap-1"
+                              onClick={() => rejectRow(b.isin)}
                               disabled={saving}
-                              onClick={() => acceptRow(b.isin)}
                             >
-                              {saving ? (
-                                <Loader2 className="size-4 animate-spin" />
-                              ) : (
-                                <Check className="size-4" />
-                              )}
-                              Accept &amp; save
+                              <X className="size-4" />
+                              Reject
                             </Button>
-                          </AllowOnlyView>
-                        </div>
+                            <AllowOnlyView permissions={["edit:bonds"]}>
+                              <Button
+                                type="button"
+                                className="gap-1"
+                                disabled={saving}
+                                onClick={() => acceptRow(b.isin)}
+                              >
+                                {saving ? (
+                                  <Loader2 className="size-4 animate-spin" />
+                                ) : (
+                                  <Check className="size-4" />
+                                )}
+                                Accept &amp; save
+                              </Button>
+                            </AllowOnlyView>
+                          </div>
+                        ) : null}
                       </>
                     )}
                   </div>
