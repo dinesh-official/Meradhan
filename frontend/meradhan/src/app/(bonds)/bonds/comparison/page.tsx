@@ -17,6 +17,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { generatePagesMetaData } from "@/graphql/pagesMetaDataGql_Action";
+import { formatBondListingYieldLabel } from "@/global/utils/bondListingYield";
 
 export const revalidate = 0;
 
@@ -158,9 +159,7 @@ async function page({
                 hasInfoIcon
                 values={bondsData.map((bond, i) => (
                   <span key={"yield" + i} className="font-medium">
-                    {bond?.yield !== null && bond?.yield !== undefined
-                      ? `${Number(bond?.yield).toFixed(2)}%`
-                      : "Coming Soon"}
+                    {formatBondListingYieldLabel(bond?.yield)}
                   </span>
                 ))}
               />
