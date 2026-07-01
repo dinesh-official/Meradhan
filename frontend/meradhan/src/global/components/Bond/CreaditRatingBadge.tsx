@@ -35,7 +35,7 @@ function CreditRatingBadge({ creditRating }: { creditRating: string }) {
       className="flex"
       style={{ backgroundColor: getRatingColor(creditRating) }}
     >
-      <FaStar />
+      <FaStar aria-hidden="true" />
       <span className="font-semibold">{creditRating}</span>
     </Badge>
   );

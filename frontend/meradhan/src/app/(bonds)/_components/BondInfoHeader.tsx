@@ -26,8 +26,12 @@ function BondInfoHeader({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-        <BondLogoImage logoUrl={bond.logoUrl} alt={logoAlt} />
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+        <BondLogoImage
+          logoUrl={bond.logoUrl}
+          alt={logoAlt}
+          className="border-0 bg-transparent sm:h-32 sm:w-32"
+        />
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           <div className="flex md:flex-row flex-col justify-between md:items-center gap-5">
             <p className={cn("font-medium text-2xl", "quicksand-medium")}>
@@ -38,7 +42,7 @@ function BondInfoHeader({
               <div className="flex items-center gap-5">
                 <div className="flex items-center gap-2 bg-muted px-2 py-0.5 rounded-sm max-w-[350px] text-primary">
                   <div className="w-5">
-                    <FaStar size={17} className="text-secondary" />
+                    <FaStar size={17} className="text-secondary" aria-hidden="true" />
                   </div>
                   <span className="text-sm line-clamp-1">
                     {bond.creditRatingInfo}
@@ -53,7 +57,7 @@ function BondInfoHeader({
                 {bond.bondName}
               </h2>
               {formatYield(bond.yield) && (
-                <span className="inline-flex items-center rounded-full bg-green-100 px-4 py-1.5 text-base md:text-lg font-bold text-green-700">
+                <span className="yield-badge inline-flex items-center rounded-full bg-green-100 px-4 py-1.5 text-base md:text-lg font-bold text-green-700">
                   Yield ({formatYield(bond.yield)})
                 </span>
               )}

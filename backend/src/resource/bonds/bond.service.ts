@@ -16,6 +16,7 @@ import {
 } from "./place-order-email";
 import { AppConfigService } from "@resource/app-config/app-config.service";
 import { AppError } from "@utils/error/AppError";
+import { sanitizeIssuerHtml } from "@utils/html-sanitizer";
 import { env } from "@packages/config/src/env";
 import { OrderPdfService } from "@resource/customer/order/order-pdf.service";
 import { OrderService } from "@resource/customer/order/order.service";
@@ -54,6 +55,7 @@ const HOMEPAGE_ELIGIBLE_CREDIT_RATINGS = [
   "AAA",
   "AA+",
   "AA",
+  "AA-",
   "A+",
   "A",
   "A-",
@@ -839,7 +841,7 @@ export class BondService {
         bondName: bondData.bondName,
         instrumentName: bondData.instrumentName,
         description: bondData.description,
-        issuerDescription: bondData.issuerDescription || null,
+        issuerDescription: sanitizeIssuerHtml(bondData.issuerDescription),
         issuePrice: bondData.issuePrice,
         faceValue: bondData.faceValue,
         stampDutyPercentage: bondData.stampDutyPercentage ?? 0,
@@ -942,7 +944,7 @@ export class BondService {
         bondName: bondData.bondName,
         instrumentName: bondData.instrumentName,
         description: bondData.description,
-        issuerDescription: bondData.issuerDescription || null,
+        issuerDescription: sanitizeIssuerHtml(bondData.issuerDescription),
         issuePrice: bondData.issuePrice,
         faceValue: bondData.faceValue,
         stampDutyPercentage: bondData.stampDutyPercentage ?? 0,

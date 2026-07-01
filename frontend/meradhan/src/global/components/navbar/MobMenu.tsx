@@ -22,9 +22,9 @@ interface MenuItemProps {
 function MobMenu({ session }: { session?: ISessionResponse["responseData"] | null }) {
   return (
     <Sheet>
-      <SheetTrigger className="lg:hidden block">
+      <SheetTrigger className="lg:hidden block" aria-label="Open menu">
         <div className="cursor-pointer">
-          <AiOutlineMenu size={30} />
+          <AiOutlineMenu size={30} aria-hidden="true" />
         </div>
       </SheetTrigger>
       <SheetContent className="flex flex-col gap-0 p-0 border-l-0 w-full max-w-xs h-full">
@@ -103,6 +103,7 @@ const MobileMenuItem = ({ item, level = 0 }: MenuItemProps) => {
 
         {hasChildren && (
           <IoMdArrowDropdown
+            aria-hidden="true"
             onClick={() => setOpen(!open)}
             className={`transition-transform duration-200 ${open ? "rotate-180" : "-rotate-90"
               }`}

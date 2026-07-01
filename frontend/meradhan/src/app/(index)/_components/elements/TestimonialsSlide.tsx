@@ -41,9 +41,9 @@ export const CustomArrow: React.FC<ArrowProps & { side: "LEFT" | "RIGHT" }> = ({
       aria-label="Next Slide"
     >
       {side == "LEFT" ? (
-        <FaChevronLeft size={18} className="text-gray-400" />
+        <FaChevronLeft size={18} className="text-gray-400" aria-hidden="true" />
       ) : (
-        <FaChevronRight size={18} className="text-gray-400" />
+        <FaChevronRight size={18} className="text-gray-400" aria-hidden="true" />
       )}
     </button>
   );

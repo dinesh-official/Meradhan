@@ -17,7 +17,7 @@ export function SocialMediaLinks({ socialLinks }: SocialMediaLinksProps) {
                 href={social.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-primary rounded-full hover:text-[#F25C4C] transition-colors duration-200"
+                className="social-icon bg-primary rounded-full hover:text-[#F25C4C] transition-colors duration-200"
                 aria-label={social.ariaLabel}
               >
                 <social.icon />

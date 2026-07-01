@@ -3,8 +3,8 @@ import { ContactCard } from "./ContactCard";
 
 export function ContactInfoSection({}) {
   return (
-    <div className="mt-5 container">
-      <div className="flex flex-wrap gap-5 py-10">
+    <div className="contact-section mt-5 container">
+      <div className="flex flex-wrap" style={{ gap: "20px", paddingTop: "40px", paddingBottom: "40px" }}>
         <ContactCard
           icon={CONTACT_INFO.phone.icon}
           label={CONTACT_INFO.phone.label}

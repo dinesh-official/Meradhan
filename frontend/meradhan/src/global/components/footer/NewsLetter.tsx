@@ -4,7 +4,7 @@ import React from "react";
 
 function NewsLetter() {
   return (
-    <div className="bg-secondary py-12">
+    <div className="newsletter-section bg-secondary py-12">
       <div className="container">
         <div className="grid lg:grid-cols-2 gap-5">
           <div className="text-white">

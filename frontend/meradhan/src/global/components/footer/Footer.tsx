@@ -13,7 +13,7 @@ import { MdEmail } from "react-icons/md";
 
 function Footer({ lightModded }: { lightModded?: boolean }) {
   return (
-    <div>
+    <footer role="contentinfo">
       <div className={cn("bg-[#f5f5f5] py-12", lightModded && "bg-white")}>
         <div className={!lightModded ? "container" : "px-8"}>
           <p
@@ -45,7 +45,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     className="hover:text-[#F25C4C] transition-colors duration-200"
                     aria-label="Facebook"
                   >
-                    <FaFacebook />
+                    <FaFacebook aria-hidden="true" />
                   </Link>
                 </li>
                 <li>
@@ -56,7 +56,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     className="hover:text-[#F25C4C] transition-colors duration-200"
                     aria-label="Instagram"
                   >
-                    <FaInstagramSquare />
+                    <FaInstagramSquare aria-hidden="true" />
                   </Link>
                 </li>
                 <li>
@@ -67,7 +67,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     className="hover:text-[#F25C4C] transition-colors duration-200"
                     aria-label="Pinterest"
                   >
-                    <FaPinterest />
+                    <FaPinterest aria-hidden="true" />
                   </Link>
                 </li>
                 <li>
@@ -78,7 +78,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     className="hover:text-[#F25C4C] transition-colors duration-200"
                     aria-label="LinkedIn"
                   >
-                    <FaLinkedin />
+                    <FaLinkedin aria-hidden="true" />
                   </Link>
                 </li>
                 <li>
@@ -89,21 +89,21 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     className="hover:text-[#F25C4C] transition-colors duration-200"
                     aria-label="Twitter (X)"
                   >
-                    <FaXTwitter />
+                    <FaXTwitter aria-hidden="true" />
                   </Link>
                 </li>
               </ul>
               <div className="flex flex-col gap-2 text-xs">
-                <p><b>BondNest Capital India Securities Private Limited</b></p>
-                <p><b>SEBI Registration No.:</b> INZ000330234</p>
-                <p><b>NSE Member ID:</b> 90480 (Debt Segment)</p>
-                <p><b>BSE Member ID:</b> 6963 (Debt Segment)</p>
-                <p><b>CIN:</b> U66190MH2025PTC441753</p>
+                <p><strong>BondNest Capital India Securities Private Limited</strong></p>
+                <p><strong>SEBI Registration No.:</strong> INZ000330234</p>
+                <p><strong>NSE Member ID:</strong> 90480 (Debt Segment)</p>
+                <p><strong>BSE Member ID:</strong> 6963 (Debt Segment)</p>
+                <p><strong>CIN:</strong> U66190MH2025PTC441753</p>
               </div>
               <div className="flex flex-col gap-3">
                 <div className="flex gap-4 text-sm">
                   <div className="mt-1 w-4">
-                    <FaLocationDot size={16} />
+                    <FaLocationDot size={16} aria-hidden="true" />
                   </div>
                   <p>
                     D 2703, Ashok Tower, Dr SSR Road, Parel (East) <br /> Mumbai -
@@ -112,7 +112,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                 </div>
                 <div className="flex items-center gap-4 text-sm flx">
                   <div className="w-4">
-                    <MdEmail size={16} />
+                    <MdEmail size={16} aria-hidden="true" />
                   </div>
                   <p>contact@meradhan.co</p>
                 </div>
@@ -138,7 +138,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                       rel="noopener noreferrer"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
-                      Investor Charter
+                      Investor Charter<span className="sr-only"> (opens PDF in new tab)</span>
                     </Link>
                   </li>
                   <li>
@@ -148,7 +148,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                       rel="noopener noreferrer"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
-                      Regulatory Disclosure
+                      Regulatory Disclosure<span className="sr-only"> (opens PDF in new tab)</span>
                     </Link>
                   </li>
                   <li>
@@ -158,7 +158,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                       rel="noopener noreferrer"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
-                      Investor Grievance
+                      Investor Grievance<span className="sr-only"> (opens PDF in new tab)</span>
                     </Link>
                   </li>
                   <li>
@@ -284,7 +284,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
           </div>
         </div>
       </div>
-    </div>
+    </footer>
   );
 }
 

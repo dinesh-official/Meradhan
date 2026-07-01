@@ -31,14 +31,14 @@ export default function BondBuyNowCalc() {
           <div className="text-white flex justify-between gap-2 items-start">
             <p>Face Value:</p>
             <p className="flex items-center">
-              <PiCurrencyInrBold />
+              <PiCurrencyInrBold aria-hidden="true" />
               1,00,000.00
             </p>
           </div>
           <div className="text-white flex justify-between gap-2 items-start">
             <p>Last Offered Market Value:</p>
             <p className="flex items-center">
-              <PiCurrencyInrBold />
+              <PiCurrencyInrBold aria-hidden="true" />
               99,699.10
             </p>
           </div>
@@ -52,7 +52,7 @@ export default function BondBuyNowCalc() {
               </span>
             </p>
             <p className="flex items-center">
-              <PiCurrencyInrBold /> 1,00,000.00
+              <PiCurrencyInrBold aria-hidden="true" /> 1,00,000.00
             </p>
           </div>
           <div className="text-white flex justify-between gap-2 items-start">
@@ -63,14 +63,14 @@ export default function BondBuyNowCalc() {
               </span>
             </p>
             <p className="flex items-center">
-              <PiCurrencyInrBold />
+              <PiCurrencyInrBold aria-hidden="true" />
               99,699.10
             </p>
           </div>
           <div className="text-white flex justify-between gap-2 items-start">
             <p>Total Investment:</p>
             <p className="flex items-center">
-              <PiCurrencyInrBold />
+              <PiCurrencyInrBold aria-hidden="true" />
               55,00,055.26
             </p>
           </div>

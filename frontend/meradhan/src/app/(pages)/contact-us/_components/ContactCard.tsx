@@ -20,7 +20,7 @@ export function ContactCard({
 }: ContactCardProps) {
   const cardContent = (
     <>
-      <span className="-top-3 left-3 absolute bg-white px-4">
+      <span className="contact-card-label -top-3 left-3 absolute bg-white px-4">
         {label}
       </span>
       <Icon className="text-secondary" size={iconSize} />
@@ -32,10 +32,8 @@ export function ContactCard({
     return (
       <a
         href={href}
-        className={cn(
-          "relative flex items-center gap-4 p-4 px-6 border border-gray-200 rounded-md w-full min-[1200px]:w-80 transition-colors duration-200",
-          className
-        )}
+        className={cn("contact-card relative flex items-center transition-colors duration-200", className)}
+        style={{ gap: "16px", padding: "16px 24px", border: "1px solid #e5e7eb", borderRadius: "6px", maxWidth: "320px", width: "100%" }}
       >
         {cardContent}
       </a>
@@ -44,10 +42,8 @@ export function ContactCard({
 
   return (
     <div
-      className={cn(
-        "relative flex items-center gap-4 p-4 px-6 border border-gray-200 rounded-md w-full min-[1200px]:w-80",
-        className
-      )}
+      className={cn("contact-card relative flex items-center", className)}
+      style={{ gap: "16px", padding: "16px 24px", border: "1px solid #e5e7eb", borderRadius: "6px", maxWidth: "320px", width: "100%" }}
     >
       {cardContent}
     </div>
