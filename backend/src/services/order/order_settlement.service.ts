@@ -24,7 +24,7 @@ import { CrmOrdersService } from "@resource/crm/orders/orders.service";
 import { CustomerProfileRepo } from "@resource/crm/customers/customer.repo";
 import crypto from "crypto";
 import { RfqMasterService } from "@resource/crm/refq/nse/rfq_master/rfq_master.service";
-import { formatDate } from "@packages/kyc-providers/pdf/helper";
+import { getEmailSalutationFromSources } from "@root/schema";
 import { formatDateDdMmYyyy, formatDateIstDdMmmYyyy } from "@resource/customer/order/order.utils";
 import { getLastCouponDate, getLastNextCouponDateBasedOnSettlementDate } from "./order-pricing-helper";
 import { AxiosError } from "axios";
@@ -1091,10 +1091,11 @@ export class OrderSettlementService {
       const customerName =
         [user.firstName, user.middleName, user.lastName].filter(Boolean).join(" ").trim() ||
         "CUSTOMER";
-      const gender = String((user as unknown as { gender?: string | null }).gender ?? "")
-        .trim()
-        .toUpperCase();
-      const salutation = gender === "FEMALE" ? "Ms." : gender === "MALE" ? "Mr." : "Mr. / Ms.";
+      const salutation = getEmailSalutationFromSources({
+        gender: user.gender,
+        panCard: user.panCard,
+        aadhaarCard: user.aadhaarCard,
+      });
 
       const metadata = (order as unknown as { metadata?: Record<string, unknown> | null }).metadata ?? null;
       const dealId = metadata && typeof metadata === "object" ? (metadata.dealId as string | undefined) : undefined;

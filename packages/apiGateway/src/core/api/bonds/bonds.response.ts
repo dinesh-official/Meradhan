@@ -152,7 +152,7 @@ export interface BondOrderPricingData {
   isUnderShutPeriod: boolean;
   recordDate: string;
   settlementAmount: number;
-  /** Indicative yield at checkout (`buyYield` preferred, else listing `yield`). */
+  /** Indicative offered yield at checkout (listing `yield` only). */
   yield?: number;
 }
 

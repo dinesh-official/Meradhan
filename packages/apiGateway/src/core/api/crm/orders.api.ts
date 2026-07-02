@@ -18,6 +18,8 @@ import type {
   GetPaymentProcessLogsResponse,
   PaymentGatewayMode,
   CrmOrderStatus,
+  VerifyOrderPaymentResponse,
+  VerifyOrderSettlementResponse,
 } from "./orders.response";
 import type { IApiCaller } from "../../connection/apiCaller.interface";
 
@@ -131,6 +133,43 @@ export class CrmOrdersApi {
     const { data } = await this.apiClient.patch<GetCrmOrderDetailsResponse>(
       `/crm/orders/${orderId}/status`,
       { status },
+      config
+    );
+    return data;
+  }
+
+  /**
+   * Verify this order's Razorpay payment against the live Razorpay status.
+   * Backend reads the payment reference stored on the order (paymentId /
+   * paymentOrderId). By default this is a *preview* — pass `apply: true`
+   * to commit the resolved status to the database.
+   */
+  async verifyOrderPayment(
+    orderId: number,
+    options?: { apply?: boolean },
+    config?: AxiosRequestConfig
+  ): Promise<VerifyOrderPaymentResponse> {
+    const { data } = await this.apiClient.post<VerifyOrderPaymentResponse>(
+      `/crm/orders/${orderId}/verify-payment`,
+      { apply: options?.apply === true },
+      config
+    );
+    return data;
+  }
+
+  /**
+   * Verify this order's NSE settlement against the live settlement API
+   * (`/settle/order/all`). By default this is a *preview* — pass
+   * `apply: true` to commit the mapped status to the order.
+   */
+  async verifyOrderSettlement(
+    orderId: number,
+    options?: { apply?: boolean },
+    config?: AxiosRequestConfig
+  ): Promise<VerifyOrderSettlementResponse> {
+    const { data } = await this.apiClient.post<VerifyOrderSettlementResponse>(
+      `/crm/orders/${orderId}/verify-settlement`,
+      { apply: options?.apply === true },
       config
     );
     return data;

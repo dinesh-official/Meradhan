@@ -1,5 +1,7 @@
 import { type Request, type Response } from "express";
 import { CrmOrdersService } from "./orders.service";
+import { OrderPaymentVerifyService } from "./order_payment_verify.service";
+import { OrderSettlementVerifyService } from "./order_settlement_verify.service";
 import {
   appSchema,
   getEmailSalutationFromGender,
@@ -295,6 +297,141 @@ function buildProposalEmailTemplate(payload: {
 export class CrmOrdersController {
   private ordersService = new CrmOrdersService();
   private appConfigService = new AppConfigService();
+  private paymentVerifyService = new OrderPaymentVerifyService();
+  private settlementVerifyService = new OrderSettlementVerifyService();
+
+  /**
+   * Manually verify an order's Razorpay payment and sync `paymentStatus`
+   * from the live Razorpay status. Separate from the reconciliation cron;
+   * status update only (no settlement queueing).
+   */
+  verifyOrderPayment = async (req: Request, res: Response) => {
+    const orderId = Number(req.params.id);
+    if (!orderId || isNaN(orderId)) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid order ID",
+      });
+    }
+    try {
+      const apply = req.body?.apply === true || req.body?.apply === "true";
+      const result = await this.paymentVerifyService.verifyAndUpdate(orderId, {
+        apply,
+      });
+      const message = result.applied
+        ? "Payment status updated in database"
+        : result.willChange
+          ? "Razorpay status verified — accept to update the database"
+          : result.hasDefinitiveStatus
+            ? "Database already matches Razorpay status"
+            : "Payment is still pending on Razorpay";
+
+      await createCrmActivityLog(req, {
+        userId: Number(req.session?.id),
+        action: result.applied
+          ? "ORDER_PAYMENT_VERIFY_UPDATE"
+          : "ORDER_PAYMENT_VERIFY",
+        details: {
+          Reason: message,
+          Mode: apply ? "APPLY" : "PREVIEW",
+          OrderId: result.orderId,
+          OrderNumber: result.orderNumber,
+          RazorpayPaymentId: result.razorpayPaymentId,
+          RazorpayStatus: result.razorpayStatus,
+          CurrentPaymentStatus: result.currentPaymentStatus,
+          ProposedPaymentStatus: result.proposedPaymentStatus,
+          ProposedOrderStatus: result.proposedOrderStatus,
+          Updated: result.applied,
+        },
+        entityType: "rfq",
+        entityId: String(orderId),
+      });
+
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        message,
+        responseData: result,
+      });
+    } catch (err) {
+      if (err instanceof AppError) {
+        return res.sendResponse({
+          statusCode: err.statusCode,
+          message: err.message,
+        });
+      }
+      return res.sendResponse({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: err instanceof Error ? err.message : "Failed to verify payment",
+      });
+    }
+  };
+
+  /**
+   * Manually verify an order's NSE settlement (live `/settle/order/all`) and
+   * sync `status` from the returned `settleStatus`. Preview by default;
+   * pass `apply: true` in the body to commit.
+   */
+  verifyOrderSettlement = async (req: Request, res: Response) => {
+    const orderId = Number(req.params.id);
+    if (!orderId || isNaN(orderId)) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid order ID",
+      });
+    }
+    try {
+      const apply = req.body?.apply === true || req.body?.apply === "true";
+      const result = await this.settlementVerifyService.verifyAndUpdate(orderId, {
+        apply,
+      });
+      const message = result.applied
+        ? "Order status updated from NSE settlement"
+        : result.willChange
+          ? "NSE settlement verified — accept to update the order status"
+          : result.hasDefinitiveStatus
+            ? "Order status already matches NSE settlement"
+            : "No NSE settlement status available yet";
+
+      await createCrmActivityLog(req, {
+        userId: Number(req.session?.id),
+        action: result.applied
+          ? "ORDER_SETTLEMENT_VERIFY_UPDATE"
+          : "ORDER_SETTLEMENT_VERIFY",
+        details: {
+          Reason: message,
+          Mode: apply ? "APPLY" : "PREVIEW",
+          OrderId: result.orderId,
+          OrderNumber: result.orderNumber,
+          NseTradeNumber: result.nseTradeNumber,
+          SettleStatus: result.settleStatus,
+          SettleStatusLabel: result.settleStatusLabel,
+          CurrentOrderStatus: result.currentOrderStatus,
+          ProposedOrderStatus: result.proposedOrderStatus,
+          Updated: result.applied,
+        },
+        entityType: "rfq",
+        entityId: String(orderId),
+      });
+
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        message,
+        responseData: result,
+      });
+    } catch (err) {
+      if (err instanceof AppError) {
+        return res.sendResponse({
+          statusCode: err.statusCode,
+          message: err.message,
+        });
+      }
+      return res.sendResponse({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message:
+          err instanceof Error ? err.message : "Failed to verify settlement",
+      });
+    }
+  };
 
   getPaymentGatewaySettings = async (_req: Request, res: Response) => {
     const paymentGatewayMode =

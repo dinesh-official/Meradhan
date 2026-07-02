@@ -9,25 +9,12 @@ import apiGateway from "@root/apiGateway";
 import { decodeId } from "@/global/utils/url.utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, RefreshCw } from "lucide-react";
 import StatusBadge from "@/global/elements/wrapper/badges/StatusBadge";
 import OrderStatusBadge from "@/global/elements/wrapper/badges/OrderStatusBadge";
-import {
-  CRM_ORDER_STATUS_VALUES,
-  ORDER_STATUS_CONFIG,
-  type CrmOrderStatus,
-} from "@/global/constants/order";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { toast } from "sonner";
 import {
   CheckCircle2,
   Clock,
@@ -45,9 +32,17 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { payinDateTimeToPickerValue } from "@/global/utils/receiptPdfOptions.utils";
 import { OrderPdfDownloadDialog } from "../_components/OrderPdfDownloadDialog";
+import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 
 // Helper functions to safely extract values from Record<string, unknown>
 const getBondDetail = (
@@ -93,6 +88,20 @@ function formatBusinessDateLabel(value: unknown): string {
   return formatted && formatted !== "Invalid Date" ? formatted : s;
 }
 
+/** Color classes for a payment / razorpay status pill. */
+function statusPillClasses(value: string | null | undefined): string {
+  const v = (value ?? "").toUpperCase();
+  if (["COMPLETED", "CAPTURED", "APPLIED", "SETTLED"].includes(v))
+    return "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200";
+  if (["CANCELLED", "FAILED", "REJECTED", "EXPIRED"].includes(v))
+    return "bg-rose-100 text-rose-700 ring-1 ring-rose-200";
+  if (["REFUNDED"].includes(v))
+    return "bg-violet-100 text-violet-700 ring-1 ring-violet-200";
+  if (["PENDING", "CREATED", "AUTHORIZED", "IN_PROGRESS"].includes(v))
+    return "bg-amber-100 text-amber-700 ring-1 ring-amber-200";
+  return "bg-slate-100 text-slate-600 ring-1 ring-slate-200";
+}
+
 function OrderDetailsView() {
   const params = useParams();
   const router = useRouter();
@@ -102,6 +111,34 @@ function OrderDetailsView() {
   const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
   const [pdfDialogType, setPdfDialogType] = useState<"order" | "deal">("order");
 
+  const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
+  const [verifyResult, setVerifyResult] = useState<{
+    ok: boolean;
+    message: string;
+    razorpayPaymentId?: string | null;
+    razorpayStatus?: string | null;
+    currentPaymentStatus?: string | null;
+    proposedPaymentStatus?: string | null;
+    proposedOrderStatus?: string | null;
+    hasDefinitiveStatus?: boolean;
+    willChange?: boolean;
+    applied?: boolean;
+  } | null>(null);
+
+  const [settleDialogOpen, setSettleDialogOpen] = useState(false);
+  const [settleResult, setSettleResult] = useState<{
+    ok: boolean;
+    message: string;
+    nseTradeNumber?: string | null;
+    settleStatus?: number | null;
+    settleStatusLabel?: string | null;
+    currentOrderStatus?: string | null;
+    proposedOrderStatus?: string | null;
+    hasDefinitiveStatus?: boolean;
+    willChange?: boolean;
+    applied?: boolean;
+  } | null>(null);
+
   const apiCaller = new apiGateway.crm.crmOrdersApi(apiClientCaller);
 
   const { data, isLoading, error } = useQuery({
@@ -110,21 +147,117 @@ function OrderDetailsView() {
     enabled: !!orderId && orderId > 0,
   });
 
-  const updateStatusMutation = useMutation({
-    mutationFn: (status: CrmOrderStatus) =>
-      apiCaller.updateOrderStatus(orderId, status),
-    onSuccess: () => {
-      toast.success("Order status updated successfully");
-      queryClient.invalidateQueries({ queryKey: ["crm-order", orderId] });
-      queryClient.invalidateQueries({ queryKey: ["crmOrders"] });
+  const parseVerifyError = (error: unknown): string =>
+    (error as { response?: { data?: { message?: string } } })?.response?.data
+      ?.message ||
+    (error as { message?: string })?.message ||
+    "Failed to verify payment";
+
+  // Step 1: preview only — fetches the live Razorpay status, does NOT write.
+  const verifyPaymentMutation = useMutation({
+    mutationFn: () => apiCaller.verifyOrderPayment(orderId, { apply: false }),
+    onSuccess: (res) => {
+      const d = res?.responseData;
+      setVerifyResult({
+        ok: true,
+        message: res?.message ?? "Payment verified",
+        razorpayPaymentId: d?.razorpayPaymentId ?? null,
+        razorpayStatus: d?.razorpayStatus ?? null,
+        currentPaymentStatus: d?.currentPaymentStatus ?? null,
+        proposedPaymentStatus: d?.proposedPaymentStatus ?? null,
+        proposedOrderStatus: d?.proposedOrderStatus ?? null,
+        hasDefinitiveStatus: d?.hasDefinitiveStatus ?? false,
+        willChange: d?.willChange ?? false,
+        applied: d?.applied ?? false,
+      });
+      setVerifyDialogOpen(true);
     },
     onError: (error: unknown) => {
-      const errorMessage =
-        (error as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message ||
-        (error as { message?: string })?.message ||
-        "Failed to update order status";
-      toast.error(errorMessage);
+      setVerifyResult({ ok: false, message: parseVerifyError(error) });
+      setVerifyDialogOpen(true);
+    },
+  });
+
+  // Step 2: accept — commits the resolved status to the database.
+  const applyPaymentMutation = useMutation({
+    mutationFn: () => apiCaller.verifyOrderPayment(orderId, { apply: true }),
+    onSuccess: (res) => {
+      const d = res?.responseData;
+      setVerifyResult({
+        ok: true,
+        message: res?.message ?? "Payment status updated",
+        razorpayPaymentId: d?.razorpayPaymentId ?? null,
+        razorpayStatus: d?.razorpayStatus ?? null,
+        currentPaymentStatus: d?.currentPaymentStatus ?? null,
+        proposedPaymentStatus: d?.proposedPaymentStatus ?? null,
+        proposedOrderStatus: d?.proposedOrderStatus ?? null,
+        hasDefinitiveStatus: d?.hasDefinitiveStatus ?? false,
+        willChange: d?.willChange ?? false,
+        applied: d?.applied ?? false,
+      });
+      queryClient.invalidateQueries({ queryKey: ["crm-order", orderId] });
+    },
+    onError: (error: unknown) => {
+      setVerifyResult((prev) =>
+        prev ? { ...prev, ok: false, message: parseVerifyError(error) } : {
+          ok: false,
+          message: parseVerifyError(error),
+        },
+      );
+    },
+  });
+
+  // Settlement — step 1: preview only (queries live NSE settlement API).
+  const verifySettlementMutation = useMutation({
+    mutationFn: () => apiCaller.verifyOrderSettlement(orderId, { apply: false }),
+    onSuccess: (res) => {
+      const d = res?.responseData;
+      setSettleResult({
+        ok: true,
+        message: res?.message ?? "Settlement verified",
+        nseTradeNumber: d?.nseTradeNumber ?? null,
+        settleStatus: d?.settleStatus ?? null,
+        settleStatusLabel: d?.settleStatusLabel ?? null,
+        currentOrderStatus: d?.currentOrderStatus ?? null,
+        proposedOrderStatus: d?.proposedOrderStatus ?? null,
+        hasDefinitiveStatus: d?.hasDefinitiveStatus ?? false,
+        willChange: d?.willChange ?? false,
+        applied: d?.applied ?? false,
+      });
+      setSettleDialogOpen(true);
+    },
+    onError: (error: unknown) => {
+      setSettleResult({ ok: false, message: parseVerifyError(error) });
+      setSettleDialogOpen(true);
+    },
+  });
+
+  // Settlement — step 2: accept — commits the mapped status to the order.
+  const applySettlementMutation = useMutation({
+    mutationFn: () => apiCaller.verifyOrderSettlement(orderId, { apply: true }),
+    onSuccess: (res) => {
+      const d = res?.responseData;
+      setSettleResult({
+        ok: true,
+        message: res?.message ?? "Order status updated",
+        nseTradeNumber: d?.nseTradeNumber ?? null,
+        settleStatus: d?.settleStatus ?? null,
+        settleStatusLabel: d?.settleStatusLabel ?? null,
+        currentOrderStatus: d?.currentOrderStatus ?? null,
+        proposedOrderStatus: d?.proposedOrderStatus ?? null,
+        hasDefinitiveStatus: d?.hasDefinitiveStatus ?? false,
+        willChange: d?.willChange ?? false,
+        applied: d?.applied ?? false,
+      });
+      queryClient.invalidateQueries({ queryKey: ["crm-order", orderId] });
+    },
+    onError: (error: unknown) => {
+      setSettleResult((prev) =>
+        prev ? { ...prev, ok: false, message: parseVerifyError(error) } : {
+          ok: false,
+          message: parseVerifyError(error),
+        },
+      );
     },
   });
 
@@ -156,12 +289,6 @@ function OrderDetailsView() {
       : order?.createdAt
         ? dateTimeUtils.formatDateTime(order.createdAt, "DD MMM YYYY")
         : "—";
-
-  const handleStatusChange = (newStatus: string) => {
-    if (CRM_ORDER_STATUS_VALUES.includes(newStatus as CrmOrderStatus)) {
-      updateStatusMutation.mutate(newStatus as CrmOrderStatus);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -233,6 +360,38 @@ function OrderDetailsView() {
                 </Link>
               </Button>
             )}
+          <AllowOnlyView permissions={["edit:orders"]}>
+            {order.paymentProvider === "RAZORPAY" && (
+              <Button
+                variant="outline"
+                onClick={() => verifyPaymentMutation.mutate()}
+                disabled={verifyPaymentMutation.isPending}
+              >
+                {verifyPaymentMutation.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                )}
+                Verify Razorpay Payment
+              </Button>
+            )}
+            {(order.paymentProvider === "CUSTOM" ||
+              (order.paymentProvider === "RAZORPAY" &&
+                order.paymentStatus === "COMPLETED")) && (
+              <Button
+                variant="outline"
+                onClick={() => verifySettlementMutation.mutate()}
+                disabled={verifySettlementMutation.isPending}
+              >
+                {verifySettlementMutation.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                )}
+                Verify Settlement
+              </Button>
+            )}
+          </AllowOnlyView>
           <OrderStatusBadge status={order.status} paymentStatus={order.paymentStatus} />
           <Badge variant="outline">{order.paymentStatus}</Badge>
         </div>
@@ -249,34 +408,321 @@ function OrderDetailsView() {
         />
       ) : null}
 
-      {/* Status Update Section - Admin Only */}
-      <AllowOnlyView permissions={['edit:orders']} >
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-muted-foreground whitespace-nowrap">
-            Update Status:
-          </span>
-          <Select
-            value={order.status}
-            onValueChange={handleStatusChange}
-            disabled={updateStatusMutation.isPending}
+      <Dialog open={verifyDialogOpen} onOpenChange={setVerifyDialogOpen}>
+        <DialogContent className="sm:max-w-md shadow-none border border-slate-200 p-0 overflow-hidden gap-0">
+          {/* Colored banner reflecting the outcome */}
+          <div
+            className={`px-6 py-4 border-b ${
+              !verifyResult?.ok
+                ? "bg-rose-50 border-rose-100"
+                : verifyResult?.applied
+                  ? "bg-emerald-50 border-emerald-100"
+                  : verifyResult?.willChange
+                    ? "bg-blue-50 border-blue-100"
+                    : "bg-amber-50 border-amber-100"
+            }`}
           >
-            <SelectTrigger className="w-[180px] h-9">
-              <SelectValue placeholder="Select status" />
-            </SelectTrigger>
-            <SelectContent>
-              {CRM_ORDER_STATUS_VALUES.map((status) => (
-                <SelectItem key={status} value={status}>
-                  {ORDER_STATUS_CONFIG[status].title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {updateStatusMutation.isPending && (
-            <Loader2 className="h-4 w-4 animate-spin text-primary" />
-          )}
-        </div>
+            <DialogHeader className="space-y-1">
+              <DialogTitle
+                className={`flex items-center gap-2 text-base ${
+                  !verifyResult?.ok
+                    ? "text-rose-700"
+                    : verifyResult?.applied
+                      ? "text-emerald-700"
+                      : verifyResult?.willChange
+                        ? "text-blue-700"
+                        : "text-amber-700"
+                }`}
+              >
+                {!verifyResult?.ok ? (
+                  <XCircle className="h-5 w-5" />
+                ) : verifyResult?.applied ? (
+                  <CheckCircle2 className="h-5 w-5" />
+                ) : verifyResult?.willChange ? (
+                  <RefreshCw className="h-5 w-5" />
+                ) : (
+                  <Clock className="h-5 w-5" />
+                )}
+                {verifyResult?.ok
+                  ? "Razorpay Payment Verification"
+                  : "Verification Failed"}
+              </DialogTitle>
+              <DialogDescription
+                className={
+                  !verifyResult?.ok
+                    ? "text-rose-600/80"
+                    : verifyResult?.applied
+                      ? "text-emerald-600/80"
+                      : verifyResult?.willChange
+                        ? "text-blue-600/80"
+                        : "text-amber-600/80"
+                }
+              >
+                {verifyResult?.message}
+              </DialogDescription>
+            </DialogHeader>
+          </div>
 
-      </AllowOnlyView>
+          {verifyResult?.ok && (
+            <dl className="divide-y divide-slate-100 px-6 py-2 text-sm">
+              <div className="grid grid-cols-2 items-center gap-4 py-2.5">
+                <dt className="text-muted-foreground">Razorpay Payment ID</dt>
+                <dd className="text-right font-medium break-all text-slate-800">
+                  {verifyResult.razorpayPaymentId ?? "—"}
+                </dd>
+              </div>
+              <div className="grid grid-cols-2 items-center gap-4 py-2.5">
+                <dt className="text-muted-foreground">Razorpay Status</dt>
+                <dd className="text-right">
+                  <span
+                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusPillClasses(
+                      verifyResult.razorpayStatus,
+                    )}`}
+                  >
+                    {verifyResult.razorpayStatus ?? "—"}
+                  </span>
+                </dd>
+              </div>
+              <div className="grid grid-cols-2 items-center gap-4 py-2.5">
+                <dt className="text-muted-foreground">
+                  {verifyResult.applied
+                    ? "Database Payment Status"
+                    : "Payment Status (current → proposed)"}
+                </dt>
+                <dd className="flex items-center justify-end gap-1.5">
+                  <span
+                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusPillClasses(
+                      verifyResult.currentPaymentStatus,
+                    )}`}
+                  >
+                    {verifyResult.currentPaymentStatus ?? "—"}
+                  </span>
+                  {verifyResult.willChange && (
+                    <>
+                      <ArrowRight className="h-3.5 w-3.5 text-slate-400" />
+                      <span
+                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusPillClasses(
+                          verifyResult.proposedPaymentStatus,
+                        )}`}
+                      >
+                        {verifyResult.proposedPaymentStatus ?? "—"}
+                      </span>
+                    </>
+                  )}
+                </dd>
+              </div>
+              <div className="grid grid-cols-2 items-center gap-4 py-2.5">
+                <dt className="text-muted-foreground">Order Status</dt>
+                <dd className="text-right">
+                  <span
+                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusPillClasses(
+                      verifyResult.proposedOrderStatus,
+                    )}`}
+                  >
+                    {verifyResult.proposedOrderStatus ?? "—"}
+                  </span>
+                </dd>
+              </div>
+              <div className="grid grid-cols-2 items-center gap-4 py-2.5">
+                <dt className="text-muted-foreground">Database</dt>
+                <dd className="text-right">
+                  <span
+                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                      verifyResult.applied
+                        ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200"
+                        : verifyResult.willChange
+                          ? "bg-blue-100 text-blue-700 ring-1 ring-blue-200"
+                          : "bg-slate-100 text-slate-600 ring-1 ring-slate-200"
+                    }`}
+                  >
+                    {verifyResult.applied
+                      ? "Updated"
+                      : verifyResult.willChange
+                        ? "Pending your acceptance"
+                        : "No change needed"}
+                  </span>
+                </dd>
+              </div>
+            </dl>
+          )}
+
+          <DialogFooter className="px-6 py-4 border-t border-slate-100 gap-2 sm:gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setVerifyDialogOpen(false)}
+              disabled={applyPaymentMutation.isPending}
+            >
+              Close
+            </Button>
+            {verifyResult?.ok &&
+              verifyResult.willChange &&
+              !verifyResult.applied && (
+                <Button
+                  onClick={() => applyPaymentMutation.mutate()}
+                  disabled={applyPaymentMutation.isPending}
+                >
+                  {applyPaymentMutation.isPending && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Accept &amp; Update
+                </Button>
+              )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={settleDialogOpen} onOpenChange={setSettleDialogOpen}>
+        <DialogContent className="sm:max-w-md shadow-none border border-slate-200 p-0 overflow-hidden gap-0">
+          <div
+            className={`px-6 py-4 border-b ${
+              !settleResult?.ok
+                ? "bg-rose-50 border-rose-100"
+                : settleResult?.applied
+                  ? "bg-emerald-50 border-emerald-100"
+                  : settleResult?.willChange
+                    ? "bg-blue-50 border-blue-100"
+                    : "bg-amber-50 border-amber-100"
+            }`}
+          >
+            <DialogHeader className="space-y-1">
+              <DialogTitle
+                className={`flex items-center gap-2 text-base ${
+                  !settleResult?.ok
+                    ? "text-rose-700"
+                    : settleResult?.applied
+                      ? "text-emerald-700"
+                      : settleResult?.willChange
+                        ? "text-blue-700"
+                        : "text-amber-700"
+                }`}
+              >
+                {!settleResult?.ok ? (
+                  <XCircle className="h-5 w-5" />
+                ) : settleResult?.applied ? (
+                  <CheckCircle2 className="h-5 w-5" />
+                ) : settleResult?.willChange ? (
+                  <RefreshCw className="h-5 w-5" />
+                ) : (
+                  <Clock className="h-5 w-5" />
+                )}
+                {settleResult?.ok
+                  ? "NSE Settlement Verification"
+                  : "Verification Failed"}
+              </DialogTitle>
+              <DialogDescription
+                className={
+                  !settleResult?.ok
+                    ? "text-rose-600/80"
+                    : settleResult?.applied
+                      ? "text-emerald-600/80"
+                      : settleResult?.willChange
+                        ? "text-blue-600/80"
+                        : "text-amber-600/80"
+                }
+              >
+                {settleResult?.message}
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+
+          {settleResult?.ok && (
+            <dl className="divide-y divide-slate-100 px-6 py-2 text-sm">
+              <div className="grid grid-cols-2 items-center gap-4 py-2.5">
+                <dt className="text-muted-foreground">NSE Trade Number</dt>
+                <dd className="text-right font-medium break-all text-slate-800">
+                  {settleResult.nseTradeNumber ?? "—"}
+                </dd>
+              </div>
+              <div className="grid grid-cols-2 items-center gap-4 py-2.5">
+                <dt className="text-muted-foreground">NSE Settlement Status</dt>
+                <dd className="text-right">
+                  <span
+                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusPillClasses(
+                      settleResult.proposedOrderStatus,
+                    )}`}
+                  >
+                    {settleResult.settleStatus != null
+                      ? `${settleResult.settleStatus} · ${settleResult.settleStatusLabel ?? "Unknown"}`
+                      : "—"}
+                  </span>
+                </dd>
+              </div>
+              <div className="grid grid-cols-2 items-center gap-4 py-2.5">
+                <dt className="text-muted-foreground">
+                  {settleResult.applied
+                    ? "Order Status"
+                    : "Order Status (current → proposed)"}
+                </dt>
+                <dd className="flex items-center justify-end gap-1.5">
+                  <span
+                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusPillClasses(
+                      settleResult.currentOrderStatus,
+                    )}`}
+                  >
+                    {settleResult.currentOrderStatus ?? "—"}
+                  </span>
+                  {settleResult.willChange && (
+                    <>
+                      <ArrowRight className="h-3.5 w-3.5 text-slate-400" />
+                      <span
+                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusPillClasses(
+                          settleResult.proposedOrderStatus,
+                        )}`}
+                      >
+                        {settleResult.proposedOrderStatus ?? "—"}
+                      </span>
+                    </>
+                  )}
+                </dd>
+              </div>
+              <div className="grid grid-cols-2 items-center gap-4 py-2.5">
+                <dt className="text-muted-foreground">Database</dt>
+                <dd className="text-right">
+                  <span
+                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                      settleResult.applied
+                        ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200"
+                        : settleResult.willChange
+                          ? "bg-blue-100 text-blue-700 ring-1 ring-blue-200"
+                          : "bg-slate-100 text-slate-600 ring-1 ring-slate-200"
+                    }`}
+                  >
+                    {settleResult.applied
+                      ? "Updated"
+                      : settleResult.willChange
+                        ? "Pending your acceptance"
+                        : "No change needed"}
+                  </span>
+                </dd>
+              </div>
+            </dl>
+          )}
+
+          <DialogFooter className="px-6 py-4 border-t border-slate-100 gap-2 sm:gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setSettleDialogOpen(false)}
+              disabled={applySettlementMutation.isPending}
+            >
+              Close
+            </Button>
+            {settleResult?.ok &&
+              settleResult.willChange &&
+              !settleResult.applied && (
+                <Button
+                  onClick={() => applySettlementMutation.mutate()}
+                  disabled={applySettlementMutation.isPending}
+                >
+                  {applySettlementMutation.isPending && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Accept &amp; Update
+                </Button>
+              )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Order Information */}
         <div className="lg:col-span-2 space-y-6">

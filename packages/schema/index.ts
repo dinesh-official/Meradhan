@@ -43,7 +43,10 @@ export {
 
 export {
   getEmailSalutationFromGender,
+  getEmailSalutationFromSources,
+  getOptionalEmailTitleFromSources,
   resolveGenderForEmailSalutation,
+  type EmailTitle,
   type GenderSources,
 } from "./lib/customers/email_salutation";
 

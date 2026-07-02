@@ -4,6 +4,7 @@ import logger from "@utils/logger/logger";
 import { type Request, type Response } from "express";
 import { sendKycApprovedEmail } from "@jobs/helper/send_emails";
 import { sendDealSheetPdfByOrderId } from "@services/notifications/send_deal_sheet_nyOrderId";
+import { getOptionalEmailTitleFromSources } from "@root/schema";
 import { kraStatusFromCbricsWorkflowStatus } from "./cbrics_workflow_kra_map";
 
 const kraStatusFromWorkflowStatus = kraStatusFromCbricsWorkflowStatus;
@@ -66,7 +67,9 @@ export class NseWebhookController {
               firstName: true,
               lastName: true,
               gender: true,
-              kraStatus: true
+              kraStatus: true,
+              panCard: { select: { gender: true } },
+              aadhaarCard: { select: { gender: true } },
             },
           });
           if (!customer) continue;
@@ -84,12 +87,7 @@ export class NseWebhookController {
             const fullName =
               `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim() ||
               "Customer";
-            const title =
-              customer.gender === "MALE"
-                ? ("Mr." as const)
-                : customer.gender === "FEMALE"
-                  ? ("Ms." as const)
-                  : undefined;
+            const title = getOptionalEmailTitleFromSources(customer);
             await sendKycApprovedEmail({
               customerId: customer.id,
               email: customer.emailAddress,
