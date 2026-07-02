@@ -1,0 +1,63 @@
+---
+description: Mr/Ms salutation from customer gender in order receipt, deal sheet, and related emails
+globs: backend/src/services/notifications/**/*,backend/src/services/order/**/*,backend/src/resource/bonds/place-order-email.ts,backend/src/resource/customer/**/*,backend/src/resource/crm/orders/**/*,backend/src/modules/RFQ/**/*,frontend/crm/**/GeneratePdfContent.tsx,packages/schema/lib/customers/email_salutation.ts,packages/kyc-providers/pdf/helper.ts
+alwaysApply: false
+---
+
+# Customer Email Salutation (Mr / Ms)
+
+Order receipt, deal sheet, RFQ confirmation, KYC emails, and similar customer communications must greet using **Mr.** or **Ms.** from the customer profile — never guess or default incorrectly.
+
+## Canonical helpers (`@root/schema`)
+
+```typescript
+import {
+  getEmailSalutationFromSources,
+  getOptionalEmailTitleFromSources,
+  getEmailSalutationFromGender,
+  resolveGenderForEmailSalutation,
+} from "@root/schema";
+```
+
+| Gender | Salutation |
+|--------|------------|
+| `MALE` / `M` | **Mr.** |
+| `FEMALE` / `F` | **Ms.** |
+| Missing / `OTHER` / `NA` | **Mr. / Ms.** (fallback only) |
+
+**Resolve gender** in this order: profile `gender` → `panCard.gender` → `aadhaarCard.gender` (KYC often stores gender only on documents).
+
+```typescript
+// Plain-text / PDF "Dear …" (includes Mr. / Ms. fallback)
+const salutation = getEmailSalutationFromSources(profile);
+
+// HTML templates with optional title?: "Mr." | "Ms."
+const title = getOptionalEmailTitleFromSources(profile);
+```
+
+## Corporate customers
+
+When `userType === "CORPORATE"`, use **`Dear Sir / Madam,`** instead of Mr/Ms + personal name (see deal sheet email flow).
+
+## Where this applies
+
+- Order receipt & deal sheet PDF emails (`send_deal_sheet_nyOrderId.ts`, `order_settlement.service.ts`)
+- CRM email PDF flows (`orders.controller`, `GeneratePdfContent.tsx`)
+- Place-order / RFQ confirmation (`place-order-email.ts`, proposals)
+- KYC & account emails (`customer.manage_accounts`, `kyc_store`, `webhook_notification`, auth signup reminder)
+- Order PDF salutation line (`packages/kyc-providers/pdf/helper.ts`)
+
+## Do not
+
+```typescript
+// ❌ BAD — defaults non-MALE to Ms (wrong for unknown gender)
+const salutation = customer.gender === "MALE" ? "Mr." : "Ms.";
+
+// ❌ BAD — inline duplicate logic; misses PAN/Aadhaar fallback
+const salutation = gender === "FEMALE" ? "Ms." : gender === "MALE" ? "Mr." : "Mr. / Ms.";
+
+// ❌ BAD — PDF helper defaulting unknown gender to Mr
+const salutation = genderRaw === "FEMALE" ? "Ms." : "Mr.";
+```
+
+Always use the shared helpers; extend `email_salutation.ts` if resolution rules change — do not copy logic into each email template.

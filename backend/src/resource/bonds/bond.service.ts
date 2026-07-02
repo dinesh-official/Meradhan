@@ -347,10 +347,7 @@ export class BondService {
         lastCouponDate: { not: null },
         natureOfInstrument: { not: null },
         dateOfAllotment: { not: null },
-        OR: [
-          { buyYield: { not: null } },
-          { yield: { not: null } },
-        ],
+        yield: { not: null },
         AND: [
           {
             OR: [

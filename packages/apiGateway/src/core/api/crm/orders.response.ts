@@ -209,6 +209,38 @@ export interface GetPaymentProcessLogsResponse {
   };
 }
 
+export interface VerifyOrderPaymentResponse {
+  message?: string;
+  responseData: {
+    orderId: number;
+    orderNumber: string;
+    razorpayPaymentId: string | null;
+    razorpayStatus: string | null;
+    currentPaymentStatus: "PENDING" | "COMPLETED" | "REFUNDED" | "CANCELLED";
+    proposedPaymentStatus: "PENDING" | "COMPLETED" | "REFUNDED" | "CANCELLED";
+    proposedOrderStatus: CrmOrderStatus;
+    hasDefinitiveStatus: boolean;
+    willChange: boolean;
+    applied: boolean;
+  };
+}
+
+export interface VerifyOrderSettlementResponse {
+  message?: string;
+  responseData: {
+    orderId: number;
+    orderNumber: string;
+    nseTradeNumber: string;
+    settleStatus: number | null;
+    settleStatusLabel: string | null;
+    currentOrderStatus: CrmOrderStatus;
+    proposedOrderStatus: CrmOrderStatus;
+    hasDefinitiveStatus: boolean;
+    willChange: boolean;
+    applied: boolean;
+  };
+}
+
 /** Settle order (RFQ) record returned by GET /crm/orders/rfq/:orderNumber */
 export interface RfqByOrderNumberSettleOrder {
   id: number;

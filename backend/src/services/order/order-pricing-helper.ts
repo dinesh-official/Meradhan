@@ -515,7 +515,7 @@ export const computeBondOrderPricingData = async (
             storedAccruedPerUnit != null
             ? bondInfo.settlementAmount
             : totalConsiderationResolved + stampDuty;
-    const yieldRaw = bondInfo?.buyYield ?? bondInfo?.yield;
+    const yieldRaw = bondInfo?.yield;
     const yieldNum =
         yieldRaw != null && Number.isFinite(Number(yieldRaw))
             ? Number(yieldRaw)
@@ -607,11 +607,7 @@ export async function computeLocalProviderBondPricing(opts: {
     const totalConsideration = principal + accrued.accruedInterest;
     const settlementAmount = totalConsideration + stampDuty;
     const yieldNum =
-        bond.yield != null && Number.isFinite(bond.yield)
-            ? bond.yield
-            : bond.buyYield != null && Number.isFinite(bond.buyYield)
-                ? bond.buyYield
-                : 0;
+        bond.yield != null && Number.isFinite(bond.yield) ? bond.yield : 0;
 
     return {
         quantity,
