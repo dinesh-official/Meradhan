@@ -1,5 +1,5 @@
 import { db } from "@core/database/database";
-import { appSchema } from "@root/schema";
+import { appSchema, getEmailSalutationFromSources } from "@root/schema";
 import {
     computeBondOrderPricingData,
     getLastNextCouponDateBasedOnSettlementDate,
@@ -218,6 +218,10 @@ export function placeOrderEmailCustomerSubject(
 export const placeOrderEmailCustomer = async (orderData: z.infer<typeof appSchema.bonds.orderPlaceSchema>) => {
     const customer = await db.dataBase.customerProfileDataModel.findUnique({
         where: { id: orderData.customerProfileId },
+        include: {
+            panCard: { select: { gender: true } },
+            aadhaarCard: { select: { gender: true } },
+        },
     });
     if (!customer) {
         throw new Error(`Customer with ID ${orderData.customerProfileId} not found`);
@@ -231,7 +235,7 @@ export const placeOrderEmailCustomer = async (orderData: z.infer<typeof appSchem
 
     const pricing = await resolveOrderPricing(orderData, bond);
     const fullName = `${customer.firstName} ${customer.lastName}`.trim();
-    const salutation = customer.gender === "MALE" ? "Mr." : "Ms.";
+    const salutation = getEmailSalutationFromSources(customer);
     const dealDateLabel = formatDealDateForEmail(orderData.dealDate);
     const settlementDateLabel = pricing
         ? formatDealDateForEmail(pricing.settlementDate)

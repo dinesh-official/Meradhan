@@ -72,14 +72,18 @@ export class PortfolioService {
   }
 
   /**
-   * Yields stored on `Order.bondDetails` (snapshot of the bond row at checkout).
-   * Prefer buy/trade notion over stale listing `yield` when present.
+   * User-facing yield stored on `Order.bondDetails` (listing `yield` at checkout).
    */
   private snapshotYieldFromBondDetails(bondDetails: unknown): number | undefined {
     if (!bondDetails || typeof bondDetails !== "object") return undefined;
     const b = bondDetails as Record<string, unknown>;
+    const pricing = b.pricing;
+    const pricingYield =
+      pricing != null && typeof pricing === "object" && !Array.isArray(pricing)
+        ? toPositiveYieldPercent((pricing as Record<string, unknown>).yield)
+        : undefined;
     return (
-      toPositiveYieldPercent(b.buyYield) ??
+      pricingYield ??
       toPositiveYieldPercent(b.yield) ??
       toPositiveYieldPercent(b.lastTradeYield)
     );
@@ -419,14 +423,13 @@ export class PortfolioService {
 
     const bonds = await db.dataBase.bonds.findMany({
       where: { isin: { in: this.uniqueIsins(rows) } },
-      select: { isin: true, yield: true, buyYield: true, lastTradeYield: true },
+      select: { isin: true, yield: true, lastTradeYield: true },
     });
     const bondFallbackYieldByIsin = new Map<string, number>();
     for (const b of bonds) {
       const y =
-        toPositiveYieldPercent(b.buyYield) ??
-        toPositiveYieldPercent(b.lastTradeYield) ??
-        toPositiveYieldPercent(b.yield);
+        toPositiveYieldPercent(b.yield) ??
+        toPositiveYieldPercent(b.lastTradeYield);
       if (y !== undefined) bondFallbackYieldByIsin.set(b.isin, y);
     }
 

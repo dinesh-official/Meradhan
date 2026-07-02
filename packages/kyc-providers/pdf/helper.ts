@@ -1,6 +1,7 @@
 export const strApi = process.env.NEXT_PUBLIC_STRAPI_HOST_URL;
 
 import { env } from "@packages/config/env";
+import { getEmailSalutationFromSources } from "@root/schema";
 import axios from "axios";
 import { pdf } from "pdf-to-img";
 // Define allowed formats as a TypeScript type
@@ -154,8 +155,11 @@ export function getPdfDearGreeting(
     (user.firstName ?? "") +
     `${user.middleName ? `${user.middleName} ` : " "}` +
     (user.lastName ?? "");
-  const genderRaw = String(user?.gender ?? "").trim().toUpperCase();
-  const salutation = genderRaw === "FEMALE" ? "Ms." : "Mr.";
+  const salutation = getEmailSalutationFromSources({
+    gender: user?.gender,
+    panCard: user?.panCard,
+    aadhaarCard: user?.aadhaarCard,
+  });
   return `Dear ${salutation} ${fullname},`;
 }
 

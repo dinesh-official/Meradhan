@@ -1,4 +1,5 @@
 import type { BondDetailsResponse } from "@root/apiGateway";
+import { parseBondListingYield } from "@/global/utils/bondListingYield";
 
 function isNonEmptyString(v: unknown): boolean {
   return typeof v === "string" && v.trim().length > 0;
@@ -18,15 +19,9 @@ function isPositiveNumber(v: unknown): boolean {
   return typeof v === "number" && !Number.isNaN(v) && v > 0;
 }
 
-/** Offered / buy-side yield: `buyYield` preferred, else listing `yield`. */
+/** Public listing yield only (`yield` — not internal `buyYield`). */
 function hasOfferedYield(bond: BondDetailsResponse): boolean {
-  const y = bond.buyYield ?? bond.yield;
-  if (y == null) return false;
-  if (typeof y === "number") return !Number.isNaN(y);
-  const s = String(y).trim();
-  if (!s) return false;
-  const n = Number(s);
-  return !Number.isNaN(n);
+  return parseBondListingYield(bond.yield) != null;
 }
 
 export type BondPurchaseEligibility = {
