@@ -1,7 +1,7 @@
 export const strApi = process.env.NEXT_PUBLIC_STRAPI_HOST_URL;
 
 import { env } from "@packages/config/env";
-import { getEmailSalutationFromSources } from "@root/schema";
+import { getEmailSalutationFromSources, type GenderSources } from "@root/schema";
 import axios from "axios";
 import { pdf } from "pdf-to-img";
 // Define allowed formats as a TypeScript type
@@ -128,9 +128,11 @@ export function formatLastInterestPaymentDateDisplay(raw: string): string {
   return trimmed;
 }
 
-type PdfGreetingUser = {
+type PdfGreetingUser = Pick<
+  GenderSources,
+  "gender" | "panCard" | "aadhaarCard"
+> & {
   id: number;
-  gender?: string | null;
   firstName?: string | null;
   middleName?: string | null;
   lastName?: string | null;
