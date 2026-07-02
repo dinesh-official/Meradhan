@@ -172,6 +172,18 @@ router.patch(
   crmOrdersController.updateOrderStatus
 );
 
+router.post(
+  "/api/crm/orders/:id/verify-payment",
+  allowAccessMiddleware("CRM"),
+  crmOrdersController.verifyOrderPayment
+);
+
+router.post(
+  "/api/crm/orders/:id/verify-settlement",
+  allowAccessMiddleware("CRM"),
+  crmOrdersController.verifyOrderSettlement
+);
+
 router.get(
   "/api/crm/orders/rfq/:orderNumber",
   allowAccessMiddleware("CRM"),

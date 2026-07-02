@@ -5,6 +5,7 @@ import { CustomerProfileRepo } from "@resource/crm/customers/customer.repo";
 import logger from "@utils/logger/logger";
 import { getLastCouponDate } from "@services/order/order-pricing-helper";
 import { formatDateIstDdMmmYyyy } from "@resource/customer/order/order.utils";
+import { getEmailSalutationFromSources } from "@root/schema";
 
 type OrderEmailParams = {
     orderId: number | string;
@@ -63,8 +64,11 @@ export async function sendOrderReceiptPdfByOrderId(params: OrderEmailParams) {
     const crmOrdersService = new CrmOrdersService();
     const user = await new CustomerProfileRepo().getFullCustomerProfile(order.customerProfileId);
     const customerName = [user.firstName, user.middleName, user.lastName].filter(Boolean).join(" ").trim() || "CUSTOMER";
-    const gender = String((user as unknown as { gender?: string | null }).gender ?? "").trim().toUpperCase();
-    const salutation = gender === "FEMALE" ? "Ms." : gender === "MALE" ? "Mr." : "Mr. / Ms.";
+    const salutation = getEmailSalutationFromSources({
+        gender: user.gender,
+        panCard: user.panCard,
+        aadhaarCard: user.aadhaarCard,
+    });
 
     const metadata = (order.metadata as Record<string, unknown> | null) ?? {};
     const dealId = typeof metadata.dealId === "string" ? metadata.dealId : "—";
@@ -244,10 +248,11 @@ export async function sendDealSheetPdfByOrderId(params: DealSheetEmailParams) {
     const customerName =
         [user.firstName, user.middleName, user.lastName].filter(Boolean).join(" ").trim() ||
         "CUSTOMER";
-    const gender = String((user as unknown as { gender?: string | null }).gender ?? "")
-        .trim()
-        .toUpperCase();
-    const salutation = gender === "FEMALE" ? "Ms." : gender === "MALE" ? "Mr." : "Mr. / Ms.";
+    const salutation = getEmailSalutationFromSources({
+        gender: user.gender,
+        panCard: user.panCard,
+        aadhaarCard: user.aadhaarCard,
+    });
 
     const metadata = (order as unknown as { metadata?: Record<string, unknown> | null }).metadata ?? null;
     const clientOrderSide =

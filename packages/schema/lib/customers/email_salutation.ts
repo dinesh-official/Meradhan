@@ -33,3 +33,22 @@ export function getEmailSalutationFromGender(
   if (normalized === "MALE") return "Mr.";
   return "Mr. / Ms.";
 }
+
+export type EmailTitle = "Mr." | "Ms.";
+
+/** Salutation for "Dear …" lines (profile → PAN → Aadhaar). */
+export function getEmailSalutationFromSources(
+  sources: GenderSources | null | undefined,
+): "Mr." | "Ms." | "Mr. / Ms." {
+  return getEmailSalutationFromGender(resolveGenderForEmailSalutation(sources));
+}
+
+/** For HTML templates that accept optional `title` (Mr./Ms. only; omitted when unknown). */
+export function getOptionalEmailTitleFromSources(
+  sources: GenderSources | null | undefined,
+): EmailTitle | undefined {
+  const resolved = resolveGenderForEmailSalutation(sources);
+  if (resolved === "MALE") return "Mr.";
+  if (resolved === "FEMALE") return "Ms.";
+  return undefined;
+}

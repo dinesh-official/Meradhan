@@ -307,11 +307,18 @@ export function formatMaturityDdMmYyyy(raw: string | undefined): string {
   return "—";
 }
 
-/** Offered / snapshot yield from order `bondDetails` (`buyYield` preferred, else listing `yield`). */
+/** User-facing yield from order snapshot (`pricing.yield` or listing `yield` only). */
 export function formatOrderYieldPercent(order: Order): string {
   const b = bondDetailsRecord(order);
+  const pricing = b.pricing;
+  const pricingYield =
+    pricing != null &&
+    typeof pricing === "object" &&
+    !Array.isArray(pricing)
+      ? parseNumericUnknown((pricing as Record<string, unknown>).yield)
+      : null;
   const y =
-    parseNumericUnknown(b.buyYield) ??
+    pricingYield ??
     parseNumericUnknown(b.yield) ??
     parseNumericUnknown(b.lastTradeYield);
   if (y == null || !Number.isFinite(y) || y < 0) return "—";

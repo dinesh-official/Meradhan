@@ -1,5 +1,5 @@
 import { cookieOptions } from "@config/cookie";
-import { appSchema } from "@root/schema";
+import { appSchema, getOptionalEmailTitleFromSources } from "@root/schema";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import type { Request, Response } from "express";
 
@@ -86,7 +86,13 @@ export class CustomerAuthController {
   private async sendPostSignupCompletionEmails(customerId: number, email: string) {
     const userData = await db.dataBase.customerProfileDataModel.findUnique({
       where: { id: customerId },
-      select: { firstName: true, lastName: true, gender: true },
+      select: {
+        firstName: true,
+        lastName: true,
+        gender: true,
+        panCard: { select: { gender: true } },
+        aadhaarCard: { select: { gender: true } },
+      },
     });
     await sendCustomerWelcomeEmail({
       email,
@@ -95,12 +101,7 @@ export class CustomerAuthController {
     try {
       const fullName =
         `${userData?.firstName ?? ""} ${userData?.lastName ?? ""}`.trim() || "Customer";
-      const title =
-        userData?.gender === "MALE"
-          ? ("Mr." as const)
-          : userData?.gender === "FEMALE"
-            ? ("Ms." as const)
-            : undefined;
+      const title = getOptionalEmailTitleFromSources(userData);
       await sendKycReminderNotStartedEmail({
         customerId,
         email,

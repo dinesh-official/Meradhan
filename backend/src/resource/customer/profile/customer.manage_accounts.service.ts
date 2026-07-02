@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { db } from "@core/database/database";
-import type { appSchema } from "@root/schema";
+import { getOptionalEmailTitleFromSources, type appSchema } from "@root/schema";
 import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import { sendBankAccountSubmissionReceivedEmail } from "@jobs/helper/send_emails";
@@ -23,6 +23,15 @@ function formatCaughtError(error: unknown): string {
 
 const KYC_VERIFIED_REQUIRED_MSG =
   "You cannot add, update, or delete bank or demat accounts until your KYC is verified.";
+
+const CUSTOMER_EMAIL_GENDER_SELECT = {
+  emailAddress: true,
+  firstName: true,
+  lastName: true,
+  gender: true,
+  panCard: { select: { gender: true } },
+  aadhaarCard: { select: { gender: true } },
+} as const;
 
 export class CustomerManageAccountsService {
   private cbricsManager = new ParticipantManager();
@@ -100,23 +109,13 @@ export class CustomerManageAccountsService {
     try {
       const customer = await db.dataBase.customerProfileDataModel.findUnique({
         where: { id: customerId },
-        select: {
-          emailAddress: true,
-          firstName: true,
-          lastName: true,
-          gender: true,
-        },
+        select: CUSTOMER_EMAIL_GENDER_SELECT,
       });
       if (customer?.emailAddress) {
         const customerName =
           `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim() ||
           "Customer";
-        const title =
-          customer.gender === "MALE"
-            ? ("Mr." as const)
-            : customer.gender === "FEMALE"
-              ? ("Ms." as const)
-              : undefined;
+        const title = getOptionalEmailTitleFromSources(customer);
         const last4Digits = String(bankDetails.accountNumber ?? "")
           .replace(/\s+/g, "")
           .slice(-4);
@@ -233,23 +232,13 @@ export class CustomerManageAccountsService {
     try {
       const customer = await db.dataBase.customerProfileDataModel.findUnique({
         where: { id: customerId },
-        select: {
-          emailAddress: true,
-          firstName: true,
-          lastName: true,
-          gender: true,
-        },
+        select: CUSTOMER_EMAIL_GENDER_SELECT,
       });
       if (customer?.emailAddress) {
         const customerName =
           `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim() ||
           "Customer";
-        const title =
-          customer.gender === "MALE"
-            ? ("Mr." as const)
-            : customer.gender === "FEMALE"
-              ? ("Ms." as const)
-              : undefined;
+        const title = getOptionalEmailTitleFromSources(customer);
         const last4Digits = String(bankAccount.accountNumber ?? "")
           .replace(/\s+/g, "")
           .slice(-4);
@@ -323,23 +312,13 @@ export class CustomerManageAccountsService {
     try {
       const customer = await db.dataBase.customerProfileDataModel.findUnique({
         where: { id: customerId },
-        select: {
-          emailAddress: true,
-          firstName: true,
-          lastName: true,
-          gender: true,
-        },
+        select: CUSTOMER_EMAIL_GENDER_SELECT,
       });
       if (customer?.emailAddress) {
         const customerName =
           `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim() ||
           "Customer";
-        const title =
-          customer.gender === "MALE"
-            ? ("Mr." as const)
-            : customer.gender === "FEMALE"
-              ? ("Ms." as const)
-              : undefined;
+        const title = getOptionalEmailTitleFromSources(customer);
         const last4Digits = String(dematDetails.clientId ?? "")
           .replace(/\s+/g, "")
           .slice(-4);
@@ -474,23 +453,13 @@ export class CustomerManageAccountsService {
     try {
       const customer = await db.dataBase.customerProfileDataModel.findUnique({
         where: { id: customerId },
-        select: {
-          emailAddress: true,
-          firstName: true,
-          lastName: true,
-          gender: true,
-        },
+        select: CUSTOMER_EMAIL_GENDER_SELECT,
       });
       if (customer?.emailAddress) {
         const customerName =
           `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim() ||
           "Customer";
-        const title =
-          customer.gender === "MALE"
-            ? ("Mr." as const)
-            : customer.gender === "FEMALE"
-              ? ("Ms." as const)
-              : undefined;
+        const title = getOptionalEmailTitleFromSources(customer);
         const last4Digits = String(dematAccount.clientId ?? "")
           .replace(/\s+/g, "")
           .slice(-4);
