@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - preprod
+    paths:
+      - 'backend/**'
+      - 'packages/**'
+      - 'workerDocker'
+      - 'preprod-worker.json'
+      - '.github/workflows/preprod-worker.yaml'
+  workflow_dispatch:
 
 jobs:
   deploy:

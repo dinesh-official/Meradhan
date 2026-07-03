@@ -4,6 +4,15 @@ on:
   push:
     branches:
       - preprod
+    paths:
+      - 'backend/**'
+      - 'packages/**'
+      - 'backenddocker'
+      - 'be-start.sh'
+      - 'pre-prod-be-revision.json'
+      - '.github/workflows/pre-prod-be.yaml'
+  workflow_dispatch:
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
