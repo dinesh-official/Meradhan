@@ -4,6 +4,14 @@ on:
   push:
     branches:
       - preprod
+    paths:
+      - 'frontend/crm/**'
+      - 'packages/**'
+      - 'crmdockerfile'
+      - 'pre-prod-crm-revision.json'
+      - '.github/workflows/pre-prod-crm.yaml'
+  workflow_dispatch:
+
 jobs:
   deploy:
     runs-on: ubuntu-latest

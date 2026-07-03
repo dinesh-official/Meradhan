@@ -5,6 +5,14 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'backend/**'
+      - 'packages/**'
+      - 'backenddocker'
+      - 'be-start.sh'
+      - 'meradhan-be-task.json'
+      - '.github/workflows/backend.yaml'
+  workflow_dispatch:
 
 jobs:
   deploy:

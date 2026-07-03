@@ -2,6 +2,15 @@
 name: Build, Push & Deploy
 
 on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'backend/**'
+      - 'packages/**'
+      - 'workerDocker'
+      - 'meradhan-worker-task.json'
+      - '.github/workflows/worker.yaml'
   workflow_dispatch:
 
 jobs:

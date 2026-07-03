@@ -27,6 +27,25 @@ export type GetBondOrderPricingResult =
   | { ok: false; reason: "not_found" }
   | { ok: false; reason: "missing_coupon_dates" };
 
+// ─── IST date-only derivation ──────────────────────────────────────────────
+// Every date field on a bond has an `*Ist` (`@db.Date`) counterpart that stores
+// the IST calendar day of the instant. This mirrors the NSDL scraper's
+// `toIstDateOnly` so manual CRM edits stay consistent with scraped data.
+const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+
+function toIstDateOnly(
+  value: Date | string | null | undefined,
+): Date | null {
+  if (value == null) return null;
+  const dt = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(dt.getTime())) return null;
+  // Shift the instant into IST, then keep only the calendar day (UTC midnight).
+  const ist = new Date(dt.getTime() + IST_OFFSET_MS);
+  return new Date(
+    Date.UTC(ist.getUTCFullYear(), ist.getUTCMonth(), ist.getUTCDate()),
+  );
+}
+
 // ─── CRM inventory batch cache ─────────────────────────────────────────────
 // CRM inventory uploads happen manually and are rare, so we cache the latest
 // batch id in process for `INVENTORY_BATCH_CACHE_TTL_MS`. Without this every
@@ -827,36 +846,40 @@ export class BondService {
         isListed: bondData.isListed,
         ratingAgencyName: bondData.ratingAgencyName || null,
         ratingDate: bondData.ratingDate || null,
+        ratingDateIst: toIstDateOnly(bondData.ratingDate),
         categories: bondData.categories || [],
         sectorName: bondData.sectorName || null,
         dateOfAllotment: bondData.dateOfAllotment || null,
+        dateOfAllotmentIst: toIstDateOnly(bondData.dateOfAllotment),
         redemptionDate: bondData.redemptionDate || null,
+        redemptionDateIst: toIstDateOnly(bondData.redemptionDate),
         maturityDate: bondData.maturityDate || null,
+        maturityDateIst: toIstDateOnly(bondData.maturityDate),
+        maturityDateOnly: toIstDateOnly(bondData.maturityDate),
         sortedAt: bondData.sortedAt || 0,
         isConvertedDeal: bondData.isConvertedDeal || null,
         yield: bondData.yield || null,
         lastTradePrice: bondData.lastTradePrice || null,
         lastTradeYield: bondData.lastTradeYield || null,
         nextCouponDate: bondData.nextCouponDate || null,
+        nextCouponDateIst: toIstDateOnly(bondData.nextCouponDate),
         modeOfIssuance: bondData.modeOfIssuance || null,
         couponType: bondData.couponType || null,
         buyYield: bondData.buyYield || null,
         providerName: bondData.providerName || null,
         providerInterestDate: bondData.providerInterestDate || null,
+        providerInterestDateIst: toIstDateOnly(bondData.providerInterestDate),
         providerQuantity: bondData.providerQuantity || null,
         isOngoingDeal: bondData.isOngoingDeal ?? false,
         providerPrice: bondData.providerPrice || null,
         ignoreAutoUpdate: bondData.ignoreAutoUpdate ?? false,
         allCouponDates: bondData.allCouponDates ?? [],
-        allCouponDatesIst: (bondData.allCouponDates ?? []).map((d) => {
-          const dt = d instanceof Date ? d : new Date(d);
-          if (Number.isNaN(dt.getTime())) return dt;
-          return new Date(
-            Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate()),
-          );
-        }),
+        allCouponDatesIst: (bondData.allCouponDates ?? [])
+          .map((d) => toIstDateOnly(d))
+          .filter((d): d is Date => d != null),
         dayConvention: bondData.dayConvention || null,
         recordDate: bondData.recordDate || null,
+        recordDateIst: toIstDateOnly(bondData.recordDate),
         recordDays: bondData.recordDays ?? null,
         accruedInterestDays: bondData.accruedInterestDays ?? null,
         accruedInterest: bondData.accruedInterest ?? null,
@@ -866,6 +889,7 @@ export class BondService {
         imDocumentLink: bondData.imDocumentLink || null,
         exchangeListedOn: bondData.exchangeListedOn ?? null,
         lastCouponDate: bondData.lastCouponDate || null,
+        lastCouponDateIst: toIstDateOnly(bondData.lastCouponDate),
         isPerpetual: bondData.isPerpetual ?? null,
         bondType: bondData.bondType ?? null,
         seniority: bondData.seniority ?? null,
@@ -874,7 +898,9 @@ export class BondService {
         sellPrice: bondData.sellPrice ?? null,
         redemptionType: bondData.redemptionType || null,
         startDate: bondData.startDate || null,
+        startDateIst: toIstDateOnly(bondData.startDate),
         endDate: bondData.endDate || null,
+        endDateIst: toIstDateOnly(bondData.endDate),
       },
     });
 
@@ -930,36 +956,40 @@ export class BondService {
         isListed: bondData.isListed,
         ratingAgencyName: bondData.ratingAgencyName || null,
         ratingDate: bondData.ratingDate || null,
+        ratingDateIst: toIstDateOnly(bondData.ratingDate),
         categories: bondData.categories || [],
         sectorName: bondData.sectorName || null,
         dateOfAllotment: bondData.dateOfAllotment || null,
+        dateOfAllotmentIst: toIstDateOnly(bondData.dateOfAllotment),
         redemptionDate: bondData.redemptionDate || null,
+        redemptionDateIst: toIstDateOnly(bondData.redemptionDate),
         maturityDate: bondData.maturityDate || null,
+        maturityDateIst: toIstDateOnly(bondData.maturityDate),
+        maturityDateOnly: toIstDateOnly(bondData.maturityDate),
         sortedAt: bondData.sortedAt || 0,
         isConvertedDeal: bondData.isConvertedDeal || null,
         yield: bondData.yield || null,
         lastTradePrice: bondData.lastTradePrice || null,
         lastTradeYield: bondData.lastTradeYield || null,
         nextCouponDate: bondData.nextCouponDate || null,
+        nextCouponDateIst: toIstDateOnly(bondData.nextCouponDate),
         modeOfIssuance: bondData.modeOfIssuance || null,
         couponType: bondData.couponType || null,
         buyYield: bondData.buyYield || null,
         providerName: bondData.providerName || null,
         providerInterestDate: bondData.providerInterestDate || null,
+        providerInterestDateIst: toIstDateOnly(bondData.providerInterestDate),
         providerQuantity: bondData.providerQuantity || null,
         isOngoingDeal: bondData.isOngoingDeal ?? false,
         providerPrice: bondData.providerPrice || null,
         ignoreAutoUpdate: bondData.ignoreAutoUpdate ?? false,
         allCouponDates: bondData.allCouponDates ?? [],
-        allCouponDatesIst: (bondData.allCouponDates ?? []).map((d) => {
-          const dt = d instanceof Date ? d : new Date(d);
-          if (Number.isNaN(dt.getTime())) return dt;
-          return new Date(
-            Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate()),
-          );
-        }),
+        allCouponDatesIst: (bondData.allCouponDates ?? [])
+          .map((d) => toIstDateOnly(d))
+          .filter((d): d is Date => d != null),
         dayConvention: bondData.dayConvention || null,
         recordDate: bondData.recordDate || null,
+        recordDateIst: toIstDateOnly(bondData.recordDate),
         recordDays: bondData.recordDays ?? null,
         accruedInterestDays: bondData.accruedInterestDays ?? null,
         accruedInterest: bondData.accruedInterest ?? null,
@@ -969,6 +999,7 @@ export class BondService {
         imDocumentLink: bondData.imDocumentLink || null,
         exchangeListedOn: bondData.exchangeListedOn ?? null,
         lastCouponDate: bondData.lastCouponDate || null,
+        lastCouponDateIst: toIstDateOnly(bondData.lastCouponDate),
         isPerpetual: bondData.isPerpetual ?? null,
         bondType: bondData.bondType ?? null,
         seniority: bondData.seniority ?? null,
@@ -977,7 +1008,9 @@ export class BondService {
         sellPrice: bondData.sellPrice ?? null,
         redemptionType: bondData.redemptionType || null,
         startDate: bondData.startDate || null,
+        startDateIst: toIstDateOnly(bondData.startDate),
         endDate: bondData.endDate || null,
+        endDateIst: toIstDateOnly(bondData.endDate),
       },
     });
 
