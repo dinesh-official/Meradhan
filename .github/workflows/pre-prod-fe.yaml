@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - preprod
+    paths:
+      - 'frontend/meradhan/**'
+      - 'packages/**'
+      - 'frontendDockerfile'
+      - 'preprod_fe-revision.json'
+      - '.github/workflows/pre-prod-fe.yaml'
+  workflow_dispatch:
 
 jobs:
   deploy:
