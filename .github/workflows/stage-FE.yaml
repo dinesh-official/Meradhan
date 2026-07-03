@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - staging
+    paths:
+      - 'frontend/meradhan/**'
+      - 'packages/**'
+      - 'frontendDockerfile'
+      - 'stage-fe-revision.json'
+      - '.github/workflows/stage-FE.yaml'
+  workflow_dispatch:
 
 jobs:
   deploy:
