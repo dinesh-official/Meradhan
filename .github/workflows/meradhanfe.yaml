@@ -5,6 +5,14 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'frontend/meradhan/**'
+      - 'packages/**'
+      - 'frontendDockerfile'
+      - 'meradhan-fe-task.json'
+      - '.github/workflows/meradhanfe.yaml'
+  workflow_dispatch:
+
 jobs:
   deploy:
     runs-on: ubuntu-latest

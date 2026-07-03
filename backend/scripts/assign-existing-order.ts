@@ -194,7 +194,7 @@ async function assignExistingOrder(
       quantity,
       unitPrice,
       totalAmount: negotiation.acceptedConsideration ?? 0,
-      status: OrderStatus.IN_PROGRESS,
+      status: OrderStatus.SETTLED,
       paymentStatus: PaymentStatus.COMPLETED,
       dealId,
     },
@@ -224,7 +224,7 @@ async function assignExistingOrder(
         reqOrderNumber: rfq.orderNumber,
         paymentStatus: PaymentStatus.PENDING,
         paymentProvider: "CUSTOM",
-        status: OrderStatus.IN_PROGRESS,
+        status: OrderStatus.SETTLED,
         metadata: mergeMetadata(order.metadata, {
           dealId,
           rfqNumber: rfq.orderNumber,

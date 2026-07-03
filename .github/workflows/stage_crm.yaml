@@ -4,6 +4,14 @@ on:
   push:
     branches:
       - staging
+    paths:
+      - 'frontend/crm/**'
+      - 'packages/**'
+      - 'crmdockerfile'
+      - 'stage-crm-ui-revision.json'
+      - '.github/workflows/stage_crm.yaml'
+  workflow_dispatch:
+
 jobs:
   deploy:
     runs-on: ubuntu-latest

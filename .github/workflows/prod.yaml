@@ -5,6 +5,13 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'frontend/crm/**'
+      - 'packages/**'
+      - 'crmdockerfile'
+      - 'meradhan-crm-task.json'
+      - '.github/workflows/prod.yaml'
+  workflow_dispatch:
 
 jobs:
   deploy:
