@@ -13,6 +13,10 @@ import { createCrmActivityLog } from "@resource/crm/auditlogs/auditlog.repo";
 import { sendBackOfficeEmail } from "@communication/email_communication";
 import { AppConfigService } from "@resource/app-config/app-config.service";
 import { db } from "@core/database/database";
+import {
+  processCbricsSettlementWebhook,
+  resolveOrderForNseSettleKey,
+} from "@services/notifications/cbrics_settlement_webhook.service";
 
 function formatProposalDate(value: string | number | Date | null | undefined) {
   if (value == null || value === "") return "—";
@@ -1057,9 +1061,9 @@ export class CrmOrdersController {
           customerProfileId != null && Number.isFinite(customerProfileId)
             ? { id: customerProfileId, isDeleted: false }
             : {
-                emailAddress: { equals: recipientEmail, mode: "insensitive" },
-                isDeleted: false,
-              },
+              emailAddress: { equals: recipientEmail, mode: "insensitive" },
+              isDeleted: false,
+            },
         select: {
           gender: true,
           panCard: { select: { gender: true } },
@@ -1136,6 +1140,129 @@ export class CrmOrdersController {
       return res.sendResponse({
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: err instanceof Error ? err.message : "Failed to send proposal email",
+      });
+    }
+  };
+
+  /**
+   * Test / replay CBRICS settlement webhook deal-sheet automation for an order.
+   * POST /api/crm/orders/test-deal-sheet-webhook
+   * Body: { orderId?, reqOrderNumber?, dryRun?, send?, force?, toEmail? }
+   */
+  testDealSheetWebhook = async (req: Request, res: Response) => {
+    const body = (req.body ?? {}) as Record<string, unknown>;
+    const orderIdRaw = body.orderId;
+    const orderId =
+      orderIdRaw != null && String(orderIdRaw).trim() !== ""
+        ? Number(orderIdRaw)
+        : undefined;
+    const reqOrderNumber =
+      typeof body.reqOrderNumber === "string" ? body.reqOrderNumber.trim() : "";
+    const dryRun = body.send !== true && body.dryRun !== false;
+    const force = body.force === true;
+    const toEmail =
+      typeof body.toEmail === "string" && body.toEmail.trim()
+        ? body.toEmail.trim()
+        : undefined;
+
+    if ((!orderId || Number.isNaN(orderId)) && !reqOrderNumber) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Provide orderId or reqOrderNumber",
+      });
+    }
+
+    let order =
+      orderId != null && !Number.isNaN(orderId)
+        ? await db.dataBase.order.findUnique({
+            where: { id: orderId },
+            select: {
+              id: true,
+              orderNumber: true,
+              reqOrderNumber: true,
+              status: true,
+              metadata: true,
+              customerProfileId: true,
+            },
+          })
+        : null;
+
+    const nseKey =
+      reqOrderNumber ||
+      order?.reqOrderNumber?.trim() ||
+      null;
+
+    if (!order && nseKey) {
+      order = await resolveOrderForNseSettleKey(nseKey);
+    }
+
+    if (!order) {
+      return res.sendResponse({
+        statusCode: HttpStatus.NOT_FOUND,
+        message: "Order not found",
+      });
+    }
+
+    if (!nseKey) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Order has no reqOrderNumber — pass reqOrderNumber in body",
+      });
+    }
+
+    const payload = {
+      settleOrderList: [
+        {
+          orderNumber: nseKey,
+          settleStatus: 4,
+          modSettleDate: new Date()
+            .toLocaleDateString("en-GB")
+            .replaceAll("/", "-"),
+          settlementNo:
+            typeof body.settlementNo === "string" ? body.settlementNo : "CRM-TEST",
+        },
+      ],
+    };
+
+    try {
+      const result = await processCbricsSettlementWebhook(payload, {
+        dryRun,
+        forceDealSheet: force,
+        toEmail,
+      });
+
+      await createCrmActivityLog(req, {
+        userId: Number(req.session?.id),
+        action: "TEST_DEAL_SHEET_WEBHOOK",
+        entityType: "Order",
+        entityId: String(order.id),
+        details: {
+          dryRun,
+          force,
+          nseKey,
+          result,
+        },
+      });
+
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        message: result.dealSheetSent
+          ? "Deal sheet email sent"
+          : result.dealSheetSkippedReason ?? "Webhook simulation completed",
+        responseData: {
+          order: {
+            id: order.id,
+            orderNumber: order.orderNumber,
+            reqOrderNumber: order.reqOrderNumber,
+          },
+          payload,
+          result,
+        },
+      });
+    } catch (err) {
+      return res.sendResponse({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: err instanceof Error ? err.message : "Deal sheet test failed",
       });
     }
   };
