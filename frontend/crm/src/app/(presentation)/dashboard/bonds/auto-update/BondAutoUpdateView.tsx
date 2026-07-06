@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/collapsible";
 import {
   DecimalInput,
-  formatDecimalWithMinFractionDigits,
 } from "@/components/ui/decimal-input";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -1027,14 +1026,6 @@ export default function BondAutoUpdateView() {
                                     >
                                       {key === "categories" && Array.isArray(curVal)
                                         ? (curVal as string[]).join(", ") || "—"
-                                        : (key === "couponRate" || key === "buyYield" || key === "yield") &&
-                                          typeof curVal === "number" &&
-                                          Number.isFinite(curVal)
-                                        ? formatDecimalWithMinFractionDigits(curVal, 2)
-                                        : key === "sellPrice" &&
-                                          typeof curVal === "number" &&
-                                          Number.isFinite(curVal)
-                                        ? formatDecimalWithMinFractionDigits(curVal, 4)
                                         : (key === "settlementAmount" ||
                                             key === "accruedInterest" ||
                                             key === "principalAmount" ||
@@ -1112,8 +1103,6 @@ export default function BondAutoUpdateView() {
                                         key === "totalConsideration" ? (
                                         <DecimalInput
                                           className="h-9 font-mono text-sm"
-                                          minFractionDigits={2}
-                                          maxFractionDigits={2}
                                           value={
                                             sug == null
                                               ? undefined
@@ -1138,8 +1127,6 @@ export default function BondAutoUpdateView() {
                                         key === "yield" ? (
                                         <DecimalInput
                                           className="h-9 font-mono text-sm"
-                                          minFractionDigits={2}
-                                          maxFractionDigits={2}
                                           value={
                                             sug == null
                                               ? undefined
@@ -1183,10 +1170,8 @@ export default function BondAutoUpdateView() {
                                         />
                                       ) : key === "sellPrice" ? (
                                         <DecimalInput
-                                          title="Clean price: at most 4 decimal places (calc rounding). Text field; blur applies."
+                                          title="Clean price (% of face). Commits on blur."
                                           className="h-9 font-mono text-sm"
-                                          minFractionDigits={4}
-                                          maxFractionDigits={4}
                                           value={
                                             sug == null
                                               ? undefined
