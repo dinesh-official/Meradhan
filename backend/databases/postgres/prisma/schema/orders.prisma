@@ -27,16 +27,16 @@ model Order {
     status        OrderStatus   @default(PENDING)
 
     // Financials
-    subTotal    Decimal @db.Decimal(15, 2)
-    stampDuty   Decimal @db.Decimal(15, 2)
-    totalAmount Decimal @db.Decimal(15, 2)
+    subTotal    Decimal @db.Decimal(15, 4)
+    stampDuty   Decimal @db.Decimal(15, 4)
+    totalAmount Decimal @db.Decimal(15, 4)
 
     // Bond Snapshot (Single bond per order)
     isin        String
     bondName    String
-    faceValue   Decimal @db.Decimal(15, 2)
+    faceValue   Decimal @db.Decimal(15, 4)
     quantity    Int
-    unitPrice   Decimal @db.Decimal(15, 2)
+    unitPrice   Decimal @db.Decimal(15, 4)
     bondDetails Json // Full bond details
 
     // Relations
@@ -70,9 +70,9 @@ model CustomerBonds {
     // Snapshot of bond details at purchase (decoupled from Bonds table)
     isin          String
     bondName      String
-    faceValue     Decimal  @db.Decimal(15, 2)
+    faceValue     Decimal  @db.Decimal(15, 4)
     quantity      Int
-    purchasePrice Decimal  @db.Decimal(15, 2)
+    purchasePrice Decimal  @db.Decimal(15, 4)
     purchaseDate  DateTime @default(now())
 
     metadata Json?
