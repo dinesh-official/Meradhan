@@ -2,6 +2,26 @@ import { createLogger, format } from 'winston';
 import LokiTransport from 'winston-loki';
 import type { LogsMonitorServiceInterface } from './monitoring';
 
+function serializeLogMeta(value: unknown): unknown {
+    if (value instanceof Error) {
+        const err = value as Error & {
+            statusCode?: number;
+            code?: string;
+            meta?: unknown;
+        };
+        return {
+            name: err.name,
+            message: err.message,
+            ...(err.code != null ? { code: err.code } : {}),
+            ...(err.statusCode != null ? { statusCode: err.statusCode } : {}),
+            ...(err.meta != null ? { meta: err.meta } : {}),
+            ...(err.stack != null && !err.code?.startsWith("P")
+                ? { stack: err.stack }
+                : {}),
+        };
+    }
+    return value;
+}
 
 export class LokiLogsProvider implements LogsMonitorServiceInterface {
 
@@ -34,7 +54,12 @@ export class LokiLogsProvider implements LogsMonitorServiceInterface {
     }
 
     public logError(message: string, ...meta: unknown[]): void {
-        this.logger.error(message,meta);
-        console.error(message)
+        const serialized = meta.map(serializeLogMeta);
+        this.logger.error(message, serialized);
+        if (serialized.length === 0) {
+            console.error(message);
+        } else {
+            console.error(message, ...serialized);
+        }
     }
 }

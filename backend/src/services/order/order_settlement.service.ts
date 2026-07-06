@@ -27,6 +27,7 @@ import { RfqMasterService } from "@resource/crm/refq/nse/rfq_master/rfq_master.s
 import { getEmailSalutationFromSources } from "@root/schema";
 import { formatDateDdMmYyyy, formatDateIstDdMmmYyyy } from "@resource/customer/order/order.utils";
 import { getLastCouponDate, getLastNextCouponDateBasedOnSettlementDate } from "./order-pricing-helper";
+import { sendSettlementAutomationFailureEmail } from "./settlement_automation_alert";
 import { AxiosError } from "axios";
 
 // Type definitions for settlement service
@@ -268,6 +269,8 @@ export class OrderSettlementService {
         errorData: {
           error: error instanceof Error ? error.message : "Unknown error",
           stack: error instanceof Error ? error.stack : undefined,
+          nseResponse:
+            error instanceof AxiosError ? error.response?.data : undefined,
         },
         startedAt,
         completedAt: new Date(),
@@ -568,6 +571,39 @@ export class OrderSettlementService {
           message: "Auto-marked failed after batch failure",
           completedAt: new Date(),
         },
+      });
+
+      const failedStepLog =
+        await db.dataBase.orderSettlementAutomationLog.findFirst({
+          where: {
+            paymentId,
+            batchId: finalBatchId,
+            status: "FAILED",
+            step: { not: "SETTLEMENT_BATCH" },
+          },
+          orderBy: [{ completedAt: "desc" }, { id: "desc" }],
+        });
+
+      await sendSettlementAutomationFailureEmail({
+        context: "ORDER",
+        failedStep: failedStepLog?.step ?? "SETTLEMENT_BATCH",
+        error,
+        orderId,
+        orderNumber: order?.orderNumber ?? null,
+        isin: order?.isin ?? null,
+        quantity: order?.quantity ?? null,
+        paymentId,
+        batchId: finalBatchId,
+        customerName:
+          order?.customerProfile?.nseDataSet?.participant?.firstName ?? null,
+        ucc: order?.customerProfile?.nseDataSet?.participant?.loginId ?? null,
+        rfqNumber:
+          typeof (order?.metadata as Record<string, unknown> | null)?.rfqNumber ===
+          "string"
+            ? String(
+                (order?.metadata as Record<string, unknown>).rfqNumber,
+              ).trim()
+            : null,
       });
 
       throw error;

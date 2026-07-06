@@ -99,6 +99,8 @@ export class OrderService {
       });
     }
 
+    console.log(bondDetails?.sellPrice);
+
     return {
       subTotal: bond.ok ? bond.pricing.principalAmount : 0,
       stampDuty: bond.ok ? bond.pricing.stampDuty : 0,
@@ -237,6 +239,9 @@ export class OrderService {
     const issuerName = preview.bondName || (preview.bondDetails as { instrumentName?: string }).instrumentName || "";
     const tempOrderNumber = `MD-DIR-TEMP-${crypto.randomUUID().replace(/-/g, "").slice(0, 32)}`;
 
+
+    console.log(preview.unitPrice);
+
     const order = await db.dataBase.order.create({
       data: {
         customerProfileId: customerId,
@@ -320,7 +325,10 @@ export class OrderService {
     paymentOrderId: string,
     paymentId: string,
     signature?: string,
-  ) {
+  ): Promise<
+    | { status: "success"; orderId: number }
+    | { status: "already_captured"; orderId: number }
+  > {
     const order = await db.dataBase.order.findUnique({
       where: { paymentOrderId },
     });
@@ -328,7 +336,7 @@ export class OrderService {
     if (!order)
       throw new AppError("Order not found", { code: "ORDER_NOT_FOUND" });
     if (order.paymentStatus === PaymentStatus.COMPLETED) {
-      return { message: "Already captured", id: order.id };
+      return { status: "already_captured", orderId: order.id };
     }
     // The customer payment path is for Meradhan-customer orders only;
     // participant-counterparty orders never go through Razorpay.
@@ -360,9 +368,9 @@ export class OrderService {
       }
     }
 
-    await db.dataBase.$transaction(async (tx) => {
-      await tx.order.update({
-        where: { id: order.id },
+    const captured = await db.dataBase.$transaction(async (tx) => {
+      const updated = await tx.order.updateMany({
+        where: { id: order.id, paymentStatus: PaymentStatus.PENDING },
         data: {
           paymentStatus: PaymentStatus.COMPLETED,
           status: "IN_PROGRESS",
@@ -374,27 +382,42 @@ export class OrderService {
         },
       });
 
-      await tx.customerBonds.create({
-        data: {
-          customerProfileId,
-          orderId: order.id,
-          isin: order.isin,
-          bondName: order.bondName,
-          faceValue: order.faceValue,
-          quantity: order.quantity,
-          purchasePrice: order.unitPrice,
-          metadata: {
-            ...(order.metadata as any),
-            ...(order.bondDetails as any),
-          },
-        },
-      });
+      if (updated.count === 0) {
+        return false;
+      }
 
-      await this.crmInventoryStock.applyPaidOrderInventoryDecrement(tx, {
-        isin: order.isin,
-        quantity: order.quantity,
+      const existingBond = await tx.customerBonds.findUnique({
+        where: { orderId: order.id },
       });
+      if (!existingBond) {
+        await tx.customerBonds.create({
+          data: {
+            customerProfileId,
+            orderId: order.id,
+            isin: order.isin,
+            bondName: order.bondName,
+            faceValue: order.faceValue,
+            quantity: order.quantity,
+            purchasePrice: order.unitPrice,
+            metadata: {
+              ...(order.metadata as any),
+              ...(order.bondDetails as any),
+            },
+          },
+        });
+
+        await this.crmInventoryStock.applyPaidOrderInventoryDecrement(tx, {
+          isin: order.isin,
+          quantity: order.quantity,
+        });
+      }
+
+      return true;
     });
+
+    if (!captured) {
+      return { status: "already_captured", orderId: order.id };
+    }
 
     return { status: "success", orderId: order.id };
   }
