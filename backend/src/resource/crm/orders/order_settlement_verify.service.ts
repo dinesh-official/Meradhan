@@ -3,6 +3,7 @@ import type { Prisma } from "@databases/generated/prisma/postgres";
 import { OrderStatus } from "@databases/generated/prisma/postgres";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import { NseCBRICS } from "@modules/RFQ/nse/nse_CBRICS";
+import { processCbricsSettlementWebhook } from "@services/notifications/cbrics_settlement_webhook.service";
 
 /**
  * NSE `settle_order.settleStatus` → human label (as documented by CBRICS).
@@ -145,12 +146,34 @@ export class OrderSettlementVerifyService {
     const willChange = mapped != null && mapped !== order.status;
 
     let applied = false;
+    let dealSheetResult: Awaited<
+      ReturnType<typeof processCbricsSettlementWebhook>
+    > | null = null;
+
     if (apply && mapped != null && willChange) {
       await db.dataBase.order.update({
         where: { id: order.id },
         data: { status: mapped },
       });
       applied = true;
+    }
+
+    // When NSE reports payout done (4), ensure deal sheet is emailed once
+    // (covers missed/failed CBRICS webhooks).
+    if (apply && settleStatus === 4) {
+      dealSheetResult = await processCbricsSettlementWebhook(
+        {
+          settleOrderList: [
+            {
+              orderNumber: tradeKey,
+              settleStatus: 4,
+              settlementNo: record?.settlementNo ?? undefined,
+              modSettleDate: record?.modSettleDate ?? undefined,
+            },
+          ],
+        },
+        { forceDealSheet: false },
+      );
     }
 
     return {
@@ -165,6 +188,8 @@ export class OrderSettlementVerifyService {
       hasDefinitiveStatus: mapped != null,
       willChange,
       applied,
+      dealSheetSent: dealSheetResult?.dealSheetSent ?? false,
+      dealSheetSkippedReason: dealSheetResult?.dealSheetSkippedReason,
     };
   }
 }

@@ -216,7 +216,8 @@ function computeBondSettlement(
 
 const calculateStampDuty = (principal: number) => {
     const raw = principal * 0.000001;
-    return raw < 0.5 ? 0 : raw < 1.5 ? 1 : raw;
+    const amount = (raw < 0.5 ? 0 : raw < 1.5 ? 1 : raw);
+    return Number(amount.toFixed());
 };
 
 const principalAmount = (faceValue: number, quantity: number, cleanPrice: number) => {

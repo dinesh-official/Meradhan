@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/collapsible";
 import {
   DecimalInput,
-  formatDecimalWithMinFractionDigits,
 } from "@/components/ui/decimal-input";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -916,8 +915,8 @@ export default function BondAutoUpdateView() {
                                   {formatInr(
                                     parseCalcAmount(
                                       model.autofill.pricing.calc?.settlement_amount as
-                                        | string
-                                        | undefined,
+                                      | string
+                                      | undefined,
                                     ),
                                   )}
                                 </dd>
@@ -938,8 +937,8 @@ export default function BondAutoUpdateView() {
                                   {formatInr(
                                     parseCalcAmount(
                                       model.autofill.pricing.calc?.principal_amount as
-                                        | string
-                                        | undefined,
+                                      | string
+                                      | undefined,
                                     ),
                                   )}
                                 </dd>
@@ -952,8 +951,8 @@ export default function BondAutoUpdateView() {
                                   {formatInr(
                                     parseCalcAmount(
                                       model.autofill.pricing.calc?.total_consideration as
-                                        | string
-                                        | undefined,
+                                      | string
+                                      | undefined,
                                     ),
                                   )}
                                 </dd>
@@ -1027,22 +1026,14 @@ export default function BondAutoUpdateView() {
                                     >
                                       {key === "categories" && Array.isArray(curVal)
                                         ? (curVal as string[]).join(", ") || "—"
-                                        : (key === "couponRate" || key === "buyYield" || key === "yield") &&
-                                          typeof curVal === "number" &&
-                                          Number.isFinite(curVal)
-                                        ? formatDecimalWithMinFractionDigits(curVal, 2)
-                                        : key === "sellPrice" &&
-                                          typeof curVal === "number" &&
-                                          Number.isFinite(curVal)
-                                        ? formatDecimalWithMinFractionDigits(curVal, 4)
                                         : (key === "settlementAmount" ||
-                                            key === "accruedInterest" ||
-                                            key === "principalAmount" ||
-                                            key === "totalConsideration") &&
+                                          key === "accruedInterest" ||
+                                          key === "principalAmount" ||
+                                          key === "totalConsideration") &&
                                           typeof curVal === "number" &&
                                           Number.isFinite(curVal)
-                                        ? formatInr(curVal)
-                                        : formatDisplayValue(curVal)}
+                                          ? formatInr(curVal)
+                                          : formatDisplayValue(curVal)}
                                     </TableCell>
                                     <TableCell className="min-w-[220px] align-top">
                                       {!canEditBonds ? (
@@ -1094,17 +1085,27 @@ export default function BondAutoUpdateView() {
                                           }}
                                         />
                                       ) : key === "recordDays" || key === "accruedInterestDays" ? (
-                                        <Input
-                                          type="number"
+                                        <DecimalInput
                                           className="h-9 font-mono text-sm"
-                                          value={sug == null ? "" : String(sug)}
-                                          onChange={(e) => {
-                                            const v = e.target.value;
+                                          value={
+                                            sug == null
+                                              ? undefined
+                                              : (() => {
+                                                const n =
+                                                  typeof sug === "number"
+                                                    ? sug
+                                                    : Number(sug);
+                                                return Number.isFinite(n)
+                                                  ? n
+                                                  : undefined;
+                                              })()
+                                          }
+                                          onChange={(n) =>
                                             updateDraft(b.isin, {
                                               [key]:
-                                                v === "" ? null : Math.round(parseFloat(v)),
-                                            } as Partial<DraftSuggestions>);
-                                          }}
+                                                n == null ? null : Math.round(n),
+                                            } as Partial<DraftSuggestions>)
+                                          }
                                         />
                                       ) : key === "settlementAmount" ||
                                         key === "accruedInterest" ||
@@ -1112,8 +1113,6 @@ export default function BondAutoUpdateView() {
                                         key === "totalConsideration" ? (
                                         <DecimalInput
                                           className="h-9 font-mono text-sm"
-                                          minFractionDigits={2}
-                                          maxFractionDigits={2}
                                           value={
                                             sug == null
                                               ? undefined
@@ -1138,8 +1137,6 @@ export default function BondAutoUpdateView() {
                                         key === "yield" ? (
                                         <DecimalInput
                                           className="h-9 font-mono text-sm"
-                                          minFractionDigits={2}
-                                          maxFractionDigits={2}
                                           value={
                                             sug == null
                                               ? undefined
@@ -1183,10 +1180,8 @@ export default function BondAutoUpdateView() {
                                         />
                                       ) : key === "sellPrice" ? (
                                         <DecimalInput
-                                          title="Clean price: at most 4 decimal places (calc rounding). Text field; blur applies."
+                                          title="Clean price (% of face). Commits on blur."
                                           className="h-9 font-mono text-sm"
-                                          minFractionDigits={4}
-                                          maxFractionDigits={4}
                                           value={
                                             sug == null
                                               ? undefined

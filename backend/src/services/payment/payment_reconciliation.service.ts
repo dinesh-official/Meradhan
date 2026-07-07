@@ -560,7 +560,7 @@ export class PaymentReconciliationService {
         // Guard on paymentStatus PENDING so we never race a webhook that just completed it.
         const res = await db.dataBase.order.updateMany({
           where: { id: order.id, paymentStatus: PaymentStatus.PENDING },
-          data: { status: "REJECTED", paymentStatus: PaymentStatus.CANCELLED },
+          data: { status: "PENDING", paymentStatus: PaymentStatus.CANCELLED },
         });
 
         if (res.count > 0) {

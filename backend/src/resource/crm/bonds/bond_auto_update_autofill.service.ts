@@ -132,9 +132,7 @@ export class BondAutoUpdateAutofillService {
     );
 
     const sellPriceResolved =
-      finalPrice != null && Number.isFinite(finalPrice)
-        ? Number(finalPrice.toFixed(4))
-        : null;
+      finalPrice != null && Number.isFinite(finalPrice) ? finalPrice : null;
 
     const accruedDaysRaw = calcResponse.accrued_days;
     const accruedInterestDays =
@@ -183,18 +181,16 @@ export class BondAutoUpdateAutofillService {
       ),
       faceValue: Number(ctx.payload.Face_Value ?? bond?.faceValue ?? bondData?.faceValue ?? 0),
       couponRate: Number(
-        Number(ctx.payload.Coupon_Rate_Pct ?? bond?.couponRate ?? bondData?.couponRate ?? 0).toFixed(2),
+        ctx.payload.Coupon_Rate_Pct ?? bond?.couponRate ?? bondData?.couponRate ?? 0,
       ),
       buyYield: (() => {
         const raw =
           bondData?.buyYield ??
           bondData?.yield ??
           (Number(calcResponse.final_yield) || null);
-        return raw != null && Number.isFinite(raw)
-          ? Number(Number(raw).toFixed(2))
-          : null;
+        return raw != null && Number.isFinite(raw) ? Number(raw) : null;
       })(),
-      yield: Number(finalYieldRaw.toFixed(2)),
+      yield: finalYieldRaw,
       sellPrice: sellPriceResolved,
       settlementAmount: settlementAmountResolved,
       accruedInterest: accruedInterestResolved,

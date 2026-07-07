@@ -250,4 +250,10 @@ router.post(
   crmOrdersController.sendProposalEmailToClient
 );
 
+router.post(
+  "/api/crm/orders/test-deal-sheet-webhook",
+  allowAccessMiddleware("CRM"),
+  crmOrdersController.testDealSheetWebhook
+);
+
 export default router;
