@@ -116,28 +116,28 @@ export function mergeAutofillIntoForm(
     suggested.accruedInterest != null &&
     Number.isFinite(suggested.accruedInterest)
   ) {
-    out.accruedInterest = Number(suggested.accruedInterest.toFixed(2));
+    out.accruedInterest = suggested.accruedInterest;
   }
   if (
     include.settlementAmount &&
     suggested.settlementAmount != null &&
     Number.isFinite(suggested.settlementAmount)
   ) {
-    out.settlementAmount = Number(suggested.settlementAmount.toFixed(2));
+    out.settlementAmount = suggested.settlementAmount;
   }
   if (
     include.principalAmount &&
     suggested.principalAmount != null &&
     Number.isFinite(suggested.principalAmount)
   ) {
-    out.principalAmount = Number(suggested.principalAmount.toFixed(2));
+    out.principalAmount = suggested.principalAmount;
   }
   if (
     include.totalConsideration &&
     suggested.totalConsideration != null &&
     Number.isFinite(suggested.totalConsideration)
   ) {
-    out.totalConsideration = Number(suggested.totalConsideration.toFixed(2));
+    out.totalConsideration = suggested.totalConsideration;
   }
   if (include.dayConvention && suggested.dayConvention != null) {
     out.dayConvention = suggested.dayConvention;
@@ -157,13 +157,13 @@ export function mergeAutofillIntoForm(
     out.couponType = suggested.couponType;
   }
   if (include.couponRate && Number.isFinite(suggested.couponRate)) {
-    out.couponRate = Number(suggested.couponRate.toFixed(2));
+    out.couponRate = suggested.couponRate;
   }
   if (include.buyYield && suggested.buyYield != null && Number.isFinite(suggested.buyYield)) {
-    out.buyYield = Number(suggested.buyYield.toFixed(2));
+    out.buyYield = suggested.buyYield;
   }
   if (include.yield && Number.isFinite(suggested.yield)) {
-    out.yield = Number(suggested.yield.toFixed(2));
+    out.yield = suggested.yield;
   }
   if (include.sellPrice && suggested.sellPrice != null && Number.isFinite(suggested.sellPrice)) {
     out.sellPrice = suggested.sellPrice;

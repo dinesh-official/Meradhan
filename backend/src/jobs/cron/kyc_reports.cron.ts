@@ -2,7 +2,7 @@ import cron from "node-cron";
 import { EmailCommunication } from "@communication/email_communication";
 import { db } from "@core/database/database";
 
-const SALES_DL = "dl.sales@meradhan.co";
+const KYC_REPORT_RECIPIENT = "vikas.kukreja@meradhan.co";
 const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
 
 function istNowParts(now = new Date()): { y: number; m: number; d: number } {
@@ -158,24 +158,23 @@ function renderSummaryEmailHtml(opts: {
         </tr>
       </thead>
       <tbody>
-        ${
-          kycSummary.pendingReasons.length
-            ? kycSummary.pendingReasons
-              .map(
-                (r) => `
+        ${kycSummary.pendingReasons.length
+      ? kycSummary.pendingReasons
+        .map(
+          (r) => `
           <tr>
             <td style="border: 1px solid #ddd;">${htmlEscape(r.reason)}</td>
             <td align="right" style="border: 1px solid #ddd;">${r.count}</td>
           </tr>
         `.trim(),
-              )
-              .join("\n")
-            : `
+        )
+        .join("\n")
+      : `
         <tr>
           <td colspan="2" style="border: 1px solid #ddd; color: #666;">No pending KYCs initiated in this period.</td>
         </tr>
         `.trim()
-        }
+    }
       </tbody>
     </table>
 
@@ -206,24 +205,23 @@ function renderSummaryEmailHtml(opts: {
         </tr>
       </thead>
       <tbody>
-        ${
-          rows.length
-            ? rows
-              .map(
-                (r) => `
+        ${rows.length
+      ? rows
+        .map(
+          (r) => `
           <tr>
             <td style="border: 1px solid #ddd;">${htmlEscape(r.status)}</td>
             <td align="right" style="border: 1px solid #ddd;">${r.count}</td>
           </tr>
         `.trim()
-              )
-              .join("\n")
-            : `
+        )
+        .join("\n")
+      : `
         <tr>
           <td colspan="2" style="border: 1px solid #ddd; color: #666;">No submissions in this period.</td>
         </tr>
         `.trim()
-        }
+    }
       </tbody>
     </table>
 
@@ -259,67 +257,38 @@ async function sendKycReportEmail(params: {
   });
 }
 
-// Daily — 9:00 AM IST — previous day
-cron.schedule(
-  "0 9 * * *",
-  async () => {
-    try {
-      const { y, m, d } = istNowParts();
-      const todayStart = istMidnightToUtcDate(y, m, d);
-      const yesterdayStart = new Date(todayStart.getTime() - 24 * 60 * 60 * 1000);
-      const yesterdayParts = (() => {
-        const ist = new Date(yesterdayStart.getTime() + IST_OFFSET_MS);
-        return { y: ist.getUTCFullYear(), m: ist.getUTCMonth(), d: ist.getUTCDate() };
-      })();
-
-      await sendKycReportEmail({
-        to: SALES_DL,
-        subject: `Daily KYC Submission Report (Summary) - ${formatYmd(
-          yesterdayParts.y,
-          yesterdayParts.m,
-          yesterdayParts.d,
-        )}`,
-        title: "Daily KYC Submission Report (Summary)",
-        subtitle: `Period: ${formatYmd(yesterdayParts.y, yesterdayParts.m, yesterdayParts.d)} (IST)`,
-        range: { from: yesterdayStart, to: todayStart },
-      });
-    } catch (error) {
-      console.error("Daily KYC report cron failed:", error);
-    }
-  },
-  { timezone: "Asia/Kolkata" },
-);
-
 // Weekly — Monday 9:00 AM IST — previous week (Mon..Sun)
 cron.schedule(
   "0 9 * * 1",
   async () => {
     try {
       const { y, m, d } = istNowParts();
-      const thisMondayStart = (() => {
-        const todayStart = istMidnightToUtcDate(y, m, d);
-        // In IST, cron fires on Monday; compute monday by walking back (day-of-week from IST date)
-        const ist = new Date(todayStart.getTime() + IST_OFFSET_MS);
-        const dow = ist.getUTCDay(); // 1=Mon ... 0=Sun
-        const deltaDays = (dow + 6) % 7; // days since Monday
-        return new Date(todayStart.getTime() - deltaDays * 24 * 60 * 60 * 1000);
-      })();
-      const prevMondayStart = new Date(thisMondayStart.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const todayStart = istMidnightToUtcDate(y, m, d);
+      const ist = new Date(todayStart.getTime() + IST_OFFSET_MS);
+      const dow = ist.getUTCDay(); // 1=Mon ... 0=Sun
+      const deltaDays = (dow + 6) % 7; // days since Monday
+      const thisMondayStart = new Date(
+        todayStart.getTime() - deltaDays * 24 * 60 * 60 * 1000,
+      );
+      const prevMondayStart = new Date(
+        thisMondayStart.getTime() - 7 * 24 * 60 * 60 * 1000,
+      );
       const prevWeekEnd = thisMondayStart;
 
       const startIst = new Date(prevMondayStart.getTime() + IST_OFFSET_MS);
       const endIst = new Date(prevWeekEnd.getTime() + IST_OFFSET_MS);
+      const endInclusive = new Date(endIst.getTime() - 1);
 
       await sendKycReportEmail({
-        to: SALES_DL,
+        to: KYC_REPORT_RECIPIENT,
         subject: `Weekly KYC Report - ${formatYmd(
           startIst.getUTCFullYear(),
           startIst.getUTCMonth(),
           startIst.getUTCDate(),
         )} to ${formatYmd(
-          new Date(endIst.getTime() - 1).getUTCFullYear(),
-          new Date(endIst.getTime() - 1).getUTCMonth(),
-          new Date(endIst.getTime() - 1).getUTCDate(),
+          endInclusive.getUTCFullYear(),
+          endInclusive.getUTCMonth(),
+          endInclusive.getUTCDate(),
         )}`,
         title: "Weekly KYC Report",
         subtitle: `Period: ${formatYmd(
@@ -327,9 +296,9 @@ cron.schedule(
           startIst.getUTCMonth(),
           startIst.getUTCDate(),
         )} to ${formatYmd(
-          new Date(endIst.getTime() - 1).getUTCFullYear(),
-          new Date(endIst.getTime() - 1).getUTCMonth(),
-          new Date(endIst.getTime() - 1).getUTCDate(),
+          endInclusive.getUTCFullYear(),
+          endInclusive.getUTCMonth(),
+          endInclusive.getUTCDate(),
         )} (IST)`,
         range: { from: prevMondayStart, to: prevWeekEnd },
       });
@@ -339,46 +308,3 @@ cron.schedule(
   },
   { timezone: "Asia/Kolkata" },
 );
-
-// Monthly — 1st day 9:00 AM IST — previous month
-cron.schedule(
-  "0 9 1 * *",
-  async () => {
-    try {
-      const { y, m } = istNowParts();
-      const thisMonthStart = istMidnightToUtcDate(y, m, 1);
-      const prevMonthStart = istMidnightToUtcDate(y, m - 1, 1);
-
-      const startIst = new Date(prevMonthStart.getTime() + IST_OFFSET_MS);
-      const endIstInclusive = new Date(thisMonthStart.getTime() + IST_OFFSET_MS - 1);
-
-      await sendKycReportEmail({
-        to: SALES_DL,
-        subject: `Monthly KYC Report - ${formatYmd(
-          startIst.getUTCFullYear(),
-          startIst.getUTCMonth(),
-          startIst.getUTCDate(),
-        )} to ${formatYmd(
-          endIstInclusive.getUTCFullYear(),
-          endIstInclusive.getUTCMonth(),
-          endIstInclusive.getUTCDate(),
-        )}`,
-        title: "Monthly KYC Report",
-        subtitle: `Period: ${formatYmd(
-          startIst.getUTCFullYear(),
-          startIst.getUTCMonth(),
-          startIst.getUTCDate(),
-        )} to ${formatYmd(
-          endIstInclusive.getUTCFullYear(),
-          endIstInclusive.getUTCMonth(),
-          endIstInclusive.getUTCDate(),
-        )} (IST)`,
-        range: { from: prevMonthStart, to: thisMonthStart },
-      });
-    } catch (error) {
-      console.error("Monthly KYC report cron failed:", error);
-    }
-  },
-  { timezone: "Asia/Kolkata" },
-);
-
