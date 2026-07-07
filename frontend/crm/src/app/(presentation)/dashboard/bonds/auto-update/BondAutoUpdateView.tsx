@@ -915,8 +915,8 @@ export default function BondAutoUpdateView() {
                                   {formatInr(
                                     parseCalcAmount(
                                       model.autofill.pricing.calc?.settlement_amount as
-                                        | string
-                                        | undefined,
+                                      | string
+                                      | undefined,
                                     ),
                                   )}
                                 </dd>
@@ -937,8 +937,8 @@ export default function BondAutoUpdateView() {
                                   {formatInr(
                                     parseCalcAmount(
                                       model.autofill.pricing.calc?.principal_amount as
-                                        | string
-                                        | undefined,
+                                      | string
+                                      | undefined,
                                     ),
                                   )}
                                 </dd>
@@ -951,8 +951,8 @@ export default function BondAutoUpdateView() {
                                   {formatInr(
                                     parseCalcAmount(
                                       model.autofill.pricing.calc?.total_consideration as
-                                        | string
-                                        | undefined,
+                                      | string
+                                      | undefined,
                                     ),
                                   )}
                                 </dd>
@@ -1027,13 +1027,13 @@ export default function BondAutoUpdateView() {
                                       {key === "categories" && Array.isArray(curVal)
                                         ? (curVal as string[]).join(", ") || "—"
                                         : (key === "settlementAmount" ||
-                                            key === "accruedInterest" ||
-                                            key === "principalAmount" ||
-                                            key === "totalConsideration") &&
+                                          key === "accruedInterest" ||
+                                          key === "principalAmount" ||
+                                          key === "totalConsideration") &&
                                           typeof curVal === "number" &&
                                           Number.isFinite(curVal)
-                                        ? formatInr(curVal)
-                                        : formatDisplayValue(curVal)}
+                                          ? formatInr(curVal)
+                                          : formatDisplayValue(curVal)}
                                     </TableCell>
                                     <TableCell className="min-w-[220px] align-top">
                                       {!canEditBonds ? (
@@ -1085,17 +1085,27 @@ export default function BondAutoUpdateView() {
                                           }}
                                         />
                                       ) : key === "recordDays" || key === "accruedInterestDays" ? (
-                                        <Input
-                                          type="number"
+                                        <DecimalInput
                                           className="h-9 font-mono text-sm"
-                                          value={sug == null ? "" : String(sug)}
-                                          onChange={(e) => {
-                                            const v = e.target.value;
+                                          value={
+                                            sug == null
+                                              ? undefined
+                                              : (() => {
+                                                const n =
+                                                  typeof sug === "number"
+                                                    ? sug
+                                                    : Number(sug);
+                                                return Number.isFinite(n)
+                                                  ? n
+                                                  : undefined;
+                                              })()
+                                          }
+                                          onChange={(n) =>
                                             updateDraft(b.isin, {
                                               [key]:
-                                                v === "" ? null : Math.round(parseFloat(v)),
-                                            } as Partial<DraftSuggestions>);
-                                          }}
+                                                n == null ? null : Math.round(n),
+                                            } as Partial<DraftSuggestions>)
+                                          }
                                         />
                                       ) : key === "settlementAmount" ||
                                         key === "accruedInterest" ||
