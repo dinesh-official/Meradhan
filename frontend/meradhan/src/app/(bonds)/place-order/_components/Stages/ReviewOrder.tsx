@@ -170,7 +170,7 @@ function ReviewOrder({
         <div className="grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2  md:gap-y-10 gap-y-5 gap-x-6">
           <BondInfoLabel title="Yield to Maturity">
             <p className="text-black">
-              {indicativeYield != null && indicativeYield !== "" && Number.isFinite(Number(indicativeYield))
+              {indicativeYield != null && Number.isFinite(Number(indicativeYield))
                 ? `${Number(indicativeYield).toFixed(2)}%`
                 : "—"}
             </p>

@@ -147,7 +147,9 @@ export interface BondOrderPricingData {
   isUnderShutPeriod: boolean;
   recordDate: string;
   settlementAmount: number;
-  /** Indicative offered yield at checkout (listing `yield` only). */
+  /** DeriData `total_consideration` (same as settlement when stamp duty is not added locally). */
+  totalConsideration?: number;
+  /** Indicative offered yield at checkout (from DeriData / live pricing). */
   yield?: number;
 }
 

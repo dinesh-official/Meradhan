@@ -327,9 +327,9 @@ function OrderDetailsView() {
     n == null || !Number.isFinite(n)
       ? "—"
       : `₹${n.toLocaleString("en-IN", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}`;
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`;
 
   const cleanPriceValue = pricingNumber("cleanPrice");
   const principalAmountValue = pricingNumber("principalAmount");
@@ -420,19 +420,19 @@ function OrderDetailsView() {
             {(order.paymentProvider === "CUSTOM" ||
               (order.paymentProvider === "RAZORPAY" &&
                 order.paymentStatus === "COMPLETED")) && (
-              <Button
-                variant="outline"
-                onClick={() => verifySettlementMutation.mutate()}
-                disabled={verifySettlementMutation.isPending}
-              >
-                {verifySettlementMutation.isPending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                )}
-                Verify Settlement
-              </Button>
-            )}
+                <Button
+                  variant="outline"
+                  onClick={() => verifySettlementMutation.mutate()}
+                  disabled={verifySettlementMutation.isPending}
+                >
+                  {verifySettlementMutation.isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                  )}
+                  Verify Settlement
+                </Button>
+              )}
           </AllowOnlyView>
           <OrderStatusBadge status={order.status} paymentStatus={order.paymentStatus} />
           <Badge variant="outline">{order.paymentStatus}</Badge>
@@ -454,27 +454,25 @@ function OrderDetailsView() {
         <DialogContent className="sm:max-w-md shadow-none border border-slate-200 p-0 overflow-hidden gap-0">
           {/* Colored banner reflecting the outcome */}
           <div
-            className={`px-6 py-4 border-b ${
-              !verifyResult?.ok
+            className={`px-6 py-4 border-b ${!verifyResult?.ok
                 ? "bg-rose-50 border-rose-100"
                 : verifyResult?.applied
                   ? "bg-emerald-50 border-emerald-100"
                   : verifyResult?.willChange
                     ? "bg-blue-50 border-blue-100"
                     : "bg-amber-50 border-amber-100"
-            }`}
+              }`}
           >
             <DialogHeader className="space-y-1">
               <DialogTitle
-                className={`flex items-center gap-2 text-base ${
-                  !verifyResult?.ok
+                className={`flex items-center gap-2 text-base ${!verifyResult?.ok
                     ? "text-rose-700"
                     : verifyResult?.applied
                       ? "text-emerald-700"
                       : verifyResult?.willChange
                         ? "text-blue-700"
                         : "text-amber-700"
-                }`}
+                  }`}
               >
                 {!verifyResult?.ok ? (
                   <XCircle className="h-5 w-5" />
@@ -569,13 +567,12 @@ function OrderDetailsView() {
                 <dt className="text-muted-foreground">Database</dt>
                 <dd className="text-right">
                   <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                      verifyResult.applied
+                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${verifyResult.applied
                         ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200"
                         : verifyResult.willChange
                           ? "bg-blue-100 text-blue-700 ring-1 ring-blue-200"
                           : "bg-slate-100 text-slate-600 ring-1 ring-slate-200"
-                    }`}
+                      }`}
                   >
                     {verifyResult.applied
                       ? "Updated"
@@ -616,27 +613,25 @@ function OrderDetailsView() {
       <Dialog open={settleDialogOpen} onOpenChange={setSettleDialogOpen}>
         <DialogContent className="sm:max-w-md shadow-none border border-slate-200 p-0 overflow-hidden gap-0">
           <div
-            className={`px-6 py-4 border-b ${
-              !settleResult?.ok
+            className={`px-6 py-4 border-b ${!settleResult?.ok
                 ? "bg-rose-50 border-rose-100"
                 : settleResult?.applied
                   ? "bg-emerald-50 border-emerald-100"
                   : settleResult?.willChange
                     ? "bg-blue-50 border-blue-100"
                     : "bg-amber-50 border-amber-100"
-            }`}
+              }`}
           >
             <DialogHeader className="space-y-1">
               <DialogTitle
-                className={`flex items-center gap-2 text-base ${
-                  !settleResult?.ok
+                className={`flex items-center gap-2 text-base ${!settleResult?.ok
                     ? "text-rose-700"
                     : settleResult?.applied
                       ? "text-emerald-700"
                       : settleResult?.willChange
                         ? "text-blue-700"
                         : "text-amber-700"
-                }`}
+                  }`}
               >
                 {!settleResult?.ok ? (
                   <XCircle className="h-5 w-5" />
@@ -721,13 +716,12 @@ function OrderDetailsView() {
                 <dt className="text-muted-foreground">Database</dt>
                 <dd className="text-right">
                   <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                      settleResult.applied
+                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${settleResult.applied
                         ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200"
                         : settleResult.willChange
                           ? "bg-blue-100 text-blue-700 ring-1 ring-blue-200"
                           : "bg-slate-100 text-slate-600 ring-1 ring-slate-200"
-                    }`}
+                      }`}
                   >
                     {settleResult.applied
                       ? "Updated"
@@ -891,7 +885,7 @@ function OrderDetailsView() {
                 <div>
                   <p className="text-sm text-muted-foreground">Unit Price</p>
                   <p className="font-medium">
-                    ₹{parseFloat(order.unitPrice).toLocaleString("en-IN")}
+                    ₹{(order.unitPrice)}
                   </p>
                 </div>
               </div>
@@ -1850,7 +1844,7 @@ function OrderDetailsView() {
             </CardHeader>
             <CardContent>
               {order.settlementAutomationLogs &&
-              order.settlementAutomationLogs.length > 0 ? (
+                order.settlementAutomationLogs.length > 0 ? (
                 <div className="space-y-4">
                   {Object.entries(
                     order.settlementAutomationLogs.reduce(
@@ -2038,9 +2032,9 @@ function OrderDetailsView() {
                       ? settlementDateLabel
                       : order.customerBonds.purchaseDate
                         ? dateTimeUtils.formatDateTime(
-                            order.customerBonds.purchaseDate,
-                            "DD MMM YYYY",
-                          )
+                          order.customerBonds.purchaseDate,
+                          "DD MMM YYYY",
+                        )
                         : "—"}
                   </p>
                 </div>
