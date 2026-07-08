@@ -60,6 +60,10 @@ export function getDeriDataCalculatorUrl(baseUrl: string): string {
   return `${baseUrl}/api/public/merchant/v1/calculator/`;
 }
 
+export function getDeriDataIssueDetailUrl(baseUrl: string): string {
+  return `${baseUrl}/api/public/merchant/v1/issue-detail/`;
+}
+
 export function faceAmountInCrores(faceValue: number, quantity: number): number {
   const fv = Number.isFinite(faceValue) ? faceValue : 0;
   const qty = Number.isFinite(quantity) && quantity > 0 ? quantity : 1;

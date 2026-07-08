@@ -48,14 +48,25 @@ export function paymentFrequencyToDbEnum(
 ): InterestMode {
   const v = String(input ?? "")
     .trim()
-    .toLowerCase();
+    .toLowerCase()
+    .replace(/_/g, " ");
   if (v === "monthly") return "MONTHLY";
   if (v === "quarterly") return "QUARTERLY";
-  if (v === "semi-annual" || v === "semi annual" || v === "semiannual") {
+  if (
+    v === "semi-annual" ||
+    v === "semi annual" ||
+    v === "semiannual" ||
+    v === "half yearly" ||
+    v === "half-yearly"
+  ) {
     return "HALF_YEARLY";
   }
   if (v === "annual" || v === "yearly") return "YEARLY";
-  if (v === "on maturity" || v === "on-maturity" || v === "maturity") {
+  if (
+    v === "on maturity" ||
+    v === "on-maturity" ||
+    v === "maturity"
+  ) {
     return "ON_MATURITY";
   }
   return "UNKNOWN";

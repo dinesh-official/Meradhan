@@ -9,6 +9,8 @@ import {
   calculatePriceToYield,
   calculateYieldToPrice,
 } from "@services/deridata/deridata.calculator.client";
+import { mapDeriDataIssueDetailToBondFields } from "@services/deridata/deridata.issue-detail.adapter";
+import { fetchIssueDetailItem } from "@services/deridata/deridata.issue-detail.client";
 import {
   buildAutofillCalcContext,
   collectAllCouponDatesYmd,
@@ -31,13 +33,19 @@ export type BondDealAutofillResponse = {
     usedProviderQuantity?: boolean;
     usedProviderSettlementDate?: boolean;
     usedDeriDataCalculator?: boolean;
+    usedDeriDataIssueDetail?: boolean;
     pricingMode?: "ytm" | "cleanPrice";
     /** @deprecated Use usedDeriDataCalculator */
     usedCalcBondApi?: boolean;
   };
   suggested: {
     bondName?: string | null;
+    instrumentName?: string | null;
+    description?: string | null;
+    sectorName?: string | null;
     creditRating?: string | null;
+    creditRatingInfo?: string | null;
+    ratingAgencyName?: string | null;
     allCouponDates?: string[];
     allCouponDatesIst?: string[];
     natureOfInstrument?: "SECURED" | "UNSECURED" | "UNKNOWN" | null;
@@ -64,6 +72,8 @@ export type BondDealAutofillResponse = {
     isListed?: string | null;
     couponType?: string | null;
     categories?: string[];
+    totalIssueSize?: number | null;
+    putCallOptionDetails?: string | null;
   };
   pricing: {
     finalPrice: number | null;
@@ -101,6 +111,24 @@ export class BondAutoUpdateAutofillService {
     );
 
     const resolved = resolveAutoUpdateCalcInputs(bondData, input);
+
+    let issueDetailMapped: ReturnType<
+      typeof mapDeriDataIssueDetailToBondFields
+    > | null = null;
+    let usedDeriDataIssueDetail = false;
+    try {
+      const { item } = await fetchIssueDetailItem(isin);
+      issueDetailMapped = mapDeriDataIssueDetailToBondFields(item);
+      usedDeriDataIssueDetail = true;
+    } catch (err) {
+      // Issue-detail is preferred for master fields but should not block pricing
+      // when Daily Data is unavailable for this ISIN.
+      console.warn(
+        `[bond_auto_update_autofill] DeriData issue-detail unavailable for ${isin}:`,
+        err instanceof Error ? err.message : err,
+      );
+    }
+
     const ctx = await buildAutofillCalcContext(
       isin,
       bond,
@@ -108,6 +136,39 @@ export class BondAutoUpdateAutofillService {
       couponRows,
       resolved,
     );
+
+    // Prefer Daily Data face / coupon when present so calculator sizing matches issue terms.
+    if (
+      issueDetailMapped?.faceValue != null &&
+      Number.isFinite(issueDetailMapped.faceValue)
+    ) {
+      ctx.faceValue = issueDetailMapped.faceValue;
+    }
+    if (
+      issueDetailMapped?.couponRate != null &&
+      Number.isFinite(issueDetailMapped.couponRate)
+    ) {
+      ctx.couponRate = issueDetailMapped.couponRate;
+    }
+    if (issueDetailMapped?.maturityDate) {
+      ctx.maturityDate = issueDetailMapped.maturityDate;
+    }
+    if (issueDetailMapped?.dateOfAllotment) {
+      ctx.datedDate = issueDetailMapped.dateOfAllotment;
+    }
+    if (issueDetailMapped?.interestPaymentFrequency) {
+      ctx.interestPaymentFrequency =
+        issueDetailMapped.interestPaymentFrequency;
+    }
+    if (
+      issueDetailMapped?.recordDays != null &&
+      Number.isFinite(issueDetailMapped.recordDays)
+    ) {
+      ctx.couponDate = {
+        ...ctx.couponDate,
+        recordDays: issueDetailMapped.recordDays,
+      };
+    }
 
     if (
       ctx.pricingMode === "ytm" &&
@@ -166,17 +227,31 @@ export class BondAutoUpdateAutofillService {
       bondData?.allCouponDates,
     );
 
+    const dd = issueDetailMapped;
     const bondName =
       (
+        dd?.bondName?.trim() ||
         bondData?.bondName?.trim() ||
         bond?.issuerName?.trim() ||
         ""
       ).trim() || null;
-    const creditRating = bondData?.creditRating?.trim() || "UnRated";
+    const creditRating =
+      dd?.creditRating?.trim() ||
+      bondData?.creditRating?.trim() ||
+      "UnRated";
     const natureOfInstrument =
+      dd?.natureOfInstrument ??
       mapNatureOfInstrument(
         bondData?.natureOfInstrument ?? bond?.natureOfInstrument,
-      ) ?? null;
+      ) ??
+      null;
+
+    const interestFromDd = dd?.interestPaymentFrequency
+      ? paymentFrequencyToDbEnum(dd.interestPaymentFrequency)
+      : null;
+    const interestFromCtx = paymentFrequencyToDbEnum(
+      ctx.interestPaymentFrequency,
+    );
 
     const finalPrice = parseCalcMoneyString(calcResponse.final_price);
     const finalYieldRaw = Number(calcResponse.final_yield_raw ?? 0);
@@ -192,28 +267,45 @@ export class BondAutoUpdateAutofillService {
       deriDataResponse.record_date,
     );
 
+    const categoriesFromDd = dd?.categories?.length ? dd.categories : null;
+
     const suggested = {
       bondName,
+      instrumentName: dd?.instrumentName ?? null,
+      description: dd?.description ?? null,
+      sectorName: dd?.sectorName ?? null,
       creditRating,
+      creditRatingInfo: dd?.creditRatingInfo ?? null,
+      ratingAgencyName: dd?.ratingAgencyName ?? null,
       allCouponDates,
       allCouponDatesIst: allCouponDates,
       natureOfInstrument,
-      maturityDate: ctx.maturityDate || toYyyyMmDd(bond?.maturityDate) || null,
-      dateOfAllotment: ctx.datedDate || toYyyyMmDd(bond?.issueDateIst) || null,
+      maturityDate:
+        dd?.maturityDate ||
+        ctx.maturityDate ||
+        toYyyyMmDd(bond?.maturityDate) ||
+        null,
+      dateOfAllotment:
+        dd?.dateOfAllotment ||
+        ctx.datedDate ||
+        toYyyyMmDd(bond?.issueDateIst) ||
+        null,
       lastCouponDate: ctx.lastCouponDate,
       nextCouponDate: ctx.nextCouponDate,
       recordDate:
         recordDateFromDeriData ?? toYyyyMmDd(ctx.pricing.recordDate) ?? null,
-      recordDays: ctx.couponDate.recordDays,
+      recordDays:
+        dd?.recordDays != null && Number.isFinite(dd.recordDays)
+          ? dd.recordDays
+          : ctx.couponDate.recordDays,
       dueDate: ctx.dueDateYmd ?? null,
       dayConvention: bond?.dayConvention ?? bondData?.dayConvention ?? null,
       interestPaymentFrequency:
-        paymentFrequencyToDbEnum(ctx.interestPaymentFrequency) ||
+        interestFromDd ||
+        interestFromCtx ||
         bond?.interestPaymentFrequency ||
         "UNKNOWN",
-      interestPaymentMode: paymentFrequencyToDbEnum(
-        ctx.interestPaymentFrequency,
-      ),
+      interestPaymentMode: interestFromDd || interestFromCtx || "UNKNOWN",
       faceValue: ctx.faceValue,
       couponRate: ctx.couponRate,
       buyYield: (() => {
@@ -232,12 +324,14 @@ export class BondAutoUpdateAutofillService {
       sellPrice: sellPriceResolved,
       isUnderShutPeriod: isUnderShutPeriodFromCalc,
       bondType: bondData?.bondType ?? null,
-      seniority: bondData?.seniority ?? null,
-      redemptionType: bondData?.redemptionType ?? null,
-      taxStatus: bondData?.taxStatus ?? null,
-      isListed: bondData?.isListed ?? null,
-      couponType: bondData?.couponType ?? null,
-      categories: bondData?.categories ?? [],
+      seniority: dd?.seniority ?? bondData?.seniority ?? null,
+      redemptionType: dd?.redemptionType ?? bondData?.redemptionType ?? null,
+      taxStatus: dd?.taxStatus ?? bondData?.taxStatus ?? null,
+      isListed: dd?.isListed ?? bondData?.isListed ?? null,
+      couponType: dd?.couponType ?? bondData?.couponType ?? null,
+      categories: categoriesFromDd ?? bondData?.categories ?? [],
+      totalIssueSize: dd?.totalIssueSize ?? null,
+      putCallOptionDetails: dd?.putCallOptionDetails ?? null,
     };
 
     const usedReferenceMetadata = bond != null;
@@ -257,6 +351,7 @@ export class BondAutoUpdateAutofillService {
         usedProviderQuantity: false,
         usedProviderSettlementDate: false,
         usedDeriDataCalculator: true,
+        usedDeriDataIssueDetail,
         pricingMode: ctx.pricingMode,
         usedCalcBondApi: false,
       },

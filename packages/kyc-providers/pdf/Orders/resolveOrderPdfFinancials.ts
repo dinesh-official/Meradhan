@@ -125,8 +125,7 @@ export function resolveOrderPdfFinancials(params: {
       settleOrder?.modConsideration != null
         ? Number(settleOrder.modConsideration) + stampDutyAmount
         : null,
-      // DeriData settlement equals total consideration (no extra stamp add).
-      totalConsideration,
+      totalConsideration + stampDutyAmount,
     ) ?? 0;
 
   const accruedInterestDays = firstNum(

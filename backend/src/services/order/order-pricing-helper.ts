@@ -10,6 +10,9 @@ import {
     calculateYieldToPrice,
 } from "@services/deridata/deridata.calculator.client";
 import { AppError, HttpStatus } from "@utils/error/AppError";
+import { calculateStampDuty } from "./stamp-duty";
+
+export { calculateStampDuty } from "./stamp-duty";
 
 type BondSettlementResult = {
     dealDate: string;
@@ -221,12 +224,6 @@ function computeBondSettlement(
 /* =========================
    CALCULATIONS
 ========================= */
-
-export const calculateStampDuty = (principal: number) => {
-    const raw = principal * 0.000001;
-    const amount = (raw < 0.5 ? 0 : raw < 1.5 ? 1 : raw);
-    return Number(amount.toFixed());
-};
 
 const principalAmount = (faceValue: number, quantity: number, cleanPrice: number) => {
     return faceValue * quantity * (cleanPrice / 100);
@@ -521,8 +518,8 @@ export const computeBondOrderPricingData = async (
             });
         }
 
-        // Use DeriData summary fields as-is — do not add stamp duty or otherwise
-        // recompute settlement / consideration from principal + accrued.
+        // DeriData supplies TC / principal / accrued; stamp duty is computed locally
+        // and added to get settlement amount.
         const principalResolved = parseDeriDataMoney(liveCalc.summary.principal);
         const accruedInterestResolved = parseDeriDataMoney(
             liveCalc.summary.accrued_int_bottom,
@@ -550,6 +547,8 @@ export const computeBondOrderPricingData = async (
             );
         }
 
+        const stampDuty = calculateStampDuty(principalResolved);
+        const settlementAmount = totalConsiderationResolved + stampDuty;
         const recordDateYmd = parseDeriDataRecordDateYmd(liveCalc.record_date);
 
         return {
@@ -560,8 +559,8 @@ export const computeBondOrderPricingData = async (
             cleanPrice: cleanPriceResolved,
             principalAmount: principalResolved,
             accruedInterest: accruedInterestResolved,
-            stampDuty: 0,
-            settlementAmount: totalConsiderationResolved,
+            stampDuty,
+            settlementAmount,
             totalConsideration: totalConsiderationResolved,
             noOfAccrualDays: accrued.noOfAccrualDays,
             isUnderShutPeriod: Boolean(liveCalc.cashflow_shut_flag ?? cashflowShutFlag),

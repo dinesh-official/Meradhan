@@ -118,9 +118,11 @@ function ReviewOrder({
 
   const principalScaled = orderPricing?.principalAmount
   const accruedScaled = orderPricing?.accruedInterest || 0;
+  const stampScaled = orderPricing?.stampDuty ?? 0;
   const settlementAmount = orderPricing?.settlementAmount ?? 0
   const totalConsideration =
-    orderPricing?.totalConsideration ?? settlementAmount;
+    orderPricing?.totalConsideration ??
+    ((principalScaled ?? 0) + (accruedScaled ?? 0));
 
   return (
     <div className="container">
@@ -399,6 +401,12 @@ function ReviewOrder({
                         <span>Total Consideration</span>
                         <span className="font-medium">
                           Rs. {formatNumberTS(totalConsideration)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Stamp duty</span>
+                        <span className="font-medium">
+                          Rs. {formatNumberTS(stampScaled)}
                         </span>
                       </div>
                       <div className="flex justify-between ">

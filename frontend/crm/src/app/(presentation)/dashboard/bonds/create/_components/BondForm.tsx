@@ -518,6 +518,40 @@ function BondForm({ initialData, isin }: BondFormProps) {
     if (s.sellPrice != null && Number.isFinite(s.sellPrice)) {
       form.setValue("sellPrice", s.sellPrice);
     }
+    if (s.instrumentName?.trim()) {
+      form.setValue("instrumentName", s.instrumentName.trim());
+    }
+    if (s.description?.trim()) form.setValue("description", s.description.trim());
+    if (s.sectorName?.trim()) form.setValue("sectorName", s.sectorName.trim());
+    if (s.creditRatingInfo?.trim()) {
+      form.setValue("creditRatingInfo", s.creditRatingInfo.trim());
+    }
+    if (s.ratingAgencyName?.trim()) {
+      form.setValue("ratingAgencyName", s.ratingAgencyName.trim());
+    }
+    if (s.couponType != null) form.setValue("couponType", s.couponType);
+    if (s.bondType != null) {
+      form.setValue("bondType", s.bondType as BondFormData["bondType"]);
+    }
+    if (s.seniority != null) {
+      form.setValue("seniority", s.seniority as BondFormData["seniority"]);
+    }
+    if (s.redemptionType != null) form.setValue("redemptionType", s.redemptionType);
+    if (s.taxStatus != null) {
+      form.setValue("taxStatus", s.taxStatus as BondFormData["taxStatus"]);
+    }
+    if (s.isListed != null) {
+      form.setValue("isListed", s.isListed as BondFormData["isListed"]);
+    }
+    if (s.categories && s.categories.length > 0) {
+      form.setValue("categories", s.categories);
+    }
+    if (s.totalIssueSize != null && Number.isFinite(s.totalIssueSize)) {
+      form.setValue("totalIssueSize", s.totalIssueSize);
+    }
+    if (s.putCallOptionDetails?.trim()) {
+      form.setValue("putCallOptionDetails", s.putCallOptionDetails.trim());
+    }
     calcResultToast(data, "Filled:", s);
   };
 

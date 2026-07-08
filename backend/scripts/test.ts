@@ -1,1 +1,3 @@
-import { getBondInfoCalcData } from "@resource/bonds/fill-bonds-auto";
+import { calculateStampDuty } from "@services/order/order-pricing-helper";
+
+console.log(calculateStampDuty(500000));

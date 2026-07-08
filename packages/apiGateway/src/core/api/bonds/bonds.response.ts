@@ -147,7 +147,7 @@ export interface BondOrderPricingData {
   isUnderShutPeriod: boolean;
   recordDate: string;
   settlementAmount: number;
-  /** DeriData `total_consideration` (same as settlement when stamp duty is not added locally). */
+  /** DeriData `total_consideration` (before local stamp duty). */
   totalConsideration?: number;
   /** Indicative offered yield at checkout (from DeriData / live pricing). */
   yield?: number;
@@ -171,7 +171,12 @@ export interface BondCalcServiceSnapshot {
 
 export interface BondDealAutofillSuggestions {
   bondName?: string | null;
+  instrumentName?: string | null;
+  description?: string | null;
+  sectorName?: string | null;
   creditRating?: string | null;
+  creditRatingInfo?: string | null;
+  ratingAgencyName?: string | null;
   /** Coupon schedule as `YYYY-MM-DD` (IST calendar days). */
   allCouponDates?: string[];
   allCouponDatesIst?: string[];
@@ -208,6 +213,9 @@ export interface BondDealAutofillSuggestions {
   couponType?: string | null;
   /** Listing category slugs (e.g. ["tax-free", "banks"]) — controls MeraDhan bond listing filters. */
   categories?: string[];
+  /** Issue size in crores from DeriData Daily Data. */
+  totalIssueSize?: number | null;
+  putCallOptionDetails?: string | null;
 }
 
 export interface BondDealAutofillResponse {
@@ -220,6 +228,8 @@ export interface BondDealAutofillResponse {
     usedProviderPrice?: boolean;
     usedProviderQuantity?: boolean;
     usedProviderSettlementDate?: boolean;
+    usedDeriDataCalculator?: boolean;
+    usedDeriDataIssueDetail?: boolean;
     pricingMode?: "ytm" | "cleanPrice";
   };
   suggested: BondDealAutofillSuggestions;

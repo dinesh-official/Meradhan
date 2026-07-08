@@ -3,12 +3,19 @@ import {
   DEFAULT_DERIDATA_BASE_URL,
   faceAmountInCrores,
   getDeriDataConfig,
+  getDeriDataIssueDetailUrl,
 } from "./deridata.config";
 
 describe("deridata.config", () => {
   test("faceAmountInCrores converts face value and quantity to crores", () => {
     expect(faceAmountInCrores(10000, 1)).toBe(0.001);
     expect(faceAmountInCrores(100000, 10)).toBe(0.1);
+  });
+
+  test("getDeriDataIssueDetailUrl", () => {
+    expect(getDeriDataIssueDetailUrl("https://stage-dd.meradhan.co/prod")).toBe(
+      "https://stage-dd.meradhan.co/prod/api/public/merchant/v1/issue-detail/",
+    );
   });
 
   test("getDeriDataConfig uses default base URL when unset", () => {

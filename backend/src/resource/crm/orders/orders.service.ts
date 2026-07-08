@@ -159,7 +159,7 @@ function buildPdfFinancialFields(
     snap?.settlementAmount ??
     (settleOrder?.modConsideration != null
       ? Number(settleOrder.modConsideration) + stampDuty
-      : totalConsideration);
+      : totalConsideration + stampDuty);
 
   const settlePrice = numFromSnap(
     (settleOrder as { price?: unknown } | null | undefined)?.price,
