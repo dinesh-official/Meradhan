@@ -88,6 +88,98 @@ export type BondDealAutofillResponse = {
 };
 
 export class BondAutoUpdateAutofillService {
+  private buildStaticIssueDetailResponse(args: {
+    isin: string;
+    bond: Awaited<
+      ReturnType<typeof db.dataBase.bondReferenceMetadata.findFirst>
+    > | null;
+    couponRowsCount: number;
+    issueDetailMapped: NonNullable<
+      ReturnType<typeof mapDeriDataIssueDetailToBondFields>
+    >;
+    usedDeriDataIssueDetail: boolean;
+  }): BondDealAutofillResponse {
+    const { isin, bond, couponRowsCount, issueDetailMapped, usedDeriDataIssueDetail } =
+      args;
+    const suggested = {
+      bondName: issueDetailMapped.bondName,
+      instrumentName: issueDetailMapped.instrumentName,
+      description: issueDetailMapped.description,
+      sectorName: issueDetailMapped.sectorName,
+      creditRating: issueDetailMapped.creditRating ?? "UnRated",
+      creditRatingInfo: issueDetailMapped.creditRatingInfo,
+      ratingAgencyName: issueDetailMapped.ratingAgencyName,
+      allCouponDates: [],
+      allCouponDatesIst: [],
+      natureOfInstrument: issueDetailMapped.natureOfInstrument,
+      maturityDate: issueDetailMapped.maturityDate,
+      dateOfAllotment: issueDetailMapped.dateOfAllotment,
+      lastCouponDate: "",
+      nextCouponDate: "",
+      recordDate: null,
+      recordDays: issueDetailMapped.recordDays,
+      dueDate: null,
+      dayConvention: bond?.dayConvention ?? null,
+      interestPaymentFrequency:
+        paymentFrequencyToDbEnum(issueDetailMapped.interestPaymentFrequency) ||
+        "UNKNOWN",
+      interestPaymentMode:
+        paymentFrequencyToDbEnum(issueDetailMapped.interestPaymentMode) ||
+        "UNKNOWN",
+      faceValue:
+        issueDetailMapped.faceValue != null &&
+        Number.isFinite(issueDetailMapped.faceValue)
+          ? issueDetailMapped.faceValue
+          : 10000,
+      couponRate:
+        issueDetailMapped.couponRate != null &&
+        Number.isFinite(issueDetailMapped.couponRate)
+          ? issueDetailMapped.couponRate
+          : 0,
+      buyYield: null,
+      yield: 0,
+      sellPrice: null,
+      isUnderShutPeriod: false,
+      bondType: bond?.bondType ?? null,
+      seniority: issueDetailMapped.seniority,
+      redemptionType: issueDetailMapped.redemptionType,
+      taxStatus: issueDetailMapped.taxStatus,
+      isListed: issueDetailMapped.isListed,
+      couponType: issueDetailMapped.couponType,
+      categories: issueDetailMapped.categories,
+      totalIssueSize: issueDetailMapped.totalIssueSize,
+      putCallOptionDetails: issueDetailMapped.putCallOptionDetails,
+    };
+
+    return {
+      isin,
+      quantity: 1,
+      sources: {
+        usedReferenceMetadata: bond != null,
+        usedCouponSchedule: couponRowsCount > 0,
+        yieldSource: "override",
+        usedProviderPrice: false,
+        usedProviderQuantity: false,
+        usedProviderSettlementDate: false,
+        usedDeriDataCalculator: false,
+        usedDeriDataIssueDetail,
+        pricingMode: "ytm",
+        usedCalcBondApi: false,
+      },
+      suggested,
+      pricing: {
+        finalPrice: null,
+        finalYieldRaw: 0,
+        settlementAmount: null,
+        totalAccruedInterest: null,
+        principalAmount: null,
+        totalConsideration: null,
+        calc: {},
+      },
+      margin: {},
+    };
+  }
+
   async buildAutofill(
     isin: string,
     input: AutoUpdateAutofillInput = {},
@@ -96,12 +188,6 @@ export class BondAutoUpdateAutofillService {
       where: { isin },
     });
     const bondData = await db.dataBase.bonds.findFirst({ where: { isin } });
-
-    if (!bond && !bondData) {
-      throw new AppError(`Bond not found for ISIN ${isin}`, {
-        statusCode: HttpStatus.NOT_FOUND,
-      });
-    }
 
     const couponRows = await db.dataBase.bondReferenceCouponPaymentDate.findMany(
       {
@@ -129,13 +215,47 @@ export class BondAutoUpdateAutofillService {
       );
     }
 
-    const ctx = await buildAutofillCalcContext(
-      isin,
-      bond,
-      bondData,
-      couponRows,
-      resolved,
-    );
+    if (!bond && !bondData && !issueDetailMapped) {
+      throw new AppError(`Bond not found for ISIN ${isin}`, {
+        statusCode: HttpStatus.NOT_FOUND,
+      });
+    }
+
+    if (!bondData && issueDetailMapped) {
+      return this.buildStaticIssueDetailResponse({
+        isin,
+        bond,
+        couponRowsCount: couponRows.length,
+        issueDetailMapped,
+        usedDeriDataIssueDetail,
+      });
+    }
+
+    let ctx: Awaited<ReturnType<typeof buildAutofillCalcContext>>;
+    try {
+      ctx = await buildAutofillCalcContext(
+        isin,
+        bond,
+        bondData,
+        couponRows,
+        resolved,
+      );
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      if (
+        issueDetailMapped &&
+        /Missing coupon schedule for ISIN/i.test(message)
+      ) {
+        return this.buildStaticIssueDetailResponse({
+          isin,
+          bond,
+          couponRowsCount: couponRows.length,
+          issueDetailMapped,
+          usedDeriDataIssueDetail,
+        });
+      }
+      throw err;
+    }
 
     // Prefer Daily Data face / coupon when present so calculator sizing matches issue terms.
     if (

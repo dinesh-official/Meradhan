@@ -428,6 +428,10 @@ function BondForm({ initialData, isin }: BondFormProps) {
     prefix: string,
     s: BondDealAutofillResponse["suggested"],
   ) => {
+    if (!data.sources.usedDeriDataCalculator) {
+      toast.success(`${prefix} bond details loaded from Daily Data for ${data.isin}.`);
+      return;
+    }
     const sale =
       s.sellPrice != null
         ? `₹${s.sellPrice.toLocaleString("en-IN", { maximumFractionDigits: 4 })}`
@@ -566,7 +570,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
   const dealAutofillMutation = useMutation({
     mutationFn: async (opts?: { pricingYield?: number }) => {
       const res = await apiCaller.getBondDealAutofillCalc(
-        isin!,
+        (isin ?? form.getValues("isin") ?? "").trim(),
         buildDealAutofillParams({ pricingYield: opts?.pricingYield }),
       );
       return res.responseData;
@@ -633,6 +637,18 @@ function BondForm({ initialData, isin }: BondFormProps) {
     dealAutofillMutation.mutate({ pricingYield: py });
   };
 
+  const onFillByIsinClick = () => {
+    const typedIsin = String(form.getValues("isin") ?? "")
+      .trim()
+      .toUpperCase();
+    if (!typedIsin) {
+      toast.error("Enter an ISIN first.");
+      return;
+    }
+    form.setValue("isin", typedIsin);
+    dealAutofillMutation.mutate(undefined);
+  };
+
   const submitBuyYieldThenAutofill = () => {
     const raw = buyYieldDraft.trim().replace(/,/g, "");
     const n = parseFloat(raw);
@@ -689,11 +705,30 @@ function BondForm({ initialData, isin }: BondFormProps) {
                     <FormItem>
                       <FormLabel>ISIN *</FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Enter ISIN"
-                          disabled={isUpdateMode}
-                        />
+                        <div className="flex gap-2">
+                          <Input
+                            {...field}
+                            placeholder="Enter ISIN"
+                            disabled={isUpdateMode}
+                            onChange={(e) =>
+                              field.onChange(e.target.value.toUpperCase())
+                            }
+                          />
+                          {!isUpdateMode ? (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={onFillByIsinClick}
+                              disabled={dealAutofillBusy}
+                              className="shrink-0"
+                            >
+                              {dealAutofillBusy ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              ) : null}
+                              Fill with ISIN
+                            </Button>
+                          ) : null}
+                        </div>
                       </FormControl>
                       <FormDescription>
                         International Securities Identification Number
