@@ -1,5 +1,6 @@
 import type { CalcApiResponse } from "@resource/crm/bonds/bond_auto_update_autofill.calc";
 import type { ExternalCalcResponse } from "@resource/bonds/bond_clac";
+import { calculateStampDuty } from "@services/order/stamp-duty";
 import moment from "moment";
 import type {
   DeriDataCalcContext,
@@ -57,10 +58,18 @@ function buildLegacyCalcResponse(
   response: DeriDataCalculatorResponse,
   ctx: LegacyCalcBase,
 ): CalcApiResponse & ExternalCalcResponse {
-  // Pass DeriData summary through unchanged — do not add stamp duty or recompute amounts.
+  const principal = parseDeriDataMoney(response.summary.principal);
   const totalConsideration = parseDeriDataMoney(
     response.summary.total_consideration,
   );
+  const stampDuty =
+    principal != null && Number.isFinite(principal)
+      ? calculateStampDuty(principal)
+      : 0;
+  const settlementAmount =
+    totalConsideration != null && Number.isFinite(totalConsideration)
+      ? totalConsideration + stampDuty
+      : null;
 
   const finalYieldRaw =
     ctx.ytm != null && Number.isFinite(ctx.ytm)
@@ -81,8 +90,8 @@ function buildLegacyCalcResponse(
     quantity: String(ctx.quantity),
     running_total: response.summary.total_consideration ?? "0",
     settle_dt: ctx.settlementDateYmd,
-    settlement_amount: formatMoney(totalConsideration),
-    stamp_duty: "0",
+    settlement_amount: formatMoney(settlementAmount),
+    stamp_duty: String(stampDuty),
     total_ai: response.summary.accrued_int_bottom ?? "0",
     total_consideration: response.summary.total_consideration ?? "0",
   };

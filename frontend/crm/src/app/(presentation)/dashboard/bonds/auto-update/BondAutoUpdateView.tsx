@@ -27,7 +27,6 @@ import {
   DecimalInput,
 } from "@/components/ui/decimal-input";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Table,
   TableBody,
@@ -924,6 +923,18 @@ export default function BondAutoUpdateView() {
                           <Badge variant={model.autofill.sources.usedCouponSchedule ? "default" : "secondary"}>
                             Coupon schedule {model.autofill.sources.usedCouponSchedule ? "on" : "off"}
                           </Badge>
+                          <Badge
+                            variant={
+                              model.autofill.sources.usedDeriDataIssueDetail
+                                ? "default"
+                                : "secondary"
+                            }
+                          >
+                            Daily Data{" "}
+                            {model.autofill.sources.usedDeriDataIssueDetail
+                              ? "on"
+                              : "off"}
+                          </Badge>
                           {typeof model.autofill.suggested.isUnderShutPeriod === "boolean" ? (
                             <div
                               className="flex flex-wrap items-center gap-1.5"
@@ -1063,13 +1074,15 @@ export default function BondAutoUpdateView() {
                         ) : null}
 
                         <div className="rounded-md border overflow-x-auto">
-                          <Table>
+                          <Table className="table-fixed w-full min-w-[720px]">
                             <TableHeader>
                               <TableRow>
                                 <TableHead className="w-10">Use</TableHead>
-                                <TableHead>Field</TableHead>
-                                <TableHead>Current (saved)</TableHead>
-                                <TableHead className="min-w-[220px]">
+                                <TableHead className="w-[160px]">Field</TableHead>
+                                <TableHead className="w-[200px]">
+                                  Current (saved)
+                                </TableHead>
+                                <TableHead className="w-[220px]">
                                   New{canEditBonds ? " (editable)" : ""}
                                 </TableHead>
                               </TableRow>
@@ -1079,6 +1092,14 @@ export default function BondAutoUpdateView() {
                                 const curVal = model.formBase[key as keyof BondFormData];
                                 const draft = model.draft!;
                                 const sug = draft[key as keyof DraftSuggestions];
+                                const curDisplay =
+                                  key === "categories" && Array.isArray(curVal)
+                                    ? (curVal as string[]).join(", ") || "—"
+                                    : formatDisplayValue(curVal);
+                                const sugDisplay =
+                                  key === "categories" && Array.isArray(sug)
+                                    ? (sug as string[]).join(", ") || "—"
+                                    : formatDisplayValue(sug);
                                 const yieldSourceAffected =
                                   model.autofill!.sources.yieldSource !== "consolidated" &&
                                   YIELD_SOURCE_AFFECTED_KEYS.includes(key);
@@ -1113,26 +1134,42 @@ export default function BondAutoUpdateView() {
                                         ) : null}
                                       </span>
                                     </TableCell>
-                                    <TableCell
-                                      className={cn(
-                                        "text-muted-foreground text-sm max-w-[180px] break-all",
-                                        key === "allCouponDates" && "max-h-28 overflow-y-auto align-top",
-                                      )}
-                                    >
-                                      {key === "categories" && Array.isArray(curVal)
-                                        ? (curVal as string[]).join(", ") || "—"
-                                        : formatDisplayValue(curVal)}
+                                    <TableCell className="w-[200px] max-w-[200px] overflow-hidden text-muted-foreground text-sm">
+                                      <span
+                                        className="block max-w-full truncate whitespace-nowrap"
+                                        title={curDisplay}
+                                      >
+                                        {curDisplay}
+                                      </span>
                                     </TableCell>
-                                    <TableCell className="min-w-[220px] align-top">
+                                    <TableCell className="w-[220px] max-w-[220px] overflow-hidden align-middle">
                                       {!canEditBonds ? (
-                                        <span className="text-sm break-all">
-                                          {key === "categories" && Array.isArray(sug)
-                                            ? (sug as string[]).join(", ") || "—"
-                                            : formatDisplayValue(sug)}
+                                        <span
+                                          className="block max-w-full truncate whitespace-nowrap text-sm"
+                                          title={sugDisplay}
+                                        >
+                                          {sugDisplay}
                                         </span>
-                                      ) : key === "bondName" || key === "creditRating" ? (
+                                      ) : key === "bondName" ||
+                                        key === "creditRating" ||
+                                        key === "instrumentName" ||
+                                        key === "sectorName" ||
+                                        key === "ratingAgencyName" ? (
                                         <Input
-                                          className="h-9 text-sm"
+                                          className="h-9 w-full max-w-full text-sm truncate"
+                                          value={typeof sug === "string" ? sug : ""}
+                                          onChange={(e) =>
+                                            updateDraft(b.isin, {
+                                              [key]: e.target.value,
+                                            } as Partial<DraftSuggestions>)
+                                          }
+                                        />
+                                      ) : key === "description" ||
+                                        key === "creditRatingInfo" ||
+                                        key === "putCallOptionDetails" ? (
+                                        <Input
+                                          className="h-9 w-full max-w-full text-sm truncate"
+                                          title={typeof sug === "string" ? sug : undefined}
                                           value={typeof sug === "string" ? sug : ""}
                                           onChange={(e) =>
                                             updateDraft(b.isin, {
@@ -1142,7 +1179,7 @@ export default function BondAutoUpdateView() {
                                         />
                                       ) : key === "natureOfInstrument" ? (
                                         <Input
-                                          className="h-9 font-mono text-sm"
+                                          className="h-9 w-full max-w-full font-mono text-sm truncate"
                                           placeholder="SECURED | UNSECURED | UNKNOWN"
                                           value={typeof sug === "string" ? sug : ""}
                                           onChange={(e) =>
@@ -1152,13 +1189,17 @@ export default function BondAutoUpdateView() {
                                           }
                                         />
                                       ) : key === "allCouponDates" ? (
-                                        <Textarea
-                                          rows={4}
-                                          className="font-mono text-xs min-w-[220px] max-h-28 resize-none overflow-y-auto"
-                                          placeholder="YYYY-MM-DD per line"
+                                        <Input
+                                          className="h-9 w-full max-w-full font-mono text-xs truncate"
+                                          placeholder="YYYY-MM-DD, …"
+                                          title={
+                                            Array.isArray(sug)
+                                              ? sug.map(String).join(", ")
+                                              : undefined
+                                          }
                                           value={
                                             Array.isArray(sug)
-                                              ? sug.map(String).join("\n")
+                                              ? sug.map(String).join(", ")
                                               : ""
                                           }
                                           onChange={(e) => {
@@ -1174,7 +1215,7 @@ export default function BondAutoUpdateView() {
                                         />
                                       ) : key === "recordDays" ? (
                                         <DecimalInput
-                                          className="h-9 font-mono text-sm"
+                                          className="h-9 w-full max-w-full font-mono text-sm"
                                           value={
                                             sug == null
                                               ? undefined
@@ -1197,7 +1238,7 @@ export default function BondAutoUpdateView() {
                                         />
                                       ) : key === "couponRate" || key === "buyYield" ? (
                                         <DecimalInput
-                                          className="h-9 font-mono text-sm"
+                                          className="h-9 w-full max-w-full font-mono text-sm"
                                           value={
                                             sug == null
                                               ? undefined
@@ -1224,7 +1265,7 @@ export default function BondAutoUpdateView() {
                                               ? "Clean price from DeriData (read-only)."
                                               : "Yield from DeriData (read-only)."
                                           }
-                                          className="h-9 font-mono text-sm"
+                                          className="h-9 w-full max-w-full font-mono text-sm truncate"
                                           disabled
                                           value={
                                             sug == null
@@ -1243,9 +1284,9 @@ export default function BondAutoUpdateView() {
                                             /* read-only — DeriData calculated */
                                           }}
                                         />
-                                      ) : key === "faceValue" ? (
+                                      ) : key === "faceValue" || key === "totalIssueSize" ? (
                                         <DecimalInput
-                                          className="h-9 font-mono text-sm"
+                                          className="h-9 w-full max-w-full font-mono text-sm truncate"
                                           value={
                                             sug == null
                                               ? undefined
@@ -1269,7 +1310,7 @@ export default function BondAutoUpdateView() {
                                         key === "interestPaymentFrequency" ||
                                         key === "interestPaymentMode" ? (
                                         <Input
-                                          className="h-9 font-mono text-sm"
+                                          className="h-9 w-full max-w-full font-mono text-sm truncate"
                                           value={typeof sug === "string" ? sug : ""}
                                           onChange={(e) =>
                                             updateDraft(b.isin, {
@@ -1279,7 +1320,7 @@ export default function BondAutoUpdateView() {
                                         />
                                       ) : key === "bondType" ? (
                                         <Input
-                                          className="h-9 font-mono text-sm"
+                                          className="h-9 w-full max-w-full font-mono text-sm truncate"
                                           placeholder="GOVERNMENT | CORPORATE | TAX_FREE | PSU | OTHER"
                                           value={typeof sug === "string" ? sug : ""}
                                           onChange={(e) =>
@@ -1290,7 +1331,7 @@ export default function BondAutoUpdateView() {
                                         />
                                       ) : key === "seniority" ? (
                                         <Input
-                                          className="h-9 font-mono text-sm"
+                                          className="h-9 w-full max-w-full font-mono text-sm truncate"
                                           placeholder="SENIOR | TIER_2_SUBORDINATED | UNKNOWN"
                                           value={typeof sug === "string" ? sug : ""}
                                           onChange={(e) =>
@@ -1301,7 +1342,7 @@ export default function BondAutoUpdateView() {
                                         />
                                       ) : key === "redemptionType" ? (
                                         <Input
-                                          className="h-9 font-mono text-sm"
+                                          className="h-9 w-full max-w-full font-mono text-sm truncate"
                                           placeholder="e.g. BULLET, AMORTISING"
                                           value={typeof sug === "string" ? sug : ""}
                                           onChange={(e) =>
@@ -1312,7 +1353,7 @@ export default function BondAutoUpdateView() {
                                         />
                                       ) : key === "taxStatus" ? (
                                         <Input
-                                          className="h-9 font-mono text-sm"
+                                          className="h-9 w-full max-w-full font-mono text-sm truncate"
                                           placeholder="TAXABLE | TAX_FREE | TAX_SAVING | UNKNOWN"
                                           value={typeof sug === "string" ? sug : ""}
                                           onChange={(e) =>
@@ -1323,7 +1364,7 @@ export default function BondAutoUpdateView() {
                                         />
                                       ) : key === "isListed" ? (
                                         <Input
-                                          className="h-9 font-mono text-sm"
+                                          className="h-9 w-full max-w-full font-mono text-sm truncate"
                                           placeholder="YES | NO | UNKNOWN"
                                           value={typeof sug === "string" ? sug : ""}
                                           onChange={(e) =>
@@ -1334,7 +1375,7 @@ export default function BondAutoUpdateView() {
                                         />
                                       ) : key === "couponType" ? (
                                         <Input
-                                          className="h-9 font-mono text-sm"
+                                          className="h-9 w-full max-w-full font-mono text-sm truncate"
                                           placeholder="e.g. Fixed, Floating, Step-Up"
                                           value={typeof sug === "string" ? sug : ""}
                                           onChange={(e) =>
@@ -1344,14 +1385,16 @@ export default function BondAutoUpdateView() {
                                           }
                                         />
                                       ) : key === "categories" ? (
-                                        <div className="grid grid-cols-2 gap-x-6 gap-y-2 py-1 max-w-[300px]">
+                                        <div className="grid w-full max-w-full grid-cols-1 gap-y-1 overflow-hidden py-0.5">
                                           {BOND_LISTING_CATEGORY_OPTIONS.map((opt) => {
-                                            const current = Array.isArray(sug) ? (sug as string[]) : [];
+                                            const current = Array.isArray(sug)
+                                              ? (sug as string[])
+                                              : [];
                                             const checked = current.includes(opt.value);
                                             return (
                                               <label
                                                 key={opt.value}
-                                                className="flex items-center gap-1.5 text-sm font-normal cursor-pointer whitespace-nowrap"
+                                                className="flex min-w-0 items-center gap-1.5 text-xs font-normal cursor-pointer"
                                               >
                                                 <Checkbox
                                                   checked={checked}
@@ -1359,11 +1402,15 @@ export default function BondAutoUpdateView() {
                                                     const on = v === true;
                                                     const next = on
                                                       ? [...current, opt.value]
-                                                      : current.filter((c) => c !== opt.value);
-                                                    updateDraft(b.isin, { categories: next });
+                                                      : current.filter(
+                                                          (c) => c !== opt.value,
+                                                        );
+                                                    updateDraft(b.isin, {
+                                                      categories: next,
+                                                    });
                                                   }}
                                                 />
-                                                {opt.label}
+                                                <span className="truncate">{opt.label}</span>
                                               </label>
                                             );
                                           })}
@@ -1371,7 +1418,7 @@ export default function BondAutoUpdateView() {
                                       ) : (
                                         <Input
                                           type="date"
-                                          className="h-9 font-mono text-sm"
+                                          className="h-9 w-full max-w-full font-mono text-sm truncate"
                                           value={
                                             sug != null &&
                                               typeof sug === "string" &&

@@ -3,7 +3,12 @@ import { parseApiDateStringToLocalDate } from "../_utils/bondCalendarDates";
 import type { BondFormData } from "../_utils/bondDetailsToFormData";
 export const AUTOFILL_MERGE_KEYS = [
   "bondName",
+  "instrumentName",
+  "description",
+  "sectorName",
   "creditRating",
+  "creditRatingInfo",
+  "ratingAgencyName",
   "allCouponDates",
   "natureOfInstrument",
   "maturityDate",
@@ -26,6 +31,8 @@ export const AUTOFILL_MERGE_KEYS = [
   "taxStatus",
   "isListed",
   "categories",
+  "totalIssueSize",
+  "putCallOptionDetails",
 ] as const;
 
 export type AutofillMergeKey = (typeof AUTOFILL_MERGE_KEYS)[number];
@@ -61,8 +68,23 @@ export function mergeAutofillIntoForm(
   if (include.bondName && suggested.bondName?.trim()) {
     out.bondName = suggested.bondName.trim();
   }
+  if (include.instrumentName && suggested.instrumentName?.trim()) {
+    out.instrumentName = suggested.instrumentName.trim();
+  }
+  if (include.description && suggested.description?.trim()) {
+    out.description = suggested.description.trim();
+  }
+  if (include.sectorName && suggested.sectorName?.trim()) {
+    out.sectorName = suggested.sectorName.trim();
+  }
   if (include.creditRating && suggested.creditRating?.trim()) {
     out.creditRating = suggested.creditRating.trim();
+  }
+  if (include.creditRatingInfo && suggested.creditRatingInfo?.trim()) {
+    out.creditRatingInfo = suggested.creditRatingInfo.trim();
+  }
+  if (include.ratingAgencyName && suggested.ratingAgencyName?.trim()) {
+    out.ratingAgencyName = suggested.ratingAgencyName.trim();
   }
   if (include.allCouponDates) {
     const dates = ymdListToDates(
@@ -143,6 +165,16 @@ export function mergeAutofillIntoForm(
   // array would silently clear all listing filters, which is never the intent.
   if (include.categories && suggested.categories && suggested.categories.length > 0) {
     out.categories = suggested.categories;
+  }
+  if (
+    include.totalIssueSize &&
+    suggested.totalIssueSize != null &&
+    Number.isFinite(suggested.totalIssueSize)
+  ) {
+    out.totalIssueSize = suggested.totalIssueSize;
+  }
+  if (include.putCallOptionDetails && suggested.putCallOptionDetails?.trim()) {
+    out.putCallOptionDetails = suggested.putCallOptionDetails.trim();
   }
 
   return out;

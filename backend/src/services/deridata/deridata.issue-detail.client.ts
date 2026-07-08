@@ -1,19 +1,14 @@
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import { buildDeriDataAuth } from "./deridata.auth";
 import {
-  faceAmountInCrores,
-  getDeriDataCalculatorUrl,
   getDeriDataConfig,
+  getDeriDataIssueDetailUrl,
 } from "./deridata.config";
-import type {
-  DeriDataCalculatorResponse,
-  PriceToYieldInput,
-  YieldToPriceInput,
-} from "./deridata.types";
+import type { DeriDataIssueDetailResponse } from "./deridata.types";
 
 function parseDeriDataErrorBody(text: string): string {
   const trimmed = text.trim();
-  if (!trimmed) return "DeriData calculator request failed";
+  if (!trimmed) return "DeriData issue-detail request failed";
   try {
     const parsed = JSON.parse(trimmed) as {
       error?: string;
@@ -31,9 +26,21 @@ function parseDeriDataErrorBody(text: string): string {
   }
 }
 
-async function postCalculator(
-  body: Record<string, unknown>,
-): Promise<DeriDataCalculatorResponse> {
+/**
+ * Fetch bond master / issue terms for an ISIN from DeriData Daily Data.
+ * Auth matches Merchant API V3.1 (uuid + checksum), same as calculator.
+ */
+export async function fetchIssueDetail(
+  isin: string,
+): Promise<DeriDataIssueDetailResponse> {
+  const normalized = isin.trim().toUpperCase();
+  if (!normalized) {
+    throw new AppError("ISIN is required for DeriData issue-detail", {
+      statusCode: HttpStatus.BAD_REQUEST,
+      code: "DERIDATA_ISSUE_DETAIL_INVALID",
+    });
+  }
+
   const config = getDeriDataConfig();
   const auth = buildDeriDataAuth({
     merchantId: config.merchantId,
@@ -42,13 +49,13 @@ async function postCalculator(
     merchantEmail: config.merchantEmail,
     publicIp: config.publicIp,
   });
-  const url = getDeriDataCalculatorUrl(config.baseUrl);
+  const url = getDeriDataIssueDetailUrl(config.baseUrl);
 
   const payload = {
     merchant_id: config.merchantId,
     uuid: auth.uuid,
     checksum: auth.checksum,
-    ...body,
+    isin: normalized,
   };
 
   const res = await fetch(url, {
@@ -69,49 +76,23 @@ async function postCalculator(
         : res.status >= 500
           ? HttpStatus.BAD_GATEWAY
           : HttpStatus.BAD_REQUEST;
-    throw new AppError(`DeriData calculator failed: ${message}`, {
+    throw new AppError(`DeriData issue-detail failed: ${message}`, {
       statusCode,
-      code: "DERIDATA_CALC_FAILED",
+      code: "DERIDATA_ISSUE_DETAIL_FAILED",
     });
   }
 
-  return (await res.json()) as DeriDataCalculatorResponse;
+  return (await res.json()) as DeriDataIssueDetailResponse;
 }
 
-export async function calculateYieldToPrice(
-  input: YieldToPriceInput,
-): Promise<DeriDataCalculatorResponse> {
-  const amount = faceAmountInCrores(input.faceValue, input.quantity);
-  return postCalculator({
-    isin: input.isin,
-    value_date: input.valueDate,
-    amount,
-    yield_to_price: true,
-    selected_yield: "ytm",
-    ytm: input.ytm,
-    ytc: null,
-    ytp: null,
-    clean_price: null,
-    cashflow_shut_flag: input.cashflowShutFlag,
-    type_field: "cashflow",
-  });
-}
-
-export async function calculatePriceToYield(
-  input: PriceToYieldInput,
-): Promise<DeriDataCalculatorResponse> {
-  const amount = faceAmountInCrores(input.faceValue, input.quantity);
-  return postCalculator({
-    isin: input.isin,
-    value_date: input.valueDate,
-    amount,
-    yield_to_price: false,
-    selected_yield: "ytm",
-    ytm: null,
-    ytc: null,
-    ytp: null,
-    clean_price: input.cleanPrice,
-    cashflow_shut_flag: input.cashflowShutFlag,
-    type_field: "cashflow",
-  });
+export async function fetchIssueDetailItem(isin: string) {
+  const response = await fetchIssueDetail(isin);
+  const item = response.data?.[0];
+  if (!item) {
+    throw new AppError(`No DeriData issue-detail found for ISIN ${isin}`, {
+      statusCode: HttpStatus.NOT_FOUND,
+      code: "DERIDATA_ISSUE_DETAIL_NOT_FOUND",
+    });
+  }
+  return { item, response };
 }

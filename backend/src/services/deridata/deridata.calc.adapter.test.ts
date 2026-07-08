@@ -56,6 +56,7 @@ describe("deridata.calc.adapter", () => {
     expect(mapped.accrued_days).toBe(12);
     expect(mapped.period_status).toBe("Shut Period");
     expect(mapped.cf_count).toBe(1);
+    expect(mapped.stamp_duty).toBe("0");
     expect(parseDeriDataMoney(mapped.settlement_amount)).toBe(9941.75);
   });
 });
