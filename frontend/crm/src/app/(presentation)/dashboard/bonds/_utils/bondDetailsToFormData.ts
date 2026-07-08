@@ -100,26 +100,6 @@ export function bondDetailsResponseToFormData(
       ? parseApiDateStringToLocalDate(String(initialData.recordDate))
       : undefined,
     recordDays: num(initialData.recordDays, 0),
-    accruedInterestDays:
-      initialData.accruedInterestDays != null
-        ? num(initialData.accruedInterestDays)
-        : undefined,
-    accruedInterest:
-      initialData.accruedInterest != null
-        ? num(initialData.accruedInterest)
-        : undefined,
-    settlementAmount:
-      initialData.settlementAmount != null
-        ? num(initialData.settlementAmount)
-        : undefined,
-    principalAmount:
-      initialData.principalAmount != null
-        ? num(initialData.principalAmount)
-        : undefined,
-    totalConsideration:
-      initialData.totalConsideration != null
-        ? num(initialData.totalConsideration)
-        : undefined,
     imDocumentLink: initialData.imDocumentLink || undefined,
     exchangeListedOn:
       (initialData.exchangeListedOn as BondFormData["exchangeListedOn"]) || undefined,

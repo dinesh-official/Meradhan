@@ -14,6 +14,7 @@ interface OrderPdfOrderData {
   totalAmount?: number;
   createdAt?: string;
   price?: number;
+  bondDetails?: { pricing?: Record<string, unknown> } | null;
   metadata?: {
     rfqNumber?: string;
     dealId?: string;

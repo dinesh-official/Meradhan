@@ -12,6 +12,11 @@ dotenv.config({
   path: path.resolve(__dirname, "../../../", ".env"),
   debug: false,
 });
+// Local backend overrides (e.g. DERIDATA_* in backend/.env)
+dotenv.config({
+  path: path.resolve(__dirname, "../../../backend/.env"),
+  debug: false,
+});
 const EnvSchema = z.object(
   {
     // BASE

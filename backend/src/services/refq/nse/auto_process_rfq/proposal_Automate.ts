@@ -421,7 +421,9 @@ const createOrderFromProposal = async (data: PRPOSALDATA): Promise<{
         await resolveClientUccCode(data);
 
     const settlementType: 0 | 1 = data.settlementType === "T+0" ? 0 : 1;
-    const yieldValue = data.manualYieldEnabled ? parseFloat(data.manualYield) : bond.yield;
+    const yieldValue = data.manualYieldEnabled
+        ? parseFloat(data.manualYield)
+        : pricing.yield;
 
     const tempOrderNumber = `MD-ASSIST-TEMP-${crypto.randomUUID().replace(/-/g, "").slice(0, 24)}`;
 

@@ -3,7 +3,12 @@ import { parseApiDateStringToLocalDate } from "../_utils/bondCalendarDates";
 import type { BondFormData } from "../_utils/bondDetailsToFormData";
 export const AUTOFILL_MERGE_KEYS = [
   "bondName",
+  "instrumentName",
+  "description",
+  "sectorName",
   "creditRating",
+  "creditRatingInfo",
+  "ratingAgencyName",
   "allCouponDates",
   "natureOfInstrument",
   "maturityDate",
@@ -12,18 +17,12 @@ export const AUTOFILL_MERGE_KEYS = [
   "nextCouponDate",
   "recordDate",
   "recordDays",
-  "accruedInterestDays",
-  "accruedInterest",
-  "settlementAmount",
-  "principalAmount",
-  "totalConsideration",
   "dayConvention",
   "interestPaymentFrequency",
   "interestPaymentMode",
   "faceValue",
   "couponType",
   "couponRate",
-  "buyYield",
   "yield",
   "sellPrice",
   "bondType",
@@ -32,6 +31,8 @@ export const AUTOFILL_MERGE_KEYS = [
   "taxStatus",
   "isListed",
   "categories",
+  "totalIssueSize",
+  "putCallOptionDetails",
 ] as const;
 
 export type AutofillMergeKey = (typeof AUTOFILL_MERGE_KEYS)[number];
@@ -67,8 +68,23 @@ export function mergeAutofillIntoForm(
   if (include.bondName && suggested.bondName?.trim()) {
     out.bondName = suggested.bondName.trim();
   }
+  if (include.instrumentName && suggested.instrumentName?.trim()) {
+    out.instrumentName = suggested.instrumentName.trim();
+  }
+  if (include.description && suggested.description?.trim()) {
+    out.description = suggested.description.trim();
+  }
+  if (include.sectorName && suggested.sectorName?.trim()) {
+    out.sectorName = suggested.sectorName.trim();
+  }
   if (include.creditRating && suggested.creditRating?.trim()) {
     out.creditRating = suggested.creditRating.trim();
+  }
+  if (include.creditRatingInfo && suggested.creditRatingInfo?.trim()) {
+    out.creditRatingInfo = suggested.creditRatingInfo.trim();
+  }
+  if (include.ratingAgencyName && suggested.ratingAgencyName?.trim()) {
+    out.ratingAgencyName = suggested.ratingAgencyName.trim();
   }
   if (include.allCouponDates) {
     const dates = ymdListToDates(
@@ -104,41 +120,6 @@ export function mergeAutofillIntoForm(
   if (include.recordDays && suggested.recordDays != null && Number.isFinite(suggested.recordDays)) {
     out.recordDays = Math.round(suggested.recordDays);
   }
-  if (
-    include.accruedInterestDays &&
-    suggested.accruedInterestDays != null &&
-    Number.isFinite(suggested.accruedInterestDays)
-  ) {
-    out.accruedInterestDays = Math.round(suggested.accruedInterestDays);
-  }
-  if (
-    include.accruedInterest &&
-    suggested.accruedInterest != null &&
-    Number.isFinite(suggested.accruedInterest)
-  ) {
-    out.accruedInterest = suggested.accruedInterest;
-  }
-  if (
-    include.settlementAmount &&
-    suggested.settlementAmount != null &&
-    Number.isFinite(suggested.settlementAmount)
-  ) {
-    out.settlementAmount = suggested.settlementAmount;
-  }
-  if (
-    include.principalAmount &&
-    suggested.principalAmount != null &&
-    Number.isFinite(suggested.principalAmount)
-  ) {
-    out.principalAmount = suggested.principalAmount;
-  }
-  if (
-    include.totalConsideration &&
-    suggested.totalConsideration != null &&
-    Number.isFinite(suggested.totalConsideration)
-  ) {
-    out.totalConsideration = suggested.totalConsideration;
-  }
   if (include.dayConvention && suggested.dayConvention != null) {
     out.dayConvention = suggested.dayConvention;
   }
@@ -158,9 +139,6 @@ export function mergeAutofillIntoForm(
   }
   if (include.couponRate && Number.isFinite(suggested.couponRate)) {
     out.couponRate = suggested.couponRate;
-  }
-  if (include.buyYield && suggested.buyYield != null && Number.isFinite(suggested.buyYield)) {
-    out.buyYield = suggested.buyYield;
   }
   if (include.yield && Number.isFinite(suggested.yield)) {
     out.yield = suggested.yield;
@@ -187,6 +165,16 @@ export function mergeAutofillIntoForm(
   // array would silently clear all listing filters, which is never the intent.
   if (include.categories && suggested.categories && suggested.categories.length > 0) {
     out.categories = suggested.categories;
+  }
+  if (
+    include.totalIssueSize &&
+    suggested.totalIssueSize != null &&
+    Number.isFinite(suggested.totalIssueSize)
+  ) {
+    out.totalIssueSize = suggested.totalIssueSize;
+  }
+  if (include.putCallOptionDetails && suggested.putCallOptionDetails?.trim()) {
+    out.putCallOptionDetails = suggested.putCallOptionDetails.trim();
   }
 
   return out;

@@ -144,16 +144,6 @@ export const bondCreateUpdateSchema = z.object({
   recordDays: z
     .number({ error: () => "Record days is required" })
     .int("Record days must be a whole number"),
-  accruedInterestDays: z
-    .number()
-    .int("Accrued interest days must be a whole number")
-    .optional()
-    .nullable(),
-  /** Shut-period calc can return negative accrued interest / days. */
-  accruedInterest: z.number().optional().nullable(),
-  settlementAmount: z.number().optional().nullable(),
-  principalAmount: z.number().optional().nullable(),
-  totalConsideration: z.number().optional().nullable(),
   imDocumentLink: z.string().trim().optional().nullable(),
   exchangeListedOn: STOCK_EXCHANGE_ENUM.optional().nullable(),
   lastCouponDate: z.coerce.date().optional().nullable(),

@@ -8,6 +8,8 @@ export type BondAutoUpdateAutofillParams = {
   quantity?: number;
   settlementDate?: string;
   pricingYield?: number;
+  cleanPrice?: number;
+  pricingMode?: "ytm" | "cleanPrice";
 };
 
 export class CrmBondAutoUpdateApi {
@@ -24,11 +26,15 @@ export class CrmBondAutoUpdateApi {
     const safeIsin = encodeURIComponent(isin);
     const body = {
       quantity: params?.quantity ?? 1,
+      ...(params?.pricingMode != null ? { pricingMode: params.pricingMode } : {}),
       ...(params?.settlementDate != null && params.settlementDate !== ""
         ? { settlementDate: params.settlementDate }
         : {}),
       ...(params?.pricingYield != null && Number.isFinite(params.pricingYield)
         ? { pricingYield: params.pricingYield }
+        : {}),
+      ...(params?.cleanPrice != null && Number.isFinite(params.cleanPrice)
+        ? { cleanPrice: params.cleanPrice }
         : {}),
     };
     const response = await this.apiClient.post<BondDealAutofillApiResponse>(
