@@ -54,11 +54,6 @@ export interface BondDetailsResponse {
   dayConvention?: string | null
   recordDate?: string | null
   recordDays?: number | null
-  accruedInterestDays?: number | null
-  accruedInterest?: number | null
-  settlementAmount?: number | null
-  principalAmount?: number | null
-  totalConsideration?: number | null
   imDocumentLink?: string | null
   exchangeListedOn?: string | null
   lastCouponDate?: string | null
@@ -152,13 +147,15 @@ export interface BondOrderPricingData {
   isUnderShutPeriod: boolean;
   recordDate: string;
   settlementAmount: number;
-  /** Indicative offered yield at checkout (listing `yield` only). */
+  /** DeriData `total_consideration` (before local stamp duty). */
+  totalConsideration?: number;
+  /** Indicative offered yield at checkout (from DeriData / live pricing). */
   yield?: number;
 }
 
 export type BondOrderPricingResponse = BaseResponseData<BondOrderPricingData>;
 
-/** Snapshot from calc.meradhan.co (fields used by CRM bond autofill). */
+/** Snapshot from DeriData calculator (fields used by CRM bond autofill). */
 export interface BondCalcServiceSnapshot {
   accrued_days: number;
   final_price: string;
@@ -174,7 +171,12 @@ export interface BondCalcServiceSnapshot {
 
 export interface BondDealAutofillSuggestions {
   bondName?: string | null;
+  instrumentName?: string | null;
+  description?: string | null;
+  sectorName?: string | null;
   creditRating?: string | null;
+  creditRatingInfo?: string | null;
+  ratingAgencyName?: string | null;
   /** Coupon schedule as `YYYY-MM-DD` (IST calendar days). */
   allCouponDates?: string[];
   allCouponDatesIst?: string[];
@@ -185,16 +187,6 @@ export interface BondDealAutofillSuggestions {
   nextCouponDate: string;
   recordDate: string | null;
   recordDays: number | null;
-  /** Accrued-interest day count from calc API (`accrued_days`). */
-  accruedInterestDays?: number | null;
-  /** Accrued interest amount (₹) per unit at qty=1 from calc API (`total_ai`). */
-  accruedInterest?: number | null;
-  /** Settlement amount (₹) per unit at qty=1 from calc API (`settlement_amount`). */
-  settlementAmount?: number | null;
-  /** Principal amount (₹) per unit at qty=1 from calc API (`principal_amount`). */
-  principalAmount?: number | null;
-  /** Total consideration w/o stamp (₹) per unit at qty=1 from calc API (`total_consideration`). */
-  totalConsideration?: number | null;
   /** Reference coupon-payment `dueDate` (YYYY-MM-DD) */
   dueDate: string | null;
   dayConvention: string | null;
@@ -221,6 +213,9 @@ export interface BondDealAutofillSuggestions {
   couponType?: string | null;
   /** Listing category slugs (e.g. ["tax-free", "banks"]) — controls MeraDhan bond listing filters. */
   categories?: string[];
+  /** Issue size in crores from DeriData Daily Data. */
+  totalIssueSize?: number | null;
+  putCallOptionDetails?: string | null;
 }
 
 export interface BondDealAutofillResponse {
@@ -233,6 +228,9 @@ export interface BondDealAutofillResponse {
     usedProviderPrice?: boolean;
     usedProviderQuantity?: boolean;
     usedProviderSettlementDate?: boolean;
+    usedDeriDataCalculator?: boolean;
+    usedDeriDataIssueDetail?: boolean;
+    pricingMode?: "ytm" | "cleanPrice";
   };
   suggested: BondDealAutofillSuggestions;
   pricing: {

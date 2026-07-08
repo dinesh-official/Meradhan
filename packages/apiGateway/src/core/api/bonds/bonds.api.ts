@@ -102,7 +102,7 @@ export class BondsApi {
   }
 
   /**
-   * CRM: auto-fill bond update form fields + sale price from DB, margin rules, and calc.meradhan.co.
+   * CRM: auto-fill bond update form fields + sale price from DB, margin rules, and DeriData calculator.
    * When `pricingYield` is set, uses POST with a JSON body (no query-string `pricingYield` param).
    */
   public async getBondDealAutofill(

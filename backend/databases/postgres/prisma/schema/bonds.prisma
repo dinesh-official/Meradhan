@@ -86,21 +86,6 @@ model Bonds {
     /// Business days before record date for shut period (e.g. 7, 15, 20)
     recordDays Int?
 
-    /// Accrued-interest day count from calc API (`accrued_days`) at last autofill save
-    accruedInterestDays Int?
-
-    /// Accrued interest amount (₹) per unit at qty=1 from calc API (`total_ai`) at last autofill save
-    accruedInterest Float?
-
-    /// Settlement amount (₹) per unit at qty=1 from calc API (`settlement_amount`) at last autofill save
-    settlementAmount Float?
-
-    /// Principal amount (₹) per unit at qty=1 from calc API (`principal_amount`) at last autofill save
-    principalAmount Float?
-
-    /// Total consideration w/o stamp (₹) per unit at qty=1 from calc API (`total_consideration`) at last autofill save
-    totalConsideration Float?
-
     imDocumentLink String?
 
     /// Issuer/bond logo URL for listings and detail pages

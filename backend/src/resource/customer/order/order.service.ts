@@ -99,22 +99,20 @@ export class OrderService {
       });
     }
 
-    console.log(bondDetails?.sellPrice);
-
     return {
-      subTotal: bond.ok ? bond.pricing.principalAmount : 0,
-      stampDuty: bond.ok ? bond.pricing.stampDuty : 0,
-      totalAmount: bond.ok ? bond.pricing.settlementAmount : 0,
+      subTotal: bond.pricing.principalAmount,
+      stampDuty: bond.pricing.stampDuty,
+      totalAmount: bond.pricing.settlementAmount,
       isin: item.isin,
       bondName: bondDetails?.bondName ?? "",
       quantity: item.quantity,
-      unitPrice: bondDetails?.sellPrice ?? 0,
+      unitPrice: bond.pricing.cleanPrice,
       faceValue: bondDetails?.faceValue ?? 0,
       bondDetails: bondDetails,
-      yield: bondDetails?.yield ?? 0,
+      yield: bond.pricing.yield ?? 0,
       couponRate: bondDetails?.couponRate ?? 0,
       interestPaymentFrequency: bondDetails?.interestPaymentFrequency ?? "",
-      pricing: bond.ok ? bond.pricing : null,
+      pricing: bond.pricing,
     };
   }
 

@@ -312,6 +312,48 @@ function OrderDetailsView() {
     );
   }
 
+  // Bond order pricing snapshot captured at checkout (`bondDetails.pricing`).
+  const orderPricing = (order.bondDetails as Record<string, unknown> | undefined)
+    ?.pricing as Record<string, unknown> | undefined;
+
+  const pricingNumber = (key: string): number | undefined => {
+    const v = orderPricing?.[key];
+    if (v == null) return undefined;
+    const n = typeof v === "number" ? v : Number(v);
+    return Number.isFinite(n) ? n : undefined;
+  };
+
+  const formatInrAmount = (n: number | undefined | null): string =>
+    n == null || !Number.isFinite(n)
+      ? "—"
+      : `₹${n.toLocaleString("en-IN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`;
+
+  const cleanPriceValue = pricingNumber("cleanPrice");
+  const principalAmountValue = pricingNumber("principalAmount");
+  const accruedInterestValue = pricingNumber("accruedInterest");
+  const totalConsiderationValue = pricingNumber("totalConsideration");
+  const pricingStampDutyValue = pricingNumber("stampDuty");
+  const accrualDaysValue = pricingNumber("noOfAccrualDays");
+  const settlementAmountValue = pricingNumber("settlementAmount");
+
+  const hasPricingSnapshot =
+    orderPricing != null &&
+    [
+      cleanPriceValue,
+      principalAmountValue,
+      accruedInterestValue,
+      totalConsiderationValue,
+      settlementAmountValue,
+    ].some((v) => v != null);
+
+  const stampDutyDisplay =
+    pricingStampDutyValue ?? parseFloat(order.stampDuty);
+  const settlementTotalDisplay =
+    settlementAmountValue ?? parseFloat(order.totalAmount);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -378,19 +420,19 @@ function OrderDetailsView() {
             {(order.paymentProvider === "CUSTOM" ||
               (order.paymentProvider === "RAZORPAY" &&
                 order.paymentStatus === "COMPLETED")) && (
-              <Button
-                variant="outline"
-                onClick={() => verifySettlementMutation.mutate()}
-                disabled={verifySettlementMutation.isPending}
-              >
-                {verifySettlementMutation.isPending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                )}
-                Verify Settlement
-              </Button>
-            )}
+                <Button
+                  variant="outline"
+                  onClick={() => verifySettlementMutation.mutate()}
+                  disabled={verifySettlementMutation.isPending}
+                >
+                  {verifySettlementMutation.isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                  )}
+                  Verify Settlement
+                </Button>
+              )}
           </AllowOnlyView>
           <OrderStatusBadge status={order.status} paymentStatus={order.paymentStatus} />
           <Badge variant="outline">{order.paymentStatus}</Badge>
@@ -412,27 +454,25 @@ function OrderDetailsView() {
         <DialogContent className="sm:max-w-md shadow-none border border-slate-200 p-0 overflow-hidden gap-0">
           {/* Colored banner reflecting the outcome */}
           <div
-            className={`px-6 py-4 border-b ${
-              !verifyResult?.ok
+            className={`px-6 py-4 border-b ${!verifyResult?.ok
                 ? "bg-rose-50 border-rose-100"
                 : verifyResult?.applied
                   ? "bg-emerald-50 border-emerald-100"
                   : verifyResult?.willChange
                     ? "bg-blue-50 border-blue-100"
                     : "bg-amber-50 border-amber-100"
-            }`}
+              }`}
           >
             <DialogHeader className="space-y-1">
               <DialogTitle
-                className={`flex items-center gap-2 text-base ${
-                  !verifyResult?.ok
+                className={`flex items-center gap-2 text-base ${!verifyResult?.ok
                     ? "text-rose-700"
                     : verifyResult?.applied
                       ? "text-emerald-700"
                       : verifyResult?.willChange
                         ? "text-blue-700"
                         : "text-amber-700"
-                }`}
+                  }`}
               >
                 {!verifyResult?.ok ? (
                   <XCircle className="h-5 w-5" />
@@ -527,13 +567,12 @@ function OrderDetailsView() {
                 <dt className="text-muted-foreground">Database</dt>
                 <dd className="text-right">
                   <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                      verifyResult.applied
+                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${verifyResult.applied
                         ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200"
                         : verifyResult.willChange
                           ? "bg-blue-100 text-blue-700 ring-1 ring-blue-200"
                           : "bg-slate-100 text-slate-600 ring-1 ring-slate-200"
-                    }`}
+                      }`}
                   >
                     {verifyResult.applied
                       ? "Updated"
@@ -574,27 +613,25 @@ function OrderDetailsView() {
       <Dialog open={settleDialogOpen} onOpenChange={setSettleDialogOpen}>
         <DialogContent className="sm:max-w-md shadow-none border border-slate-200 p-0 overflow-hidden gap-0">
           <div
-            className={`px-6 py-4 border-b ${
-              !settleResult?.ok
+            className={`px-6 py-4 border-b ${!settleResult?.ok
                 ? "bg-rose-50 border-rose-100"
                 : settleResult?.applied
                   ? "bg-emerald-50 border-emerald-100"
                   : settleResult?.willChange
                     ? "bg-blue-50 border-blue-100"
                     : "bg-amber-50 border-amber-100"
-            }`}
+              }`}
           >
             <DialogHeader className="space-y-1">
               <DialogTitle
-                className={`flex items-center gap-2 text-base ${
-                  !settleResult?.ok
+                className={`flex items-center gap-2 text-base ${!settleResult?.ok
                     ? "text-rose-700"
                     : settleResult?.applied
                       ? "text-emerald-700"
                       : settleResult?.willChange
                         ? "text-blue-700"
                         : "text-amber-700"
-                }`}
+                  }`}
               >
                 {!settleResult?.ok ? (
                   <XCircle className="h-5 w-5" />
@@ -679,13 +716,12 @@ function OrderDetailsView() {
                 <dt className="text-muted-foreground">Database</dt>
                 <dd className="text-right">
                   <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                      settleResult.applied
+                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${settleResult.applied
                         ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200"
                         : settleResult.willChange
                           ? "bg-blue-100 text-blue-700 ring-1 ring-blue-200"
                           : "bg-slate-100 text-slate-600 ring-1 ring-slate-200"
-                    }`}
+                      }`}
                   >
                     {settleResult.applied
                       ? "Updated"
@@ -849,7 +885,7 @@ function OrderDetailsView() {
                 <div>
                   <p className="text-sm text-muted-foreground">Unit Price</p>
                   <p className="font-medium">
-                    ₹{parseFloat(order.unitPrice).toLocaleString("en-IN")}
+                    ₹{(order.unitPrice)}
                   </p>
                 </div>
               </div>
@@ -1704,25 +1740,100 @@ function OrderDetailsView() {
               <CardTitle>Financial Summary</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Subtotal</span>
-                <span className="font-medium">
-                  ₹{parseFloat(order.subTotal).toLocaleString("en-IN")}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Stamp Duty</span>
-                <span className="font-medium">
-                  ₹{parseFloat(order.stampDuty).toLocaleString("en-IN")}
-                </span>
-              </div>
-              <Separator />
-              <div className="flex justify-between text-lg font-bold">
-                <span>Total Amount</span>
-                <span>
-                  ₹{parseFloat(order.totalAmount).toLocaleString("en-IN")}
-                </span>
-              </div>
+              {hasPricingSnapshot ? (
+                <>
+                  {cleanPriceValue != null && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Clean Price</span>
+                      <span className="font-medium">
+                        {cleanPriceValue.toLocaleString("en-IN", {
+                          minimumFractionDigits: 4,
+                          maximumFractionDigits: 4,
+                        })}
+                      </span>
+                    </div>
+                  )}
+                  {principalAmountValue != null && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        Principal Amount
+                      </span>
+                      <span className="font-medium">
+                        {formatInrAmount(principalAmountValue)}
+                      </span>
+                    </div>
+                  )}
+                  {accruedInterestValue != null && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        Accrued interest
+                      </span>
+                      <span className="font-medium">
+                        {formatInrAmount(accruedInterestValue)}
+                      </span>
+                    </div>
+                  )}
+                  {totalConsiderationValue != null && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        Total Consideration w/o Stamp Duty
+                      </span>
+                      <span className="font-medium">
+                        {formatInrAmount(totalConsiderationValue)}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Stamp duty</span>
+                    <span className="font-medium">
+                      {formatInrAmount(stampDutyDisplay)}
+                    </span>
+                  </div>
+                  {accrualDaysValue != null && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        Accrued Interest Days
+                      </span>
+                      <span className="font-medium">
+                        {accrualDaysValue.toLocaleString("en-IN")}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Quantity</span>
+                    <span className="font-medium">
+                      {order.quantity.toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between text-lg font-bold">
+                    <span>Settlement Amount</span>
+                    <span>{formatInrAmount(settlementTotalDisplay)}</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span className="font-medium">
+                      ₹{parseFloat(order.subTotal).toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Stamp Duty</span>
+                    <span className="font-medium">
+                      ₹{parseFloat(order.stampDuty).toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between text-lg font-bold">
+                    <span>Total Amount</span>
+                    <span>
+                      ₹{parseFloat(order.totalAmount).toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
 
@@ -1733,7 +1844,7 @@ function OrderDetailsView() {
             </CardHeader>
             <CardContent>
               {order.settlementAutomationLogs &&
-              order.settlementAutomationLogs.length > 0 ? (
+                order.settlementAutomationLogs.length > 0 ? (
                 <div className="space-y-4">
                   {Object.entries(
                     order.settlementAutomationLogs.reduce(
@@ -1921,9 +2032,9 @@ function OrderDetailsView() {
                       ? settlementDateLabel
                       : order.customerBonds.purchaseDate
                         ? dateTimeUtils.formatDateTime(
-                            order.customerBonds.purchaseDate,
-                            "DD MMM YYYY",
-                          )
+                          order.customerBonds.purchaseDate,
+                          "DD MMM YYYY",
+                        )
                         : "—"}
                   </p>
                 </div>

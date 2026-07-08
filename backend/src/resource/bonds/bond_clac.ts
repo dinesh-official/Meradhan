@@ -1,4 +1,12 @@
 import { db } from "@core/database/database";
+import {
+    mapDeriDataToExternalCalcResponse,
+    parseDeriDataMoney,
+} from "@services/deridata/deridata.calc.adapter";
+import {
+    calculatePriceToYield,
+    calculateYieldToPrice,
+} from "@services/deridata/deridata.calculator.client";
 import { getLastCouponDate, getLastNextCouponDateBasedOnSettlementDate, toISTISODate } from "@services/order/order-pricing-helper";
 import moment from "moment";
 
@@ -920,8 +928,7 @@ export async function getBondDealAutofill(opts: {
 }
 
 /**
- * Proxy to `calc.meradhan.co/api/calculate` and return its JSON response.
- * The input shape mirrors the calc UI form (see calc.meradhan.co `<form>` field names).
+ * Proxy to DeriData Merchant API calculator and return legacy calc JSON shape.
  *
  * `Day_Convention`, `Bond_Type`, and `amort_schedule` are required by the service —
  * historical callers omitted them, so the calc engine fell back to legacy defaults
@@ -999,23 +1006,64 @@ function parseCalcServiceErrorBody(text: string): string {
 export async function calculateBondFromService(
     payload: BondCalcServicePayload,
 ): Promise<ExternalCalcResponse> {
-    console.log(JSON.stringify(payload, null, 2));
-    const url = "https://calc.meradhan.co/api/calculate";
-    const res = await fetch(url, {
-        method: "POST",
-        headers: {
-            accept: "*/*",
-            "content-type": "application/json",
-        },
-        body: JSON.stringify(payload ?? {}),
-    });
-
-    if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(parseCalcServiceErrorBody(text));
+    const isin = payload.ISIN?.trim() ?? "";
+    if (!isin) {
+        throw new Error("ISIN is required for bond calculation");
     }
 
-    return (await res.json()) as ExternalCalcResponse;
+    const quantity = Math.max(1, Number(payload.Quantity) || 1);
+    const faceValue = Math.max(1, Number(payload.Face_Value) || 10000);
+    const settlementDate = payload.Settlement_Date;
+    const cashflowShutFlag = /shut/i.test(payload.Period_Status ?? "");
+
+    const adapterCtx = {
+        quantity,
+        settlementDateYmd: settlementDate,
+        periodStatus: payload.Period_Status,
+    };
+
+    if (payload.Input_Type === "Calculate from Clean Price") {
+        const cleanPrice = Number(payload.Pricing_Input);
+        if (!Number.isFinite(cleanPrice) || cleanPrice <= 0) {
+            throw new Error(
+                "Clean price is required for price-to-yield calculation",
+            );
+        }
+
+        const response = await calculatePriceToYield({
+            isin,
+            valueDate: settlementDate,
+            faceValue,
+            quantity,
+            cleanPrice,
+            cashflowShutFlag,
+        });
+
+        return mapDeriDataToExternalCalcResponse(response, {
+            ...adapterCtx,
+            cleanPrice,
+            ytm: parseDeriDataMoney(response.summary.xirr) ?? null,
+        });
+    }
+
+    const ytm = Number(payload.Pricing_Input);
+    if (!Number.isFinite(ytm)) {
+        throw new Error("Yield is required for yield-to-price calculation");
+    }
+
+    const response = await calculateYieldToPrice({
+        isin,
+        valueDate: settlementDate,
+        faceValue,
+        quantity,
+        ytm,
+        cashflowShutFlag,
+    });
+
+    return mapDeriDataToExternalCalcResponse(response, {
+        ...adapterCtx,
+        ytm,
+    });
 }
 
 
