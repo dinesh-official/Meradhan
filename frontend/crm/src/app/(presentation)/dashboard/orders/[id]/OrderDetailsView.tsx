@@ -312,6 +312,48 @@ function OrderDetailsView() {
     );
   }
 
+  // Bond order pricing snapshot captured at checkout (`bondDetails.pricing`).
+  const orderPricing = (order.bondDetails as Record<string, unknown> | undefined)
+    ?.pricing as Record<string, unknown> | undefined;
+
+  const pricingNumber = (key: string): number | undefined => {
+    const v = orderPricing?.[key];
+    if (v == null) return undefined;
+    const n = typeof v === "number" ? v : Number(v);
+    return Number.isFinite(n) ? n : undefined;
+  };
+
+  const formatInrAmount = (n: number | undefined | null): string =>
+    n == null || !Number.isFinite(n)
+      ? "—"
+      : `₹${n.toLocaleString("en-IN", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}`;
+
+  const cleanPriceValue = pricingNumber("cleanPrice");
+  const principalAmountValue = pricingNumber("principalAmount");
+  const accruedInterestValue = pricingNumber("accruedInterest");
+  const totalConsiderationValue = pricingNumber("totalConsideration");
+  const pricingStampDutyValue = pricingNumber("stampDuty");
+  const accrualDaysValue = pricingNumber("noOfAccrualDays");
+  const settlementAmountValue = pricingNumber("settlementAmount");
+
+  const hasPricingSnapshot =
+    orderPricing != null &&
+    [
+      cleanPriceValue,
+      principalAmountValue,
+      accruedInterestValue,
+      totalConsiderationValue,
+      settlementAmountValue,
+    ].some((v) => v != null);
+
+  const stampDutyDisplay =
+    pricingStampDutyValue ?? parseFloat(order.stampDuty);
+  const settlementTotalDisplay =
+    settlementAmountValue ?? parseFloat(order.totalAmount);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -1704,25 +1746,100 @@ function OrderDetailsView() {
               <CardTitle>Financial Summary</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Subtotal</span>
-                <span className="font-medium">
-                  ₹{parseFloat(order.subTotal).toLocaleString("en-IN")}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Stamp Duty</span>
-                <span className="font-medium">
-                  ₹{parseFloat(order.stampDuty).toLocaleString("en-IN")}
-                </span>
-              </div>
-              <Separator />
-              <div className="flex justify-between text-lg font-bold">
-                <span>Total Amount</span>
-                <span>
-                  ₹{parseFloat(order.totalAmount).toLocaleString("en-IN")}
-                </span>
-              </div>
+              {hasPricingSnapshot ? (
+                <>
+                  {cleanPriceValue != null && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Clean Price</span>
+                      <span className="font-medium">
+                        {cleanPriceValue.toLocaleString("en-IN", {
+                          minimumFractionDigits: 4,
+                          maximumFractionDigits: 4,
+                        })}
+                      </span>
+                    </div>
+                  )}
+                  {principalAmountValue != null && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        Principal Amount
+                      </span>
+                      <span className="font-medium">
+                        {formatInrAmount(principalAmountValue)}
+                      </span>
+                    </div>
+                  )}
+                  {accruedInterestValue != null && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        Accrued interest
+                      </span>
+                      <span className="font-medium">
+                        {formatInrAmount(accruedInterestValue)}
+                      </span>
+                    </div>
+                  )}
+                  {totalConsiderationValue != null && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        Total Consideration w/o Stamp Duty
+                      </span>
+                      <span className="font-medium">
+                        {formatInrAmount(totalConsiderationValue)}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Stamp duty</span>
+                    <span className="font-medium">
+                      {formatInrAmount(stampDutyDisplay)}
+                    </span>
+                  </div>
+                  {accrualDaysValue != null && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        Accrued Interest Days
+                      </span>
+                      <span className="font-medium">
+                        {accrualDaysValue.toLocaleString("en-IN")}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Quantity</span>
+                    <span className="font-medium">
+                      {order.quantity.toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between text-lg font-bold">
+                    <span>Settlement Amount</span>
+                    <span>{formatInrAmount(settlementTotalDisplay)}</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span className="font-medium">
+                      ₹{parseFloat(order.subTotal).toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Stamp Duty</span>
+                    <span className="font-medium">
+                      ₹{parseFloat(order.stampDuty).toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between text-lg font-bold">
+                    <span>Total Amount</span>
+                    <span>
+                      ₹{parseFloat(order.totalAmount).toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
 
