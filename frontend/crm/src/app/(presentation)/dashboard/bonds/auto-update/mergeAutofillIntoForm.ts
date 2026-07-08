@@ -12,18 +12,12 @@ export const AUTOFILL_MERGE_KEYS = [
   "nextCouponDate",
   "recordDate",
   "recordDays",
-  "accruedInterestDays",
-  "accruedInterest",
-  "settlementAmount",
-  "principalAmount",
-  "totalConsideration",
   "dayConvention",
   "interestPaymentFrequency",
   "interestPaymentMode",
   "faceValue",
   "couponType",
   "couponRate",
-  "buyYield",
   "yield",
   "sellPrice",
   "bondType",
@@ -104,41 +98,6 @@ export function mergeAutofillIntoForm(
   if (include.recordDays && suggested.recordDays != null && Number.isFinite(suggested.recordDays)) {
     out.recordDays = Math.round(suggested.recordDays);
   }
-  if (
-    include.accruedInterestDays &&
-    suggested.accruedInterestDays != null &&
-    Number.isFinite(suggested.accruedInterestDays)
-  ) {
-    out.accruedInterestDays = Math.round(suggested.accruedInterestDays);
-  }
-  if (
-    include.accruedInterest &&
-    suggested.accruedInterest != null &&
-    Number.isFinite(suggested.accruedInterest)
-  ) {
-    out.accruedInterest = suggested.accruedInterest;
-  }
-  if (
-    include.settlementAmount &&
-    suggested.settlementAmount != null &&
-    Number.isFinite(suggested.settlementAmount)
-  ) {
-    out.settlementAmount = suggested.settlementAmount;
-  }
-  if (
-    include.principalAmount &&
-    suggested.principalAmount != null &&
-    Number.isFinite(suggested.principalAmount)
-  ) {
-    out.principalAmount = suggested.principalAmount;
-  }
-  if (
-    include.totalConsideration &&
-    suggested.totalConsideration != null &&
-    Number.isFinite(suggested.totalConsideration)
-  ) {
-    out.totalConsideration = suggested.totalConsideration;
-  }
   if (include.dayConvention && suggested.dayConvention != null) {
     out.dayConvention = suggested.dayConvention;
   }
@@ -158,9 +117,6 @@ export function mergeAutofillIntoForm(
   }
   if (include.couponRate && Number.isFinite(suggested.couponRate)) {
     out.couponRate = suggested.couponRate;
-  }
-  if (include.buyYield && suggested.buyYield != null && Number.isFinite(suggested.buyYield)) {
-    out.buyYield = suggested.buyYield;
   }
   if (include.yield && Number.isFinite(suggested.yield)) {
     out.yield = suggested.yield;

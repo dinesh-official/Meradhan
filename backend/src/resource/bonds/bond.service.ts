@@ -203,7 +203,18 @@ export class BondService {
       throw new Error("No Bond Found")
     }
 
-    const cleanPrice =
+    const ytm =
+      bond.yield != null && Number.isFinite(Number(bond.yield))
+        ? Number(bond.yield)
+        : null;
+    if (ytm == null) {
+      throw new Error(
+        "Yield (YTM) is required for live DeriData order pricing",
+      );
+    }
+
+    // Optional seed only — live DeriData yield→price overwrites cleanPrice from the API.
+    const cleanPriceSeed =
       sellPrice ?? bond.sellPrice ?? bond.providerPrice ?? bond.issuePrice ?? 0;
 
     let lastCouponDateStr = bond.lastCouponDateIst?.toISOString() ?? null;
@@ -238,27 +249,24 @@ export class BondService {
         isin: bond.isin,
         faceValue: bond.faceValue,
         quantity,
-        cleanPrice: cleanPrice ?? 0,
+        cleanPrice: cleanPriceSeed,
+        ytm,
         couponRate: Number(bond.couponRate),
         lastCouponDate: lastCouponDateStr,
         recordDays,
         nextCouponDate: nextCouponDateStr,
       },
-      { settlementType },
+      {
+        settlementType,
+        liveCalculator: "deridata",
+        deridataMode: "yieldToPrice",
+        maturityDate: bond.maturityDate ?? bond.maturityDateIst ?? null,
+      },
     );
-
-    const yieldRaw = bond.yield
-    const yieldNum =
-      yieldRaw != null && Number.isFinite(Number(yieldRaw))
-        ? Number(yieldRaw)
-        : null;
 
     return {
       ok: true,
-      pricing: {
-        ...pricingData,
-        ...(yieldNum != null ? { yield: yieldNum } : {}),
-      },
+      pricing: pricingData,
     };
   }
 
@@ -881,11 +889,6 @@ export class BondService {
         recordDate: bondData.recordDate || null,
         recordDateIst: toIstDateOnly(bondData.recordDate),
         recordDays: bondData.recordDays ?? null,
-        accruedInterestDays: bondData.accruedInterestDays ?? null,
-        accruedInterest: bondData.accruedInterest ?? null,
-        settlementAmount: bondData.settlementAmount ?? null,
-        principalAmount: bondData.principalAmount ?? null,
-        totalConsideration: bondData.totalConsideration ?? null,
         imDocumentLink: bondData.imDocumentLink || null,
         exchangeListedOn: bondData.exchangeListedOn ?? null,
         lastCouponDate: bondData.lastCouponDate || null,
@@ -991,11 +994,6 @@ export class BondService {
         recordDate: bondData.recordDate || null,
         recordDateIst: toIstDateOnly(bondData.recordDate),
         recordDays: bondData.recordDays ?? null,
-        accruedInterestDays: bondData.accruedInterestDays ?? null,
-        accruedInterest: bondData.accruedInterest ?? null,
-        settlementAmount: bondData.settlementAmount ?? null,
-        principalAmount: bondData.principalAmount ?? null,
-        totalConsideration: bondData.totalConsideration ?? null,
         imDocumentLink: bondData.imDocumentLink || null,
         exchangeListedOn: bondData.exchangeListedOn ?? null,
         lastCouponDate: bondData.lastCouponDate || null,

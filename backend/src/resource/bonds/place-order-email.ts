@@ -170,6 +170,11 @@ async function resolveOrderPricing(
         faceValue: number;
         couponRate: unknown;
         sellPrice: number | null;
+        providerPrice?: number | null;
+        issuePrice?: number | null;
+        yield?: number | null;
+        maturityDate?: Date | null;
+        maturityDateIst?: Date | null;
         lastCouponDate: Date | null;
         nextCouponDate: Date | null;
         recordDays: number | null;
@@ -193,18 +198,37 @@ async function resolveOrderPricing(
         return null;
     }
 
+    const ytm =
+        orderData.yield != null && Number.isFinite(Number(orderData.yield))
+            ? Number(orderData.yield)
+            : bond.yield != null && Number.isFinite(Number(bond.yield))
+                ? Number(bond.yield)
+                : null;
+    if (ytm == null) {
+        return null;
+    }
+
+    const cleanPriceSeed =
+        bond.sellPrice ?? bond.providerPrice ?? bond.issuePrice ?? 0;
+
     return await computeBondOrderPricingData(
         {
             isin: orderData.isin,
             faceValue: bond.faceValue,
             quantity: orderData.quantity,
-            cleanPrice: bond.sellPrice ?? 0,
+            cleanPrice: cleanPriceSeed,
+            ytm,
             couponRate: Number(bond.couponRate),
             lastCouponDate: lastCouponDateStr,
             recordDays,
             nextCouponDate: nextCouponDateStr,
         },
-        { settlementType: orderData.settlementType },
+        {
+            settlementType: orderData.settlementType,
+            liveCalculator: "deridata",
+            deridataMode: "yieldToPrice",
+            maturityDate: bond.maturityDate ?? bond.maturityDateIst ?? null,
+        },
     );
 }
 
@@ -245,14 +269,15 @@ export const placeOrderEmailCustomer = async (orderData: z.infer<typeof appSchem
 
     const faceValue = bond.faceValue ?? orderData.faceValue;
     const quantum = faceValue * orderData.quantity;
-    const cleanPrice = pricing?.cleanPrice ?? bond.sellPrice ?? 0;
+    const cleanPrice = pricing?.cleanPrice ?? 0;
     const principalAmount = pricing?.principalAmount ?? orderData.faceValue * orderData.quantity;
     const accruedInterest = pricing?.accruedInterest ?? 0;
     const accrualDays = pricing?.noOfAccrualDays ?? 0;
     const stampDuty = pricing?.stampDuty ?? 0;
-    const totalConsideration = Number(principalAmount) + Number(accruedInterest);
+    const totalConsideration =
+        pricing?.totalConsideration ?? Number(principalAmount) + Number(accruedInterest);
     const settlementAmount = pricing?.settlementAmount ?? orderData.settlementAmount;
-    const ytm = orderData.yield;
+    const ytm = pricing?.yield ?? orderData.yield;
 
     const detailsBlock = [
         ["Security Name", bond.bondName],

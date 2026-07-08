@@ -1,13 +1,21 @@
 import { db } from "@core/database/database";
+import { pickYmd } from "@resource/crm/bonds/bond_auto_update_autofill.calc";
 import {
-    fetchCalcBondInfo,
-    parseApiDecimal,
-    pickYmd,
-} from "@resource/crm/bonds/bond_auto_update_autofill.calc";
+    mapDeriDataToCalcApiResponse,
+    mapDeriDataToCalcPayload,
+} from "@services/deridata/deridata.calc.adapter";
+import {
+    calculatePriceToYield,
+    calculateYieldToPrice,
+} from "@services/deridata/deridata.calculator.client";
 import { accruedInterest, DEFAULT_BOND_MARKET_HOLIDAYS, firstWorkingDayAfter, getBondLastCouponDate, getBondNextCouponDate, getLastCouponDate, getLastCouponDateFromReferenceData, getLastNextCouponDateBasedOnSettlementDate, getNextCouponDate, resolveCouponDatesForSettlement, toISTISODate } from "@services/order/order-pricing-helper";
-import axios from "axios";
 import moment from "moment";
-// Matches `enum INTEREST_MODE` in `bonds.prisma`
+function parseApiDecimal(s: string | number | null | undefined): number | null {
+    if (s == null || s === "") return null;
+    const n = Number(String(s).replace(/,/g, "").trim());
+    return Number.isFinite(n) ? n : null;
+}
+
 export type InterestMode =
     | "MONTHLY"
     | "QUARTERLY"
@@ -376,13 +384,7 @@ export const getBondInfoCalcData = async (
             ? toYyyyMmDd(couponPayRow.dueDateIst)
             : null;
 
-    const calcBond = await fetchCalcBondInfo(isin, resolved.settlementDateYmd);
-    const settlementDateYmd =
-        options.settlementDate?.trim() &&
-        /^\d{4}-\d{2}-\d{2}$/.test(options.settlementDate.trim())
-            ? resolved.settlementDateYmd
-            : pickYmd(calcBond?.Settlement_Date, resolved.settlementDateYmd) ??
-              resolved.settlementDateYmd;
+    const settlementDateYmd = resolved.settlementDateYmd;
     const settlementDateObj = ymdToUtcNoon(settlementDateYmd);
 
     const couponDate = await getLastNextCouponDateBasedOnSettlementDate(isin, settlementDateObj);
@@ -401,14 +403,12 @@ export const getBondInfoCalcData = async (
     const bondTableNext = await getBondNextCouponDate(isin);
 
     const paymentFrequencyForInfer =
-        calcBond?.Payment_Frequency?.trim() ||
         bond?.interestPaymentFrequency ||
         bondData?.interestPaymentFrequency ||
         "Monthly";
 
     const maturityDateForInfer =
         pickYmd(
-            calcBond?.Maturity_Date,
             bond?.maturityDateIst instanceof Date &&
                 !Number.isNaN(bond.maturityDateIst.getTime())
                 ? toISTISODate(bond.maturityDateIst)
@@ -417,14 +417,12 @@ export const getBondInfoCalcData = async (
 
     let lastCouponDate =
         pickYmd(
-            calcBond?.Last_IP_Date,
             couponResolved.lastCouponDate,
             bondTableLast,
             toYyyyMmDd(bondData?.lastCouponDate),
         ) ?? "";
     let nextCouponDate =
         pickYmd(
-            calcBond?.Next_IP_Date,
             couponResolved.nextCouponDate,
             bondTableNext,
             toYyyyMmDd(bondData?.nextCouponDate),
@@ -454,12 +452,8 @@ export const getBondInfoCalcData = async (
         );
     }
 
-    const faceValue =
-        parseApiDecimal(calcBond?.Face_Value) ??
-        Number(bond?.faceValue ?? bondData?.faceValue ?? 10000);
-    const couponRate =
-        parseApiDecimal(calcBond?.Coupon_Rate_Pct) ??
-        Number(bond?.couponRate ?? bondData?.couponRate ?? 0);
+    const faceValue = Number(bond?.faceValue ?? bondData?.faceValue ?? 10000);
+    const couponRate = Number(bond?.couponRate ?? bondData?.couponRate ?? 0);
 
     const pricing = accruedInterest({
         couponRate,
@@ -471,120 +465,71 @@ export const getBondInfoCalcData = async (
         settlementDate: settlementDateObj,
     });
 
-    const bondType =
-        (calcBond?.amort_schedule?.length ?? 0) > 0
-            ? "Amortizing"
-            : toCalcBondType(bondData?.bondType ?? bond?.bondType);
+    const bondType = toCalcBondType(bondData?.bondType ?? bond?.bondType);
     const datedDate =
         pickYmd(
-            calcBond?.Dated_Date,
             bond?.issueDateIst instanceof Date && !Number.isNaN(bond.issueDateIst.getTime())
                 ? toISTISODate(bond.issueDateIst)
                 : toYyyyMmDd(bondData?.dateOfAllotment ?? bond?.issueDateIst),
         ) ?? "";
     const maturityDate = maturityDateForInfer;
 
-    const paymentFrequency =
-        calcBond?.Payment_Frequency?.trim() ||
-        toCalcPaymentFrequency(
-            bond?.interestPaymentFrequency ?? bondData?.interestPaymentFrequency,
-        );
-
-    const settlementDateOverridden = Boolean(
-        options.settlementDate?.trim() &&
-        /^\d{4}-\d{2}-\d{2}$/.test(options.settlementDate.trim()),
+    const paymentFrequency = toCalcPaymentFrequency(
+        bond?.interestPaymentFrequency ?? bondData?.interestPaymentFrequency,
     );
-    const periodStatus =
-        calcBond?.Period_Status?.trim() && !settlementDateOverridden
-            ? calcBond.Period_Status.trim()
-            : pricing.isUnderShutPeriod
-              ? "Shut Period"
-              : "Normal";
 
-    const calcYieldFallback =
-        calcBond?.yield != null
-            ? parseApiDecimal(String(calcBond.yield)) ?? undefined
-            : undefined;
-    const resolvedPricingInput = useCleanPrice
-        ? String(cleanPriceInput)
-        : pricingYieldStr != null
-          ? String(pricingYieldStr)
-          : calcYieldFallback != null
-            ? String(calcYieldFallback)
-            : "0";
+    const periodStatus = pricing.isUnderShutPeriod ? "Shut Period" : "Normal";
+
+    const deriDataResponse = useCleanPrice
+        ? await calculatePriceToYield({
+              isin,
+              valueDate: settlementDateYmd,
+              faceValue,
+              quantity,
+              cleanPrice: Number(cleanPriceInput),
+              cashflowShutFlag: pricing.isUnderShutPeriod,
+          })
+        : await calculateYieldToPrice({
+              isin,
+              valueDate: settlementDateYmd,
+              faceValue,
+              quantity,
+              ytm: Number(pricingYieldStr ?? resolved.pricingYield ?? 0),
+              cashflowShutFlag: pricing.isUnderShutPeriod,
+          });
+
+    const calcData = mapDeriDataToCalcApiResponse(deriDataResponse, {
+        quantity,
+        settlementDateYmd,
+        accruedDays: pricing.noOfAccrualDays,
+        periodStatus,
+        ytm: useCleanPrice
+            ? parseApiDecimal(deriDataResponse.summary.xirr) ?? undefined
+            : Number(pricingYieldStr ?? resolved.pricingYield ?? 0),
+    });
 
     const payload = {
         ISIN: isin,
-        Face_Value: formatCalcFaceValue(faceValue),
-        Coupon_Rate_Pct: formatCalcCouponRate(couponRate),
-        Payment_Frequency: paymentFrequency,
-        Quantity: String(quantity),
         Settlement_Date: settlementDateYmd,
-        Dated_Date: datedDate,
+        Quantity: String(quantity),
+        Input_Type: useCleanPrice ? "Calculate from Clean Price" : "Calculate from Yield",
         Last_IP_Date: lastCouponDate,
         Next_IP_Date: nextCouponDate,
-        Maturity_Date: maturityDate,
-        Period_Status: periodStatus,
-        Input_Type: useCleanPrice ? "Calculate from Clean Price" : "Calculate from Yield",
-        Pricing_Input: resolvedPricingInput,
-        Is_End_Of_Month_Bond: "No",
-        Price_Rounding_Decimals: "4",
-        Stamp_Duty: stampDuty != null ? String(stampDuty) : "0",
-        Day_Convention: toCalcDayConvention(bond?.dayConvention ?? bondData?.dayConvention),
-        Bond_Type: bondType,
-        amort_schedule:
-            bondType === "Amortizing"
-                ? JSON.stringify(calcBond?.amort_schedule ?? [])
-                : "",
+        Payment_Frequency: paymentFrequency,
+        deridata: mapDeriDataToCalcPayload(deriDataResponse, {
+            quantity,
+            settlementDateYmd,
+            accruedDays: pricing.noOfAccrualDays,
+            periodStatus,
+            ytm: useCleanPrice
+                ? parseApiDecimal(deriDataResponse.summary.xirr) ?? undefined
+                : Number(pricingYieldStr ?? resolved.pricingYield ?? 0),
+        }),
     };
 
-    let response: {
-        data: {
-            accrued_days: number;
-            cf_count: number;
-            cf_rows: Array<{
-                date: string;
-                days: number;
-                interest: string;
-                num: number;
-                principal: string;
-                total: string;
-                total_raw: number;
-            }>;
-            final_price: string;
-            final_yield: string;
-            final_yield_raw: number;
-            period_status: string;
-            principal_amount: string;
-            quantity: string;
-            running_total: string;
-            settle_dt: string;
-            settlement_amount: string;
-            stamp_duty: string;
-            total_ai: string;
-            total_consideration: string;
-        };
-    };
-    try {
-        response = await axios.post(
-            "https://calc.meradhan.co/api/calculate",
-            payload,
-        );
-    } catch (err) {
-        if (axios.isAxiosError(err)) {
-            const apiError =
-                err.response?.data &&
-                typeof err.response.data === "object" &&
-                "error" in err.response.data
-                    ? String((err.response.data as { error: unknown }).error)
-                    : err.message;
-            throw new Error(`Bond calc failed: ${apiError}`);
-        }
-        throw err;
-    }
     const allCouponDates = collectAllCouponDatesYmd(
         couponRows,
-        response.data.cf_rows,
+        calcData.cf_rows,
         bondData?.allCouponDates,
     );
 
@@ -595,11 +540,7 @@ export const getBondInfoCalcData = async (
         mapNatureOfInstrument(bondData?.natureOfInstrument ?? bond?.natureOfInstrument) ??
         null;
 
-    const calcAccruedDaysFromApi = Number(response.data.accrued_days);
-    const accruedDaysResolved =
-        pricing.isUnderShutPeriod && Number.isFinite(calcAccruedDaysFromApi)
-            ? calcAccruedDaysFromApi
-            : pricing.noOfAccrualDays;
+    const accruedDaysResolved = pricing.noOfAccrualDays;
 
     return {
         payload,
@@ -611,24 +552,33 @@ export const getBondInfoCalcData = async (
             natureOfInstrument,
             maturityDate: toYyyyMmDd(bond?.maturityDate),
             dateOfAllotment: toYyyyMmDd(bond?.issueDateIst),
-            lastCouponDate: String(payload.Last_IP_Date ?? ""),
-            nextCouponDate: String(payload.Next_IP_Date ?? ""),
+            lastCouponDate,
+            nextCouponDate,
             recordDate: toYyyyMmDd(pricing.recordDate),
             recordDays: couponDate.recordDays,
             dueDate: dueDateYmd ?? null,
             dayConvention: bond?.dayConvention ?? null,
-            interestPaymentFrequency: paymentFrequencyToDbEnum(payload.Payment_Frequency) || bond?.interestPaymentFrequency,
-            interestPaymentMode: paymentFrequencyToDbEnum(payload.Payment_Frequency),
+            interestPaymentFrequency:
+                paymentFrequencyToDbEnum(paymentFrequency) ||
+                bond?.interestPaymentFrequency,
+            interestPaymentMode: paymentFrequencyToDbEnum(paymentFrequency),
             faceValue: Number(bond?.faceValue ?? 0),
             couponRate: Number(Number(bond?.couponRate ?? 0).toFixed(2)),
             buyYield: (() => {
-                const raw = bondData?.buyYield ?? bondData?.yield ?? (Number(response.data.final_yield) || null);
-                return raw != null && Number.isFinite(raw) ? Number(Number(raw).toFixed(2)) : null;
+                const raw =
+                    bondData?.buyYield ??
+                    bondData?.yield ??
+                    (Number(calcData.final_yield) || null);
+                return raw != null && Number.isFinite(raw)
+                    ? Number(Number(raw).toFixed(2))
+                    : null;
             })(),
-            yield: Number(Number(response.data.final_yield_raw ?? 0).toFixed(2)),
+            yield: Number(Number(calcData.final_yield_raw ?? 0).toFixed(2)),
             sellPrice: (() => {
-                const sp = parseCalcMoneyString(response.data.final_price);
-                return sp != null && Number.isFinite(sp) ? Number(sp.toFixed(4)) : null;
+                const sp = parseCalcMoneyString(calcData.final_price);
+                return sp != null && Number.isFinite(sp)
+                    ? Number(sp.toFixed(4))
+                    : null;
             })(),
             isUnderShutPeriod: pricing.isUnderShutPeriod,
             bondType: bondData?.bondType ?? null,
@@ -640,7 +590,7 @@ export const getBondInfoCalcData = async (
             categories: bondData?.categories ?? [],
         },
         calc: {
-            ...response.data,
+            ...calcData,
             accrued_days: accruedDaysResolved,
         },
         inputSources: {

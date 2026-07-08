@@ -140,28 +140,45 @@ export class BondController {
       settlementTypeRaw === "T+0" || settlementTypeRaw === "T+1"
         ? (settlementTypeRaw as "T+0" | "T+1")
         : undefined;
-    const result = await this.bondService.getBondOrderPricing(isin, quantity, settlementType);
+    try {
+      const result = await this.bondService.getBondOrderPricing(
+        isin,
+        quantity,
+        settlementType,
+      );
 
-    if (!result.ok) {
-      if (result.reason === "not_found") {
+      console.log("result", result);
+
+      if (!result.ok) {
+        if (result.reason === "not_found") {
+          return res.sendResponse({
+            statusCode: HttpStatus.NOT_FOUND,
+            message: "Bond not found",
+            success: false,
+          });
+        }
         return res.sendResponse({
-          statusCode: HttpStatus.NOT_FOUND,
-          message: "Bond not found",
+          statusCode: HttpStatus.BAD_REQUEST,
+          message:
+            "Bond is missing lastCouponDate or nextCouponDate required for order pricing",
           success: false,
         });
       }
-      return res.sendResponse({
-        statusCode: HttpStatus.BAD_REQUEST,
-        message:
-          "Bond is missing lastCouponDate or nextCouponDate required for order pricing",
-        success: false,
-      });
-    }
 
-    return res.sendResponse({
-      statusCode: HttpStatus.OK,
-      responseData: result.pricing,
-    });
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        responseData: result.pricing,
+      });
+    } catch (err) {
+      if (err instanceof AppError) {
+        return res.sendResponse({
+          statusCode: err.statusCode,
+          message: err.message,
+          success: false,
+        });
+      }
+      throw err;
+    }
   }
 
   /**
@@ -226,6 +243,7 @@ export class BondController {
             ? pricingYield
             : undefined,
       });
+      console.log("data", data);
       return res.sendResponse({
         statusCode: HttpStatus.OK,
         responseData: data,

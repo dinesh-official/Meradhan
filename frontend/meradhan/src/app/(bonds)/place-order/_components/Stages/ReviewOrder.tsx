@@ -114,16 +114,13 @@ function ReviewOrder({
   const bankAccount = customer.bankAccounts.find(
     (account) => account.isPrimary
   );
-  const totalConsideration = bond.issuePrice * quantity;
-  const stampDutyRate = 0.0001; // 0.01%
-  const stampDutyAmount = totalConsideration * stampDutyRate;
-  const otherCharges = 0;
-  const indicativeYield = orderPricing?.yield ?? bond.yield;
+  const indicativeYield = orderPricing?.yield;
 
   const principalScaled = orderPricing?.principalAmount
   const accruedScaled = orderPricing?.accruedInterest || 0;
-  const stampScaled = orderPricing?.stampDuty
   const settlementAmount = orderPricing?.settlementAmount ?? 0
+  const totalConsideration =
+    orderPricing?.totalConsideration ?? settlementAmount;
 
   return (
     <div className="container">
@@ -164,7 +161,7 @@ function ReviewOrder({
         >
           <p className="font-semibold">Pricing unavailable</p>
           <p className="mt-1">
-            Settlement amounts could not be loaded from the calculator. Change quantity or refresh
+            Settlement amounts could not be loaded from DeriData. Change quantity or refresh
             the page to retry.
           </p>
         </div>
@@ -354,11 +351,9 @@ function ReviewOrder({
         <div className="md:grid md:grid-cols-2 flex justify-between  gap-5 border-t pt-6 mt-6 border-gray-200">
           <div>
             <p className="text-lg text-black">Settlement Amount</p>
-            <p className="text-sm">
-              {orderPricing
-                ? "(Principal + accrued interest + stamp duty · scaled by quantity)"
-                : "(Total Consideration + Stamp Duty + Other Charges)"}
-            </p>
+            {!orderPricing && (
+              <p className="text-sm">(Pricing unavailable)</p>
+            )}
           </div>
           <div>
             <p className="text-lg text-black flex items-center gap-1 font-medium">
@@ -401,15 +396,9 @@ function ReviewOrder({
                       </div>
 
                       <div className="flex justify-between">
-                        <span>Total Consideration w/o Stamp Duty</span>
+                        <span>Total Consideration</span>
                         <span className="font-medium">
-                          Rs. {formatNumberTS((principalScaled ?? 0) + (accruedScaled ?? 0))}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Stamp duty</span>
-                        <span className="font-medium">
-                          Rs. {formatNumberTS(stampScaled ?? 0)}
+                          Rs. {formatNumberTS(totalConsideration)}
                         </span>
                       </div>
                       <div className="flex justify-between ">
@@ -420,28 +409,10 @@ function ReviewOrder({
                       </div>
                     </>
                   ) : (
-                    <>
-                      <div className="flex justify-between">
-                        <span>Unit Price</span>
-                        <span className="font-medium">Rs. {formatNumberTS(bond.issuePrice)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Total Consideration</span>
-                        <span className="font-medium">
-                          Rs. {formatNumberTS(totalConsideration)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Stamp Duty (0.01%)</span>
-                        <span className="font-medium">
-                          Rs. {formatNumberTS(stampDutyAmount)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Other Charges</span>
-                        <span className="font-medium">Rs. {formatNumberTS(otherCharges)}</span>
-                      </div>
-                    </>
+                    <p className="text-sm text-amber-900 dark:text-amber-200">
+                      Live pricing from DeriData is unavailable. Refresh or change
+                      quantity to retry.
+                    </p>
                   )}
                   <div className="flex justify-between">
                     <span>Quantity</span>

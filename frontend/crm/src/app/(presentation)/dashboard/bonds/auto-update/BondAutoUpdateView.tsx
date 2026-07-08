@@ -62,7 +62,6 @@ import { formatCouponDatesDisplay } from "./couponDatesText";
 
 /** Fields whose calculator values depend on which yield feed was used (non-consolidated vs consolidated). */
 const YIELD_SOURCE_AFFECTED_KEYS: readonly AutofillMergeKey[] = [
-  "buyYield",
   "yield",
   "sellPrice",
 ];
@@ -83,20 +82,42 @@ const bondsApi = new apiGateway.bondsApi.BondsApi(apiClientCaller);
 const autoUpdateAutofillApi =
   new apiGateway.crmBondAutoUpdateApi.CrmBondAutoUpdateApi(apiClientCaller);
 
-/** Empty draft → default autofill; non-empty → must parse as % or fail. */
-function autofillParamsFromCustomYieldDraft(draft: string | undefined):
-  | { ok: true; params: { quantity: number; pricingYield?: number } }
+type PricingMode = "ytm" | "cleanPrice";
+
+/** Empty draft → default autofill; non-empty → parse using selected mode or fail. */
+function autofillParamsFromPricingDraft(
+  draft: string | undefined,
+  mode: PricingMode,
+):
+  | {
+    ok: true;
+    params: {
+      quantity: number;
+      pricingMode: PricingMode;
+      pricingYield?: number;
+      cleanPrice?: number;
+    };
+  }
   | { ok: false; message: string } {
   const raw = (draft ?? "").trim().replace(/,/g, "");
-  if (raw === "") return { ok: true, params: { quantity: 1 } };
+  if (raw === "") return { ok: true, params: { quantity: 1, pricingMode: mode } };
   const n = parseFloat(raw);
   if (!Number.isFinite(n)) {
     return {
       ok: false,
-      message: "Enter a valid custom yield (%), or leave the field empty for default pricing.",
+      message:
+        mode === "cleanPrice"
+          ? "Enter a valid clean price, or leave the field empty for default pricing."
+          : "Enter a valid YTM (%), or leave the field empty for default pricing.",
     };
   }
-  return { ok: true, params: { quantity: 1, pricingYield: n } };
+  return {
+    ok: true,
+    params:
+      mode === "cleanPrice"
+        ? { quantity: 1, pricingMode: mode, cleanPrice: n }
+        : { quantity: 1, pricingMode: mode, pricingYield: n },
+  };
 }
 
 function formatDisplayValue(v: unknown): string {
@@ -123,6 +144,13 @@ function formatInr(n: number | null | undefined): string {
   return n != null && Number.isFinite(n)
     ? `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`
     : "—";
+}
+
+function getDefaultYtmInputValue(bond: BondDetailsResponse): string {
+  const raw = bond.yield;
+  if (raw == null || raw === "") return "";
+  const n = typeof raw === "number" ? raw : Number(String(raw).replace(/,/g, "").trim());
+  return Number.isFinite(n) ? String(n) : "";
 }
 
 function autofillWarnings(res: BondDealAutofillResponse): string[] {
@@ -224,18 +252,32 @@ export default function BondAutoUpdateView() {
     for (const b of list) ensureRow(b);
   }, [listQuery.data, ensureRow]);
 
-  /** Per-ISIN draft for “custom yield” row; sent in POST body, not query params. */
-  const [customYieldByIsin, setCustomYieldByIsin] = useState<Record<string, string>>(
+  /** Per-ISIN draft for autofill pricing input; sent in POST body, not query params. */
+  const [pricingInputByIsin, setPricingInputByIsin] = useState<Record<string, string>>(
+    {},
+  );
+  const [pricingModeByIsin, setPricingModeByIsin] = useState<Record<string, PricingMode>>(
     {},
   );
 
   const autofillMutation = useMutation({
-    mutationFn: async (args: { isin: string; pricingYield?: number }) => {
-      const { isin, pricingYield } = args;
+    mutationFn: async (
+      args: {
+        isin: string;
+        pricingMode: PricingMode;
+        pricingYield?: number;
+        cleanPrice?: number;
+      },
+    ) => {
+      const { isin, pricingMode, pricingYield, cleanPrice } = args;
       const res = await autoUpdateAutofillApi.postBondAutoUpdateAutofill(isin, {
         quantity: 1,
+        pricingMode,
         ...(pricingYield != null && Number.isFinite(pricingYield)
           ? { pricingYield }
+          : {}),
+        ...(cleanPrice != null && Number.isFinite(cleanPrice)
+          ? { cleanPrice }
           : {}),
       });
       return { isin, data: res.responseData };
@@ -275,7 +317,15 @@ export default function BondAutoUpdateView() {
       });
       toast.success(`Autofill loaded for ${isin}`);
     },
-    onError: (err: AxiosError, variables: { isin: string; pricingYield?: number }) => {
+    onError: (
+      err: AxiosError,
+      variables: {
+        isin: string;
+        pricingMode: PricingMode;
+        pricingYield?: number;
+        cleanPrice?: number;
+      },
+    ) => {
       const { isin } = variables;
       const msg =
         (err?.response?.data as { message?: string })?.message ||
@@ -361,7 +411,10 @@ export default function BondAutoUpdateView() {
       const b = list[i]!;
       setBulkProgress({ kind: "load", current: i + 1, total: list.length });
       try {
-        const parsed = autofillParamsFromCustomYieldDraft(customYieldByIsin[b.isin]);
+        const parsed = autofillParamsFromPricingDraft(
+          pricingInputByIsin[b.isin],
+          pricingModeByIsin[b.isin] ?? "ytm",
+        );
         if (!parsed.ok) {
           fail++;
           setRows((prev) => {
@@ -437,7 +490,7 @@ export default function BondAutoUpdateView() {
     }
     setBulkProgress(null);
     toast.success(`Load all finished: ${ok} succeeded, ${fail} failed.`);
-  }, [listQuery, customYieldByIsin]);
+  }, [listQuery, pricingInputByIsin, pricingModeByIsin]);
 
   const saveAllWithAutofill = useCallback(async () => {
     const list = listQuery.data?.data ?? [];
@@ -559,10 +612,13 @@ export default function BondAutoUpdateView() {
     });
   };
 
-  /** Empty field → default autofill; non-empty → must be a valid % (sent as pricingYield in POST body). */
+  /** Empty field → default autofill; non-empty → sent as YTM or clean price per row mode. */
   const loadBondAutofill = (b: BondDetailsResponse) => {
     ensureRow(b);
-    const parsed = autofillParamsFromCustomYieldDraft(customYieldByIsin[b.isin]);
+    const parsed = autofillParamsFromPricingDraft(
+      pricingInputByIsin[b.isin],
+      pricingModeByIsin[b.isin] ?? "ytm",
+    );
     if (!parsed.ok) {
       toast.error(parsed.message);
       return;
@@ -570,7 +626,9 @@ export default function BondAutoUpdateView() {
     const { params } = parsed;
     autofillMutation.mutate({
       isin: b.isin,
+      pricingMode: params.pricingMode,
       ...(params.pricingYield != null ? { pricingYield: params.pricingYield } : {}),
+      ...(params.cleanPrice != null ? { cleanPrice: params.cleanPrice } : {}),
     });
   };
 
@@ -578,6 +636,21 @@ export default function BondAutoUpdateView() {
     () => listQuery.data?.data ?? [],
     [listQuery.data?.data],
   );
+  useEffect(() => {
+    if (!bonds.length) return;
+    setPricingInputByIsin((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      for (const bond of bonds) {
+        if (next[bond.isin] != null) continue;
+        const defaultValue = getDefaultYtmInputValue(bond);
+        if (defaultValue === "") continue;
+        next[bond.isin] = defaultValue;
+        changed = true;
+      }
+      return changed ? next : prev;
+    });
+  }, [bonds]);
   const readyToSaveCount = useMemo(
     () =>
       bonds.filter(
@@ -595,10 +668,10 @@ export default function BondAutoUpdateView() {
           {canEditBonds ? (
             <>
               {" "}
-              Load autofill from calc.meradhan.co, review each field, uncheck what you do not want
+              Load pricing autofill, review each field, uncheck what you do not want
               to overwrite, edit values, then accept to save or reject to discard.{" "}
-              <span className="font-medium text-foreground">Load all</span> uses each row&apos;s optional custom yield
-              when filled.
+              <span className="font-medium text-foreground">Load all</span> uses each row&apos;s selected YTM or clean
+              price input when filled.
             </>
           ) : (
             " You have view-only access on this page."
@@ -758,18 +831,34 @@ export default function BondAutoUpdateView() {
                     {canEditBonds ? (
                       <>
                         <div className="flex flex-wrap items-center gap-1.5">
-                          <span className="text-muted-foreground text-xs whitespace-nowrap">
-                            Custom yield %
-                          </span>
+                          <select
+                            className="h-9 rounded-md border bg-background px-2 text-sm"
+                            value={pricingModeByIsin[b.isin] ?? "ytm"}
+                            onChange={(e) =>
+                              setPricingModeByIsin((prev) => ({
+                                ...prev,
+                                [b.isin]: e.target.value as PricingMode,
+                              }))
+                            }
+                            disabled={loading}
+                            aria-label={`Pricing mode for ${b.isin}`}
+                          >
+                            <option value="ytm">YTM</option>
+                            <option value="cleanPrice">Clean price</option>
+                          </select>
                           <Input
                             type="text"
                             inputMode="decimal"
                             autoComplete="off"
-                            placeholder="optional"
-                            className="h-9 w-[92px] font-mono text-sm"
-                            value={customYieldByIsin[b.isin] ?? ""}
+                            placeholder={
+                              (pricingModeByIsin[b.isin] ?? "ytm") === "cleanPrice"
+                                ? "clean price"
+                                : "ytm %"
+                            }
+                            className="h-9 w-[110px] font-mono text-sm"
+                            value={pricingInputByIsin[b.isin] ?? ""}
                             onChange={(e) =>
-                              setCustomYieldByIsin((prev) => ({
+                              setPricingInputByIsin((prev) => ({
                                 ...prev,
                                 [b.isin]: e.target.value,
                               }))
@@ -781,7 +870,7 @@ export default function BondAutoUpdateView() {
                               }
                             }}
                             disabled={loading}
-                            aria-label={`Optional custom pricing yield percent for ${b.isin}; leave empty for default`}
+                            aria-label={`Optional pricing input for ${b.isin}; uses selected YTM or clean price mode`}
                           />
                         </div>
                         <Button
@@ -817,14 +906,18 @@ export default function BondAutoUpdateView() {
                   <div className="border-t px-4 pb-4 pt-2 space-y-4">
                     {!model.autofill || !model.draft ? (
                       <p className="text-muted-foreground text-sm py-4">
-                        Optionally enter <span className="font-medium text-foreground">Custom yield %</span>, then
-                        click <span className="font-medium text-foreground">Load autofill</span> to use it; leave the
-                        field empty for default pricing.
+                        Optionally choose <span className="font-medium text-foreground">YTM</span> or{" "}
+                        <span className="font-medium text-foreground">clean price</span>, enter a value, then click{" "}
+                        <span className="font-medium text-foreground">Load autofill</span> to use it; leave the field
+                        empty for default pricing.
                       </p>
                     ) : (
                       <>
                         <div className="flex flex-wrap items-center gap-2">
                           <Badge variant="outline">Yield: {model.autofill.sources.yieldSource}</Badge>
+                          <Badge variant="outline">
+                            Mode: {model.autofill.sources.pricingMode === "cleanPrice" ? "clean price" : "ytm"}
+                          </Badge>
                           <Badge variant={model.autofill.sources.usedReferenceMetadata ? "default" : "secondary"}>
                             Reference metadata {model.autofill.sources.usedReferenceMetadata ? "on" : "off"}
                           </Badge>
@@ -860,11 +953,13 @@ export default function BondAutoUpdateView() {
                             role="status"
                           >
                             <p className="font-medium text-amber-950 dark:text-amber-100">
-                              Yield not from the consolidated priced list
+                              Pricing not from the consolidated priced list
                             </p>
                             <p className="mt-1 text-amber-900/90 dark:text-amber-100/85">
                               {model.autofill.sources.yieldSource === "override"
-                                ? "Using your pricing yield override."
+                                ? model.autofill.sources.pricingMode === "cleanPrice"
+                                  ? "Using your clean price override."
+                                  : "Using your pricing yield override."
                                 : "Using the bond / margin record."}{" "}
                               Review the highlighted rows before accepting.
                             </p>
@@ -1026,14 +1121,7 @@ export default function BondAutoUpdateView() {
                                     >
                                       {key === "categories" && Array.isArray(curVal)
                                         ? (curVal as string[]).join(", ") || "—"
-                                        : (key === "settlementAmount" ||
-                                          key === "accruedInterest" ||
-                                          key === "principalAmount" ||
-                                          key === "totalConsideration") &&
-                                          typeof curVal === "number" &&
-                                          Number.isFinite(curVal)
-                                          ? formatInr(curVal)
-                                          : formatDisplayValue(curVal)}
+                                        : formatDisplayValue(curVal)}
                                     </TableCell>
                                     <TableCell className="min-w-[220px] align-top">
                                       {!canEditBonds ? (
@@ -1084,7 +1172,7 @@ export default function BondAutoUpdateView() {
                                             });
                                           }}
                                         />
-                                      ) : key === "recordDays" || key === "accruedInterestDays" ? (
+                                      ) : key === "recordDays" ? (
                                         <DecimalInput
                                           className="h-9 font-mono text-sm"
                                           value={
@@ -1102,15 +1190,12 @@ export default function BondAutoUpdateView() {
                                           }
                                           onChange={(n) =>
                                             updateDraft(b.isin, {
-                                              [key]:
+                                              recordDays:
                                                 n == null ? null : Math.round(n),
-                                            } as Partial<DraftSuggestions>)
+                                            })
                                           }
                                         />
-                                      ) : key === "settlementAmount" ||
-                                        key === "accruedInterest" ||
-                                        key === "principalAmount" ||
-                                        key === "totalConsideration" ? (
+                                      ) : key === "couponRate" || key === "buyYield" ? (
                                         <DecimalInput
                                           className="h-9 font-mono text-sm"
                                           value={
@@ -1132,11 +1217,15 @@ export default function BondAutoUpdateView() {
                                             } as Partial<DraftSuggestions>)
                                           }
                                         />
-                                      ) : key === "couponRate" ||
-                                        key === "buyYield" ||
-                                        key === "yield" ? (
+                                      ) : key === "yield" || key === "sellPrice" ? (
                                         <DecimalInput
+                                          title={
+                                            key === "sellPrice"
+                                              ? "Clean price from DeriData (read-only)."
+                                              : "Yield from DeriData (read-only)."
+                                          }
                                           className="h-9 font-mono text-sm"
+                                          disabled
                                           value={
                                             sug == null
                                               ? undefined
@@ -1150,11 +1239,9 @@ export default function BondAutoUpdateView() {
                                                   : undefined;
                                               })()
                                           }
-                                          onChange={(n) =>
-                                            updateDraft(b.isin, {
-                                              [key]: n ?? null,
-                                            } as Partial<DraftSuggestions>)
-                                          }
+                                          onChange={() => {
+                                            /* read-only — DeriData calculated */
+                                          }}
                                         />
                                       ) : key === "faceValue" ? (
                                         <DecimalInput
@@ -1176,29 +1263,6 @@ export default function BondAutoUpdateView() {
                                             updateDraft(b.isin, {
                                               [key]: n ?? null,
                                             } as Partial<DraftSuggestions>)
-                                          }
-                                        />
-                                      ) : key === "sellPrice" ? (
-                                        <DecimalInput
-                                          title="Clean price (% of face). Commits on blur."
-                                          className="h-9 font-mono text-sm"
-                                          value={
-                                            sug == null
-                                              ? undefined
-                                              : (() => {
-                                                const n =
-                                                  typeof sug === "number"
-                                                    ? sug
-                                                    : Number(sug);
-                                                return Number.isFinite(n)
-                                                  ? n
-                                                  : undefined;
-                                              })()
-                                          }
-                                          onChange={(n) =>
-                                            updateDraft(b.isin, {
-                                              sellPrice: n ?? null,
-                                            })
                                           }
                                         />
                                       ) : key === "dayConvention" ||

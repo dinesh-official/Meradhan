@@ -81,7 +81,7 @@ function OrderReceipt({
       });
       return false;
     }
-    const yieldVal = Number(orderPricing.yield ?? bond.yield);
+    const yieldVal = Number(orderPricing.yield);
     if (!Number.isFinite(yieldVal) || yieldVal < 1) {
       toast({
         title: "Invalid yield",
@@ -296,7 +296,7 @@ function OrderReceipt({
               try {
                 const okStock = await verifyFreshInventory();
                 if (!okStock) return;
-                const yieldVal = Number(orderPricing!.yield ?? bond.yield);
+                const yieldVal = Number(orderPricing!.yield);
                 trackButtonClick(orderId, "PLACE_ORDER", {
                   step: 2,
                   isin: bond.isin,

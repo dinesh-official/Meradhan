@@ -47,6 +47,8 @@ interface OrderData {
   totalAmount?: number;
   createdAt?: string;
   price?: number;
+  /** Checkout pricing snapshot (`order.bondDetails.pricing`) — preferred over bond DB amounts. */
+  bondDetails?: { pricing?: Record<string, unknown> } | null;
   metadata?: {
     rfqNumber?: string;
     settlementOrderNumber?: string;
@@ -116,7 +118,7 @@ export default function OrdersPage({
     : new Date(now.getTime() + 24 * 60 * 60 * 1000); // Tomorrow
 
 
-  // Calculate financials (settle_order → bond DB → order snapshot)
+  // Financials: settle_order → order checkout pricing snapshot (never bond DB calc columns)
   const {
     effectiveQty: effectiveQun,
     principalAmount,
@@ -125,7 +127,11 @@ export default function OrdersPage({
     stampDutyAmount,
     totalConsideration,
     settlementAmount,
-  } = resolveOrderPdfFinancials({ bond, orderData, qun });
+  } = resolveOrderPdfFinancials({
+    orderData,
+    qun,
+    faceValue: Number(bond.faceValue) || null,
+  });
   const faceValue = Number(bond.faceValue) || 1000;
   // Format amounts
   const formatCurrency = (amount: number, fixed = 2) => {
