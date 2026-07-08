@@ -47,7 +47,6 @@ export type BondDealAutofillResponse = {
     nextCouponDate: string;
     recordDate: string | null;
     recordDays: number | null;
-    accruedInterestDays: number | null;
     dueDate: string | null;
     dayConvention: string | null;
     interestPaymentFrequency: string;
@@ -57,10 +56,6 @@ export type BondDealAutofillResponse = {
     buyYield: number | null;
     yield: number;
     sellPrice: number | null;
-    settlementAmount: number | null;
-    accruedInterest: number | null;
-    principalAmount: number | null;
-    totalConsideration: number | null;
     isUnderShutPeriod?: boolean;
     bondType?: string | null;
     seniority?: string | null;
@@ -193,23 +188,6 @@ export class BondAutoUpdateAutofillService {
     const sellPriceResolved =
       finalPrice != null && Number.isFinite(finalPrice) ? finalPrice : null;
 
-    const accruedInterestDays =
-      ctx.pricing.noOfAccrualDays != null &&
-      Number.isFinite(ctx.pricing.noOfAccrualDays)
-        ? Math.round(ctx.pricing.noOfAccrualDays)
-        : null;
-
-    const settlementAmountResolved = parseCalcMoneyString(
-      calcResponse.settlement_amount,
-    );
-    const accruedInterestResolved = parseCalcMoneyString(calcResponse.total_ai);
-    const principalAmountResolved = parseCalcMoneyString(
-      calcResponse.principal_amount,
-    );
-    const totalConsiderationResolved = parseCalcMoneyString(
-      calcResponse.total_consideration,
-    );
-
     const recordDateFromDeriData = parseDeriDataRecordDateYmd(
       deriDataResponse.record_date,
     );
@@ -227,7 +205,6 @@ export class BondAutoUpdateAutofillService {
       recordDate:
         recordDateFromDeriData ?? toYyyyMmDd(ctx.pricing.recordDate) ?? null,
       recordDays: ctx.couponDate.recordDays,
-      accruedInterestDays,
       dueDate: ctx.dueDateYmd ?? null,
       dayConvention: bond?.dayConvention ?? bondData?.dayConvention ?? null,
       interestPaymentFrequency:
@@ -253,10 +230,6 @@ export class BondAutoUpdateAutofillService {
           ? Number(deriDataResponse.summary.xirr || 0)
           : finalYieldRaw,
       sellPrice: sellPriceResolved,
-      settlementAmount: settlementAmountResolved,
-      accruedInterest: accruedInterestResolved,
-      principalAmount: principalAmountResolved,
-      totalConsideration: totalConsiderationResolved,
       isUnderShutPeriod: isUnderShutPeriodFromCalc,
       bondType: bondData?.bondType ?? null,
       seniority: bondData?.seniority ?? null,

@@ -1121,14 +1121,7 @@ export default function BondAutoUpdateView() {
                                     >
                                       {key === "categories" && Array.isArray(curVal)
                                         ? (curVal as string[]).join(", ") || "—"
-                                        : (key === "settlementAmount" ||
-                                          key === "accruedInterest" ||
-                                          key === "principalAmount" ||
-                                          key === "totalConsideration") &&
-                                          typeof curVal === "number" &&
-                                          Number.isFinite(curVal)
-                                          ? formatInr(curVal)
-                                          : formatDisplayValue(curVal)}
+                                        : formatDisplayValue(curVal)}
                                     </TableCell>
                                     <TableCell className="min-w-[220px] align-top">
                                       {!canEditBonds ? (
@@ -1179,7 +1172,7 @@ export default function BondAutoUpdateView() {
                                             });
                                           }}
                                         />
-                                      ) : key === "recordDays" || key === "accruedInterestDays" ? (
+                                      ) : key === "recordDays" ? (
                                         <DecimalInput
                                           className="h-9 font-mono text-sm"
                                           value={
@@ -1197,15 +1190,12 @@ export default function BondAutoUpdateView() {
                                           }
                                           onChange={(n) =>
                                             updateDraft(b.isin, {
-                                              [key]:
+                                              recordDays:
                                                 n == null ? null : Math.round(n),
-                                            } as Partial<DraftSuggestions>)
+                                            })
                                           }
                                         />
-                                      ) : key === "settlementAmount" ||
-                                        key === "accruedInterest" ||
-                                        key === "principalAmount" ||
-                                        key === "totalConsideration" ? (
+                                      ) : key === "couponRate" || key === "buyYield" ? (
                                         <DecimalInput
                                           className="h-9 font-mono text-sm"
                                           value={
@@ -1227,11 +1217,15 @@ export default function BondAutoUpdateView() {
                                             } as Partial<DraftSuggestions>)
                                           }
                                         />
-                                      ) : key === "couponRate" ||
-                                        key === "buyYield" ||
-                                        key === "yield" ? (
+                                      ) : key === "yield" || key === "sellPrice" ? (
                                         <DecimalInput
+                                          title={
+                                            key === "sellPrice"
+                                              ? "Clean price from DeriData (read-only)."
+                                              : "Yield from DeriData (read-only)."
+                                          }
                                           className="h-9 font-mono text-sm"
+                                          disabled
                                           value={
                                             sug == null
                                               ? undefined
@@ -1245,11 +1239,9 @@ export default function BondAutoUpdateView() {
                                                   : undefined;
                                               })()
                                           }
-                                          onChange={(n) =>
-                                            updateDraft(b.isin, {
-                                              [key]: n ?? null,
-                                            } as Partial<DraftSuggestions>)
-                                          }
+                                          onChange={() => {
+                                            /* read-only — DeriData calculated */
+                                          }}
                                         />
                                       ) : key === "faceValue" ? (
                                         <DecimalInput
@@ -1271,29 +1263,6 @@ export default function BondAutoUpdateView() {
                                             updateDraft(b.isin, {
                                               [key]: n ?? null,
                                             } as Partial<DraftSuggestions>)
-                                          }
-                                        />
-                                      ) : key === "sellPrice" ? (
-                                        <DecimalInput
-                                          title="Clean price (% of face). Commits on blur."
-                                          className="h-9 font-mono text-sm"
-                                          value={
-                                            sug == null
-                                              ? undefined
-                                              : (() => {
-                                                const n =
-                                                  typeof sug === "number"
-                                                    ? sug
-                                                    : Number(sug);
-                                                return Number.isFinite(n)
-                                                  ? n
-                                                  : undefined;
-                                              })()
-                                          }
-                                          onChange={(n) =>
-                                            updateDraft(b.isin, {
-                                              sellPrice: n ?? null,
-                                            })
                                           }
                                         />
                                       ) : key === "dayConvention" ||

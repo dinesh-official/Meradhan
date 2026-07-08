@@ -58,9 +58,22 @@ type SettleOrderPdfRow = {
   stampDutyAmount?: number | string | null;
 };
 
+function numFromSnap(v: unknown): number | undefined {
+  if (v == null || v === "") return undefined;
+  const n = typeof v === "number" ? v : Number(String(v).replace(/,/g, "").trim());
+  return Number.isFinite(n) ? n : undefined;
+}
+
+/** Checkout pricing snapshot on `order.bondDetails.pricing` — never bonds-table calc columns. */
 function orderPricingSnapshot(bondDetails: unknown): {
+  cleanPrice?: number;
+  principalAmount?: number;
   accruedInterest?: number;
+  totalConsideration?: number;
+  settlementAmount?: number;
+  stampDuty?: number;
   noOfAccrualDays?: number;
+  yield?: number;
 } | null {
   if (!bondDetails || typeof bondDetails !== "object" || Array.isArray(bondDetails)) {
     return null;
@@ -68,17 +81,25 @@ function orderPricingSnapshot(bondDetails: unknown): {
   const p = (bondDetails as Record<string, unknown>).pricing;
   if (!p || typeof p !== "object" || Array.isArray(p)) return null;
   const snap = p as Record<string, unknown>;
-  const accruedInterest =
-    typeof snap.accruedInterest === "number"
-      ? snap.accruedInterest
-      : Number(snap.accruedInterest);
-  const noOfAccrualDays =
-    typeof snap.noOfAccrualDays === "number"
-      ? snap.noOfAccrualDays
-      : Number(snap.noOfAccrualDays);
   return {
-    ...(Number.isFinite(accruedInterest) ? { accruedInterest } : {}),
-    ...(Number.isFinite(noOfAccrualDays) ? { noOfAccrualDays } : {}),
+    ...(numFromSnap(snap.cleanPrice) != null ? { cleanPrice: numFromSnap(snap.cleanPrice) } : {}),
+    ...(numFromSnap(snap.principalAmount) != null
+      ? { principalAmount: numFromSnap(snap.principalAmount) }
+      : {}),
+    ...(numFromSnap(snap.accruedInterest) != null
+      ? { accruedInterest: numFromSnap(snap.accruedInterest) }
+      : {}),
+    ...(numFromSnap(snap.totalConsideration) != null
+      ? { totalConsideration: numFromSnap(snap.totalConsideration) }
+      : {}),
+    ...(numFromSnap(snap.settlementAmount) != null
+      ? { settlementAmount: numFromSnap(snap.settlementAmount) }
+      : {}),
+    ...(numFromSnap(snap.stampDuty) != null ? { stampDuty: numFromSnap(snap.stampDuty) } : {}),
+    ...(numFromSnap(snap.noOfAccrualDays) != null
+      ? { noOfAccrualDays: numFromSnap(snap.noOfAccrualDays) }
+      : {}),
+    ...(numFromSnap(snap.yield) != null ? { yield: numFromSnap(snap.yield) } : {}),
   };
 }
 
@@ -86,12 +107,10 @@ function buildPdfFinancialFields(
   order: {
     subTotal: unknown;
     stampDuty: unknown;
+    totalAmount?: unknown;
+    unitPrice?: unknown;
     quantity: number;
     bondDetails: unknown;
-  },
-  bond: {
-    accruedInterest?: number | null;
-    accruedInterestDays?: number | null;
   },
   settleOrder: SettleOrderPdfRow | null | undefined,
   pdfAccruedInterestDays?: number,
@@ -100,6 +119,8 @@ function buildPdfFinancialFields(
   subTotal: number;
   stampDuty: number;
   totalConsideration: number;
+  settlementAmount: number;
+  price: number;
   accruedInterest?: number;
   accruedInterestDays?: number;
 } {
@@ -108,32 +129,53 @@ function buildPdfFinancialFields(
       ? Number(settleOrder.modQuantity)
       : order.quantity;
   const snap = orderPricingSnapshot(order.bondDetails);
-  const principal = Number(order.subTotal);
+
   const accruedInterest =
     settleOrder?.modAccrInt != null
       ? Number(settleOrder.modAccrInt)
-      : bond.accruedInterest != null && Number.isFinite(Number(bond.accruedInterest))
-        ? Number(bond.accruedInterest) * quantity
-        : snap?.accruedInterest;
+      : snap?.accruedInterest;
   const accruedInterestDays =
-    pdfAccruedInterestDays ??
-    (bond.accruedInterestDays != null && Number.isFinite(bond.accruedInterestDays)
-      ? bond.accruedInterestDays
-      : snap?.noOfAccrualDays);
+    pdfAccruedInterestDays ?? snap?.noOfAccrualDays;
+
+  const principal =
+    snap?.principalAmount ??
+    (Number.isFinite(Number(order.subTotal)) ? Number(order.subTotal) : 0);
+
   const stampDuty =
     settleOrder?.stampDutyAmount != null
       ? Number(settleOrder.stampDutyAmount)
-      : Number(order.stampDuty);
+      : snap?.stampDuty ??
+        (Number.isFinite(Number(order.stampDuty)) ? Number(order.stampDuty) : 0);
+
   const totalConsideration =
     settleOrder?.modConsideration != null
       ? Number(settleOrder.modConsideration)
-      : principal + (accruedInterest ?? 0);
+      : snap?.totalConsideration ??
+        (Number.isFinite(Number(order.totalAmount))
+          ? Number(order.totalAmount)
+          : principal + (accruedInterest ?? 0));
+
+  const settlementAmount =
+    snap?.settlementAmount ??
+    (settleOrder?.modConsideration != null
+      ? Number(settleOrder.modConsideration) + stampDuty
+      : totalConsideration);
+
+  const settlePrice = numFromSnap(
+    (settleOrder as { price?: unknown } | null | undefined)?.price,
+  );
+  const price =
+    settlePrice ??
+    snap?.cleanPrice ??
+    (Number.isFinite(Number(order.unitPrice)) ? Number(order.unitPrice) : 0);
 
   return {
     quantity,
     subTotal: principal,
     stampDuty,
     totalConsideration,
+    settlementAmount,
+    price,
     ...(accruedInterest != null && Number.isFinite(accruedInterest)
       ? { accruedInterest }
       : {}),
@@ -1108,6 +1150,7 @@ export class CrmOrdersService {
       quantity: number;
       unitPrice: number;
       createdAt: Date;
+      bondDetails?: unknown;
     };
 
     let order: OrderLike | null = null;
@@ -1120,6 +1163,7 @@ export class CrmOrdersService {
           existingOrder.createdAt instanceof Date
             ? existingOrder.createdAt
             : new Date(existingOrder.createdAt),
+        bondDetails: existingOrder.bondDetails,
       };
     } else if (settleOrder) {
       order = {
@@ -1151,12 +1195,8 @@ export class CrmOrdersService {
       });
     }
 
-    const settlementDateStr = [
-      settlementDt.getFullYear(),
-      String(settlementDt.getMonth() + 1).padStart(2, "0"),
-      String(settlementDt.getDate()).padStart(2, "0"),
-    ].join("-");
-
+    // Prefer checkout DeriData pricing snapshot on the order — never bonds-table calc columns.
+    const orderSnap = orderPricingSnapshot(order.bondDetails);
     const bondService = new BondService();
     const bond = await bondService.getBondDetails(order.isin);
     if (!bond) {
@@ -1166,36 +1206,46 @@ export class CrmOrdersService {
       });
     }
 
-    const pricingYield =
-      bond.yield != null && Number.isFinite(Number(bond.yield))
-        ? String(bond.yield)
-        : bond.buyYield != null && Number.isFinite(Number(bond.buyYield))
-          ? String(bond.buyYield)
-          : undefined;
+    let accruedInterestDays =
+      orderSnap?.noOfAccrualDays != null && Number.isFinite(orderSnap.noOfAccrualDays)
+        ? Math.round(orderSnap.noOfAccrualDays)
+        : NaN;
 
-    const bondData = await getBondInfoCalcData(order.isin, {
-      settlementDate: settlementDateStr,
-      quantity: order.quantity,
-      yeild: pricingYield,
-    });
+    if (!Number.isFinite(accruedInterestDays)) {
+      const settlementDateStr = [
+        settlementDt.getFullYear(),
+        String(settlementDt.getMonth() + 1).padStart(2, "0"),
+        String(settlementDt.getDate()).padStart(2, "0"),
+      ].join("-");
+      const pricingYield =
+        orderSnap?.yield != null && Number.isFinite(orderSnap.yield)
+          ? String(orderSnap.yield)
+          : bond.yield != null && Number.isFinite(Number(bond.yield))
+            ? String(bond.yield)
+            : bond.buyYield != null && Number.isFinite(Number(bond.buyYield))
+              ? String(bond.buyYield)
+              : undefined;
+      const bondData = await getBondInfoCalcData(order.isin, {
+        settlementDate: settlementDateStr,
+        quantity: order.quantity,
+        yeild: pricingYield,
+      });
+      accruedInterestDays = Number(bondData.calc.accrued_days);
+    }
 
     const interestPaymentDates = await getPayoutDates(bond.isin, settlementDt);
-
-    const lastIpRaw = bondData.payload.Last_IP_Date?.trim() || null;
-    let lastInterestPaymentDateRaw: string | null = lastIpRaw;
+    const lastIpFromBond = bond.lastCouponDateIst ?? bond.lastCouponDate;
+    let lastInterestPaymentDateRaw: string | null = null;
     let lastInterestPaymentDate: string | null = null;
-    if (lastIpRaw) {
-      const lastIpDt = parseLooseDate(lastIpRaw);
-      if (lastIpDt) {
-        lastInterestPaymentDateRaw = toYyyyMmDd(lastIpDt);
-        lastInterestPaymentDate = formatDateWithDayNameForPdfOption(lastIpDt);
-      } else {
-        lastInterestPaymentDate = lastIpRaw;
-      }
+    if (lastIpFromBond instanceof Date && !Number.isNaN(lastIpFromBond.getTime())) {
+      lastInterestPaymentDateRaw = toYyyyMmDd(lastIpFromBond);
+      lastInterestPaymentDate = formatDateWithDayNameForPdfOption(lastIpFromBond);
     }
 
     return {
-      accruedInterestDays: Number(bondData.calc.accrued_days),
+      accruedInterestDays: Number.isFinite(accruedInterestDays)
+        ? accruedInterestDays
+        : 0,
       settlementNumber: settleOrder?.settlementNo?.trim() || null,
       lastInterestPaymentDateRaw,
       lastInterestPaymentDate,
@@ -1907,7 +1957,6 @@ export class CrmOrdersService {
 
     const pdfFinancials = buildPdfFinancialFields(
       order,
-      bond,
       settleOrder,
       accruedInterestDaysParam,
     );
@@ -1923,7 +1972,8 @@ export class CrmOrdersService {
         subTotal: pdfFinancials.subTotal,
         stampDuty: pdfFinancials.stampDuty,
         totalAmount: pdfFinancials.totalConsideration,
-        price: Number(settleOrder?.price ?? bond.sellPrice ?? 0),
+        price: pdfFinancials.price,
+        bondDetails: order.bondDetails as { pricing?: Record<string, unknown> } | null,
         metadata: {
           dealId: (metadata.dealId as string) ?? undefined,
           clientOrderSide: (metadata.clientOrderSide as "BUY" | "SELL") ?? undefined,
@@ -2156,7 +2206,6 @@ export class CrmOrdersService {
 
     const pdfFinancials = buildPdfFinancialFields(
       order,
-      bond,
       settleOrder,
       accruedInterestDaysParam,
     );
@@ -2172,7 +2221,8 @@ export class CrmOrdersService {
         subTotal: pdfFinancials.subTotal,
         stampDuty: pdfFinancials.stampDuty,
         totalAmount: pdfFinancials.totalConsideration,
-        price: Number(settleOrder?.price ?? bond.sellPrice ?? 0),
+        price: pdfFinancials.price,
+        bondDetails: order.bondDetails as { pricing?: Record<string, unknown> } | null,
         metadata: {
           settlementType: rfqDetails?.settlementType ?? 0,
           dealId: (metadata.dealId as string) ?? undefined,

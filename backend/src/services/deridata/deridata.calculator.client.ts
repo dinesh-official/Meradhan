@@ -51,6 +51,8 @@ async function postCalculator(
     ...body,
   };
 
+  console.log("payload", payload);
+
   const res = await fetch(url, {
     method: "POST",
     headers: {

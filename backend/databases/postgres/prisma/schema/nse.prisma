@@ -196,7 +196,7 @@ model SettleOrderModel {
     price                  Decimal       @db.Decimal(15, 4)
     yieldType              YieldTypeSort
     yield                  Decimal       @db.Decimal(15, 4)
-    value                  Decimal       @db.Decimal(17, 2)
+    value                  Decimal       @db.Decimal(17, 4)
     buyerRefNo             String?       @db.VarChar(50)
     sellerRefNo            String?       @db.VarChar(50)
     buyBackofficeLoginId   String?       @db.VarChar(30)
@@ -206,24 +206,24 @@ model SettleOrderModel {
     source                 Int
 
     modSettleDate    String?
-    modQuantity      Decimal? @db.Decimal(17, 2)
-    modAccrInt       Decimal? @db.Decimal(17, 2)
+    modQuantity      Decimal? @db.Decimal(17, 4)
+    modAccrInt       Decimal? @db.Decimal(17, 4)
     modConsideration Decimal?
 
     settlementNo               String?
-    stampDutyAmount            Decimal? @db.Decimal(17, 2)
+    stampDutyAmount            Decimal? @db.Decimal(17, 4)
     stampDutyBearer            String?  @db.VarChar(30)
-    buyerFundPayinObligation   Decimal? @db.Decimal(17, 2)
-    sellerFundPayoutObligation Decimal? @db.Decimal(17, 2)
+    buyerFundPayinObligation   Decimal? @db.Decimal(17, 4)
+    sellerFundPayoutObligation Decimal? @db.Decimal(17, 4)
     fundPayinRefId             String?  @db.VarChar(50)
 
     settleStatus Int
 
-    secPayinQuantity Decimal? @db.Decimal(17, 2)
+    secPayinQuantity Decimal? @db.Decimal(17, 4)
     secPayinRemarks  String?  @db.VarChar(50)
     secPayinTime     String?
 
-    fundsPayinAmount  Decimal? @db.Decimal(17, 2)
+    fundsPayinAmount  Decimal? @db.Decimal(17, 4)
     fundsPayinRemarks String?  @db.VarChar(50)
     fundsPayinTime    String?
 

@@ -87,18 +87,39 @@ export class OrderPdfService {
       );
     }
 
-    const cleanPrice = bond.sellPrice ?? 0;
+    const ytm =
+      bond.yield != null && Number.isFinite(Number(bond.yield))
+        ? Number(bond.yield)
+        : null;
+    if (ytm == null) {
+      throw new AppError(
+        "Yield (YTM) is required for live DeriData order pricing",
+        { statusCode: HttpStatus.BAD_REQUEST },
+      );
+    }
 
-    const pricing = await computeBondOrderPricingData({
-      isin: bond.isin,
-      faceValue: bond.faceValue,
-      quantity,
-      cleanPrice: cleanPrice ?? 0,
-      couponRate: Number(bond.couponRate),
-      lastCouponDate: lastCouponDateStr,
-      recordDays,
-      nextCouponDate: nextCouponDateStr,
-    });
+    // Optional seed only — live DeriData yield→price overwrites cleanPrice.
+    const cleanPriceSeed =
+      bond.sellPrice ?? bond.providerPrice ?? bond.issuePrice ?? 0;
+
+    const pricing = await computeBondOrderPricingData(
+      {
+        isin: bond.isin,
+        faceValue: bond.faceValue,
+        quantity,
+        cleanPrice: cleanPriceSeed,
+        ytm,
+        couponRate: Number(bond.couponRate),
+        lastCouponDate: lastCouponDateStr,
+        recordDays,
+        nextCouponDate: nextCouponDateStr,
+      },
+      {
+        liveCalculator: "deridata",
+        deridataMode: "yieldToPrice",
+        maturityDate: bond.maturityDate ?? bond.maturityDateIst ?? null,
+      },
+    );
     let settlementNumber = "--";
 
     try {
@@ -123,8 +144,11 @@ export class OrderPdfService {
       price: pricing.cleanPrice,
       subTotal: pricing.principalAmount,
       stampDuty: pricing.stampDuty,
-      totalAmount: pricing.principalAmount + pricing.accruedInterest,
+      totalAmount: pricing.settlementAmount,
       createdAt: new Date(pricing.dealDate).toISOString(),
+      bondDetails: {
+        pricing,
+      },
       metadata: {
         lastInterestPaymentDate: lastPaymentDate,
         valueDate: pricing.dealDate,

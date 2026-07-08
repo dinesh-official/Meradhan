@@ -1,10 +1,9 @@
-import type { BondDetailsResponse } from "@root/apiGateway";
-
 type SettleOrderMeta = {
   modQuantity?: number | string | null;
   modAccrInt?: number | string | null;
   modConsideration?: number | string | null;
   stampDutyAmount?: number | string | null;
+  price?: number | string | null;
 };
 
 type OrderPdfMetadata = {
@@ -13,12 +12,25 @@ type OrderPdfMetadata = {
   settleOrder?: SettleOrderMeta;
 };
 
+type OrderPdfPricingSnapshot = {
+  cleanPrice?: unknown;
+  principalAmount?: unknown;
+  accruedInterest?: unknown;
+  totalConsideration?: unknown;
+  settlementAmount?: unknown;
+  stampDuty?: unknown;
+  noOfAccrualDays?: unknown;
+  yield?: unknown;
+};
+
 type OrderPdfInput = {
   subTotal?: number;
   stampDuty?: number;
   totalAmount?: number;
   price?: number;
   metadata?: OrderPdfMetadata;
+  /** Checkout pricing snapshot from `order.bondDetails.pricing` — never bond master DB amounts. */
+  bondDetails?: { pricing?: OrderPdfPricingSnapshot } | null;
 };
 
 function toNum(v: unknown): number | null {
@@ -37,21 +49,14 @@ function firstNum(...values: unknown[]): number | null {
 
 /**
  * Resolves principal, accrued interest, consideration, and settlement for order PDFs.
- * Priority: NSE settle_order → bond DB (autofill) → order checkout snapshot → computed fallback.
+ * Priority: NSE settle_order → order checkout pricing snapshot → order row amounts.
+ * Does not read calculated pricing fields from the bonds master table.
  */
 export function resolveOrderPdfFinancials(params: {
-  bond: Pick<
-    BondDetailsResponse,
-    | "faceValue"
-    | "sellPrice"
-    | "accruedInterest"
-    | "accruedInterestDays"
-    | "settlementAmount"
-    | "principalAmount"
-    | "totalConsideration"
-  >;
   orderData?: OrderPdfInput;
   qun: number;
+  /** Face value used only if principal cannot be derived from settle/order/snapshot. */
+  faceValue?: number | null;
 }): {
   effectiveQty: number;
   principalAmount: number;
@@ -60,68 +65,74 @@ export function resolveOrderPdfFinancials(params: {
   stampDutyAmount: number;
   totalConsideration: number;
   settlementAmount: number;
+  cleanPrice: number | null;
 } {
-  const { bond, orderData, qun } = params;
+  const { orderData, qun } = params;
   const settleOrder = orderData?.metadata?.settleOrder;
+  const orderPricing = orderData?.bondDetails?.pricing;
 
   const effectiveQty =
     settleOrder?.modQuantity != null
       ? Math.max(1, Math.round(Number(settleOrder.modQuantity)))
       : Math.max(1, Math.round(qun));
 
-  const bondAccruedPerUnit = toNum(bond.accruedInterest);
-  const bondSettlementPerUnit = toNum(bond.settlementAmount);
-  const bondPrincipalPerUnit = toNum(bond.principalAmount);
-  const bondConsiderationPerUnit = toNum(bond.totalConsideration);
-  const bondAccruedDays = toNum(bond.accruedInterestDays);
-
   const accruedInterest =
     firstNum(
       settleOrder?.modAccrInt,
       orderData?.metadata?.accruedInterest,
-      bondAccruedPerUnit != null ? bondAccruedPerUnit * effectiveQty : null,
+      orderPricing?.accruedInterest,
     ) ?? 0;
 
   const stampDutyAmount =
-    firstNum(settleOrder?.stampDutyAmount, orderData?.stampDuty) ?? 0;
+    firstNum(
+      settleOrder?.stampDutyAmount,
+      orderData?.stampDuty,
+      orderPricing?.stampDuty,
+    ) ?? 0;
 
   const principalFromSettle =
     settleOrder?.modConsideration != null && settleOrder?.modAccrInt != null
       ? Number(settleOrder.modConsideration) - Number(settleOrder.modAccrInt)
       : null;
 
-  const cleanPricePct =
-    firstNum(orderData?.price, bond.sellPrice) ?? 100;
-  const faceValue = toNum(bond.faceValue) ?? 1000;
+  const cleanPrice = firstNum(
+    settleOrder?.price,
+    orderData?.price,
+    orderPricing?.cleanPrice,
+  );
+
+  const faceValue = toNum(params.faceValue) ?? 1000;
 
   const principalAmount =
     firstNum(
+      orderPricing?.principalAmount,
       orderData?.subTotal,
       principalFromSettle,
-      bondPrincipalPerUnit != null ? bondPrincipalPerUnit * effectiveQty : null,
-      (faceValue * effectiveQty * cleanPricePct) / 100,
+      cleanPrice != null ? (faceValue * effectiveQty * cleanPrice) / 100 : null,
     ) ?? 0;
 
   const totalConsideration =
     firstNum(
       settleOrder?.modConsideration,
-      bondConsiderationPerUnit != null
-        ? bondConsiderationPerUnit * effectiveQty
-        : null,
+      orderPricing?.totalConsideration,
+      orderData?.totalAmount,
       principalAmount + accruedInterest,
     ) ?? 0;
 
   const settlementAmount =
     firstNum(
+      orderPricing?.settlementAmount,
       settleOrder?.modConsideration != null
         ? Number(settleOrder.modConsideration) + stampDutyAmount
         : null,
-      bondSettlementPerUnit != null ? bondSettlementPerUnit * effectiveQty : null,
-      totalConsideration + stampDutyAmount,
+      // DeriData settlement equals total consideration (no extra stamp add).
+      totalConsideration,
     ) ?? 0;
 
-  const accruedInterestDays =
-    firstNum(orderData?.metadata?.accruedInterestDays, bondAccruedDays);
+  const accruedInterestDays = firstNum(
+    orderData?.metadata?.accruedInterestDays,
+    orderPricing?.noOfAccrualDays,
+  );
 
   return {
     effectiveQty,
@@ -131,5 +142,6 @@ export function resolveOrderPdfFinancials(params: {
     stampDutyAmount,
     totalConsideration,
     settlementAmount,
+    cleanPrice,
   };
 }
