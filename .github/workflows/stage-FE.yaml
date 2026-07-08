@@ -3,7 +3,7 @@ name: stage fe deploy
 on:
   push:
     branches:
-      - staging
+      - staging--
 
 jobs:
   deploy:

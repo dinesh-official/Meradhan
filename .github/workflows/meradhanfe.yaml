@@ -4,7 +4,7 @@ name: meradhan FE deploy
 on:
   push:
     branches:
-      - master
+      - master--
 jobs:
   deploy:
     runs-on: ubuntu-latest
