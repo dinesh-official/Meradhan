@@ -23,7 +23,6 @@ export const AUTOFILL_MERGE_KEYS = [
   "faceValue",
   "couponType",
   "couponRate",
-  "buyYield",
   "yield",
   "sellPrice",
   "bondType",
@@ -158,9 +157,6 @@ export function mergeAutofillIntoForm(
   }
   if (include.couponRate && Number.isFinite(suggested.couponRate)) {
     out.couponRate = suggested.couponRate;
-  }
-  if (include.buyYield && suggested.buyYield != null && Number.isFinite(suggested.buyYield)) {
-    out.buyYield = suggested.buyYield;
   }
   if (include.yield && Number.isFinite(suggested.yield)) {
     out.yield = suggested.yield;

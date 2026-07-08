@@ -1,12 +1,20 @@
 import { db } from "@core/database/database";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import {
-  buildCalcPayloadAndContext,
+  mapDeriDataToCalcApiResponse,
+  mapDeriDataToCalcPayload,
+  parseDeriDataRecordDateYmd,
+} from "@services/deridata/deridata.calc.adapter";
+import {
+  calculatePriceToYield,
+  calculateYieldToPrice,
+} from "@services/deridata/deridata.calculator.client";
+import {
+  buildAutofillCalcContext,
   collectAllCouponDatesYmd,
   mapNatureOfInstrument,
   parseCalcMoneyString,
   paymentFrequencyToDbEnum,
-  postToCalcApi,
   resolveAutoUpdateCalcInputs,
   toYyyyMmDd,
   type AutoUpdateAutofillInput,
@@ -22,6 +30,9 @@ export type BondDealAutofillResponse = {
     usedProviderPrice?: boolean;
     usedProviderQuantity?: boolean;
     usedProviderSettlementDate?: boolean;
+    usedDeriDataCalculator?: boolean;
+    pricingMode?: "ytm" | "cleanPrice";
+    /** @deprecated Use usedDeriDataCalculator */
     usedCalcBondApi?: boolean;
   };
   suggested: {
@@ -95,7 +106,7 @@ export class BondAutoUpdateAutofillService {
     );
 
     const resolved = resolveAutoUpdateCalcInputs(bondData, input);
-    const ctx = await buildCalcPayloadAndContext(
+    const ctx = await buildAutofillCalcContext(
       isin,
       bond,
       bondData,
@@ -103,7 +114,56 @@ export class BondAutoUpdateAutofillService {
       resolved,
     );
 
-    const calcResponse = await postToCalcApi(ctx.payload);
+    if (
+      ctx.pricingMode === "ytm" &&
+      (ctx.pricingYield == null || !Number.isFinite(ctx.pricingYield))
+    ) {
+      throw new AppError(
+        `Pricing yield is required for ISIN ${isin}. Set buy yield or yield on the bond, or pass pricingYield.`,
+        { statusCode: HttpStatus.BAD_REQUEST, code: "MISSING_PRICING_YIELD" },
+      );
+    }
+    if (
+      ctx.pricingMode === "cleanPrice" &&
+      (ctx.cleanPrice == null || !Number.isFinite(ctx.cleanPrice))
+    ) {
+      throw new AppError(
+        `Clean price is required for ISIN ${isin}. Enter a clean price or switch back to YTM mode.`,
+        { statusCode: HttpStatus.BAD_REQUEST, code: "MISSING_CLEAN_PRICE" },
+      );
+    }
+
+    const deriDataResponse =
+      ctx.pricingMode === "cleanPrice"
+        ? await calculatePriceToYield({
+            isin,
+            valueDate: ctx.settlementDateYmd,
+            faceValue: ctx.faceValue,
+            quantity: ctx.quantity,
+            cleanPrice: ctx.cleanPrice!,
+            cashflowShutFlag: ctx.cashflowShutFlag,
+          })
+        : await calculateYieldToPrice({
+            isin,
+            valueDate: ctx.settlementDateYmd,
+            faceValue: ctx.faceValue,
+            quantity: ctx.quantity,
+            ytm: ctx.pricingYield,
+            cashflowShutFlag: ctx.cashflowShutFlag,
+          });
+
+    const resolvedYieldRaw =
+      ctx.pricingMode === "cleanPrice"
+        ? Number(deriDataResponse.summary.xirr || 0)
+        : ctx.pricingYield;
+
+    const calcResponse = mapDeriDataToCalcApiResponse(deriDataResponse, {
+      quantity: ctx.quantity,
+      settlementDateYmd: ctx.settlementDateYmd,
+      accruedDays: ctx.pricing.noOfAccrualDays,
+      periodStatus: ctx.periodStatus,
+      ytm: resolvedYieldRaw,
+    });
 
     const allCouponDates = collectAllCouponDatesYmd(
       couponRows,
@@ -115,7 +175,6 @@ export class BondAutoUpdateAutofillService {
       (
         bondData?.bondName?.trim() ||
         bond?.issuerName?.trim() ||
-        ctx.calcBond?.issuer_name?.trim() ||
         ""
       ).trim() || null;
     const creditRating = bondData?.creditRating?.trim() || "UnRated";
@@ -134,10 +193,10 @@ export class BondAutoUpdateAutofillService {
     const sellPriceResolved =
       finalPrice != null && Number.isFinite(finalPrice) ? finalPrice : null;
 
-    const accruedDaysRaw = calcResponse.accrued_days;
     const accruedInterestDays =
-      accruedDaysRaw != null && Number.isFinite(Number(accruedDaysRaw))
-        ? Math.round(Number(accruedDaysRaw))
+      ctx.pricing.noOfAccrualDays != null &&
+      Number.isFinite(ctx.pricing.noOfAccrualDays)
+        ? Math.round(ctx.pricing.noOfAccrualDays)
         : null;
 
     const settlementAmountResolved = parseCalcMoneyString(
@@ -151,46 +210,48 @@ export class BondAutoUpdateAutofillService {
       calcResponse.total_consideration,
     );
 
+    const recordDateFromDeriData = parseDeriDataRecordDateYmd(
+      deriDataResponse.record_date,
+    );
+
     const suggested = {
       bondName,
       creditRating,
       allCouponDates,
       allCouponDatesIst: allCouponDates,
       natureOfInstrument,
-      maturityDate:
-        toYyyyMmDd(ctx.calcBond?.Maturity_Date) ??
-        toYyyyMmDd(bond?.maturityDate) ??
-        null,
-      dateOfAllotment:
-        toYyyyMmDd(ctx.calcBond?.Dated_Date) ??
-        toYyyyMmDd(bond?.issueDateIst) ??
-        null,
-      lastCouponDate: String(ctx.payload.Last_IP_Date ?? ""),
-      nextCouponDate: String(ctx.payload.Next_IP_Date ?? ""),
-      recordDate: toYyyyMmDd(ctx.pricing.recordDate) ?? null,
+      maturityDate: ctx.maturityDate || toYyyyMmDd(bond?.maturityDate) || null,
+      dateOfAllotment: ctx.datedDate || toYyyyMmDd(bond?.issueDateIst) || null,
+      lastCouponDate: ctx.lastCouponDate,
+      nextCouponDate: ctx.nextCouponDate,
+      recordDate:
+        recordDateFromDeriData ?? toYyyyMmDd(ctx.pricing.recordDate) ?? null,
       recordDays: ctx.couponDate.recordDays,
       accruedInterestDays,
       dueDate: ctx.dueDateYmd ?? null,
       dayConvention: bond?.dayConvention ?? bondData?.dayConvention ?? null,
       interestPaymentFrequency:
-        paymentFrequencyToDbEnum(ctx.payload.Payment_Frequency) ||
+        paymentFrequencyToDbEnum(ctx.interestPaymentFrequency) ||
         bond?.interestPaymentFrequency ||
         "UNKNOWN",
       interestPaymentMode: paymentFrequencyToDbEnum(
-        ctx.payload.Payment_Frequency,
+        ctx.interestPaymentFrequency,
       ),
-      faceValue: Number(ctx.payload.Face_Value ?? bond?.faceValue ?? bondData?.faceValue ?? 0),
-      couponRate: Number(
-        ctx.payload.Coupon_Rate_Pct ?? bond?.couponRate ?? bondData?.couponRate ?? 0,
-      ),
+      faceValue: ctx.faceValue,
+      couponRate: ctx.couponRate,
       buyYield: (() => {
         const raw =
-          bondData?.buyYield ??
-          bondData?.yield ??
-          (Number(calcResponse.final_yield) || null);
+          ctx.pricingMode === "cleanPrice"
+            ? (Number(deriDataResponse.summary.xirr) || null)
+            : bondData?.buyYield ??
+              bondData?.yield ??
+              (Number(calcResponse.final_yield) || null);
         return raw != null && Number.isFinite(raw) ? Number(raw) : null;
       })(),
-      yield: finalYieldRaw,
+      yield:
+        ctx.pricingMode === "cleanPrice"
+          ? Number(deriDataResponse.summary.xirr || 0)
+          : finalYieldRaw,
       sellPrice: sellPriceResolved,
       settlementAmount: settlementAmountResolved,
       accruedInterest: accruedInterestResolved,
@@ -216,11 +277,15 @@ export class BondAutoUpdateAutofillService {
         usedReferenceMetadata,
         usedCouponSchedule,
         yieldSource:
-          resolved.pricingYieldOverride != null ? "override" : "bonds",
+          resolved.pricingMode === "cleanPrice" || resolved.pricingYieldOverride != null
+            ? "override"
+            : "bonds",
         usedProviderPrice: false,
         usedProviderQuantity: false,
         usedProviderSettlementDate: false,
-        usedCalcBondApi: ctx.calcBond != null,
+        usedDeriDataCalculator: true,
+        pricingMode: ctx.pricingMode,
+        usedCalcBondApi: false,
       },
       suggested,
       pricing: {
@@ -232,12 +297,13 @@ export class BondAutoUpdateAutofillService {
         totalConsideration: parseCalcMoneyString(
           calcResponse.total_consideration,
         ),
-        calc: {
-          ...calcResponse,
-          ...(ctx.calcBond?.Period_Status_Note
-            ? { period_status_note: ctx.calcBond.Period_Status_Note }
-            : {}),
-        },
+        calc: mapDeriDataToCalcPayload(deriDataResponse, {
+          quantity: ctx.quantity,
+          settlementDateYmd: ctx.settlementDateYmd,
+          accruedDays: ctx.pricing.noOfAccrualDays,
+          periodStatus: ctx.periodStatus,
+          ytm: resolvedYieldRaw,
+        }),
       },
       margin: {},
     };

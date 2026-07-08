@@ -158,7 +158,7 @@ export interface BondOrderPricingData {
 
 export type BondOrderPricingResponse = BaseResponseData<BondOrderPricingData>;
 
-/** Snapshot from calc.meradhan.co (fields used by CRM bond autofill). */
+/** Snapshot from DeriData calculator (fields used by CRM bond autofill). */
 export interface BondCalcServiceSnapshot {
   accrued_days: number;
   final_price: string;
@@ -233,6 +233,7 @@ export interface BondDealAutofillResponse {
     usedProviderPrice?: boolean;
     usedProviderQuantity?: boolean;
     usedProviderSettlementDate?: boolean;
+    pricingMode?: "ytm" | "cleanPrice";
   };
   suggested: BondDealAutofillSuggestions;
   pricing: {

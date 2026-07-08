@@ -36,12 +36,18 @@ export class BondAutoUpdateAutofillController {
     const quantity = readNum(body.quantity);
     const settlementDate = readStr(body.settlementDate);
     const pricingYield = readNum(body.pricingYield);
+    const cleanPrice = readNum(body.cleanPrice);
+    const pricingModeRaw = readStr(body.pricingMode);
+    const pricingMode =
+      pricingModeRaw === "cleanPrice" ? "cleanPrice" : "ytm";
 
     try {
       const data = await this.service.buildAutofill(isin, {
         quantity: quantity != null && quantity > 0 ? quantity : 1,
         settlementDate,
         pricingYield,
+        cleanPrice,
+        pricingMode,
       });
       return res.sendResponse({
         statusCode: HttpStatus.OK,
