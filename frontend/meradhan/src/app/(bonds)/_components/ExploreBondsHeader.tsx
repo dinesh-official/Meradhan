@@ -1,0 +1,482 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+"use client";
+import { Input } from "@/components/ui/input";
+import {
+  MultiSelect,
+  MultiSelectContent,
+  MultiSelectGroup,
+  MultiSelectItem,
+  MultiSelectTrigger,
+  MultiSelectValue,
+} from "@/components/ui/multi-select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import { Search, Trash2Icon, X } from "lucide-react";
+import { ReactNode, useEffect, useState } from "react";
+// [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold]
+// Commented out: static option arrays replaced by dynamic `filterOptions` prop.
+// Keeping the import for fallback label lookups in the selected-filter chips.
+import {
+  couponOptions,
+  interestPaymentOptions,
+  maturityOptions,
+  ratingOptions,
+  taxationOptions,
+} from "../_hooks/bonds_filter_data";
+import type { useBondFilterOptions } from "../_hooks/useBondFilterOptions";
+import { BondsFilterHook } from "../_hooks/useBondsFilters";
+import { useRouter } from "nextjs-toploader/app";
+
+// "Sort by" options. Values are `${field}_${dir}` tokens parsed by the backend
+// (desc = highest value first). Rating uses a custom credit-quality order;
+// Tenure = Maturity Date − Allotment Date.
+const sortOptions = [
+  { value: "yield_desc", title: "Yield: High to Low" },
+  { value: "yield_asc", title: "Yield: Low to High" },
+  { value: "rating_desc", title: "Rating: High to Low" },
+  { value: "rating_asc", title: "Rating: Low to High" },
+  { value: "tenure_desc", title: "Tenure: High to Low" },
+  { value: "tenure_asc", title: "Tenure: Low to High" },
+] as const;
+
+// [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold]
+// Added `filterOptions` prop so dropdowns only show options that exist in actual bond data.
+function ExploreBondsHeader({
+  manager,
+  applyFilters,
+  desc,
+  title,
+  rootUrl,
+  filterOptions,
+}: {
+  manager: BondsFilterHook;
+  applyFilters?: () => void;
+  title?: string | ReactNode;
+  desc?: string | ReactNode;
+  rootUrl: string;
+  /** Dynamic filter options from useBondFilterOptions hook. Falls back to static arrays if not provided. */
+  filterOptions?: ReturnType<typeof useBondFilterOptions>;
+}) {
+  const [dounce, setDobunce] = useState(0);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (dounce === 0) return; // skip first render
+
+    const timer = setTimeout(() => {
+      applyFilters?.(); // ✅ safely call it after delay
+    }, 1200); // 1200ms debounce
+
+    return () => clearTimeout(timer); // ✅ cleanup on re-run
+  }, [dounce]);
+
+  return (
+    <div className="flex flex-col justify-center items-center bg-primary py-14 w-full ">
+      <div className="h-full text-white text-center container">
+        <div className="flex flex-col justify-center gap-5 h-full">
+          {title && (
+            <h1
+              className={cn(
+                "font-medium lg:text-[40px] text-3xl",
+                "quicksand-medium"
+              )}
+            >
+              {title}
+            </h1>
+          )}
+          {desc && <p>{desc}</p>}
+          <div className="relative">
+            <Input
+              className="bg-white px-5 py-5.5 border-0 text-gray-950"
+              placeholder="Search by ISIN, Issuer Name"
+              onChange={(e) => {
+                manager.setSearch(e.target.value);
+                setDobunce((prev) => prev + 1);
+              }}
+              value={manager.filters?.search || ""}
+            />
+            <button
+              className="focus:z-10 absolute inset-y-0 flex justify-center items-center disabled:opacity-50 focus-visible:border-ring rounded-e-md outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-9 h-full text-muted-foreground/80 hover:text-foreground transition-[color,box-shadow] disabled:cursor-not-allowed disabled:pointer-events-none end-0"
+              aria-label="Subscribe"
+              disabled={!manager.filters?.search}
+              onClick={() => {
+                setDobunce((prev) => prev + 1);
+              }}
+            >
+              <Search className="mr-3 text-secondary" />
+            </button>
+          </div>
+          {/* Centered over the 5 filters only — the leading spacer matches the
+              2-column Sort By so the label aligns with the filter columns. */}
+          <div className="mt-5 lg:grid lg:grid-cols-7 lg:gap-3">
+            <span className="hidden lg:block lg:col-span-2" />
+            <p className="lg:col-span-5 text-center">Or Search by Filter</p>
+          </div>
+          <div className="gap-3 grid grid-cols-2 lg:grid-cols-7">
+            {/* Sort By — single-select; sorts the whole result set by the chosen
+                field. Spans 2 columns and is styled blue/bold to stand apart. */}
+            <Select
+              value={manager.sort || undefined}
+              onValueChange={(value) => {
+                manager.setSort(value);
+                setDobunce((prev) => prev + 1);
+              }}
+            >
+              <SelectTrigger className="col-span-2 bg-blue-100 border-blue-300 w-full font-bold text-black lg:col-span-2">
+                <SelectValue placeholder="Sort By" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {sortOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.title}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+
+            {/* <MultiSelect
+              defaultValues={[]}
+              onValuesChange={() => {
+                setDobunce((prev) => prev + 1);
+              }}
+            >
+              <MultiSelectTrigger className="w-full" disabled>
+                <MultiSelectValue placeholder="Yield" />
+              </MultiSelectTrigger>
+              <MultiSelectContent>
+                <MultiSelectGroup>
+                  {([] as unknown as typeof maturityOptions).map((option) => (
+                    <MultiSelectItem key={option.value} value={option.value}>
+                      {option.title}
+                    </MultiSelectItem>
+                  ))}
+                </MultiSelectGroup>
+              </MultiSelectContent>
+            </MultiSelect> */}
+
+            <MultiSelect
+              values={manager.filters?.maturity}
+              onValuesChange={(values) => {
+                manager.setMaturity(values);
+                setDobunce((prev) => prev + 1);
+              }}
+            >
+              <MultiSelectTrigger className="w-full">
+                <MultiSelectValue placeholder="Select Maturity" />
+              </MultiSelectTrigger>
+              <MultiSelectContent>
+                <MultiSelectGroup>
+                  {/* [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold] */}
+                  {/* Commented out: was using static maturityOptions — now using dynamic activeMaturityOptions */}
+                  {/* {maturityOptions.map((option) => (
+                    <MultiSelectItem key={option.value} value={option.value}>
+                      {option.title}
+                    </MultiSelectItem>
+                  ))} */}
+                  {(filterOptions?.activeMaturityOptions ?? maturityOptions).map((option) => (
+                    <MultiSelectItem key={option.value} value={option.value}>
+                      {option.title}
+                    </MultiSelectItem>
+                  ))}
+                </MultiSelectGroup>
+              </MultiSelectContent>
+            </MultiSelect>
+
+            <MultiSelect
+              values={manager.filters?.rating}
+              onValuesChange={(values) => {
+                manager.setRating(values);
+                setDobunce((prev) => prev + 1);
+              }}
+            >
+              <MultiSelectTrigger className="w-full">
+                <MultiSelectValue placeholder="Credit Rating" />
+              </MultiSelectTrigger>
+              <MultiSelectContent>
+                <MultiSelectGroup>
+                  {/* [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold] */}
+                  {/* Commented out: was using static ratingOptions — now using dynamic activeRatingOptions */}
+                  {/* {ratingOptions.map((option) => (
+                    <MultiSelectItem key={option.value} value={option.value}>
+                      {option.title}
+                    </MultiSelectItem>
+                  ))} */}
+                  {(filterOptions?.activeRatingOptions ?? ratingOptions).map((option) => (
+                    <MultiSelectItem key={option.value} value={option.value}>
+                      {option.title}
+                    </MultiSelectItem>
+                  ))}
+                </MultiSelectGroup>
+              </MultiSelectContent>
+            </MultiSelect>
+
+            <MultiSelect
+              values={manager.filters?.taxation}
+              onValuesChange={(values) => {
+                manager.setTaxation(values);
+                setDobunce((prev) => prev + 1);
+              }}
+            >
+              <MultiSelectTrigger className="w-full">
+                <MultiSelectValue placeholder="Taxation" />
+              </MultiSelectTrigger>
+              <MultiSelectContent>
+                <MultiSelectGroup>
+                  {/* [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold] */}
+                  {/* Commented out: was using static taxationOptions — now using dynamic activeTaxationOptions */}
+                  {/* {taxationOptions.map((option) => (
+                    <MultiSelectItem key={option.value} value={option.value}>
+                      {option.title}
+                    </MultiSelectItem>
+                  ))} */}
+                  {(filterOptions?.activeTaxationOptions ?? taxationOptions).map((option) => (
+                    <MultiSelectItem key={option.value} value={option.value}>
+                      {option.title}
+                    </MultiSelectItem>
+                  ))}
+                </MultiSelectGroup>
+              </MultiSelectContent>
+            </MultiSelect>
+
+            <MultiSelect
+              values={manager.filters?.coupon}
+              onValuesChange={(values) => {
+                manager.setCoupon(values);
+                setDobunce((prev) => prev + 1);
+              }}
+            >
+              <MultiSelectTrigger className="w-full">
+                <MultiSelectValue placeholder="Coupon (%)" />
+              </MultiSelectTrigger>
+              <MultiSelectContent>
+                <MultiSelectGroup>
+                  {/* [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold] */}
+                  {/* Commented out: was using static couponOptions — now using dynamic activeCouponOptions */}
+                  {/* {couponOptions.map((option) => (
+                    <MultiSelectItem key={option.value} value={option.value}>
+                      {option.title}
+                    </MultiSelectItem>
+                  ))} */}
+                  {(filterOptions?.activeCouponOptions ?? couponOptions).map((option) => (
+                    <MultiSelectItem key={option.value} value={option.value}>
+                      {option.title}
+                    </MultiSelectItem>
+                  ))}
+                </MultiSelectGroup>
+              </MultiSelectContent>
+            </MultiSelect>
+
+            <MultiSelect
+              values={manager.filters?.interest}
+              onValuesChange={(values) => {
+                manager.setInterest(values);
+                setDobunce((prev) => prev + 1);
+              }}
+            >
+              <MultiSelectTrigger className="w-full">
+                <MultiSelectValue placeholder="Interest Payment" />
+              </MultiSelectTrigger>
+              <MultiSelectContent>
+                <MultiSelectGroup>
+                  {/* [Ticket: Maturity and Credit Rating dropdown filters should display only bonds we hold] */}
+                  {/* Commented out: was using static interestPaymentOptions — now using dynamic activeInterestOptions */}
+                  {/* {interestPaymentOptions.map((option) => (
+                    <MultiSelectItem key={option.value} value={option.value}>
+                      {option.title}
+                    </MultiSelectItem>
+                  ))} */}
+                  {(filterOptions?.activeInterestOptions ?? interestPaymentOptions).map((option) => (
+                    <MultiSelectItem key={option.value} value={option.value}>
+                      {option.title}
+                    </MultiSelectItem>
+                  ))}
+                </MultiSelectGroup>
+              </MultiSelectContent>
+            </MultiSelect>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {/* Search Filter */}
+            {/* {manager.filters?.search && (
+              <div className="flex items-center gap-2 bg-secondary px-3 py-1 rounded-full text-white text-sm">
+                <span>Search: {manager.filters.search}</span>
+                <Trash2Icon
+                  className="hover:text-red-300 transition-colors cursor-pointer"
+                  size={14}
+                  onClick={() => {
+                    manager.setSearch("");
+                    setDobunce((prev) => prev + 1);
+                  }}
+                />
+              </div>
+            )} */}
+
+            {/* Maturity Filters */}
+            {manager.filters?.maturity?.map((m) => {
+              const maturityOption = maturityOptions.find(
+                (opt) => opt.value === m
+              );
+              return (
+                <div
+                  key={m}
+                  className="flex items-center gap-2 bg-secondary px-3 py-1 rounded-full text-white text-sm"
+                >
+                  <span>Maturity: {maturityOption?.title || m}</span>
+                  <Trash2Icon
+                    className="hover:text-red-300 transition-colors cursor-pointer"
+                    size={14}
+                    onClick={() => {
+                      const newMaturity =
+                        manager.filters?.maturity?.filter(
+                          (item) => item !== m
+                        ) || [];
+                      manager.setMaturity(newMaturity);
+                      setDobunce((prev) => prev + 1);
+                    }}
+                  />
+                </div>
+              );
+            })}
+
+            {/* Rating Filters */}
+            {manager.filters?.rating?.map((r) => {
+              const ratingOption = ratingOptions.find((opt) => opt.value === r);
+              return (
+                <div
+                  key={r}
+                  className="flex items-center gap-2 bg-secondary px-3 py-1 rounded-full text-white text-sm"
+                >
+                  <span>Rating: {ratingOption?.title || r}</span>
+                  <Trash2Icon
+                    className="hover:text-red-300 transition-colors cursor-pointer"
+                    size={14}
+                    onClick={() => {
+                      const newRating =
+                        manager.filters?.rating?.filter((item) => item !== r) ||
+                        [];
+                      manager.setRating(newRating);
+                      setDobunce((prev) => prev + 1);
+                    }}
+                  />
+                </div>
+              );
+            })}
+
+            {/* Taxation Filters */}
+            {manager.filters?.taxation?.map((t) => {
+              const taxationOption = taxationOptions.find(
+                (opt) => opt.value === t
+              );
+              return (
+                <div
+                  key={t}
+                  className="flex items-center gap-2 bg-secondary px-3 py-1 rounded-full text-white text-sm"
+                >
+                  <span>Taxation: {taxationOption?.title || t}</span>
+                  <Trash2Icon
+                    className="hover:text-red-300 transition-colors cursor-pointer"
+                    size={14}
+                    onClick={() => {
+                      const newTaxation =
+                        manager.filters?.taxation?.filter(
+                          (item) => item !== t
+                        ) || [];
+                      manager.setTaxation(newTaxation);
+                      setDobunce((prev) => prev + 1);
+                    }}
+                  />
+                </div>
+              );
+            })}
+
+            {/* Coupon Filters */}
+            {manager.filters?.coupon?.map((c) => {
+              const couponOption = couponOptions.find((opt) => opt.value === c);
+              return (
+                <div
+                  key={c}
+                  className="flex items-center gap-2 bg-secondary px-3 py-1 rounded-full text-white text-sm"
+                >
+                  <span>Coupon: {couponOption?.title || c}%</span>
+                  <Trash2Icon
+                    className="hover:text-red-300 transition-colors cursor-pointer"
+                    size={14}
+                    onClick={() => {
+                      const newCoupon =
+                        manager.filters?.coupon?.filter((item) => item !== c) ||
+                        [];
+                      manager.setCoupon(newCoupon);
+                      setDobunce((prev) => prev + 1);
+                    }}
+                  />
+                </div>
+              );
+            })}
+
+            {/* Interest Payment Filters */}
+            {manager.filters?.interest?.map((i) => {
+              const interestOption = interestPaymentOptions.find(
+                (opt) => opt.value === i
+              );
+              return (
+                <div
+                  key={i}
+                  className="flex items-center gap-2 bg-secondary px-3 py-1 rounded-full text-white text-sm"
+                >
+                  <span>Interest: {interestOption?.title || i}</span>
+                  <Trash2Icon
+                    className="hover:text-red-300 transition-colors cursor-pointer"
+                    size={14}
+                    onClick={() => {
+                      const newInterest =
+                        manager.filters?.interest?.filter(
+                          (item) => item !== i
+                        ) || [];
+                      manager.setInterest(newInterest);
+                      setDobunce((prev) => prev + 1);
+                    }}
+                  />
+                </div>
+              );
+            })}
+
+            {/* Clear All Filters Button */}
+            {manager.filters?.maturity?.length ||
+              manager.filters?.rating?.length ||
+              manager.filters?.taxation?.length ||
+              manager.filters?.coupon?.length ||
+              manager.filters?.interest?.length ? (
+              <div
+                className="flex items-center gap-2 bg-red-500 hover:bg-red-600 px-3 py-1 rounded-full text-white text-sm transition-colors cursor-pointer"
+                onClick={() => {
+                  manager.applyFilterMutation.reset();
+                  // manager.setSearch("");
+                  // manager.setMaturity([]);
+                  // manager.setRating([]);
+                  // manager.setTaxation([]);
+                  // manager.setCoupon([]);
+                  // manager.setInterest([]);
+                  router.replace(rootUrl);
+                  // setDobunce((prev) => prev + 1);
+                }}
+              >
+                <span>Clear All</span>
+                <X size={14} />
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default ExploreBondsHeader;

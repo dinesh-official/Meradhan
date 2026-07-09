@@ -1,0 +1,59 @@
+/// Reminder type for bond-related emails.
+/// MATURITY_* = N days before maturity (or 0 = on maturity day).
+/// COUPON_*   = N days before coupon due date (or 0 = on coupon day).
+enum BondReminderType {
+    MATURITY_M_30
+    MATURITY_M_15
+    MATURITY_M_3
+    MATURITY_DAY
+    COUPON_D_MINUS_4
+    COUPON_DAY
+}
+
+/// Lifecycle state for a single (customer, ISIN, reminderType, anchorDateIst) row.
+enum BondReminderStatus {
+    QUEUED
+    SENT
+    FAILED
+    SKIPPED
+}
+
+/// Per-customer/per-bond/per-event dedupe log for maturity + coupon reminder emails.
+/// The unique constraint (customerProfileId, isin, reminderType, anchorDateIst) makes
+/// the cron / queue worker pipeline idempotent: re-running the scan or retrying a
+/// job will never produce a duplicate email to the customer.
+model BondReminderLog {
+    id Int @id @default(autoincrement())
+
+    /// Logical FK to CustomerProfileDataModel.id. We intentionally do NOT
+    /// declare a Prisma @relation here so the customer model schema stays
+    /// untouched. The DB-level foreign key is created in the migration so
+    /// data integrity is preserved.
+    customerProfileId Int
+
+    isin         String
+    reminderType BondReminderType
+
+    /// The IST calendar date that the reminder is anchored to.
+    /// Maturity reminders: Bonds.maturityDateIst.
+    /// Coupon reminders:   BondReferenceCouponPaymentDate.dueDateIst.
+    anchorDateIst DateTime @db.Date
+
+    /// The IST calendar date this row was scheduled to send on (today, when the cron ran).
+    scheduledForIst DateTime @db.Date
+
+    status       BondReminderStatus @default(QUEUED)
+    errorMessage String?
+    emailMessageId String?
+    sentAt       DateTime?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@unique([customerProfileId, isin, reminderType, anchorDateIst], name: "uniq_customer_isin_event")
+    @@index([scheduledForIst])
+    @@index([customerProfileId])
+    @@index([isin])
+    @@index([status])
+    @@map("bond_reminder_logs")
+}

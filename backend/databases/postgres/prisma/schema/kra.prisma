@@ -1,0 +1,150 @@
+model KraDownloadResponse {
+    id                         Int     @id @default(autoincrement())
+    // PAN Inquiry Section
+    appIopFlg                  String? @map("app_iop_flg")
+    appPosCode                 String? @map("app_pos_code")
+    appType                    String? @map("app_type")
+    appKycMode                 String? @map("app_kyc_mode")
+    appNo                      String? @map("app_no")
+    appDate                    String? @map("app_date")
+    appPanNo                   String? @map("app_pan_no")
+    appPanexNo                 String? @map("app_panex_no")
+    appPanCopy                 String? @map("app_pan_copy")
+    appExmt                    String? @map("app_exmt")
+    appExmtCat                 String? @map("app_exmt_cat")
+    appExmtIdProof             String? @map("app_exmt_id_proof")
+    appIpvFlag                 String? @map("app_ipv_flag")
+    appIpvDate                 String? @map("app_ipv_date")
+    appGen                     String? @map("app_gen")
+    appName                    String? @map("app_name")
+    appFName                   String? @map("app_f_name")
+    appRegno                   String? @map("app_regno")
+    appDobDt                   String? @map("app_dob_dt")
+    appDoiDt                   String? @map("app_doi_dt")
+    appCommenceDt              String? @map("app_commence_dt")
+    appNationality             String? @map("app_nationality")
+    appOthNationality          String? @map("app_oth_nationality")
+    appCompStatus              String? @map("app_comp_status")
+    appOthCompStatus           String? @map("app_oth_comp_status")
+    appResStatus               String? @map("app_res_status")
+    appResStatusProof          String? @map("app_res_status_proof")
+    appUidNo                   String? @map("app_uid_no")
+    appCorAdd1                 String? @map("app_cor_add1")
+    appCorAdd2                 String? @map("app_cor_add2")
+    appCorAdd3                 String? @map("app_cor_add3")
+    appCorCity                 String? @map("app_cor_city")
+    appCorPincd                String? @map("app_cor_pincd")
+    appCorState                String? @map("app_cor_state")
+    appCorCtry                 String? @map("app_cor_ctry")
+    appOffNo                   String? @map("app_off_no")
+    appResNo                   String? @map("app_res_no")
+    appMobNo                   String? @map("app_mob_no")
+    appFaxNo                   String? @map("app_fax_no")
+    appEmail                   String? @map("app_email")
+    appCorAddProof             String? @map("app_cor_add_proof")
+    appCorAddRef               String? @map("app_cor_add_ref")
+    appCorAddDt                String? @map("app_cor_add_dt")
+    appPerAdd1                 String? @map("app_per_add1")
+    appPerAdd2                 String? @map("app_per_add2")
+    appPerAdd3                 String? @map("app_per_add3")
+    appPerCity                 String? @map("app_per_city")
+    appPerPincd                String? @map("app_per_pincd")
+    appPerState                String? @map("app_per_state")
+    appPerCtry                 String? @map("app_per_ctry")
+    appPerAddProof             String? @map("app_per_add_proof")
+    appPerAddRef               String? @map("app_per_add_ref")
+    appPerAddDt                String? @map("app_per_add_dt")
+    appIncome                  String? @map("app_income")
+    appOcc                     String? @map("app_occ")
+    appOthOcc                  String? @map("app_oth_occ")
+    appPolConn                 String? @map("app_pol_conn")
+    appDocProof                String? @map("app_doc_proof")
+    appInternalRef             String? @map("app_internal_ref")
+    appBranchCode              String? @map("app_branch_code")
+    appMarStatus               String? @map("app_mar_status")
+    appNetWrth                 String? @map("app_netwrth")
+    appNetWorthDt              String? @map("app_networth_dt")
+    appIncorpPlc               String? @map("app_incorp_plc")
+    appOtherinfo               String? @map("app_otherinfo")
+    appFiller1                 String? @map("app_filler1")
+    appFiller2                 String? @map("app_filler2")
+    appFiller3                 String? @map("app_filler3")
+    appRemarks                 String? @map("app_remarks")
+    appStatus                  String? @map("app_status")
+    appStatusdt                String? @map("app_statusdt")
+    appErrorDesc               String? @map("app_error_desc")
+    appDumpType                String? @map("app_dumptype")
+    appDnlddt                  String? @map("app_dnlddt")
+    appKraInfo                 String? @map("app_kra_info")
+    appSignature               String? @map("app_signature")
+    appFatcaApplicableFlag     String? @map("app_fatca_applicable_flag")
+    appFatcaBirthPlace         String? @map("app_fatca_birth_place")
+    appFatcaBirthCountry       String? @map("app_fatca_birth_country")
+    appFatcaCountryRes         String? @map("app_fatca_country_res")
+    appFatcaCountryCityzenship String? @map("app_fatca_country_cityzenship")
+    appFatcaDateDeclaration    String? @map("app_fatca_date_declaration")
+
+    // Fetch FATCA additional details in a relation (one-to-many)
+    fatcaAddlDtls KraFatcaAddlDtls[]
+
+    // App summary record
+    appSummRecId Int?
+    appSummRec   KraAppSummRec? @relation(fields: [appSummRecId], references: [id])
+
+    isNameMatch   Boolean @default(false)
+    isDOBMatch    Boolean @default(false)
+    isPANMatch    Boolean @default(false)
+    isMobileMatch Boolean @default(false)
+    isEmailMatch  Boolean @default(false)
+    rawXml        String? @map("raw_xml")
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("kra_download_response")
+}
+
+model KraFatcaAddlDtls {
+    id                          Int     @id @default(autoincrement())
+    kraDownloadResponseId       Int
+    appFatcaEntityPan           String? @map("app_fatca_entity_pan")
+    appFatcaCountryResidency    String? @map("app_fatca_country_residency")
+    appFatcaTaxIdentificationNo String? @map("app_fatca_tax_identification_no")
+    appFatcaTaxExemptFlag       String? @map("app_fatca_tax_exempt_flag")
+    appFatcaTaxExemptReason     String? @map("app_fatca_tax_exempt_reason")
+
+    kraDownloadResponse KraDownloadResponse @relation(fields: [kraDownloadResponseId], references: [id])
+
+    @@map("kra_fatca_addl_dtls")
+}
+
+model KraAppSummRec {
+    id                       Int     @id @default(autoincrement())
+    appReqDate               String? @map("app_req_date")
+    appOthkraBatch           String? @map("app_othkra_batch")
+    appOthkraCode            String? @map("app_othkra_code")
+    appResponseDate          String? @map("app_response_date")
+    appTotalRec              Int?    @map("app_total_rec")
+    noOfFatcaAddlDtlsRecords Int?    @map("no_of_fatca_addl_dtls_records")
+
+    kraDownloadResponses KraDownloadResponse[]
+
+    @@map("kra_app_summ_rec")
+}
+
+model KraDataLogs {
+    id           Int       @id @default(autoincrement())
+    userId       Int
+    kycId        Int
+    requestData  Json?
+    responseData Json?
+    stage        String    @default("ENQUIRY")
+    reqTime      DateTime  @default(now())
+    resTime      DateTime?
+    error        Json?
+    /// Timestamps
+    createdAt    DateTime  @default(now())
+    updatedAt    DateTime  @updatedAt
+
+    @@map("kra_data_logs")
+}

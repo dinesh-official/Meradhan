@@ -1,0 +1,175 @@
+model Bonds {
+    id Int @id @default(autoincrement())
+
+    isin              String  @unique
+    bondName          String
+    instrumentName    String
+    description       String
+    issuerDescription String?
+    issuePrice        Float
+    faceValue         Float
+
+    stampDutyPercentage Float?   @default(0)
+    allowForPurchase    Boolean? @default(false)
+
+    couponRate               Float
+    interestPaymentFrequency String
+    putCallOptionDetails     String?
+    certificateNumbers       String?
+    totalIssueSize           Float?  @default(0)
+    registrarDetails         String?
+
+    physicalSecurityAddress String?
+    defaultedInRedemption   String?
+    debentureTrustee        String?
+    creditRatingInfo        String?
+    remarks                 String?
+
+    taxStatus           TAX_TYPE
+    creditRating        String        @default("UnRated")
+    interestPaymentMode INTEREST_MODE @default(UNKNOWN)
+    isListed            IS_LISTED     @default(UNKNOWN)
+
+    ratingAgencyName String?
+    ratingDate       DateTime?
+    ratingDateIst    DateTime? @db.Date
+
+    categories String[]
+    sectorName String?
+
+    // Additional fields for bond details
+    yield             Float?
+    lastTradePrice    Float?
+    lastTradeYield    Float?
+    nextCouponDate    DateTime?
+    nextCouponDateIst DateTime? @db.Date
+
+    modeOfIssuance          String?
+    couponType              String?
+    buyYield                Float?
+    providerName            String?
+    providerInterestDate    DateTime?
+    providerInterestDateIst DateTime? @db.Date
+
+    providerQuantity Int?
+    isOngoingDeal    Boolean? @default(false)
+    providerPrice    Float?
+    ignoreAutoUpdate Boolean? @default(false)
+
+    /// Timestamps
+    dateOfAllotment    DateTime?
+    dateOfAllotmentIst DateTime? @db.Date
+
+    redemptionDate    DateTime?
+    redemptionDateIst DateTime? @db.Date
+    maturityDate      DateTime?
+    maturityDateIst   DateTime? @db.Date
+    maturityDateOnly  DateTime? @db.Date
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    sortedAt Int @default(0)
+
+    isConvertedDeal Boolean?
+
+    /// All scheduled coupon payment dates for this ISIN
+    allCouponDates    DateTime[]
+    allCouponDatesIst DateTime[] @db.Date
+
+    dayConvention String?
+
+    /// Record date (shut period)
+    recordDate    DateTime?
+    recordDateIst DateTime? @db.Date
+
+    /// Business days before record date for shut period (e.g. 7, 15, 20)
+    recordDays Int?
+
+    imDocumentLink String?
+
+    /// Issuer/bond logo URL for listings and detail pages
+    logoUrl String?
+
+    exchangeListedOn STOCK_EXCHANGE?
+
+    lastCouponDate    DateTime?
+    lastCouponDateIst DateTime? @db.Date
+
+    isPerpetual Boolean?
+
+    bondType BondType?
+
+    seniority BOND_SENIORITY?
+
+    natureOfInstrument INSTRUMENT_SECURITY?
+
+    buyPrice  Float?
+    sellPrice Float?
+
+    redemptionType String?
+
+    startDate    DateTime?
+    startDateIst DateTime? @db.Date
+
+    endDate    DateTime?
+    endDateIst DateTime? @db.Date
+
+    autofillSavedAt DateTime?
+
+    documents BondDocument[]
+
+    @@index([isin])
+    @@index([sortedAt])
+    // Homepage / listings filter patterns: (isListed='YES' AND allowForPurchase=TRUE)
+    // followed by dateOfAllotment / yield / creditRating sort. Without these
+    // Postgres falls back to a sequential scan + sort on the bonds table which
+    // is the main contributor to the 15s homepage timeouts.
+    @@index([isListed, allowForPurchase, dateOfAllotment(sort: Desc)])
+    @@index([isListed, allowForPurchase, yield(sort: Desc)])
+    @@index([creditRating])
+    @@map("bonds")
+}
+
+enum TAX_TYPE {
+    TAX_FREE
+    TAXABLE
+    TAX_SAVING
+    TAX_EXEMPTION
+    UNKNOWN
+}
+
+enum IS_LISTED {
+    YES
+    NO
+    UNKNOWN
+}
+
+enum INTEREST_MODE {
+    MONTHLY
+    QUARTERLY
+    HALF_YEARLY
+    YEARLY
+    ON_MATURITY
+    UNKNOWN
+}
+
+enum BOND_SENIORITY {
+    SENIOR
+    TIER_2_SUBORDINATED
+    LOWER_TIER_II_SUBORDINATED
+    UNKNOWN
+}
+
+enum INSTRUMENT_SECURITY {
+    SECURED
+    UNSECURED
+    UNKNOWN
+}
+
+enum STOCK_EXCHANGE {
+    BSE
+    NSE
+    BOTH
+    UNKNOWN
+}

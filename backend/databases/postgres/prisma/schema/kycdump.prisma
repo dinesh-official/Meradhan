@@ -1,0 +1,17 @@
+model KYC_FLOW {
+    id              Int      @id @default(autoincrement())
+    userID          Int?
+    step            Int      @default(1)
+    data            Json?
+    auditLog        Json[]
+    currentStepName String?  @default("Not Started")
+    complete        Boolean  @default(false)
+    markExpired     Boolean  @default(false)
+    kycUserId       Int?
+    /// Timestamps 
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @updatedAt
+
+    @@index([userID])
+    @@map("kyc_dump")
+}

@@ -1,0 +1,94 @@
+import { db } from "@core/database/database";
+import { HttpStatus } from "@utils/error/AppError";
+import type { Request, Response } from "express";
+import { addKraWorkerJob } from "@jobs/kra_worker/kraWroker.helper";
+import { cacheStorage } from "@store/redis_store";
+import z from "zod";
+
+const RUNNER_KEY_PREFIX = "KRA:";
+const RUNNER_KEY_SUFFIX = "-RUNNER";
+
+export class KraController {
+  /**
+   * POST /api/kra/reschedule-kra
+   * Re-queues the KRA worker job for the given customer/KYC.
+   * Returns 409 if a KRA process is already in progress (RUNNER key exists).
+   */
+
+
+  async rescheduleKra(req: Request, res: Response) {
+    const TTL_72_HOURS = 72 * 60 * 60; // 72 hours
+
+    const schema = z.object({
+      pastExecution: z.enum(["MODIFY", "REGISTER", "NONE", "CBRICS_ONLY"]),
+    });
+
+    const { pastExecution } = schema.parse(req.body);
+
+    const customerId = Number(req.body?.customerId);
+    const kycDataStoreId = Number(req.body?.kycDataStoreId);
+    const delayMs = req.body?.delayMs != null ? Number(req.body.delayMs) : 5000;
+
+    if (!Number.isFinite(customerId) || !Number.isFinite(kycDataStoreId)) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "customerId and kycDataStoreId are required and must be valid numbers",
+      });
+    }
+    const cachedKey = `KRA:${customerId}-${kycDataStoreId}`;
+
+    const runnerCachedKey = `${RUNNER_KEY_PREFIX}${customerId}-${kycDataStoreId}${RUNNER_KEY_SUFFIX}`;
+    const runner = await cacheStorage.get<string>(runnerCachedKey);
+    if (pastExecution !== "NONE") {
+      const cacheValue =
+        pastExecution === "CBRICS_ONLY" ? "MODIFY" : pastExecution;
+      await cacheStorage.set(cachedKey, cacheValue, TTL_72_HOURS);
+    }
+    if (pastExecution == "NONE") {
+      await cacheStorage.delete(cachedKey);
+    }
+    if (runner) {
+      return res.sendResponse({
+        statusCode: HttpStatus.CONFLICT,
+        message: "KRA process already in progress for this customer and KYC. Cannot reschedule until the current process completes or times out (72 hours).",
+      });
+    }
+
+    const customer = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { id: customerId },
+    });
+
+    if (!customer) {
+      return res.sendResponse({
+        statusCode: HttpStatus.NOT_FOUND,
+        message: "Customer not found",
+      });
+    }
+
+    const kycFlow = await db.dataBase.kYC_FLOW.findFirst({
+      where: { id: kycDataStoreId, userID: customerId },
+    });
+    if (!kycFlow) {
+      return res.sendResponse({
+        statusCode: HttpStatus.NOT_FOUND,
+        message: "KYC flow record not found for this customer",
+      });
+    }
+
+    const job = await addKraWorkerJob(
+      {
+        customerId,
+        kycDataStoreId,
+        stage: "ENQUIRY_KRA",
+        ...(pastExecution === "CBRICS_ONLY" ? { cbricsOnly: true } : {}),
+      },
+      delayMs
+    );
+
+    return res.sendResponse({
+      statusCode: HttpStatus.OK,
+      message: "KRA process rescheduled",
+      responseData: { jobId: job.id },
+    });
+  }
+}

@@ -1,0 +1,119 @@
+import { Router } from "express";
+
+import { allowAccessMiddleware } from "@middlewares/auth_middleware";
+import { withRateLimit } from "@middlewares/ratelimit_midddleare";
+import { CustomerAuthController } from "./customer.auth.controller";
+
+const customerAuthRoutes = Router();
+const controller = new CustomerAuthController();
+
+customerAuthRoutes.all(
+  "/api/customer/session",
+  allowAccessMiddleware("USER"),
+  (req, res) => controller.session(req, res)
+);
+
+// signup email and mobile verification
+customerAuthRoutes.post(
+  "/api/auth/customer/send-signup-mobile-verify",
+  withRateLimit({ max: 5 }),
+  (req, res) => controller.sendAuthMobileOtp(req, res)
+);
+// signup email verification
+customerAuthRoutes.post(
+  "/api/auth/customer/send-signup-email-verify",
+  withRateLimit({ max: 5 }),
+  (req, res) => controller.sendAuthEmailOtp(req, res)
+);
+
+customerAuthRoutes.post(
+  "/api/auth/customer/verify-signup-otp",
+  withRateLimit({ max: 5 }),
+  (req, res) => controller.verifyOtpForSignup(req, res)
+);
+
+customerAuthRoutes.post(
+  "/api/auth/customer/verify-signup-otp-both",
+  withRateLimit({ max: 5 }),
+  (req, res) => controller.verifyOtpForSignupBoth(req, res)
+);
+
+customerAuthRoutes.post(
+  "/api/auth/customer/signup/update-email",
+  withRateLimit({ max: 5 }),
+  (req, res) => controller.updateSignupEmail(req, res)
+);
+
+customerAuthRoutes.post(
+  "/api/auth/customer/signup/update-phone",
+  withRateLimit({ max: 5 }),
+  (req, res) => controller.updateSignupPhone(req, res)
+);
+
+customerAuthRoutes.post(
+  "/api/auth/customer/signup-with-credentials",
+  withRateLimit({ max: 10 }),
+  (req, res) => controller.signUpWithCredentials(req, res)
+);
+
+// signin
+customerAuthRoutes.post(
+  "/api/auth/customer/signin/request",
+  withRateLimit({ max: 5 }),
+  (req, res) => controller.signInRequest(req, res)
+);
+customerAuthRoutes.post(
+  "/api/auth/customer/signin/send-otp",
+  withRateLimit({ max: 5 }),
+  (req, res) => controller.signInWithOtpSend(req, res)
+);
+customerAuthRoutes.post(
+  "/api/auth/customer/signin/with-otp",
+  withRateLimit({ max: 5 }),
+  (req, res) => controller.signInWithOtpVerify(req, res)
+);
+customerAuthRoutes.post(
+  "/api/auth/customer/signin/2fa/verify",
+  withRateLimit({ max: 5 }),
+  (req, res) => controller.verifySigninTwoFactor(req, res)
+);
+customerAuthRoutes.post(
+  "/api/auth/customer/signin/account-activation/verify",
+  withRateLimit({ max: 5 }),
+  (req, res) => controller.verifyAccountActivationAtLogin(req, res)
+);
+
+// logout
+customerAuthRoutes.all("/api/auth/customer/logout", (req, res) =>
+  controller.logout(req, res)
+);
+
+customerAuthRoutes.get(
+  "/api/auth/customer/send-verify-email",
+  allowAccessMiddleware("USER"),
+  withRateLimit({ max: 5 }),
+  (req, res) => controller.sendVerifyEmail(req, res)
+);
+customerAuthRoutes.get("/api/auth/customer/verify-email", (req, res) =>
+  controller.verifyEmail(req, res)
+);
+
+customerAuthRoutes.post(
+  "/api/auth/customer/resend-email-verification",
+  withRateLimit({ max: 5 }),
+  (req, res) => controller.resendEmailVerificationForUnverifiedUser(req, res)
+);
+
+customerAuthRoutes.get(
+  "/api/auth/customer/2fa/settings",
+  allowAccessMiddleware("USER"),
+  (req, res) => controller.getTwoFactorSettings(req, res)
+);
+customerAuthRoutes.patch(
+  "/api/auth/customer/2fa/settings",
+  allowAccessMiddleware("USER"),
+  withRateLimit({ max: 10 }),
+  (req, res) => controller.updateTwoFactorSettings(req, res)
+);
+
+export default customerAuthRoutes;

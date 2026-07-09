@@ -1,0 +1,34 @@
+FROM oven/bun:latest
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    qpdf \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY . .
+
+WORKDIR /app/packages/apiGateway
+RUN bun install
+
+WORKDIR /app/packages/config
+RUN bun install
+
+WORKDIR /app/packages/kyc-providers
+RUN bun install
+
+WORKDIR /app/packages/schema
+RUN bun install
+
+WORKDIR /app/backend
+RUN bun install
+
+WORKDIR /app/backend/databases/postgres
+RUN bunx prisma generate
+
+COPY be-start.sh /app/be-start.sh
+RUN chmod +x /app/be-start.sh
+
+EXPOSE 4000
+WORKDIR /app/backend
+CMD ["/app/be-start.sh"]

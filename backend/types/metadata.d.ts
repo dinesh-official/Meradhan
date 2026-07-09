@@ -1,0 +1,1 @@
+export type META_DATA_PAGINATION = { total: number; page: number; pageSize: number; totalPages: number };

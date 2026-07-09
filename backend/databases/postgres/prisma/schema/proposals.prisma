@@ -1,0 +1,47 @@
+/// CRM: Saved proposals created from Proposal Management screen.
+/// Stores snapshot JSON so the UI can reopen exactly what was generated.
+model CrmSavedProposal {
+  id Int @id @default(autoincrement())
+
+  createdById Int
+  createdBy   CRMUserDataModel @relation(fields: [createdById], references: [id])
+
+  /// Meradhan customer when the proposal targets an onboarded user.
+  customerProfileId Int?
+  customerProfile   CustomerProfileDataModel? @relation(fields: [customerProfileId], references: [id], onDelete: Cascade)
+
+  /// External NSE RFQ participant (`nse_rfq_participant_info.code`) when
+  /// there is no linked Meradhan customer profile.
+  linkedRfqParticipantCode String? @db.VarChar(64)
+
+  isin     String
+  bondName String
+  side     String
+  quantity Int
+
+  notes String?
+
+  /// Snapshot payload (bond/pricing/autofill/customer display fields)
+  data       Json
+  failedNote String?
+
+  status ProposalStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdById])
+  @@index([customerProfileId])
+  @@index([linkedRfqParticipantCode])
+  @@index([isin])
+  @@map("crm_saved_proposals")
+}
+
+enum ProposalStatus {
+  PENDING
+  PROCESSING
+  WAITING_FOR_APPROVAL
+  FAILED
+  REJECTED
+  CONVERTED
+}

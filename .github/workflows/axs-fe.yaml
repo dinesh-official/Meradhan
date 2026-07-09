@@ -1,0 +1,45 @@
+on:
+  push:
+    branches:
+      - saravanan
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create .env from GitHub Secret
+        shell: bash 
+        env:
+          ENV: ${{ vars.ENV }}
+        run: |
+          # base env from secret (if any)
+          printf "%s\n" "$ENV" > .env
+          echo "----------- .env created successfully -----------"
+          cat .env
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          
+      - name: Login to Amazon ECR
+        run: |
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} \
+          | docker login \
+            --username AWS \
+            --password-stdin 450321244603.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+        
+
+      - name: Build, Tag & Push Docker Image
+        env:
+          REGISTRY: 450321244603.dkr.ecr.ap-south-1.amazonaws.com
+          REPOSITORY: axs.fe
+          IMAGE_TAG: latest
+        run: |
+          docker build --no-cache -f frontendDockerfile -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG

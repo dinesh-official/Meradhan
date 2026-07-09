@@ -1,0 +1,116 @@
+/// Broadcast medium
+enum NotificationMedium {
+    SMS
+    WHATSAPP
+    RCS
+}
+
+/// Aggregate status for a send batch (notification_logs)
+enum NotificationBatchDeliveryStatus {
+    PENDING
+    PROCESSING
+    COMPLETED
+    PARTIAL_FAILURE
+    FAILED
+}
+
+/// Per-recipient delivery status
+enum NotificationRecipientDeliveryStatus {
+    PENDING
+    SENT
+    DELIVERED
+    FAILED
+    INVALID_NUMBER
+}
+
+/// Templates managed through the CRM UI (one per medium type)
+model NotificationTemplateModel {
+    id           Int                @id @default(autoincrement())
+    name         String
+    templateId   String
+    medium       NotificationMedium @default(SMS)
+    message      String?
+    /// RCS-only: MSG91 project ID
+    rcsProjectId String?
+    /// RCS-only: MSG91 namespace (may differ from name)
+    rcsNamespace String?
+    /// RCS-only: ordered variable names, e.g. ["customer_name","amount"]
+    rcsVariables Json?
+    isActive     Boolean            @default(true)
+    createdById  Int
+    createdBy    CRMUserDataModel   @relation("NotificationTemplateCreatedBy", fields: [createdById], references: [id])
+    createdAt    DateTime           @default(now())
+    updatedAt    DateTime           @updatedAt
+
+    @@unique([templateId, medium])
+    @@map("notification_templates")
+}
+
+model CrmNotificationSavedListModel {
+    id           Int              @id @default(autoincrement())
+    name         String
+    createdById  Int
+    createdBy    CRMUserDataModel @relation(fields: [createdById], references: [id])
+    sourcePrompt String?
+    isActive     Boolean          @default(true)
+    createdAt    DateTime         @default(now())
+    updatedAt    DateTime         @updatedAt
+
+    members          CrmNotificationSavedListMemberModel[]
+    notificationLogs NotificationLogModel[]
+
+    @@unique([createdById, name])
+    @@map("crm_notification_saved_lists")
+}
+
+model CrmNotificationSavedListMemberModel {
+    id                Int                           @id @default(autoincrement())
+    savedListId       Int
+    savedList         CrmNotificationSavedListModel @relation(fields: [savedListId], references: [id], onDelete: Cascade)
+    customerProfileId Int
+    customerProfile   CustomerProfileDataModel      @relation(fields: [customerProfileId], references: [id], onDelete: Cascade)
+    addedAt           DateTime                      @default(now())
+
+    @@unique([savedListId, customerProfileId])
+    @@index([customerProfileId])
+    @@map("crm_notification_saved_list_members")
+}
+
+model NotificationLogModel {
+    id                Int                             @id @default(autoincrement())
+    savedListId       Int?
+    savedList         CrmNotificationSavedListModel?  @relation(fields: [savedListId], references: [id], onDelete: SetNull)
+    medium            NotificationMedium
+    dltTemplateId     String
+    templateVariables Json
+    messagePreview    String?
+    sentById          Int
+    sentBy            CRMUserDataModel                @relation("NotificationSentBy", fields: [sentById], references: [id])
+    sentAt            DateTime                        @default(now())
+    deliveryStatus    NotificationBatchDeliveryStatus
+    providerBatchId   String?
+    meta              Json?
+
+    recipients NotificationRecipientLogModel[]
+
+    @@index([sentAt])
+    @@map("notification_logs")
+}
+
+model NotificationRecipientLogModel {
+    id                Int                                 @id @default(autoincrement())
+    notificationLogId Int
+    notificationLog   NotificationLogModel                @relation(fields: [notificationLogId], references: [id], onDelete: Cascade)
+    customerProfileId Int
+    customerProfile   CustomerProfileDataModel            @relation(fields: [customerProfileId], references: [id], onDelete: Cascade)
+    phone             String
+    deliveryStatus    NotificationRecipientDeliveryStatus
+    providerMessageId String?
+    errorCode         String?
+    errorMessage      String?
+    updatedAt         DateTime                            @updatedAt
+
+    @@index([customerProfileId])
+    @@index([notificationLogId])
+    @@map("notification_recipient_logs")
+}

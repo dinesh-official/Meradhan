@@ -1,0 +1,4 @@
+.env
+.planning/
+package-lock.json
+packages/node_modules/
