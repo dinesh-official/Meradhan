@@ -77,10 +77,33 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     environment: ${{ inputs.environment == 'prod' && 'production' || 'staging' }}
 
     steps:
+
+      # Load ALL GitHub Environment Variables + Secrets
+      - name: Export GitHub Variables & Secrets
+        shell: bash
+        env:
+          ALL_SECRETS: ${{ toJSON(secrets) }}
+          ALL_VARS: ${{ toJSON(vars) }}
+        run: |
+          echo "$ALL_VARS" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> $GITHUB_ENV
+          echo "$ALL_SECRETS" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> $GITHUB_ENV
+
+      # Generate .env Automatically
+      - name: Generate .env
+        run: |
+          printenv \
+          | grep -v '^GITHUB_' \
+          | grep -v '^RUNNER_' \
+          | grep -v '^CI=' \
+          | grep -v '^HOME=' \
+          | grep -v '^PATH=' \
+          > .env     
+
+
       - name: Get DNS Value
         shell: bash
         run: |
@@ -93,6 +116,7 @@ jobs:
           echo "DNS_VAL=$DNS_VAL" >> "$GITHUB_ENV"
 
           echo "DNS Value: $DNS_VAL"
+          
 
       - name: Generate Resource IDs
         id: naming
