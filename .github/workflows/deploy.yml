@@ -82,6 +82,10 @@ jobs:
 
     steps:
 
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
       # Load ALL GitHub Environment Variables + Secrets
       - name: Export GitHub Variables & Secrets
         shell: bash
@@ -376,8 +380,6 @@ jobs:
           echo "Repository URIs : ${REPOSITORY_URIS%,}"
 
           echo "repository_uris=${REPOSITORY_URIS%,}" >> "$GITHUB_OUTPUT"    
-      - name: Checkout Repository
-        uses: actions/checkout@v4
 
       - name: Login to Amazon ECR
         run: |
