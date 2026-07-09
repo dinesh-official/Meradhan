@@ -12,6 +12,36 @@ on:
           - stage
           - prod
 
+      live_time:
+        description: "Preview Environment Lifetime"
+        required: true
+        type: choice
+        default: 1hr
+        options:
+          - 1hr
+          - 2hr
+          - 4hr
+          - 8hr
+          - 24hr      
+
+      upline:
+        description: "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈"
+        required: false
+        type: boolean
+        default: false              
+
+      Title:
+        description: "Select the applications to deploy"
+        required: true
+        type: boolean
+        default: true    
+
+      downline:
+        description: "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈"
+        required: false
+        type: boolean
+        default: false
+
       frontend:
         description: "Frontend"
         required: true
@@ -36,17 +66,7 @@ on:
         type: boolean
         default: true
 
-      live_time:
-        description: "Preview Environment Lifetime"
-        required: true
-        type: choice
-        default: 1hr
-        options:
-          - 1hr
-          - 2hr
-          - 4hr
-          - 8hr
-          - 24hr
+
 
 env:
   prod_dns: prod-736795584.ap-south-1.elb.amazonaws.com
@@ -332,12 +352,28 @@ jobs:
 
           set -e
 
-          declare -A SERVICES=(
-            ["$FRONTEND_NAME"]="frontenddocker"
-            ["$BACKEND_NAME"]="backenddocker"
-            ["$CRM_NAME"]="crmdocker"
-            ["$WORKER_NAME"]="workerdocker"
-          )
+          declare -A SERVICES=()
+
+          if [ "${{ inputs.frontend }}" = "true" ]; then
+            SERVICES["$FRONTEND_NAME"]="frontenddocker"
+          fi
+
+          if [ "${{ inputs.backend }}" = "true" ]; then
+            SERVICES["$BACKEND_NAME"]="backenddocker"
+          fi
+
+          if [ "${{ inputs.crm }}" = "true" ]; then
+            SERVICES["$CRM_NAME"]="crmdocker"
+          fi
+
+          if [ "${{ inputs.worker }}" = "true" ]; then
+            SERVICES["$WORKER_NAME"]="workerdocker"
+          fi
+
+          if [ ${#SERVICES[@]} -eq 0 ]; then
+            echo "No services selected."
+            exit 1
+          fi
 
           echo "======================================"
           echo "Building Docker Images"
@@ -368,8 +404,8 @@ jobs:
 
           echo ""
           echo "======================================"
-          echo "All Docker Images Built & Pushed"
-          echo "======================================"          
+          echo "All Selected Docker Images Built & Pushed"
+          echo "======================================"       
 
 
       - name: Create or Reuse Instance
