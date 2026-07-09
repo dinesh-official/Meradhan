@@ -355,7 +355,7 @@ jobs:
           declare -A SERVICES=()
 
           if [ "${{ inputs.frontend }}" = "true" ]; then
-            SERVICES["$FRONTEND_NAME"]="frontenddocker"
+            SERVICES["$FRONTEND_NAME"]="frontendDocker"
           fi
 
           if [ "${{ inputs.backend }}" = "true" ]; then
@@ -363,11 +363,11 @@ jobs:
           fi
 
           if [ "${{ inputs.crm }}" = "true" ]; then
-            SERVICES["$CRM_NAME"]="crmdocker"
+            SERVICES["$CRM_NAME"]="crmdockerfile"
           fi
 
           if [ "${{ inputs.worker }}" = "true" ]; then
-            SERVICES["$WORKER_NAME"]="workerdocker"
+            SERVICES["$WORKER_NAME"]="workerDocker"
           fi
 
           if [ ${#SERVICES[@]} -eq 0 ]; then
