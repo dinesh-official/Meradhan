@@ -80,20 +80,7 @@ jobs:
 
     environment: ${{ inputs.environment == 'prod' && 'production' || 'staging' }}
 
-    steps:
-
-      - uses: actions/checkout@v4
-
-      - name: Create .env from GitHub Environment Variable
-        shell: bash
-        env:
-          ENV: ${{ vars.ENV }}
-        run: |
-          printf "%s\n" "$ENV" > .env
-
-          echo "----------- .env created successfully -----------"
-          cat .env
-
+    steps:fc
       - name: Get DNS Value
         shell: bash
         run: |
@@ -351,6 +338,8 @@ jobs:
           echo "Repository URIs : ${REPOSITORY_URIS%,}"
 
           echo "repository_uris=${REPOSITORY_URIS%,}" >> "$GITHUB_OUTPUT"    
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Login to Amazon ECR
         run: |
