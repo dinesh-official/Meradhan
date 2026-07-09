@@ -78,9 +78,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    environment: ${{ inputs.environment == 'prod' && 'production' || 'staging' }}
-
-    steps:fc
+    steps:
       - name: Get DNS Value
         shell: bash
         run: |
