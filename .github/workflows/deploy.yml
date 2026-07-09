@@ -101,7 +101,21 @@ jobs:
           | grep -v '^CI=' \
           | grep -v '^HOME=' \
           | grep -v '^PATH=' \
-          > .env     
+          > .env    
+          
+      - name: Verify .env
+        run: |
+          echo "Current Directory: $(pwd)"
+          ls -la
+          echo "========================"
+          if [ -f .env ]; then
+            echo ".env exists"
+            wc -l .env
+            head -5 .env
+          else
+            echo ".env NOT FOUND"
+            exit 1
+          fi          
 
 
       - name: Get DNS Value
@@ -116,7 +130,7 @@ jobs:
           echo "DNS_VAL=$DNS_VAL" >> "$GITHUB_ENV"
 
           echo "DNS Value: $DNS_VAL"
-          
+
 
       - name: Generate Resource IDs
         id: naming
