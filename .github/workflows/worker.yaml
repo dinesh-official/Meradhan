@@ -31,6 +31,7 @@ jobs:
             echo "NEXT_PUBLIC_BACKEND_IP_URL=http://prod-meradhan-be.prod-namespace:4000"
             echo "NEXT_PUBLIC_STRAPI_HOST_URL=https://spyder.meradhan.co"
             echo "NEXT_PUBLIC_DIGIO=production"
+            echo "INTERNAL_API_KEY=1da72b687ec308ed38ad29f8c1da3efb0b668194dd28a00a08216e576258267f" >> .env
             echo "STRAPI_API_URL=https://spyder.meradhan.co/api"
             echo "INTERNAL_API_KEY=1da72b687ec308ed38ad29f8c1da3efb0b668194dd28a00a08216e576258267f" >> .env
 
@@ -123,6 +124,17 @@ jobs:
             echo "BACKOFFICE_SMTP_EMAIL=${{vars.BACKOFFICE_SMTP_EMAIL}}"
             echo "BACKOFFICE_SMTP_PASS=${{vars.BACKOFFICE_SMTP_PASS}}"
             echo "ABSOLUTE_DATA_API_KEY=${{vars.ABSOLUTE_DATA_API_KEY}}"
+
+            echo "DERIDATA_ENABLED=${{ vars.DERIDATA_ENABLED }}"
+            echo "DERIDATA_MERCHANT_ID=${{ vars.DERIDATA_MERCHANT_ID }}"
+            echo "DERIDATA_SECRET_KEY=${{ vars.DERIDATA_SECRET_KEY }}"
+            echo "DERIDATA_MERCHANT_NAME=${{ vars.DERIDATA_MERCHANT_NAME }}"
+            echo "DERIDATA_MERCHANT_EMAIL=${{ vars.DERIDATA_MERCHANT_EMAIL }}"
+            echo "DERIDATA_PUBLIC_IP=${{ vars.DERIDATA_PUBLIC_IP }}"
+            echo "DERIDATA_BASE_URL=${{ vars.DERIDATA_BASE_URL }}"
+            echo "USE_DERIDATA_CALCULATOR=${{ vars.USE_DERIDATA_CALCULATOR }}"
+
+
           } >> .env
 
       - name: Configure AWS Credentials
