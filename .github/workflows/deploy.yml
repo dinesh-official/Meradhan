@@ -355,7 +355,7 @@ jobs:
           declare -A SERVICES=()
 
           if [ "${{ inputs.frontend }}" = "true" ]; then
-            SERVICES["$FRONTEND_NAME"]="frontendDocker"
+            SERVICES["$FRONTEND_NAME"]="frontendDockerfile"
           fi
 
           if [ "${{ inputs.backend }}" = "true" ]; then
