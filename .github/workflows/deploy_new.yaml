@@ -598,7 +598,7 @@ jobs:
             COMMANDS+="aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 450321244603.dkr.ecr.ap-south-1.amazonaws.com"$'\n'
             COMMANDS+="rm -rf branch-deploy"$'\n'
             COMMANDS+="git clone https://github.com/bcispl/branch-deploy.git"$'\n'
-            
+
             COMMANDS+="cd branch-deploy"$'\n'
             COMMANDS+="pwd"$'\n'
             COMMANDS+="ls -la"$'\n'
@@ -619,7 +619,6 @@ jobs:
             COMMANDS+="chmod +x restore.sh"$'\n'
             COMMANDS+="./restore.sh meradhan_database_2_july_2026.backup"$'\n'
 
-            COMMANDS+="cd /"$'\n'
             COMMANDS+="cd /"$'\n'
             COMMANDS+="docker ps"$'\n'
 
