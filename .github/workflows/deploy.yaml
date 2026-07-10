@@ -496,6 +496,16 @@ jobs:
               --security-group-ids "$SECURITY_GROUP_ID" \
               --key-name "$KEY_NAME" \
               --iam-instance-profile Name=EC2-SSM-Role \
+              --block-device-mappings '[
+                {
+                  "DeviceName": "/dev/xvda",
+                  "Ebs": {
+                    "VolumeSize": 30,
+                    "VolumeType": "gp3",
+                    "DeleteOnTermination": true
+                  }
+                }
+              ]' \
               --tag-specifications "ResourceType=instance,Tags=[
                 {Key=Name,Value=${DEPLOY_TAG}-${BRANCH_NAME}},
                 {Key=branch_deploy,Value=${DEPLOY_TAG}},
