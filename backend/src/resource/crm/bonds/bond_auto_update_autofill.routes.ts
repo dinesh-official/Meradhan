@@ -11,4 +11,10 @@ router.post(
   (req, res) => controller.autofill(req, res),
 );
 
+router.post(
+  "/api/crm/bonds/:isin/deridata-autofill",
+  allowAccessMiddleware("CRM"),
+  (req, res) => controller.deridataAutofill(req, res),
+);
+
 export default router;

@@ -8,7 +8,8 @@ import {
     calculatePriceToYield,
     calculateYieldToPrice,
 } from "@services/deridata/deridata.calculator.client";
-import { accruedInterest, DEFAULT_BOND_MARKET_HOLIDAYS, firstWorkingDayAfter, getBondLastCouponDate, getBondNextCouponDate, getLastCouponDate, getLastCouponDateFromReferenceData, getLastNextCouponDateBasedOnSettlementDate, getNextCouponDate, resolveCouponDatesForSettlement, toISTISODate } from "@services/order/order-pricing-helper";
+import { calculateBondPricing } from "@services/order/bond-pricing";
+import { accruedInterest, computeBondSettlement, getBondLastCouponDate, getBondNextCouponDate, getLastCouponDate, getLastCouponDateFromReferenceData, getLastNextCouponDateBasedOnSettlementDate, getNextCouponDate, resolveCouponDatesForSettlement, settlementDateFromYmd, toISTISODate } from "@services/order/order-pricing-helper";
 import moment from "moment";
 function parseApiDecimal(s: string | number | null | undefined): number | null {
     if (s == null || s === "") return null;
@@ -236,14 +237,8 @@ type BondRowForCalc = {
     yield?: number | null;
 };
 
-function ymdToUtcNoon(ymd: string): Date {
-    const [y, m, d] = ymd.split("-").map(Number);
-    return new Date(Date.UTC(y!, (m ?? 1) - 1, d ?? 1, 12, 0, 0));
-}
-
-function defaultT1IstSettlementYmd(): string {
-    const holidays = new Set(DEFAULT_BOND_MARKET_HOLIDAYS);
-    return toYyyyMmDd(firstWorkingDayAfter(new Date(), holidays))!;
+function defaultSettlementYmd(): string {
+    return computeBondSettlement(new Date()).settlementDate;
 }
 
 export function resolveBondCalcInputs(
@@ -308,7 +303,7 @@ export function resolveBondCalcInputs(
     ) {
         settlementDateYmd = overrides.settlementDate.trim();
     } else {
-        settlementDateYmd = defaultT1IstSettlementYmd();
+        settlementDateYmd = defaultSettlementYmd();
     }
 
     const pricingYieldOverride =
@@ -385,7 +380,7 @@ export const getBondInfoCalcData = async (
             : null;
 
     const settlementDateYmd = resolved.settlementDateYmd;
-    const settlementDateObj = ymdToUtcNoon(settlementDateYmd);
+    const settlementDateObj = settlementDateFromYmd(settlementDateYmd);
 
     const couponDate = await getLastNextCouponDateBasedOnSettlementDate(isin, settlementDateObj);
     const couponResolved = await resolveCouponDatesForSettlement(
@@ -498,7 +493,25 @@ export const getBondInfoCalcData = async (
               cashflowShutFlag: pricing.isUnderShutPeriod,
           });
 
-    const calcData = mapDeriDataToCalcApiResponse(deriDataResponse, {
+    const cleanPriceResolved = useCleanPrice
+        ? Number(cleanPriceInput)
+        : parseApiDecimal(deriDataResponse.summary.clean_price) ?? 0;
+    const accruedInterestPerUnit =
+        quantity > 0 ? pricing.accruedInterest / quantity : 0;
+    const manualPricing =
+        cleanPriceResolved > 0 && quantity > 0
+            ? calculateBondPricing({
+                  faceValue,
+                  cleanPrice: cleanPriceResolved,
+                  accruedInterest:
+                      faceValue > 0
+                          ? (accruedInterestPerUnit * 100) / faceValue
+                          : 0,
+                  quantity,
+              })
+            : null;
+
+    const manualCalcContext = {
         quantity,
         settlementDateYmd,
         accruedDays: pricing.noOfAccrualDays,
@@ -506,7 +519,14 @@ export const getBondInfoCalcData = async (
         ytm: useCleanPrice
             ? parseApiDecimal(deriDataResponse.summary.xirr) ?? undefined
             : Number(pricingYieldStr ?? resolved.pricingYield ?? 0),
-    });
+        totalAccruedInterest:
+            manualPricing?.accruedInterest ?? pricing.accruedInterest,
+        principalAmount: manualPricing?.principalAmount ?? null,
+        totalConsideration: manualPricing?.totalConsideration ?? null,
+        settlementAmount: manualPricing?.settlementAmount ?? null,
+    };
+
+    const calcData = mapDeriDataToCalcApiResponse(deriDataResponse, manualCalcContext);
 
     const payload = {
         ISIN: isin,
@@ -516,15 +536,7 @@ export const getBondInfoCalcData = async (
         Last_IP_Date: lastCouponDate,
         Next_IP_Date: nextCouponDate,
         Payment_Frequency: paymentFrequency,
-        deridata: mapDeriDataToCalcPayload(deriDataResponse, {
-            quantity,
-            settlementDateYmd,
-            accruedDays: pricing.noOfAccrualDays,
-            periodStatus,
-            ytm: useCleanPrice
-                ? parseApiDecimal(deriDataResponse.summary.xirr) ?? undefined
-                : Number(pricingYieldStr ?? resolved.pricingYield ?? 0),
-        }),
+        deridata: mapDeriDataToCalcPayload(deriDataResponse, manualCalcContext),
     };
 
     const allCouponDates = collectAllCouponDatesYmd(

@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import {
+  convertIssueSizeCroreToRupees,
   mapDeriDataIssueDetailToBondFields,
   mapDeriDataTagsToCategories,
   parseDeriDataIssueDateYmd,
@@ -68,7 +69,8 @@ describe("deridata.issue-detail.adapter", () => {
     expect(mapped.recordDays).toBe(15);
     expect(mapped.redemptionType).toBe("Bullet");
     expect(mapped.couponType).toBe("Zero Coupon");
-    expect(mapped.totalIssueSize).toBe(9.5);
+    expect(convertIssueSizeCroreToRupees(9.5)).toBe(95_000_000);
+    expect(mapped.totalIssueSize).toBe(95_000_000);
     expect(mapped.sectorName).toBe("Real Estate");
     expect(mapped.categories).toEqual(["zero-coupon"]);
     expect(mapped.creditRating).toBe("UnRated");
@@ -86,6 +88,43 @@ describe("deridata.issue-detail.adapter", () => {
     expect(mapped.creditRatingInfo).toBe("ICRA: A+ (Stable)");
     expect(mapped.creditRating).toBe("A+");
     expect(mapped.ratingAgencyName).toBe("ICRA");
+  });
+
+  test("converts issue size crore to absolute rupees", () => {
+    const large: DeriDataIssueDetailItem = {
+      ...sample,
+      total_issue_size_cr: "529.2",
+    };
+    const mapped = mapDeriDataIssueDetailToBondFields(large);
+    expect(mapped.totalIssueSize).toBe(5_292_000_000);
+  });
+
+  test("maps exchange names like BSE/NSE to listed YES", () => {
+    const bseListed: DeriDataIssueDetailItem = {
+      ...sample,
+      listed: "BSE",
+    };
+    const nseListed: DeriDataIssueDetailItem = {
+      ...sample,
+      listed: "NSE",
+    };
+
+    expect(mapDeriDataIssueDetailToBondFields(bseListed).isListed).toBe("YES");
+    expect(mapDeriDataIssueDetailToBondFields(nseListed).isListed).toBe("YES");
+  });
+
+  test("formats put/call from DeriData without NA placeholders", () => {
+    const withPutCall: DeriDataIssueDetailItem = {
+      ...sample,
+      put_date: "21-Feb-2028",
+      put_amount: "100.00",
+      call_date: "21-Feb-2029",
+      call_amount: "101.00",
+    };
+    const mapped = mapDeriDataIssueDetailToBondFields(withPutCall);
+    expect(mapped.putCallOptionDetails).toBe(
+      "Put: 21-Feb-2028 Call: 21-Feb-2029",
+    );
   });
 
   test("formats fully nested rating objects", () => {

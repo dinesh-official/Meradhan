@@ -133,16 +133,15 @@ function formatDisplayValue(v: unknown): string {
   return String(v);
 }
 
-function parseCalcAmount(s: string | null | undefined): number | null {
-  if (s == null || !String(s).trim()) return null;
-  const n = Number(String(s).replace(/,/g, "").trim());
-  return Number.isFinite(n) ? n : null;
+/** Exact numeric display — no toFixed / fraction-digit rounding. */
+function formatExactNumber(n: number | null | undefined): string {
+  if (n == null || !Number.isFinite(n)) return "—";
+  return String(n);
 }
 
-function formatInr(n: number | null | undefined): string {
-  return n != null && Number.isFinite(n)
-    ? `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`
-    : "—";
+function formatExactInr(n: number | null | undefined): string {
+  if (n == null || !Number.isFinite(n)) return "—";
+  return `₹${String(n)}`;
 }
 
 function getDefaultYtmInputValue(bond: BondDetailsResponse): string {
@@ -181,6 +180,40 @@ type BondRowModel = {
   /** Row highlight only after Accept (save), Reject, or failed save — not after Load autofill. */
   outcome: "idle" | "success" | "error" | "rejected";
 };
+
+function attachPricingSnapshotToPayload(
+  payload: BondFormData,
+  autofill: BondDealAutofillResponse | null,
+): BondFormData {
+  if (!autofill) return payload;
+  const cleanPrice = autofill.pricing.finalPrice;
+  // DB `accruedInterest` = DeriData `accrued_int_bottom` from the pricing call
+  // that used the computed `cashflow_shut_flag` (Phase 2).
+  const accruedInterestAmount = autofill.pricing.totalAccruedInterest;
+  const stampDuty = autofill.pricing.stampDuty;
+  const pricingQuantity =
+    autofill.quantity != null && autofill.quantity > 0 ? autofill.quantity : 1;
+  const yieldValue = autofill.suggested?.yield;
+  const sellPrice =
+    cleanPrice != null && Number.isFinite(cleanPrice)
+      ? cleanPrice
+      : autofill.suggested?.sellPrice;
+
+  return {
+    ...payload,
+    ...(sellPrice != null && Number.isFinite(sellPrice)
+      ? { sellPrice }
+      : {}),
+    ...(yieldValue != null && Number.isFinite(yieldValue)
+      ? { yield: yieldValue }
+      : {}),
+    ...(accruedInterestAmount != null && Number.isFinite(accruedInterestAmount)
+      ? { accruedInterest: accruedInterestAmount }
+      : {}),
+    ...(stampDuty != null && Number.isFinite(stampDuty) ? { stampDuty } : {}),
+    ...(pricingQuantity > 0 ? { pricingQuantity } : {}),
+  };
+}
 
 function createInitialRow(b: BondDetailsResponse): BondRowModel {
   return {
@@ -517,7 +550,10 @@ export default function BondAutoUpdateView() {
         continue;
       }
       try {
-        const payload = mergeAutofillIntoForm(row.formBase, row.draft, row.include);
+        const payload = attachPricingSnapshotToPayload(
+          mergeAutofillIntoForm(row.formBase, row.draft, row.include),
+          row.autofill,
+        );
         // Pass autofillSave: true so the backend stamps autofillSavedAt on this bond.
         await bondsApi.updateBond(isin, payload, { autofillSave: true });
         const detail = await bondsApi.getBondDetailsByIsin(isin);
@@ -599,7 +635,10 @@ export default function BondAutoUpdateView() {
   const acceptRow = (isin: string) => {
     const cur = rows[isin];
     if (!cur?.draft) return;
-    const payload = mergeAutofillIntoForm(cur.formBase, cur.draft, cur.include);
+    const payload = attachPricingSnapshotToPayload(
+      mergeAutofillIntoForm(cur.formBase, cur.draft, cur.include),
+      cur.autofill,
+    );
     saveMutation.mutate({ isin, payload });
   };
 
@@ -1005,73 +1044,88 @@ export default function BondAutoUpdateView() {
                           </p>
                         )}
 
-                        {model.autofill.pricing ? (
-                          <div className="rounded-md border border-primary/15 bg-muted/30 px-3 py-2.5 text-sm">
-                            <p className="font-medium text-foreground">Calc summary</p>
-                            <dl className="mt-2 grid gap-x-4 gap-y-1 sm:grid-cols-2 lg:grid-cols-4">
-                              <div>
-                                <dt className="text-muted-foreground text-xs">Settlement (T+1 IST)</dt>
-                                <dd className="font-medium font-mono text-xs">
-                                  {String(model.autofill.pricing.calc?.settle_dt ?? "—")}
-                                </dd>
-                              </div>
-                              <div>
-                                <dt className="text-muted-foreground text-xs">Settlement amount</dt>
-                                <dd className="font-medium">
-                                  {formatInr(
-                                    parseCalcAmount(
-                                      model.autofill.pricing.calc?.settlement_amount as
-                                      | string
-                                      | undefined,
-                                    ),
-                                  )}
-                                </dd>
-                              </div>
-                              <div>
-                                <dt className="text-muted-foreground text-xs">Accrued interest</dt>
-                                <dd className="font-medium">
-                                  {formatInr(
-                                    parseCalcAmount(
-                                      model.autofill.pricing.calc?.total_ai as string | undefined,
-                                    ),
-                                  )}
-                                </dd>
-                              </div>
-                              <div>
-                                <dt className="text-muted-foreground text-xs">Principal amount</dt>
-                                <dd className="font-medium">
-                                  {formatInr(
-                                    parseCalcAmount(
-                                      model.autofill.pricing.calc?.principal_amount as
-                                      | string
-                                      | undefined,
-                                    ),
-                                  )}
-                                </dd>
-                              </div>
-                              <div>
-                                <dt className="text-muted-foreground text-xs">
-                                  Total consideration (w/o stamp)
-                                </dt>
-                                <dd className="font-medium">
-                                  {formatInr(
-                                    parseCalcAmount(
-                                      model.autofill.pricing.calc?.total_consideration as
-                                      | string
-                                      | undefined,
-                                    ),
-                                  )}
-                                </dd>
-                              </div>
-                              <div>
-                                <dt className="text-muted-foreground text-xs">Accrued days</dt>
-                                <dd className="font-medium">
-                                  {model.autofill.pricing.calc?.accrued_days ?? "—"}
-                                </dd>
-                              </div>
-                            </dl>
-                          </div>
-                        ) : null}
+                        {model.autofill.pricing ? (() => {
+                          const pricing = model.autofill.pricing;
+                          // Prefer API/DeriData amounts as returned (no client-side recalculation).
+                          const amounts = pricing;
+                          return (
+                            <div className="rounded-md border border-primary/15 bg-muted/30 px-3 py-2.5 text-sm">
+                              <p className="font-medium text-foreground">Calc summary</p>
+                              <p className="text-muted-foreground text-xs mt-0.5">
+                                Values from DeriData calculator (clean price, accrued, settlement) with shut/accrual days resolved from cashflows.
+                              </p>
+                              <dl className="mt-2 grid gap-x-4 gap-y-1 sm:grid-cols-2 lg:grid-cols-4">
+                                <div>
+                                  <dt className="text-muted-foreground text-xs">Settlement</dt>
+                                  <dd className="font-medium font-mono text-xs">
+                                    {String(
+                                      pricing.settlementDateYmd ??
+                                      pricing.calc?.settle_dt ??
+                                      "—",
+                                    )}
+                                  </dd>
+                                </div>
+                                <div>
+                                  <dt className="text-muted-foreground text-xs">Settlement amount</dt>
+                                  <dd className="font-medium font-mono text-xs">
+                                    {formatExactInr(amounts.settlementAmount)}
+                                  </dd>
+                                </div>
+                                <div>
+                                  <dt className="text-muted-foreground text-xs">Principal amount</dt>
+                                  <dd className="font-medium font-mono text-xs">
+                                    {formatExactInr(amounts.principalAmount)}
+                                  </dd>
+                                </div>
+                                <div>
+                                  <dt className="text-muted-foreground text-xs">
+                                    Total consideration (w/o stamp)
+                                  </dt>
+                                  <dd className="font-medium font-mono text-xs">
+                                    {formatExactInr(amounts.totalConsideration)}
+                                  </dd>
+                                </div>
+                                <div>
+                                  <dt className="text-muted-foreground text-xs">Accrued interest</dt>
+                                  <dd className="font-medium font-mono text-xs">
+                                    {formatExactInr(amounts.totalAccruedInterest)}
+                                  </dd>
+                                </div>
+                                <div>
+                                  <dt className="text-muted-foreground text-xs">Stamp duty</dt>
+                                  <dd className="font-medium font-mono text-xs">
+                                    {formatExactInr(amounts.stampDuty)}
+                                  </dd>
+                                </div>
+                                <div>
+                                  <dt className="text-muted-foreground text-xs">Accrued days</dt>
+                                  <dd className="font-medium font-mono text-xs">
+                                    {formatExactNumber(
+                                      typeof pricing.accruedDays === "number"
+                                        ? pricing.accruedDays
+                                        : typeof pricing.calc?.accrued_days === "number"
+                                          ? pricing.calc.accrued_days
+                                          : null,
+                                    )}
+                                  </dd>
+                                </div>
+                                <div>
+                                  <dt className="text-muted-foreground text-xs">
+                                    DeriData cashflow_shut_flag
+                                  </dt>
+                                  <dd className="font-medium font-mono text-xs">
+                                    {typeof pricing.calc?.cashflow_shut_flag === "boolean"
+                                      ? String(pricing.calc.cashflow_shut_flag)
+                                      : typeof model.autofill.suggested.isUnderShutPeriod ===
+                                          "boolean"
+                                        ? String(model.autofill.suggested.isUnderShutPeriod)
+                                        : "—"}
+                                  </dd>
+                                </div>
+                              </dl>
+                            </div>
+                          );
+                        })() : null}
 
                         <div className="rounded-md border overflow-x-auto">
                           <Table className="table-fixed w-full min-w-[720px]">
@@ -1231,12 +1285,11 @@ export default function BondAutoUpdateView() {
                                           }
                                           onChange={(n) =>
                                             updateDraft(b.isin, {
-                                              recordDays:
-                                                n == null ? null : Math.round(n),
+                                              recordDays: n ?? null,
                                             })
                                           }
                                         />
-                                      ) : key === "couponRate" || key === "buyYield" ? (
+                                      ) : key === "couponRate" ? (
                                         <DecimalInput
                                           className="h-9 w-full max-w-full font-mono text-sm"
                                           value={
@@ -1262,8 +1315,8 @@ export default function BondAutoUpdateView() {
                                         <DecimalInput
                                           title={
                                             key === "sellPrice"
-                                              ? "Clean price from DeriData (read-only)."
-                                              : "Yield from DeriData (read-only)."
+                                              ? "Clean price from DeriData yield/price conversion (read-only)."
+                                              : "Yield from DeriData yield/price conversion (read-only)."
                                           }
                                           className="h-9 w-full max-w-full font-mono text-sm truncate"
                                           disabled
@@ -1281,7 +1334,7 @@ export default function BondAutoUpdateView() {
                                               })()
                                           }
                                           onChange={() => {
-                                            /* read-only — DeriData calculated */
+                                            /* read-only — DeriData yield/price conversion */
                                           }}
                                         />
                                       ) : key === "faceValue" || key === "totalIssueSize" ? (
@@ -1403,8 +1456,8 @@ export default function BondAutoUpdateView() {
                                                     const next = on
                                                       ? [...current, opt.value]
                                                       : current.filter(
-                                                          (c) => c !== opt.value,
-                                                        );
+                                                        (c) => c !== opt.value,
+                                                      );
                                                     updateDraft(b.isin, {
                                                       categories: next,
                                                     });
@@ -1438,6 +1491,40 @@ export default function BondAutoUpdateView() {
                                   </TableRow>
                                 );
                               })}
+                              <TableRow key="accruedInterest">
+                                <TableCell>
+                                  <Checkbox
+                                    checked
+                                    disabled
+                                    aria-label="Apply accruedInterest"
+                                  />
+                                </TableCell>
+                                <TableCell className="font-mono text-xs whitespace-nowrap">
+                                  accruedInterest
+                                </TableCell>
+                                <TableCell className="w-[200px] max-w-[200px] overflow-hidden text-muted-foreground text-sm">
+                                  <span
+                                    className="block max-w-full truncate whitespace-nowrap font-mono text-xs"
+                                    title={formatExactNumber(model.formBase.accruedInterest)}
+                                  >
+                                    {formatExactNumber(model.formBase.accruedInterest)}
+                                  </span>
+                                </TableCell>
+                                <TableCell className="w-[220px] max-w-[220px] overflow-hidden align-middle">
+                                  <Input
+                                    title="Actual accrued interest amount (₹) — DeriData accrued_int_bottom; saved to bonds.accruedInterest."
+                                    className="h-9 w-full max-w-full font-mono text-sm truncate"
+                                    disabled
+                                    readOnly
+                                    value={
+                                      model.autofill.pricing.totalAccruedInterest != null &&
+                                      Number.isFinite(model.autofill.pricing.totalAccruedInterest)
+                                        ? String(model.autofill.pricing.totalAccruedInterest)
+                                        : ""
+                                    }
+                                  />
+                                </TableCell>
+                              </TableRow>
                             </TableBody>
                           </Table>
                         </div>

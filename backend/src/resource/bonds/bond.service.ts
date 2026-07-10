@@ -6,6 +6,7 @@ import { BondQueryBuilder } from "./bond_query_builder";
 import { isISIN } from "@utils/filters/convert";
 import {
   computeBondOrderPricingData,
+  computeStoredBondOrderPricing,
   getLastNextCouponDateBasedOnSettlementDate,
 } from "@services/order/order-pricing-helper";
 import { sendBackOfficeEmail } from "@communication/email_communication";
@@ -196,73 +197,21 @@ export class BondService {
     isin: string,
     quantityInput?: number,
     settlementType?: "T+0" | "T+1",
-    sellPrice?: number,
+    _sellPrice?: number,
   ): Promise<GetBondOrderPricingResult> {
     const bond = await this.getBondDetails(isin);
     if (!bond) {
       throw new Error("No Bond Found")
     }
 
-    const ytm =
-      bond.yield != null && Number.isFinite(Number(bond.yield))
-        ? Number(bond.yield)
-        : null;
-    if (ytm == null) {
-      throw new Error(
-        "Yield (YTM) is required for live DeriData order pricing",
-      );
-    }
-
-    // Optional seed only — live DeriData yield→price overwrites cleanPrice from the API.
-    const cleanPriceSeed =
-      sellPrice ?? bond.sellPrice ?? bond.providerPrice ?? bond.issuePrice ?? 0;
-
-    let lastCouponDateStr = bond.lastCouponDateIst?.toISOString() ?? null;
-    let nextCouponDateStr = bond.nextCouponDateIst?.toISOString() ?? null;
-    let recordDays =
-      typeof bond.recordDays === "number" && !Number.isNaN(bond.recordDays)
-        ? bond.recordDays
-        : 7;
-
-    if (!lastCouponDateStr || !nextCouponDateStr) {
-      const couponDates = await getLastNextCouponDateBasedOnSettlementDate(
-        isin,
-        new Date(),
-      );
-      lastCouponDateStr = couponDates.lastCouponDate;
-      nextCouponDateStr = couponDates.nextCouponDate;
-      if (couponDates.recordDays != null && Number.isFinite(couponDates.recordDays)) {
-        recordDays = couponDates.recordDays;
-      }
-    }
-
-    if (!lastCouponDateStr || !nextCouponDateStr) {
-      return { ok: false, reason: "missing_coupon_dates" };
-    }
-
     const rawQuantity = quantityInput ?? 1;
     const quantity =
       Number.isFinite(rawQuantity) && rawQuantity > 0 ? rawQuantity : 1;
-
-    const pricingData = await computeBondOrderPricingData(
-      {
-        isin: bond.isin,
-        faceValue: bond.faceValue,
-        quantity,
-        cleanPrice: cleanPriceSeed,
-        ytm,
-        couponRate: Number(bond.couponRate),
-        lastCouponDate: lastCouponDateStr,
-        recordDays,
-        nextCouponDate: nextCouponDateStr,
-      },
-      {
-        settlementType,
-        liveCalculator: "deridata",
-        deridataMode: "yieldToPrice",
-        maturityDate: bond.maturityDate ?? bond.maturityDateIst ?? null,
-      },
-    );
+    const pricingData = await computeStoredBondOrderPricing({
+      isin: bond.isin,
+      quantity,
+      settlementType,
+    });
 
     return {
       ok: true,
@@ -836,6 +785,8 @@ export class BondService {
         issuePrice: bondData.issuePrice,
         faceValue: bondData.faceValue,
         stampDutyPercentage: bondData.stampDutyPercentage ?? 0,
+        stampDuty: bondData.stampDuty ?? null,
+        pricingQuantity: bondData.pricingQuantity ?? null,
         allowForPurchase: bondData.allowForPurchase ?? false,
         couponRate: bondData.couponRate,
         interestPaymentFrequency: bondData.interestPaymentFrequency,
@@ -880,6 +831,7 @@ export class BondService {
         providerQuantity: bondData.providerQuantity || null,
         isOngoingDeal: bondData.isOngoingDeal ?? false,
         providerPrice: bondData.providerPrice || null,
+        accruedInterest: bondData.accruedInterest ?? null,
         ignoreAutoUpdate: bondData.ignoreAutoUpdate ?? false,
         allCouponDates: bondData.allCouponDates ?? [],
         allCouponDatesIst: (bondData.allCouponDates ?? [])
@@ -941,6 +893,8 @@ export class BondService {
         issuePrice: bondData.issuePrice,
         faceValue: bondData.faceValue,
         stampDutyPercentage: bondData.stampDutyPercentage ?? 0,
+        stampDuty: bondData.stampDuty ?? null,
+        pricingQuantity: bondData.pricingQuantity ?? null,
         allowForPurchase: bondData.allowForPurchase ?? false,
         couponRate: bondData.couponRate,
         interestPaymentFrequency: bondData.interestPaymentFrequency,
@@ -985,6 +939,7 @@ export class BondService {
         providerQuantity: bondData.providerQuantity || null,
         isOngoingDeal: bondData.isOngoingDeal ?? false,
         providerPrice: bondData.providerPrice || null,
+        accruedInterest: bondData.accruedInterest ?? null,
         ignoreAutoUpdate: bondData.ignoreAutoUpdate ?? false,
         allCouponDates: bondData.allCouponDates ?? [],
         allCouponDatesIst: (bondData.allCouponDates ?? [])

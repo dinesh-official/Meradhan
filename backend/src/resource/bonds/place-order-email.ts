@@ -1,8 +1,7 @@
 import { db } from "@core/database/database";
 import { appSchema, getEmailSalutationFromSources } from "@root/schema";
 import {
-    computeBondOrderPricingData,
-    getLastNextCouponDateBasedOnSettlementDate,
+    computeStoredBondOrderPricing,
 } from "@services/order/order-pricing-helper";
 import type { z } from "zod";
 
@@ -166,7 +165,7 @@ function amountToWords(amount: number): string {
 
 async function resolveOrderPricing(
     orderData: z.infer<typeof appSchema.bonds.orderPlaceSchema>,
-    bond: {
+    _bond: {
         faceValue: number;
         couponRate: unknown;
         sellPrice: number | null;
@@ -180,56 +179,15 @@ async function resolveOrderPricing(
         recordDays: number | null;
     },
 ) {
-    let lastCouponDateStr = bond.lastCouponDate?.toISOString() ?? null;
-    let nextCouponDateStr = bond.nextCouponDate?.toISOString() ?? null;
-    let recordDays =
-        typeof bond.recordDays === "number" && !Number.isNaN(bond.recordDays) ? bond.recordDays : 7;
-
-    if (!lastCouponDateStr || !nextCouponDateStr) {
-        const couponDates = await getLastNextCouponDateBasedOnSettlementDate(orderData.isin, new Date());
-        lastCouponDateStr = couponDates.lastCouponDate;
-        nextCouponDateStr = couponDates.nextCouponDate;
-        if (couponDates.recordDays != null && Number.isFinite(couponDates.recordDays)) {
-            recordDays = couponDates.recordDays;
-        }
-    }
-
-    if (!lastCouponDateStr || !nextCouponDateStr) {
-        return null;
-    }
-
-    const ytm =
-        orderData.yield != null && Number.isFinite(Number(orderData.yield))
-            ? Number(orderData.yield)
-            : bond.yield != null && Number.isFinite(Number(bond.yield))
-                ? Number(bond.yield)
-                : null;
-    if (ytm == null) {
-        return null;
-    }
-
-    const cleanPriceSeed =
-        bond.sellPrice ?? bond.providerPrice ?? bond.issuePrice ?? 0;
-
-    return await computeBondOrderPricingData(
-        {
+    try {
+        return await computeStoredBondOrderPricing({
             isin: orderData.isin,
-            faceValue: bond.faceValue,
             quantity: orderData.quantity,
-            cleanPrice: cleanPriceSeed,
-            ytm,
-            couponRate: Number(bond.couponRate),
-            lastCouponDate: lastCouponDateStr,
-            recordDays,
-            nextCouponDate: nextCouponDateStr,
-        },
-        {
             settlementType: orderData.settlementType,
-            liveCalculator: "deridata",
-            deridataMode: "yieldToPrice",
-            maturityDate: bond.maturityDate ?? bond.maturityDateIst ?? null,
-        },
-    );
+        });
+    } catch {
+        return null;
+    }
 }
 
 export function placeOrderEmailCustomerSubject(

@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   mapDeriDataToCalcApiResponse,
   parseDeriDataMoney,
+  parseDeriDataPricingAmounts,
   parseDeriDataRecordDateYmd,
 } from "./deridata.calc.adapter";
 import type { DeriDataCalculatorResponse } from "./deridata.types";
@@ -30,6 +31,32 @@ const sampleResponse: DeriDataCalculatorResponse = {
 };
 
 describe("deridata.calc.adapter", () => {
+  test("parseDeriDataPricingAmounts prefers DeriData stamp_duty field", () => {
+    const amounts = parseDeriDataPricingAmounts({
+      ...sampleResponse,
+      summary: {
+        ...sampleResponse.summary,
+        stamp_duty: "1",
+        settlement_amount: "9,942.75",
+      },
+    });
+
+    expect(amounts.stampDuty).toBe(1);
+    expect(amounts.settlementAmount).toBe(9942.75);
+  });
+
+  test("parseDeriDataPricingAmounts maps DeriData summary fields", () => {
+    const amounts = parseDeriDataPricingAmounts(sampleResponse);
+
+    expect(amounts.cleanPrice).toBe(98.9572);
+    expect(amounts.accruedInterestPerUnit).toBe(0.4603);
+    expect(amounts.principalAmount).toBe(9895.72);
+    expect(amounts.totalAccruedInterest).toBe(46.03);
+    expect(amounts.totalConsideration).toBe(9941.75);
+    expect(amounts.stampDuty).toBe(0);
+    expect(amounts.settlementAmount).toBe(9941.75);
+  });
+
   test("parseDeriDataMoney handles comma-separated values", () => {
     expect(parseDeriDataMoney("9,895.72")).toBe(9895.72);
     expect(parseDeriDataMoney("46.03")).toBe(46.03);
@@ -58,5 +85,70 @@ describe("deridata.calc.adapter", () => {
     expect(mapped.cf_count).toBe(1);
     expect(mapped.stamp_duty).toBe("0");
     expect(parseDeriDataMoney(mapped.settlement_amount)).toBe(9941.75);
+  });
+
+  test("manual totalAccruedInterest overrides DeriData accrued_int_bottom", () => {
+    const mapped = mapDeriDataToCalcApiResponse(
+      {
+        ...sampleResponse,
+        summary: {
+          ...sampleResponse.summary,
+          accrued_int_bottom: "2,819.18",
+        },
+      },
+      {
+        quantity: 10,
+        settlementDateYmd: "2026-07-06",
+        totalAccruedInterest: 2500.5,
+        principalAmount: 1_000_000,
+        totalConsideration: 1_002_500.5,
+        settlementAmount: 1_002_501.5,
+      },
+    );
+
+    expect(parseDeriDataMoney(mapped.total_ai)).toBe(2500.5);
+    expect(parseDeriDataMoney(mapped.principal_amount)).toBe(1_000_000);
+    expect(parseDeriDataMoney(mapped.total_consideration)).toBe(1_002_500.5);
+    expect(parseDeriDataMoney(mapped.settlement_amount)).toBe(1_002_501.5);
+  });
+
+  test("manualAccruedInterest skips DeriData accrued_int_bottom when total is absent", () => {
+    const mapped = mapDeriDataToCalcApiResponse(
+      {
+        ...sampleResponse,
+        summary: {
+          ...sampleResponse.summary,
+          accrued_int_bottom: "2,819.18",
+        },
+      },
+      {
+        quantity: 10,
+        settlementDateYmd: "2026-07-06",
+        manualAccruedInterest: true,
+      },
+    );
+
+    expect(parseDeriDataMoney(mapped.total_ai)).toBe(0);
+  });
+
+  test("stamp duty is calculated from total consideration, not principal", () => {
+    const mapped = mapDeriDataToCalcApiResponse(
+      {
+        ...sampleResponse,
+        summary: {
+          ...sampleResponse.summary,
+          principal: "400,000.00",
+          accrued_int_bottom: "250,000.00",
+          total_consideration: "650,000.00",
+        },
+      },
+      {
+        quantity: 1,
+        settlementDateYmd: "2026-07-06",
+      },
+    );
+
+    expect(mapped.stamp_duty).toBe("1");
+    expect(parseDeriDataMoney(mapped.settlement_amount)).toBe(650_001);
   });
 });
