@@ -1,0 +1,637 @@
+name: Deploy Application
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Deployment Environment"
+        required: true
+        type: choice
+        default: stage
+        options:
+          - stage
+          - prod
+
+      live_time:
+        description: "Preview Environment Lifetime"
+        required: true
+        type: choice
+        default: 1hr
+        options:
+          - 1hr
+          - 2hr
+          - 4hr
+          - 8hr
+          - 24hr      
+
+      upline:
+        description: "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈"
+        required: false
+        type: boolean
+        default: false              
+
+      Title:
+        description: "Select the applications to deploy"
+        required: true
+        type: boolean
+        default: true    
+
+      downline:
+        description: "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈"
+        required: false
+        type: boolean
+        default: false
+
+      frontend:
+        description: "Frontend"
+        required: true
+        type: boolean
+        default: true
+
+      backend:
+        description: "Backend"
+        required: true
+        type: boolean
+        default: true
+
+      crm:
+        description: "CRM"
+        required: true
+        type: boolean
+        default: true
+
+      worker:
+        description: "Worker"
+        required: true
+        type: boolean
+        default: true
+
+
+
+env:
+  prod_dns: prod-736795584.ap-south-1.elb.amazonaws.com
+  stage_dns: stttage-1036666024.ap-south-1.elb.amazonaws.com
+  github_pat: ${{ secrets.GITHUB_PAT }}
+  
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    environment: ${{ inputs.environment == 'prod' && 'production' || 'staging' }}
+
+    steps:
+
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Load ALL GitHub Environment Variables + Secrets
+      - name: Export GitHub Variables & Secrets
+        shell: bash
+        env:
+          ALL_SECRETS: ${{ toJSON(secrets) }}
+          ALL_VARS: ${{ toJSON(vars) }}
+        run: |
+          echo "$ALL_VARS" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> $GITHUB_ENV
+          echo "$ALL_SECRETS" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> $GITHUB_ENV
+
+      # Generate .env Automatically
+      - name: Generate .env
+        run: |
+          printenv \
+          | grep -v '^GITHUB_' \
+          | grep -v '^RUNNER_' \
+          | grep -v '^CI=' \
+          | grep -v '^HOME=' \
+          | grep -v '^PATH=' \
+          > .env    
+          
+      - name: Verify .env
+        run: |
+          echo "Current Directory: $(pwd)"
+          ls -la
+          echo "========================"
+          if [ -f .env ]; then
+            echo ".env exists"
+            wc -l .env
+            head -5 .env
+          else
+            echo ".env NOT FOUND"
+            exit 1
+          fi          
+
+
+      - name: Get DNS Value
+        shell: bash
+        run: |
+          if [ "${{ inputs.environment }}" = "stage" ]; then
+            DNS_VAL="stttage-1036666024.ap-south-1.elb.amazonaws.com"
+          else
+            DNS_VAL="prod-736795584.ap-south-1.elb.amazonaws.com"
+          fi
+
+          echo "DNS_VAL=$DNS_VAL" >> "$GITHUB_ENV"
+
+          echo "DNS Value: $DNS_VAL"
+
+
+      - name: Generate Resource IDs
+        id: naming
+        shell: bash
+        run: |
+
+          # Environment Code
+          ENVIRONMENT="${{ inputs.environment }}"
+          ENV_CODE="${ENVIRONMENT:0:1}"
+
+          # Branch Code
+          BRANCH="${GITHUB_REF_NAME}"
+
+          FIRST_CHAR="${BRANCH:0:1}"
+          LAST_CHAR="${BRANCH: -1}"
+          BRANCH_LENGTH=${#BRANCH}
+          MIDDLE_NUM=$((BRANCH_LENGTH - 2))
+
+          BRANCH_CODE="${FIRST_CHAR}${MIDDLE_NUM}${LAST_CHAR}"
+
+          # Resource Names
+          FRONTEND_NAME="${ENV_CODE}${BRANCH_CODE}f"
+          BACKEND_NAME="${ENV_CODE}${BRANCH_CODE}b"
+          CRM_NAME="${ENV_CODE}${BRANCH_CODE}c"
+          WORKER_NAME="${ENV_CODE}${BRANCH_CODE}w"
+
+          # Export Variables
+          echo "ENV_CODE=$ENV_CODE" >> $GITHUB_ENV
+          echo "BRANCH_CODE=$BRANCH_CODE" >> $GITHUB_ENV
+
+          echo "FRONTEND_NAME=$FRONTEND_NAME" >> $GITHUB_ENV
+          echo "BACKEND_NAME=$BACKEND_NAME" >> $GITHUB_ENV
+          echo "CRM_NAME=$CRM_NAME" >> $GITHUB_ENV
+          echo "WORKER_NAME=$WORKER_NAME" >> $GITHUB_ENV
+
+          # Output
+          echo "Environment  : $ENVIRONMENT"
+          echo "Branch       : $BRANCH"
+          echo "ENV_CODE     : $ENV_CODE"
+          echo "BRANCH_CODE  : $BRANCH_CODE"
+          echo "Frontend     : $FRONTEND_NAME"
+          echo "Backend      : $BACKEND_NAME"
+          echo "CRM          : $CRM_NAME"
+          echo "Worker       : $WORKER_NAME"
+
+
+      - name: Create Records
+        id: create_dns
+        env:
+          ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+
+          set -e
+
+          RECORD_TYPE="CNAME"
+          TARGET="$DNS_VAL"
+          ROOT_DOMAIN="devkng.com"
+
+          declare -A SERVICES=(
+            ["frontend"]="$FRONTEND_NAME"
+            ["backend"]="$BACKEND_NAME"
+            ["crm"]="$CRM_NAME"
+            ["worker"]="$WORKER_NAME"
+            ["strapi"]="$STRAPI_NAME"
+          )
+
+          RECORD_IDS=""
+          DOMAINS=""
+
+          echo "=========== DNS RECORDS ==========="
+
+          for SERVICE in "${!SERVICES[@]}"
+          do
+
+            SUBDOMAIN="${SERVICES[$SERVICE]}"
+
+            # Skip empty values
+            [ -z "$SUBDOMAIN" ] && continue
+
+            FULL_DOMAIN="${SUBDOMAIN}.${ROOT_DOMAIN}"
+
+            RESPONSE=$(curl -s -X POST \
+              "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records" \
+              -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+              -H "Content-Type: application/json" \
+              --data "{
+                \"type\":\"${RECORD_TYPE}\",
+                \"name\":\"${FULL_DOMAIN}\",
+                \"content\":\"${TARGET}\",
+                \"ttl\":120,
+                \"proxied\":true
+              }")
+
+            SUCCESS=$(echo "$RESPONSE" | jq -r '.success')
+            ERROR_CODE=$(echo "$RESPONSE" | jq -r '.errors[0].code // empty')
+
+            # ---------------------------------------------------------
+            # Record already exists
+            # ---------------------------------------------------------
+            if [ "$ERROR_CODE" = "81053" ]; then
+
+              EXISTING=$(curl -s -X GET \
+                "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records?type=${RECORD_TYPE}&name=${FULL_DOMAIN}" \
+                -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+                -H "Content-Type: application/json")
+
+              RECORD_ID=$(echo "$EXISTING" | jq -r '.result[0].id')
+
+              # Fallback search if Cloudflare doesn't return it directly
+              if [ -z "$RECORD_ID" ] || [ "$RECORD_ID" = "null" ]; then
+
+                RECORD_ID=$(curl -s -X GET \
+                  "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records?per_page=5000" \
+                  -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+                  -H "Content-Type: application/json" |
+                  jq -r ".result[] | select(.name==\"${FULL_DOMAIN}\") | .id" | head -1)
+
+              fi
+
+              RECORD_IDS="${RECORD_IDS}${RECORD_ID},"
+              DOMAINS="${DOMAINS}${FULL_DOMAIN},"
+
+              echo "${SERVICE^^}"
+              echo "Status    : Already Exists"
+              echo "URL       : https://${FULL_DOMAIN}"
+              echo "Record ID : ${RECORD_ID}"
+              echo "-------------------------------------------"
+
+              continue
+            fi
+
+            # ---------------------------------------------------------
+            # Any other API error
+            # ---------------------------------------------------------
+            if [ "$SUCCESS" != "true" ]; then
+              echo "Failed to create ${FULL_DOMAIN}"
+              echo "$RESPONSE"
+              exit 1
+            fi
+
+            # ---------------------------------------------------------
+            # Record created successfully
+            # ---------------------------------------------------------
+            RECORD_ID=$(echo "$RESPONSE" | jq -r '.result.id')
+            NAME=$(echo "$RESPONSE" | jq -r '.result.name')
+
+            RECORD_IDS="${RECORD_IDS}${RECORD_ID},"
+            DOMAINS="${DOMAINS}${NAME},"
+
+            echo "${SERVICE^^}"
+            echo "Status    : Created"
+            echo "URL       : https://${NAME}"
+            echo "Record ID : ${RECORD_ID}"
+            echo "-------------------------------------------"
+
+          done
+
+          RECORD_IDS="${RECORD_IDS%,}"
+          DOMAINS="${DOMAINS%,}"
+
+          echo ""
+          echo "=========== SUMMARY ==========="
+          echo "Record IDs : ${RECORD_IDS}"
+          echo "Domains    : ${DOMAINS}"
+          echo "==============================="
+
+          echo "record_ids=${RECORD_IDS}" >> "$GITHUB_OUTPUT"
+          echo "domains=${DOMAINS}" >> "$GITHUB_OUTPUT"
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1              
+
+      - name: Create Repositories
+        id: create_ecr
+        shell: bash
+        run: |
+
+          set -e
+
+          REPOSITORIES=(
+            "$FRONTEND_NAME"
+            "$BACKEND_NAME"
+            "$CRM_NAME"
+            "$WORKER_NAME"
+          )
+
+          REPOSITORY_URIS=""
+
+          echo "======================================"
+          echo "Creating ECR Repositories"
+          echo "======================================"
+
+          for REPO in "${REPOSITORIES[@]}"
+          do
+
+            [ -z "$REPO" ] && continue
+
+            echo ""
+            echo "Repository : $REPO"
+
+            EXISTS=$(aws ecr describe-repositories \
+              --repository-names "$REPO" \
+              --query "repositories[0].repositoryName" \
+              --output text 2>/dev/null || true)
+
+            if [ "$EXISTS" = "$REPO" ]; then
+
+              echo "Status : Already Exists"
+
+            else
+
+              aws ecr create-repository \
+                --repository-name "$REPO" \
+                --image-scanning-configuration scanOnPush=true \
+                --image-tag-mutability MUTABLE >/dev/null
+
+              echo "Status : Created"
+
+            fi
+
+            URI=$(aws ecr describe-repositories \
+              --repository-names "$REPO" \
+              --query "repositories[0].repositoryUri" \
+              --output text)
+
+            REPOSITORY_URIS="${REPOSITORY_URIS}${URI},"
+
+            echo "Repository URI : $URI"
+            echo "--------------------------------------"
+
+          done
+
+          echo ""
+          echo "======================================"
+          echo "ECR Repositories Ready"
+          echo "======================================"
+
+          echo "Repository URIs : ${REPOSITORY_URIS%,}"
+
+          echo "repository_uris=${REPOSITORY_URIS%,}" >> "$GITHUB_OUTPUT"    
+
+      - name: Login to Amazon ECR
+        run: |
+          aws ecr get-login-password --region ap-south-1 \
+            | docker login \
+              --username AWS \
+              --password-stdin 450321244603.dkr.ecr.ap-south-1.amazonaws.com
+
+      - name: Build & Push Docker Images
+        shell: bash
+        run: |
+
+          set -e
+
+          declare -A SERVICES=()
+
+          if [ "${{ inputs.frontend }}" = "true" ]; then
+            SERVICES["$FRONTEND_NAME"]="frontendDockerfile"
+          fi
+
+          if [ "${{ inputs.backend }}" = "true" ]; then
+            SERVICES["$BACKEND_NAME"]="backenddocker"
+          fi
+
+          if [ "${{ inputs.crm }}" = "true" ]; then
+            SERVICES["$CRM_NAME"]="crmdockerfile"
+          fi
+
+          if [ "${{ inputs.worker }}" = "true" ]; then
+            SERVICES["$WORKER_NAME"]="workerDocker"
+          fi
+
+          if [ ${#SERVICES[@]} -eq 0 ]; then
+            echo "No services selected."
+            exit 1
+          fi
+
+          echo "======================================"
+          echo "Building Docker Images"
+          echo "======================================"
+
+          for REPOSITORY in "${!SERVICES[@]}"
+          do
+            (
+              DOCKERFILE="${SERVICES[$REPOSITORY]}"
+              IMAGE="450321244603.dkr.ecr.ap-south-1.amazonaws.com/${REPOSITORY}:latest"
+
+              echo ""
+              echo "Repository : $REPOSITORY"
+              echo "Dockerfile : $DOCKERFILE"
+
+              docker build \
+                --no-cache \
+                -f "$DOCKERFILE" \
+                -t "$IMAGE" .
+
+              docker push "$IMAGE"
+
+              echo "Completed : $REPOSITORY"
+            ) &
+          done
+
+          wait
+
+          echo ""
+          echo "======================================"
+          echo "All Selected Docker Images Built & Pushed"
+          echo "======================================"       
+
+
+      - name: Create or Reuse Instance
+        id: create_ec2
+        shell: bash
+        env:
+          AMI_ID: ${{ secrets.PREVIEW_AMI_ID }}
+          SUBNET_ID: ${{ secrets.AWS_SUBNET_ID }}
+          SECURITY_GROUP_ID: ${{ secrets.AWS_SECURITY_GROUP_ID }}
+          KEY_NAME: preview
+        run: |
+
+          set -e
+
+          BRANCH_NAME="${{ github.ref_name }}"
+          BRANCH_NAME=$(echo "$BRANCH_NAME" | tr '/' '-' | tr '_' '-')
+
+          DEPLOY_TAG="${ENV_CODE}${BRANCH_CODE}"
+
+          echo "======================================"
+          echo "Deployment Tag : $DEPLOY_TAG"
+          echo "Branch         : $BRANCH_NAME"
+          echo "======================================"
+
+          INSTANCE_ID=$(aws ec2 describe-instances \
+            --filters \
+              "Name=tag:branch_deploy,Values=${DEPLOY_TAG}" \
+              "Name=instance-state-name,Values=pending,running,stopping,stopped" \
+            --query "Reservations[0].Instances[0].InstanceId" \
+            --output text)
+
+          if [ "$INSTANCE_ID" != "None" ] && [ -n "$INSTANCE_ID" ]; then
+
+            echo "EXISTING INSTANCE FOUND"
+            echo "Instance ID : $INSTANCE_ID"
+
+          else
+
+            echo "No existing instance found."
+            echo "Creating new EC2..."
+
+            INSTANCE_ID=$(aws ec2 run-instances \
+              --image-id "$AMI_ID" \
+              --instance-type t3.medium \
+              --subnet-id "$SUBNET_ID" \
+              --security-group-ids "$SECURITY_GROUP_ID" \
+              --key-name "$KEY_NAME" \
+              --iam-instance-profile Name=EC2-SSM-Role \
+              --tag-specifications "ResourceType=instance,Tags=[
+                {Key=Name,Value=${DEPLOY_TAG}-${BRANCH_NAME}},
+                {Key=branch_deploy,Value=${DEPLOY_TAG}},
+                {Key=Branch,Value=${BRANCH_NAME}},
+                {Key=Environment,Value=${{ inputs.environment }}},
+                {Key=ssm-dev,Value=allow}
+              ]" \
+              --query "Instances[0].InstanceId" \
+              --output text)
+
+            echo "NEW INSTANCE CREATED"
+            echo "Instance ID : $INSTANCE_ID"
+
+          fi
+
+          if [ -z "$INSTANCE_ID" ] || [ "$INSTANCE_ID" = "None" ]; then
+            echo "Failed to obtain Instance ID."
+            exit 1
+          fi
+
+          echo "INSTANCE_ID=$INSTANCE_ID" >> $GITHUB_ENV
+          echo "instance_id=$INSTANCE_ID" >> $GITHUB_OUTPUT
+
+          echo ""
+          echo "======================================"
+          echo "Deployment Summary"
+          echo "======================================"
+          echo "Deployment Tag : $DEPLOY_TAG"
+          echo "Name Tag       : ${DEPLOY_TAG}-${BRANCH_NAME}"
+          echo "Instance ID    : $INSTANCE_ID"
+          echo "======================================"
+
+
+
+      - name: Run commands
+        shell: bash
+        run: |
+          set -e
+
+          INSTANCE_ID="${{ steps.create_ec2.outputs.instance_id }}"
+
+          echo "======================================"
+          echo "Target Instance: $INSTANCE_ID"
+          echo "======================================"
+
+          echo "Waiting for EC2 to enter RUNNING state..."
+          aws ec2 wait instance-running --instance-ids "$INSTANCE_ID"
+
+          echo "EC2 is now RUNNING."
+
+          echo "Waiting for SSM Agent registration..."
+
+          while true; do
+            STATUS=$(aws ssm describe-instance-information \
+              --filters "Key=InstanceIds,Values=$INSTANCE_ID" \
+              --query "InstanceInformationList[0].PingStatus" \
+              --output text 2>/dev/null || true)
+
+            if [ "$STATUS" = "Online" ]; then
+              echo "SSM Agent is ONLINE."
+              break
+            fi
+
+            echo "Waiting for SSM..."
+            sleep 10
+          done
+
+          COMMANDS=(
+            "sudo su"
+            "cd / && pwd"
+            "docker ps "
+
+          )
+
+          STEP=1
+
+          for CMD in "${COMMANDS[@]}"; do
+
+            echo ""
+            echo "STEP $STEP"
+            echo "Running:"
+            echo "$CMD"
+
+
+            COMMAND_ID=$(aws ssm send-command \
+              --instance-ids "$INSTANCE_ID" \
+              --document-name "AWS-RunShellScript" \
+              --parameters commands="$CMD" \
+              --query "Command.CommandId" \
+              --output text)
+
+            while true; do
+
+              STATUS=$(aws ssm get-command-invocation \
+                --command-id "$COMMAND_ID" \
+                --instance-id "$INSTANCE_ID" \
+                --query "Status" \
+                --output text 2>/dev/null || echo "Pending")
+
+              if [[ "$STATUS" == "Success" || "$STATUS" == "Failed" || "$STATUS" == "Cancelled" || "$STATUS" == "TimedOut" ]]; then
+                break
+              fi
+
+              sleep 2
+            done
+
+            OUTPUT=$(aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" \
+              --instance-id "$INSTANCE_ID" \
+              --query "StandardOutputContent" \
+              --output text)
+
+            ERROR=$(aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" \
+              --instance-id "$INSTANCE_ID" \
+              --query "StandardErrorContent" \
+              --output text)
+
+            
+            [ -n "$OUTPUT" ] && [ "$OUTPUT" != "None" ] && echo "$OUTPUT"
+
+  
+            [ -n "$ERROR" ] && [ "$ERROR" != "None" ] && echo "$ERROR"
+
+            if [ "$STATUS" != "Success" ]; then
+              echo ""
+              echo "Command Failed!"
+              echo "$CMD"
+              exit 1
+            fi
+
+            STEP=$((STEP+1))
+
+          done
+
+          echo ""
+          echo "======================================"
+          echo "Deployment completed successfully."
+          echo "======================================"

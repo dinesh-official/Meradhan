@@ -1,0 +1,438 @@
+"use client";
+
+import { useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { apiClientCaller } from "@/core/connection/apiClientCaller";
+import apiGateway from "@root/apiGateway";
+import type { PortfolioDetailsResponse } from "@root/apiGateway";
+import { Fragment } from "react";
+import {
+  MultiSelect,
+  MultiSelectContent,
+  MultiSelectGroup,
+  MultiSelectItem,
+  MultiSelectTrigger,
+  MultiSelectValue,
+} from "@/components/ui/multi-select";
+import { PortfolioDetailsTabShimmer } from "./PortfolioTabShimmers";
+import { extractRatingAgencyName } from "@/global/utils/ratingAgency";
+
+interface PortfolioFilterOptions {
+  bondCategories: string[];
+  bondRatings: string[];
+  couponRanges: string[];
+  paymentFrequencies: string[];
+  isins: { isin: string; bondName: string }[];
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+  corporate: "Corporate",
+  "bank-bonds": "Bank bonds",
+  nbfc: "NBFC",
+  psu: "PSU",
+  "tax-free": "Tax free",
+  "zero-coupon": "Zero coupon",
+  perpetual: "Perpetual",
+  "latest-release": "Latest release",
+};
+
+function getCategoryLabel(slug: string): string {
+  return CATEGORY_LABELS[slug.toLowerCase()] ?? slug;
+}
+
+// Hardcoded 3-char month abbreviations to avoid the "Sept" vs "Sep" inconsistency
+// introduced by newer ICU data in Node.js 18+ / Chrome 110+ where Intl.DateTimeFormat
+// with { month: "short" } outputs "Sept" (4 chars) for September.
+const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+function formatPortfolioDate(value: string | Date | null | undefined): string | null {
+  if (!value) return null;
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return null;
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = MONTHS_SHORT[d.getMonth()];
+  const year = d.getFullYear();
+  return `${day} ${month} ${year}`;
+}
+
+export default function PortfolioDetails() {
+  const [filters, setFilters] = useState({
+    bondCategory: [] as string[],
+    bondRating: [] as string[],
+    coupon: [] as string[],
+    paymentFrequency: [] as string[],
+  });
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [expandedRow, setExpandedRow] = useState<number | null>(null);
+
+  const itemsPerPage = 10;
+
+  const setFilterValues = (key: keyof typeof filters, values: string[]) => {
+    setFilters((prev) => ({ ...prev, [key]: values }));
+    setCurrentPage(1);
+    setExpandedRow(null);
+  };
+
+  const toggleRow = (id: number) => {
+    setExpandedRow((prev) => (prev === id ? null : id));
+  };
+
+  const portfolioApi = new apiGateway.meradhan.customerPortfolioApi(
+    apiClientCaller
+  );
+
+  const { data: filtersResponse } = useQuery<{
+    responseData: PortfolioFilterOptions;
+  }>({
+    queryKey: ["portfolioFilterOptions"],
+    queryFn: async () => {
+      const { data } = await apiClientCaller.get<{
+        responseData: PortfolioFilterOptions;
+      }>("/customer/portfolio/details/filters");
+      return data;
+    },
+  });
+
+  const {
+    data: portfolioData,
+    isLoading,
+    error,
+  } = useQuery<PortfolioDetailsResponse>({
+    queryKey: [
+      "portfolioDetails",
+      currentPage,
+      filters.bondCategory.join("|"),
+      filters.bondRating.join("|"),
+      filters.coupon.join("|"),
+      filters.paymentFrequency.join("|"),
+    ],
+    queryFn: async () => {
+      const response = await portfolioApi.getPortfolioDetails({
+        page: currentPage,
+        limit: itemsPerPage,
+        bondCategories: filters.bondCategory.length ? filters.bondCategory : undefined,
+        bondRatings: filters.bondRating.length ? filters.bondRating : undefined,
+        couponRanges: filters.coupon.length ? filters.coupon : undefined,
+        paymentFrequencies: filters.paymentFrequency.length
+          ? filters.paymentFrequency
+          : undefined,
+      });
+
+      return response.responseData;
+    },
+  });
+
+  const bondData = portfolioData?.data ?? [];
+  const totalPages = portfolioData?.meta?.totalPages ?? 0;
+
+  const apiFilterOptions = filtersResponse?.responseData;
+  const filterOptions = {
+    bondCategory: apiFilterOptions?.bondCategories ?? [],
+    bondRating: apiFilterOptions?.bondRatings ?? [],
+    coupon: apiFilterOptions?.couponRanges ?? [],
+    paymentFrequency: apiFilterOptions?.paymentFrequencies ?? [],
+  };
+
+  const handlePrevPage = () => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
+    setExpandedRow(null);
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+    setExpandedRow(null);
+  };
+
+  return (
+    <div className="p-0 bg-white rounded-xl w-full min-w-0">
+      {/* Filters */}
+      <div className="flex flex-col md:flex-row gap-4 md:gap-6 mb-8">
+        <MultiSelect
+          values={filters.bondCategory}
+          onValuesChange={(values) => setFilterValues("bondCategory", values)}
+        >
+          <MultiSelectTrigger className="md:max-w-[250px] w-full justify-between">
+            <MultiSelectValue placeholder="Bond Category" />
+          </MultiSelectTrigger>
+          <MultiSelectContent>
+            <MultiSelectGroup>
+              {filterOptions.bondCategory.map((option) => (
+                <MultiSelectItem key={option} value={option}>
+                  {getCategoryLabel(option)}
+                </MultiSelectItem>
+              ))}
+            </MultiSelectGroup>
+          </MultiSelectContent>
+        </MultiSelect>
+
+        <MultiSelect
+          values={filters.bondRating}
+          onValuesChange={(values) => setFilterValues("bondRating", values)}
+        >
+          <MultiSelectTrigger className="md:max-w-[250px] w-full justify-between">
+            <MultiSelectValue placeholder="Bond Rating" />
+          </MultiSelectTrigger>
+          <MultiSelectContent>
+            <MultiSelectGroup>
+              {filterOptions.bondRating.map((option) => (
+                <MultiSelectItem key={option} value={option}>
+                  {option}
+                </MultiSelectItem>
+              ))}
+            </MultiSelectGroup>
+          </MultiSelectContent>
+        </MultiSelect>
+
+        <MultiSelect
+          values={filters.coupon}
+          onValuesChange={(values) => setFilterValues("coupon", values)}
+        >
+          <MultiSelectTrigger className="md:max-w-[250px] w-full justify-between">
+            <MultiSelectValue placeholder="Coupon" />
+          </MultiSelectTrigger>
+          <MultiSelectContent>
+            <MultiSelectGroup>
+              {filterOptions.coupon.map((option) => (
+                <MultiSelectItem key={option} value={option}>
+                  {option.includes("%") ? option : `${option}%`}
+                </MultiSelectItem>
+              ))}
+            </MultiSelectGroup>
+          </MultiSelectContent>
+        </MultiSelect>
+
+        <MultiSelect
+          values={filters.paymentFrequency}
+          onValuesChange={(values) =>
+            setFilterValues("paymentFrequency", values)
+          }
+        >
+          <MultiSelectTrigger className="md:max-w-[250px] w-full justify-between">
+            <MultiSelectValue placeholder="Payment Frequency" />
+          </MultiSelectTrigger>
+          <MultiSelectContent>
+            <MultiSelectGroup>
+              {filterOptions.paymentFrequency.map((option) => (
+                <MultiSelectItem key={option} value={option}>
+                  {option}
+                </MultiSelectItem>
+              ))}
+            </MultiSelectGroup>
+          </MultiSelectContent>
+        </MultiSelect>
+      </div>
+
+      {isLoading && <PortfolioDetailsTabShimmer />}
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <p className="text-red-700 font-semibold">Error loading portfolio</p>
+        </div>
+      )}
+
+      {!isLoading && (
+        <>
+          <div className="overflow-x-auto common-table-wrapper">
+            <table className="w-full text-sm table-fixed">
+              <colgroup>
+                <col style={{ width: "200px" }} />
+                <col style={{ width: "160px" }} />
+                <col style={{ width: "120px" }} />
+                <col style={{ width: "90px" }} />
+                <col style={{ width: "170px" }} />
+                <col style={{ width: "150px" }} />
+                <col style={{ width: "90px" }} />
+                <col style={{ width: "90px" }} />
+                <col style={{ width: "160px" }} />
+                <col style={{ width: "130px" }} />
+              </colgroup>
+
+              <thead>
+                <tr>
+                  <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Security Name</th>
+                  <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">ISIN</th>
+                  <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Bond Category</th>
+                  <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Coupon</th>
+                  <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Investment Amount</th>
+                  <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Face Value</th>
+                  <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Quantity</th>
+                  <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Yield</th>
+                  <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Interest Frequency</th>
+                  <th className="px-4 py-3 text-left font-semibold text-black text-[12px]">Maturity Date</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {bondData.length > 0 ? (
+                  bondData.map((bond) => (
+                    <Fragment key={bond.id}>
+                      <tr
+                        onClick={() => toggleRow(bond.id)}
+                        className="border-b border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer"
+                      >
+                        <td className="px-4 py-4 max-w-xs min-w-[200px]">
+                          <div className="font-medium text-[14px] text-black truncate">
+                            {bond.securityName}
+                          </div>
+                          <div className="text-[12px] text-[#666666] truncate">
+                            {bond.instrumentName || "N/A"}
+                          </div>
+                        </td>
+
+                        <td className="px-4 py-4 text-black">{bond.isin}</td>
+
+                        <td className="px-4 py-4">
+                          {bond.categories && bond.categories.filter(cat => cat.toLowerCase() !== "n/a").length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {bond.categories.filter(cat => cat.toLowerCase() !== "n/a").map((cat) => (
+                                <span
+                                  key={cat}
+                                  className="px-3 py-1 rounded-[5px] text-[12px] font-semibold whitespace-nowrap bg-[#4ecdc4] text-white"
+                                >
+                                  {getCategoryLabel(cat)}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="px-3 py-1 rounded-[5px] text-[12px] font-semibold whitespace-nowrap bg-[#4ecdc4] text-white">
+                              N/A
+                            </span>
+                          )}
+                        </td>
+
+                        <td className="px-4 py-4 text-black">
+                          {Number(bond.coupon).toFixed(2)}%
+                        </td>
+
+                        <td className="px-4 py-4 text-black font-medium whitespace-nowrap">
+                          ₹{" "}
+                          {bond.investmentAmount.toLocaleString("en-IN", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
+                        </td>
+
+                        <td className="px-4 py-4 text-black font-medium whitespace-nowrap">
+                          ₹{" "}
+                          {bond.faceValue.toLocaleString("en-IN", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
+                        </td>
+
+                        <td className="px-4 py-4 text-black">{bond.quantity}</td>
+
+                        <td className="px-4 py-4 text-black whitespace-nowrap">
+                          {bond.yield !== null && bond.yield !== undefined
+                            ? `${Number(bond.yield).toFixed(2)}%`
+                            : "N/A"}
+                        </td>
+
+                        <td className="px-4 py-4 text-black">
+                          {bond.interestFrequency || "N/A"}
+                        </td>
+
+                        <td className="px-4 py-4 text-black whitespace-nowrap">
+                          {formatPortfolioDate(bond.maturityDate) ?? "N/A"}
+                        </td>
+                      </tr>
+
+                      {expandedRow === bond.id && (
+                        <tr className="border-b border-gray-200 bg-gray-50">
+                          <td colSpan={10} className="px-4 py-4">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
+                              <Detail label="Description" value={bond.description} />
+                              <Detail label="Credit Rating" value={bond.creditRating} />
+                              <Detail label="Sector Name" value={bond.sectorName} />
+                              <Detail label="Tax Status" value={bond.taxStatus} />
+                              <Detail label="Nature of Instrument" value={bond.natureOfInstrument} />
+                              <Detail label="Last Trade Yield" value={bond.lastTradeYield} />
+                              <Detail label="Last Trade Price" value={bond.lastTradePrice} />
+                              <Detail label="Mode Of Issuance" value={bond.modeOfIssuance} />
+                              <Detail label="Coupon Type" value={bond.couponType} />
+                              <Detail
+                                label="Date Of Allotment"
+                                value={formatPortfolioDate(bond.dateOfAllotment)}
+                              />
+                              <Detail
+                                label="Next Coupon Date"
+                                value={formatPortfolioDate(bond.nextCouponDate)}
+                              />
+                              <Detail
+                                label="Rating Agency"
+                                value={extractRatingAgencyName(bond.ratingAgencyName)}
+                              />
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={10} className="px-4 py-8 text-center text-gray-500">
+                      No bonds found matching your filters.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-6 min-w-0">
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={handlePrevPage}
+                disabled={currentPage === 1}
+                className="p-1 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft className="w-5 h-5 text-gray-600" />
+              </button>
+              {currentPage} of {totalPages}
+              <button
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+                className="p-1 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+            <div className="text-sm text-black min-w-0 sm:text-right">
+              Showing{" "}
+              {portfolioData?.meta.total === 0
+                ? 0
+                : (currentPage - 1) * itemsPerPage + 1}{" "}
+              to{" "}
+              {Math.min(
+                currentPage * itemsPerPage,
+                portfolioData?.meta.total || 0
+              )}{" "}
+              of {portfolioData?.meta.total || 0} records
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function Detail({ label, value }: { label: string; value: any }) {
+  const isMissing =
+    value === null ||
+    value === undefined ||
+    (typeof value === "string" &&
+      (value.trim() === "" ||
+        ["N/A", "NA", "UNKNOWN", "NULL"].includes(value.trim().toUpperCase())));
+
+  if (isMissing) return null;
+
+  return (
+    <div>
+      <p className="text-xs text-gray-500">{label}</p>
+      <p className="font-medium text-black">{value}</p>
+    </div>
+  );
+}

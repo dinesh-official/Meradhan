@@ -1,0 +1,74 @@
+/// Razorpay Route (connected accounts) storage for CRM UI.
+/// Stores the full Razorpay `/v2/accounts` payload for audit/debug along with the Razorpay account id.
+model RazorpayRouteAccount {
+  id                Int     @id @default(autoincrement())
+  razorpayAccountId String  @unique
+  data              Json
+  isDefault         Boolean @default(false)
+
+  settlementAccounts RazorpayRouteSettlementAccount[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isDefault])
+  @@index([razorpayAccountId])
+  @@map("razorpay_route_accounts")
+}
+
+/// Settlement/bank account details for Razorpay Route payouts.
+/// This is CRM-managed and stored separately from Razorpay payloads.
+model RazorpayRouteSettlementAccount {
+  id                Int    @id @default(autoincrement())
+  razorpayAccountId String
+
+  accountNumber   String
+  ifscCode        String
+  beneficiaryName String
+  isDefault       Boolean @default(false)
+
+  routeAccount RazorpayRouteAccount @relation(fields: [razorpayAccountId], references: [razorpayAccountId], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([razorpayAccountId])
+  @@index([isDefault])
+  @@map("razorpay_route_settlement_accounts")
+}
+
+/// Razorpay Route stakeholder payload storage (e.g. `sth_...`).
+/// Stores important searchable fields and the flexible objects as JSON.
+model RazorpayRouteStakeholder {
+  id Int @id @default(autoincrement())
+
+  /// Razorpay stakeholder id (e.g. `sth_SgxrqJqhPK8XjD`)
+  razorpayStakeholderId String @unique
+
+  /// Related Route account id (e.g. `acc_...`) - provided by caller.
+  razorpayAccountId String
+
+  /// Optional CRM user id selected while creating stakeholder in CRM UI.
+  userId Int?
+
+  entity              String
+  name                String
+  email               String?
+  kycPan              String?
+  percentageOwnership Int?
+
+  relationship Json?
+  phone        Json?
+  notes        Json?
+  kyc          Json?
+  addresses    Json?
+  data         Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([razorpayAccountId])
+  @@index([userId])
+  @@index([razorpayStakeholderId])
+  @@map("razorpay_route_stakeholders")
+}

@@ -1,0 +1,382 @@
+import { appSchema } from "@root/schema";
+import type { BaseResponseData } from "../../../types/base";
+import type { AxiosRequestConfig } from "axios";
+import type z from "zod";
+import type { IApiCaller } from "../../connection/apiCaller.interface";
+import type {
+  IAuthCompleteResponse,
+  ICustomerTwoFactorSettingsResponse,
+  ISessionResponse,
+  ISignInRequestResponse,
+  ISignInSendOtpResponse,
+  ISignupOtpVerifyResponse,
+} from "./customerauth.response";
+
+export class CustomerAuthApi {
+  private schema = appSchema.customer;
+
+  constructor(private apiClient: IApiCaller) { }
+
+  async sendSignupMobileVerify(
+    payload: z.infer<typeof this.schema.sendMobileOtpSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<ISignupOtpVerifyResponse>(
+      "/auth/customer/send-signup-mobile-verify",
+      payload,
+      config
+    );
+    return data;
+  }
+
+  async sendSignupEmailVerify(
+    payload: z.infer<typeof this.schema.sendEmailOtpSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<ISignupOtpVerifyResponse>(
+      "/auth/customer/send-signup-email-verify",
+      payload,
+      config
+    );
+    return data;
+  }
+
+  async verifySignupOtp(
+    params: z.infer<typeof this.schema.signUpWithCredentialsQuerySchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<IAuthCompleteResponse>(
+      "/auth/customer/verify-signup-otp",
+      undefined,
+      {
+        ...config,
+        params: params,
+      }
+    );
+    return data;
+  }
+
+  async updateSignupEmail(
+    payload: z.infer<typeof this.schema.signupUpdateEmailSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<
+      BaseResponseData<{ id: number; email: string }>
+    >("/auth/customer/signup/update-email", payload, config);
+    return data;
+  }
+
+  async updateSignupPhone(
+    payload: z.infer<typeof this.schema.signupUpdatePhoneSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<
+      BaseResponseData<{ id: number; phone: string }>
+    >("/auth/customer/signup/update-phone", payload, config);
+    return data;
+  }
+
+  async verifySignupOtpBoth(
+    payload: z.infer<typeof this.schema.signUpVerifyBothSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<
+      BaseResponseData<{ id: number; email: string }>
+    >("/auth/customer/verify-signup-otp-both", payload, config);
+    return data;
+  }
+
+  async singUpWithCredentials(
+    payload: z.infer<typeof this.schema.createNewCustomerSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<IAuthCompleteResponse>(
+      "/auth/customer/signup-with-credentials",
+      payload,
+      {
+        ...config,
+      }
+    );
+    return data;
+  }
+
+  // sign in with email or phone
+  async signInRequest(
+    payload: z.infer<typeof this.schema.signInWithEmailPhoneRequestSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<ISignInRequestResponse>(
+      "/auth/customer/signin/request",
+      payload,
+      config
+    );
+    return data;
+  }
+
+  async signInSendOtp(
+    payload: z.infer<typeof this.schema.sendSignInOtpSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<ISignInSendOtpResponse>(
+      "/auth/customer/signin/send-otp",
+      payload,
+      config
+    );
+    return data;
+  }
+
+  async signInVerifyOtp(
+    payload: z.infer<typeof this.schema.signInWithOtpSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<IAuthCompleteResponse>(
+      "/auth/customer/signin/with-otp",
+      payload,
+      config
+    );
+    return data;
+  }
+
+  async verifyAccountActivationAtLogin(
+    payload: z.infer<typeof this.schema.accountActivationVerifySchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<IAuthCompleteResponse>(
+      "/auth/customer/signin/account-activation/verify",
+      payload,
+      config
+    );
+    return data;
+  }
+
+  async getTwoFactorSettings(config?: AxiosRequestConfig) {
+    const { data } = await this.apiClient.get<ICustomerTwoFactorSettingsResponse>(
+      "/auth/customer/2fa/settings",
+      config,
+    );
+    return data;
+  }
+
+  async updateTwoFactorSettings(
+    payload: z.infer<typeof this.schema.customerTwoFactorSettingsUpdateSchema>,
+    config?: AxiosRequestConfig,
+  ) {
+    const { data } = await this.apiClient.patch<ICustomerTwoFactorSettingsResponse>(
+      "/auth/customer/2fa/settings",
+      payload,
+      config,
+    );
+    return data;
+  }
+
+  async verifySignInTwoFactor(
+    payload: z.infer<typeof this.schema.signInVerifyTwoFactorSchema>,
+    config?: AxiosRequestConfig,
+  ) {
+    const { data } = await this.apiClient.post<IAuthCompleteResponse>(
+      "/auth/customer/signin/2fa/verify",
+      payload,
+      config,
+    );
+    return data;
+  }
+
+  async getSession(config?: AxiosRequestConfig) {
+    const { data } = await this.apiClient.get<ISessionResponse>(
+      `/customer/session`,
+      config
+    );
+    return data;
+  }
+
+  async sendEmailVerifyLink(config?: AxiosRequestConfig) {
+    return await this.apiClient.get<{ message: string }>(
+      `/auth/customer/send-verify-email`,
+      config
+    );
+  }
+
+  async verifyEmail(token: string, config?: AxiosRequestConfig) {
+    return await this.apiClient.get<{ message: string }>(
+      `/auth/customer/verify-email?token=${token}`,
+      config
+    );
+  }
+
+  async resendEmailVerificationForUnverifiedUser(
+    payload: z.infer<typeof this.schema.signInWithEmailPhoneRequestSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<{ message: string }>(
+      "/auth/customer/resend-email-verification",
+      payload,
+      config
+    );
+    return data;
+  }
+
+  async updateMobileNumber(
+    payload: z.infer<typeof this.schema.customerMobileUpdateRequestSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<{ message: string }>(
+      `/auth/customer/profile/mobile`,
+      payload,
+      config
+    );
+    return data;
+  }
+
+  async sendMobileVerifyOtp(
+    payload: z.infer<typeof this.schema.sendMobileOtpSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<{ otpToken: string }>(
+      "/auth/customer/profile/mobile/send-otp",
+      payload,
+      config
+    );
+    return data;
+  }
+
+  async verifyMobileOtp(
+    payload: z.infer<typeof this.schema.customerMobileVerifyRequestSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<{
+      success: boolean;
+      message: string;
+    }>("/auth/customer/profile/mobile/verify", payload, config);
+    return data;
+  }
+
+  async sendEmailVerifyOtp(
+    payload: z.infer<typeof this.schema.customerEmailVerifySendOtpSchema>,
+    config?: AxiosRequestConfig,
+  ) {
+    const { data } = await this.apiClient.post<{ otpToken: string }>(
+      "/auth/customer/profile/email-verification/send-otp",
+      payload,
+      config,
+    );
+    return data;
+  }
+
+  async verifyEmailVerifyOtp(
+    payload: z.infer<typeof this.schema.customerEmailVerifyConfirmSchema>,
+    config?: AxiosRequestConfig,
+  ) {
+    const { data } = await this.apiClient.post<{
+      success: boolean;
+      message: string;
+    }>("/auth/customer/profile/email-verification/verify", payload, config);
+    return data;
+  }
+
+  async sendEmailChangeOtp(
+    payload: z.infer<typeof this.schema.customerEmailChangeSendOtpSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<
+      BaseResponseData<{ otpToken: string }>
+    >("/auth/customer/profile/email/send-otp", payload, config);
+    return data;
+  }
+
+  async verifyEmailChange(
+    payload: z.infer<typeof this.schema.customerEmailChangeVerifySchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<IAuthCompleteResponse>(
+      "/auth/customer/profile/email/verify",
+      payload,
+      config
+    );
+    return data;
+  }
+
+  async toggleWhatsAppNotification(
+    status?: boolean,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<{
+      success: boolean;
+      message: string;
+    }>(
+      "/auth/customer/profile/whatsapp",
+      {
+        enableWhatsApp: status,
+      },
+      config
+    );
+    return data;
+  }
+
+  async addBankAccount(
+    payload: z.infer<typeof appSchema.kyc.bankInfoSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<{ message: string }>(
+      "/auth/customer/profile/bank-account",
+      payload,
+      config
+    );
+    return data;
+  }
+
+  async removeBankAccount(bankId: number, config?: AxiosRequestConfig) {
+    const { data } = await this.apiClient.delete<{ message: string }>(
+      `/auth/customer/profile/bank-account/${bankId}`,
+      config
+    );
+    return data;
+  }
+
+  async setPrimaryBankAccount(bankId: number, config?: AxiosRequestConfig) {
+    const { data } = await this.apiClient.post<{ message: string }>(
+      `/auth/customer/profile/bank-account/primary/${bankId}`,
+      {},
+      config
+    );
+    return data;
+  }
+
+  async addDematAccount(
+    payload: z.infer<typeof appSchema.customer.createDematAccountSchema>,
+    config?: AxiosRequestConfig
+  ) {
+    const { data } = await this.apiClient.post<{ message: string }>(
+      "/auth/customer/profile/demat-account",
+      payload,
+      config
+    );
+    return data;
+  }
+
+  async removeDematAccount(dematId: number, config?: AxiosRequestConfig) {
+    const { data } = await this.apiClient.delete<{ message: string }>(
+      `/auth/customer/profile/demat-account/${dematId}`,
+      config
+    );
+    return data;
+  }
+
+  async setPrimaryDematAccount(dematId: number, config?: AxiosRequestConfig) {
+    const { data } = await this.apiClient.post<{ message: string }>(
+      `/auth/customer/profile/demat-account/primary/${dematId}`,
+      {},
+      config
+    );
+    return data;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async setRiskProfile(payload: any[], config?: AxiosRequestConfig) {
+    const { data } = await this.apiClient.post<{ message: string }>(
+      "/auth/customer/profile/risk-profile",
+      payload,
+      config
+    );
+    return data;
+  }
+}

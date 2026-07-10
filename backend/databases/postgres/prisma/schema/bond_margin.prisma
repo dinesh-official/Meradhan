@@ -1,0 +1,17 @@
+model BondMargin {
+    id                   String   @id @default(uuid())
+    sectorName           String
+    rating               String
+    underOneYear         Float
+    oneToThreeYears      Float
+    threeToFiveYears     Float
+    fiveToSevenYears     Float
+    sevenToTenYears      Float
+    tenToFifteenYears    Float
+    moreThanFifteenYears Float
+    createdAt            DateTime @default(now())
+    updatedAt            DateTime @updatedAt
+
+    @@unique([sectorName, rating], name: "bond_priced_margin_sector_rating_key")
+    @@map("bond_priced_margin")
+}

@@ -1,0 +1,25 @@
+model CRMUserDataModel {
+  id                         Int                          @id @default(autoincrement())
+  name                       String
+  email                      String                       @unique
+  phoneNo                    String
+  avatar                     String?                      @default("person.jpg")
+  lastLogin                  DateTime?
+  role                       CrmUserROLE                  @default(VIEWER)
+  accountStatus              AccountStatus                @default(ACTIVE)
+  createdAt                  DateTime                     @default(now())
+  updatedAt                  DateTime                     @updatedAt
+  createdBy                  Int?
+  CustomersAuthDataModel     CustomersAuthDataModel[]
+  LeadsModel                 LeadsModel[]
+    PartnershipSubmissionModel PartnershipSubmissionModel[]
+
+    notificationSavedLists   CrmNotificationSavedListModel[]
+    notificationLogsSent     NotificationLogModel[]           @relation("NotificationSentBy")
+    notificationTemplates    NotificationTemplateModel[]      @relation("NotificationTemplateCreatedBy")
+
+    savedProposals           CrmSavedProposal[]
+
+    @@index([email])
+    @@map("crm_users")
+}

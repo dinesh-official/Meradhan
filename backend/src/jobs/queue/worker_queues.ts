@@ -1,0 +1,98 @@
+import { QueueNames, sharedConnection } from "@store/redis_store";
+import Bull from "bull";
+
+// 🔹 Reuse shared Redis clients across all queues
+const sharedRedisOpts = {
+  createClient: (type: string) => {
+    switch (type) {
+      case "client":
+        return sharedConnection.getInstance().duplicate();
+      case "subscriber":
+        return sharedConnection.getInstance().duplicate();
+      default:
+        return sharedConnection.getInstance().duplicate();
+    }
+  },
+};
+
+// 🔹 Initialize all queues using shared redis connections
+export const welcomeEmailSenderQueue = new Bull(
+  QueueNames.welComeEmail,
+  sharedRedisOpts,
+);
+export const emailOtpSenderQueue = new Bull(
+  QueueNames.emailOtpSend,
+  sharedRedisOpts,
+);
+export const emailAdminOtpSenderQueue = new Bull(
+  QueueNames.emailAdminOtpSend,
+  sharedRedisOpts,
+);
+
+export const rekycOtpSenderQueue = new Bull(
+  QueueNames.rekycOtpSend,
+  sharedRedisOpts,
+);
+export const mobileOtpSenderQueue = new Bull(
+  QueueNames.mobileOtpSend,
+  sharedRedisOpts,
+);
+export const emailVerificationQueue = new Bull(
+  QueueNames.emailVerification,
+  sharedRedisOpts,
+);
+
+export const addBankAccountsClearingCorporationsEmailQueue = new Bull(
+  QueueNames.addBankAccountsClearingCorporationsEmail,
+  sharedRedisOpts,
+);
+
+export const kycSubmittedForVerificationEmailQueue = new Bull(
+  QueueNames.kycSubmittedForVerificationEmail,
+  sharedRedisOpts,
+);
+
+export const bankAccountSubmissionReceivedEmailQueue = new Bull(
+  QueueNames.bankAccountSubmissionReceivedEmail,
+  sharedRedisOpts,
+);
+
+export const dematAccountSubmissionReceivedEmailQueue = new Bull(
+  QueueNames.dematAccountSubmissionReceivedEmail,
+  sharedRedisOpts,
+);
+
+export const kycReminderNotStartedEmailQueue = new Bull(
+  QueueNames.kycReminderNotStartedEmail,
+  sharedRedisOpts,
+);
+
+export const kycApprovedEmailQueue = new Bull(
+  QueueNames.kycApprovedEmail,
+  sharedRedisOpts,
+);
+
+export const kraWorkerQueue = new Bull(
+  QueueNames.kraProcessWork,
+  sharedRedisOpts,
+);
+
+export const orderSettlementQueue = new Bull(
+  QueueNames.orderSettlement,
+  sharedRedisOpts,
+);
+
+export const profileSubmitSettlementQueue = new Bull(
+  QueueNames.submitProfileCompleat,
+  sharedRedisOpts,
+);
+
+export const maturityReminderEmailQueue = new Bull(
+  QueueNames.maturityReminderEmail,
+  sharedRedisOpts,
+);
+
+export const couponReminderEmailQueue = new Bull(
+  QueueNames.couponReminderEmail,
+  sharedRedisOpts,
+);

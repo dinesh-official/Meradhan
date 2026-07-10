@@ -1,0 +1,157 @@
+model BondPricedListConsolidated {
+  id Int @id @default(autoincrement())
+
+  /// Source file metadata
+  provider     String?
+  dateRaw      String?
+  timeRaw      String?
+  timestamp    DateTime
+  timestampIst DateTime? @db.Date
+
+  /// Identifiers — upsert key = `isin` + `timestamp` (full quote instant)
+  isin       String
+  issuerName String?
+
+  /// Frequently queried fields (normalized where possible)
+  couponRate      Float?
+  maturityDate    DateTime?
+  maturityDateIst DateTime? @db.Date
+  yield           Float?
+
+  currency  String?
+  faceValue Float?
+  quantity  String?
+
+  rating       String?
+  ratingAgency String?
+
+  price           Float?
+  dirtyPrice      Float?
+  cleanPrice      Float?
+  accruedInterest Float?
+
+  taxFree  Boolean?
+  isListed String?
+
+  /// Preserve full row (forward-compatible)
+  raw Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([isin, timestamp], name: "bond_priced_list_consolidated_isin_timestamp_key")
+  @@index([issuerName])
+  @@index([timestamp])
+  @@map("bond_priced_list_consolidated")
+}
+
+model BondReferenceMetadata {
+  id Int @id @default(autoincrement())
+
+  /// One metadata record per ISIN from the reference file
+  isin       String  @unique
+  issuerName String?
+
+  issueDate       DateTime?
+  issueDateIst    DateTime? @db.Date
+  maturityDate    DateTime?
+  maturityDateIst DateTime? @db.Date
+  isPerpetual     Boolean?
+
+  issueCurrency        String?
+  originalAmountIssued String?
+
+  couponType               String?
+  bondType                 String?
+  couponRate               Float?
+  interestPaymentFrequency String?
+  seniority                String?
+  natureOfInstrument       String?
+
+  callableFlag  String?
+  puttableFlag  String?
+  dayConvention String?
+
+  previousCouponDate    DateTime?
+  previousCouponDateIst DateTime? @db.Date
+  lastCouponDate        DateTime?
+  lastCouponDateIst     DateTime? @db.Date
+  nextCouponDate        DateTime?
+  nextCouponDateIst     DateTime? @db.Date
+
+  isListed     Boolean?
+  exchangeName String?
+  exchangeCode String?
+
+  bloombergFigi         String?
+  bloombergTicker       String?
+  bloombergSecurityType String?
+  marketSector          String?
+
+  faceValue      Float?
+  issuePrice     Float?
+  bondCategory   String?
+  taxable        String?
+  modeOfIssuance String?
+
+  yield           Float?
+  lastTradedYield Float?
+  lastTradedPrice Float?
+
+  /// Preserve the full AD row (forward-compatible)
+  raw Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isin])
+  @@index([issuerName])
+  @@map("bond_reference_metadata")
+}
+
+model BondReferenceCouponPaymentDate {
+  id Int @id @default(autoincrement())
+
+  isin                 String
+  interestPaymentDates String?
+  recordDays           Float?
+  recordDate           DateTime?
+  recordDateIst        DateTime? @db.Date
+  dueDate              DateTime?
+  dueDateIst           DateTime? @db.Date
+
+  raw Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isin])
+  @@index([recordDate])
+  @@index([dueDate])
+  @@map("bond_reference_coupon_payment_dates")
+}
+
+model BondReferenceRedemptionSchedule {
+  id Int @id @default(autoincrement())
+
+  isin            String
+  redemptionType  String?
+  startDate       DateTime?
+  startDateIst    DateTime? @db.Date
+  endDate         DateTime?
+  endDateIst      DateTime? @db.Date
+  price           Float?
+  amount          Float?
+  optionType      String?
+  optionFrequency String?
+
+  raw Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isin])
+  @@index([startDate])
+  @@index([endDate])
+  @@map("bond_reference_redemption_schedule")
+}

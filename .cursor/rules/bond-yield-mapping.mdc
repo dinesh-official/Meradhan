@@ -1,0 +1,56 @@
+---
+description: Bond yield (user-facing) vs buyYield (internal) — never mix them in customer code
+globs: frontend/meradhan/**/*,backend/src/resource/customer/**/*,backend/src/services/order/**/*,backend/src/resource/bonds/bond.service.ts,packages/apiGateway/src/core/api/bonds/**/*
+alwaysApply: false
+---
+
+# Bond Yield vs Buy Yield
+
+Two fields on `bonds`; they are **not interchangeable**.
+
+| Field | DB column | Audience | UI / API |
+|-------|-----------|----------|----------|
+| **`yield`** | `bonds.yield` | Customers | Show as "Yield", "Yield Offered", "Yield to Maturity" |
+| **`buyYield`** | `bonds.buyYield` | CRM / ops only | Never show on MeraDhan; never use in customer pricing or order history |
+
+## Calculation flow (internal)
+
+1. Ops sets **`buyYield`** in CRM.
+2. Pricing calculator runs with `buyYield` as input.
+3. Result (`final_yield_raw`) is stored as public **`yield`** (offered/sell yield).
+4. Customers only ever see **`yield`** — not the calc inputs or `buyYield`.
+
+## Customer code — use `yield` only
+
+```typescript
+// ❌ BAD — exposes internal buy-side yield
+const y = bond.buyYield ?? bond.yield;
+const yieldVal = Number(bond.buyYield ?? bond.yield);
+
+// ✅ GOOD — public listing yield
+import { parseBondListingYield, formatBondListingYieldLabel } from "@/global/utils/bondListingYield";
+const y = parseBondListingYield(bond.yield);
+const label = formatBondListingYieldLabel(bond.yield);
+
+// ✅ GOOD — checkout / order pricing
+const indicativeYield = orderPricing?.yield ?? bond.yield;
+```
+
+Order history snapshots: prefer `bondDetails.pricing.yield`, then `bondDetails.yield`, then `lastTradeYield`. **Never** `bondDetails.buyYield`.
+
+## CRM code — both fields allowed
+
+- **Yield - Offered / Sell (%)** → `yield` (what customers see)
+- **Buy Yield (%)** → `buyYield` (calc input; e.g. BondsTable "Buy" row, BondForm, autofill)
+
+## Backend customer APIs
+
+- `computeBondOrderPricingData` / order-pricing responses: return **`yield`** only.
+- Portfolio averages and order snapshots: use **`yield`** / `pricing.yield`, not `buyYield`.
+- Buy-now bond filters: require public **`yield`**, not `buyYield OR yield`.
+
+## Helpers (MeraDhan)
+
+- `parseBondListingYield` / `formatBondListingYield` — **only** for `bond.yield`
+- `getBondPurchaseEligibility` — checks public `yield` for "Offered yield"
+- `formatOrderYieldPercent` — user-facing order yield from snapshot `yield` fields

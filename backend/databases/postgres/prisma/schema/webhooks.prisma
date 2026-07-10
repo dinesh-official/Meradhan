@@ -1,0 +1,14 @@
+model WebhookLog {
+    id        Int      @id @default(autoincrement())
+    provider  String   // e.g., "RAZORPAY"
+    eventType String?  // e.g., "payment.captured"
+    payload   Json     // Raw webhook payload
+    processed Boolean  @default(false)
+    error     String?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([provider, eventType])
+    @@index([createdAt])
+    @@map("webhook_logs")
+}
