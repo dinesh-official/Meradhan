@@ -595,11 +595,12 @@ jobs:
           COMMANDS+="echo Starting Deployment"$'\n'
           COMMANDS+="echo ======================================="$'\n'
 
-          COMMANDS+="aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 450321244603.dkr.ecr.ap-south-1.amazonaws.com"$'\n'
-          COMMANDS+="git clone https://github.com/bcispl/branch-deploy.git"$'\n'
-          COMMANDS+="cd branch_deploy && docker compose up -d'
-          COMMANDS+="cd /"$'\n'
-          COMMANDS+="docker ps"$'\n'
+            COMMANDS+="aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 450321244603.dkr.ecr.ap-south-1.amazonaws.com"$'\n'
+            COMMANDS+="rm -rf branch-deploy"$'\n'
+            COMMANDS+="git clone https://github.com/bcispl/branch-deploy.git"$'\n'
+            COMMANDS+="cd branch-deploy && docker compose up -d"$'\n'
+            COMMANDS+="cd /"$'\n'
+            COMMANDS+="docker ps"$'\n'
 
           for REPO in "${!SERVICES[@]}"
           do
