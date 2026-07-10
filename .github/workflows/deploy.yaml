@@ -538,100 +538,150 @@ jobs:
           INSTANCE_ID="${{ steps.create_ec2.outputs.instance_id }}"
 
           echo "======================================"
-          echo "Target Instance: $INSTANCE_ID"
+          echo "Target Instance : $INSTANCE_ID"
           echo "======================================"
 
-          echo "Waiting for EC2 to enter RUNNING state..."
+          echo "Waiting for EC2..."
           aws ec2 wait instance-running --instance-ids "$INSTANCE_ID"
 
-          echo "EC2 is now RUNNING."
-
-          echo "Waiting for SSM Agent registration..."
+          echo "Waiting for SSM Agent..."
 
           while true; do
+
             STATUS=$(aws ssm describe-instance-information \
               --filters "Key=InstanceIds,Values=$INSTANCE_ID" \
               --query "InstanceInformationList[0].PingStatus" \
               --output text 2>/dev/null || true)
 
             if [ "$STATUS" = "Online" ]; then
-              echo "SSM Agent is ONLINE."
+              echo "SSM Agent Online"
               break
             fi
 
-            echo "Waiting for SSM..."
             sleep 10
+
           done
 
-          COMMANDS=(
-            "sudo su"
-            "cd / && pwd"
-            "docker ps "
+          declare -A SERVICES=()
 
-          )
+          if [ "${{ inputs.frontend }}" = "true" ]; then
+            SERVICES["$FRONTEND_NAME"]="3000:3000"
+          fi
 
-          STEP=1
+          if [ "${{ inputs.backend }}" = "true" ]; then
+            SERVICES["$BACKEND_NAME"]="4000:4000"
+          fi
 
-          for CMD in "${COMMANDS[@]}"; do
+          if [ "${{ inputs.crm }}" = "true" ]; then
+            SERVICES["$CRM_NAME"]="5000:5000"
+          fi
 
-            echo ""
-            echo "STEP $STEP"
-            echo "Running:"
-            echo "$CMD"
+          if [ "${{ inputs.worker }}" = "true" ]; then
+            SERVICES["$WORKER_NAME"]=""
+          fi
 
+          COMMANDS=""
 
-            COMMAND_ID=$(aws ssm send-command \
-              --instance-ids "$INSTANCE_ID" \
-              --document-name "AWS-RunShellScript" \
-              --parameters commands="$CMD" \
-              --query "Command.CommandId" \
-              --output text)
+          COMMANDS+="echo ======================================="$'\n'
+          COMMANDS+="echo Starting Deployment"$'\n'
+          COMMANDS+="echo ======================================="$'\n'
 
-            while true; do
+          COMMANDS+="aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 450321244603.dkr.ecr.ap-south-1.amazonaws.com"$'\n'
+          COMMANDS+="cd /"$'\n'
+          COMMANDS+="docker ps"$'\n'
 
-              STATUS=$(aws ssm get-command-invocation \
-                --command-id "$COMMAND_ID" \
-                --instance-id "$INSTANCE_ID" \
-                --query "Status" \
-                --output text 2>/dev/null || echo "Pending")
+          for REPO in "${!SERVICES[@]}"
+          do
 
-              if [[ "$STATUS" == "Success" || "$STATUS" == "Failed" || "$STATUS" == "Cancelled" || "$STATUS" == "TimedOut" ]]; then
-                break
-              fi
+            PORT="${SERVICES[$REPO]}"
 
-              sleep 2
-            done
+            IMAGE="450321244603.dkr.ecr.ap-south-1.amazonaws.com/${REPO}:latest"
 
-            OUTPUT=$(aws ssm get-command-invocation \
-              --command-id "$COMMAND_ID" \
-              --instance-id "$INSTANCE_ID" \
-              --query "StandardOutputContent" \
-              --output text)
+            COMMANDS+="echo"$'\n'
+            COMMANDS+="echo Deploying ${REPO}"$'\n'
 
-            ERROR=$(aws ssm get-command-invocation \
-              --command-id "$COMMAND_ID" \
-              --instance-id "$INSTANCE_ID" \
-              --query "StandardErrorContent" \
-              --output text)
+            COMMANDS+="docker pull ${IMAGE}"$'\n'
 
-            
-            [ -n "$OUTPUT" ] && [ "$OUTPUT" != "None" ] && echo "$OUTPUT"
+            COMMANDS+="docker stop ${REPO} >/dev/null 2>&1 || true"$'\n'
+            COMMANDS+="docker rm ${REPO} >/dev/null 2>&1 || true"$'\n'
 
-  
-            [ -n "$ERROR" ] && [ "$ERROR" != "None" ] && echo "$ERROR"
-
-            if [ "$STATUS" != "Success" ]; then
-              echo ""
-              echo "Command Failed!"
-              echo "$CMD"
-              exit 1
+            if [ -n "$PORT" ]; then
+              COMMANDS+="docker run -d --restart unless-stopped --name ${REPO} -p ${PORT} ${IMAGE}"$'\n'
+            else
+              COMMANDS+="docker run -d --restart unless-stopped --name ${REPO} ${IMAGE}"$'\n'
             fi
 
-            STEP=$((STEP+1))
+          done
+
+          COMMANDS+="echo"$'\n'
+          COMMANDS+="echo ======================================="$'\n'
+          COMMANDS+="echo Running Containers"$'\n'
+          COMMANDS+="echo ======================================="$'\n'
+          COMMANDS+="docker ps"$'\n'
+
+          echo "======================================"
+          echo "Commands to Execute"
+          echo "======================================"
+          echo "$COMMANDS"
+
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "$INSTANCE_ID" \
+            --document-name "AWS-RunShellScript" \
+            --parameters commands="$COMMANDS" \
+            --query "Command.CommandId" \
+            --output text)
+
+          echo "Command ID : $COMMAND_ID"
+
+          while true
+          do
+
+            STATUS=$(aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" \
+              --instance-id "$INSTANCE_ID" \
+              --query "Status" \
+              --output text 2>/dev/null || echo "Pending")
+
+            echo "Status : $STATUS"
+
+            if [[ "$STATUS" == "Success" || "$STATUS" == "Failed" || "$STATUS" == "Cancelled" || "$STATUS" == "TimedOut" ]]; then
+              break
+            fi
+
+            sleep 5
 
           done
+
+          OUTPUT=$(aws ssm get-command-invocation \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$INSTANCE_ID" \
+            --query "StandardOutputContent" \
+            --output text)
+
+          ERROR=$(aws ssm get-command-invocation \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$INSTANCE_ID" \
+            --query "StandardErrorContent" \
+            --output text)
+
+          echo "======================================"
+          echo "OUTPUT"
+          echo "======================================"
+          echo "$OUTPUT"
+
+          if [ -n "$ERROR" ] && [ "$ERROR" != "None" ]; then
+            echo "======================================"
+            echo "ERROR"
+            echo "======================================"
+            echo "$ERROR"
+          fi
+
+          if [ "$STATUS" != "Success" ]; then
+            echo "Deployment Failed"
+            exit 1
+          fi
 
           echo ""
           echo "======================================"
-          echo "Deployment completed successfully."
+          echo "Deployment Completed Successfully"
           echo "======================================"
