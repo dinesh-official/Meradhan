@@ -498,7 +498,7 @@ jobs:
               --iam-instance-profile Name=EC2-SSM-Role \
               --block-device-mappings '[
                 {
-                  "DeviceName": "/dev/xvda",
+                  "DeviceName": "/dev/sda1",
                   "Ebs": {
                     "VolumeSize": 30,
                     "VolumeType": "gp3",
