@@ -598,11 +598,28 @@ jobs:
             COMMANDS+="aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 450321244603.dkr.ecr.ap-south-1.amazonaws.com"$'\n'
             COMMANDS+="rm -rf branch-deploy"$'\n'
             COMMANDS+="git clone https://github.com/bcispl/branch-deploy.git"$'\n'
-            COMMANDS+="cd branch-deploy && docker compose up -d"$'\n'
-            COMMANDS+="cd branch-deploy && docker compose -f pgsql.yaml up -d"$'\n'
-            COMMANDS+="cd branch-deploy && docker compose -f redis.yaml up -d"$'\n'
+            
+            COMMANDS+="cd branch-deploy"$'\n'
+            COMMANDS+="pwd"$'\n'
+            COMMANDS+="ls -la"$'\n'
+
+            COMMANDS+="docker compose up -d"$'\n'
+            COMMANDS+="docker compose ps"$'\n'
+
+            COMMANDS+="docker compose -f pgsql.yaml up -d"$'\n'
+            COMMANDS+="docker compose -f pgsql.yaml ps"$'\n'
+            COMMANDS+="docker compose -f pgsql.yaml logs --tail=50"$'\n'
+
+            COMMANDS+="docker compose -f redis.yaml up -d"$'\n'
+            COMMANDS+="docker compose -f redis.yaml ps"$'\n'
+            COMMANDS+="docker compose -f redis.yaml logs --tail=50"$'\n'
+
             COMMANDS+="sleep 20"$'\n'
-            COMMANDS+="cd branch-deploy && chmod +x restore.sh && ./restore.sh meradhan_database_2_july_2026.backup"$'\n'
+
+            COMMANDS+="chmod +x restore.sh"$'\n'
+            COMMANDS+="./restore.sh meradhan_database_2_july_2026.backup"$'\n'
+
+            COMMANDS+="cd /"$'\n'
             COMMANDS+="cd /"$'\n'
             COMMANDS+="docker ps"$'\n'
 
