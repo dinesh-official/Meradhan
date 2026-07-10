@@ -596,6 +596,9 @@ jobs:
           COMMANDS+="echo ======================================="$'\n'
 
             COMMANDS+="aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 450321244603.dkr.ecr.ap-south-1.amazonaws.com"$'\n'
+
+            COMMANDS+="docker network inspect deployment_app-network >/dev/null 2>&1 || docker network create deployment_app-network"$'\n'
+
             COMMANDS+="rm -rf branch-deploy"$'\n'
             COMMANDS+="git clone https://github.com/bcispl/branch-deploy.git"$'\n'
 
@@ -608,11 +611,9 @@ jobs:
 
             COMMANDS+="docker compose -f pgsql.yaml up -d"$'\n'
             COMMANDS+="docker compose -f pgsql.yaml ps"$'\n'
-            COMMANDS+="docker compose -f pgsql.yaml logs --tail=50"$'\n'
 
             COMMANDS+="docker compose -f redis.yaml up -d"$'\n'
             COMMANDS+="docker compose -f redis.yaml ps"$'\n'
-            COMMANDS+="docker compose -f redis.yaml logs --tail=50"$'\n'
 
             COMMANDS+="sleep 20"$'\n'
 
@@ -621,6 +622,7 @@ jobs:
 
             COMMANDS+="cd /"$'\n'
             COMMANDS+="docker ps"$'\n'
+
 
           for REPO in "${!SERVICES[@]}"
           do
@@ -639,9 +641,9 @@ jobs:
             COMMANDS+="docker rm ${REPO} >/dev/null 2>&1 || true"$'\n'
 
             if [ -n "$PORT" ]; then
-              COMMANDS+="docker run -d --restart unless-stopped --name ${REPO} -p ${PORT} ${IMAGE}"$'\n'
+            COMMANDS+="docker run -d --restart unless-stopped --network deployment_app-network --name ${REPO} -p ${PORT} ${IMAGE}"$'\n'
             else
-              COMMANDS+="docker run -d --restart unless-stopped --name ${REPO} ${IMAGE}"$'\n'
+            COMMANDS+="docker run -d --restart unless-stopped --network deployment_app-network --name ${REPO} ${IMAGE}"$'\n'
             fi
 
           done
