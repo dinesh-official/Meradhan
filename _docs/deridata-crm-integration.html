@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>DeriData API Integration in CRM — Management Brief</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 18mm 16mm 18mm 16mm;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      color: #1a1a1a;
+      font-size: 10.5pt;
+      line-height: 1.45;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      font-size: 20pt;
+      margin: 0 0 4pt;
+      letter-spacing: -0.02em;
+      color: #0f172a;
+    }
+    .subtitle {
+      font-size: 11pt;
+      color: #475569;
+      margin: 0 0 18pt;
+    }
+    .meta {
+      display: flex;
+      gap: 24pt;
+      font-size: 9pt;
+      color: #64748b;
+      border-top: 1px solid #e2e8f0;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 8pt 0;
+      margin-bottom: 18pt;
+    }
+    h2 {
+      font-size: 12.5pt;
+      color: #0f172a;
+      margin: 18pt 0 8pt;
+      padding-bottom: 3pt;
+      border-bottom: 2px solid #0f766e;
+    }
+    h3 {
+      font-size: 10.5pt;
+      color: #134e4a;
+      margin: 12pt 0 6pt;
+    }
+    p { margin: 0 0 8pt; }
+    ul, ol { margin: 0 0 10pt; padding-left: 18pt; }
+    li { margin-bottom: 3pt; }
+    .callout {
+      background: #f0fdfa;
+      border-left: 3px solid #0f766e;
+      padding: 8pt 10pt;
+      margin: 10pt 0 14pt;
+      font-size: 10pt;
+    }
+    .callout strong { color: #134e4a; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8pt 0 14pt;
+      font-size: 9.5pt;
+    }
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 6pt 7pt;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #0f766e;
+      color: #fff;
+      font-weight: 600;
+    }
+    tr:nth-child(even) td { background: #f8fafc; }
+    code, .mono {
+      font-family: "SF Mono", Menlo, Consolas, monospace;
+      font-size: 8.5pt;
+      background: #f1f5f9;
+      padding: 1pt 3pt;
+      border-radius: 2pt;
+    }
+    .flow {
+      background: #0f172a;
+      color: #e2e8f0;
+      font-family: "SF Mono", Menlo, Consolas, monospace;
+      font-size: 8pt;
+      line-height: 1.35;
+      padding: 12pt 14pt;
+      border-radius: 4pt;
+      white-space: pre;
+      margin: 8pt 0 14pt;
+      overflow: hidden;
+    }
+    .phase {
+      border: 1px solid #cbd5e1;
+      border-radius: 4pt;
+      padding: 10pt 12pt;
+      margin: 0 0 12pt;
+      page-break-inside: avoid;
+    }
+    .phase-label {
+      display: inline-block;
+      background: #0f766e;
+      color: #fff;
+      font-size: 8.5pt;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 2pt 7pt;
+      border-radius: 2pt;
+      margin-bottom: 6pt;
+    }
+    .footer {
+      margin-top: 22pt;
+      padding-top: 8pt;
+      border-top: 1px solid #e2e8f0;
+      font-size: 8.5pt;
+      color: #64748b;
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10pt;
+      margin-bottom: 10pt;
+    }
+    .box {
+      border: 1px solid #e2e8f0;
+      border-radius: 4pt;
+      padding: 8pt 10pt;
+      background: #fafafa;
+    }
+    .box h4 {
+      margin: 0 0 4pt;
+      font-size: 9.5pt;
+      color: #0f172a;
+    }
+    .box p, .box ul { font-size: 9pt; margin-bottom: 0; }
+    .highlight-key {
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      border-radius: 4pt;
+      padding: 8pt 10pt;
+      margin: 8pt 0 12pt;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>DeriData API Integration in CRM</h1>
+  <p class="subtitle">Bond Autofill — Two-Phase Calculator Flow (Management Brief)</p>
+
+  <div class="meta">
+    <div><strong>Audience:</strong> Product / Ops / Leadership</div>
+    <div><strong>Scope:</strong> CRM Bond Auto-Update Autofill only</div>
+    <div><strong>Date:</strong> 10 Jul 2026</div>
+  </div>
+
+  <h2>1. Purpose</h2>
+  <p>
+    DeriData is the external bond calculator used by MeraDhan CRM to price bonds
+    during <strong>autofill</strong>. Ops reviews the suggested values and Accepts them
+    onto the bond master record. Customer place-order and draft PDFs then reuse those
+    <strong>saved CRM values</strong> (scaled by quantity) — they do <strong>not</strong> call DeriData live.
+  </p>
+
+  <div class="callout">
+    <strong>One-line summary:</strong>
+    We call DeriData once to learn dates and decide shut period, then call again with the
+    correct shut flag so price, accrued interest, and settlement amounts are consistent.
+  </div>
+
+  <h2>2. End-to-End Flow</h2>
+  <div class="flow">CRM inputs (ISIN, settlement date, quantity, YTM or clean price)
+        │
+        ▼
+┌──────────────────────────────────┐
+│ Phase 1 — Probe calculator call  │  cashflow_shut_flag = true
+│ Get record_date + cashflow dates │
+└────────────────┬─────────────────┘
+                 │
+                 ▼
+      Local shut / accrual calculation
+      → cashflow_shut_flag (true / false)
+      → accrued days, coupon &amp; record dates
+                 │
+                 ▼
+┌──────────────────────────────────┐
+│ Phase 2 — Pricing calculator     │  cashflow_shut_flag = computed
+│ (or reuse Phase 1 if already OK) │
+└────────────────┬─────────────────┘
+                 │
+                 ▼
+   Map money fields as-is → CRM Autofill UI
+   On Accept → save sell price, yield, accrued ₹,
+               stamp duty, pricing quantity, dates</div>
+
+  <h2>3. Phase 1 — Probe (Dates &amp; Shut Decision)</h2>
+  <div class="phase">
+    <div class="phase-label">API Call 1 — Same DeriData calculator endpoint</div>
+    <p>Purpose: obtain calendar data needed to decide whether settlement is in the shut (ex-interest) window.</p>
+
+    <h3>Keys sent to DeriData</h3>
+    <table>
+      <thead>
+        <tr><th>Key</th><th>Source / value</th><th>Role</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="mono">isin</span></td><td>Bond ISIN</td><td>Instrument identity</td></tr>
+        <tr><td><span class="mono">value_date</span></td><td>CRM settlement date</td><td>Pricing / settlement date</td></tr>
+        <tr><td><span class="mono">amount</span></td><td>Face value × quantity (crores)</td><td>Notional size</td></tr>
+        <tr><td><span class="mono">yield_to_price</span></td><td><span class="mono">true</span></td><td>YTM → price mode for probe</td></tr>
+        <tr><td><span class="mono">ytm</span></td><td>CRM yield (or probe default 10.5)</td><td>Required by calculator</td></tr>
+        <tr><td><span class="mono">cashflow_shut_flag</span></td><td><span class="mono">true</span> (always for probe)</td><td>Forces cashflow/date payload</td></tr>
+        <tr><td><span class="mono">type_field</span></td><td><span class="mono">cashflow</span></td><td>Request cashflow schedule</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Keys read from DeriData (Phase 1)</h3>
+    <table>
+      <thead>
+        <tr><th>DeriData field</th><th>Used for</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="mono">record_date</span></td><td>Shut-period start (record date)</td></tr>
+        <tr><td><span class="mono">cashflows[].cash_flow_dates</span></td><td>Last coupon &amp; next coupon dates</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>4. Manipulation — Shut Period &amp; Accrual Days</h2>
+  <p>
+    Between the two API calls, MeraDhan computes shut status locally from DeriData dates.
+    This is the <strong>only business key we override and send back</strong> into Phase 2.
+  </p>
+
+  <div class="highlight-key">
+    <strong>Manipulated key:</strong> <span class="mono">cashflow_shut_flag</span><br />
+    Set to our computed <span class="mono">isUnderShutPeriod</span> (not DeriData’s echo of the probe input).
+  </div>
+
+  <h3>Shut rule</h3>
+  <div class="callout">
+    Shut is <strong>ON</strong> when:<br />
+    <span class="mono">RECORD_DATE ≤ SETTLEMENT_DATE &lt; NEXT_COUPON_DATE</span><br />
+    Settlement on the coupon date → shut ON, accrual days = 0.
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Output key</th><th>How it is calculated</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="mono">isUnderShutPeriod</span> / <span class="mono">cashflowShutFlag</span></td>
+        <td>From shut rule above</td>
+      </tr>
+      <tr>
+        <td><span class="mono">accruedDays</span></td>
+        <td>
+          <strong>Shut:</strong> negative days from settlement → next coupon<br />
+          <strong>Normal:</strong> positive days from last coupon → settlement
+        </td>
+      </tr>
+      <tr>
+        <td><span class="mono">recordDate</span>, <span class="mono">lastCouponDate</span>, <span class="mono">nextCouponDate</span></td>
+        <td>Parsed from DeriData <span class="mono">record_date</span> + cashflow dates</td>
+      </tr>
+      <tr>
+        <td><span class="mono">recordDays</span></td>
+        <td>Calendar days between record date and next coupon</td>
+      </tr>
+      <tr>
+        <td><span class="mono">periodStatus</span></td>
+        <td><span class="mono">"Shut Period"</span> or <span class="mono">"Normal"</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>5. Phase 2 — Pricing (Money Amounts)</h2>
+  <div class="phase">
+    <div class="phase-label">API Call 2 — Same endpoint, corrected shut flag</div>
+    <p>
+      Purpose: obtain final clean price, accrued interest, consideration, stamp duty, and settlement amount
+      under the <strong>correct</strong> shut flag.
+    </p>
+
+    <div class="two-col">
+      <div class="box">
+        <h4>YTM mode</h4>
+        <ul>
+          <li><span class="mono">yield_to_price: true</span></li>
+          <li><span class="mono">ytm</span> = CRM pricing yield</li>
+          <li><span class="mono">cashflow_shut_flag</span> = <strong>computed</strong></li>
+        </ul>
+      </div>
+      <div class="box">
+        <h4>Clean-price mode</h4>
+        <ul>
+          <li><span class="mono">yield_to_price: false</span></li>
+          <li><span class="mono">clean_price</span> = CRM clean price</li>
+          <li><span class="mono">cashflow_shut_flag</span> = <strong>computed</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <p>
+      <strong>Reuse optimisation:</strong> If Phase 1 already used <span class="mono">cashflow_shut_flag = true</span>
+      and our computed shut is also <span class="mono">true</span> (YTM mode), Phase 1’s response is reused —
+      no second network call (avoids timeouts).
+    </p>
+  </div>
+
+  <h3>Money keys mapped from DeriData (as-is)</h3>
+  <table>
+    <thead>
+      <tr><th>DeriData field</th><th>CRM / saved field</th><th>Meaning</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="mono">summary.clean_price</span></td>
+        <td>Sell / clean price</td>
+        <td>Clean price (% of par)</td>
+      </tr>
+      <tr>
+        <td><span class="mono">summary.xirr</span></td>
+        <td>Yield (clean-price mode)</td>
+        <td>YTM %</td>
+      </tr>
+      <tr>
+        <td><span class="mono">summary.principal</span></td>
+        <td>Principal amount</td>
+        <td>Principal ₹</td>
+      </tr>
+      <tr>
+        <td><span class="mono">summary.accrued_int_top</span></td>
+        <td>Accrued % of par</td>
+        <td>Accrued interest %</td>
+      </tr>
+      <tr>
+        <td><span class="mono">summary.accrued_int_bottom</span></td>
+        <td><span class="mono">bonds.accruedInterest</span></td>
+        <td>Accrued interest <strong>₹</strong> (saved on Accept)</td>
+      </tr>
+      <tr>
+        <td><span class="mono">summary.total_consideration</span></td>
+        <td>Total consideration</td>
+        <td>Principal + accrued</td>
+      </tr>
+      <tr>
+        <td><span class="mono">summary.stamp_duty</span></td>
+        <td>Stamp duty</td>
+        <td>Stamp duty ₹ (or derived if missing)</td>
+      </tr>
+      <tr>
+        <td><span class="mono">summary.settlement_amount</span></td>
+        <td>Settlement amount</td>
+        <td>Consideration + stamp duty</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    After Phase 2, principal / accrued / consideration are <strong>not</strong> recalculated in-house.
+    DeriData amounts are preferred and shown in CRM autofill.
+  </div>
+
+  <h2>6. What Happens After Accept</h2>
+  <ol>
+    <li>Ops reviews autofill suggestions in CRM and Accepts.</li>
+    <li>
+      Bond master is updated with sell price, yield, accrued interest (₹), stamp duty,
+      pricing quantity, and related dates.
+    </li>
+    <li>
+      Customer place-order and draft order PDFs scale those <strong>saved</strong> values by order quantity.
+      No live DeriData call on the customer path.
+    </li>
+  </ol>
+
+  <h2>7. Why Two Calls?</h2>
+  <table>
+    <thead>
+      <tr><th>Risk if we skip Phase 1</th><th>Impact</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Wrong <span class="mono">cashflow_shut_flag</span> sent to pricing</td>
+        <td>Incorrect accrued interest (sign/amount) and settlement totals</td>
+      </tr>
+      <tr>
+        <td>Rely only on local coupon schedule</td>
+        <td>Can disagree with DeriData record date → shut mismatch</td>
+      </tr>
+      <tr>
+        <td>Always double-call without reuse</td>
+        <td>Slow CRM autofill / proxy timeouts under load</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>8. Boundary Summary</h2>
+  <table>
+    <thead>
+      <tr><th>Surface</th><th>DeriData?</th><th>Pricing source</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>CRM Bond Autofill</td>
+        <td><strong>Yes</strong> (two-phase)</td>
+        <td>Live DeriData + local shut calc</td>
+      </tr>
+      <tr>
+        <td>Place-order UI</td>
+        <td>No</td>
+        <td>Saved CRM bond values × quantity</td>
+      </tr>
+      <tr>
+        <td>Draft / order PDF</td>
+        <td>No</td>
+        <td>Saved CRM / order snapshot × quantity</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="footer">
+    MeraDhan — DeriData CRM Integration Brief · Internal use · Generated from current autofill implementation
+    (Phase 1 probe → shut manipulation → Phase 2 pricing).
+  </div>
+
+</body>
+</html>

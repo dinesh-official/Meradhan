@@ -74,7 +74,7 @@ describe("deridata.issue-detail.adapter", () => {
     expect(mapped.sectorName).toBe("Real Estate");
     expect(mapped.categories).toEqual(["zero-coupon"]);
     expect(mapped.creditRating).toBe("UnRated");
-    expect(mapped.putCallOptionDetails).toBeNull();
+    expect(mapped.putCallOptionDetails).toBe("Put:NA Call:NA");
   });
 
   test("formats object-shaped ratings without [object Object] or agency duplication", () => {
@@ -113,7 +113,7 @@ describe("deridata.issue-detail.adapter", () => {
     expect(mapDeriDataIssueDetailToBondFields(nseListed).isListed).toBe("YES");
   });
 
-  test("formats put/call from DeriData without NA placeholders", () => {
+  test("formats put/call from DeriData and uses NA when a leg is missing", () => {
     const withPutCall: DeriDataIssueDetailItem = {
       ...sample,
       put_date: "21-Feb-2028",
@@ -123,8 +123,15 @@ describe("deridata.issue-detail.adapter", () => {
     };
     const mapped = mapDeriDataIssueDetailToBondFields(withPutCall);
     expect(mapped.putCallOptionDetails).toBe(
-      "Put: 21-Feb-2028 Call: 21-Feb-2029",
+      "Put:21-Feb-2028 Call:21-Feb-2029",
     );
+
+    const putOnly = mapDeriDataIssueDetailToBondFields({
+      ...sample,
+      put_date: "21-Feb-2028",
+      call_date: "NA",
+    });
+    expect(putOnly.putCallOptionDetails).toBe("Put:21-Feb-2028 Call:NA");
   });
 
   test("formats fully nested rating objects", () => {

@@ -236,7 +236,7 @@ export const placeOrderEmailCustomer = async (orderData: z.infer<typeof appSchem
         pricing?.totalConsideration ?? Number(principalAmount) + Number(accruedInterest);
     const settlementAmount = pricing?.settlementAmount ?? orderData.settlementAmount;
     const ytm = pricing?.yield ?? orderData.yield;
-
+    // (No. of Days: ${accrualDays})
     const detailsBlock = [
         ["Security Name", bond.bondName],
         ["ISIN", bond.isin],
@@ -253,7 +253,7 @@ export const placeOrderEmailCustomer = async (orderData: z.infer<typeof appSchem
         ["Principal Amount", formatInrCurrency(Number(principalAmount))],
         [
             "Accrued / Ex Interest",
-            `${formatInrCurrency(Number(accruedInterest))} (No. of Days: ${accrualDays})`,
+            `${formatInrCurrency(Number(accruedInterest))}`,
         ],
         ["Total Consideration", formatInrCurrency(totalConsideration)],
         ["Stamp Duty", formatInrNumber(Number(stampDuty), 2)],

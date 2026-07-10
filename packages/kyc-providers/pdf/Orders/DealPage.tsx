@@ -251,7 +251,7 @@ ${getInterestPaymentDatesDisplay()} `,
     ["Principal Amount", `INR ${formatCurrency(totalConsideration - accruedInterest)}`],
     [
       "Accrued / Ex Interest",
-      `${accruedInterest >= 0 ? `INR ${formatCurrency(accruedInterest)} (No. of Days: ${accruedInterestDays ?? orderData?.metadata?.accruedInterestDays ?? "N/A"})` : `${`INR (${formatCurrency(accruedInterest)})`.replaceAll("-", "")} (No. of Days: (${accruedInterestDays ?? orderData?.metadata?.accruedInterestDays ?? "N/A"}))`}`,
+      `${accruedInterest >= 0 ? `INR ${formatCurrency(accruedInterest)}` : `${`INR (${formatCurrency(accruedInterest)})`.replaceAll("-", "")}`}`,
     ],
     ["Total Consideration", `INR ${formatCurrency(totalConsideration)}`],
     [

@@ -173,8 +173,9 @@ export function mergeAutofillIntoForm(
   ) {
     out.totalIssueSize = suggested.totalIssueSize;
   }
-  if (include.putCallOptionDetails && suggested.putCallOptionDetails?.trim()) {
-    out.putCallOptionDetails = suggested.putCallOptionDetails.trim();
+  if (include.putCallOptionDetails) {
+    out.putCallOptionDetails =
+      suggested.putCallOptionDetails?.trim() || "Put:NA Call:NA";
   }
 
   return out;
