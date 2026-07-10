@@ -13,6 +13,7 @@ import { AppError, HttpStatus } from "@utils/error/AppError";
 import { calculateStampDuty } from "./stamp-duty";
 import { calculateBondPricing } from "./bond-pricing";
 import { resolveBondStampDuty } from "./stamp-duty";
+import { loadInvestorCouponScheduleForPdf } from "./investor-coupon-entitlement";
 
 export { calculateStampDuty } from "./stamp-duty";
 
@@ -987,103 +988,25 @@ export function dropMaturityDayIfMonthHasCoupon(
 }
 
 /**
- * Returns coupon due dates (as `DD-Mon`) from settlement for the next 12 months
- * (or until maturity if earlier).
+ * Returns buyer-entitled coupon due dates (as `d-Mon`) from settlement for the
+ * next 12 months (or until maturity if earlier).
  *
- * Shut-period rule:
- * - If settlement is within shut period for the *next* coupon (recordDate ≤ settlement < dueDate),
- *   skip that next coupon from the returned list.
- * - Else include it.
+ * Delegates to `loadInvestorCouponScheduleForPdf` (settlement ≤ record date ⇒ buyer gets coupon).
  */
 export const getPayoutDates = async (isin: string, settlement: Date) => {
-    const settlementDtRaw = new Date(settlement);
-    if (Number.isNaN(settlementDtRaw.getTime())) return [];
+    const schedule = await loadInvestorCouponScheduleForPdf(isin, settlement);
+    return schedule.interestPaymentDates;
+};
 
-    // Normalize to an IST calendar moment to avoid UTC date shifting.
-    // We anchor at 12:00 IST for stable day/month/year comparisons.
-    const istYmd = settlementDtRaw.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" }); // YYYY-MM-DD
-    const settlementDt = new Date(`${istYmd}`);
-
-    const [meta, rows] = await Promise.all([
-        db.dataBase.bondReferenceMetadata.findUnique({ where: { isin } }),
-        db.dataBase.bondReferenceCouponPaymentDate.findMany({
-            where: { isin },
-            orderBy: { dueDate: "asc" },
-        }),
-    ]);
-
-    const maturityDate =
-        meta?.maturityDateIst instanceof Date && !Number.isNaN(meta.maturityDateIst.getTime())
-            ? meta.maturityDateIst
-            : null;
-
-    const oneYearLater = new Date(
-        Date.UTC(
-            settlementDt.getUTCFullYear() + 1,
-            settlementDt.getUTCMonth(),
-            settlementDt.getUTCDate(),
-            12,
-        ),
-    );
-    const endLimit = maturityDate
-        ? new Date(Math.min(maturityDate.getTime(), oneYearLater.getTime()))
-        : oneYearLater;
-
-    const dueDates = rows
-        .map((r) => (r.dueDateIst instanceof Date ? r.dueDateIst : null))
-        .filter((d): d is Date => d instanceof Date && !Number.isNaN(d.getTime()))
-        .filter((d) => d.getTime() >= settlementDt.getTime() && d.getTime() <= endLimit.getTime());
-
-    if (dueDates.length === 0) return [];
-
-    // Next coupon row (first dueDate >= settlement).
-    const nextRow = rows.find(
-        (r) =>
-            r.dueDateIst instanceof Date &&
-            !Number.isNaN(r.dueDateIst.getTime()) &&
-            r.dueDateIst.getTime() >= settlementDt.getTime(),
-    );
-
-    let skipNext = false;
-    if (nextRow?.dueDateIst instanceof Date) {
-        const due = nextRow.dueDateIst;
-        const recordDaysRaw = nextRow.recordDays;
-        const recordDays =
-            typeof recordDaysRaw === "number" && Number.isFinite(recordDaysRaw)
-                ? Math.floor(recordDaysRaw)
-                : null;
-
-        const recordDate =
-            nextRow.recordDateIst instanceof Date && !Number.isNaN(nextRow.recordDateIst.getTime())
-                ? nextRow.recordDateIst
-                : recordDays != null
-                    ? utcMidnightForISODate(
-                        addUTCCalendarDays(toUTCISODate(due), -recordDays),
-                    )
-                    : null;
-
-        if (recordDate) {
-            const shut = isUnderShutPeriod(settlementDt, due, recordDays ?? 0);
-            // More strict: use actual recordDate from data if available.
-            skipNext = settlementDt.getTime() >= recordDate.getTime() && settlementDt.getTime() < due.getTime();
-            // If recordDays missing, rely on computed shut (will be false when recordDays=0).
-            if (recordDays == null) skipNext = shut.isUnderShutPeriod;
-        }
-    }
-
-    const out = dropMaturityDayIfMonthHasCoupon(
-        skipNext ? dueDates.slice(1) : dueDates,
-        maturityDate,
-    );
-    const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
-    return out.map((d) => {
-        // ✅ FIX: Use UTC date parts directly to match the date stored in DB.
-        // Do NOT convert to IST here — that adds +5:30 and can roll the date forward by 1 day
-        // if the underlying timestamp is at/after 18:30 UTC.
-        const dd = d.getUTCDate();
-        const monthName = MONTHS[d.getUTCMonth()] ?? "Jan";
-        return `${dd}-${monthName}`;
-    });
+/**
+ * Last contractual coupon with due ≤ settlement, formatted for PDF:
+ * `DD-MMM-YYYY (Weekday)`.
+ *
+ * Delegates to `loadInvestorCouponScheduleForPdf`.
+ */
+export const getLastCouponDate = async (isin: string, settlement: Date): Promise<string | null> => {
+    const schedule = await loadInvestorCouponScheduleForPdf(isin, settlement);
+    return schedule.lastInterestPaymentDate;
 };
 
 
@@ -1267,47 +1190,6 @@ export async function resolveCouponDatesForSettlement(
  * Returns the last coupon due date (YYYY-MM-DD) on/before the settlement date.
  * Uses IST calendar date for the settlement anchor to avoid timezone shifting.
  */
-export const getLastCouponDate = async (isin: string, settlement: Date): Promise<string | null> => {
-    const settlementDtRaw = new Date(settlement);
-    if (Number.isNaN(settlementDtRaw.getTime())) return null;
-
-    // Anchor settlement at 12:00 IST on the same IST calendar day.
-    const istYmd = settlementDtRaw.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" }); // YYYY-MM-DD
-    const settlementDt = new Date(`${istYmd}`);
-
-    const rows = await db.dataBase.bondReferenceCouponPaymentDate.findMany({
-        where: { isin },
-        orderBy: { dueDate: "asc" },
-    });
-
-    const dueDates = rows
-        .map((r) => (r.dueDateIst instanceof Date ? r.dueDateIst : null))
-        .filter((d): d is Date => d instanceof Date && !Number.isNaN(d.getTime()))
-        .sort((a, b) => a.getTime() - b.getTime());
-
-    let last: Date | null = null;
-    for (const d of dueDates) {
-        if (d.getTime() <= settlementDt.getTime()) last = d;
-        else break;
-    }
-    if (!last) return null;
-
-    // ✅ FIX: Use UTC date parts (not IST timezone) so the displayed date matches DB.
-    // IST conversion adds +5:30 and can shift the day if the timestamp has a time component
-    // past 18:30 UTC.
-    const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
-    const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] as const;
-
-    const dd = pad2(last.getUTCDate());
-    const mmm = MONTHS[last.getUTCMonth()] ?? "Jan";
-    const yyyy = String(last.getUTCFullYear());
-    const weekday = DAYS[last.getUTCDay()] ?? "";
-    console.log(weekday);
-
-    return `${dd}-${mmm}-${yyyy}${` (${weekday})`}`;
-};
-
-
 export const getNextCouponDate = async (isin: string, settlement: Date) => {
     const settlementDt = new Date(settlement);
     if (Number.isNaN(settlementDt.getTime())) return null;

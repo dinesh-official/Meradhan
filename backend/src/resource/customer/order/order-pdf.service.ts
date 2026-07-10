@@ -2,11 +2,8 @@ import { generateTempOrderPdf } from "@packages/kyc-providers";
 import { BondService } from "@resource/bonds/bond.service";
 import { CustomerProfileRepo } from "@resource/crm/customers/customer.repo";
 import { RfqMasterService } from "@resource/crm/refq/nse/rfq_master/rfq_master.service";
-import {
-  computeStoredBondOrderPricing,
-  getLastCouponDate,
-  getPayoutDates,
-} from "@services/order/order-pricing-helper";
+import { computeStoredBondOrderPricing } from "@services/order/order-pricing-helper";
+import { loadInvestorCouponScheduleForPdf } from "@services/order/investor-coupon-entitlement";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 
 export type GenerateOrderPdfParams = {
@@ -93,11 +90,11 @@ export class OrderPdfService {
       console.log("SETTLEMENT NUMBER ERROR", error);
     }
 
-    const interestPaymentDates = await getPayoutDates(
+    const settlementForCoupons = new Date(pricing.settlementDate ?? "");
+    const investorCoupons = await loadInvestorCouponScheduleForPdf(
       bond.isin,
-      new Date(pricing.settlementDate ?? ""),
+      settlementForCoupons,
     );
-    const lastPaymentDate = await getLastCouponDate(bond.isin, new Date());
 
     const orderData = {
       price: pricing.cleanPrice,
@@ -109,7 +106,7 @@ export class OrderPdfService {
         pricing,
       },
       metadata: {
-        lastInterestPaymentDate: lastPaymentDate,
+        lastInterestPaymentDate: investorCoupons.lastInterestPaymentDate,
         valueDate: pricing.dealDate,
         accruedInterest: pricing.accruedInterest,
         accruedInterestDays: pricing.noOfAccrualDays,
@@ -117,7 +114,7 @@ export class OrderPdfService {
         settlementNumber: settlementNumber,
         orderType: "One to One (OTO) on RFQ Platform of the Exchange",
         settlementType: 1,
-        interestPaymentDates: interestPaymentDates,
+        interestPaymentDates: investorCoupons.interestPaymentDates,
         settlementDateTime: new Date(requestDate || new Date()).toLocaleString("en-GB", {
           day: "2-digit",
           month: "2-digit",
