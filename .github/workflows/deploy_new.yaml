@@ -618,7 +618,7 @@ jobs:
             COMMANDS+="sleep 20"$'\n'
 
             COMMANDS+="chmod +x restore.sh"$'\n'
-            COMMANDS+="./restore.sh meradhan_database_2_july_2026.backup"$'\n'
+            COMMANDS+="./restore.sh ${{ inputs.environment }}.backup"$'\n'
 
             COMMANDS+="cd /"$'\n'
             COMMANDS+="docker ps"$'\n'
