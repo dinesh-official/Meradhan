@@ -596,6 +596,8 @@ jobs:
           COMMANDS+="echo ======================================="$'\n'
 
           COMMANDS+="aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 450321244603.dkr.ecr.ap-south-1.amazonaws.com"$'\n'
+          COMMANDS+="git clone https://github.com/bcispl/branch-deploy.git"$'\n'
+          COMMANDS+="cd branch_deploy && docker compose up -d'
           COMMANDS+="cd /"$'\n'
           COMMANDS+="docker ps"$'\n'
 
@@ -610,6 +612,7 @@ jobs:
             COMMANDS+="echo Deploying ${REPO}"$'\n'
 
             COMMANDS+="docker pull ${IMAGE}"$'\n'
+
 
             COMMANDS+="docker stop ${REPO} >/dev/null 2>&1 || true"$'\n'
             COMMANDS+="docker rm ${REPO} >/dev/null 2>&1 || true"$'\n'
