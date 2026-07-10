@@ -602,7 +602,7 @@ jobs:
             COMMANDS+="cd branch-deploy && docker compose -f pgsql.yaml up -d"$'\n'
             COMMANDS+="cd branch-deploy && docker compose -f redis.yaml up -d"$'\n'
             COMMANDS+="sleep 20"$'\n'
-            COMMANDS+="chmod +x restore.sh && ./restore.sh meradhan_database_2_july_2026.backup"$'\n'
+            COMMANDS+="cd branch-deploy && chmod +x restore.sh && ./restore.sh meradhan_database_2_july_2026.backup"$'\n'
             COMMANDS+="cd /"$'\n'
             COMMANDS+="docker ps"$'\n'
 
