@@ -595,6 +595,10 @@ jobs:
           COMMANDS+="echo Starting Deployment"$'\n'
           COMMANDS+="echo ======================================="$'\n'
 
+            COMMANDS+="docker image prune -af"$'\n'
+
+            COMMANDS+="docker builder prune -af"$'\n'
+
             COMMANDS+="aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 450321244603.dkr.ecr.ap-south-1.amazonaws.com"$'\n'
 
             COMMANDS+="docker network inspect deployment_app-network >/dev/null 2>&1 || docker network create deployment_app-network"$'\n'
