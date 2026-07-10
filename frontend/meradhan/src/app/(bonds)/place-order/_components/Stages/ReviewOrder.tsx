@@ -163,8 +163,8 @@ function ReviewOrder({
         >
           <p className="font-semibold">Pricing unavailable</p>
           <p className="mt-1">
-            Settlement amounts could not be loaded from DeriData. Change quantity or refresh
-            the page to retry.
+            Settlement amounts could not be loaded from saved bond pricing. Change quantity or
+            refresh the page to retry.
           </p>
         </div>
       )}
@@ -418,8 +418,8 @@ function ReviewOrder({
                     </>
                   ) : (
                     <p className="text-sm text-amber-900 dark:text-amber-200">
-                      Live pricing from DeriData is unavailable. Refresh or change
-                      quantity to retry.
+                      Saved bond pricing is unavailable. Refresh or change quantity to
+                      retry.
                     </p>
                   )}
                   <div className="flex justify-between">

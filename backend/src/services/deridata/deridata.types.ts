@@ -6,6 +6,8 @@ export type DeriDataCalculatorSummary = {
   accrued_int_bottom: string;
   total_consideration: string;
   xirr: string;
+  stamp_duty?: string;
+  settlement_amount?: string;
 };
 
 export type DeriDataCashflowRow = {
@@ -47,6 +49,20 @@ export type DeriDataCalcContext = {
   accruedDays?: number | null;
   periodStatus?: string | null;
   ytm?: number | null;
+  /** Manual accrued interest total — overrides DeriData `accrued_int_bottom`. */
+  totalAccruedInterest?: number | null;
+  /** Per-unit manual accrued interest (saved on bond as `accruedInterest`). */
+  accruedInterestPerUnit?: number | null;
+  /** When true, never fall back to DeriData `accrued_int_bottom`. */
+  manualAccruedInterest?: boolean;
+  /** Manual principal — overrides DeriData `principal` when set. */
+  principalAmount?: number | null;
+  /** Manual total consideration — overrides DeriData `total_consideration` when set. */
+  totalConsideration?: number | null;
+  /** Manual settlement amount — overrides derived settlement when set. */
+  settlementAmount?: number | null;
+  /** Stamp duty from DeriData autofill — overrides local calculation when set. */
+  stampDuty?: number | null;
 };
 
 /** One instrument row from DeriData Merchant `issue-detail`. */

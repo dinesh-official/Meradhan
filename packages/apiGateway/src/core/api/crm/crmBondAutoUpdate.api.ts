@@ -13,7 +13,7 @@ export type BondAutoUpdateAutofillParams = {
 };
 
 export class CrmBondAutoUpdateApi {
-  constructor(private apiClient: IApiCaller) {}
+  constructor(private apiClient: IApiCaller) { }
 
   /**
    * CRM bond auto-update screen only: calc-based autofill via isolated CRM endpoint.
@@ -40,6 +40,22 @@ export class CrmBondAutoUpdateApi {
     const response = await this.apiClient.post<BondDealAutofillApiResponse>(
       `/crm/bonds/${safeIsin}/auto-update-autofill`,
       body,
+      config,
+    );
+    return response.data;
+  }
+
+  /**
+   * Create-bond ISIN fetch: DeriData issue-detail only (no calculator / DB merge).
+   */
+  public async postBondDeriDataAutofill(
+    isin: string,
+    config?: AxiosRequestConfig,
+  ): Promise<BondDealAutofillApiResponse> {
+    const safeIsin = encodeURIComponent(isin);
+    const response = await this.apiClient.post<BondDealAutofillApiResponse>(
+      `/crm/bonds/${safeIsin}/deridata-autofill`,
+      {},
       config,
     );
     return response.data;

@@ -118,7 +118,7 @@ export function mergeAutofillIntoForm(
     if (d) out.recordDate = d;
   }
   if (include.recordDays && suggested.recordDays != null && Number.isFinite(suggested.recordDays)) {
-    out.recordDays = Math.round(suggested.recordDays);
+    out.recordDays = suggested.recordDays;
   }
   if (include.dayConvention && suggested.dayConvention != null) {
     out.dayConvention = suggested.dayConvention;

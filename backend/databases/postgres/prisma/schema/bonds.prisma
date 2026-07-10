@@ -10,6 +10,10 @@ model Bonds {
     faceValue         Float
 
     stampDutyPercentage Float?   @default(0)
+    /** Stamp duty amount from last DeriData autofill save (reference `pricingQuantity`). */
+    stampDuty           Float?
+    /** Quantity used when `stampDuty` was saved from autofill. */
+    pricingQuantity     Int?
     allowForPurchase    Boolean? @default(false)
 
     couponRate               Float
@@ -54,6 +58,8 @@ model Bonds {
     providerQuantity Int?
     isOngoingDeal    Boolean? @default(false)
     providerPrice    Float?
+    /// Actual accrued interest amount in ₹ (DeriData `accrued_int_bottom`), not % of par.
+    accruedInterest  Float?
     ignoreAutoUpdate Boolean? @default(false)
 
     /// Timestamps

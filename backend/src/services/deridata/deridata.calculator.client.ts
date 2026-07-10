@@ -51,6 +51,8 @@ async function postCalculator(
     ...body,
   };
 
+  console.log(payload);
+
   const res = await fetch(url, {
     method: "POST",
     headers: {
@@ -63,6 +65,7 @@ async function postCalculator(
   if (!res.ok) {
     const text = await res.text().catch(() => "");
     const message = parseDeriDataErrorBody(text);
+
     const statusCode =
       res.status === 401 || res.status === 403
         ? HttpStatus.UNAUTHORIZED

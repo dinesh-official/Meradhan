@@ -33,8 +33,11 @@ export function bondDetailsResponseToFormData(
     issuerDescription: initialData.issuerDescription || undefined,
     issuePrice: num(initialData.issuePrice),
     faceValue: num(initialData.faceValue),
-    stampDutyPercentage: num(initialData.stampDutyPercentage, 0),
-    allowForPurchase: initialData.allowForPurchase ?? false,
+  stampDutyPercentage: num(initialData.stampDutyPercentage, 0),
+  stampDuty: initialData.stampDuty != null ? num(initialData.stampDuty) : undefined,
+  pricingQuantity:
+    initialData.pricingQuantity != null ? num(initialData.pricingQuantity) : undefined,
+  allowForPurchase: initialData.allowForPurchase ?? false,
     couponRate: num(initialData.couponRate),
     interestPaymentFrequency: initialData.interestPaymentFrequency,
     putCallOptionDetails: initialData.putCallOptionDetails || undefined,
@@ -91,6 +94,7 @@ export function bondDetailsResponseToFormData(
     isOngoingDeal: initialData.isOngoingDeal ?? false,
     providerPrice:
       initialData.providerPrice != null ? num(initialData.providerPrice) : undefined,
+    accruedInterest: initialData.accruedInterest ?? undefined,
     ignoreAutoUpdate: initialData.ignoreAutoUpdate ?? false,
     allCouponDates: (initialData.allCouponDates ?? []).map((d) =>
       parseApiDateStringToLocalDate(d),
