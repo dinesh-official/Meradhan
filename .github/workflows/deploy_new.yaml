@@ -574,7 +574,7 @@ jobs:
           declare -A SERVICES=()
 
           if [ "${{ inputs.frontend }}" = "true" ]; then
-            SERVICES["$FRONTEND_NAME"]="3000:3000"
+            SERVICES["$FRONTEND_NAME"]="4002:4002"
           fi
 
           if [ "${{ inputs.backend }}" = "true" ]; then
@@ -582,7 +582,7 @@ jobs:
           fi
 
           if [ "${{ inputs.crm }}" = "true" ]; then
-            SERVICES["$CRM_NAME"]="5000:5000"
+            SERVICES["$CRM_NAME"]="4001:4001"
           fi
 
           if [ "${{ inputs.worker }}" = "true" ]; then
