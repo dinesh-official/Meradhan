@@ -169,6 +169,16 @@ function autofillWarnings(res: BondDealAutofillResponse): string[] {
 
 type DraftSuggestions = BondDealAutofillResponse["suggested"];
 
+const PUT_CALL_OPTION_DETAILS_NA = "Put:NA Call:NA";
+
+function withPutCallFallback(suggested: DraftSuggestions): DraftSuggestions {
+  return {
+    ...suggested,
+    putCallOptionDetails:
+      suggested.putCallOptionDetails?.trim() || PUT_CALL_OPTION_DETAILS_NA,
+  };
+}
+
 type BondRowModel = {
   bond: BondDetailsResponse;
   formBase: BondFormData;
@@ -340,7 +350,7 @@ export default function BondAutoUpdateView() {
           [isin]: {
             ...cur,
             autofill: data,
-            draft: { ...data.suggested },
+            draft: withPutCallFallback(data.suggested),
             include: defaultIncludeMap(),
             error: null,
             open: true,
@@ -492,7 +502,7 @@ export default function BondAutoUpdateView() {
             [b.isin]: {
               ...cur,
               autofill: data,
-              draft: { ...data.suggested },
+              draft: withPutCallFallback(data.suggested),
               include: defaultIncludeMap(),
               error: null,
               open: true,

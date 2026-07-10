@@ -160,7 +160,8 @@ export class BondAutoUpdateAutofillService {
       couponType: issueDetailMapped.couponType,
       categories: issueDetailMapped.categories,
       totalIssueSize: issueDetailMapped.totalIssueSize,
-      putCallOptionDetails: issueDetailMapped.putCallOptionDetails,
+      putCallOptionDetails:
+        issueDetailMapped.putCallOptionDetails?.trim() || "Put:NA Call:NA",
     };
 
     return {
@@ -581,7 +582,9 @@ export class BondAutoUpdateAutofillService {
         ? (dd.categories?.length ? dd.categories : [])
         : (bondData?.categories ?? []),
       totalIssueSize: hasDd ? dd.totalIssueSize : null,
-      putCallOptionDetails: hasDd ? dd.putCallOptionDetails : null,
+      putCallOptionDetails: hasDd
+        ? (dd.putCallOptionDetails?.trim() || "Put:NA Call:NA")
+        : "Put:NA Call:NA",
     };
 
     const usedReferenceMetadata = bond != null;

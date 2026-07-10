@@ -528,9 +528,10 @@ function BondForm({ initialData, isin }: BondFormProps) {
     if (s.totalIssueSize != null && Number.isFinite(s.totalIssueSize)) {
       form.setValue("totalIssueSize", s.totalIssueSize);
     }
-    if (s.putCallOptionDetails?.trim()) {
-      form.setValue("putCallOptionDetails", s.putCallOptionDetails.trim());
-    }
+    form.setValue(
+      "putCallOptionDetails",
+      s.putCallOptionDetails?.trim() || "Put:NA Call:NA",
+    );
     toast.success(`Bond details loaded from DeriData for ${data.isin}.`);
   };
 
@@ -633,9 +634,10 @@ function BondForm({ initialData, isin }: BondFormProps) {
     if (s.totalIssueSize != null && Number.isFinite(s.totalIssueSize)) {
       form.setValue("totalIssueSize", s.totalIssueSize);
     }
-    if (s.putCallOptionDetails?.trim()) {
-      form.setValue("putCallOptionDetails", s.putCallOptionDetails.trim());
-    }
+    form.setValue(
+      "putCallOptionDetails",
+      s.putCallOptionDetails?.trim() || "Put:NA Call:NA",
+    );
     calcResultToast(data, "Filled:", s);
   };
 
