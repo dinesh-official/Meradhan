@@ -409,12 +409,12 @@ function ReviewOrder({
                           Rs. {formatNumberTS(stampScaled)}
                         </span>
                       </div>
-                      <div className="flex justify-between ">
+                      {/* <div className="flex justify-between ">
                         <span>Accrued Interest Days</span>
                         <span>
                           {orderPricing.noOfAccrualDays}
                         </span>
-                      </div>
+                      </div> */}
                     </>
                   ) : (
                     <p className="text-sm text-amber-900 dark:text-amber-200">

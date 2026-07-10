@@ -217,8 +217,7 @@ function buildEmailPreviewHtml(
       : "—";
   const accruedDisplay =
     params.accruedInterest != null && Number.isFinite(Number(params.accruedInterest))
-      ? `${formatCurrency(params.accruedInterest)}${params.noOfDays != null ? ` (No. of Days: ${params.noOfDays})` : ""
-      }`
+      ? `${formatCurrency(params.accruedInterest)}`
       : "—";
   const faceVal =
     params.faceValue != null && Number.isFinite(params.faceValue)
@@ -235,8 +234,8 @@ function buildEmailPreviewHtml(
     ["Face Value", faceVal],
     ["Quantity", formatInteger(params.quantity)],
     ["Quantum", formatCurrency(params.quantum)],
-    ["Clean Price", cleanPx != null ? `${formatNumber(cleanPx, 4)}` : "—"],
-    ["YTM Ann", params.ytmAnn != null ? `${formatNumber(params.ytmAnn, 2)}%` : "—"],
+    ["Clean Price", cleanPx != null ? `${formatNumber(cleanPx, 4)} ` : "—"],
+    ["YTM Ann", params.ytmAnn != null ? `${formatNumber(params.ytmAnn, 2)}% ` : "—"],
     ["Last IP Date", formatDealDateForEmailSubject(params.lastIpDate ?? undefined)],
     ["Principal Amount", formatCurrency(params.principalAmount)],
     ["Accrued / Ex Interest", accruedDisplay],
@@ -251,12 +250,12 @@ function buildEmailPreviewHtml(
   const tableRows = rows
     .map(
       ([k, v]) =>
-        `<tr><td style="padding:6px 8px;border:1px solid #e5e7eb;"><strong>${k}</strong></td><td style="padding:6px 8px;border:1px solid #e5e7eb;">${v}</td></tr>`,
+        `< tr ><td style="padding:6px 8px;border:1px solid #e5e7eb;"><strong>${k}</strong></td><td style="padding:6px 8px;border:1px solid #e5e7eb;">${v}</td></tr > `,
     )
     .join("");
 
   return `
-    <p>${dearLine}</p>
+  < p > ${dearLine}</p >
     <p>Thank you for placing your ${orderSideWord} order on BondNest Capital India Securities Private Limited (MeraDhan). Your order request has been recorded successfully and is currently pending confirmation.</p>
     <p>To proceed with the order placement, kindly reply to this email with the following confirmation text:</p>
     <p style="margin:10px 0;padding:10px 14px;border-left:4px solid #2563eb;background:#f8fafc;font-style:italic;">&ldquo;${confirmationQuote}&rdquo;</p>
@@ -264,7 +263,7 @@ function buildEmailPreviewHtml(
     <table style="border-collapse:collapse;width:100%;margin:12px 0;">${tableRows}</table>
     <p style="margin-top:12px;font-size:12px;color:#64748b;">Preview only. Sent email includes full legal notes, disclaimer, and SEBI / exchange member IDs.</p>
     <p style="margin-top:12px;">Best regards,<br/>MeraDhan Team</p>
-  `;
+`;
 }
 
 type ProposalDraft = {
@@ -374,7 +373,7 @@ function isNseParticipantProposal(draft: {
 }
 
 function bondLabel(bond: Pick<BondDetailsResponse, "isin" | "bondName" | "instrumentName">) {
-  return `${bond.isin} - ${bond.bondName || bond.instrumentName || "Unnamed Bond"}`;
+  return `${bond.isin} - ${bond.bondName || bond.instrumentName || "Unnamed Bond"} `;
 }
 
 function InfoRow({
@@ -675,7 +674,7 @@ function ProposalManagementView() {
       const customer = await resolveParticipantCustomer(participant.code);
       setSelectedCustomer(customer);
       if (customer) {
-        toast.success(`Linked customer: ${customerFullName(customer)}`);
+        toast.success(`Linked customer: ${customerFullName(customer)} `);
       }
     } finally {
       setIsResolvingParticipantCustomer(false);
@@ -830,7 +829,7 @@ function ProposalManagementView() {
     setRecipientMode(item.rfqParticipant ? "RFQ_PARTICIPANT" : "CUSTOMER");
     setEditSourceId(item.id);
     setIsSheetOpen(true);
-    toast.success(`Editing proposal (will save as new version)`);
+    toast.success(`Editing proposal(will save as new version)`);
   };
 
   const saveMutation = useMutation({
@@ -1164,7 +1163,7 @@ function ProposalManagementView() {
       params.set("yield", String(yieldValue));
     }
 
-    router.push(`/dashboard/rfqs/nse/create?${params.toString()}`);
+    router.push(`/ dashboard / rfqs / nse / create ? ${params.toString()} `);
   };
 
   const proposal = proposalDraft?.fetched;
@@ -1493,7 +1492,7 @@ function ProposalManagementView() {
                 <div className="px-5 py-4">
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">YTM</p>
                   <p className="mt-1 text-base font-semibold tabular-nums text-slate-800">
-                    {dealAutofill?.pricing.finalYieldRaw != null ? `${formatNumber(dealAutofill.pricing.finalYieldRaw, 4)}%` : "—"}
+                    {dealAutofill?.pricing.finalYieldRaw != null ? `${formatNumber(dealAutofill.pricing.finalYieldRaw, 4)}% ` : "—"}
                   </p>
                 </div>
               </div>
@@ -1715,7 +1714,7 @@ function ProposalManagementView() {
 
                             {/* YTM */}
                             <td className="px-4 py-3.5 text-right font-mono text-sm tabular-nums text-slate-700">
-                              {ytm != null ? `${formatNumber(ytm, 4)}%` : "—"}
+                              {ytm != null ? `${formatNumber(ytm, 4)}% ` : "—"}
                             </td>
 
                             {/* Status */}
@@ -1802,7 +1801,7 @@ function ProposalManagementView() {
                       return (
                         <>
                           <tr
-                            key={`group-${rootId}`}
+                            key={`group - ${rootId} `}
                             onClick={() => handleOpenSavedProposal(primary)}
                             className={cn(
                               "cursor-pointer transition-colors hover:bg-slate-50/80",
@@ -1816,7 +1815,7 @@ function ProposalManagementView() {
                           </tr>
                           {isExpanded && items.slice(1).map((child) => (
                             <tr
-                              key={`child-${child.id}`}
+                              key={`child - ${child.id} `}
                               onClick={() => handleOpenSavedProposal(child)}
                               className="cursor-pointer bg-indigo-50/40 transition-colors hover:bg-indigo-50/70"
                             >
@@ -2007,13 +2006,13 @@ function ProposalManagementView() {
                   label="YTM (Ann)"
                   value={
                     dealAutofill?.pricing.finalYieldRaw != null
-                      ? `${formatNumber(dealAutofill.pricing.finalYieldRaw, 4)}%`
+                      ? `${formatNumber(dealAutofill.pricing.finalYieldRaw, 4)}% `
                       : "—"
                   }
                 />
                 <InfoRow
                   label="Coupon Rate"
-                  value={`${formatNumber(pricing?.couponRate ?? dealAutofill?.suggested.couponRate, 2)}%`}
+                  value={`${formatNumber(pricing?.couponRate ?? dealAutofill?.suggested.couponRate, 2)}% `}
                 />
                 <InfoRow
                   label="Principal Amount"
@@ -2057,7 +2056,7 @@ function ProposalManagementView() {
                   <InfoRow label="Final price (calc)" value={formatNumber(calc.final_price, 4)} />
                   <InfoRow
                     label="Final yield (calc)"
-                    value={calc.final_yield ? `${calc.final_yield}%` : "—"}
+                    value={calc.final_yield ? `${calc.final_yield}% ` : "—"}
                   />
 
                   <div className="rounded-lg border border-gray-200 overflow-hidden">
@@ -2070,7 +2069,7 @@ function ProposalManagementView() {
                     <div className="max-h-64 overflow-y-auto">
                       {(calc.cf_rows ?? []).map((row, idx) => (
                         <div
-                          key={`${row.date}-${idx}`}
+                          key={`${row.date} -${idx} `}
                           className="grid grid-cols-4 gap-2 px-3 py-2 text-xs border-t border-gray-100"
                         >
                           <div className="truncate">{row.date}</div>
@@ -2271,7 +2270,7 @@ function ProposalManagementView() {
                 </TableHeader>
                 <TableBody>
                   {getHistoryItems(historyRootId).map((v) => (
-                    <TableRow key={`hist-${v.id}`}>
+                    <TableRow key={`hist - ${v.id} `}>
                       <TableCell className="font-mono text-xs">#{v.id}</TableCell>
                       <TableCell className="font-mono text-xs">{v.isin}</TableCell>
                       <TableCell>
@@ -2289,7 +2288,7 @@ function ProposalManagementView() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-xs">
-                        {v.manualYieldEnabled ? `${v.manualYield || "—"}%` : "—"}
+                        {v.manualYieldEnabled ? `${v.manualYield || "—"}% ` : "—"}
                       </TableCell>
                       <TableCell className="tabular-nums">{formatDisplayDate(v.createdAt)}</TableCell>
                       <TableCell className="text-right">
@@ -2531,7 +2530,7 @@ function ProposalManagementView() {
 
                   <div className="text-muted-foreground">YTM</div>
                   <div className="tabular-nums text-slate-700">
-                    {ytmRaw != null ? `${formatNumber(ytmRaw, 4)}%` : item.manualYieldEnabled ? `${item.manualYield}% (manual)` : "—"}
+                    {ytmRaw != null ? `${formatNumber(ytmRaw, 4)}% ` : item.manualYieldEnabled ? `${item.manualYield}% (manual)` : "—"}
                   </div>
 
                   <div className="text-muted-foreground">Settlement Amt</div>
@@ -2606,8 +2605,8 @@ function ProposalManagementView() {
               }}
             >
               {queueProcessingMutation.isPending ||
-              autoCreateRfqMutation.isPending ||
-              markWaitingMutation.isPending ? (
+                autoCreateRfqMutation.isPending ||
+                markWaitingMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
                   {allowAutoRfqTrigger
