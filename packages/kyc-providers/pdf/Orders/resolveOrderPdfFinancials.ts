@@ -86,8 +86,8 @@ export function resolveOrderPdfFinancials(params: {
   const stampDutyAmount =
     firstNum(
       settleOrder?.stampDutyAmount,
-      orderData?.stampDuty,
       orderPricing?.stampDuty,
+      orderData?.stampDuty,
     ) ?? 0;
 
   const principalFromSettle =
@@ -97,8 +97,8 @@ export function resolveOrderPdfFinancials(params: {
 
   const cleanPrice = firstNum(
     settleOrder?.price,
-    orderData?.price,
     orderPricing?.cleanPrice,
+    orderData?.price,
   );
 
   const faceValue = toNum(params.faceValue) ?? 1000;

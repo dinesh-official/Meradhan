@@ -1,10 +1,9 @@
 import {
   accruedInterest,
-  DEFAULT_BOND_MARKET_HOLIDAYS,
-  firstWorkingDayAfter,
-  getLastCouponDateFromReferenceData,
-  getLastNextCouponDateBasedOnSettlementDate,
-  getNextCouponDate,
+  computeBondSettlement,
+  resolveCashflowShutFlag,
+  resolveCouponDatesForSettlement,
+  settlementDateFromYmd,
   toISTISODate,
 } from "@services/order/order-pricing-helper";
 import moment from "moment";
@@ -168,14 +167,8 @@ export function collectAllCouponDatesYmd(
   return [...set].sort();
 }
 
-function ymdToUtcNoon(ymd: string): Date {
-  const [y, m, d] = ymd.split("-").map(Number);
-  return new Date(Date.UTC(y!, (m ?? 1) - 1, d ?? 1, 12, 0, 0));
-}
-
-function defaultT1IstSettlementYmd(): string {
-  const holidays = new Set(DEFAULT_BOND_MARKET_HOLIDAYS);
-  return toYyyyMmDd(firstWorkingDayAfter(new Date(), holidays))!;
+function defaultSettlementYmd(): string {
+  return computeBondSettlement(new Date()).settlementDate;
 }
 
 export type AutoUpdateAutofillInput = {
@@ -218,7 +211,7 @@ export function resolveAutoUpdateCalcInputs(
   );
   const settlementDateYmd = settlementDateOverridden
     ? settlementOverrideRaw!
-    : defaultT1IstSettlementYmd();
+    : defaultSettlementYmd();
 
   const pricingYieldOverride =
     overrides?.pricingYield != null && Number.isFinite(overrides.pricingYield)
@@ -301,7 +294,80 @@ export type BondDataRow = {
   couponType: string | null;
   categories: string[];
   allCouponDates: Date[];
+  lastCouponDateIst?: Date | null;
+  nextCouponDateIst?: Date | null;
+  recordDays?: number | null;
 };
+
+export function recomputeAccruedPricing(input: {
+  settlementDateYmd: string;
+  faceValue: number;
+  couponRate: number;
+  quantity: number;
+  lastCouponDate: string;
+  nextCouponDate: string;
+  recordDays: number;
+  recordDateYmd?: string;
+  maturityDateYmd?: string;
+}) {
+  const settlementDateObj = settlementDateFromYmd(input.settlementDateYmd);
+  const recordDateOverride =
+    input.recordDateYmd?.trim()
+      ? settlementDateFromYmd(input.recordDateYmd)
+      : undefined;
+
+  const cashflowShutFlag = resolveCashflowShutFlag({
+    settlementDateYmd: input.settlementDateYmd,
+    nextCouponDateYmd: input.nextCouponDate,
+    recordDays: input.recordDays,
+    recordDateYmd: input.recordDateYmd,
+    maturityDateYmd: input.maturityDateYmd,
+  });
+
+  const pricing = accruedInterest({
+    couponRate: input.couponRate,
+    faceValue: input.faceValue,
+    lastCouponDate: settlementDateFromYmd(
+      input.lastCouponDate || input.settlementDateYmd,
+    ),
+    nextCouponDate: settlementDateFromYmd(
+      input.nextCouponDate || input.settlementDateYmd,
+    ),
+    quantity: input.quantity,
+    recordDays: input.recordDays,
+    settlementDate: settlementDateObj,
+    recordDateOverride,
+    cashflowShutFlag,
+  });
+
+  return {
+    pricing,
+    periodStatus: cashflowShutFlag ? "Shut Period" : "Normal",
+    cashflowShutFlag,
+  };
+}
+
+export function buildManualAccruedFromContext(input: {
+  settlementDateYmd: string;
+  faceValue: number;
+  couponRate: number;
+  quantity: number;
+  lastCouponDate: string;
+  nextCouponDate: string;
+  recordDays: number;
+}) {
+  const { pricing } = recomputeAccruedPricing(input);
+  const quantity = input.quantity > 0 ? input.quantity : 1;
+
+  return {
+    pricing,
+    totalAccruedInterest: pricing.accruedInterest,
+    accruedInterestPerUnit: pricing.accruedInterest / quantity,
+    noOfAccrualDays: pricing.noOfAccrualDays,
+    isUnderShutPeriod: pricing.isUnderShutPeriod,
+    recordDate: pricing.recordDate,
+  };
+}
 
 export async function buildAutofillCalcContext(
   isin: string,
@@ -315,32 +381,54 @@ export async function buildAutofillCalcContext(
   resolved: ReturnType<typeof resolveAutoUpdateCalcInputs>,
 ) {
   const settlementDateYmd = resolved.settlementDateYmd;
-  const settlementDateObj = ymdToUtcNoon(settlementDateYmd);
-  const couponDate = await getLastNextCouponDateBasedOnSettlementDate(
+  const settlementDateObj = settlementDateFromYmd(settlementDateYmd);
+  const couponResolved = await resolveCouponDatesForSettlement(
     isin,
     settlementDateObj,
+    bondData
+      ? {
+        lastCouponDateIst: bondData.lastCouponDateIst ?? null,
+        nextCouponDateIst: bondData.nextCouponDateIst ?? null,
+        recordDays: bondData.recordDays ?? null,
+      }
+      : null,
   );
-  const lastCouponDateDb = await getLastCouponDateFromReferenceData(
-    isin,
-    settlementDateObj,
-  );
-  const nextCouponDateDb = await getNextCouponDate(isin, settlementDateObj);
 
-  const lastCouponDate = lastCouponDateDb ?? "";
-  const nextCouponDate = nextCouponDateDb ?? "";
+  const lastCouponDate = couponResolved.lastCouponDate ?? "";
+  const nextCouponDate = couponResolved.nextCouponDate ?? "";
+  const recordDays = couponResolved.recordDays ?? 0;
+  const recordDateYmd = couponResolved.recordDate ?? "";
 
   const faceValue = Number(bond?.faceValue ?? bondData?.faceValue ?? 10000);
   const couponRate = Number(bond?.couponRate ?? bondData?.couponRate ?? 0);
 
-  const pricing = accruedInterest({
-    couponRate,
+  const maturityDate =
+    pickYmd(
+      bond?.maturityDateIst instanceof Date &&
+        !Number.isNaN(bond.maturityDateIst.getTime())
+        ? toISTISODate(bond.maturityDateIst)
+        : toYyyyMmDd(bondData?.maturityDate ?? bond?.maturityDateIst),
+    ) ?? "";
+
+  const { pricing, periodStatus, cashflowShutFlag } = recomputeAccruedPricing({
+    settlementDateYmd,
     faceValue,
-    lastCouponDate: new Date(lastCouponDate || settlementDateYmd),
-    nextCouponDate: new Date(nextCouponDate || settlementDateYmd),
+    couponRate,
     quantity: resolved.quantity,
-    recordDays: couponDate.recordDays || 0,
-    settlementDate: settlementDateObj,
+    lastCouponDate,
+    nextCouponDate,
+    recordDays,
+    recordDateYmd: recordDateYmd || undefined,
+    maturityDateYmd: maturityDate || undefined,
   });
+
+  const couponDate = {
+    lastCouponDate,
+    nextCouponDate,
+    recordDays,
+    recordDate: recordDateYmd,
+    isUnderShutPeriod: cashflowShutFlag,
+  };
 
   const bondType = toCalcBondType(bondData?.bondType ?? bond?.bondType);
   const datedDate =
@@ -350,18 +438,9 @@ export async function buildAutofillCalcContext(
         ? toISTISODate(bond.issueDateIst)
         : toYyyyMmDd(bondData?.dateOfAllotment ?? bond?.issueDateIst),
     ) ?? "";
-  const maturityDate =
-    pickYmd(
-      bond?.maturityDateIst instanceof Date &&
-        !Number.isNaN(bond.maturityDateIst.getTime())
-        ? toISTISODate(bond.maturityDateIst)
-        : toYyyyMmDd(bondData?.maturityDate ?? bond?.maturityDateIst),
-    ) ?? "";
 
   const interestPaymentFrequency =
     bond?.interestPaymentFrequency ?? bondData?.interestPaymentFrequency ?? null;
-
-  const periodStatus = pricing.isUnderShutPeriod ? "Shut Period" : "Normal";
 
   const couponPayRow = couponRows[0] ?? null;
   const dueDateYmd =
@@ -383,7 +462,7 @@ export async function buildAutofillCalcContext(
     nextCouponDate,
     datedDate,
     maturityDate,
-    cashflowShutFlag: pricing.isUnderShutPeriod,
+    cashflowShutFlag,
     pricing,
     couponDate,
     dueDateYmd,

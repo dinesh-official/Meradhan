@@ -18,7 +18,8 @@ import { getDpName } from "dp-id-lookup";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import crypto from "crypto";
 import { env } from "@packages/config/src/env";
-import { getPayoutDates } from "@services/order/order-pricing-helper";
+import { loadInvestorCouponScheduleForPdf } from "@services/order/investor-coupon-entitlement";
+import { settlementDateFromYmd } from "@services/order/order-pricing-helper";
 import { sendBackOfficeEmail } from "@communication/email_communication";
 import { buildOrderEmailHtmlBody } from "@communication/order_email_disclaimer";
 import {
@@ -1194,6 +1195,14 @@ export class CrmOrdersService {
         code: "BAD_REQUEST",
       });
     }
+    // Prefer YYYY-MM-DD → UTC midnight so last IP on a coupon due date includes that coupon.
+    const settlementYmdMatch = /^(\d{4}-\d{2}-\d{2})/.exec(
+      String(input.settlementDate ?? "").trim(),
+    );
+    const settlementYmd =
+      settlementYmdMatch?.[1] ??
+      settlementDt.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+    const settlementForCoupons = settlementDateFromYmd(settlementYmd);
 
     // Prefer checkout DeriData pricing snapshot on the order — never bonds-table calc columns.
     const orderSnap = orderPricingSnapshot(order.bondDetails);
@@ -1233,24 +1242,22 @@ export class CrmOrdersService {
       accruedInterestDays = Number(bondData.calc.accrued_days);
     }
 
-    const interestPaymentDates = await getPayoutDates(bond.isin, settlementDt);
-    const lastIpFromBond = bond.lastCouponDateIst ?? bond.lastCouponDate;
-    let lastInterestPaymentDateRaw: string | null = null;
-    let lastInterestPaymentDate: string | null = null;
-    if (lastIpFromBond instanceof Date && !Number.isNaN(lastIpFromBond.getTime())) {
-      lastInterestPaymentDateRaw = toYyyyMmDd(lastIpFromBond);
-      lastInterestPaymentDate = formatDateWithDayNameForPdfOption(lastIpFromBond);
-    }
+    const investorCoupons = await loadInvestorCouponScheduleForPdf(
+      bond.isin,
+      settlementForCoupons,
+    );
 
     return {
       accruedInterestDays: Number.isFinite(accruedInterestDays)
         ? accruedInterestDays
         : 0,
       settlementNumber: settleOrder?.settlementNo?.trim() || null,
-      lastInterestPaymentDateRaw,
-      lastInterestPaymentDate,
+      lastInterestPaymentDateRaw: investorCoupons.lastInterestPaymentDateRaw,
+      lastInterestPaymentDate: investorCoupons.lastInterestPaymentDate,
       interestPaymentDates:
-        interestPaymentDates.length > 0 ? interestPaymentDates : null,
+        investorCoupons.interestPaymentDates.length > 0
+          ? investorCoupons.interestPaymentDates
+          : null,
     };
   }
 

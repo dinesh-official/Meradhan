@@ -24,7 +24,7 @@ export type MappedDeriDataIssueDetail = {
   taxStatus: string | null;
   isListed: string | null;
   totalIssueSize: number | null;
-  putCallOptionDetails: string | null;
+  putCallOptionDetails: string;
   categories: string[];
   firstInterestDate: string | null;
 };
@@ -116,6 +116,7 @@ export function mapDeriDataIsListed(
   if (!v || v === "na" || v === "null") return null;
   if (v === "yes" || v === "y" || v === "listed") return "YES";
   if (v === "no" || v === "n" || v === "unlisted") return "NO";
+  if (v.includes("bse") || v.includes("nse")) return "YES";
   return "UNKNOWN";
 }
 
@@ -158,27 +159,30 @@ export function mapDeriDataTagsToCategories(
   return [...out];
 }
 
-function formatPutCallDetails(item: DeriDataIssueDetailItem): string | null {
-  const parts: string[] = [];
-  const putDate = pickStr(item.put_date);
-  const putAmount = pickStr(item.put_amount);
-  const callDate = pickStr(item.call_date);
-  const callAmount = pickStr(item.call_amount);
-  const isNa = (s: string | undefined) =>
-    !s || /^NA$/i.test(s) || s.toLowerCase() === "null";
-
-  if (!isNa(putDate) || !isNa(putAmount)) {
-    parts.push(
-      `Put: date=${isNa(putDate) ? "NA" : putDate}, amount=${isNa(putAmount) ? "NA" : putAmount}`,
-    );
-  }
-  if (!isNa(callDate) || !isNa(callAmount)) {
-    parts.push(
-      `Call: date=${isNa(callDate) ? "NA" : callDate}, amount=${isNa(callAmount) ? "NA" : callAmount}`,
-    );
-  }
-  return parts.length ? parts.join("; ") : null;
+function isDeriDataNaValue(s: string | undefined): boolean {
+  return !s || /^NA$/i.test(s) || s.toLowerCase() === "null";
 }
+
+/** DeriData `total_issue_size_cr` (crores) → absolute rupees (e.g. 529.2 → 5292000000). */
+export function convertIssueSizeCroreToRupees(
+  crore: number | null | undefined,
+): number | null {
+  if (crore == null || !Number.isFinite(crore)) return null;
+  return Math.round(crore * 10_000_000);
+}
+
+/** Always returns both legs so CRM never stores an empty put/call field. */
+function formatPutCallDetails(item: DeriDataIssueDetailItem): string {
+  const putDate = pickStr(item.put_date);
+  const callDate = pickStr(item.call_date);
+  const put =
+    putDate && !isDeriDataNaValue(putDate) ? putDate : "NA";
+  const call =
+    callDate && !isDeriDataNaValue(callDate) ? callDate : "NA";
+  return `Put:${put} Call:${call}`;
+}
+
+export const PUT_CALL_OPTION_DETAILS_NA = "Put:NA Call:NA";
 
 /** Pull a readable string from DeriData scalar/object rating payload cells. */
 function stringifyDeriDataCell(
@@ -419,7 +423,7 @@ export function mapDeriDataIssueDetailToBondFields(
     seniority: mapDeriDataSeniority(item.seniority),
     taxStatus: mapDeriDataTaxStatus(item.tax_free),
     isListed: mapDeriDataIsListed(item.listed),
-    totalIssueSize: issueSizeCr,
+    totalIssueSize: convertIssueSizeCroreToRupees(issueSizeCr),
     putCallOptionDetails: formatPutCallDetails(item),
     categories: mapDeriDataTagsToCategories(item.tags),
     firstInterestDate: parseDeriDataIssueDateYmd(item.first_interest_date),

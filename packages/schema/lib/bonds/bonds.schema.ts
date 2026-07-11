@@ -95,6 +95,9 @@ export const bondCreateUpdateSchema = z.object({
     .default(0)
     .optional()
     .nullable(),
+  /** Stamp duty amount (₹) saved from DeriData autofill at `pricingQuantity`. */
+  stampDuty: z.number().nonnegative().optional().nullable(),
+  pricingQuantity: z.number().int().positive().optional().nullable(),
   allowForPurchase: z.boolean().default(false).optional().nullable(),
   couponRate: z.number().nonnegative("Coupon rate must be non-negative"),
   interestPaymentFrequency: z
@@ -136,6 +139,7 @@ export const bondCreateUpdateSchema = z.object({
   providerQuantity: z.number().int().nonnegative().optional().nullable(),
   isOngoingDeal: z.boolean().default(false).optional().nullable(),
   providerPrice: z.number().nonnegative().optional().nullable(),
+  accruedInterest: z.number().optional().nullable(),
   ignoreAutoUpdate: z.boolean().default(false).optional().nullable(),
 
   allCouponDates: z.array(z.coerce.date()).default([]),

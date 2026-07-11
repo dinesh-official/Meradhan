@@ -76,6 +76,17 @@ function ReviewOrder({
 
   const maxOrderQuantity = useMemo(() => getMaxOrderQuantityFromBond(bond), [bond]);
   const outOfStock = !hasCrmInventoryAvailable(bond);
+  const securityLabel = useMemo(() => {
+    const coupon = Number.isFinite(Number(bond.couponRate))
+      ? Number(bond.couponRate).toFixed(2)
+      : "N/A";
+    const name = (bond.bondName ?? "").trim() || "N/A";
+    const maturity = bond.maturityDate
+      ? formatDateCustom(bond.maturityDate)
+      : "N/A";
+    return `${coupon}% ${name} Maturity ${maturity}`;
+  }, [bond.bondName, bond.couponRate, bond.maturityDate]);
+  const creditRating = (bond.creditRating ?? "").trim() || "N/A";
 
   const suppressQuantityReloadRef = useRef(false);
   useEffect(() => {
@@ -163,8 +174,8 @@ function ReviewOrder({
         >
           <p className="font-semibold">Pricing unavailable</p>
           <p className="mt-1">
-            Settlement amounts could not be loaded from DeriData. Change quantity or refresh
-            the page to retry.
+            Settlement amounts could not be loaded from saved bond pricing. Change quantity or
+            refresh the page to retry.
           </p>
         </div>
       )}
@@ -409,17 +420,17 @@ function ReviewOrder({
                           Rs. {formatNumberTS(stampScaled)}
                         </span>
                       </div>
-                      <div className="flex justify-between ">
+                      {/* <div className="flex justify-between ">
                         <span>Accrued Interest Days</span>
                         <span>
                           {orderPricing.noOfAccrualDays}
                         </span>
-                      </div>
+                      </div> */}
                     </>
                   ) : (
                     <p className="text-sm text-amber-900 dark:text-amber-200">
-                      Live pricing from DeriData is unavailable. Refresh or change
-                      quantity to retry.
+                      Saved bond pricing is unavailable. Refresh or change quantity to
+                      retry.
                     </p>
                   )}
                   <div className="flex justify-between">
@@ -502,8 +513,8 @@ function ReviewOrder({
                       I confirm that I have read and understood all the documents
                       related to this security. I am aware that the credit rating of
                       the selected security{" "}
-                      <strong>{bond.description}</strong> is{" "}
-                      <strong>{bond.creditRating}</strong>. I am investing in this bond after
+                      <strong>{securityLabel}</strong> is{" "}
+                      <strong>{creditRating}</strong>. I am investing in this bond after
                       fully understanding the risks involved. This investment
                       decision is my own and has not been influenced by any advice,
                       suggestion, or recommendation from MeraDhan.

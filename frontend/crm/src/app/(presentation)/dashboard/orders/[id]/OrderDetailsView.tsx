@@ -455,23 +455,23 @@ function OrderDetailsView() {
           {/* Colored banner reflecting the outcome */}
           <div
             className={`px-6 py-4 border-b ${!verifyResult?.ok
-                ? "bg-rose-50 border-rose-100"
-                : verifyResult?.applied
-                  ? "bg-emerald-50 border-emerald-100"
-                  : verifyResult?.willChange
-                    ? "bg-blue-50 border-blue-100"
-                    : "bg-amber-50 border-amber-100"
+              ? "bg-rose-50 border-rose-100"
+              : verifyResult?.applied
+                ? "bg-emerald-50 border-emerald-100"
+                : verifyResult?.willChange
+                  ? "bg-blue-50 border-blue-100"
+                  : "bg-amber-50 border-amber-100"
               }`}
           >
             <DialogHeader className="space-y-1">
               <DialogTitle
                 className={`flex items-center gap-2 text-base ${!verifyResult?.ok
-                    ? "text-rose-700"
-                    : verifyResult?.applied
-                      ? "text-emerald-700"
-                      : verifyResult?.willChange
-                        ? "text-blue-700"
-                        : "text-amber-700"
+                  ? "text-rose-700"
+                  : verifyResult?.applied
+                    ? "text-emerald-700"
+                    : verifyResult?.willChange
+                      ? "text-blue-700"
+                      : "text-amber-700"
                   }`}
               >
                 {!verifyResult?.ok ? (
@@ -568,10 +568,10 @@ function OrderDetailsView() {
                 <dd className="text-right">
                   <span
                     className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${verifyResult.applied
-                        ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200"
-                        : verifyResult.willChange
-                          ? "bg-blue-100 text-blue-700 ring-1 ring-blue-200"
-                          : "bg-slate-100 text-slate-600 ring-1 ring-slate-200"
+                      ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200"
+                      : verifyResult.willChange
+                        ? "bg-blue-100 text-blue-700 ring-1 ring-blue-200"
+                        : "bg-slate-100 text-slate-600 ring-1 ring-slate-200"
                       }`}
                   >
                     {verifyResult.applied
@@ -614,23 +614,23 @@ function OrderDetailsView() {
         <DialogContent className="sm:max-w-md shadow-none border border-slate-200 p-0 overflow-hidden gap-0">
           <div
             className={`px-6 py-4 border-b ${!settleResult?.ok
-                ? "bg-rose-50 border-rose-100"
-                : settleResult?.applied
-                  ? "bg-emerald-50 border-emerald-100"
-                  : settleResult?.willChange
-                    ? "bg-blue-50 border-blue-100"
-                    : "bg-amber-50 border-amber-100"
+              ? "bg-rose-50 border-rose-100"
+              : settleResult?.applied
+                ? "bg-emerald-50 border-emerald-100"
+                : settleResult?.willChange
+                  ? "bg-blue-50 border-blue-100"
+                  : "bg-amber-50 border-amber-100"
               }`}
           >
             <DialogHeader className="space-y-1">
               <DialogTitle
                 className={`flex items-center gap-2 text-base ${!settleResult?.ok
-                    ? "text-rose-700"
-                    : settleResult?.applied
-                      ? "text-emerald-700"
-                      : settleResult?.willChange
-                        ? "text-blue-700"
-                        : "text-amber-700"
+                  ? "text-rose-700"
+                  : settleResult?.applied
+                    ? "text-emerald-700"
+                    : settleResult?.willChange
+                      ? "text-blue-700"
+                      : "text-amber-700"
                   }`}
               >
                 {!settleResult?.ok ? (
@@ -717,10 +717,10 @@ function OrderDetailsView() {
                 <dd className="text-right">
                   <span
                     className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${settleResult.applied
-                        ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200"
-                        : settleResult.willChange
-                          ? "bg-blue-100 text-blue-700 ring-1 ring-blue-200"
-                          : "bg-slate-100 text-slate-600 ring-1 ring-slate-200"
+                      ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200"
+                      : settleResult.willChange
+                        ? "bg-blue-100 text-blue-700 ring-1 ring-blue-200"
+                        : "bg-slate-100 text-slate-600 ring-1 ring-slate-200"
                       }`}
                   >
                     {settleResult.applied
@@ -1789,7 +1789,7 @@ function OrderDetailsView() {
                       {formatInrAmount(stampDutyDisplay)}
                     </span>
                   </div>
-                  {accrualDaysValue != null && (
+                  {/* {accrualDaysValue != null && (
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">
                         Accrued Interest Days
@@ -1798,7 +1798,7 @@ function OrderDetailsView() {
                         {accrualDaysValue.toLocaleString("en-IN")}
                       </span>
                     </div>
-                  )}
+                  )} */}
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Quantity</span>
                     <span className="font-medium">
