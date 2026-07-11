@@ -4,6 +4,7 @@ import type {
   CustomerByIdPayload,
 } from "@root/apiGateway";
 import {
+  formatBondSecurityLabel,
   formatDate,
   formatLastInterestPaymentDateDisplay,
   getPdfDearGreeting,
@@ -220,7 +221,7 @@ export default function OrdersPage({
         (!releasedOrder ? "N/A" : "XXXXXXXX")),
     ],
     ["ISIN", bond.isin],
-    ["Security Name", bond.description],
+    ["Security Name", formatBondSecurityLabel(bond)],
     ["Coupon Rate", `${bond.couponRate.toFixed(2) || "N/A"}%`],
     ["Face Value", `INR ${formatCurrency(faceValue)}`],
     [
@@ -248,9 +249,12 @@ ${getInterestPaymentDatesDisplay()}`,
       (() => {
         const raw = orderData?.metadata?.lastInterestPaymentDate?.trim();
         if (raw) return formatLastInterestPaymentDateDisplay(raw);
-        const d = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-        return formatDate(d.toISOString(), "DD-MMM-YYYY") + ` (${dayNames[d.getDay()]})`;
+        const bondLast =
+          bond.lastCouponDate != null && String(bond.lastCouponDate).trim() !== ""
+            ? String(bond.lastCouponDate).trim()
+            : "";
+        if (bondLast) return formatLastInterestPaymentDateDisplay(bondLast);
+        return "N/A";
       })(),
     ],
     [
@@ -286,7 +290,7 @@ ${getInterestPaymentDatesDisplay()}`,
     ["Principal Amount", `INR ${formatCurrency(totalConsideration - accruedInterest)}`],
     [
       "Accrued / Ex Interest",
-      `${accruedInterest >= 0 ? `INR ${formatCurrency(accruedInterest)} (No. of Days: ${accruedInterestDays ?? orderData?.metadata?.accruedInterestDays ?? "N/A"})` : `${`INR (${formatCurrency(accruedInterest)})`.replaceAll("-", "")} (No. of Days: (${accruedInterestDays ?? orderData?.metadata?.accruedInterestDays ?? "N/A"}))`}`,
+      `${accruedInterest >= 0 ? `INR ${formatCurrency(accruedInterest)}` : `${`INR (${formatCurrency(accruedInterest)})`.replaceAll("-", "")}`}`,
     ],
     ["Total Consideration", `INR ${formatCurrency(totalConsideration)}`],
     [

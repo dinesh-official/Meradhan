@@ -125,8 +125,17 @@ MeraDhan Team`;
     try {
         const autofill = await crmOrdersService.autofillReceiptPdfOptions(orderNumber, { settlementDate: settlementDateInput });
         if (autofill?.settlementNumber) settlementNumber = autofill.settlementNumber;
-        const lastCoupon = await getLastCouponDate(order.isin, new Date());
-        if (lastCoupon) lastInterestPaymentDate = lastCoupon;
+        // Last IP must use settlement date (same as cash flows) — not `new Date()`.
+        if (autofill?.lastInterestPaymentDate) {
+            lastInterestPaymentDate = autofill.lastInterestPaymentDate;
+        } else {
+            const settlementDt = new Date(`${settlementDateInput}T00:00:00.000Z`);
+            const lastCoupon = await getLastCouponDate(
+                order.isin,
+                Number.isNaN(settlementDt.getTime()) ? new Date() : settlementDt,
+            );
+            if (lastCoupon) lastInterestPaymentDate = lastCoupon;
+        }
         if (autofill?.interestPaymentDates?.length) interestPaymentDates = autofill.interestPaymentDates.join(", ");
     } catch (err) {
         logger.logError(`Order receipt PDF autofill failed for ${orderNumber}`, err);
@@ -320,8 +329,17 @@ MeraDhan Team`;
         //     if (Number.isFinite(n)) accruedInterestDays = n;
         // }
         if (autofill?.settlementNumber) settlementNumber = autofill.settlementNumber;
-        const setData = await getLastCouponDate(order.isin, new Date());
-        if (setData) lastInterestPaymentDate = setData;
+        // Last IP must use settlement date (same as cash flows) — not `new Date()`.
+        if (autofill?.lastInterestPaymentDate) {
+            lastInterestPaymentDate = autofill.lastInterestPaymentDate;
+        } else {
+            const settlementDt = new Date(`${settlementDateInput}T00:00:00.000Z`);
+            const setData = await getLastCouponDate(
+                order.isin,
+                Number.isNaN(settlementDt.getTime()) ? new Date() : settlementDt,
+            );
+            if (setData) lastInterestPaymentDate = setData;
+        }
         if (autofill?.interestPaymentDates?.length) {
             interestPaymentDates = autofill.interestPaymentDates.join(", ");
         }

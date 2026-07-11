@@ -77,4 +77,45 @@ export class BondAutoUpdateAutofillController {
       });
     }
   }
+
+  async deridataAutofill(req: Request, res: Response) {
+    const isin = req.params.isin?.toString().trim() ?? "";
+    if (!isin) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        success: false,
+        message: "Missing ISIN",
+      });
+    }
+
+    try {
+      const data = await this.service.buildDeriDataOnlyAutofill(isin);
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        responseData: data,
+      });
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error ? err.message : "Failed to fetch bond from DeriData";
+      if (isAxiosError(err) && err.response?.data?.error) {
+        return res.sendResponse({
+          statusCode: HttpStatus.BAD_REQUEST,
+          success: false,
+          message: String(err.response.data.error),
+        });
+      }
+      if (msg.toLowerCase().includes("not found")) {
+        return res.sendResponse({
+          statusCode: HttpStatus.NOT_FOUND,
+          success: false,
+          message: msg,
+        });
+      }
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        success: false,
+        message: msg,
+      });
+    }
+  }
 }

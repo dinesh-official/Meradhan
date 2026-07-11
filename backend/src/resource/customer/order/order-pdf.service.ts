@@ -1,14 +1,9 @@
 import { generateTempOrderPdf } from "@packages/kyc-providers";
-import { formatDate } from "@packages/kyc-providers/pdf/helper";
 import { BondService } from "@resource/bonds/bond.service";
 import { CustomerProfileRepo } from "@resource/crm/customers/customer.repo";
 import { RfqMasterService } from "@resource/crm/refq/nse/rfq_master/rfq_master.service";
-import {
-  computeBondOrderPricingData,
-  getLastCouponDate,
-  getLastNextCouponDateBasedOnSettlementDate,
-  getPayoutDates,
-} from "@services/order/order-pricing-helper";
+import { computeStoredBondOrderPricing } from "@services/order/order-pricing-helper";
+import { loadInvestorCouponScheduleForPdf } from "@services/order/investor-coupon-entitlement";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 
 export type GenerateOrderPdfParams = {
@@ -33,6 +28,9 @@ export type GenerateOrderPdfParams = {
 /**
  * Builds the same bond order slip PDF as the customer `/order/pdf` route,
  * returning a temp file path suitable for `res.sendFile`.
+ *
+ * Pricing uses CRM-saved bond values only (scaled by quantity).
+ * DeriData is not called here — that runs only in CRM autofill.
  */
 export class OrderPdfService {
   private bondService = new BondService();
@@ -61,65 +59,21 @@ export class OrderPdfService {
       });
     }
 
-    let lastCouponDateStr = bond.lastCouponDateIst?.toISOString() ?? null;
-    let nextCouponDateStr = bond.nextCouponDateIst?.toISOString() ?? null;
-    let recordDays =
-      typeof bond.recordDays === "number" && !Number.isNaN(bond.recordDays)
-        ? bond.recordDays
-        : 7;
-
-    if (!lastCouponDateStr || !nextCouponDateStr) {
-      const couponDates = await getLastNextCouponDateBasedOnSettlementDate(
-        isin,
-        new Date(),
-      );
-      lastCouponDateStr = couponDates.lastCouponDate;
-      nextCouponDateStr = couponDates.nextCouponDate;
-      if (couponDates.recordDays != null && Number.isFinite(couponDates.recordDays)) {
-        recordDays = couponDates.recordDays;
-      }
-    }
-
-    if (!lastCouponDateStr || !nextCouponDateStr) {
-      throw new AppError(
-        "Bond is missing lastCouponDate or nextCouponDate required for order pricing",
-        { statusCode: HttpStatus.BAD_REQUEST }
-      );
-    }
-
-    const ytm =
-      bond.yield != null && Number.isFinite(Number(bond.yield))
-        ? Number(bond.yield)
-        : null;
-    if (ytm == null) {
-      throw new AppError(
-        "Yield (YTM) is required for live DeriData order pricing",
-        { statusCode: HttpStatus.BAD_REQUEST },
-      );
-    }
-
-    // Optional seed only — live DeriData yield→price overwrites cleanPrice.
-    const cleanPriceSeed =
-      bond.sellPrice ?? bond.providerPrice ?? bond.issuePrice ?? 0;
-
-    const pricing = await computeBondOrderPricingData(
-      {
+    let pricing: Awaited<ReturnType<typeof computeStoredBondOrderPricing>>;
+    try {
+      pricing = await computeStoredBondOrderPricing({
         isin: bond.isin,
-        faceValue: bond.faceValue,
         quantity,
-        cleanPrice: cleanPriceSeed,
-        ytm,
-        couponRate: Number(bond.couponRate),
-        lastCouponDate: lastCouponDateStr,
-        recordDays,
-        nextCouponDate: nextCouponDateStr,
-      },
-      {
-        liveCalculator: "deridata",
-        deridataMode: "yieldToPrice",
-        maturityDate: bond.maturityDate ?? bond.maturityDateIst ?? null,
-      },
-    );
+      });
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to price order from saved bond data";
+      throw new AppError(message, {
+        statusCode: HttpStatus.BAD_REQUEST,
+        code: "STORED_BOND_PRICING_FAILED",
+      });
+    }
+
     let settlementNumber = "--";
 
     try {
@@ -128,17 +82,19 @@ export class OrderPdfService {
       );
       settlementNumber = st.settlementNo;
     } catch (error) {
-      //2026-05-06 -> 2605006 create this formrated 
       const [yyyy, mm, dd] = pricing.settlementDate.trim().split("-");
-      if (!yyyy || !mm || !dd) return "";
-      const yy = yyyy.slice(-2);
-      settlementNumber = `${yy}${mm.padStart(2, "0")}0${dd.padStart(2, "0")}`;
+      if (yyyy && mm && dd) {
+        const yy = yyyy.slice(-2);
+        settlementNumber = `${yy}${mm.padStart(2, "0")}0${dd.padStart(2, "0")}`;
+      }
       console.log("SETTLEMENT NUMBER ERROR", error);
     }
-    console.log(pricing.settlementDate);
 
-    const interestPaymentDates = await getPayoutDates(bond.isin, new Date(pricing.settlementDate ?? ""));
-    const lastPaymentDate = await getLastCouponDate(bond.isin, new Date());
+    const settlementForCoupons = new Date(pricing.settlementDate ?? "");
+    const investorCoupons = await loadInvestorCouponScheduleForPdf(
+      bond.isin,
+      settlementForCoupons,
+    );
 
     const orderData = {
       price: pricing.cleanPrice,
@@ -150,16 +106,15 @@ export class OrderPdfService {
         pricing,
       },
       metadata: {
-        lastInterestPaymentDate: lastPaymentDate,
+        lastInterestPaymentDate: investorCoupons.lastInterestPaymentDate,
         valueDate: pricing.dealDate,
         accruedInterest: pricing.accruedInterest,
         accruedInterestDays: pricing.noOfAccrualDays,
         settlementDate: pricing.settlementDate,
         settlementNumber: settlementNumber,
         orderType: "One to One (OTO) on RFQ Platform of the Exchange",
-        // Required by PDF generator typing
         settlementType: 1,
-        interestPaymentDates: interestPaymentDates,
+        interestPaymentDates: investorCoupons.interestPaymentDates,
         settlementDateTime: new Date(requestDate || new Date()).toLocaleString("en-GB", {
           day: "2-digit",
           month: "2-digit",

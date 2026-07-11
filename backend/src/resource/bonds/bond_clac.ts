@@ -7,7 +7,7 @@ import {
     calculatePriceToYield,
     calculateYieldToPrice,
 } from "@services/deridata/deridata.calculator.client";
-import { getLastCouponDate, getLastNextCouponDateBasedOnSettlementDate, toISTISODate } from "@services/order/order-pricing-helper";
+import { computeBondSettlement, firstWorkingDayAfter, getLastCouponDate, getLastNextCouponDateBasedOnSettlementDate, toISTISODate } from "@services/order/order-pricing-helper";
 import moment from "moment";
 
 type BondMaturityRange = "0-1" | "1-3" | "3-5" | "5-7" | "7-10" | "10-15" | "15+";
@@ -656,7 +656,9 @@ export const calculateBondMargin = async ({
     }
     const bondMargin = await getBondMargin(isin);
     const dateData = await getDatefromReferenceData(isin);
-    const settlementYmd = formatYmdAsiaKolkata(new Date());
+
+    const date = computeBondSettlement(new Date())
+    const settlementYmd = formatYmdAsiaKolkata(new Date(date.settlementDate));
 
     const payload = buildBondCalcServicePayload({
         bondMargin,
@@ -1010,6 +1012,9 @@ export async function calculateBondFromService(
     if (!isin) {
         throw new Error("ISIN is required for bond calculation");
     }
+
+    console.log(payload);
+
 
     const quantity = Math.max(1, Number(payload.Quantity) || 1);
     const faceValue = Math.max(1, Number(payload.Face_Value) || 10000);

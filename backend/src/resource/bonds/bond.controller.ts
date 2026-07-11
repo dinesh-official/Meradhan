@@ -177,7 +177,11 @@ export class BondController {
           success: false,
         });
       }
-      throw err;
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: err instanceof Error ? err.message : "Failed to calculate bond pricing",
+        success: false,
+      });
     }
   }
 

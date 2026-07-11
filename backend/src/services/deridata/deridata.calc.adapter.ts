@@ -52,24 +52,99 @@ type LegacyCalcBase = {
   periodStatus?: string | null;
   ytm?: number | null;
   cleanPrice?: number | null;
+  totalAccruedInterest?: number | null;
+  accruedInterestPerUnit?: number | null;
+  manualAccruedInterest?: boolean;
+  principalAmount?: number | null;
+  totalConsideration?: number | null;
+  settlementAmount?: number | null;
+  stampDuty?: number | null;
 };
+
+export function parseDeriDataPricingAmounts(
+  response: DeriDataCalculatorResponse,
+): {
+  cleanPrice: number | null;
+  accruedInterestPerUnit: number | null;
+  principalAmount: number | null;
+  totalAccruedInterest: number | null;
+  totalConsideration: number | null;
+  stampDuty: number | null;
+  settlementAmount: number | null;
+} {
+  const cleanPrice = parseDeriDataMoney(response.summary.clean_price);
+  const accruedInterestPerUnit = parseDeriDataMoney(response.summary.accrued_int_top);
+  const principalAmount = parseDeriDataMoney(response.summary.principal);
+  const totalAccruedInterest = parseDeriDataMoney(response.summary.accrued_int_bottom);
+  const totalConsideration = parseDeriDataMoney(response.summary.total_consideration);
+  const stampDutyFromApi = parseDeriDataMoney(response.summary.stamp_duty);
+  const settlementFromApi = parseDeriDataMoney(response.summary.settlement_amount);
+  const stampDuty =
+    stampDutyFromApi != null && Number.isFinite(stampDutyFromApi)
+      ? stampDutyFromApi
+      : settlementFromApi != null &&
+          totalConsideration != null &&
+          Number.isFinite(settlementFromApi) &&
+          Number.isFinite(totalConsideration)
+        ? settlementFromApi - totalConsideration
+        : totalConsideration != null && Number.isFinite(totalConsideration)
+          ? calculateStampDuty(totalConsideration)
+          : null;
+  const settlementAmount =
+    settlementFromApi != null && Number.isFinite(settlementFromApi)
+      ? settlementFromApi
+      : totalConsideration != null &&
+          stampDuty != null &&
+          Number.isFinite(totalConsideration) &&
+          Number.isFinite(stampDuty)
+        ? totalConsideration + stampDuty
+        : null;
+
+  return {
+    cleanPrice,
+    accruedInterestPerUnit,
+    principalAmount,
+    totalAccruedInterest,
+    totalConsideration,
+    stampDuty,
+    settlementAmount,
+  };
+}
 
 function buildLegacyCalcResponse(
   response: DeriDataCalculatorResponse,
   ctx: LegacyCalcBase,
 ): CalcApiResponse & ExternalCalcResponse {
-  const principal = parseDeriDataMoney(response.summary.principal);
-  const totalConsideration = parseDeriDataMoney(
+  const principalFromDeri = parseDeriDataMoney(response.summary.principal);
+  const totalConsiderationFromDeri = parseDeriDataMoney(
     response.summary.total_consideration,
   );
+  const principal =
+    ctx.principalAmount != null && Number.isFinite(ctx.principalAmount)
+      ? ctx.principalAmount
+      : principalFromDeri;
+  const totalConsideration =
+    ctx.totalConsideration != null && Number.isFinite(ctx.totalConsideration)
+      ? ctx.totalConsideration
+      : totalConsiderationFromDeri;
+  const totalAccruedInterest =
+    ctx.totalAccruedInterest != null && Number.isFinite(ctx.totalAccruedInterest)
+      ? ctx.totalAccruedInterest
+      : ctx.manualAccruedInterest
+        ? 0
+        : parseDeriDataMoney(response.summary.accrued_int_bottom);
   const stampDuty =
-    principal != null && Number.isFinite(principal)
-      ? calculateStampDuty(principal)
-      : 0;
+    ctx.stampDuty != null && Number.isFinite(ctx.stampDuty)
+      ? ctx.stampDuty
+      : totalConsideration != null && Number.isFinite(totalConsideration)
+        ? calculateStampDuty(totalConsideration)
+        : 0;
   const settlementAmount =
-    totalConsideration != null && Number.isFinite(totalConsideration)
-      ? totalConsideration + stampDuty
-      : null;
+    ctx.settlementAmount != null && Number.isFinite(ctx.settlementAmount)
+      ? ctx.settlementAmount
+      : totalConsideration != null && Number.isFinite(totalConsideration)
+        ? totalConsideration + stampDuty
+        : null;
 
   const finalYieldRaw =
     ctx.ytm != null && Number.isFinite(ctx.ytm)
@@ -86,14 +161,26 @@ function buildLegacyCalcResponse(
     final_yield: String(finalYieldRaw),
     final_yield_raw: finalYieldRaw,
     period_status: ctx.periodStatus ?? "Normal",
-    principal_amount: response.summary.principal ?? "0",
+    principal_amount:
+      principal != null && Number.isFinite(principal)
+        ? formatMoney(principal)
+        : response.summary.principal ?? "0",
     quantity: String(ctx.quantity),
-    running_total: response.summary.total_consideration ?? "0",
+    running_total:
+      totalConsideration != null && Number.isFinite(totalConsideration)
+        ? formatMoney(totalConsideration)
+        : response.summary.total_consideration ?? "0",
     settle_dt: ctx.settlementDateYmd,
     settlement_amount: formatMoney(settlementAmount),
     stamp_duty: String(stampDuty),
-    total_ai: response.summary.accrued_int_bottom ?? "0",
-    total_consideration: response.summary.total_consideration ?? "0",
+    total_ai:
+      totalAccruedInterest != null && Number.isFinite(totalAccruedInterest)
+        ? formatMoney(totalAccruedInterest)
+        : response.summary.accrued_int_bottom ?? "0",
+    total_consideration:
+      totalConsideration != null && Number.isFinite(totalConsideration)
+        ? formatMoney(totalConsideration)
+        : response.summary.total_consideration ?? "0",
   };
 }
 

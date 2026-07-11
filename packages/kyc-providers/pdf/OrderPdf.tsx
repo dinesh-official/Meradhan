@@ -128,7 +128,7 @@ export function OrderPdf({
       </Page>
       <Page size="A4" style={{ fontFamily: "Poppins" }}>
         <LogoSvgTop showAll={true} title={releasedOrder ? "ORDER RECEIPT" : "ORDER RECEIPT (DRAFT)"} />
-        <OrdersPageTwo user={user} releasedOrder={releasedOrder} orderData={orderData} />
+        <OrdersPageTwo user={user} releasedOrder={releasedOrder} orderData={orderData} bond={bond} />
         <Footer />
       </Page>
     </Document>

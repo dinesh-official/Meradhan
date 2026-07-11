@@ -10,6 +10,8 @@ export interface BondDetailsResponse {
   issuePrice: number
   faceValue: number
   stampDutyPercentage: number
+  stampDuty?: number | null
+  pricingQuantity?: number | null
   allowForPurchase: boolean
   couponRate: number
   interestPaymentFrequency: string
@@ -42,6 +44,7 @@ export interface BondDetailsResponse {
   providerQuantity: string | number | undefined | null
   isOngoingDeal: boolean
   providerPrice: string | number | undefined | null
+  accruedInterest?: number | null
   ignoreAutoUpdate: boolean
   dateOfAllotment: string
   redemptionDate: string
@@ -142,6 +145,7 @@ export interface BondOrderPricingData {
   settlementDay: string;
   principalAmount: number;
   accruedInterest: number;
+  accruedInterestPerUnit?: number;
   stampDuty: number;
   noOfAccrualDays: number;
   isUnderShutPeriod: boolean;
@@ -165,6 +169,7 @@ export interface BondCalcServiceSnapshot {
   settlement_amount: string;
   principal_amount: string;
   total_consideration: string;
+  stamp_duty: string;
   settle_dt: string;
   [key: string]: unknown;
 }
@@ -213,7 +218,7 @@ export interface BondDealAutofillSuggestions {
   couponType?: string | null;
   /** Listing category slugs (e.g. ["tax-free", "banks"]) — controls MeraDhan bond listing filters. */
   categories?: string[];
-  /** Issue size in crores from DeriData Daily Data. */
+  /** Issue size in absolute rupees from DeriData (`total_issue_size_cr` × 10⁷). */
   totalIssueSize?: number | null;
   putCallOptionDetails?: string | null;
 }
@@ -238,8 +243,12 @@ export interface BondDealAutofillResponse {
     finalYieldRaw: number;
     settlementAmount: number | null;
     totalAccruedInterest: number | null;
+    accruedInterestPerUnit?: number | null;
     principalAmount: number | null;
     totalConsideration: number | null;
+    stampDuty?: number | null;
+    settlementDateYmd?: string | null;
+    accruedDays?: number | null;
     calc: BondCalcServiceSnapshot;
   };
   margin: Record<string, unknown>;

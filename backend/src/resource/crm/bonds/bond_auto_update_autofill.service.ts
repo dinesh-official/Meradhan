@@ -3,6 +3,8 @@ import { AppError, HttpStatus } from "@utils/error/AppError";
 import {
   mapDeriDataToCalcApiResponse,
   mapDeriDataToCalcPayload,
+  parseDeriDataMoney,
+  parseDeriDataPricingAmounts,
   parseDeriDataRecordDateYmd,
 } from "@services/deridata/deridata.calc.adapter";
 import {
@@ -12,11 +14,17 @@ import {
 import { mapDeriDataIssueDetailToBondFields } from "@services/deridata/deridata.issue-detail.adapter";
 import { fetchIssueDetailItem } from "@services/deridata/deridata.issue-detail.client";
 import {
+  resolveAccrualDaysFromDailyCashflow,
+  resolveAccrualDaysFromDeriDataResponse,
+  toAutofillShutFields,
+} from "@services/order/accrual-days-from-daily-cashflow";
+import type { DeriDataCalculatorResponse } from "@services/deridata/deridata.types";
+import {
   buildAutofillCalcContext,
   collectAllCouponDatesYmd,
   mapNatureOfInstrument,
-  parseCalcMoneyString,
   paymentFrequencyToDbEnum,
+  recomputeAccruedPricing,
   resolveAutoUpdateCalcInputs,
   toYyyyMmDd,
   type AutoUpdateAutofillInput,
@@ -80,8 +88,12 @@ export type BondDealAutofillResponse = {
     finalYieldRaw: number;
     settlementAmount: number | null;
     totalAccruedInterest: number | null;
+    accruedInterestPerUnit: number | null;
     principalAmount: number | null;
     totalConsideration: number | null;
+    stampDuty: number | null;
+    settlementDateYmd: string | null;
+    accruedDays: number | null;
     calc: Record<string, unknown>;
   };
   margin: Record<string, unknown>;
@@ -119,7 +131,7 @@ export class BondAutoUpdateAutofillService {
       recordDate: null,
       recordDays: issueDetailMapped.recordDays,
       dueDate: null,
-      dayConvention: bond?.dayConvention ?? null,
+      dayConvention: null,
       interestPaymentFrequency:
         paymentFrequencyToDbEnum(issueDetailMapped.interestPaymentFrequency) ||
         "UNKNOWN",
@@ -128,19 +140,19 @@ export class BondAutoUpdateAutofillService {
         "UNKNOWN",
       faceValue:
         issueDetailMapped.faceValue != null &&
-        Number.isFinite(issueDetailMapped.faceValue)
+          Number.isFinite(issueDetailMapped.faceValue)
           ? issueDetailMapped.faceValue
-          : 10000,
+          : 0,
       couponRate:
         issueDetailMapped.couponRate != null &&
-        Number.isFinite(issueDetailMapped.couponRate)
+          Number.isFinite(issueDetailMapped.couponRate)
           ? issueDetailMapped.couponRate
           : 0,
       buyYield: null,
       yield: 0,
       sellPrice: null,
       isUnderShutPeriod: false,
-      bondType: bond?.bondType ?? null,
+      bondType: null,
       seniority: issueDetailMapped.seniority,
       redemptionType: issueDetailMapped.redemptionType,
       taxStatus: issueDetailMapped.taxStatus,
@@ -148,7 +160,8 @@ export class BondAutoUpdateAutofillService {
       couponType: issueDetailMapped.couponType,
       categories: issueDetailMapped.categories,
       totalIssueSize: issueDetailMapped.totalIssueSize,
-      putCallOptionDetails: issueDetailMapped.putCallOptionDetails,
+      putCallOptionDetails:
+        issueDetailMapped.putCallOptionDetails?.trim() || "Put:NA Call:NA",
     };
 
     return {
@@ -172,12 +185,29 @@ export class BondAutoUpdateAutofillService {
         finalYieldRaw: 0,
         settlementAmount: null,
         totalAccruedInterest: null,
+        accruedInterestPerUnit: null,
         principalAmount: null,
         totalConsideration: null,
+        stampDuty: null,
+        settlementDateYmd: null,
+        accruedDays: null,
         calc: {},
       },
       margin: {},
     };
+  }
+
+  /** Create-bond / ISIN fetch: DeriData issue-detail only — no DB or calculator merge. */
+  async buildDeriDataOnlyAutofill(isin: string): Promise<BondDealAutofillResponse> {
+    const { item } = await fetchIssueDetailItem(isin);
+    const issueDetailMapped = mapDeriDataIssueDetailToBondFields(item);
+    return this.buildStaticIssueDetailResponse({
+      isin,
+      bond: null,
+      couponRowsCount: 0,
+      issueDetailMapped,
+      usedDeriDataIssueDetail: true,
+    });
   }
 
   async buildAutofill(
@@ -280,15 +310,6 @@ export class BondAutoUpdateAutofillService {
       ctx.interestPaymentFrequency =
         issueDetailMapped.interestPaymentFrequency;
     }
-    if (
-      issueDetailMapped?.recordDays != null &&
-      Number.isFinite(issueDetailMapped.recordDays)
-    ) {
-      ctx.couponDate = {
-        ...ctx.couponDate,
-        recordDays: issueDetailMapped.recordDays,
-      };
-    }
 
     if (
       ctx.pricingMode === "ytm" &&
@@ -309,132 +330,240 @@ export class BondAutoUpdateAutofillService {
       );
     }
 
-    const deriDataResponse =
-      ctx.pricingMode === "cleanPrice"
-        ? await calculatePriceToYield({
-            isin,
-            valueDate: ctx.settlementDateYmd,
-            faceValue: ctx.faceValue,
-            quantity: ctx.quantity,
-            cleanPrice: ctx.cleanPrice!,
-            cashflowShutFlag: ctx.cashflowShutFlag,
-          })
-        : await calculateYieldToPrice({
-            isin,
-            valueDate: ctx.settlementDateYmd,
-            faceValue: ctx.faceValue,
-            quantity: ctx.quantity,
-            ytm: ctx.pricingYield,
-            cashflowShutFlag: ctx.cashflowShutFlag,
-          });
+    // Phase 1 — probe DeriData for record_date + cashflows, then resolve shut/accrual.
+    // Phase 2 — call DeriData again with cashflow_shut_flag = computed shut (reuse Phase 1
+    // when the probe flag already matched, to avoid a slow double round-trip).
+    const probeYield =
+      ctx.pricingYield != null &&
+      Number.isFinite(ctx.pricingYield) &&
+      ctx.pricingYield > 0
+        ? ctx.pricingYield
+        : 10.5;
+    const probeShut = true;
+
+    let shutFields: ReturnType<typeof toAutofillShutFields> | null = null;
+    let phase1Response: DeriDataCalculatorResponse | null = null;
+
+    try {
+      const shutAccrual = await resolveAccrualDaysFromDailyCashflow({
+        isin,
+        settlementDate: ctx.settlementDateYmd,
+        yield: probeYield,
+        faceValue: ctx.faceValue,
+        quantity: ctx.quantity,
+        underShut: probeShut,
+      });
+      shutFields = toAutofillShutFields(shutAccrual);
+      phase1Response = shutAccrual.deriDataResponse ?? null;
+      ctx.cashflowShutFlag = shutFields.cashflowShutFlag;
+      ctx.periodStatus = shutFields.periodStatus;
+      ctx.pricing = {
+        ...ctx.pricing,
+        noOfAccrualDays: shutFields.accruedDays,
+        isUnderShutPeriod: shutFields.isUnderShutPeriod,
+      };
+      if (shutFields.lastCouponDate) {
+        ctx.lastCouponDate = shutFields.lastCouponDate;
+      }
+      if (shutFields.nextCouponDate) {
+        ctx.nextCouponDate = shutFields.nextCouponDate;
+      }
+    } catch (err) {
+      console.warn(
+        `[bond_auto_update_autofill] Phase1 shut/accrual failed for ${isin}; falling back to local schedule:`,
+        err instanceof Error ? err.message : err,
+      );
+      const recomputed = recomputeAccruedPricing({
+        settlementDateYmd: ctx.settlementDateYmd,
+        faceValue: ctx.faceValue,
+        couponRate: ctx.couponRate,
+        quantity: ctx.quantity,
+        lastCouponDate: ctx.lastCouponDate,
+        nextCouponDate: ctx.nextCouponDate,
+        recordDays: ctx.couponDate.recordDays ?? 0,
+        recordDateYmd: ctx.couponDate.recordDate || undefined,
+        maturityDateYmd: ctx.maturityDate || undefined,
+      });
+      ctx.pricing = recomputed.pricing;
+      ctx.periodStatus = recomputed.periodStatus;
+      ctx.cashflowShutFlag = recomputed.cashflowShutFlag;
+    }
+
+    // Phase 2 — pricing calculator with computed cashflow_shut_flag.
+    const canReusePhase1 =
+      phase1Response != null &&
+      shutFields != null &&
+      probeShut === shutFields.cashflowShutFlag &&
+      ctx.pricingMode === "ytm";
+
+    let deriDataResponse: DeriDataCalculatorResponse;
+    const reusedPhase1 = phase1Response;
+    if (
+      canReusePhase1 &&
+      reusedPhase1 != null
+    ) {
+      deriDataResponse = reusedPhase1;
+    } else if (ctx.pricingMode === "cleanPrice") {
+      deriDataResponse = await calculatePriceToYield({
+        isin,
+        valueDate: ctx.settlementDateYmd,
+        faceValue: ctx.faceValue,
+        quantity: ctx.quantity,
+        cleanPrice: ctx.cleanPrice!,
+        cashflowShutFlag: ctx.cashflowShutFlag,
+      });
+    } else {
+      deriDataResponse = await calculateYieldToPrice({
+        isin,
+        valueDate: ctx.settlementDateYmd,
+        faceValue: ctx.faceValue,
+        quantity: ctx.quantity,
+        ytm: ctx.pricingYield,
+        cashflowShutFlag: ctx.cashflowShutFlag,
+      });
+    }
+
+    // If Phase 2 used a fresh response, re-resolve shut/accrual from that response
+    // so dates stay aligned with the pricing call.
+    if (!canReusePhase1) {
+      try {
+        const shutAccrual = await resolveAccrualDaysFromDeriDataResponse({
+          isin,
+          settlementDate: ctx.settlementDateYmd,
+          response: deriDataResponse,
+          lastCouponFallback: ctx.lastCouponDate,
+          underShut: ctx.cashflowShutFlag,
+          yield: probeYield,
+        });
+        shutFields = toAutofillShutFields(shutAccrual);
+        ctx.cashflowShutFlag = shutFields.cashflowShutFlag;
+        ctx.periodStatus = shutFields.periodStatus;
+        ctx.pricing = {
+          ...ctx.pricing,
+          noOfAccrualDays: shutFields.accruedDays,
+          isUnderShutPeriod: shutFields.isUnderShutPeriod,
+        };
+        if (shutFields.lastCouponDate) {
+          ctx.lastCouponDate = shutFields.lastCouponDate;
+        }
+        if (shutFields.nextCouponDate) {
+          ctx.nextCouponDate = shutFields.nextCouponDate;
+        }
+      } catch (err) {
+        console.warn(
+          `[bond_auto_update_autofill] Phase2 shut/accrual re-resolve failed for ${isin}:`,
+          err instanceof Error ? err.message : err,
+        );
+      }
+    }
 
     const resolvedYieldRaw =
       ctx.pricingMode === "cleanPrice"
         ? Number(deriDataResponse.summary.xirr || 0)
         : ctx.pricingYield;
 
-    const calcResponse = mapDeriDataToCalcApiResponse(deriDataResponse, {
+    const sellPriceResolved = (() => {
+      const fromDeri = parseDeriDataMoney(deriDataResponse.summary.clean_price);
+      return fromDeri != null && Number.isFinite(fromDeri) ? fromDeri : null;
+    })();
+
+    // Prefer DeriData amounts as-is (Phase 2 pricing with correct shut flag).
+    const pricingAmounts = parseDeriDataPricingAmounts(deriDataResponse);
+
+    const calcContext = {
       quantity: ctx.quantity,
       settlementDateYmd: ctx.settlementDateYmd,
       accruedDays: ctx.pricing.noOfAccrualDays,
       periodStatus: ctx.periodStatus,
       ytm: resolvedYieldRaw,
-    });
+      stampDuty: pricingAmounts.stampDuty,
+      settlementAmount: pricingAmounts.settlementAmount,
+      totalConsideration: pricingAmounts.totalConsideration,
+      principalAmount: pricingAmounts.principalAmount,
+      totalAccruedInterest: pricingAmounts.totalAccruedInterest,
+    };
+
+    const calcResponse = mapDeriDataToCalcApiResponse(
+      deriDataResponse,
+      calcContext,
+    );
 
     const allCouponDates = collectAllCouponDatesYmd(
       couponRows,
-      calcResponse.cf_rows,
+      undefined,
       bondData?.allCouponDates,
     );
 
-    const dd = issueDetailMapped;
-    const bondName =
-      (
-        dd?.bondName?.trim() ||
-        bondData?.bondName?.trim() ||
-        bond?.issuerName?.trim() ||
-        ""
-      ).trim() || null;
-    const creditRating =
-      dd?.creditRating?.trim() ||
-      bondData?.creditRating?.trim() ||
-      "UnRated";
-    const natureOfInstrument =
-      dd?.natureOfInstrument ??
-      mapNatureOfInstrument(
-        bondData?.natureOfInstrument ?? bond?.natureOfInstrument,
-      ) ??
-      null;
-
-    const interestFromDd = dd?.interestPaymentFrequency
-      ? paymentFrequencyToDbEnum(dd.interestPaymentFrequency)
-      : null;
-    const interestFromCtx = paymentFrequencyToDbEnum(
-      ctx.interestPaymentFrequency,
-    );
-
-    const finalPrice = parseCalcMoneyString(calcResponse.final_price);
+    const finalPrice = sellPriceResolved;
     const finalYieldRaw = Number(calcResponse.final_yield_raw ?? 0);
 
-    const isUnderShutPeriodFromCalc = /shut/i.test(
-      String(ctx.periodStatus ?? calcResponse.period_status ?? ""),
-    );
+    const isUnderShutPeriodFromCalc = ctx.cashflowShutFlag;
 
-    const sellPriceResolved =
-      finalPrice != null && Number.isFinite(finalPrice) ? finalPrice : null;
-
-    const recordDateFromDeriData = parseDeriDataRecordDateYmd(
-      deriDataResponse.record_date,
-    );
-
-    const categoriesFromDd = dd?.categories?.length ? dd.categories : null;
+    const dd = issueDetailMapped;
+    const hasDd = usedDeriDataIssueDetail && dd != null;
 
     const suggested = {
-      bondName,
-      instrumentName: dd?.instrumentName ?? null,
-      description: dd?.description ?? null,
-      sectorName: dd?.sectorName ?? null,
-      creditRating,
-      creditRatingInfo: dd?.creditRatingInfo ?? null,
-      ratingAgencyName: dd?.ratingAgencyName ?? null,
+      bondName: hasDd ? (dd.bondName?.trim() || null) : (
+        bondData?.bondName?.trim() ||
+        bond?.issuerName?.trim() ||
+        null
+      ),
+      instrumentName: hasDd ? dd.instrumentName : null,
+      description: hasDd ? dd.description : null,
+      sectorName: hasDd ? dd.sectorName : bondData?.sectorName ?? null,
+      creditRating: hasDd
+        ? (dd.creditRating?.trim() || "UnRated")
+        : (bondData?.creditRating?.trim() || "UnRated"),
+      creditRatingInfo: hasDd ? dd.creditRatingInfo : bondData?.creditRatingInfo ?? null,
+      ratingAgencyName: hasDd ? dd.ratingAgencyName : bondData?.ratingAgencyName ?? null,
       allCouponDates,
       allCouponDatesIst: allCouponDates,
-      natureOfInstrument,
-      maturityDate:
-        dd?.maturityDate ||
-        ctx.maturityDate ||
-        toYyyyMmDd(bond?.maturityDate) ||
-        null,
-      dateOfAllotment:
-        dd?.dateOfAllotment ||
-        ctx.datedDate ||
-        toYyyyMmDd(bond?.issueDateIst) ||
-        null,
-      lastCouponDate: ctx.lastCouponDate,
-      nextCouponDate: ctx.nextCouponDate,
+      natureOfInstrument: hasDd
+        ? dd.natureOfInstrument
+        : mapNatureOfInstrument(
+          bondData?.natureOfInstrument ?? bond?.natureOfInstrument,
+        ) ?? null,
+      maturityDate: hasDd
+        ? dd.maturityDate
+        : ctx.maturityDate || toYyyyMmDd(bond?.maturityDate) || null,
+      dateOfAllotment: hasDd
+        ? dd.dateOfAllotment
+        : ctx.datedDate || toYyyyMmDd(bond?.issueDateIst) || null,
+      lastCouponDate: shutFields?.lastCouponDate || ctx.lastCouponDate,
+      nextCouponDate: shutFields?.nextCouponDate || ctx.nextCouponDate,
       recordDate:
-        recordDateFromDeriData ?? toYyyyMmDd(ctx.pricing.recordDate) ?? null,
-      recordDays:
-        dd?.recordDays != null && Number.isFinite(dd.recordDays)
-          ? dd.recordDays
-          : ctx.couponDate.recordDays,
+        shutFields?.recordDate ??
+        parseDeriDataRecordDateYmd(deriDataResponse.record_date) ??
+        toYyyyMmDd(ctx.pricing.recordDate) ??
+        null,
+      recordDays: shutFields?.recordDays ?? ctx.couponDate.recordDays ?? null,
       dueDate: ctx.dueDateYmd ?? null,
-      dayConvention: bond?.dayConvention ?? bondData?.dayConvention ?? null,
-      interestPaymentFrequency:
-        interestFromDd ||
-        interestFromCtx ||
-        bond?.interestPaymentFrequency ||
-        "UNKNOWN",
-      interestPaymentMode: interestFromDd || interestFromCtx || "UNKNOWN",
-      faceValue: ctx.faceValue,
-      couponRate: ctx.couponRate,
+      dayConvention: hasDd ? null : (bond?.dayConvention ?? bondData?.dayConvention ?? null),
+      interestPaymentFrequency: hasDd
+        ? (paymentFrequencyToDbEnum(dd.interestPaymentFrequency) || "UNKNOWN")
+        : (
+          paymentFrequencyToDbEnum(ctx.interestPaymentFrequency) ||
+          bond?.interestPaymentFrequency ||
+          "UNKNOWN"
+        ),
+      interestPaymentMode: hasDd
+        ? (paymentFrequencyToDbEnum(dd.interestPaymentMode) || "UNKNOWN")
+        : (paymentFrequencyToDbEnum(ctx.interestPaymentFrequency) || "UNKNOWN"),
+      faceValue:
+        hasDd && dd.faceValue != null && Number.isFinite(dd.faceValue)
+          ? dd.faceValue
+          : ctx.faceValue,
+      couponRate:
+        hasDd && dd.couponRate != null && Number.isFinite(dd.couponRate)
+          ? dd.couponRate
+          : ctx.couponRate,
       buyYield: (() => {
         const raw =
           ctx.pricingMode === "cleanPrice"
             ? (Number(deriDataResponse.summary.xirr) || null)
             : bondData?.buyYield ??
-              bondData?.yield ??
-              (Number(calcResponse.final_yield) || null);
+            bondData?.yield ??
+            (Number(calcResponse.final_yield) || null);
         return raw != null && Number.isFinite(raw) ? Number(raw) : null;
       })(),
       yield:
@@ -443,15 +572,19 @@ export class BondAutoUpdateAutofillService {
           : finalYieldRaw,
       sellPrice: sellPriceResolved,
       isUnderShutPeriod: isUnderShutPeriodFromCalc,
-      bondType: bondData?.bondType ?? null,
-      seniority: dd?.seniority ?? bondData?.seniority ?? null,
-      redemptionType: dd?.redemptionType ?? bondData?.redemptionType ?? null,
-      taxStatus: dd?.taxStatus ?? bondData?.taxStatus ?? null,
-      isListed: dd?.isListed ?? bondData?.isListed ?? null,
-      couponType: dd?.couponType ?? bondData?.couponType ?? null,
-      categories: categoriesFromDd ?? bondData?.categories ?? [],
-      totalIssueSize: dd?.totalIssueSize ?? null,
-      putCallOptionDetails: dd?.putCallOptionDetails ?? null,
+      bondType: hasDd ? null : (bondData?.bondType ?? null),
+      seniority: hasDd ? dd.seniority : (bondData?.seniority ?? null),
+      redemptionType: hasDd ? dd.redemptionType : (bondData?.redemptionType ?? null),
+      taxStatus: hasDd ? dd.taxStatus : (bondData?.taxStatus ?? null),
+      isListed: hasDd ? dd.isListed : (bondData?.isListed ?? null),
+      couponType: hasDd ? dd.couponType : (bondData?.couponType ?? null),
+      categories: hasDd
+        ? (dd.categories?.length ? dd.categories : [])
+        : (bondData?.categories ?? []),
+      totalIssueSize: hasDd ? dd.totalIssueSize : null,
+      putCallOptionDetails: hasDd
+        ? (dd.putCallOptionDetails?.trim() || "Put:NA Call:NA")
+        : "Put:NA Call:NA",
     };
 
     const usedReferenceMetadata = bond != null;
@@ -477,21 +610,28 @@ export class BondAutoUpdateAutofillService {
       },
       suggested,
       pricing: {
-        finalPrice,
+        finalPrice: sellPriceResolved ?? pricingAmounts.cleanPrice,
         finalYieldRaw: Number.isFinite(finalYieldRaw) ? finalYieldRaw : 0,
-        settlementAmount: parseCalcMoneyString(calcResponse.settlement_amount),
-        totalAccruedInterest: parseCalcMoneyString(calcResponse.total_ai),
-        principalAmount: parseCalcMoneyString(calcResponse.principal_amount),
-        totalConsideration: parseCalcMoneyString(
-          calcResponse.total_consideration,
-        ),
-        calc: mapDeriDataToCalcPayload(deriDataResponse, {
-          quantity: ctx.quantity,
-          settlementDateYmd: ctx.settlementDateYmd,
-          accruedDays: ctx.pricing.noOfAccrualDays,
-          periodStatus: ctx.periodStatus,
-          ytm: resolvedYieldRaw,
-        }),
+        settlementAmount: pricingAmounts.settlementAmount,
+        totalAccruedInterest: pricingAmounts.totalAccruedInterest,
+        accruedInterestPerUnit: pricingAmounts.accruedInterestPerUnit,
+        principalAmount: pricingAmounts.principalAmount,
+        totalConsideration: pricingAmounts.totalConsideration,
+        stampDuty: pricingAmounts.stampDuty,
+        settlementDateYmd: ctx.settlementDateYmd,
+        accruedDays: ctx.pricing.noOfAccrualDays ?? null,
+        calc: {
+          ...mapDeriDataToCalcPayload(deriDataResponse, calcContext),
+          // Computed shut/accrual from record_date + cashflows (source of truth).
+          // Overwrite DeriData's echoed input flag so nested + top-level stay consistent.
+          cashflow_shut_flag: ctx.cashflowShutFlag,
+          period_status: ctx.periodStatus,
+          accrued_days: ctx.pricing.noOfAccrualDays ?? 0,
+          deridata: {
+            ...deriDataResponse,
+            cashflow_shut_flag: ctx.cashflowShutFlag,
+          },
+        },
       },
       margin: {},
     };

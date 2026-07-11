@@ -22,7 +22,8 @@ class ApiServerCaller implements IApiCaller {
     this.instance = axios.create({
       baseURL,
       withCredentials: true,
-      timeout: 30000,
+      // Bond autofill (DeriData) can take longer than the previous 30s default.
+      timeout: 120_000,
     });
 
     this.instance.interceptors.response.use(
