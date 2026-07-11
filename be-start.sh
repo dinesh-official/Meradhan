@@ -4,7 +4,7 @@ echo "=> Running Prisma DB Push..."
 
 cd /app/backend/databases/postgres || exit 1
 
-# Run Prisma DB Push and automatically accept prompts
+# Sync Prisma schema to the database (fails the container if push fails)
 OUTPUT=$(bunx prisma db push 2>&1)
 STATUS=$?
 
