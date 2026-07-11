@@ -5,7 +5,7 @@ echo "=> Running Prisma DB Push..."
 cd /app/backend/databases/postgres || exit 1
 
 # Run Prisma DB Push and automatically accept prompts
-OUTPUT=$(bunx prisma db push --accept-data-loss 2>&1)
+OUTPUT=$(bunx prisma db push 2>&1)
 STATUS=$?
 
 # Print output
