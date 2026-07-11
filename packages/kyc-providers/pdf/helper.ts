@@ -325,13 +325,12 @@ export function formatBondSecurityLabel(bond: {
   bondName?: string | null;
   maturityDate?: string | null;
 }): string {
-  const coupon =
-    bond.couponRate != null && Number.isFinite(Number(bond.couponRate))
-      ? Number(bond.couponRate).toFixed(2)
-      : "N/A";
+  const coupon = bond.couponRate != null && Number.isFinite(Number(bond.couponRate))
+    ? Number(bond.couponRate).toFixed(2)
+    : "N/A";
   const name = (bond.bondName ?? "").trim() || "N/A";
   const maturity = bond.maturityDate
     ? formatDate(bond.maturityDate, "DD-MMM-YYYY")
     : "N/A";
-  return `${coupon}% ${name} Maturity date ${maturity}`;
+  return `${coupon}% ${name} Maturity ${maturity}`;
 }

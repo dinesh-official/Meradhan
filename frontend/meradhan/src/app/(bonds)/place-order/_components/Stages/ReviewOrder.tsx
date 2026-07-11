@@ -84,7 +84,7 @@ function ReviewOrder({
     const maturity = bond.maturityDate
       ? formatDateCustom(bond.maturityDate)
       : "N/A";
-    return `${coupon}% ${name} Maturity date ${maturity}`;
+    return `${coupon}% ${name} Maturity ${maturity}`;
   }, [bond.bondName, bond.couponRate, bond.maturityDate]);
   const creditRating = (bond.creditRating ?? "").trim() || "N/A";
 
