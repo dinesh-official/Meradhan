@@ -76,6 +76,17 @@ function ReviewOrder({
 
   const maxOrderQuantity = useMemo(() => getMaxOrderQuantityFromBond(bond), [bond]);
   const outOfStock = !hasCrmInventoryAvailable(bond);
+  const securityLabel = useMemo(() => {
+    const coupon = Number.isFinite(Number(bond.couponRate))
+      ? Number(bond.couponRate).toFixed(2)
+      : "N/A";
+    const name = (bond.bondName ?? "").trim() || "N/A";
+    const maturity = bond.maturityDate
+      ? formatDateCustom(bond.maturityDate)
+      : "N/A";
+    return `${coupon}% ${name} Maturity ${maturity}`;
+  }, [bond.bondName, bond.couponRate, bond.maturityDate]);
+  const creditRating = (bond.creditRating ?? "").trim() || "N/A";
 
   const suppressQuantityReloadRef = useRef(false);
   useEffect(() => {
@@ -502,8 +513,8 @@ function ReviewOrder({
                       I confirm that I have read and understood all the documents
                       related to this security. I am aware that the credit rating of
                       the selected security{" "}
-                      <strong>{bond.description}</strong> is{" "}
-                      <strong>{bond.creditRating}</strong>. I am investing in this bond after
+                      <strong>{securityLabel}</strong> is{" "}
+                      <strong>{creditRating}</strong>. I am investing in this bond after
                       fully understanding the risks involved. This investment
                       decision is my own and has not been influenced by any advice,
                       suggestion, or recommendation from MeraDhan.

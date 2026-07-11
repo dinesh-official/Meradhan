@@ -12,6 +12,9 @@ export type BondAutoUpdateAutofillParams = {
   pricingMode?: "ytm" | "cleanPrice";
 };
 
+/** DeriData issue-detail + calculator can exceed the default 30s CRM proxy timeout. */
+const BOND_AUTOFILL_TIMEOUT_MS = 120_000;
+
 export class CrmBondAutoUpdateApi {
   constructor(private apiClient: IApiCaller) { }
 
@@ -40,7 +43,7 @@ export class CrmBondAutoUpdateApi {
     const response = await this.apiClient.post<BondDealAutofillApiResponse>(
       `/crm/bonds/${safeIsin}/auto-update-autofill`,
       body,
-      config,
+      { timeout: BOND_AUTOFILL_TIMEOUT_MS, ...config },
     );
     return response.data;
   }
@@ -56,7 +59,7 @@ export class CrmBondAutoUpdateApi {
     const response = await this.apiClient.post<BondDealAutofillApiResponse>(
       `/crm/bonds/${safeIsin}/deridata-autofill`,
       {},
-      config,
+      { timeout: BOND_AUTOFILL_TIMEOUT_MS, ...config },
     );
     return response.data;
   }

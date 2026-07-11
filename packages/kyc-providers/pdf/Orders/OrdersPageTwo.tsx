@@ -1,8 +1,12 @@
 import { Link, Text, View } from "@react-pdf/renderer";
-import type { CustomerByIdPayload } from "@root/apiGateway";
+import type {
+  BondDetailsResponse,
+  CustomerByIdPayload,
+} from "@root/apiGateway";
 import { tw } from "../MdPdf";
 import { CheckOnlyIcon } from "../elements/CheckIcon";
 import TextList from "../elements/TextList";
+import { formatBondSecurityLabel } from "../helper";
 import { ClientSettlementDetailsSection } from "./ClientSettlementDetailsSection";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -75,11 +79,15 @@ function OrdersPageTwo({
   user,
   releasedOrder,
   orderData,
+  bond,
 }: {
   user: CustomerByIdPayload;
   releasedOrder?: boolean;
   orderData?: OrdersPageTwoOrderData;
+  bond?: BondDetailsResponse;
 }) {
+  const securityLabel = bond ? formatBondSecurityLabel(bond) : "N/A";
+  const creditRating = (bond?.creditRating ?? "").trim() || "N/A";
   return (
     <View
       style={{
@@ -202,6 +210,9 @@ Settlement No.: ${orderData?.metadata?.settlementNumber ?? "—"}`}
         </View> */}
         <Text style={tw(`text-[6.5px] mt-1 leading-5 ml-2`)}>a) I have read, understood, and accepted all terms & conditions provided on <Link src="https://www.meradhan.co" style={tw(`text-[6.5px] underline text-[#1D4ED8]`)}>https://www.meradhan.co</Link></Text>
         <Text style={tw(`text-[6.5px] leading-5 ml-2 mt-1`)}>b) I have reviewed the details in the Order Receipt and wish to proceed with the payment.</Text>
+        <Text style={tw(`text-[6.5px] leading-5 ml-2 mt-1`)}>
+          c) I confirm that I have read and understood all the documents related to this security. I am aware that the credit rating of the selected security {securityLabel} is {creditRating}. I am investing in this bond after fully understanding the risks involved. This investment decision is my own and has not been influenced by any advice, suggestion, or recommendation from MeraDhan.
+        </Text>
       </View>
       <Text style={tw(`text-[6.5px] mt-6 text-center font-bold`)}>The End</Text>
     </View>

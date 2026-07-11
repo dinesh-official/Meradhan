@@ -1,11 +1,20 @@
 /**
  * Buyer investor coupon entitlement for Order Receipt / Deal PDFs.
  *
- * Contractual coupons are never deleted — we only decide whether the buyer
- * receives each upcoming coupon:
- *   buyerGetsCoupon = settlementDate <= recordDate
+ * Cash flows:
+ *   nextCoupon = first scheduled coupon strictly after settlement
+ *   if settlement <= recordDate → firstCashFlow = nextCoupon
+ *   else                        → firstCashFlow = couponAfter(nextCoupon)
  *
- * Last interest payment date is always settlement-relative (latest due ≤ settlement).
+ * Last coupon date (client / senior formula — mirrors cashflow_shut_flag):
+ *
+ *   last_coupon_date =
+ *     IF cashflow_shut_flag
+ *       THEN first_coupon_date_on_or_after_settlement   // upcoming / shut coupon
+ *       ELSE last_coupon_date_on_or_before_settlement   // previous paid coupon
+ *
+ * Example: settle 14-Jul, record 06-Jul, next 20-Jul, shut=true
+ *   → last_coupon_date = 20-Jul-2026
  */
 
 import { db } from "@core/database/database";
@@ -35,6 +44,9 @@ const DAYS = [
   "Friday",
   "Saturday",
 ] as const;
+
+/** Max buyer cash-flow dates shown on PDF (monthly = 12). */
+const MAX_BUYER_CASHFLOWS = 12;
 
 function pad2(n: number): string {
   return String(n).padStart(2, "0");
@@ -83,20 +95,30 @@ export type InvestorCouponInput = {
 export type ResolveInvestorCouponScheduleInput = {
   settlementYmd: string;
   coupons: InvestorCouponInput[];
-  /** Inclusive end of future coupon window (maturity capped at ~1y). */
+  /**
+   * @deprecated Prefer maturity + MAX_BUYER_CASHFLOWS. Kept for callers;
+   * still applied as a soft upper bound when set.
+   */
   endLimitYmd?: string | null;
   maturityYmd?: string | null;
+  /** Override max cash flows (default 12). */
+  maxCashFlows?: number;
 };
 
 export type InvestorCouponScheduleForPdf = {
   /** Buyer-entitled upcoming coupons as `d-MMM`. */
   interestPaymentDates: string[];
-  /** Latest contractual coupon with due ≤ settlement: `DD-MMM-YYYY (Weekday)`. */
+  /**
+   * Last IP for PDF: `DD-MMM-YYYY (Weekday)`.
+   * Shut → first coupon on/after settlement; else last on/before settlement.
+   */
   lastInterestPaymentDate: string | null;
   /** Same last coupon as `YYYY-MM-DD`. */
   lastInterestPaymentDateRaw: string | null;
   /** Whether buyer is entitled to the next contractual coupon after settlement. */
   buyerEntitledToNextCoupon: boolean;
+  /** Same meaning as DeriData / CRM `cashflow_shut_flag` for the upcoming coupon. */
+  cashflowShutFlag: boolean;
 };
 
 function resolveRecordDateYmd(coupon: InvestorCouponInput): string | null {
@@ -128,7 +150,30 @@ export function isBuyerEntitledToCoupon(
 }
 
 /**
+ * Mirrors `resolveCashflowShutFlag` / DeriData:
+ * RECORD_DATE ≤ SETTLEMENT_DATE < NEXT_COUPON_DATE
+ * (maturity coupon suppresses shut).
+ */
+export function isCashflowShutForUpcomingCoupon(
+  settlementYmd: string,
+  upcomingCoupon: InvestorCouponInput,
+  maturityYmd?: string | null,
+): boolean {
+  const settle = ymdOnly(settlementYmd);
+  const nextYmd = ymdOnly(upcomingCoupon.dueDateYmd);
+  const maturity = maturityYmd ? ymdOnly(maturityYmd) : null;
+  if (maturity && nextYmd === maturity) return false;
+
+  const recordYmd = resolveRecordDateYmd(upcomingCoupon);
+  if (!recordYmd) return false;
+
+  return settle >= recordYmd && settle < nextYmd;
+}
+
+/**
  * Pure resolver: contractual schedule + settlement → buyer PDF interest dates.
+ *
+ * Last IP follows the client formula tied to cashflow_shut_flag.
  */
 export function resolveInvestorCouponScheduleForPdf(
   input: ResolveInvestorCouponScheduleInput,
@@ -140,6 +185,7 @@ export function resolveInvestorCouponScheduleForPdf(
       lastInterestPaymentDate: null,
       lastInterestPaymentDateRaw: null,
       buyerEntitledToNextCoupon: false,
+      cashflowShutFlag: false,
     };
   }
 
@@ -148,6 +194,12 @@ export function resolveInvestorCouponScheduleForPdf(
   const endLimitDt = endLimitYmd ? utcMidnightFromYmd(endLimitYmd) : null;
   const maturityYmd = input.maturityYmd ? ymdOnly(input.maturityYmd) : null;
   const maturityDt = maturityYmd ? utcMidnightFromYmd(maturityYmd) : null;
+  const maxCashFlows =
+    input.maxCashFlows != null &&
+    Number.isFinite(input.maxCashFlows) &&
+    input.maxCashFlows > 0
+      ? Math.floor(input.maxCashFlows)
+      : MAX_BUYER_CASHFLOWS;
 
   const sorted = [...input.coupons]
     .map((c) => ({
@@ -157,30 +209,66 @@ export function resolveInvestorCouponScheduleForPdf(
     .filter((c) => /^\d{4}-\d{2}-\d{2}$/.test(c.dueDateYmd))
     .sort((a, b) => a.dueDateYmd.localeCompare(b.dueDateYmd));
 
-  let lastDue: Date | null = null;
+  // last_coupon_date_on_or_before_settlement
+  let lastOnOrBefore: Date | null = null;
   for (const c of sorted) {
     const due = utcMidnightFromYmd(c.dueDateYmd);
-    if (due.getTime() <= settlementDt.getTime()) lastDue = due;
+    if (due.getTime() <= settlementDt.getTime()) lastOnOrBefore = due;
     else break;
   }
 
-  const upcoming = sorted.filter((c) => {
-    const due = utcMidnightFromYmd(c.dueDateYmd);
-    if (due.getTime() < settlementDt.getTime()) return false;
-    if (endLimitDt && due.getTime() > endLimitDt.getTime()) return false;
-    return true;
-  });
+  // first_coupon_date_on_or_after_settlement (senior formula for shut last IP)
+  const onOrAfter = sorted.filter(
+    (c) => utcMidnightFromYmd(c.dueDateYmd).getTime() >= settlementDt.getTime(),
+  );
+  const firstOnOrAfter = onOrAfter[0] ?? null;
 
-  const nextCoupon = upcoming[0] ?? null;
-  const buyerEntitledToNextCoupon = nextCoupon
-    ? isBuyerEntitledToCoupon(settlementYmd, nextCoupon)
+  // Cash-flow next = first coupon strictly after settlement
+  const afterSettlement = sorted.filter(
+    (c) => utcMidnightFromYmd(c.dueDateYmd).getTime() > settlementDt.getTime(),
+  );
+  const nextCouponAfterSettlement = afterSettlement[0] ?? null;
+
+  // Shut flag is evaluated on the upcoming coupon (on/after settlement).
+  const cashflowShutFlag = firstOnOrAfter
+    ? isCashflowShutForUpcomingCoupon(
+        settlementYmd,
+        firstOnOrAfter,
+        maturityYmd,
+      )
     : false;
 
-  const entitledUpcoming = upcoming.filter((c) =>
-    isBuyerEntitledToCoupon(settlementYmd, c),
-  );
+  // Senior formula:
+  //   shut → first on/after settlement
+  //   else → last on/before settlement
+  const lastDue = cashflowShutFlag
+    ? firstOnOrAfter
+      ? utcMidnightFromYmd(firstOnOrAfter.dueDateYmd)
+      : lastOnOrBefore
+    : lastOnOrBefore;
 
-  const entitledDates = entitledUpcoming.map((c) =>
+  const buyerEntitledToNextCoupon = nextCouponAfterSettlement
+    ? isBuyerEntitledToCoupon(settlementYmd, nextCouponAfterSettlement)
+    : false;
+
+  // If in shut, skip the shut coupon for buyer cash flows.
+  const firstIndex = nextCouponAfterSettlement
+    ? buyerEntitledToNextCoupon
+      ? 0
+      : 1
+    : 0;
+
+  const cashFlowCoupons: InvestorCouponInput[] = [];
+  for (let i = firstIndex; i < afterSettlement.length; i++) {
+    const c = afterSettlement[i]!;
+    const due = utcMidnightFromYmd(c.dueDateYmd);
+    if (maturityDt && due.getTime() > maturityDt.getTime()) break;
+    if (endLimitDt && due.getTime() > endLimitDt.getTime()) break;
+    cashFlowCoupons.push(c);
+    if (cashFlowCoupons.length >= maxCashFlows) break;
+  }
+
+  const entitledDates = cashFlowCoupons.map((c) =>
     utcMidnightFromYmd(c.dueDateYmd),
   );
   const cleaned = dropMaturityDayIfMonthHasCoupon(entitledDates, maturityDt);
@@ -192,11 +280,21 @@ export function resolveInvestorCouponScheduleForPdf(
       : null,
     lastInterestPaymentDateRaw: lastDue ? toUtcYmd(lastDue) : null,
     buyerEntitledToNextCoupon,
+    cashflowShutFlag,
   };
 }
 
 function settlementYmdFromDate(settlement: Date): string | null {
   if (Number.isNaN(settlement.getTime())) return null;
+  // UTC-midnight dates (settlementDateFromYmd) → use UTC calendar day.
+  if (
+    settlement.getUTCHours() === 0 &&
+    settlement.getUTCMinutes() === 0 &&
+    settlement.getUTCSeconds() === 0 &&
+    settlement.getUTCMilliseconds() === 0
+  ) {
+    return toUtcYmd(settlement);
+  }
   // IST calendar day (same as getPayoutDates / getLastCouponDate).
   return settlement.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
 }
@@ -215,10 +313,9 @@ export async function loadInvestorCouponScheduleForPdf(
       lastInterestPaymentDate: null,
       lastInterestPaymentDateRaw: null,
       buyerEntitledToNextCoupon: false,
+      cashflowShutFlag: false,
     };
   }
-
-  const settlementDt = utcMidnightFromYmd(settlementYmd);
 
   const [meta, rows] = await Promise.all([
     db.dataBase.bondReferenceMetadata.findUnique({ where: { isin } }),
@@ -233,18 +330,6 @@ export async function loadInvestorCouponScheduleForPdf(
     !Number.isNaN(meta.maturityDateIst.getTime())
       ? meta.maturityDateIst
       : null;
-
-  const oneYearLater = new Date(
-    Date.UTC(
-      settlementDt.getUTCFullYear() + 1,
-      settlementDt.getUTCMonth(),
-      settlementDt.getUTCDate(),
-      12,
-    ),
-  );
-  const endLimit = maturityDate
-    ? new Date(Math.min(maturityDate.getTime(), oneYearLater.getTime()))
-    : oneYearLater;
 
   const coupons = rows
     .map((r) => {
@@ -273,7 +358,9 @@ export async function loadInvestorCouponScheduleForPdf(
   return resolveInvestorCouponScheduleForPdf({
     settlementYmd,
     coupons,
-    endLimitYmd: toUtcYmd(endLimit),
+    // No calendar-year endLimit — take up to 12 consecutive coupons from first
+    // buyer cash flow (capped by maturity) so monthly shut cases include the
+    // shifted 12th payment (e.g. Aug…Jul).
     maturityYmd: maturityDate ? toUtcYmd(maturityDate) : null,
   });
 }

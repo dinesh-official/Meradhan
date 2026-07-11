@@ -1205,8 +1205,17 @@ BSE Member ID: 6963`;
         });
         // accruedInterestDays = autofill.accruedInterestDays;
         if (autofill.settlementNumber) settlementNumber = autofill.settlementNumber;
-        const setData = await getLastCouponDate(order.isin, new Date())
-        if (setData) lastInterestPaymentDate = setData;
+        // Last IP must use settlement date (same as cash flows) — not `new Date()`.
+        if (autofill.lastInterestPaymentDate) {
+          lastInterestPaymentDate = autofill.lastInterestPaymentDate;
+        } else {
+          const settlementDt = new Date(`${settlementDateInput}T00:00:00.000Z`);
+          const setData = await getLastCouponDate(
+            order.isin,
+            Number.isNaN(settlementDt.getTime()) ? new Date() : settlementDt,
+          );
+          if (setData) lastInterestPaymentDate = setData;
+        }
         if (autofill.interestPaymentDates?.length) {
           interestPaymentDates = autofill.interestPaymentDates.join(", ");
         }

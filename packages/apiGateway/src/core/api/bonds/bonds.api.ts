@@ -169,6 +169,11 @@ export class BondsApi {
     },
     config?: AxiosRequestConfig,
   ) {
+    /** DeriData calculator round-trips can exceed the default 30s CRM timeout. */
+    const autofillConfig: AxiosRequestConfig = {
+      timeout: 120_000,
+      ...config,
+    };
     const safeIsin = encodeURIComponent(isin);
     const body = {
       quantity: params?.quantity ?? 1,
@@ -207,14 +212,14 @@ export class BondsApi {
     if (hasPostBody) {
       const response = await this.apiClient.post<
         BaseResponseData<BondDealAutofillResponse>
-      >(`/bonds/${safeIsin}/deal-autofill-calc`, body, config);
+      >(`/bonds/${safeIsin}/deal-autofill-calc`, body, autofillConfig);
       return response.data;
     }
 
     const response = await this.apiClient.get<BaseResponseData<BondDealAutofillResponse>>(
       `/bonds/${safeIsin}/deal-autofill-calc`,
       {
-        ...config,
+        ...autofillConfig,
         params: body,
       },
     );

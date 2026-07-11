@@ -19,6 +19,7 @@ import { AppError, HttpStatus } from "@utils/error/AppError";
 import crypto from "crypto";
 import { env } from "@packages/config/src/env";
 import { loadInvestorCouponScheduleForPdf } from "@services/order/investor-coupon-entitlement";
+import { settlementDateFromYmd } from "@services/order/order-pricing-helper";
 import { sendBackOfficeEmail } from "@communication/email_communication";
 import { buildOrderEmailHtmlBody } from "@communication/order_email_disclaimer";
 import {
@@ -1194,6 +1195,14 @@ export class CrmOrdersService {
         code: "BAD_REQUEST",
       });
     }
+    // Prefer YYYY-MM-DD → UTC midnight so last IP on a coupon due date includes that coupon.
+    const settlementYmdMatch = /^(\d{4}-\d{2}-\d{2})/.exec(
+      String(input.settlementDate ?? "").trim(),
+    );
+    const settlementYmd =
+      settlementYmdMatch?.[1] ??
+      settlementDt.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+    const settlementForCoupons = settlementDateFromYmd(settlementYmd);
 
     // Prefer checkout DeriData pricing snapshot on the order — never bonds-table calc columns.
     const orderSnap = orderPricingSnapshot(order.bondDetails);
@@ -1235,7 +1244,7 @@ export class CrmOrdersService {
 
     const investorCoupons = await loadInvestorCouponScheduleForPdf(
       bond.isin,
-      settlementDt,
+      settlementForCoupons,
     );
 
     return {

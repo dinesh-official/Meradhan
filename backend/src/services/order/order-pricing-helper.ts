@@ -1225,8 +1225,9 @@ export const getLastCouponDateFromReferenceData = async (isin: string, settlemen
     const settlementDt = new Date(settlement);
     if (Number.isNaN(settlementDt.getTime())) return null;
 
+    // Include coupon due on settlement day (lte) — that payment is the last IP.
     const rows = await db.dataBase.bondReferenceCouponPaymentDate.findMany({
-        where: { isin, dueDate: { lt: settlementDt } },
+        where: { isin, dueDate: { lte: settlementDt } },
         orderBy: { dueDate: "desc" },
     });
 
