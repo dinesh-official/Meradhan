@@ -338,6 +338,13 @@ function OrderDetailsView() {
   const pricingStampDutyValue = pricingNumber("stampDuty");
   const accrualDaysValue = pricingNumber("noOfAccrualDays");
   const settlementAmountValue = pricingNumber("settlementAmount");
+  // Offered / sell yield from checkout snapshot (`pricing.yield`), then bondDetails.yield.
+  const yieldValue =
+    pricingNumber("yield") ??
+    getBondDetailNumber(
+      (order.bondDetails as Record<string, unknown>) ?? {},
+      "yield",
+    );
 
   const hasPricingSnapshot =
     orderPricing != null &&
@@ -347,6 +354,7 @@ function OrderDetailsView() {
       accruedInterestValue,
       totalConsiderationValue,
       settlementAmountValue,
+      yieldValue,
     ].some((v) => v != null);
 
   const stampDutyDisplay =
@@ -779,8 +787,14 @@ function OrderDetailsView() {
                   <div>
                     <p className="text-sm text-muted-foreground">Name</p>
                     <p className="font-medium">
-                      {order.customerProfile.firstName}{" "}
-                      {order.customerProfile.lastName}
+                      {[
+                        order.customerProfile.firstName,
+                        order.customerProfile.middleName,
+                        order.customerProfile.lastName,
+                      ]
+                        .map((p) => (typeof p === "string" ? p.trim() : ""))
+                        .filter(Boolean)
+                        .join(" ")}
                     </p>
                   </div>
                   <div>
@@ -1742,6 +1756,18 @@ function OrderDetailsView() {
             <CardContent className="space-y-4">
               {hasPricingSnapshot ? (
                 <>
+                  {yieldValue != null && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Yield</span>
+                      <span className="font-medium tabular-nums">
+                        {yieldValue.toLocaleString("en-IN", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 4,
+                        })}
+                        %
+                      </span>
+                    </div>
+                  )}
                   {cleanPriceValue != null && (
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Clean Price</span>
@@ -1813,6 +1839,18 @@ function OrderDetailsView() {
                 </>
               ) : (
                 <>
+                  {yieldValue != null && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Yield</span>
+                      <span className="font-medium tabular-nums">
+                        {yieldValue.toLocaleString("en-IN", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 4,
+                        })}
+                        %
+                      </span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Subtotal</span>
                     <span className="font-medium">

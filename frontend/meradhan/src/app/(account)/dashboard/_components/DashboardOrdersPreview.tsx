@@ -24,6 +24,7 @@ export function DashboardOrdersPreview({ orders }: { orders: Order[] }) {
           order.status,
           order.paymentStatus,
           order.settleStatus,
+          order.paymentProvider,
         );
         const tradeDate = formatOrderHistoryDate(order.createdAt);
         const settlementDate = formatOrderHistoryDate(

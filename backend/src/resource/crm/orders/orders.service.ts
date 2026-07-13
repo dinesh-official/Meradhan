@@ -655,6 +655,7 @@ export class CrmOrdersService {
           select: {
             id: true,
             firstName: true,
+            middleName: true,
             lastName: true,
             emailAddress: true,
             phoneNo: true,
@@ -724,6 +725,7 @@ export class CrmOrdersService {
           select: {
             id: true,
             firstName: true,
+            middleName: true,
             lastName: true,
             emailAddress: true,
             phoneNo: true,

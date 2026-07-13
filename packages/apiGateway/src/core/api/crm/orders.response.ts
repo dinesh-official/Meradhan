@@ -169,6 +169,7 @@ export interface CrmOrderDetails {
   customerProfile: {
     id: number;
     firstName: string;
+    middleName?: string | null;
     lastName: string;
     emailAddress: string;
     phoneNo: string | null;
