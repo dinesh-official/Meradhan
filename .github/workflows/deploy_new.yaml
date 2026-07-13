@@ -453,90 +453,98 @@ jobs:
         id: create_ec2
         shell: bash
         env:
-          AMI_ID: ${{ secrets.PREVIEW_AMI_ID }}
-          SUBNET_ID: ${{ secrets.AWS_SUBNET_ID }}
-          SECURITY_GROUP_ID: ${{ secrets.AWS_SECURITY_GROUP_ID }}
-          KEY_NAME: preview
+            AMI_ID: ${{ secrets.AMI_ID }}
+            SUBNET_ID: ${{ secrets.SUBNET_ID }}
+            SECURITY_GROUP_ID: ${{ secrets.SECURITY_GROUP_ID }}
+            KEY_NAME: ${{ secrets.KEY_NAME }}
+            INSTANCE_PROFILE: ${{ secrets.INSTANCE_PROFILE }}
+            INSTANCE_TYPE: ${{ vars.INSTANCE_TYPE }}
+            ROOT_VOLUME_SIZE: ${{ vars.ROOT_VOLUME_SIZE }}
+            ROOT_VOLUME_TYPE: ${{ vars.ROOT_VOLUME_TYPE }}
+
         run: |
+            set -e
 
-          set -e
+            BRANCH_NAME="${{ github.ref_name }}"
+            BRANCH_NAME=$(echo "$BRANCH_NAME" | tr '/' '-' | tr '_' '-')
 
-          BRANCH_NAME="${{ github.ref_name }}"
-          BRANCH_NAME=$(echo "$BRANCH_NAME" | tr '/' '-' | tr '_' '-')
+            DEPLOY_TAG="${ENV_CODE}${BRANCH_CODE}"
 
-          DEPLOY_TAG="${ENV_CODE}${BRANCH_CODE}"
+            echo "======================================"
+            echo "Environment      : ${{ inputs.environment }}"
+            echo "Deployment Tag   : $DEPLOY_TAG"
+            echo "Branch           : $BRANCH_NAME"
+            echo "AMI              : $AMI_ID"
+            echo "Subnet           : $SUBNET_ID"
+            echo "Security Group   : $SECURITY_GROUP_ID"
+            echo "Instance Type    : $INSTANCE_TYPE"
+            echo "Volume Size      : ${ROOT_VOLUME_SIZE} GB"
+            echo "======================================"
 
-          echo "======================================"
-          echo "Deployment Tag : $DEPLOY_TAG"
-          echo "Branch         : $BRANCH_NAME"
-          echo "======================================"
-
-          INSTANCE_ID=$(aws ec2 describe-instances \
+            INSTANCE_ID=$(aws ec2 describe-instances \
             --filters \
-              "Name=tag:branch_deploy,Values=${DEPLOY_TAG}" \
-              "Name=instance-state-name,Values=pending,running,stopping,stopped" \
+                "Name=tag:branch_deploy,Values=${DEPLOY_TAG}" \
+                "Name=instance-state-name,Values=pending,running,stopping,stopped" \
             --query "Reservations[0].Instances[0].InstanceId" \
             --output text)
 
-          if [ "$INSTANCE_ID" != "None" ] && [ -n "$INSTANCE_ID" ]; then
+            if [ "$INSTANCE_ID" != "None" ] && [ -n "$INSTANCE_ID" ]; then
 
-            echo "EXISTING INSTANCE FOUND"
+            echo "Existing instance found"
             echo "Instance ID : $INSTANCE_ID"
 
-          else
+            else
 
-            echo "No existing instance found."
-            echo "Creating new EC2..."
+            echo "Creating new EC2 instance..."
 
             INSTANCE_ID=$(aws ec2 run-instances \
-              --image-id "$AMI_ID" \
-              --instance-type t3.medium \
-              --subnet-id "$SUBNET_ID" \
-              --security-group-ids "$SECURITY_GROUP_ID" \
-              --key-name "$KEY_NAME" \
-              --iam-instance-profile Name=EC2-SSM-Role \
-              --block-device-mappings '[
+                --image-id "$AMI_ID" \
+                --instance-type "$INSTANCE_TYPE" \
+                --subnet-id "$SUBNET_ID" \
+                --security-group-ids "$SECURITY_GROUP_ID" \
+                --key-name "$KEY_NAME" \
+                --iam-instance-profile Name="$INSTANCE_PROFILE" \
+                --block-device-mappings "[
                 {
-                  "DeviceName": "/dev/sda1",
-                  "Ebs": {
-                    "VolumeSize": 50,
-                    "VolumeType": "gp3",
-                    "DeleteOnTermination": true
-                  }
+                    \"DeviceName\":\"/dev/sda1\",
+                    \"Ebs\":{
+                    \"VolumeSize\":${ROOT_VOLUME_SIZE},
+                    \"VolumeType\":\"${ROOT_VOLUME_TYPE}\",
+                    \"DeleteOnTermination\":true
+                    }
                 }
-              ]' \
-              --tag-specifications "ResourceType=instance,Tags=[
+                ]" \
+                --tag-specifications "ResourceType=instance,Tags=[
                 {Key=Name,Value=${DEPLOY_TAG}-${BRANCH_NAME}},
                 {Key=branch_deploy,Value=${DEPLOY_TAG}},
                 {Key=Branch,Value=${BRANCH_NAME}},
                 {Key=Environment,Value=${{ inputs.environment }}},
                 {Key=ssm-dev,Value=allow}
-              ]" \
-              --query "Instances[0].InstanceId" \
-              --output text)
+                ]" \
+                --query "Instances[0].InstanceId" \
+                --output text)
 
-            echo "NEW INSTANCE CREATED"
+            echo "New instance created"
             echo "Instance ID : $INSTANCE_ID"
 
-          fi
+            fi
 
-          if [ -z "$INSTANCE_ID" ] || [ "$INSTANCE_ID" = "None" ]; then
+            if [ -z "$INSTANCE_ID" ] || [ "$INSTANCE_ID" = "None" ]; then
             echo "Failed to obtain Instance ID."
             exit 1
-          fi
+            fi
 
-          echo "INSTANCE_ID=$INSTANCE_ID" >> $GITHUB_ENV
-          echo "instance_id=$INSTANCE_ID" >> $GITHUB_OUTPUT
+            echo "INSTANCE_ID=$INSTANCE_ID" >> "$GITHUB_ENV"
+            echo "instance_id=$INSTANCE_ID" >> "$GITHUB_OUTPUT"
 
-          echo ""
-          echo "======================================"
-          echo "Deployment Summary"
-          echo "======================================"
-          echo "Deployment Tag : $DEPLOY_TAG"
-          echo "Name Tag       : ${DEPLOY_TAG}-${BRANCH_NAME}"
-          echo "Instance ID    : $INSTANCE_ID"
-          echo "======================================"
-
+            echo ""
+            echo "======================================"
+            echo "Deployment Summary"
+            echo "======================================"
+            echo "Environment    : ${{ inputs.environment }}"
+            echo "Deployment Tag : $DEPLOY_TAG"
+            echo "Instance ID    : $INSTANCE_ID"
+            echo "======================================"
 
 
       - name: Run commands
