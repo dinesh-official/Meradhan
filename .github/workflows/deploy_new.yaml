@@ -620,6 +620,24 @@ jobs:
 
             COMMANDS+="ls -ld filebeat.yml"$'\n'
             COMMANDS+="file filebeat.yml"$'\n'
+            COMMANDS+="cat > filebeat-config.yml <<'EOF'
+              filebeat.inputs:
+                - type: filestream
+                  enabled: true
+                  paths:
+                    - /var/lib/docker/containers/*/*.log
+
+              processors:
+                - add_docker_metadata:
+                    host: unix:///var/run/docker.sock
+
+              output.elasticsearch:
+                hosts: [\"http://elasticsearch:9200\"]
+
+              setup.kibana:
+                host: \"http://kibana:5601\"
+              EOF"$'\n'
+
             COMMANDS+="chmod 644 filebeat.yml"$'\n'
 
             COMMANDS+="docker compose -f filebeat.yaml up -d"$'\n'
