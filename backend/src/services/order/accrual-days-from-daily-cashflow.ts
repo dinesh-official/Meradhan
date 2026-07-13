@@ -7,8 +7,48 @@ import {
   resolveShutPeriod,
   type ShutPeriodResult,
 } from "@services/order/shut-period-accrual";
+import { cacheStorage } from "@store/redis_store";
 
 export const DERIDATA_CASHFLOW_DATE_FORMAT = "DD-MMM-YYYY" as const;
+
+/** Phase-1 cashflow probe only (record_date + cashflows). Phase-2 pricing stays live. */
+export const DERIDATA_PHASE1_CASHFLOW_CACHE_TTL_SEC = 30 * 60;
+
+function phase1CashflowCacheKey(
+  isin: string,
+  settlementDate: string,
+  underShut: boolean,
+): string {
+  return `deridata:phase1-cashflow:${isin}:${settlementDate}:shut:${underShut ? 1 : 0}`;
+}
+
+async function getCachedPhase1Response(
+  key: string,
+): Promise<DeriDataCalculatorResponse | null> {
+  try {
+    return await cacheStorage.get<DeriDataCalculatorResponse>(key);
+  } catch (err) {
+    console.warn(
+      `[deriData cashflow cache] get failed for ${key}:`,
+      err instanceof Error ? err.message : err,
+    );
+    return null;
+  }
+}
+
+async function setCachedPhase1Response(
+  key: string,
+  response: DeriDataCalculatorResponse,
+): Promise<void> {
+  try {
+    await cacheStorage.set(key, response, DERIDATA_PHASE1_CASHFLOW_CACHE_TTL_SEC);
+  } catch (err) {
+    console.warn(
+      `[deriData cashflow cache] set failed for ${key}:`,
+      err instanceof Error ? err.message : err,
+    );
+  }
+}
 
 export type AccrualDaysFromDailyCashflowInput = {
   isin: string;
@@ -50,6 +90,8 @@ export type AccrualDaysFromDailyCashflowResult = ShutPeriodResult & {
   deriDataCashflowShutFlag: boolean | null;
   /** Raw calculator response when fetched by `resolveAccrualDaysFromDailyCashflow`. */
   deriDataResponse?: DeriDataCalculatorResponse;
+  /** True when Phase-1 DeriData response was served from Redis. */
+  fromCache?: boolean;
 };
 
 function settlementDateFromYmd(ymd: string): Date {
@@ -206,6 +248,9 @@ export function toAutofillShutFields(
  * Fetches DeriData daily cashflows for an ISIN, extracts record / coupon dates,
  * then computes accrual days and whether settlement is under shut period.
  *
+ * Phase-1 DeriData response is cached in Redis (isin + settlement + shut probe).
+ * Callers that need live pricing must still run a separate Phase-2 calculator call.
+ *
  * Uses the same shut/accrual rules as `resolveShutPeriod`.
  */
 export async function resolveAccrualDaysFromDailyCashflow(
@@ -219,15 +264,23 @@ export async function resolveAccrualDaysFromDailyCashflow(
   const quantity =
     input.quantity != null && input.quantity > 0 ? input.quantity : 1;
   const faceValue = await resolveFaceValue(isin, input.faceValue);
+  const cacheKey = phase1CashflowCacheKey(isin, settlementDate, underShut);
 
-  const deriDataResponse = await calculateYieldToPrice({
-    isin,
-    valueDate: settlementDate,
-    faceValue,
-    quantity,
-    ytm,
-    cashflowShutFlag: underShut,
-  });
+  let deriDataResponse = await getCachedPhase1Response(cacheKey);
+  let fromCache = deriDataResponse != null;
+
+  if (!deriDataResponse) {
+    deriDataResponse = await calculateYieldToPrice({
+      isin,
+      valueDate: settlementDate,
+      faceValue,
+      quantity,
+      ytm,
+      cashflowShutFlag: underShut,
+    });
+    fromCache = false;
+    await setCachedPhase1Response(cacheKey, deriDataResponse);
+  }
 
   const resolved = await resolveAccrualDaysFromDeriDataResponse({
     isin,
@@ -240,5 +293,6 @@ export async function resolveAccrualDaysFromDailyCashflow(
   return {
     ...resolved,
     deriDataResponse,
+    fromCache,
   };
 }

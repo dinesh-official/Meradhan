@@ -43,7 +43,7 @@ export class CrmBondAutoUpdateApi {
     const response = await this.apiClient.post<BondDealAutofillApiResponse>(
       `/crm/bonds/${safeIsin}/auto-update-autofill`,
       body,
-      { timeout: BOND_AUTOFILL_TIMEOUT_MS, ...config },
+      { ...config, timeout: BOND_AUTOFILL_TIMEOUT_MS },
     );
     return response.data;
   }
@@ -59,7 +59,7 @@ export class CrmBondAutoUpdateApi {
     const response = await this.apiClient.post<BondDealAutofillApiResponse>(
       `/crm/bonds/${safeIsin}/deridata-autofill`,
       {},
-      { timeout: BOND_AUTOFILL_TIMEOUT_MS, ...config },
+      { ...config, timeout: BOND_AUTOFILL_TIMEOUT_MS },
     );
     return response.data;
   }

@@ -5,31 +5,12 @@ import {
   getDeriDataCalculatorUrl,
   getDeriDataConfig,
 } from "./deridata.config";
+import { parseDeriDataErrorBody } from "./deridata.error";
 import type {
   DeriDataCalculatorResponse,
   PriceToYieldInput,
   YieldToPriceInput,
 } from "./deridata.types";
-
-function parseDeriDataErrorBody(text: string): string {
-  const trimmed = text.trim();
-  if (!trimmed) return "DeriData calculator request failed";
-  try {
-    const parsed = JSON.parse(trimmed) as {
-      error?: string;
-      message?: string;
-      detail?: string;
-    };
-    return (
-      (typeof parsed.message === "string" && parsed.message.trim()) ||
-      (typeof parsed.error === "string" && parsed.error.trim()) ||
-      (typeof parsed.detail === "string" && parsed.detail.trim()) ||
-      trimmed
-    );
-  } catch {
-    return trimmed;
-  }
-}
 
 async function postCalculator(
   body: Record<string, unknown>,
@@ -64,7 +45,10 @@ async function postCalculator(
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    const message = parseDeriDataErrorBody(text);
+    const message = parseDeriDataErrorBody(
+      text,
+      "DeriData calculator request failed",
+    );
 
     const statusCode =
       res.status === 401 || res.status === 403
