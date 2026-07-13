@@ -618,13 +618,8 @@ jobs:
             COMMANDS+="pwd"$'\n'
             COMMANDS+="ls -la"$'\n'
 
-            COMMANDS+="ls -ld filebeat.yml"$'\n'
-            COMMANDS+="file filebeat.yml"$'\n'
-            
-            COMMANDS+="chmod 644 filebeat.yml"$'\n'
-
             COMMANDS+="docker compose -f filebeat.yaml up -d"$'\n'
-            COMMANDS+="docker compose ps"$'\n'
+            COMMANDS+="docker compose -f filebeat.yaml ps"$'\n'
 
             COMMANDS+="docker compose -f pgsql.yaml up -d"$'\n'
             COMMANDS+="docker compose -f pgsql.yaml ps"$'\n'
