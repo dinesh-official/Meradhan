@@ -15,6 +15,9 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "40mb",
     },
+    // Default rewrite proxyTimeout is 30s — DeriData autofill (2 calculator calls) often exceeds that.
+    // Matches CRM axios / CrmBondAutoUpdateApi 120s timeouts.
+    proxyTimeout: 120_000,
   },
   // Skip lint and type-check during `next build` so build succeeds even with lint/type issues
   eslint: { ignoreDuringBuilds: true },
