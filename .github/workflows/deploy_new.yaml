@@ -618,11 +618,12 @@ jobs:
             COMMANDS+="pwd"$'\n'
             COMMANDS+="ls -la"$'\n'
 
-            COMMANDS+="docker compose up -d"$'\n'
+            COMMANDS+="docker compose -f filebeat.yaml up -d"$'\n'
             COMMANDS+="docker compose ps"$'\n'
 
             COMMANDS+="docker compose -f pgsql.yaml up -d"$'\n'
             COMMANDS+="docker compose -f pgsql.yaml ps"$'\n'
+            COMMANDS+="sleep 20"$'\n'
 
             COMMANDS+="docker compose -f redis.yaml up -d"$'\n'
             COMMANDS+="docker compose -f redis.yaml ps"$'\n'
