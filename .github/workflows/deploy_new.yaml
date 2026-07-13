@@ -457,7 +457,7 @@ jobs:
             SUBNET_ID: ${{ vars.SUBNET_ID }}
             SECURITY_GROUP_ID: ${{ vars.SECURITY_GROUP_ID }}
             KEY_NAME: ${{ vars.KEY_NAME }}
-            INSTANCE_PROFILE: ${{ secrets.INSTANCE_PROFILE }}
+            INSTANCE_PROFILE: ${{ vars.INSTANCE_PROFILE }}
             INSTANCE_TYPE: ${{ vars.INSTANCE_TYPE }}
             ROOT_VOLUME_SIZE: ${{ vars.ROOT_VOLUME_SIZE }}
             ROOT_VOLUME_TYPE: ${{ vars.ROOT_VOLUME_TYPE }}
