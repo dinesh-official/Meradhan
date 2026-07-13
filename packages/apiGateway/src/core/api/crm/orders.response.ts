@@ -130,6 +130,31 @@ export interface OrderSettlementAutomationLog {
   updatedAt: string;
 }
 
+export type CrmOrderSettlementStage =
+  | "started"
+  | "payment_done"
+  | "add_isin"
+  | "quote_accept"
+  | "deal_propose"
+  | "deal_accept"
+  | "pg_routing";
+
+export interface CrmOrderStage {
+  id: number;
+  orderId: number;
+  orderNo: string;
+  stage: CrmOrderSettlementStage;
+  /** 0=not started, 1=success, 2=fail, 3=waiting */
+  status: number;
+  payload: Record<string, unknown> | null;
+  response: Record<string, unknown> | null;
+  seq: number;
+  attemptCount: number;
+  lastError: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface PaymentProcessLogGroup {
   paymentId: string;
   totalLogs: number;
@@ -184,6 +209,8 @@ export interface CrmOrderDetails {
   } | null;
   orderLogs: OrderLog[];
   settlementAutomationLogs: OrderSettlementAutomationLog[];
+  settlementStage: CrmOrderSettlementStage | null;
+  orderStages: CrmOrderStage[];
   customerBonds: {
     id: number;
     customerProfileId: number;
@@ -202,6 +229,16 @@ export interface CrmOrderDetails {
 
 export interface GetCrmOrderDetailsResponse {
   responseData: CrmOrderDetails;
+}
+
+export interface ResumeOrderSettlementResponse {
+  message?: string;
+  responseData: {
+    orderId: number;
+    orderNumber: string;
+    queued: boolean;
+    jobId: string;
+  };
 }
 
 export interface GetPaymentProcessLogsResponse {

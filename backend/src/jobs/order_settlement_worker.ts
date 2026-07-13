@@ -3,9 +3,14 @@ import { startQueueWorker } from "./helper/start_queue_worker_helper";
 import { orderSettlementQueue } from "./queue/worker_queues";
 import { OrderSettlementService } from "@services/order/order_settlement.service";
 import logger from "@utils/logger/logger";
+
 startQueueWorker(orderSettlementQueue, async (job: Job) => {
   const settlementService = new OrderSettlementService();
-  await settlementService.initiateOrderSettlement(job.data.id, job.data.isNetBanking);
+  // Resume-safe stage runner. Keep initiateOrderSettlement available for one-line rollback.
+  await settlementService.reconcileOrderSettlementByStages(
+    job.data.id,
+    job.data.isNetBanking,
+  );
 }, 1, {
   onCompleted(job) {
     logger.logInfo(`Order settlement job ${job.id} completed`);

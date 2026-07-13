@@ -261,6 +261,13 @@ function OrderDetailsView() {
     },
   });
 
+  const resumeSettlementMutation = useMutation({
+    mutationFn: () => apiCaller.resumeOrderSettlement(orderId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["crm-order", orderId] });
+    },
+  });
+
   const order = data?.responseData;
 
   const openPdfDialog = (type: "order" | "deal") => {
@@ -1447,6 +1454,156 @@ function OrderDetailsView() {
                     {JSON.stringify(order.paymentMetadata, null, 2)}
                   </pre>
                 </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Settlement Pipeline (Automation Stages) */}
+          <Card>
+            <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="space-y-1">
+                <CardTitle>Settlement Pipeline</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Resume-safe automation stages. Failed steps can be retried from the last break.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                {order.settlementStage ? (
+                  <Badge variant="outline">
+                    Last success: {String(order.settlementStage).replace(/_/g, " ")}
+                  </Badge>
+                ) : (
+                  <Badge variant="outline">No stage cursor</Badge>
+                )}
+                {Array.isArray(order.orderStages) &&
+                  order.orderStages.some((s) => s.status === 2 || s.status === 0) && (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      disabled={resumeSettlementMutation.isPending}
+                      onClick={() => resumeSettlementMutation.mutate()}
+                    >
+                      {resumeSettlementMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      ) : (
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                      )}
+                      Resume settlement
+                    </Button>
+                  )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              {resumeSettlementMutation.isSuccess ? (
+                <p className="mb-3 text-sm text-green-700">
+                  {resumeSettlementMutation.data?.message ??
+                    "Settlement resume requested."}
+                </p>
+              ) : null}
+              {resumeSettlementMutation.isError ? (
+                <p className="mb-3 text-sm text-red-600">
+                  {(resumeSettlementMutation.error as { message?: string })?.message ||
+                    "Failed to resume settlement"}
+                </p>
+              ) : null}
+              {order.orderStages && order.orderStages.length > 0 ? (
+                <div className="space-y-3">
+                  {[...order.orderStages]
+                    .sort((a, b) => a.seq - b.seq)
+                    .map((stage) => {
+                      const statusLabel =
+                        stage.status === 1
+                          ? "SUCCESS"
+                          : stage.status === 2
+                            ? "FAILED"
+                            : stage.status === 3
+                              ? "WAITING"
+                              : "NOT STARTED";
+                      const statusVariant =
+                        stage.status === 1
+                          ? "secondary"
+                          : stage.status === 2
+                            ? "destructive"
+                            : "outline";
+                      return (
+                        <div
+                          key={stage.id}
+                          className={`rounded-md border p-3 ${
+                            stage.status === 2
+                              ? "border-red-300 bg-red-50/50"
+                              : "border-border/70 bg-muted/30"
+                          }`}
+                        >
+                          <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                            <div className="space-y-1">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="font-medium">
+                                  {stage.seq}. {stage.stage.replace(/_/g, " ")}
+                                </span>
+                                <Badge variant={statusVariant}>{statusLabel}</Badge>
+                                <Badge variant="outline">
+                                  Attempts {stage.attemptCount}/5
+                                </Badge>
+                              </div>
+                              {stage.lastError ? (
+                                <p className="text-sm text-red-600">{stage.lastError}</p>
+                              ) : null}
+                              <p className="text-xs text-muted-foreground">
+                                Updated{" "}
+                                {dateTimeUtils.formatDateTime(
+                                  stage.updatedAt,
+                                  "DD MMM YYYY hh:mm:ss AA"
+                                )}
+                              </p>
+                            </div>
+                            <div>
+                              {stage.status === 1 ? (
+                                <CheckCircle2 className="h-5 w-5 text-green-600" />
+                              ) : stage.status === 2 ? (
+                                <XCircle className="h-5 w-5 text-red-600" />
+                              ) : (
+                                <Clock className="h-5 w-5 text-yellow-600" />
+                              )}
+                            </div>
+                          </div>
+                          {(stage.payload || stage.response) && (
+                            <Collapsible className="mt-3">
+                              <CollapsibleTrigger className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group">
+                                <span>View payload / response</span>
+                                <ChevronDown className="h-3 w-3 transition-transform group-data-[state=open]:rotate-180" />
+                              </CollapsibleTrigger>
+                              <CollapsibleContent className="mt-2 space-y-2">
+                                {stage.payload ? (
+                                  <div className="rounded-md bg-muted/50 p-3">
+                                    <p className="mb-1 text-xs font-medium text-muted-foreground">
+                                      Payload
+                                    </p>
+                                    <pre className="text-xs overflow-auto whitespace-pre-wrap">
+                                      {JSON.stringify(stage.payload, null, 2)}
+                                    </pre>
+                                  </div>
+                                ) : null}
+                                {stage.response ? (
+                                  <div className="rounded-md bg-muted/50 p-3">
+                                    <p className="mb-1 text-xs font-medium text-muted-foreground">
+                                      Response
+                                    </p>
+                                    <pre className="text-xs overflow-auto whitespace-pre-wrap">
+                                      {JSON.stringify(stage.response, null, 2)}
+                                    </pre>
+                                  </div>
+                                ) : null}
+                              </CollapsibleContent>
+                            </Collapsible>
+                          )}
+                        </div>
+                      );
+                    })}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Stages not seeded yet (pre-pipeline order or payment not completed).
+                </p>
               )}
             </CardContent>
           </Card>

@@ -1,11 +1,25 @@
 # Order Stage Reconciliation — Complete Guide
 
-**Status:** Design / implementation guide  
+**Status:** Implemented (guided rollout)  
 **Date:** 2026-07-13  
-**Scope:** Post-payment NSE RFQ settlement pipeline with durable stage tracking and 30‑minute resume cron  
+**Scope:** Post-payment NSE RFQ settlement pipeline with durable stage tracking, 30‑minute resume cron, and CRM admin visibility  
 **Constraint:** Do **not** rewrite existing NSE / Razorpay step implementations — reuse them from a new orchestrator
 
 ---
+
+## Locked decisions (resolved)
+
+| Decision | Choice |
+|---|---|
+| Primary path | Redis worker (immediate) |
+| Backstop | Cron every 30 minutes (`order_stage_reconciliation.cron.ts`) |
+| `orders.settlementStage` | Last **successful** stage |
+| `pg_routing` | Netbanking only; non-netbanking seeded as skipped success |
+| Email / receipt | Post-pipeline via existing `trySendOrderReceiptPdfEmail` |
+| Max attempts per stage | 5 |
+| Orchestrator | `OrderSettlementService.reconcileOrderSettlementByStages` (same class → private steps unchanged) |
+| Worker | Calls new runner; `initiateOrderSettlement` kept for rollback |
+| CRM | Settlement Pipeline card + Resume button on order details |
 
 ## Table of contents
 
@@ -20,8 +34,9 @@
 9. [Idempotency & concurrency](#9-idempotency--concurrency)
 10. [Implementation phases](#10-implementation-phases)
 11. [Acceptance criteria](#11-acceptance-criteria)
-12. [Open decisions](#12-open-decisions)
-13. [Quick reference map](#13-quick-reference-map)
+12. [Risks & guards](#12-risks--guards)
+13. [CRM admin visibility](#13-crm-admin-visibility)
+14. [Quick reference map](#14-quick-reference-map)
 
 ---
 
@@ -520,34 +535,48 @@ While rolling out, keep writing:
 
 ## 11. Acceptance criteria
 
-- [ ] After payment done, 5 `order_stages` rows exist (seq 1–5, status `0`) and `orders.settlementStage = payment_done`
-- [ ] Happy path advances each row to status `1` and advances `orders.settlementStage`
-- [ ] On API failure: row status `2`, payload/response stored, later stages remain untouched
-- [ ] Cron after 30+ minutes resumes from the first non-success stage
-- [ ] Successful earlier stages are **not** re-called on NSE (no duplicate RFQ)
-- [ ] Existing step method signatures/bodies unchanged
-- [ ] Redis still runs the primary path; cron is backstop only
-- [ ] Concurrent Redis + cron do not double-process the same order
+- [x] Schema: `OrderSettlementStage`, `orders.settlementStage`, `order_stages` + migration
+- [x] Constants + `seedOrderStages` + enqueue wiring
+- [x] `reconcileOrderSettlementByStages` with lock, resume, idempotency
+- [x] Worker switched to new runner (`initiateOrderSettlement` retained)
+- [x] Payment recon uses seed + same `jobId`
+- [x] 30-min cron registered
+- [x] CRM Settlement Pipeline + Resume endpoint/UI
+- [ ] UAT: happy path, fail mid-way, resume without duplicate RFQ, transferId guard
 
 ---
 
-## 12. Open decisions
+## 12. Risks & guards
 
-Confirm before / during implementation:
-
-1. **Redis primary + cron backup?** (Recommended: yes)
-2. **`orders.settlementStage` = last success vs in-progress?** (Recommended: last success)
-3. **Always seed `pg_routing`, or only for netbanking?**
-4. **Email / order receipt** — part of `pg_routing`, post–`deal_accept`, or separate stage?
-5. **Max retries per stage** before permanent fail + alert?
-6. **Dual-write duration** vs cutover from `order_logs` for “missing steps”?
-7. **CRM assign-order** — same seeding rules as customer payment path?
-8. **Locking** — Redis lock key vs DB `WAITING` + grace window?
-9. **`started` stage** — set on order create, or only when settlement begins?
+| Risk | Guard implemented |
+|---|---|
+| Duplicate RFQ on retry | Skip Add ISIN if `rfqNumber` already in stage response / order logs |
+| Duplicate Razorpay transfer | Skip `pg_routing` if `orders.transferId` set |
+| Redis + cron double-run | Redis lock `order-stage-lock:{orderId}` + skip recent WAITING stages in cron |
+| Payment recon full restart | Worker uses resume-safe runner; recon seeds + uses same job id |
+| Infinite fail loop | `ORDER_STAGE_MAX_ATTEMPTS = 5` then alert and stop |
+| Blind `initiateOrderSettlement` restart | Not called by new path; kept only for manual rollback |
 
 ---
 
-## 13. Quick reference map
+## 13. CRM admin visibility
+
+**Order details** (`OrderDetailsView`):
+
+- New **Settlement Pipeline** card lists all `orderStages` by `seq`
+- Status chips: not started / success / failed / waiting
+- Failed steps show `lastError`; collapsible payload/response
+- **Resume settlement** → `POST /api/crm/orders/:id/resume-settlement` (same Redis job)
+- Existing Order Activity Timeline + Payment Process Logs remain
+
+**API:**
+
+- `getOrderById` includes `settlementStage` + `orderStages`
+- Types in `packages/apiGateway/.../orders.response.ts`
+
+---
+
+## 14. Quick reference map
 
 ### Sequence diagram
 
@@ -563,43 +592,33 @@ Confirm before / during implementation:
         │                              │
         └──────────┬───────────────────┘
                    ▼
-        processOrderStages (locked)
+        reconcileOrderSettlementByStages (locked)
                    │
      ┌─────────────┼─────────────┬──────────────┬──────────────┐
      ▼             ▼             ▼              ▼              ▼
   add_isin   quote_accept  deal_propose   deal_accept    pg_routing
   (existing)  (existing)    (existing)     (existing)     (existing)
-     │             │             │              │              │
-     └─────────────┴─────────────┴──────────────┴──────────────┘
                    │
                    ▼
         update order_stages + orders.settlementStage
                    │
                    ▼
-              email / receipt / settlement complete
+              CRM Settlement Pipeline + Resume
 ```
 
-### File ownership summary
+### Implemented files
 
-| Kind | Volume |
+| Kind | Path |
 |---|---|
-| **New** | Schema + migration + constants + stage reconciliation service + 30‑min cron |
-| **Touch lightly** | Payment webhook, payment recon, CRM/assign enqueue, settlement worker entry |
-| **Do not change** | NSE RFQ client, individual settlement step implementations, Razorpay route core |
+| Schema / migration | `backend/databases/postgres/prisma/schema/orders.prisma`, `migrations/20260713153000_order_settlement_stages/` |
+| Constants | `packages/config/src/constants.ts` |
+| Orchestrator | `backend/src/services/order/order_settlement.service.ts` (`seedOrderStages`, `reconcileOrderSettlementByStages`) |
+| Worker | `backend/src/jobs/order_settlement_worker.ts` |
+| Cron | `backend/src/jobs/cron/order_stage_reconciliation.cron.ts` |
+| CRM API/UI | `orders.service/controller/routes`, `orders.api.ts`, `OrderDetailsView.tsx` |
+
+**Untouched on purpose:** NSE RFQ client method bodies for step APIs, Razorpay route core, abandoned-order cron, `initiateOrderSettlement` body, MeraDhan customer frontend.
 
 ---
 
-## Related code (today)
-
-- `backend/src/services/order/order_settlement.service.ts`
-- `backend/src/jobs/order_settlement_worker.ts`
-- `backend/src/jobs/queue/worker_queues.ts`
-- `backend/src/services/payment/payment_reconciliation.service.ts`
-- `backend/src/jobs/cron/payment_reconciliation.cron.ts`
-- `backend/databases/postgres/prisma/schema/orders.prisma`
-- `packages/config/src/constants.ts`
-- `backend/src/modules/RFQ/nse/nse_RFQ.ts`
-
----
-
-*This document is the implementation guide for order stage reconciliation. Prefer additive orchestration over modifying existing NSE settlement step bodies.*
+*Prefer additive orchestration over modifying existing NSE settlement step bodies. Always resume from the first non-success stage.*

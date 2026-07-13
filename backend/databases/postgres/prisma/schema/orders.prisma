@@ -26,6 +26,9 @@ model Order {
     paymentStatus PaymentStatus @default(PENDING)
     status        OrderStatus   @default(PENDING)
 
+    /// Last successfully completed settlement pipeline stage (resume cursor).
+    settlementStage OrderSettlementStage?
+
     // Financials
     subTotal    Decimal @db.Decimal(15, 4)
     stampDuty   Decimal @db.Decimal(15, 4)
@@ -42,6 +45,7 @@ model Order {
     // Relations
     customerBonds CustomerBonds?
     orderLogs     OrderLogs[]
+    orderStages   OrderStage[]
 
     // General Metadata
     metadata       Json?
@@ -55,7 +59,35 @@ model Order {
     @@index([paymentId])
     @@index([orderNumber])
     @@index([linkedRfqParticipantCode])
+    @@index([settlementStage, updatedAt])
     @@map("orders")
+}
+
+/// Durable per-stage settlement tracking for resume-safe order reconciliation.
+model OrderStage {
+    id      Int @id @default(autoincrement())
+    orderId Int
+    order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+    orderNo String
+    stage   OrderSettlementStage
+    /// 0=not started, 1=success, 2=fail, 3=waiting
+    status  Int @default(0)
+
+    payload  Json?
+    response Json?
+    seq      Int
+    attemptCount Int     @default(0)
+    lastError    String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@unique([orderId, stage])
+    @@index([orderNo])
+    @@index([status, updatedAt])
+    @@index([orderId, seq])
+    @@map("order_stages")
 }
 
 model CustomerBonds {
@@ -178,6 +210,16 @@ enum OrderStatus {
     EXPIRED
     CANCELLED
     IN_PROGRESS
+}
+
+enum OrderSettlementStage {
+    started
+    payment_done
+    add_isin
+    quote_accept
+    deal_propose
+    deal_accept
+    pg_routing
 }
 
 model DraftOrders {

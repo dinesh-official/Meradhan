@@ -30,6 +30,7 @@ import { getBondInfoCalcData } from "@resource/bonds/fill-bonds-auto";
 import { OrderService } from "@resource/customer/order/order.service";
 import { orderSettlementQueue } from "@jobs/queue/worker_queues";
 import { db } from "@core/database/database";
+import { OrderSettlementService } from "@services/order/order_settlement.service";
 
 function formatDraftOrderCustomerName(profile: {
   firstName: string;
@@ -1662,13 +1663,20 @@ export class CrmOrdersService {
     const orderService = new OrderService();
 
     await orderService.updateOrderStatus(order.id, "APPLIED");
-    const job = await orderSettlementQueue.add(
-      {
-        type: "orderSettlement",
-        id: order.id,
-        isNetBanking: false,
-      }
-    );
+    const settlementService = new OrderSettlementService();
+    await settlementService.seedOrderStages(order.id, { isNetBanking: false });
+    const settlementJobId = `order-settlement-${order.id}`;
+    const existingJob = await orderSettlementQueue.getJob(settlementJobId);
+    if (!existingJob) {
+      await orderSettlementQueue.add(
+        {
+          type: "orderSettlement",
+          id: order.id,
+          isNetBanking: false,
+        },
+        { jobId: settlementJobId },
+      );
+    }
     return result;
   }
 

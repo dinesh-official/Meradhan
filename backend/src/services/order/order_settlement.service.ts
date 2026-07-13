@@ -9,6 +9,11 @@ import {
   NSE_CONSTANTS,
   SettlementStep,
   SettlementStatus,
+  OrderPipelineStage,
+  OrderStageStatus,
+  ORDER_STAGE_SEQUENCE,
+  ORDER_STAGE_MAX_ATTEMPTS,
+  ORDER_STAGE_LOCK_TTL_SECONDS,
 } from "@packages/config/constants";
 import { NseCBRICS } from "@modules/RFQ/nse/nse_CBRICS";
 import { NseRfq } from "@modules/RFQ/nse/nse_RFQ";
@@ -29,6 +34,8 @@ import { formatDateDdMmYyyy, formatDateIstDdMmmYyyy } from "@resource/customer/o
 import { getLastCouponDate, getLastNextCouponDateBasedOnSettlementDate } from "./order-pricing-helper";
 import { sendSettlementAutomationFailureEmail } from "./settlement_automation_alert";
 import { AxiosError } from "axios";
+import { cacheStorage } from "@store/redis_store";
+import type { OrderSettlementStage, OrderStage } from "@databases/generated/prisma/postgres";
 
 // Type definitions for settlement service
 interface OrderWithNSEData extends Omit<Order, "customerProfile"> {
@@ -1297,6 +1304,20 @@ BSE Member ID: 6963`;
   private async getRfqNumber(
     order: OrderWithNSEData
   ): Promise<string | undefined> {
+    const stage = await db.dataBase.orderStage.findUnique({
+      where: {
+        orderId_stage: {
+          orderId: order.id,
+          stage: OrderPipelineStage.ADD_ISIN as OrderSettlementStage,
+        },
+      },
+      select: { response: true, status: true },
+    });
+    if (stage?.status === OrderStageStatus.SUCCESS && stage.response) {
+      const rfqNumber = (stage.response as { rfqNumber?: string }).rfqNumber;
+      if (rfqNumber) return rfqNumber;
+    }
+
     const logs = await this.orderService.getOrderLogs(order.id);
     const rfqStep = logs.find(
       (t) =>
@@ -1307,6 +1328,21 @@ BSE Member ID: 6963`;
   }
 
   async getNegotiationId(order: OrderWithNSEData): Promise<string | undefined> {
+    const stage = await db.dataBase.orderStage.findUnique({
+      where: {
+        orderId_stage: {
+          orderId: order.id,
+          stage: OrderPipelineStage.QUOTE_ACCEPT as OrderSettlementStage,
+        },
+      },
+      select: { response: true, status: true },
+    });
+    if (stage?.status === OrderStageStatus.SUCCESS && stage.response) {
+      const negotiationId = (stage.response as { negotiationId?: string | number })
+        .negotiationId;
+      if (negotiationId != null) return String(negotiationId);
+    }
+
     const logs = await this.orderService.getOrderLogs(order.id);
     const step = logs.find(
       (t) =>
@@ -1327,5 +1363,642 @@ BSE Member ID: 6963`;
       (dealStep?.outputData as { accruedInterest?: number })?.accruedInterest ||
       0
     );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Resume-safe stage reconciliation (additive; does not replace initiateOrderSettlement)
+  // ---------------------------------------------------------------------------
+
+  private stageLockKey(orderId: number) {
+    return `order-stage-lock:${orderId}`;
+  }
+
+  private async acquireStageLock(orderId: number): Promise<boolean> {
+    const key = this.stageLockKey(orderId);
+    const existing = await cacheStorage.get<string>(key);
+    if (existing) return false;
+    await cacheStorage.set(key, { lockedAt: new Date().toISOString() }, ORDER_STAGE_LOCK_TTL_SECONDS);
+    return true;
+  }
+
+  private async releaseStageLock(orderId: number): Promise<void> {
+    await cacheStorage.delete(this.stageLockKey(orderId));
+  }
+
+  /**
+   * Idempotent seed of order_stages rows + set settlementStage = payment_done.
+   * For non-netbanking, marks pg_routing as skipped success.
+   */
+  async seedOrderStages(
+    orderId: number,
+    opts?: { isNetBanking?: boolean },
+  ): Promise<void> {
+    const order = await db.dataBase.order.findUnique({
+      where: { id: orderId },
+      select: { id: true, orderNumber: true, settlementStage: true },
+    });
+    if (!order) {
+      throw new AppError("Order not found", { code: "ORDER_NOT_FOUND" });
+    }
+
+    for (const { stage, seq } of ORDER_STAGE_SEQUENCE) {
+      await db.dataBase.orderStage.upsert({
+        where: {
+          orderId_stage: {
+            orderId: order.id,
+            stage: stage as OrderSettlementStage,
+          },
+        },
+        create: {
+          orderId: order.id,
+          orderNo: order.orderNumber,
+          stage: stage as OrderSettlementStage,
+          status: OrderStageStatus.NOT_STARTED,
+          seq,
+          payload: {},
+          response: {},
+        },
+        update: {
+          orderNo: order.orderNumber,
+        },
+      });
+    }
+
+    if (!opts?.isNetBanking) {
+      await db.dataBase.orderStage.update({
+        where: {
+          orderId_stage: {
+            orderId: order.id,
+            stage: OrderPipelineStage.PG_ROUTING as OrderSettlementStage,
+          },
+        },
+        data: {
+          status: OrderStageStatus.SUCCESS,
+          payload: { skipped: true, reason: "not_netbanking" },
+          response: { skipped: true, reason: "not_netbanking" },
+          lastError: null,
+        },
+      });
+    }
+
+    if (
+      !order.settlementStage ||
+      order.settlementStage === OrderPipelineStage.STARTED
+    ) {
+      await db.dataBase.order.update({
+        where: { id: order.id },
+        data: {
+          settlementStage: OrderPipelineStage.PAYMENT_DONE as OrderSettlementStage,
+        },
+      });
+    }
+  }
+
+  private async getStagesOrdered(orderId: number): Promise<OrderStage[]> {
+    return db.dataBase.orderStage.findMany({
+      where: { orderId },
+      orderBy: { seq: "asc" },
+    });
+  }
+
+  private async markStageWaiting(stageRow: OrderStage): Promise<OrderStage> {
+    return db.dataBase.orderStage.update({
+      where: { id: stageRow.id },
+      data: {
+        status: OrderStageStatus.WAITING,
+        attemptCount: { increment: 1 },
+        lastError: null,
+      },
+    });
+  }
+
+  private async markStageSuccess(
+    stageRow: OrderStage,
+    data: {
+      payload?: Record<string, unknown>;
+      response?: Record<string, unknown>;
+    },
+  ): Promise<void> {
+    await db.dataBase.orderStage.update({
+      where: { id: stageRow.id },
+      data: {
+        status: OrderStageStatus.SUCCESS,
+        payload: (data.payload ?? stageRow.payload ?? {}) as Prisma.InputJsonValue,
+        response: (data.response ?? {}) as Prisma.InputJsonValue,
+        lastError: null,
+      },
+    });
+    await db.dataBase.order.update({
+      where: { id: stageRow.orderId },
+      data: {
+        settlementStage: stageRow.stage,
+      },
+    });
+  }
+
+  private async markStageFail(
+    stageRow: OrderStage,
+    data: {
+      payload?: Record<string, unknown>;
+      response?: Record<string, unknown>;
+      lastError: string;
+    },
+  ): Promise<void> {
+    await db.dataBase.orderStage.update({
+      where: { id: stageRow.id },
+      data: {
+        status: OrderStageStatus.FAIL,
+        payload: (data.payload ?? stageRow.payload ?? {}) as Prisma.InputJsonValue,
+        response: (data.response ?? {}) as Prisma.InputJsonValue,
+        lastError: data.lastError.slice(0, 2000),
+      },
+    });
+  }
+
+  private stageResponseRecord(
+    stageRow: OrderStage | undefined,
+  ): Record<string, unknown> {
+    if (!stageRow?.response || typeof stageRow.response !== "object") return {};
+    return stageRow.response as Record<string, unknown>;
+  }
+
+  private async resolveInCrores(
+    order: OrderWithNSEData,
+    stages: OrderStage[],
+  ): Promise<number> {
+    const addIsin = stages.find((s) => s.stage === OrderPipelineStage.ADD_ISIN);
+    const fromResponse = this.stageResponseRecord(addIsin).inCrores;
+    if (typeof fromResponse === "number" && Number.isFinite(fromResponse)) {
+      return fromResponse;
+    }
+    return (Number(order.faceValue) * Number(order.quantity)) / 10000000;
+  }
+
+  private async hasSuccessfulOrderLog(
+    orderId: number,
+    step: string,
+  ): Promise<boolean> {
+    const log = await db.dataBase.orderLogs.findFirst({
+      where: { orderId, step, status: SettlementStatus.SUCCESS },
+      select: { id: true },
+    });
+    return !!log;
+  }
+
+  /**
+   * Resume-safe settlement runner. Skips successful stages; never restarts Add ISIN
+   * if already succeeded. Keeps initiateOrderSettlement untouched for rollback.
+   */
+  async reconcileOrderSettlementByStages(
+    orderId: number,
+    isNetBanking: boolean,
+  ): Promise<{ status: "completed" | "failed" | "skipped_locked" | "max_attempts" }> {
+    const locked = await this.acquireStageLock(orderId);
+    if (!locked) {
+      logger.logInfo(`Order ${orderId} stage reconcile skipped — lock held`);
+      return { status: "skipped_locked" };
+    }
+
+    let paymentIdForBatch = `order-${orderId}`;
+    let batchId: string | null = null;
+    let addIsinSnapshot: {
+      rfqNumber?: string;
+      isin?: string;
+      inCrores?: number;
+      rfqDbData?: { settlementDate?: string | null };
+    } = {};
+
+    try {
+      await this.seedOrderStages(orderId, { isNetBanking });
+
+      const getOrderData = async () =>
+        this.orderService.getOrderWithNSEData(orderId);
+
+      let order = await getOrderData();
+      if (!order) {
+        throw new AppError("Order not found", { code: "ORDER_NOT_FOUND" });
+      }
+      if (!order?.customerProfile?.nseDataSet?.participant) {
+        throw new AppError("NSE participant data not found for customer", {
+          code: "NSE_PARTICIPANT_NOT_FOUND",
+        });
+      }
+
+      const paymentId = order.paymentId ?? `order-${order.id}`;
+      paymentIdForBatch = paymentId;
+      batchId = this.buildBatchId(paymentId, order.id);
+
+      await this.addAutomationLog({
+        orderId: order.id,
+        paymentId,
+        batchId,
+        step: "SETTLEMENT_BATCH",
+        status: "STARTED",
+        message: "Stage-based settlement processing batch initiated",
+        inputData: {
+          timestamp: new Date().toLocaleString(),
+          orderId: order.id,
+          isNetBanking,
+          paymentId: order.paymentId,
+          mode: "reconcileOrderSettlementByStages",
+        },
+        startedAt: new Date(),
+      });
+
+      let stages = await this.getStagesOrdered(order.id);
+      let acceptNegotiationResponse: unknown;
+      let proposeDealResponse: unknown;
+      let acceptOrRejectDealResponse: unknown;
+      let updateStatusResponse: unknown;
+      let pipelineFailed = false;
+      let maxAttemptsHit = false;
+
+      for (const stageRow of stages) {
+        if (stageRow.status === OrderStageStatus.SUCCESS) {
+          if (stageRow.stage === OrderPipelineStage.ADD_ISIN) {
+            const resp = this.stageResponseRecord(stageRow);
+            addIsinSnapshot = {
+              rfqNumber: typeof resp.rfqNumber === "string" ? resp.rfqNumber : undefined,
+              isin: typeof resp.isin === "string" ? resp.isin : order.isin,
+              inCrores:
+                typeof resp.inCrores === "number" ? resp.inCrores : undefined,
+              rfqDbData: (resp.rfqDbData as { settlementDate?: string | null }) ?? undefined,
+            };
+          }
+          continue;
+        }
+
+        if (stageRow.attemptCount >= ORDER_STAGE_MAX_ATTEMPTS) {
+          maxAttemptsHit = true;
+          await sendSettlementAutomationFailureEmail({
+            context: "ORDER",
+            failedStep: `STAGE_MAX_ATTEMPTS_${stageRow.stage}`,
+            error: new Error(
+              `Stage ${stageRow.stage} exceeded max attempts (${ORDER_STAGE_MAX_ATTEMPTS})`,
+            ),
+            orderId: order.id,
+            orderNumber: order.orderNumber,
+            isin: order.isin,
+            quantity: order.quantity,
+            paymentId,
+            batchId,
+            customerName:
+              order.customerProfile?.nseDataSet?.participant?.firstName ?? null,
+            ucc: order.customerProfile?.nseDataSet?.participant?.loginId ?? null,
+            rfqNumber:
+              addIsinSnapshot.rfqNumber ??
+              (typeof (order.metadata as Record<string, unknown> | null)?.rfqNumber ===
+              "string"
+                ? String((order.metadata as Record<string, unknown>).rfqNumber)
+                : null),
+          });
+          break;
+        }
+
+        // Skip pg_routing when not netbanking (should already be success from seed)
+        if (
+          stageRow.stage === OrderPipelineStage.PG_ROUTING &&
+          !isNetBanking
+        ) {
+          await this.markStageSuccess(stageRow, {
+            payload: { skipped: true, reason: "not_netbanking" },
+            response: { skipped: true, reason: "not_netbanking" },
+          });
+          continue;
+        }
+
+        const waitingRow = await this.markStageWaiting(stageRow);
+        const payload: Record<string, unknown> = {
+          orderId: order.id,
+          stage: stageRow.stage,
+          isNetBanking,
+          paymentId,
+        };
+
+        try {
+          // Idempotency: if prior SUCCESS log / IDs exist, mark success without re-calling NSE
+          if (stageRow.stage === OrderPipelineStage.ADD_ISIN) {
+            const existingRfq = await this.getRfqNumber(order);
+            if (existingRfq) {
+              const inCrores = await this.resolveInCrores(order, stages);
+              addIsinSnapshot = {
+                rfqNumber: existingRfq,
+                isin: order.isin,
+                inCrores,
+              };
+              await this.markStageSuccess(waitingRow, {
+                payload,
+                response: {
+                  skipped: true,
+                  reason: "already_succeeded",
+                  rfqNumber: existingRfq,
+                  inCrores,
+                  isin: order.isin,
+                },
+              });
+              continue;
+            }
+          }
+
+          if (stageRow.stage === OrderPipelineStage.QUOTE_ACCEPT) {
+            const negotiationId = await this.getNegotiationId(order);
+            if (negotiationId) {
+              await this.markStageSuccess(waitingRow, {
+                payload,
+                response: {
+                  skipped: true,
+                  reason: "already_succeeded",
+                  negotiationId,
+                },
+              });
+              continue;
+            }
+          }
+
+          if (
+            stageRow.stage === OrderPipelineStage.DEAL_PROPOSE ||
+            stageRow.stage === OrderPipelineStage.DEAL_ACCEPT
+          ) {
+            const step =
+              stageRow.stage === OrderPipelineStage.DEAL_PROPOSE
+                ? SettlementStep.PROPOSE_DEAL
+                : SettlementStep.ACCEPT_OR_REJECT_DEAL;
+            if (await this.hasSuccessfulOrderLog(order.id, step)) {
+              await this.markStageSuccess(waitingRow, {
+                payload,
+                response: { skipped: true, reason: "already_succeeded" },
+              });
+              continue;
+            }
+          }
+
+          if (stageRow.stage === OrderPipelineStage.PG_ROUTING) {
+            if (order.transferId) {
+              await this.markStageSuccess(waitingRow, {
+                payload,
+                response: {
+                  skipped: true,
+                  reason: "transfer_already_exists",
+                  transferId: order.transferId,
+                },
+              });
+              continue;
+            }
+          }
+
+          let response: Record<string, unknown> = {};
+
+          if (stageRow.stage === OrderPipelineStage.ADD_ISIN) {
+            const result = await this.addIsinToSettlement(order, { paymentId });
+            addIsinSnapshot = {
+              rfqNumber: result.rfqNumber,
+              isin: result.isin,
+              inCrores: result.inCrores,
+              rfqDbData: result.rfqDbData,
+            };
+            response = {
+              rfqNumber: result.rfqNumber,
+              isin: result.isin,
+              inCrores: result.inCrores,
+              quantity: result.quantity,
+              rfqDbData: result.rfqDbData,
+            };
+            await new Promise((resolve) => setTimeout(resolve, 10000));
+          } else if (stageRow.stage === OrderPipelineStage.QUOTE_ACCEPT) {
+            const inCrores = await this.resolveInCrores(order, stages);
+            payload.inCrores = inCrores;
+            payload.rfqNumber = addIsinSnapshot.rfqNumber ?? (await this.getRfqNumber(order));
+            const result = await this.acceptNegotiation(order, inCrores);
+            acceptNegotiationResponse = result;
+            response = {
+              rfqNumber: result.rfqNumber,
+              negotiationId: result.negotiationId,
+            };
+            await new Promise((resolve) => setTimeout(resolve, 10000));
+          } else if (stageRow.stage === OrderPipelineStage.DEAL_PROPOSE) {
+            const result = await this.proposeDeal(order);
+            proposeDealResponse = result;
+            response = { ...result };
+            await new Promise((resolve) => setTimeout(resolve, 10000));
+          } else if (stageRow.stage === OrderPipelineStage.DEAL_ACCEPT) {
+            const result = await this.acceptOrRejectDeal(order);
+            acceptOrRejectDealResponse = result;
+            response = { ...result };
+            // Post-step (not a stage row): update order status like current flow
+            updateStatusResponse = await this.updateOrderStatus(order.id);
+          } else if (stageRow.stage === OrderPipelineStage.PG_ROUTING) {
+            if (order.customerProfileId == null) {
+              throw new Error(
+                "Razorpay route transfer requested for a participant-counterparty order; this is not supported.",
+              );
+            }
+            const customerProfileId = order.customerProfileId;
+            const rfqNumber =
+              addIsinSnapshot.rfqNumber ??
+              (await this.getRfqNumber(order)) ??
+              "";
+            const routeAmount = Number(order.totalAmount.toFixed(4));
+            const routePayId = order.paymentId || "";
+            const routeUcc =
+              order.customerProfile?.nseDataSet?.participant?.loginId;
+            payload.rfqNumber = rfqNumber;
+            payload.amount = Number(order.totalAmount);
+            const transferResult = await this.runWithAutomationLog({
+              orderId: order.id,
+              paymentId,
+              batchId,
+              step: "RAZORPAY_ROUTE_TRANSFER",
+              message: "Create Razorpay route transfer",
+              inputData: {
+                amount: Number(order.totalAmount),
+                payId: routePayId,
+                userId: customerProfileId,
+                rfqNumber,
+                isin: addIsinSnapshot.isin ?? order.isin,
+              },
+              fn: () =>
+                makeRazorpayRouteTransition({
+                  amount: routeAmount,
+                  payId: routePayId,
+                  userId: customerProfileId,
+                  notes: {
+                    RFQ_NUMBER: rfqNumber,
+                    UCC: routeUcc,
+                  },
+                }),
+            });
+            response = {
+              transfer: transferResult as unknown as Record<string, unknown>,
+            };
+            order = (await getOrderData()) ?? order;
+          } else {
+            throw new AppError(`Unknown settlement stage: ${stageRow.stage}`, {
+              code: "UNKNOWN_STAGE",
+            });
+          }
+
+          await this.markStageSuccess(waitingRow, { payload, response });
+        } catch (error) {
+          pipelineFailed = true;
+          const lastError =
+            error instanceof Error ? error.message : "Unknown error";
+          const errorResponse: Record<string, unknown> = {
+            error: lastError,
+            stack: error instanceof Error ? error.stack : undefined,
+            nseResponse:
+              error instanceof AxiosError ? error.response?.data : undefined,
+          };
+          await this.markStageFail(waitingRow, {
+            payload,
+            response: errorResponse,
+            lastError,
+          });
+
+          await this.addAutomationLog({
+            orderId: order.id,
+            paymentId,
+            batchId,
+            step: `STAGE_${stageRow.stage}`,
+            status: "FAILED",
+            message: `Stage ${stageRow.stage} failed`,
+            inputData: payload,
+            errorData: errorResponse,
+            completedAt: new Date(),
+          });
+
+          await sendSettlementAutomationFailureEmail({
+            context: "ORDER",
+            failedStep: stageRow.stage,
+            error,
+            orderId: order.id,
+            orderNumber: order.orderNumber,
+            isin: order.isin,
+            quantity: order.quantity,
+            paymentId,
+            batchId,
+            customerName:
+              order.customerProfile?.nseDataSet?.participant?.firstName ?? null,
+            ucc: order.customerProfile?.nseDataSet?.participant?.loginId ?? null,
+            rfqNumber: addIsinSnapshot.rfqNumber ?? null,
+          });
+
+          // Do NOT mark order REJECTED here — resume-safe path should allow retry.
+          // Legacy initiateOrderSettlement marks REJECTED; we keep stages as source of truth.
+          break;
+        }
+      }
+
+      if (pipelineFailed) {
+        await this.addAutomationLog({
+          orderId: order.id,
+          paymentId,
+          batchId,
+          step: "SETTLEMENT_BATCH",
+          status: "FAILED",
+          message: "Stage-based settlement batch stopped on failure",
+          completedAt: new Date(),
+        });
+        return { status: "failed" };
+      }
+
+      if (maxAttemptsHit) {
+        return { status: "max_attempts" };
+      }
+
+      stages = await this.getStagesOrdered(order.id);
+      const allSuccess = stages.every((s) => s.status === OrderStageStatus.SUCCESS);
+      if (!allSuccess) {
+        return { status: "failed" };
+      }
+
+      await this.addAutomationLog({
+        orderId: order.id,
+        paymentId,
+        batchId,
+        step: "SETTLEMENT_BATCH",
+        status: "SUCCESS",
+        message: "Stage-based settlement batch completed",
+        outputData: {
+          rfqNumber: addIsinSnapshot.rfqNumber,
+          isNetBanking,
+        },
+        completedAt: new Date(),
+      });
+
+      await db.dataBase.orderSettlementAutomationLog.updateMany({
+        where: {
+          paymentId,
+          batchId,
+          status: { in: ["IN_PROGRESS", "STARTED"] },
+        },
+        data: {
+          status: "SUCCESS",
+          message: "Auto-marked success after stage batch completion",
+          completedAt: new Date(),
+        },
+      });
+
+      // Post-pipeline: settled orders sync + receipt email (same as initiateOrderSettlement)
+      const rfqMasterService = new RfqMasterService();
+      await new Promise((resolve) => setTimeout(resolve, 30000));
+      const todayDate = new Date().toISOString().split("T")[0]?.split("-").reverse().join("-");
+      const d = new Date();
+      const istYmd = d.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+      const [y, m, day] = istYmd.split("-").map(Number);
+      const tomorrowIst = new Date(Date.UTC(y!, (m ?? 1) - 1, (day ?? 1) + 1, 12));
+      const nextDate = tomorrowIst
+        .toLocaleDateString("en-GB", { timeZone: "Asia/Kolkata" })
+        .replaceAll("/", "-");
+
+      await rfqMasterService.getAllSettledOrders({
+        filtFromModSettleDate: todayDate || "",
+        filtToModSettleDate: nextDate,
+      });
+
+      const updatedOrder = await getOrderData();
+      if (updatedOrder) {
+        await this.trySendOrderReceiptPdfEmail({
+          order: updatedOrder,
+          paymentId,
+          batchId,
+          settlementDate: addIsinSnapshot.rfqDbData?.settlementDate ?? "",
+          inputData: {
+            rfqNumber: addIsinSnapshot.rfqNumber,
+            addIsinResponse: addIsinSnapshot,
+            acceptNegotiationResponse,
+            proposeDealResponse,
+            acceptOrRejectDealResponse,
+            updateStatusResponse,
+            isNetBanking,
+            mode: "reconcileOrderSettlementByStages",
+          },
+        });
+      }
+
+      return { status: "completed" };
+    } catch (error) {
+      logger.logError(
+        `Stage-based settlement failed for order ${orderId}:`,
+        error,
+      );
+      if (batchId) {
+        await this.addAutomationLog({
+          orderId,
+          paymentId: paymentIdForBatch,
+          batchId,
+          step: "SETTLEMENT_BATCH",
+          status: "FAILED",
+          message: "Stage-based settlement batch failed",
+          errorData: {
+            error: error instanceof Error ? error.message : "Unknown error",
+            stack: error instanceof Error ? error.stack : undefined,
+          },
+          completedAt: new Date(),
+        });
+      }
+      throw error;
+    } finally {
+      await this.releaseStageLock(orderId);
+    }
   }
 }
