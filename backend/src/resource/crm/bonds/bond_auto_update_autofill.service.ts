@@ -330,9 +330,8 @@ export class BondAutoUpdateAutofillService {
       );
     }
 
-    // Phase 1 — probe DeriData for record_date + cashflows, then resolve shut/accrual.
-    // Phase 2 — call DeriData again with cashflow_shut_flag = computed shut (reuse Phase 1
-    // when the probe flag already matched, to avoid a slow double round-trip).
+    // Phase 1 — probe DeriData for record_date + cashflows (Redis-cached), then resolve shut/accrual.
+    // Phase 2 — always call DeriData live with cashflow_shut_flag = computed shut for real-time prices.
     const probeYield =
       ctx.pricingYield != null &&
       Number.isFinite(ctx.pricingYield) &&
@@ -342,7 +341,6 @@ export class BondAutoUpdateAutofillService {
     const probeShut = true;
 
     let shutFields: ReturnType<typeof toAutofillShutFields> | null = null;
-    let phase1Response: DeriDataCalculatorResponse | null = null;
 
     try {
       const shutAccrual = await resolveAccrualDaysFromDailyCashflow({
@@ -354,7 +352,6 @@ export class BondAutoUpdateAutofillService {
         underShut: probeShut,
       });
       shutFields = toAutofillShutFields(shutAccrual);
-      phase1Response = shutAccrual.deriDataResponse ?? null;
       ctx.cashflowShutFlag = shutFields.cashflowShutFlag;
       ctx.periodStatus = shutFields.periodStatus;
       ctx.pricing = {
@@ -389,21 +386,9 @@ export class BondAutoUpdateAutofillService {
       ctx.cashflowShutFlag = recomputed.cashflowShutFlag;
     }
 
-    // Phase 2 — pricing calculator with computed cashflow_shut_flag.
-    const canReusePhase1 =
-      phase1Response != null &&
-      shutFields != null &&
-      probeShut === shutFields.cashflowShutFlag &&
-      ctx.pricingMode === "ytm";
-
+    // Phase 2 — always live pricing. Phase-1 cashflow probe may be Redis-cached.
     let deriDataResponse: DeriDataCalculatorResponse;
-    const reusedPhase1 = phase1Response;
-    if (
-      canReusePhase1 &&
-      reusedPhase1 != null
-    ) {
-      deriDataResponse = reusedPhase1;
-    } else if (ctx.pricingMode === "cleanPrice") {
+    if (ctx.pricingMode === "cleanPrice") {
       deriDataResponse = await calculatePriceToYield({
         isin,
         valueDate: ctx.settlementDateYmd,
@@ -423,38 +408,35 @@ export class BondAutoUpdateAutofillService {
       });
     }
 
-    // If Phase 2 used a fresh response, re-resolve shut/accrual from that response
-    // so dates stay aligned with the pricing call.
-    if (!canReusePhase1) {
-      try {
-        const shutAccrual = await resolveAccrualDaysFromDeriDataResponse({
-          isin,
-          settlementDate: ctx.settlementDateYmd,
-          response: deriDataResponse,
-          lastCouponFallback: ctx.lastCouponDate,
-          underShut: ctx.cashflowShutFlag,
-          yield: probeYield,
-        });
-        shutFields = toAutofillShutFields(shutAccrual);
-        ctx.cashflowShutFlag = shutFields.cashflowShutFlag;
-        ctx.periodStatus = shutFields.periodStatus;
-        ctx.pricing = {
-          ...ctx.pricing,
-          noOfAccrualDays: shutFields.accruedDays,
-          isUnderShutPeriod: shutFields.isUnderShutPeriod,
-        };
-        if (shutFields.lastCouponDate) {
-          ctx.lastCouponDate = shutFields.lastCouponDate;
-        }
-        if (shutFields.nextCouponDate) {
-          ctx.nextCouponDate = shutFields.nextCouponDate;
-        }
-      } catch (err) {
-        console.warn(
-          `[bond_auto_update_autofill] Phase2 shut/accrual re-resolve failed for ${isin}:`,
-          err instanceof Error ? err.message : err,
-        );
+    // Re-resolve shut/accrual from the live Phase-2 response so dates stay aligned.
+    try {
+      const shutAccrual = await resolveAccrualDaysFromDeriDataResponse({
+        isin,
+        settlementDate: ctx.settlementDateYmd,
+        response: deriDataResponse,
+        lastCouponFallback: ctx.lastCouponDate,
+        underShut: ctx.cashflowShutFlag,
+        yield: probeYield,
+      });
+      shutFields = toAutofillShutFields(shutAccrual);
+      ctx.cashflowShutFlag = shutFields.cashflowShutFlag;
+      ctx.periodStatus = shutFields.periodStatus;
+      ctx.pricing = {
+        ...ctx.pricing,
+        noOfAccrualDays: shutFields.accruedDays,
+        isUnderShutPeriod: shutFields.isUnderShutPeriod,
+      };
+      if (shutFields.lastCouponDate) {
+        ctx.lastCouponDate = shutFields.lastCouponDate;
       }
+      if (shutFields.nextCouponDate) {
+        ctx.nextCouponDate = shutFields.nextCouponDate;
+      }
+    } catch (err) {
+      console.warn(
+        `[bond_auto_update_autofill] Phase2 shut/accrual re-resolve failed for ${isin}:`,
+        err instanceof Error ? err.message : err,
+      );
     }
 
     const resolvedYieldRaw =
