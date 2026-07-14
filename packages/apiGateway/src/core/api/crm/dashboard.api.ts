@@ -1,7 +1,10 @@
 import type { AxiosRequestConfig, AxiosResponse } from "axios";
 import type {
   DashboardSummaryResponse,
+  RerunLastSettlementJobResponse,
+  RunSettlementReconciliationResponse,
   SalesPerformanceResponse,
+  SettlementJobStatusResponse,
 } from "../../../types/response.types";
 import type { IApiCaller } from "../../connection/apiCaller.interface";
 
@@ -12,6 +15,15 @@ export interface TDashboardApi {
   getSalesPerformance(
     config?: AxiosRequestConfig
   ): Promise<AxiosResponse<SalesPerformanceResponse>>;
+  getSettlementJobStatus(
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<SettlementJobStatusResponse>>;
+  runSettlementReconciliation(
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<RunSettlementReconciliationResponse>>;
+  rerunLastSettlementJob(
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<RerunLastSettlementJobResponse>>;
 }
 
 export class CrmDashboardApi implements TDashboardApi {
@@ -31,6 +43,35 @@ export class CrmDashboardApi implements TDashboardApi {
   ): ReturnType<TDashboardApi["getSalesPerformance"]> {
     return this.apiClient.get<SalesPerformanceResponse>(
       "/crm/dashboard/sales-performance",
+      config
+    );
+  }
+
+  async getSettlementJobStatus(
+    config?: AxiosRequestConfig
+  ): ReturnType<TDashboardApi["getSettlementJobStatus"]> {
+    return this.apiClient.get<SettlementJobStatusResponse>(
+      "/crm/dashboard/settlement-job-status",
+      config
+    );
+  }
+
+  async runSettlementReconciliation(
+    config?: AxiosRequestConfig
+  ): ReturnType<TDashboardApi["runSettlementReconciliation"]> {
+    return this.apiClient.post<RunSettlementReconciliationResponse>(
+      "/crm/dashboard/run-settlement-reconciliation",
+      undefined,
+      config
+    );
+  }
+
+  async rerunLastSettlementJob(
+    config?: AxiosRequestConfig
+  ): ReturnType<TDashboardApi["rerunLastSettlementJob"]> {
+    return this.apiClient.post<RerunLastSettlementJobResponse>(
+      "/crm/dashboard/rerun-last-settlement-job",
+      undefined,
       config
     );
   }

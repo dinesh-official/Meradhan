@@ -20,6 +20,7 @@ import type {
   CrmOrderStatus,
   VerifyOrderPaymentResponse,
   VerifyOrderSettlementResponse,
+  ResumeOrderSettlementResponse,
 } from "./orders.response";
 import type { IApiCaller } from "../../connection/apiCaller.interface";
 
@@ -170,6 +171,21 @@ export class CrmOrdersApi {
     const { data } = await this.apiClient.post<VerifyOrderSettlementResponse>(
       `/crm/orders/${orderId}/verify-settlement`,
       { apply: options?.apply === true },
+      config
+    );
+    return data;
+  }
+
+  /**
+   * Resume settlement from the first incomplete/failed stage (same Redis job path).
+   */
+  async resumeOrderSettlement(
+    orderId: number,
+    config?: AxiosRequestConfig
+  ): Promise<ResumeOrderSettlementResponse> {
+    const { data } = await this.apiClient.post<ResumeOrderSettlementResponse>(
+      `/crm/orders/${orderId}/resume-settlement`,
+      {},
       config
     );
     return data;

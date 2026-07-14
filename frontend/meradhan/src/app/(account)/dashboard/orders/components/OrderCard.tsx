@@ -28,6 +28,7 @@ function OrderCard({ order, showSeparator = false }: OrderCardProps) {
     order.status,
     order.paymentStatus,
     order.settleStatus,
+    order.paymentProvider,
   );
   const tradeDate = formatOrderHistoryDate(order.createdAt);
   const settlementDate = formatOrderHistoryDate(getOrderSettlementDateInput(order));

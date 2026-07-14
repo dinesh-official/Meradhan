@@ -20,9 +20,11 @@ export interface CrmOrder {
   reqOrderNumber?: string | null;
   quantity: number;
   faceValue: string;
+  stampDuty?: string;
   totalAmount: string;
   status: CrmOrderStatus;
   bondDetails: Record<string, unknown>;
+  metadata?: Record<string, unknown> | null;
   createdAt: string;
   /**
    * Null when this Order's counterparty is an external NSE RFQ participant
@@ -34,6 +36,7 @@ export interface CrmOrder {
     lastName: string;
     emailAddress: string;
     phoneNo?: string;
+    userName?: string | null;
   } | null;
   linkedRfqParticipantCode?: string | null;
   rfqParticipantInfo?: {
@@ -43,6 +46,8 @@ export interface CrmOrder {
     emailList: string[];
     panNo: string | null;
   } | null;
+  /** Settlement pipeline steps (list view). */
+  orderStages?: Pick<CrmOrderStage, "stage" | "status" | "seq">[];
 }
 
 export interface GetCrmOrdersResponse {
@@ -130,6 +135,31 @@ export interface OrderSettlementAutomationLog {
   updatedAt: string;
 }
 
+export type CrmOrderSettlementStage =
+  | "started"
+  | "payment_done"
+  | "add_isin"
+  | "quote_accept"
+  | "deal_propose"
+  | "deal_accept"
+  | "pg_routing";
+
+export interface CrmOrderStage {
+  id: number;
+  orderId: number;
+  orderNo: string;
+  stage: CrmOrderSettlementStage;
+  /** 0=not started, 1=success, 2=fail, 3=waiting */
+  status: number;
+  payload: Record<string, unknown> | null;
+  response: Record<string, unknown> | null;
+  seq: number;
+  attemptCount: number;
+  lastError: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface PaymentProcessLogGroup {
   paymentId: string;
   totalLogs: number;
@@ -169,9 +199,11 @@ export interface CrmOrderDetails {
   customerProfile: {
     id: number;
     firstName: string;
+    middleName?: string | null;
     lastName: string;
     emailAddress: string;
     phoneNo: string | null;
+    userName?: string | null;
   } | null;
   rfqParticipantInfo?: {
     code: string;
@@ -183,6 +215,8 @@ export interface CrmOrderDetails {
   } | null;
   orderLogs: OrderLog[];
   settlementAutomationLogs: OrderSettlementAutomationLog[];
+  settlementStage: CrmOrderSettlementStage | null;
+  orderStages: CrmOrderStage[];
   customerBonds: {
     id: number;
     customerProfileId: number;
@@ -201,6 +235,19 @@ export interface CrmOrderDetails {
 
 export interface GetCrmOrderDetailsResponse {
   responseData: CrmOrderDetails;
+}
+
+export interface ResumeOrderSettlementResponse {
+  message?: string;
+  responseData: {
+    orderId: number;
+    orderNumber: string;
+    queued: boolean;
+    jobId: string;
+    /** First incomplete/failed stage the runner will retry (null if none / already complete). */
+    resumeFromStage: CrmOrderSettlementStage | null;
+    resumeFromSeq: number | null;
+  };
 }
 
 export interface GetPaymentProcessLogsResponse {

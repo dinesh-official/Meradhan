@@ -32,7 +32,6 @@ import {
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import CardPagination from "@/global/elements/table/CardPagination";
-import OrdersSectionTabs from "../_components/OrdersSectionTabs";
 import { hasOneOfPermission } from "@/global/utils/role.utils";
 import useAppCookie from "@/hooks/useAppCookie.hook";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -377,7 +376,6 @@ export default function InventoryStockView() {
 
   return (
     <div>
-      <OrdersSectionTabs />
       <PageInfoBar
         title="ISIN inventory (available stock)"
         description='Upload a spreadsheet daily with columns "ISIN" and "Quantity". Each upload is stored as a batch, grouped by calendar day (IST). Users with edit access can adjust line quantities or delete an entire batch (all lines) permanently.'
