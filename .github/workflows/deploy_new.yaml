@@ -671,15 +671,16 @@ jobs:
           COMMANDS+="echo Starting Deployment"$'\n'
           COMMANDS+="echo ======================================="$'\n'
 
-            COMMANDS+="docker image prune -f"$'\n'
+            COMMANDS+="docker image prune -af"$'\n'
 
-            COMMANDS+="docker builder prune -f"$'\n'
+            COMMANDS+="docker builder prune -af"$'\n'
 
             COMMANDS+="aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 450321244603.dkr.ecr.ap-south-1.amazonaws.com"$'\n'
 
             COMMANDS+="docker network inspect deployment_app-network >/dev/null 2>&1 || docker network create deployment_app-network"$'\n'
 
-            COMMANDS+="[ -d branch-deploy/.git ] && cd branch-deploy && git fetch origin && git reset --hard origin/main && cd .. || git clone --depth 1 https://github.com/bcispl/branch-deploy.git"$'\n'
+            COMMANDS+="rm -rf branch-deploy"$'\n'
+            COMMANDS+="git clone https://github.com/bcispl/branch-deploy.git"$'\n'
 
             COMMANDS+="cd branch-deploy"$'\n'
             COMMANDS+="pwd"$'\n'
