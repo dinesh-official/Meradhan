@@ -204,6 +204,7 @@ jobs:
 
           RECORD_IDS=""
           DOMAINS=""
+          URLS=""
 
           echo "=========== DNS RECORDS ==========="
 
@@ -244,19 +245,17 @@ jobs:
 
               RECORD_ID=$(echo "$EXISTING" | jq -r '.result[0].id')
 
-              # Fallback search if Cloudflare doesn't return it directly
               if [ -z "$RECORD_ID" ] || [ "$RECORD_ID" = "null" ]; then
-
                 RECORD_ID=$(curl -s -X GET \
                   "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records?per_page=5000" \
                   -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
                   -H "Content-Type: application/json" |
                   jq -r ".result[] | select(.name==\"${FULL_DOMAIN}\") | .id" | head -1)
-
               fi
 
               RECORD_IDS="${RECORD_IDS}${RECORD_ID},"
               DOMAINS="${DOMAINS}${FULL_DOMAIN},"
+              URLS="${URLS}https://${FULL_DOMAIN},"
 
               echo "${SERVICE^^}"
               echo "Status    : Already Exists"
@@ -284,6 +283,7 @@ jobs:
 
             RECORD_IDS="${RECORD_IDS}${RECORD_ID},"
             DOMAINS="${DOMAINS}${NAME},"
+            URLS="${URLS}https://${NAME},"
 
             echo "${SERVICE^^}"
             echo "Status    : Created"
@@ -295,6 +295,7 @@ jobs:
 
           RECORD_IDS="${RECORD_IDS%,}"
           DOMAINS="${DOMAINS%,}"
+          URLS="${URLS%,}"
 
           echo ""
           echo "=========== SUMMARY ==========="
