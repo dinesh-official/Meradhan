@@ -300,10 +300,12 @@ jobs:
           echo "=========== SUMMARY ==========="
           echo "Record IDs : ${RECORD_IDS}"
           echo "Domains    : ${DOMAINS}"
+          echo "URLs       : ${URLS}"
           echo "==============================="
 
           echo "record_ids=${RECORD_IDS}" >> "$GITHUB_OUTPUT"
           echo "domains=${DOMAINS}" >> "$GITHUB_OUTPUT"
+          echo "urls=${URLS}" >> "$GITHUB_OUTPUT"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v5
