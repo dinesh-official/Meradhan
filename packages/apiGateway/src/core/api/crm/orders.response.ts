@@ -20,9 +20,11 @@ export interface CrmOrder {
   reqOrderNumber?: string | null;
   quantity: number;
   faceValue: string;
+  stampDuty?: string;
   totalAmount: string;
   status: CrmOrderStatus;
   bondDetails: Record<string, unknown>;
+  metadata?: Record<string, unknown> | null;
   createdAt: string;
   /**
    * Null when this Order's counterparty is an external NSE RFQ participant
@@ -34,6 +36,7 @@ export interface CrmOrder {
     lastName: string;
     emailAddress: string;
     phoneNo?: string;
+    userName?: string | null;
   } | null;
   linkedRfqParticipantCode?: string | null;
   rfqParticipantInfo?: {
@@ -43,6 +46,8 @@ export interface CrmOrder {
     emailList: string[];
     panNo: string | null;
   } | null;
+  /** Settlement pipeline steps (list view). */
+  orderStages?: Pick<CrmOrderStage, "stage" | "status" | "seq">[];
 }
 
 export interface GetCrmOrdersResponse {
@@ -198,6 +203,7 @@ export interface CrmOrderDetails {
     lastName: string;
     emailAddress: string;
     phoneNo: string | null;
+    userName?: string | null;
   } | null;
   rfqParticipantInfo?: {
     code: string;

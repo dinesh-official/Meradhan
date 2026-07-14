@@ -15,6 +15,7 @@ import { SalesPerformanceChart } from "./_components/chart/SalesPerformanceChart
 import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 import { LoginLogsHistory } from "./audit-logs/crm/logs/_login_logs/LoginLogsHistory";
 import { DashboardStatsCards } from "./_components/DashboardStatsCards";
+import { SettlementJobPanel } from "./_components/SettlementJobPanel";
 import { useMemo, useState } from "react";
 import apiGateway from "@root/apiGateway";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
@@ -150,6 +151,7 @@ const DashBoardView = () => {
       />
 
       <DashboardStatsCards rangeDays={Number(rangeDays)} />
+      <SettlementJobPanel />
       <div className="gap-5 grid lg:grid-cols-7">
         <Card className="lg:col-span-5">
           <CardHeader>

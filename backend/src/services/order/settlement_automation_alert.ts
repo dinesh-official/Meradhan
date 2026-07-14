@@ -4,7 +4,7 @@ import logger from "@utils/logger/logger";
 import { AxiosError } from "axios";
 
 /** Ops inbox for NSE RFQ settlement automation failures. */
-const SETTLEMENT_AUTOMATION_ALERT_TO = "dl.sales@meradhan.co";
+const SETTLEMENT_AUTOMATION_ALERT_TO = "sourav@meradhan.co";
 
 const STEP_LABELS: Record<string, string> = {
   ADD_ISIN: "Create RFQ (Add ISIN)",

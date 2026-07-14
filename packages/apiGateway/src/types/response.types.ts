@@ -62,6 +62,63 @@ export type SalesPerformanceResponse = BaseResponseData<{
   data: SalesPerformancePoint[];
 }>;
 
+export type SettlementQueueCounts = {
+  waiting: number;
+  active: number;
+  completed: number;
+  failed: number;
+  delayed: number;
+};
+
+export type SettlementQueueJobSnapshot = {
+  jobId: string;
+  orderId: number;
+  orderNumber: string | null;
+  state: string;
+  at: string | null;
+  failedReason: string | null;
+};
+
+export type OrderStageReconciliationRun = {
+  at: string;
+  trigger: "cron" | "manual";
+  checked: number;
+  processed: number;
+  skipped: number;
+  failed: number;
+};
+
+export type SettlementJobOverviewPayload = {
+  queue: SettlementQueueCounts;
+  currentJob: SettlementQueueJobSnapshot | null;
+  lastJob: SettlementQueueJobSnapshot | null;
+  lastReconciliation: OrderStageReconciliationRun | null;
+  lastUpdate: {
+    type: "order_settlement" | "reconciliation";
+    at: string;
+    label: string;
+    orderId?: number;
+    orderNumber?: string | null;
+  } | null;
+};
+
+export type SettlementJobStatusResponse =
+  BaseResponseData<SettlementJobOverviewPayload>;
+
+export type RerunLastSettlementJobResponse = BaseResponseData<{
+  action: "order_settlement" | "reconciliation";
+  queued: boolean;
+  orderId?: number;
+  orderNumber?: string;
+  jobId?: string;
+  resumeFromStage?: string | null;
+  reconciliation?: OrderStageReconciliationRun;
+  message: string;
+}>;
+
+export type RunSettlementReconciliationResponse =
+  BaseResponseData<OrderStageReconciliationRun>;
+
 export type CrmUsersSummaryResponse = BaseResponseData<{
   totalUsers: number;
   activeUsers: number;

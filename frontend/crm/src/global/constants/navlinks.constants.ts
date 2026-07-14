@@ -220,12 +220,6 @@ export const NAV_ITEMS: NavItem[] = [
         allowOnly: ["view:orders"],
       },
       {
-        label: "Inventory stock",
-        path: "/dashboard/orders/inventory-stock",
-        module: "orders",
-        allowOnly: ["view:orders"],
-      },
-      {
         label: "Order reports",
         path: "/dashboard/orders/reports",
         module: "orders",
@@ -273,6 +267,12 @@ export const NAV_ITEMS: NavItem[] = [
         path: "/dashboard/bonds",
         module: "bonds",
         allowOnly: ["view:bonds"],
+      },
+      {
+        label: "Inventory stock",
+        path: "/dashboard/orders/inventory-stock",
+        module: "bonds",
+        allowOnly: ["view:bonds", "view:orders"],
       },
       {
         label: "Auto-update (sale-ready)",
