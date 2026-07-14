@@ -308,6 +308,51 @@ jobs:
           echo "domains=${DOMAINS}" >> "$GITHUB_OUTPUT"
           echo "urls=${URLS}" >> "$GITHUB_OUTPUT"
 
+      ###################################################
+      # Override Required Environment Variables
+      ###################################################
+      
+      - name: Override Required Environment Variables
+        shell: bash
+        run: |
+
+          set -e
+
+          ROOT_DOMAIN="devkng.com"
+
+          update_env() {
+            local KEY="$1"
+            local VALUE="$2"
+
+            if grep -q "^${KEY}=" .env; then
+              sed -i "s|^${KEY}=.*|${KEY}=${VALUE}|" .env
+            else
+              echo "${KEY}=${VALUE}" >> .env
+            fi
+          }
+
+          
+          # Override Variables
+          #-------------------------------------------------
+
+          update_env "NEXT_PUBLIC_API_URL" "https://${BACKEND_NAME}.${ROOT_DOMAIN}/api"
+
+          update_env "NEXT_PUBLIC_CRM_URL" "https://${CRM_NAME}.${ROOT_DOMAIN}"
+
+          update_env "NEXT_PUBLIC_FRONTEND_URL" "https://${FRONTEND_NAME}.${ROOT_DOMAIN}"
+
+          update_env "NEXT_PUBLIC_STRAPI_URL" "https://${STRAPI_NAME}.${ROOT_DOMAIN}"
+
+          update_env "NEXT_PUBLIC_ENV" "${{ inputs.environment }}"
+
+   
+          # Verify
+          #--------------------------------------------
+
+          echo "========== UPDATED VARIABLES =========="
+          grep "^NEXT_PUBLIC_" .env
+
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v5
         with:
