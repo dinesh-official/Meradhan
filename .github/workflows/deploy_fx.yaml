@@ -1,4 +1,4 @@
-name: Deploy Application
+name: Deploy Application -optim
 
 on:
   workflow_dispatch:
