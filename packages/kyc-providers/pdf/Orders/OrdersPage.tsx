@@ -142,6 +142,17 @@ export default function OrdersPage({
     })}`;
   };
 
+  const resolveYieldPct = (): string => {
+    const fromPricing = orderData?.bondDetails?.pricing?.yield;
+    const fromBond = bond.yield;
+    const raw = fromPricing ?? fromBond;
+    if (raw == null || raw === "") return "N/A";
+    const n = typeof raw === "number" ? raw : Number(String(raw).replace(/,/g, "").trim());
+    if (!Number.isFinite(n)) return "N/A";
+    return `${n.toFixed(2)}%`;
+  };
+  const yieldDisplay = resolveYieldPct();
+
   // Payment day from Last Interest Payment Date (e.g. "16-Feb-2026 (Monday)" → 16)
   const lastInterestRaw = orderData?.metadata?.lastInterestPaymentDate?.trim();
   let paymentDayOfMonth = 20;
@@ -222,7 +233,11 @@ export default function OrdersPage({
     ],
     ["ISIN", bond.isin],
     ["Security Name", formatBondSecurityLabel(bond)],
-    ["Coupon Rate", `${bond.couponRate.toFixed(2) || "N/A"}%`],
+    [
+      "Coupon Rate",
+      `${bond.couponRate.toFixed(2) || "N/A"}%`,
+      `Yield: ${yieldDisplay}`,
+    ],
     ["Face Value", `INR ${formatCurrency(faceValue)}`],
     [
       "Quantum",

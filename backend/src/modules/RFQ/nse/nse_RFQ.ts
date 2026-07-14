@@ -474,6 +474,7 @@ export class NseRfq {
   ): Promise<AcceptNegotiationQuoteResponse> {
     return this.withReLoginRetry(async (loginKey) => {
       console.log(payload);
+      // throw new AppError("Not implemented");
 
       const { data } = await this.client.post<AcceptNegotiationQuoteResponse>(
         "/negotiation/accept",

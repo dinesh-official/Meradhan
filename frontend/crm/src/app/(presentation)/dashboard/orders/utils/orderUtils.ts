@@ -78,3 +78,102 @@ export function getBondRating(bondDetails: Order["bondDetails"]): string {
   }
   return "";
 }
+
+function pricingNumber(
+  pricing: Record<string, unknown> | undefined,
+  key: string,
+): number | undefined {
+  const v = pricing?.[key];
+  if (v == null) return undefined;
+  const n = typeof v === "number" ? v : Number(v);
+  return Number.isFinite(n) ? n : undefined;
+}
+
+function asFiniteNumber(value: unknown): number | undefined {
+  if (value == null) return undefined;
+  const n = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(n) ? n : undefined;
+}
+
+export function formatInrList(n: number | undefined | null, digits = 2): string {
+  if (n == null || !Number.isFinite(n)) return "—";
+  return `₹${n.toLocaleString("en-IN", {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  })}`;
+}
+
+export function formatYtmList(n: number | undefined | null): string {
+  if (n == null || !Number.isFinite(n)) return "—";
+  return `${n.toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 4,
+  })}%`;
+}
+
+/** Pricing fields for CRM orders list (from checkout snapshot + order scalars). */
+export function getOrderListPricing(order: {
+  quantity: number;
+  totalAmount: string | number;
+  stampDuty?: string | number | null;
+  bondDetails?: Record<string, unknown> | null;
+}) {
+  const bondDetails = (order.bondDetails ?? {}) as Record<string, unknown>;
+  const pricing = bondDetails.pricing as Record<string, unknown> | undefined;
+
+  const cleanPrice = pricingNumber(pricing, "cleanPrice");
+  const ytm =
+    pricingNumber(pricing, "yield") ?? asFiniteNumber(bondDetails.yield);
+  const settlementAmount =
+    pricingNumber(pricing, "settlementAmount") ??
+    asFiniteNumber(order.totalAmount);
+  const stampDuty =
+    pricingNumber(pricing, "stampDuty") ?? asFiniteNumber(order.stampDuty);
+
+  return {
+    cleanPrice,
+    ytm,
+    settlementAmount,
+    quantity: order.quantity,
+    stampDuty,
+  };
+}
+
+/** Format deal/settlement business dates for the orders list. */
+export function formatOrderBusinessDate(value: unknown): string {
+  if (value == null || String(value).trim() === "") return "—";
+  const s = String(value).trim();
+  if (/^\d{1,2}-[A-Za-z]{3}-\d{4}$/i.test(s)) return s;
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+    // Prefer date-only display for ISO-ish values
+    const d = new Date(s);
+    if (!Number.isNaN(d.getTime())) {
+      return d.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
+    }
+  }
+  return s;
+}
+
+export function getOrderListDates(order: {
+  createdAt: string;
+  metadata?: Record<string, unknown> | null;
+  bondDetails?: Record<string, unknown> | null;
+}) {
+  const meta = (order.metadata ?? {}) as Record<string, unknown>;
+  const pricing = (order.bondDetails as Record<string, unknown> | undefined)
+    ?.pricing as Record<string, unknown> | undefined;
+
+  const dealDate =
+    meta.dealDate ?? pricing?.dealDate ?? null;
+  const settlementDate =
+    meta.settlementDate ?? pricing?.settlementDate ?? null;
+
+  return {
+    dealDate: formatOrderBusinessDate(dealDate),
+    settlementDate: formatOrderBusinessDate(settlementDate),
+  };
+}

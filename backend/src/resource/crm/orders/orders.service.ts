@@ -588,7 +588,16 @@ export class CrmOrdersService {
               firstName: true,
               lastName: true,
               emailAddress: true,
+              userName: true,
             },
+          },
+          orderStages: {
+            select: {
+              stage: true,
+              status: true,
+              seq: true,
+            },
+            orderBy: { seq: "asc" },
           },
         },
         orderBy: { createdAt: "desc" },
@@ -668,6 +677,7 @@ export class CrmOrdersService {
             lastName: true,
             emailAddress: true,
             phoneNo: true,
+            userName: true,
           },
         },
         orderLogs: {

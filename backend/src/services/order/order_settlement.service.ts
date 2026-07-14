@@ -24,7 +24,7 @@ import logger from "@utils/logger/logger";
 import { db } from "@core/database/database";
 import type { BondDetailsResponse } from "@packages/apiGateway";
 import { env } from "@packages/config/src/env";
-import { makeRazorpayRouteTransition } from "@services/razorpay-route/RPay-route";
+import { makeRazorpayRouteTransition, resolveRazorpayRouteEligibility } from "@services/razorpay-route/RPay-route";
 import { CrmOrdersService } from "@resource/crm/orders/orders.service";
 import { CustomerProfileRepo } from "@resource/crm/customers/customer.repo";
 import crypto from "crypto";
@@ -424,41 +424,78 @@ export class OrderSettlementService {
         },
         fn: () => this.updateOrderStatus(orderId),
       });
-      if (isNetBanking) {
-        // Settlement Razorpay-route-transfer requires a Meradhan customer
-        // (we route payouts to the customer's linked virtual account).
-        // Participant-counterparty orders never trigger this branch
-        // because they're created without a payment / Razorpay path.
-        if (order.customerProfileId == null) {
+      if (order.paymentId?.trim()) {
+        // Live pre-check before routing: actual status + netbanking method.
+        const routePayId = order.paymentId.trim();
+        const eligibility =
+          await resolveRazorpayRouteEligibility(routePayId);
+
+        if (eligibility.skipReason === "not_netbanking") {
+          await this.addAutomationLog({
+            orderId: order.id,
+            paymentId,
+            batchId,
+            step: "RAZORPAY_ROUTE_TRANSFER",
+            status: "SUCCESS",
+            message: "Skipped Razorpay route transfer (not netbanking)",
+            inputData: {
+              payId: routePayId,
+              razorpayStatus: eligibility.payment.status,
+              razorpayMethod: eligibility.payment.method ?? null,
+            },
+            outputData: {
+              skipped: true,
+              reason: "not_netbanking",
+            },
+            completedAt: new Date(),
+          });
+        } else if (!eligibility.canRoute) {
           throw new Error(
-            "Razorpay route transfer requested for a participant-counterparty order; this is not supported.",
+            eligibility.blockReason ??
+              "Payment not ready for Razorpay route transfer",
           );
-        }
-        const customerProfileId = order.customerProfileId;
-        await this.runWithAutomationLog({
-          orderId: order.id,
-          paymentId,
-          batchId,
-          step: "RAZORPAY_ROUTE_TRANSFER",
-          message: "Create Razorpay route transfer",
-          inputData: {
-            amount: Number(order.totalAmount),
-            payId: order.paymentId || "",
-            userId: customerProfileId,
-            rfqNumber: addIsinResponse.rfqNumber,
-            isin: addIsinResponse.isin,
-          },
-          fn: () =>
-            makeRazorpayRouteTransition({
-              amount: Number(order.totalAmount.toFixed(4)),
-              payId: order.paymentId || "",
+        } else {
+          // Settlement Razorpay-route-transfer requires a Meradhan customer
+          // (we route payouts to the customer's linked virtual account).
+          // Participant-counterparty orders never trigger this branch
+          // because they're created without a payment / Razorpay path.
+          if (order.customerProfileId == null) {
+            throw new Error(
+              "Razorpay route transfer requested for a participant-counterparty order; this is not supported.",
+            );
+          }
+          const customerProfileId = order.customerProfileId;
+          await this.runWithAutomationLog({
+            orderId: order.id,
+            paymentId,
+            batchId,
+            step: "RAZORPAY_ROUTE_TRANSFER",
+            message: "Create Razorpay route transfer",
+            inputData: {
+              amount: Number(order.totalAmount),
+              payId: routePayId,
               userId: customerProfileId,
-              notes: {
-                RFQ_NUMBER: addIsinResponse.rfqNumber,
-                UCC: order?.customerProfile?.nseDataSet?.participant?.loginId
-              }
-            }),
-        });
+              rfqNumber: addIsinResponse.rfqNumber,
+              isin: addIsinResponse.isin,
+              razorpayStatus: eligibility.payment.status,
+              razorpayMethod: eligibility.payment.method ?? null,
+            },
+            fn: () =>
+              makeRazorpayRouteTransition({
+                amount: Number(order.totalAmount.toFixed(4)),
+                payId: routePayId,
+                userId: customerProfileId,
+                notes: {
+                  RFQ_NUMBER: addIsinResponse.rfqNumber,
+                  UCC: order?.customerProfile?.nseDataSet?.participant?.loginId
+                }
+              }),
+          });
+        }
+      } else if (isNetBanking) {
+        throw new Error(
+          "No Razorpay paymentId on order — cannot verify payment or create route transfer",
+        );
       }
 
       await this.addAutomationLog({
@@ -1823,17 +1860,32 @@ BSE Member ID: 6963`;
           }
         }
 
-        // Skip PG API for non-netbanking — only when we reach this stage after priors succeed.
-        if (
-          stageRow.stage === OrderPipelineStage.PG_ROUTING &&
-          !isNetBanking
-        ) {
-          await this.markStageSuccess(stageRow, {
-            payload: { skipped: true, reason: "not_netbanking" },
-            response: { skipped: true, reason: "not_netbanking" },
-          });
-          completedStages.add(stageRow.stage);
-          continue;
+        // Skip PG API for non-netbanking only after live Razorpay method check.
+        // Do not trust the job/cron isNetBanking flag alone.
+        if (stageRow.stage === OrderPipelineStage.PG_ROUTING) {
+          const routePayId = order.paymentId?.trim() || "";
+          if (routePayId) {
+            const eligibility =
+              await resolveRazorpayRouteEligibility(routePayId);
+            if (eligibility.skipReason === "not_netbanking") {
+              await this.markStageSuccess(stageRow, {
+                payload: {
+                  skipped: true,
+                  reason: "not_netbanking",
+                  razorpayStatus: eligibility.payment.status,
+                  razorpayMethod: eligibility.payment.method ?? null,
+                },
+                response: {
+                  skipped: true,
+                  reason: "not_netbanking",
+                  razorpayStatus: eligibility.payment.status,
+                  razorpayMethod: eligibility.payment.method ?? null,
+                },
+              });
+              completedStages.add(stageRow.stage);
+              continue;
+            }
+          }
         }
 
         const waitingRow = await this.markStageWaiting(stageRow);
@@ -1991,7 +2043,40 @@ BSE Member ID: 6963`;
               (await this.getRfqNumber(order)) ??
               "";
             const routeAmount = Number(order.totalAmount.toFixed(4));
-            const routePayId = order.paymentId || "";
+            const routePayId = order.paymentId?.trim() || "";
+            if (!routePayId) {
+              throw new Error(
+                "No Razorpay paymentId on order — cannot verify payment or create route transfer",
+              );
+            }
+
+            // Live pre-check: payment status + netbanking method before routing funds.
+            const eligibility =
+              await resolveRazorpayRouteEligibility(routePayId);
+            payload.razorpayPaymentStatus = eligibility.payment.status;
+            payload.razorpayPaymentMethod =
+              eligibility.payment.method ?? null;
+            payload.isNetBanking = eligibility.isNetBanking;
+
+            if (eligibility.skipReason === "not_netbanking") {
+              response = {
+                skipped: true,
+                reason: "not_netbanking",
+                razorpayStatus: eligibility.payment.status,
+                razorpayMethod: eligibility.payment.method ?? null,
+              };
+              await this.markStageSuccess(waitingRow, { payload, response });
+              completedStages.add(stageRow.stage);
+              continue;
+            }
+
+            if (!eligibility.canRoute) {
+              throw new Error(
+                eligibility.blockReason ??
+                  "Payment not ready for Razorpay route transfer",
+              );
+            }
+
             const routeUcc =
               order.customerProfile?.nseDataSet?.participant?.loginId;
             payload.rfqNumber = rfqNumber;
@@ -2008,6 +2093,8 @@ BSE Member ID: 6963`;
                 userId: customerProfileId,
                 rfqNumber,
                 isin: addIsinSnapshot.isin ?? order.isin,
+                razorpayStatus: eligibility.payment.status,
+                razorpayMethod: eligibility.payment.method ?? null,
               },
               fn: () =>
                 makeRazorpayRouteTransition({
@@ -2022,6 +2109,8 @@ BSE Member ID: 6963`;
             });
             response = {
               transfer: transferResult as unknown as Record<string, unknown>,
+              razorpayStatus: eligibility.payment.status,
+              razorpayMethod: eligibility.payment.method ?? null,
             };
             order = (await getOrderData()) ?? order;
           } else {

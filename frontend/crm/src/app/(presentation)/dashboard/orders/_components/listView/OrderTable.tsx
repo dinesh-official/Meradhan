@@ -3,11 +3,18 @@
 import { UniversalTable } from "@/global/elements/table/UniversalTable";
 import { CrmOrder } from "@root/apiGateway";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
-import { getBondRating, getBondType } from "../../utils/orderUtils";
+import {
+  formatInrList,
+  formatYtmList,
+  getBondRating,
+  getOrderListDates,
+  getOrderListPricing,
+} from "../../utils/orderUtils";
 import { FaEye } from "react-icons/fa6";
 import OrderStatusBadge from "@/global/elements/wrapper/badges/OrderStatusBadge";
 import { useRouter } from "next/navigation";
 import { encodeId } from "@/global/utils/url.utils";
+import SettlementStageDots from "./SettlementStageDots";
 
 interface OrderTableProps {
   data: CrmOrder[];
@@ -33,8 +40,9 @@ function OrderTable({ data, pageSize = 10, isLoading }: OrderTableProps) {
             const paymentId = row.paymentId || row.paymentOrderId || "";
             const rfq = row.reqOrderNumber || "";
             return (
-              <div className="flex flex-col">
+              <div className="flex flex-col gap-1">
                 <span className="font-medium">{row.orderNumber}</span>
+                <SettlementStageDots stages={row.orderStages} />
                 <span className="text-muted-foreground text-xs font-mono">
                   {isin} · {rating}
                 </span>
@@ -77,6 +85,11 @@ function OrderTable({ data, pageSize = 10, isLoading }: OrderTableProps) {
                 <span className="font-medium">
                   {row.customerProfile.firstName} {row.customerProfile.lastName}
                 </span>
+                {row.customerProfile.userName ? (
+                  <span className="text-muted-foreground text-xs font-mono">
+                    {row.customerProfile.userName}
+                  </span>
+                ) : null}
                 <span className="text-muted-foreground text-xs">
                   {row.customerProfile.emailAddress}
                 </span>
@@ -85,33 +98,84 @@ function OrderTable({ data, pageSize = 10, isLoading }: OrderTableProps) {
           },
         },
         {
-          key: "bondDetails",
-          label: "Bond Type",
-          cell: (row) => getBondType(row.bondDetails),
-        },
-        {
-          key: "quantity",
-          label: "Quantity",
-          type: "number",
-        },
-        {
-          key: "totalAmount",
-          label: "Value",
-          type: "currency",
-          currency: "INR",
-          currencyFractionDigits: 4,
+          key: "pricing",
+          label: "Pricing",
+          sortable: false,
+          cell: (row) => {
+            const p = getOrderListPricing(row);
+            return (
+              <div className="flex flex-col gap-0.5 text-xs tabular-nums min-w-[140px]">
+                <div className="flex justify-between gap-3">
+                  <span className="text-muted-foreground">Clean</span>
+                  <span className="font-medium text-foreground">
+                    {p.cleanPrice != null
+                      ? p.cleanPrice.toLocaleString("en-IN", {
+                          minimumFractionDigits: 4,
+                          maximumFractionDigits: 4,
+                        })
+                      : "—"}
+                  </span>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span className="text-muted-foreground">YTM</span>
+                  <span className="font-medium text-foreground">
+                    {formatYtmList(p.ytm)}
+                  </span>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span className="text-muted-foreground">Settlement</span>
+                  <span className="font-medium text-foreground">
+                    {formatInrList(p.settlementAmount)}
+                  </span>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span className="text-muted-foreground">Qty</span>
+                  <span className="font-medium text-foreground">
+                    {p.quantity.toLocaleString("en-IN")}
+                  </span>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span className="text-muted-foreground">Stamp duty</span>
+                  <span className="font-medium text-foreground">
+                    {formatInrList(p.stampDuty)}
+                  </span>
+                </div>
+              </div>
+            );
+          },
         },
         {
           key: "createdAt",
-          label: "Request Date",
-          cell: (row) => (
-            <div>
-              {dateTimeUtils.formatDateTime(
-                row.createdAt,
-                "DD MMM YYYY hh:mm AA"
-              )}
-            </div>
-          ),
+          label: "Dates",
+          sortable: false,
+          cell: (row) => {
+            const dates = getOrderListDates(row);
+            return (
+              <div className="flex flex-col gap-0.5 text-xs min-w-[150px]">
+                <div className="flex justify-between gap-3">
+                  <span className="text-muted-foreground">Request</span>
+                  <span className="font-medium text-foreground tabular-nums">
+                    {dateTimeUtils.formatDateTime(
+                      row.createdAt,
+                      "DD MMM YYYY hh:mm AA",
+                    )}
+                  </span>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span className="text-muted-foreground">Deal</span>
+                  <span className="font-medium text-foreground tabular-nums">
+                    {dates.dealDate}
+                  </span>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span className="text-muted-foreground">Settlement</span>
+                  <span className="font-medium text-foreground tabular-nums">
+                    {dates.settlementDate}
+                  </span>
+                </div>
+              </div>
+            );
+          },
         },
         {
           key: "status",

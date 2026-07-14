@@ -132,7 +132,7 @@ export const ORDER_STAGE_SEQUENCE = [
   { stage: OrderPipelineStage.PG_ROUTING, seq: 5 },
 ] as const;
 
-export const ORDER_STAGE_MAX_ATTEMPTS = 5;
+export const ORDER_STAGE_MAX_ATTEMPTS = 20;
 
 export const ORDER_STAGE_LOCK_TTL_SECONDS = 900; // 15 minutes
 

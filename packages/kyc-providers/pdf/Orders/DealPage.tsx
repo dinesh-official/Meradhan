@@ -142,6 +142,17 @@ export default function DealPage({
     })}`;
   };
 
+  const resolveYieldPct = (): string => {
+    const fromPricing = orderData?.bondDetails?.pricing?.yield;
+    const fromBond = bond.yield;
+    const raw = fromPricing ?? fromBond;
+    if (raw == null || raw === "") return "N/A";
+    const n = typeof raw === "number" ? raw : Number(String(raw).replace(/,/g, "").trim());
+    if (!Number.isFinite(n)) return "N/A";
+    return `${n.toFixed(2)}%`;
+  };
+  const yieldDisplay = resolveYieldPct();
+
   // Interest payment schedule from order date to maturity based on bond frequency
   const interestSchedule = getInterestPaymentSchedule({
     orderDate,
@@ -198,7 +209,11 @@ export default function DealPage({
         ? (bond as { natureOfInstrument?: string }).natureOfInstrument
         : null) || "N.A",
     ],
-    ["Coupon Rate", `${bond.couponRate.toFixed(2) || "N/A"} % `],
+    [
+      "Coupon Rate",
+      `${bond.couponRate.toFixed(2) || "N/A"} % `,
+      `Yield: ${yieldDisplay}`,
+    ],
     [
       "Interest Payment Date",
       `${orderData?.metadata?.interestPaymentFrequencyLabel ?? interestSchedule.frequencyLabel}
