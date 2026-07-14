@@ -503,7 +503,7 @@ jobs:
                 --push \
                 .
 
-              docker push "$IMAGE"
+              #docker push "$IMAGE"
 
               echo "Completed : $REPOSITORY"
             ) &
