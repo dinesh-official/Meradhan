@@ -8,6 +8,7 @@ import { OrderService } from "@resource/customer/order/order.service";
 import logger from "@utils/logger/logger";
 import axios from "axios";
 import { S3DailyLogger } from "../../../log/s3logger";
+import { OrderSettlementService } from "@services/order/order_settlement.service";
 
 type RazorpayPayment = {
   id: string;
@@ -331,14 +332,24 @@ export class PaymentReconciliationService {
               const isNetBanking =
                 typeof payment?.method === "string" ? payment.method === "netbanking" : false;
 
-              await orderSettlementQueue.add({
-                type: "orderSettlement",
-                id: order.id,
-                paymentOrderId: order.paymentOrderId,
-                paymentId,
-                paymentEntity: payment,
-                isNetBanking,
-              });
+              const settlementService = new OrderSettlementService();
+              await settlementService.seedOrderStages(order.id, { isNetBanking });
+
+              const settlementJobId = `order-settlement-${order.id}`;
+              const existingJob = await orderSettlementQueue.getJob(settlementJobId);
+              if (!existingJob) {
+                await orderSettlementQueue.add(
+                  {
+                    type: "orderSettlement",
+                    id: order.id,
+                    paymentOrderId: order.paymentOrderId,
+                    paymentId,
+                    paymentEntity: payment,
+                    isNetBanking,
+                  },
+                  { jobId: settlementJobId },
+                );
+              }
 
               queuedSettlement++;
               await this.orderService.addOrderLog(
@@ -538,14 +549,24 @@ export class PaymentReconciliationService {
             { razorpayPayment: payment },
           );
 
-          await orderSettlementQueue.add({
-            type: "orderSettlement",
-            id: order.id,
-            paymentOrderId,
-            paymentId: payment.id,
-            paymentEntity: payment,
-            isNetBanking,
-          });
+          const settlementService = new OrderSettlementService();
+          await settlementService.seedOrderStages(order.id, { isNetBanking });
+
+          const settlementJobId = `order-settlement-${order.id}`;
+          const existingJob = await orderSettlementQueue.getJob(settlementJobId);
+          if (!existingJob) {
+            await orderSettlementQueue.add(
+              {
+                type: "orderSettlement",
+                id: order.id,
+                paymentOrderId,
+                paymentId: payment.id,
+                paymentEntity: payment,
+                isNetBanking,
+              },
+              { jobId: settlementJobId },
+            );
+          }
 
           recovered++;
           queuedSettlement++;

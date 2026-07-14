@@ -3,6 +3,7 @@ import "./cron/nseIsin_cron";
 import "./cron/kyc_reports.cron";
 import "./cron/payment_reconciliation.cron";
 import "./cron/bond_reminders.cron";
+import "./cron/order_stage_reconciliation.cron";
 // Temporarily disabled: bond auto-update / reference schedule sync cron.
 // import "./cron/bond_reference_schedules.cron";
 

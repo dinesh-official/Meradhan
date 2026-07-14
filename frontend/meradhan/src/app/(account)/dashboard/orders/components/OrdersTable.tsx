@@ -93,6 +93,7 @@ function OrdersTable({ orders, isLoading }: OrdersTableProps) {
                   order.status,
                   order.paymentStatus,
                   order.settleStatus,
+                  order.paymentProvider,
                 );
                 const tradeDate = formatOrderHistoryDate(order.createdAt);
                 const settlementDate = formatOrderHistoryDate(

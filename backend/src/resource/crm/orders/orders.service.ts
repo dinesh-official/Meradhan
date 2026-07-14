@@ -30,6 +30,7 @@ import { encryptPdfBufferWithPassword } from "@utils/encryptPdfBuffer";
 import { getBondInfoCalcData } from "@resource/bonds/fill-bonds-auto";
 import { OrderService } from "@resource/customer/order/order.service";
 import { orderSettlementQueue } from "@jobs/queue/worker_queues";
+import { OrderSettlementService } from "@services/order/order_settlement.service";
 
 function formatDraftOrderCustomerName(profile: {
   firstName: string;
@@ -648,6 +649,14 @@ export class CrmOrdersService {
   }
 
   async getOrderById(orderId: number) {
+    // Fix misleading timeline: pg_routing Done while an earlier stage is Failed.
+    try {
+      const settlementService = new OrderSettlementService();
+      await settlementService.repairPrematurePgRoutingSuccess(orderId);
+    } catch {
+      // Non-fatal — still return order details
+    }
+
     const order = await db.dataBase.order.findUnique({
       where: { id: orderId },
       include: {
@@ -655,6 +664,7 @@ export class CrmOrdersService {
           select: {
             id: true,
             firstName: true,
+            middleName: true,
             lastName: true,
             emailAddress: true,
             phoneNo: true,
@@ -662,6 +672,9 @@ export class CrmOrdersService {
         },
         orderLogs: {
           orderBy: { createdAt: "desc" },
+        },
+        orderStages: {
+          orderBy: { seq: "asc" },
         },
         customerBonds: true,
       },
@@ -724,6 +737,7 @@ export class CrmOrdersService {
           select: {
             id: true,
             firstName: true,
+            middleName: true,
             lastName: true,
             emailAddress: true,
             phoneNo: true,
@@ -2735,13 +2749,20 @@ export class CrmOrdersService {
     const orderService = new OrderService();
 
     await orderService.updateOrderStatus(order.id, "APPLIED");
-    const job = await orderSettlementQueue.add(
-      {
-        type: "orderSettlement",
-        id: order.id,
-        isNetBanking: false,
-      }
-    );
+    const settlementService = new OrderSettlementService();
+    await settlementService.seedOrderStages(order.id, { isNetBanking: false });
+    const settlementJobId = `order-settlement-${order.id}`;
+    const existingJob = await orderSettlementQueue.getJob(settlementJobId);
+    if (!existingJob) {
+      await orderSettlementQueue.add(
+        {
+          type: "orderSettlement",
+          id: order.id,
+          isNetBanking: false,
+        },
+        { jobId: settlementJobId },
+      );
+    }
     return result;
   }
 
@@ -2792,6 +2813,109 @@ export class CrmOrdersService {
     return {
       id: updated.id,
       status: (updated as { status: OrderStatus }).status,
+    };
+  }
+
+  /**
+   * CRM: enqueue resume-safe settlement.
+   * Starts at the first non-success stage (usually the failed one). The worker
+   * retries that stage, then continues forward only if it succeeds.
+   */
+  async resumeOrderSettlement(orderId: number): Promise<{
+    orderId: number;
+    orderNumber: string;
+    queued: boolean;
+    jobId: string;
+    resumeFromStage: string | null;
+    resumeFromSeq: number | null;
+  }> {
+    const order = await db.dataBase.order.findUnique({
+      where: { id: orderId },
+      select: {
+        id: true,
+        orderNumber: true,
+        paymentMetadata: true,
+        paymentStatus: true,
+      },
+    });
+    if (!order) {
+      throw new AppError("Order not found", {
+        statusCode: HttpStatus.NOT_FOUND,
+        code: "ORDER_NOT_FOUND",
+      });
+    }
+
+    const meta = (order.paymentMetadata ?? {}) as Record<string, unknown>;
+    const nestedMethod = (
+      meta as {
+        payload?: { payment?: { entity?: { method?: string } } };
+      }
+    ).payload?.payment?.entity?.method;
+    const method =
+      typeof meta.method === "string"
+        ? meta.method
+        : typeof nestedMethod === "string"
+          ? nestedMethod
+          : null;
+    const isNetBanking = method === "netbanking";
+
+    const settlementService = new OrderSettlementService();
+    await settlementService.seedOrderStages(order.id, { isNetBanking });
+
+    const stages = await db.dataBase.orderStage.findMany({
+      where: { orderId: order.id },
+      orderBy: { seq: "asc" },
+      select: { stage: true, seq: true, status: true },
+    });
+    const next = stages.find((s) => s.status !== 1) ?? null;
+    const resumeFromStage = next?.stage ?? null;
+    const resumeFromSeq = next?.seq ?? null;
+
+    if (!next) {
+      return {
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        queued: false,
+        jobId: `order-settlement-${order.id}`,
+        resumeFromStage: null,
+        resumeFromSeq: null,
+      };
+    }
+
+    const settlementJobId = `order-settlement-${order.id}`;
+    const existingJob = await orderSettlementQueue.getJob(settlementJobId);
+    if (existingJob) {
+      const state = await existingJob.getState();
+      if (state === "active" || state === "waiting" || state === "delayed") {
+        return {
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+          queued: false,
+          jobId: settlementJobId,
+          resumeFromStage,
+          resumeFromSeq,
+        };
+      }
+      await existingJob.remove().catch(() => undefined);
+    }
+
+    await orderSettlementQueue.add(
+      {
+        type: "orderSettlement",
+        id: order.id,
+        isNetBanking,
+        forceResume: true,
+      },
+      { jobId: settlementJobId },
+    );
+
+    return {
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      queued: true,
+      jobId: settlementJobId,
+      resumeFromStage,
+      resumeFromSeq,
     };
   }
 }

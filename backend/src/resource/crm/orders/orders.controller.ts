@@ -437,6 +437,68 @@ export class CrmOrdersController {
     }
   };
 
+  /**
+   * Enqueue resume-safe settlement from the first incomplete/failed stage.
+   */
+  resumeOrderSettlement = async (req: Request, res: Response) => {
+    const orderId = Number(req.params.id);
+    if (!orderId || isNaN(orderId)) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid order ID",
+      });
+    }
+    try {
+      const result = await this.ordersService.resumeOrderSettlement(orderId);
+      await createCrmActivityLog(req, {
+        userId: Number(req.session?.id),
+        action: "ORDER_SETTLEMENT_RESUME",
+        details: {
+          Reason: result.queued
+            ? "Settlement resume job queued"
+            : result.resumeFromStage
+              ? "Settlement job already active"
+              : "Settlement pipeline already complete",
+          OrderId: result.orderId,
+          OrderNumber: result.orderNumber,
+          JobId: result.jobId,
+          Queued: result.queued,
+          ResumeFromStage: result.resumeFromStage,
+          ResumeFromSeq: result.resumeFromSeq,
+        },
+        entityType: "order",
+        entityId: String(orderId),
+      });
+
+      const stageLabel = result.resumeFromStage
+        ? String(result.resumeFromStage).replace(/_/g, " ")
+        : null;
+      const message = !result.resumeFromStage
+        ? "Settlement pipeline already complete — nothing to resume"
+        : result.queued
+          ? `Resuming settlement from step: ${stageLabel}`
+          : `Settlement already in progress (will continue from: ${stageLabel})`;
+
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        message,
+        responseData: result,
+      });
+    } catch (err) {
+      if (err instanceof AppError) {
+        return res.sendResponse({
+          statusCode: err.statusCode,
+          message: err.message,
+        });
+      }
+      return res.sendResponse({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message:
+          err instanceof Error ? err.message : "Failed to resume settlement",
+      });
+    }
+  };
+
   getPaymentGatewaySettings = async (_req: Request, res: Response) => {
     const paymentGatewayMode =
       await this.appConfigService.getPaymentGatewayMode();

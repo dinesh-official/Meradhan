@@ -26,6 +26,11 @@ import {
   ChevronDown,
   Mail,
   FileDown,
+  Info,
+  Landmark,
+  Handshake,
+  CircleCheck,
+  Route,
 } from "lucide-react";
 import {
   Collapsible,
@@ -43,6 +48,17 @@ import {
 import { payinDateTimeToPickerValue } from "@/global/utils/receiptPdfOptions.utils";
 import { OrderPdfDownloadDialog } from "../_components/OrderPdfDownloadDialog";
 import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
+
+const SETTLEMENT_STAGE_META: Record<
+  string,
+  { label: string; Icon: typeof FileText }
+> = {
+  add_isin: { label: "Add ISIN", Icon: FileText },
+  quote_accept: { label: "Quote Accept", Icon: Handshake },
+  deal_propose: { label: "Deal Propose", Icon: Landmark },
+  deal_accept: { label: "Deal Accept", Icon: CircleCheck },
+  pg_routing: { label: "PG Routing", Icon: Route },
+};
 
 // Helper functions to safely extract values from Record<string, unknown>
 const getBondDetail = (
@@ -126,6 +142,9 @@ function OrderDetailsView() {
   } | null>(null);
 
   const [settleDialogOpen, setSettleDialogOpen] = useState(false);
+  const [resumeConfirmOpen, setResumeConfirmOpen] = useState(false);
+  const [stageDetailsId, setStageDetailsId] = useState<number | null>(null);
+  const [resumeSubmitted, setResumeSubmitted] = useState(false);
   const [settleResult, setSettleResult] = useState<{
     ok: boolean;
     message: string;
@@ -261,7 +280,69 @@ function OrderDetailsView() {
     },
   });
 
+  const resumeSettlementMutation = useMutation({
+    mutationFn: () => apiCaller.resumeOrderSettlement(orderId),
+    onSuccess: () => {
+      setResumeConfirmOpen(false);
+      setStageDetailsId(null);
+      // Keep resume controls disabled until stages refresh (WAITING/progress)
+      queryClient.invalidateQueries({ queryKey: ["crm-order", orderId] });
+      window.setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["crm-order", orderId] });
+        setResumeSubmitted(false);
+      }, 4000);
+    },
+    onError: () => {
+      // Allow retry after a failed queue request
+      setResumeSubmitted(false);
+    },
+  });
+
   const order = data?.responseData;
+
+  const pipelineStages = Array.isArray(order?.orderStages)
+    ? [...order.orderStages].sort((a, b) => a.seq - b.seq)
+    : [];
+  const nextResumeStage =
+    pipelineStages.find((s) => s.status !== 1) ?? null;
+  const hasFailedStage = pipelineStages.some((s) => s.status === 2);
+  const hasWaitingStage = pipelineStages.some((s) => s.status === 3);
+  const pipelineIncomplete = pipelineStages.some((s) => s.status !== 1);
+  const resumeInFlight =
+    resumeSubmitted ||
+    resumeSettlementMutation.isPending ||
+    hasWaitingStage;
+  const canResumeSettlement =
+    pipelineStages.length > 0 && pipelineIncomplete;
+  const resumeStageLabel = nextResumeStage
+    ? (SETTLEMENT_STAGE_META[nextResumeStage.stage]?.label ??
+      nextResumeStage.stage.replace(/_/g, " "))
+    : null;
+  const selectedStageDetails =
+    stageDetailsId == null
+      ? null
+      : (pipelineStages.find((s) => s.id === stageDetailsId) ?? null);
+
+  const stageStatusLabel = (status: number) =>
+    status === 1
+      ? "SUCCESS"
+      : status === 2
+        ? "FAILED"
+        : status === 3
+          ? "WAITING"
+          : "NOT STARTED";
+
+  const requestResumeSettlement = () => {
+    if (resumeInFlight) return;
+    // Always confirm when restarting after a break / incomplete pipeline
+    setResumeConfirmOpen(true);
+  };
+
+  const confirmResumeSettlement = () => {
+    if (resumeInFlight) return;
+    setResumeSubmitted(true);
+    resumeSettlementMutation.mutate();
+  };
 
   const openPdfDialog = (type: "order" | "deal") => {
     setPdfDialogType(type);
@@ -338,6 +419,13 @@ function OrderDetailsView() {
   const pricingStampDutyValue = pricingNumber("stampDuty");
   const accrualDaysValue = pricingNumber("noOfAccrualDays");
   const settlementAmountValue = pricingNumber("settlementAmount");
+  // Offered / sell yield from checkout snapshot (`pricing.yield`), then bondDetails.yield.
+  const yieldValue =
+    pricingNumber("yield") ??
+    getBondDetailNumber(
+      (order.bondDetails as Record<string, unknown>) ?? {},
+      "yield",
+    );
 
   const hasPricingSnapshot =
     orderPricing != null &&
@@ -347,6 +435,7 @@ function OrderDetailsView() {
       accruedInterestValue,
       totalConsiderationValue,
       settlementAmountValue,
+      yieldValue,
     ].some((v) => v != null);
 
   const stampDutyDisplay =
@@ -779,8 +868,14 @@ function OrderDetailsView() {
                   <div>
                     <p className="text-sm text-muted-foreground">Name</p>
                     <p className="font-medium">
-                      {order.customerProfile.firstName}{" "}
-                      {order.customerProfile.lastName}
+                      {[
+                        order.customerProfile.firstName,
+                        order.customerProfile.middleName,
+                        order.customerProfile.lastName,
+                      ]
+                        .map((p) => (typeof p === "string" ? p.trim() : ""))
+                        .filter(Boolean)
+                        .join(" ")}
                     </p>
                   </div>
                   <div>
@@ -1437,6 +1532,419 @@ function OrderDetailsView() {
             </CardContent>
           </Card>
 
+          {/* Settlement Pipeline — Stage Timeline */}
+          <Card>
+            <CardHeader>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle>Settlement Pipeline</CardTitle>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Workflow stages for NSE settlement. Click a step for request/response
+                  details. Successful steps are skipped on resume.
+                </p>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {resumeSettlementMutation.isSuccess ? (
+                <p className="mb-3 text-sm text-green-600">
+                  {resumeSettlementMutation.data?.message ??
+                    "Settlement resume requested."}
+                </p>
+              ) : null}
+              {resumeSettlementMutation.isError ? (
+                <p className="mb-3 text-sm text-red-600">
+                  {(
+                    resumeSettlementMutation.error as {
+                      response?: { data?: { message?: string } };
+                      message?: string;
+                    }
+                  )?.response?.data?.message ||
+                    (resumeSettlementMutation.error as { message?: string })
+                      ?.message ||
+                    "Failed to resume settlement"}
+                </p>
+              ) : null}
+
+              {pipelineStages.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="w-full overflow-x-auto rounded-lg border border-border bg-muted/20 p-4">
+                    <div
+                      className="grid min-w-[640px] items-start gap-0"
+                      style={{
+                        gridTemplateColumns: `repeat(${pipelineStages.length}, minmax(0, 1fr))`,
+                      }}
+                    >
+                      {pipelineStages.map((stage, index) => {
+                        const meta =
+                          SETTLEMENT_STAGE_META[stage.stage] ?? {
+                            label: stage.stage.replace(/_/g, " "),
+                            Icon: FileText,
+                          };
+                        const StageIcon = meta.Icon;
+                        const isSuccess = stage.status === 1;
+                        const isFailed = stage.status === 2;
+                        const isWaiting = stage.status === 3;
+                        const stagePayload =
+                          stage.payload && typeof stage.payload === "object"
+                            ? (stage.payload as Record<string, unknown>)
+                            : {};
+                        const stageResponse =
+                          stage.response && typeof stage.response === "object"
+                            ? (stage.response as Record<string, unknown>)
+                            : {};
+                        const isSkippedSuccess =
+                          isSuccess &&
+                          (stagePayload.skipped === true ||
+                            stageResponse.skipped === true);
+                        const isNext = nextResumeStage?.id === stage.id;
+                        const isActive = isSuccess || isWaiting || isNext;
+                        const stamp =
+                          isSuccess || isFailed || isWaiting
+                            ? dateTimeUtils.formatDateTime(
+                                stage.updatedAt,
+                                "DD MMM YY HH:mm",
+                              )
+                            : "—";
+                        const showConnector = index < pipelineStages.length - 1;
+                        const connectorDone = isSuccess;
+                        const retriesLabel = `${stage.attemptCount}/5`;
+
+                        return (
+                          <div
+                            key={stage.id}
+                            className="relative flex flex-col items-center px-1 text-center"
+                          >
+                            {showConnector ? (
+                              <div
+                                className={`pointer-events-none absolute top-5 left-1/2 h-0.5 w-full ${
+                                  connectorDone
+                                    ? "bg-primary"
+                                    : "bg-border"
+                                }`}
+                                aria-hidden
+                              />
+                            ) : null}
+
+                            <button
+                              type="button"
+                              onClick={() => setStageDetailsId(stage.id)}
+                              title={`View ${meta.label} details`}
+                              className={`relative z-[1] flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors cursor-pointer hover:opacity-90 ${
+                                isFailed
+                                  ? "border-destructive bg-destructive text-white"
+                                  : isWaiting
+                                    ? "border-yellow-500 bg-yellow-500 text-white"
+                                    : isSkippedSuccess
+                                      ? "border-muted-foreground/40 bg-muted text-muted-foreground"
+                                      : isSuccess
+                                      ? "border-primary bg-primary text-primary-foreground"
+                                      : isNext
+                                        ? "border-primary bg-background text-primary ring-2 ring-primary/20"
+                                        : "border-border bg-muted text-muted-foreground"
+                              }`}
+                            >
+                              {isFailed ? (
+                                <XCircle className="h-5 w-5 text-white stroke-[2.5]" />
+                              ) : isSuccess ? (
+                                <CheckCircle2 className="h-5 w-5" />
+                              ) : (
+                                <StageIcon className="h-4 w-4" />
+                              )}
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => setStageDetailsId(stage.id)}
+                              className={`mt-2 text-sm font-medium capitalize hover:underline ${
+                                isFailed
+                                  ? "text-destructive"
+                                  : isActive
+                                    ? "text-foreground"
+                                    : "text-muted-foreground"
+                              }`}
+                            >
+                              {meta.label}
+                            </button>
+                            <p className="mt-0.5 text-xs text-muted-foreground">
+                              {stamp}
+                            </p>
+                            <p
+                              className={`mt-0.5 text-[11px] font-medium ${
+                                stage.attemptCount > 0
+                                  ? "text-foreground"
+                                  : "text-muted-foreground"
+                              }`}
+                            >
+                              Retries {retriesLabel}
+                            </p>
+                            {isFailed ? (
+                              <Badge variant="destructive" className="mt-1 text-[10px]">
+                                Failed
+                              </Badge>
+                            ) : isWaiting ? (
+                              <Badge variant="outline" className="mt-1 text-[10px]">
+                                Waiting
+                              </Badge>
+                            ) : isNext ? (
+                              <Badge variant="outline" className="mt-1 text-[10px]">
+                                Next
+                              </Badge>
+                            ) : isSkippedSuccess ? (
+                              <Badge variant="outline" className="mt-1 text-[10px]">
+                                Skipped
+                              </Badge>
+                            ) : isSuccess ? (
+                              <Badge variant="secondary" className="mt-1 text-[10px]">
+                                Done
+                              </Badge>
+                            ) : null}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {nextResumeStage ? (
+                    <div
+                      className={`rounded-lg border border-border bg-muted/30 p-4 ${
+                        nextResumeStage.status === 2
+                          ? "border-destructive/40"
+                          : ""
+                      }`}
+                    >
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium">
+                            Next step:{" "}
+                            {SETTLEMENT_STAGE_META[nextResumeStage.stage]
+                              ?.label ??
+                              nextResumeStage.stage.replace(/_/g, " ")}
+                            <span className="ml-2 text-xs font-normal text-muted-foreground">
+                              Retries {nextResumeStage.attemptCount}/5
+                            </span>
+                          </p>
+                          {nextResumeStage.lastError ? (
+                            <p className="text-sm text-destructive">
+                              {nextResumeStage.lastError}
+                            </p>
+                          ) : (
+                            <p className="text-xs text-muted-foreground">
+                              Click Continue to resume the workflow from this step.
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <AllowOnlyView permissions={["edit:orders"]}>
+                            <Button
+                              size="sm"
+                              disabled={resumeInFlight}
+                              onClick={requestResumeSettlement}
+                            >
+                              {resumeInFlight ? (
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                              ) : (
+                                <RefreshCw className="h-4 w-4 mr-2" />
+                              )}
+                              {resumeInFlight ? "Resuming…" : "Continue"}
+                            </Button>
+                          </AllowOnlyView>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      All settlement stages completed successfully.
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Stages not seeded yet (pre-pipeline order or payment not completed).
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Step details: request / response / metadata */}
+          <Dialog
+            open={stageDetailsId != null}
+            onOpenChange={(open) => {
+              if (!open) setStageDetailsId(null);
+            }}
+          >
+            <DialogContent className="sm:max-w-4xl max-h-[85vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>
+                  {(selectedStageDetails &&
+                    (SETTLEMENT_STAGE_META[selectedStageDetails.stage]?.label ??
+                      selectedStageDetails.stage.replace(/_/g, " "))) ||
+                    "Stage details"}
+                </DialogTitle>
+                <DialogDescription>
+                  Request, response, and run metadata for this settlement step.
+                </DialogDescription>
+              </DialogHeader>
+
+              {selectedStageDetails ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
+                    <div className="rounded-md border bg-muted/30 p-3">
+                      <p className="text-xs text-muted-foreground">Status</p>
+                      <p className="font-medium">
+                        {stageStatusLabel(selectedStageDetails.status)}
+                      </p>
+                    </div>
+                    <div className="rounded-md border bg-muted/30 p-3">
+                      <p className="text-xs text-muted-foreground">Retries</p>
+                      <p className="font-medium">
+                        {selectedStageDetails.attemptCount}/5
+                      </p>
+                    </div>
+                    <div className="rounded-md border bg-muted/30 p-3">
+                      <p className="text-xs text-muted-foreground">Sequence</p>
+                      <p className="font-medium">#{selectedStageDetails.seq}</p>
+                    </div>
+                    <div className="rounded-md border bg-muted/30 p-3">
+                      <p className="text-xs text-muted-foreground">Order No</p>
+                      <p className="font-medium font-mono text-xs">
+                        {selectedStageDetails.orderNo}
+                      </p>
+                    </div>
+                    <div className="rounded-md border bg-muted/30 p-3">
+                      <p className="text-xs text-muted-foreground">Created</p>
+                      <p className="font-medium text-xs">
+                        {dateTimeUtils.formatDateTime(
+                          selectedStageDetails.createdAt,
+                          "DD MMM YYYY hh:mm:ss AA",
+                        )}
+                      </p>
+                    </div>
+                    <div className="rounded-md border bg-muted/30 p-3">
+                      <p className="text-xs text-muted-foreground">Updated</p>
+                      <p className="font-medium text-xs">
+                        {dateTimeUtils.formatDateTime(
+                          selectedStageDetails.updatedAt,
+                          "DD MMM YYYY hh:mm:ss AA",
+                        )}
+                      </p>
+                    </div>
+                  </div>
+
+                  {selectedStageDetails.lastError ? (
+                    <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3">
+                      <p className="mb-1 text-xs font-medium text-destructive">
+                        Last error
+                      </p>
+                      <p className="text-sm text-destructive whitespace-pre-wrap">
+                        {selectedStageDetails.lastError}
+                      </p>
+                    </div>
+                  ) : null}
+
+                  <div className="rounded-md border bg-muted/40 p-3">
+                    <p className="mb-2 text-xs font-medium text-muted-foreground">
+                      Request (payload)
+                    </p>
+                    <pre className="text-xs overflow-auto whitespace-pre-wrap max-h-56">
+                      {JSON.stringify(selectedStageDetails.payload ?? {}, null, 2)}
+                    </pre>
+                  </div>
+
+                  <div className="rounded-md border bg-muted/40 p-3">
+                    <p className="mb-2 text-xs font-medium text-muted-foreground">
+                      Response
+                    </p>
+                    <pre className="text-xs overflow-auto whitespace-pre-wrap max-h-56">
+                      {JSON.stringify(selectedStageDetails.response ?? {}, null, 2)}
+                    </pre>
+                  </div>
+                </div>
+              ) : null}
+
+              <DialogFooter className="gap-2 sm:gap-0">
+                <Button variant="outline" onClick={() => setStageDetailsId(null)}>
+                  Close
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Confirm resume / restart after failure */}
+          <Dialog
+            open={resumeConfirmOpen}
+            onOpenChange={(open) => {
+              if (resumeInFlight) return;
+              setResumeConfirmOpen(open);
+            }}
+          >
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>
+                  {hasFailedStage
+                    ? "Restart settlement from failed step?"
+                    : "Resume settlement workflow?"}
+                </DialogTitle>
+                <DialogDescription>
+                  {hasFailedStage ? (
+                    <>
+                      A previous step failed
+                      {resumeStageLabel ? (
+                        <>
+                          {" "}
+                          at <strong>{resumeStageLabel}</strong>
+                        </>
+                      ) : null}
+                      . Continuing will retry from that step only. Completed
+                      earlier steps will not be re-run on NSE / Razorpay.
+                    </>
+                  ) : (
+                    <>
+                      This will continue the settlement workflow
+                      {resumeStageLabel ? (
+                        <>
+                          {" "}
+                          from <strong>{resumeStageLabel}</strong>
+                        </>
+                      ) : null}
+                      . Completed steps are skipped automatically.
+                    </>
+                  )}
+                </DialogDescription>
+              </DialogHeader>
+              {nextResumeStage?.lastError ? (
+                <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+                  {nextResumeStage.lastError}
+                </div>
+              ) : null}
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setResumeConfirmOpen(false)}
+                  disabled={resumeInFlight}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={confirmResumeSettlement}
+                  disabled={resumeInFlight}
+                >
+                  {resumeInFlight ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                  )}
+                  {resumeInFlight
+                    ? "Resuming…"
+                    : hasFailedStage
+                      ? "Yes, continue from failed step"
+                      : "Yes, resume"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
           {/* Order Logs */}
           <Card>
             <CardHeader>
@@ -1742,6 +2250,18 @@ function OrderDetailsView() {
             <CardContent className="space-y-4">
               {hasPricingSnapshot ? (
                 <>
+                  {yieldValue != null && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Yield</span>
+                      <span className="font-medium tabular-nums">
+                        {yieldValue.toLocaleString("en-IN", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 4,
+                        })}
+                        %
+                      </span>
+                    </div>
+                  )}
                   {cleanPriceValue != null && (
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Clean Price</span>
@@ -1813,6 +2333,18 @@ function OrderDetailsView() {
                 </>
               ) : (
                 <>
+                  {yieldValue != null && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Yield</span>
+                      <span className="font-medium tabular-nums">
+                        {yieldValue.toLocaleString("en-IN", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 4,
+                        })}
+                        %
+                      </span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Subtotal</span>
                     <span className="font-medium">
