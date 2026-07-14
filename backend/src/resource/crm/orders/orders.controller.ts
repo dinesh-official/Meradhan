@@ -456,20 +456,32 @@ export class CrmOrdersController {
         details: {
           Reason: result.queued
             ? "Settlement resume job queued"
-            : "Settlement job already active",
+            : result.resumeFromStage
+              ? "Settlement job already active"
+              : "Settlement pipeline already complete",
           OrderId: result.orderId,
           OrderNumber: result.orderNumber,
           JobId: result.jobId,
           Queued: result.queued,
+          ResumeFromStage: result.resumeFromStage,
+          ResumeFromSeq: result.resumeFromSeq,
         },
         entityType: "order",
         entityId: String(orderId),
       });
+
+      const stageLabel = result.resumeFromStage
+        ? String(result.resumeFromStage).replace(/_/g, " ")
+        : null;
+      const message = !result.resumeFromStage
+        ? "Settlement pipeline already complete — nothing to resume"
+        : result.queued
+          ? `Resuming settlement from step: ${stageLabel}`
+          : `Settlement already in progress (will continue from: ${stageLabel})`;
+
       return res.sendResponse({
         statusCode: HttpStatus.OK,
-        message: result.queued
-          ? "Settlement resume queued from last failed stage"
-          : "Settlement job already in progress",
+        message,
         responseData: result,
       });
     } catch (err) {

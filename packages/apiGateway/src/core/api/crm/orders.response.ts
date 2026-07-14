@@ -238,6 +238,9 @@ export interface ResumeOrderSettlementResponse {
     orderNumber: string;
     queued: boolean;
     jobId: string;
+    /** First incomplete/failed stage the runner will retry (null if none / already complete). */
+    resumeFromStage: CrmOrderSettlementStage | null;
+    resumeFromSeq: number | null;
   };
 }
 

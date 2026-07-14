@@ -649,6 +649,14 @@ export class CrmOrdersService {
   }
 
   async getOrderById(orderId: number) {
+    // Fix misleading timeline: pg_routing Done while an earlier stage is Failed.
+    try {
+      const settlementService = new OrderSettlementService();
+      await settlementService.repairPrematurePgRoutingSuccess(orderId);
+    } catch {
+      // Non-fatal — still return order details
+    }
+
     const order = await db.dataBase.order.findUnique({
       where: { id: orderId },
       include: {
@@ -2809,13 +2817,17 @@ export class CrmOrdersService {
   }
 
   /**
-   * CRM: enqueue resume-safe settlement from the first incomplete/failed stage.
+   * CRM: enqueue resume-safe settlement.
+   * Starts at the first non-success stage (usually the failed one). The worker
+   * retries that stage, then continues forward only if it succeeds.
    */
   async resumeOrderSettlement(orderId: number): Promise<{
     orderId: number;
     orderNumber: string;
     queued: boolean;
     jobId: string;
+    resumeFromStage: string | null;
+    resumeFromSeq: number | null;
   }> {
     const order = await db.dataBase.order.findUnique({
       where: { id: orderId },
@@ -2834,11 +2846,41 @@ export class CrmOrdersService {
     }
 
     const meta = (order.paymentMetadata ?? {}) as Record<string, unknown>;
-    const method = typeof meta.method === "string" ? meta.method : null;
+    const nestedMethod = (
+      meta as {
+        payload?: { payment?: { entity?: { method?: string } } };
+      }
+    ).payload?.payment?.entity?.method;
+    const method =
+      typeof meta.method === "string"
+        ? meta.method
+        : typeof nestedMethod === "string"
+          ? nestedMethod
+          : null;
     const isNetBanking = method === "netbanking";
 
     const settlementService = new OrderSettlementService();
     await settlementService.seedOrderStages(order.id, { isNetBanking });
+
+    const stages = await db.dataBase.orderStage.findMany({
+      where: { orderId: order.id },
+      orderBy: { seq: "asc" },
+      select: { stage: true, seq: true, status: true },
+    });
+    const next = stages.find((s) => s.status !== 1) ?? null;
+    const resumeFromStage = next?.stage ?? null;
+    const resumeFromSeq = next?.seq ?? null;
+
+    if (!next) {
+      return {
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        queued: false,
+        jobId: `order-settlement-${order.id}`,
+        resumeFromStage: null,
+        resumeFromSeq: null,
+      };
+    }
 
     const settlementJobId = `order-settlement-${order.id}`;
     const existingJob = await orderSettlementQueue.getJob(settlementJobId);
@@ -2850,6 +2892,8 @@ export class CrmOrdersService {
           orderNumber: order.orderNumber,
           queued: false,
           jobId: settlementJobId,
+          resumeFromStage,
+          resumeFromSeq,
         };
       }
       await existingJob.remove().catch(() => undefined);
@@ -2860,6 +2904,7 @@ export class CrmOrdersService {
         type: "orderSettlement",
         id: order.id,
         isNetBanking,
+        forceResume: true,
       },
       { jobId: settlementJobId },
     );
@@ -2869,6 +2914,8 @@ export class CrmOrdersService {
       orderNumber: order.orderNumber,
       queued: true,
       jobId: settlementJobId,
+      resumeFromStage,
+      resumeFromSeq,
     };
   }
 }

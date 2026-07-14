@@ -503,6 +503,7 @@ export class NseRfq {
     payload: DealProposeRequest
   ): Promise<DealProposeResponse> {
     return this.withReLoginRetry(async (loginKey) => {
+
       const { data } = await this.client.post<DealProposeResponse>(
         "/deal/propose",
         payload,

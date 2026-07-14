@@ -65,18 +65,18 @@ model Order {
 
 /// Durable per-stage settlement tracking for resume-safe order reconciliation.
 model OrderStage {
-    id      Int @id @default(autoincrement())
+    id      Int   @id @default(autoincrement())
     orderId Int
     order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
     orderNo String
     stage   OrderSettlementStage
     /// 0=not started, 1=success, 2=fail, 3=waiting
-    status  Int @default(0)
+    status  Int                  @default(0)
 
-    payload  Json?
-    response Json?
-    seq      Int
+    payload      Json?
+    response     Json?
+    seq          Int
     attemptCount Int     @default(0)
     lastError    String?
 

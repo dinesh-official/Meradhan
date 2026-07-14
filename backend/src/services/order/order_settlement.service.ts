@@ -995,10 +995,19 @@ export class OrderSettlementService {
         cleanPrice,
       };
     } catch (error) {
+      const detail =
+        error instanceof AxiosError
+          ? JSON.stringify(error.response?.data ?? {})
+          : error instanceof Error
+            ? error.message
+            : String(error);
       logger.logError(`Failed to accept deal for order ${order.id}:`, error);
-      throw new AppError(`Failed to accept deal for order ${order.id}: ${JSON.stringify((error as AxiosError)?.response?.data)}`, {
-        code: "DEAL_ACCEPT_FAILED",
-      });
+      throw new AppError(
+        `Failed to accept deal for order ${order.id}: ${detail}`,
+        {
+          code: "DEAL_ACCEPT_FAILED",
+        },
+      );
     }
   }
 
@@ -1387,7 +1396,9 @@ BSE Member ID: 6963`;
 
   /**
    * Idempotent seed of order_stages rows + set settlementStage = payment_done.
-   * For non-netbanking, marks pg_routing as skipped success.
+   * Does NOT pre-mark pg_routing success — that happens only when the runner
+   * reaches pg_routing after all prior stages succeed (API still skipped for
+   * non-netbanking).
    */
   async seedOrderStages(
     orderId: number,
@@ -1424,22 +1435,8 @@ BSE Member ID: 6963`;
       });
     }
 
-    if (!opts?.isNetBanking) {
-      await db.dataBase.orderStage.update({
-        where: {
-          orderId_stage: {
-            orderId: order.id,
-            stage: OrderPipelineStage.PG_ROUTING as OrderSettlementStage,
-          },
-        },
-        data: {
-          status: OrderStageStatus.SUCCESS,
-          payload: { skipped: true, reason: "not_netbanking" },
-          response: { skipped: true, reason: "not_netbanking" },
-          lastError: null,
-        },
-      });
-    }
+    // Repair legacy seed: pg_routing marked SUCCESS while an earlier stage failed.
+    await this.repairPrematurePgRoutingSuccess(order.id, opts?.isNetBanking);
 
     if (
       !order.settlementStage ||
@@ -1452,6 +1449,45 @@ BSE Member ID: 6963`;
         },
       });
     }
+  }
+
+  /**
+   * If pg_routing was pre-marked SUCCESS (e.g. not_netbanking seed) while an
+   * earlier stage is still incomplete/failed, reset it so the UI and resume
+   * cursor stay honest.
+   */
+  async repairPrematurePgRoutingSuccess(
+    orderId: number,
+    isNetBanking?: boolean,
+  ): Promise<boolean> {
+    const stages = await this.getStagesOrdered(orderId);
+    const pgRow = stages.find((s) => s.stage === OrderPipelineStage.PG_ROUTING);
+    if (!pgRow || pgRow.status !== OrderStageStatus.SUCCESS) return false;
+
+    const priorIncomplete = stages.some(
+      (s) => s.seq < pgRow.seq && s.status !== OrderStageStatus.SUCCESS,
+    );
+    if (!priorIncomplete) return false;
+
+    const resp = this.stageResponseRecord(pgRow);
+    const wasSkippedNotNetbanking =
+      resp.skipped === true && resp.reason === "not_netbanking";
+    const looksLikePrematureSkip =
+      wasSkippedNotNetbanking || isNetBanking === false;
+
+    if (!looksLikePrematureSkip) return false;
+
+    await db.dataBase.orderStage.update({
+      where: { id: pgRow.id },
+      data: {
+        status: OrderStageStatus.NOT_STARTED,
+        payload: {},
+        response: {},
+        lastError: null,
+        attemptCount: 0,
+      },
+    });
+    return true;
   }
 
   private async getStagesOrdered(orderId: number): Promise<OrderStage[]> {
@@ -1546,13 +1582,25 @@ BSE Member ID: 6963`;
   }
 
   /**
-   * Resume-safe settlement runner. Skips successful stages; never restarts Add ISIN
-   * if already succeeded. Keeps initiateOrderSettlement untouched for rollback.
+   * Resume-safe settlement runner (worker / cron / CRM resume-settlement).
+   *
+   * Behaviour:
+   * 1. Skip every stage already marked SUCCESS.
+   * 2. Start at the first failed / incomplete stage.
+   * 3. If that stage succeeds, continue to the next stages in sequence.
+   * 4. If it fails again, stop — do not run any later stage.
+   *
+   * Keeps initiateOrderSettlement untouched for rollback.
+   *
+   * @param opts.forceResume — CRM manual Continue: retry even if attemptCount
+   *   already hit ORDER_STAGE_MAX_ATTEMPTS (cron stays capped).
    */
   async reconcileOrderSettlementByStages(
     orderId: number,
     isNetBanking: boolean,
+    opts?: { forceResume?: boolean },
   ): Promise<{ status: "completed" | "failed" | "skipped_locked" | "max_attempts" }> {
+    const forceResume = opts?.forceResume === true;
     const locked = await this.acquireStageLock(orderId);
     if (!locked) {
       logger.logInfo(`Order ${orderId} stage reconcile skipped — lock held`);
@@ -1613,49 +1661,169 @@ BSE Member ID: 6963`;
       let pipelineFailed = false;
       let maxAttemptsHit = false;
 
+      // Resume rule: skip every SUCCESS stage; start at the first failed/incomplete
+      // stage; only advance to later stages after that stage succeeds in this run.
+      const completedStages = new Set(
+        stages
+          .filter((s) => s.status === OrderStageStatus.SUCCESS)
+          .map((s) => s.stage),
+      );
+
+      const hydrateAddIsinSnapshot = (stageRow: OrderStage) => {
+        if (stageRow.stage !== OrderPipelineStage.ADD_ISIN) return;
+        const resp = this.stageResponseRecord(stageRow);
+        addIsinSnapshot = {
+          rfqNumber:
+            typeof resp.rfqNumber === "string" ? resp.rfqNumber : undefined,
+          isin: typeof resp.isin === "string" ? resp.isin : order.isin,
+          inCrores:
+            typeof resp.inCrores === "number" ? resp.inCrores : undefined,
+          rfqDbData:
+            (resp.rfqDbData as { settlementDate?: string | null }) ?? undefined,
+        };
+      };
+
       for (const stageRow of stages) {
         if (stageRow.status === OrderStageStatus.SUCCESS) {
-          if (stageRow.stage === OrderPipelineStage.ADD_ISIN) {
-            const resp = this.stageResponseRecord(stageRow);
-            addIsinSnapshot = {
-              rfqNumber: typeof resp.rfqNumber === "string" ? resp.rfqNumber : undefined,
-              isin: typeof resp.isin === "string" ? resp.isin : order.isin,
-              inCrores:
-                typeof resp.inCrores === "number" ? resp.inCrores : undefined,
-              rfqDbData: (resp.rfqDbData as { settlementDate?: string | null }) ?? undefined,
-            };
-          }
+          hydrateAddIsinSnapshot(stageRow);
+        }
+      }
+
+      const resumeFromIndex = stages.findIndex(
+        (s) => s.status !== OrderStageStatus.SUCCESS,
+      );
+
+      if (resumeFromIndex === -1) {
+        logger.logInfo(
+          `Order ${order.id}: settlement stages already complete — nothing to resume`,
+        );
+      } else {
+        const resumeFrom = stages[resumeFromIndex]!;
+        logger.logInfo(
+          `Order ${order.id}: resuming settlement from stage ${resumeFrom.stage} (seq ${resumeFrom.seq}, status ${resumeFrom.status})`,
+        );
+        await this.addAutomationLog({
+          orderId: order.id,
+          paymentId,
+          batchId,
+          step: "SETTLEMENT_RESUME",
+          status: "STARTED",
+          message: `Resuming settlement from ${resumeFrom.stage}`,
+          inputData: {
+            resumeFromStage: resumeFrom.stage,
+            resumeFromSeq: resumeFrom.seq,
+            resumeFromStatus: resumeFrom.status,
+            completedStages: [...completedStages],
+          },
+          startedAt: new Date(),
+        });
+      }
+
+      // Only iterate from the first incomplete stage forward.
+      for (
+        let i = resumeFromIndex === -1 ? stages.length : resumeFromIndex;
+        i < stages.length;
+        i++
+      ) {
+        const stageRow = stages[i]!;
+
+        if (
+          stageRow.status === OrderStageStatus.SUCCESS ||
+          completedStages.has(stageRow.stage)
+        ) {
+          completedStages.add(stageRow.stage);
+          hydrateAddIsinSnapshot(stageRow);
           continue;
         }
 
-        if (stageRow.attemptCount >= ORDER_STAGE_MAX_ATTEMPTS) {
-          maxAttemptsHit = true;
-          await sendSettlementAutomationFailureEmail({
-            context: "ORDER",
-            failedStep: `STAGE_MAX_ATTEMPTS_${stageRow.stage}`,
-            error: new Error(
-              `Stage ${stageRow.stage} exceeded max attempts (${ORDER_STAGE_MAX_ATTEMPTS})`,
-            ),
+        // Hard dependency: never start a stage unless every earlier stage succeeded.
+        const priorIncomplete = ORDER_STAGE_SEQUENCE.filter(
+          (s) => s.seq < stageRow.seq && !completedStages.has(s.stage),
+        );
+        if (priorIncomplete.length > 0) {
+          pipelineFailed = true;
+          const blockedBy = priorIncomplete.map((s) => s.stage).join(", ");
+          logger.logError(
+            `Order ${order.id}: blocked stage ${stageRow.stage} — prior incomplete: ${blockedBy}`,
+          );
+          await this.addAutomationLog({
             orderId: order.id,
-            orderNumber: order.orderNumber,
-            isin: order.isin,
-            quantity: order.quantity,
             paymentId,
             batchId,
-            customerName:
-              order.customerProfile?.nseDataSet?.participant?.firstName ?? null,
-            ucc: order.customerProfile?.nseDataSet?.participant?.loginId ?? null,
-            rfqNumber:
-              addIsinSnapshot.rfqNumber ??
-              (typeof (order.metadata as Record<string, unknown> | null)?.rfqNumber ===
-              "string"
-                ? String((order.metadata as Record<string, unknown>).rfqNumber)
-                : null),
+            step: `STAGE_${stageRow.stage}`,
+            status: "FAILED",
+            message: `Stage ${stageRow.stage} blocked until prior stages succeed`,
+            inputData: {
+              stage: stageRow.stage,
+              blockedBy: priorIncomplete.map((s) => s.stage),
+            },
+            errorData: {
+              error: `Previous stage(s) not successful: ${blockedBy}`,
+            },
+            completedAt: new Date(),
           });
           break;
         }
 
-        // Skip pg_routing when not netbanking (should already be success from seed)
+        if (stageRow.attemptCount >= ORDER_STAGE_MAX_ATTEMPTS) {
+          if (forceResume) {
+            logger.logInfo(
+              `Order ${order.id}: stage ${stageRow.stage} at max attempts (${stageRow.attemptCount}/${ORDER_STAGE_MAX_ATTEMPTS}) — forceResume allows another try`,
+            );
+            await db.dataBase.orderStage.update({
+              where: { id: stageRow.id },
+              data: { attemptCount: 0 },
+            });
+            stageRow.attemptCount = 0;
+          } else {
+            maxAttemptsHit = true;
+            logger.logError(
+              `Order ${order.id}: stage ${stageRow.stage} exceeded max attempts (${ORDER_STAGE_MAX_ATTEMPTS}) — not executing. Use CRM Continue to force retry.`,
+            );
+            await this.addAutomationLog({
+              orderId: order.id,
+              paymentId,
+              batchId,
+              step: `STAGE_${stageRow.stage}`,
+              status: "FAILED",
+              message: `Stage ${stageRow.stage} blocked: max attempts (${ORDER_STAGE_MAX_ATTEMPTS}) reached`,
+              inputData: {
+                stage: stageRow.stage,
+                attemptCount: stageRow.attemptCount,
+              },
+              completedAt: new Date(),
+            });
+            await sendSettlementAutomationFailureEmail({
+              context: "ORDER",
+              failedStep: `STAGE_MAX_ATTEMPTS_${stageRow.stage}`,
+              error: new Error(
+                `Stage ${stageRow.stage} exceeded max attempts (${ORDER_STAGE_MAX_ATTEMPTS})`,
+              ),
+              orderId: order.id,
+              orderNumber: order.orderNumber,
+              isin: order.isin,
+              quantity: order.quantity,
+              paymentId,
+              batchId,
+              customerName:
+                order.customerProfile?.nseDataSet?.participant?.firstName ??
+                null,
+              ucc:
+                order.customerProfile?.nseDataSet?.participant?.loginId ?? null,
+              rfqNumber:
+                addIsinSnapshot.rfqNumber ??
+                (typeof (order.metadata as Record<string, unknown> | null)
+                  ?.rfqNumber === "string"
+                  ? String(
+                      (order.metadata as Record<string, unknown>).rfqNumber,
+                    )
+                  : null),
+            });
+            break;
+          }
+        }
+
+        // Skip PG API for non-netbanking — only when we reach this stage after priors succeed.
         if (
           stageRow.stage === OrderPipelineStage.PG_ROUTING &&
           !isNetBanking
@@ -1664,6 +1832,7 @@ BSE Member ID: 6963`;
             payload: { skipped: true, reason: "not_netbanking" },
             response: { skipped: true, reason: "not_netbanking" },
           });
+          completedStages.add(stageRow.stage);
           continue;
         }
 
@@ -1675,9 +1844,21 @@ BSE Member ID: 6963`;
           paymentId,
         };
 
+        logger.logInfo(
+          `Order ${order.id}: executing stage ${stageRow.stage} (attempt ${waitingRow.attemptCount}/${ORDER_STAGE_MAX_ATTEMPTS})`,
+        );
+
+        // Failed stages must be re-attempted. Idempotent skip must not mark FAIL→SUCCESS
+        // and then continue to later stages on a manual resume.
+        const allowIdempotentSkip =
+          stageRow.status !== OrderStageStatus.FAIL;
+
         try {
           // Idempotency: if prior SUCCESS log / IDs exist, mark success without re-calling NSE
-          if (stageRow.stage === OrderPipelineStage.ADD_ISIN) {
+          if (
+            allowIdempotentSkip &&
+            stageRow.stage === OrderPipelineStage.ADD_ISIN
+          ) {
             const existingRfq = await this.getRfqNumber(order);
             if (existingRfq) {
               const inCrores = await this.resolveInCrores(order, stages);
@@ -1696,11 +1877,15 @@ BSE Member ID: 6963`;
                   isin: order.isin,
                 },
               });
+              completedStages.add(stageRow.stage);
               continue;
             }
           }
 
-          if (stageRow.stage === OrderPipelineStage.QUOTE_ACCEPT) {
+          if (
+            allowIdempotentSkip &&
+            stageRow.stage === OrderPipelineStage.QUOTE_ACCEPT
+          ) {
             const negotiationId = await this.getNegotiationId(order);
             if (negotiationId) {
               await this.markStageSuccess(waitingRow, {
@@ -1711,13 +1896,15 @@ BSE Member ID: 6963`;
                   negotiationId,
                 },
               });
+              completedStages.add(stageRow.stage);
               continue;
             }
           }
 
           if (
-            stageRow.stage === OrderPipelineStage.DEAL_PROPOSE ||
-            stageRow.stage === OrderPipelineStage.DEAL_ACCEPT
+            allowIdempotentSkip &&
+            (stageRow.stage === OrderPipelineStage.DEAL_PROPOSE ||
+              stageRow.stage === OrderPipelineStage.DEAL_ACCEPT)
           ) {
             const step =
               stageRow.stage === OrderPipelineStage.DEAL_PROPOSE
@@ -1728,11 +1915,15 @@ BSE Member ID: 6963`;
                 payload,
                 response: { skipped: true, reason: "already_succeeded" },
               });
+              completedStages.add(stageRow.stage);
               continue;
             }
           }
 
-          if (stageRow.stage === OrderPipelineStage.PG_ROUTING) {
+          if (
+            allowIdempotentSkip &&
+            stageRow.stage === OrderPipelineStage.PG_ROUTING
+          ) {
             if (order.transferId) {
               await this.markStageSuccess(waitingRow, {
                 payload,
@@ -1742,6 +1933,7 @@ BSE Member ID: 6963`;
                   transferId: order.transferId,
                 },
               });
+              completedStages.add(stageRow.stage);
               continue;
             }
           }
@@ -1767,7 +1959,8 @@ BSE Member ID: 6963`;
           } else if (stageRow.stage === OrderPipelineStage.QUOTE_ACCEPT) {
             const inCrores = await this.resolveInCrores(order, stages);
             payload.inCrores = inCrores;
-            payload.rfqNumber = addIsinSnapshot.rfqNumber ?? (await this.getRfqNumber(order));
+            payload.rfqNumber =
+              addIsinSnapshot.rfqNumber ?? (await this.getRfqNumber(order));
             const result = await this.acceptNegotiation(order, inCrores);
             acceptNegotiationResponse = result;
             response = {
@@ -1838,6 +2031,8 @@ BSE Member ID: 6963`;
           }
 
           await this.markStageSuccess(waitingRow, { payload, response });
+          completedStages.add(stageRow.stage);
+          // Success → loop advances to the next stage in sequence.
         } catch (error) {
           pipelineFailed = true;
           const lastError =
@@ -1860,7 +2055,7 @@ BSE Member ID: 6963`;
             batchId,
             step: `STAGE_${stageRow.stage}`,
             status: "FAILED",
-            message: `Stage ${stageRow.stage} failed`,
+            message: `Stage ${stageRow.stage} failed — pipeline stopped; later stages not run`,
             inputData: payload,
             errorData: errorResponse,
             completedAt: new Date(),
@@ -1882,8 +2077,7 @@ BSE Member ID: 6963`;
             rfqNumber: addIsinSnapshot.rfqNumber ?? null,
           });
 
-          // Do NOT mark order REJECTED here — resume-safe path should allow retry.
-          // Legacy initiateOrderSettlement marks REJECTED; we keep stages as source of truth.
+          // Failed stage stays failed. Do not advance. Next resume retries here again.
           break;
         }
       }
@@ -1902,6 +2096,15 @@ BSE Member ID: 6963`;
       }
 
       if (maxAttemptsHit) {
+        await this.addAutomationLog({
+          orderId: order.id,
+          paymentId,
+          batchId,
+          step: "SETTLEMENT_BATCH",
+          status: "FAILED",
+          message: "Stage-based settlement batch stopped: max attempts reached",
+          completedAt: new Date(),
+        });
         return { status: "max_attempts" };
       }
 
