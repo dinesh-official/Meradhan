@@ -343,7 +343,17 @@ jobs:
 
           update_env "NEXT_PUBLIC_STRAPI_URL" "https://${STRAPI_NAME}.${ROOT_DOMAIN}"
 
-          update_env "NEXT_PUBLIC_ENV" "${{ inputs.environment }}"
+          #update_env "NEXT_PUBLIC_ENV" "${{ inputs.environment }}"
+
+          update_env "ALLOW_ORIGINS" "${{ steps.create_dns.outputs.urls }}"
+
+          update_env "DATABASE_URL" "postgresql://postgres:AWSaws198@postgres:5432/meradhan_database?schema=public"
+
+          update_env "DIRECT_URL" "postgresql://postgres:AWSaws198@postgres:5432/meradhan_database?schema=public"
+
+          update_env "REDIS_HOST" "redis"
+
+          update_env "REDIS_PORT" "6379"
 
    
           # Verify
