@@ -495,9 +495,13 @@ jobs:
               echo "Repository : $REPOSITORY"
               echo "Dockerfile : $DOCKERFILE"
 
-              docker build \
-                -f "$DOCKERFILE" \
-                -t "$IMAGE" .
+              docker buildx build \
+                --file "$DOCKERFILE" \
+                --tag "$IMAGE" \
+                --cache-from type=gha \
+                --cache-to type=gha,mode=max \
+                --push \
+                .
 
               docker push "$IMAGE"
 
