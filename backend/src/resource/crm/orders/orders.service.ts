@@ -107,12 +107,12 @@ function orderPricingSnapshot(bondDetails: unknown): {
 
 function buildPdfFinancialFields(
   order: {
-    subTotal: unknown;
+    subTotal?: unknown;
     stampDuty: unknown;
     totalAmount?: unknown;
     unitPrice?: unknown;
     quantity: number;
-    bondDetails: unknown;
+    bondDetails?: unknown;
   },
   settleOrder: SettleOrderPdfRow | null | undefined,
   pdfAccruedInterestDays?: number,
@@ -1640,6 +1640,8 @@ export class CrmOrdersService {
       customerProfileId: number | null;
       isin: string;
       quantity: number;
+      /** Order pricing snapshot — used for PDF yield (`pricing.yield`). */
+      bondDetails?: unknown;
       totalAmount: number;
       stampDuty: number;
       metadata: unknown;
@@ -1693,6 +1695,7 @@ export class CrmOrdersService {
           customerProfileId,
           isin: customerOrder.isin,
           quantity: customerOrder.quantity,
+          bondDetails: customerOrder.bondDetails,
           totalAmount: Number(customerOrder.totalAmount),
           stampDuty: Number(customerOrder.stampDuty),
           metadata: customerOrder.metadata,
@@ -1758,6 +1761,7 @@ export class CrmOrdersService {
           customerProfileId: null,
           isin: customerOrder.isin,
           quantity: customerOrder.quantity,
+          bondDetails: customerOrder.bondDetails,
           totalAmount: Number(customerOrder.totalAmount),
           stampDuty: Number(customerOrder.stampDuty),
           metadata: customerOrder.metadata,
