@@ -671,13 +671,17 @@ jobs:
           COMMANDS+="echo Starting Deployment"$'\n'
           COMMANDS+="echo ======================================="$'\n'
 
+          # Cleanup
           COMMANDS+="docker image prune -f"$'\n'
           COMMANDS+="docker builder prune -f"$'\n'
 
+          # Login to ECR
           COMMANDS+="aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 450321244603.dkr.ecr.ap-south-1.amazonaws.com"$'\n'
 
+          # Docker Network
           COMMANDS+="docker network inspect deployment_app-network >/dev/null 2>&1 || docker network create deployment_app-network"$'\n'
 
+          # Fresh clone deployment repo
           COMMANDS+="rm -rf branch-deploy"$'\n'
           COMMANDS+="git clone --depth 1 https://github.com/bcispl/branch-deploy.git"$'\n'
 
@@ -685,59 +689,47 @@ jobs:
           COMMANDS+="pwd"$'\n'
           COMMANDS+="ls -la"$'\n'
 
+          # Filebeat
           COMMANDS+="docker compose -f filebeat.yaml up -d --remove-orphans"$'\n'
           COMMANDS+="docker compose -f filebeat.yaml ps"$'\n'
 
+          # PostgreSQL
           COMMANDS+="docker compose -f pgsql.yaml up -d --remove-orphans"$'\n'
+          COMMANDS+="until docker exec postgres pg_isready >/dev/null 2>&1; do sleep 2; done"$'\n'
           COMMANDS+="docker compose -f pgsql.yaml ps"$'\n'
 
-          COMMANDS+="until docker exec postgres pg_isready >/dev/null 2>&1; do sleep 2; done"$'\n'
-
+          # Redis
           COMMANDS+="docker compose -f redis.yaml up -d --remove-orphans"$'\n'
+          COMMANDS+="until docker exec redis redis-cli ping >/dev/null 2>&1; do sleep 2; done"$'\n'
           COMMANDS+="docker compose -f redis.yaml ps"$'\n'
 
-          COMMANDS+="until docker exec redis redis-cli ping >/dev/null 2>&1; do sleep 2; done"$'\n'
-
+          # Restore database
           COMMANDS+="chmod +x restore.sh"$'\n'
           COMMANDS+="./restore.sh ${{ inputs.environment }}.backup"$'\n'
 
           COMMANDS+="cd /"$'\n'
           COMMANDS+="docker ps"$'\n'
 
-            COMMANDS+="docker compose -f redis.yaml up -d"$'\n'
-            COMMANDS+="docker compose -f redis.yaml ps"$'\n'
-
-            COMMANDS+="sleep 20"$'\n'
-
-            COMMANDS+="chmod +x restore.sh"$'\n'
-            COMMANDS+="./restore.sh ${{ inputs.environment }}.backup"$'\n'
-
-            COMMANDS+="cd /"$'\n'
-            COMMANDS+="docker ps"$'\n'
-
-
+          # Deploy Applications
           for REPO in "${!SERVICES[@]}"
           do
+              PORT="${SERVICES[$REPO]}"
+              IMAGE="450321244603.dkr.ecr.ap-south-1.amazonaws.com/${REPO}:latest"
 
-            PORT="${SERVICES[$REPO]}"
+              COMMANDS+="echo"$'\n'
+              COMMANDS+="echo ======================================="$'\n'
+              COMMANDS+="echo Deploying ${REPO}"$'\n'
+              COMMANDS+="echo ======================================="$'\n'
 
-            IMAGE="450321244603.dkr.ecr.ap-south-1.amazonaws.com/${REPO}:latest"
+              COMMANDS+="docker pull ${IMAGE}"$'\n'
 
-            COMMANDS+="echo"$'\n'
-            COMMANDS+="echo Deploying ${REPO}"$'\n'
+              COMMANDS+="docker rm -f ${REPO} >/dev/null 2>&1 || true"$'\n'
 
-            COMMANDS+="docker pull ${IMAGE}"$'\n'
-
-
-            COMMANDS+="docker stop ${REPO} >/dev/null 2>&1 || true"$'\n'
-            COMMANDS+="docker rm ${REPO} >/dev/null 2>&1 || true"$'\n'
-
-            if [ -n "$PORT" ]; then
-            COMMANDS+="docker run -d --restart unless-stopped --network deployment_app-network --name ${REPO} -p ${PORT} ${IMAGE}"$'\n'
-            else
-            COMMANDS+="docker run -d --restart unless-stopped --network deployment_app-network --name ${REPO} ${IMAGE}"$'\n'
-            fi
-
+              if [ -n "$PORT" ]; then
+                  COMMANDS+="docker run -d --restart unless-stopped --network deployment_app-network --name ${REPO} -p ${PORT} ${IMAGE}"$'\n'
+              else
+                  COMMANDS+="docker run -d --restart unless-stopped --network deployment_app-network --name ${REPO} ${IMAGE}"$'\n'
+              fi
           done
 
           COMMANDS+="echo"$'\n'
