@@ -147,15 +147,15 @@ function buildPdfFinancialFields(
     settleOrder?.stampDutyAmount != null
       ? Number(settleOrder.stampDutyAmount)
       : snap?.stampDuty ??
-        (Number.isFinite(Number(order.stampDuty)) ? Number(order.stampDuty) : 0);
+      (Number.isFinite(Number(order.stampDuty)) ? Number(order.stampDuty) : 0);
 
   const totalConsideration =
     settleOrder?.modConsideration != null
       ? Number(settleOrder.modConsideration)
       : snap?.totalConsideration ??
-        (Number.isFinite(Number(order.totalAmount))
-          ? Number(order.totalAmount)
-          : principal + (accruedInterest ?? 0));
+      (Number.isFinite(Number(order.totalAmount))
+        ? Number(order.totalAmount)
+        : principal + (accruedInterest ?? 0));
 
   const settlementAmount =
     snap?.settlementAmount ??
@@ -2148,7 +2148,15 @@ export class CrmOrdersService {
       9: "Document not received for unregistered participant",
     }
 
-    if (settleOrder?.settleStatus !== 4) {
+    // TODO: Add the logic to check the settlement status orders table
+
+    const orderData = await db.dataBase.order.findFirst({
+      where: {
+        orderNumber: orderNumber,
+      },
+    });
+
+    if (orderData?.status !== "SETTLED") {
       if (env.CBRICS_ENV === "PROD") {
         throw new AppError(`Settlement is not completed. Please wait for the settlement to complete. ${validSettlementStatus[settleOrder?.settleStatus as keyof typeof validSettlementStatus] ?? "Unknown"}`, {
           statusCode: HttpStatus.BAD_REQUEST,
