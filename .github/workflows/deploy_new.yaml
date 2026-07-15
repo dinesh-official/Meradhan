@@ -451,70 +451,7 @@ jobs:
             | docker login \
               --username AWS \
               --password-stdin 450321244603.dkr.ecr.ap-south-1.amazonaws.com
-
-      - name: Build & Push Docker Images
-        shell: bash
-        run: |
-
-          set -e
-
-          declare -A SERVICES=()
-
-          if [ "${{ inputs.frontend }}" = "true" ]; then
-            SERVICES["$FRONTEND_NAME"]="frontendDockerfile"
-          fi
-
-          if [ "${{ inputs.backend }}" = "true" ]; then
-            SERVICES["$BACKEND_NAME"]="backenddocker"
-          fi
-
-          if [ "${{ inputs.crm }}" = "true" ]; then
-            SERVICES["$CRM_NAME"]="crmdockerfile"
-          fi
-
-          if [ "${{ inputs.worker }}" = "true" ]; then
-            SERVICES["$WORKER_NAME"]="workerDocker"
-          fi
-
-          if [ ${#SERVICES[@]} -eq 0 ]; then
-            echo "No services selected."
-            #exit 1 
-          fi
-
-          echo "======================================"
-          echo "Building Docker Images"
-          echo "======================================"
-
-          for REPOSITORY in "${!SERVICES[@]}"
-          do
-            (
-              DOCKERFILE="${SERVICES[$REPOSITORY]}"
-              IMAGE="450321244603.dkr.ecr.ap-south-1.amazonaws.com/${REPOSITORY}:latest"
-
-              echo ""
-              echo "Repository : $REPOSITORY"
-              echo "Dockerfile : $DOCKERFILE"
-
-              docker buildx build \
-                --file "$DOCKERFILE" \
-                --tag "$IMAGE" \
-                --cache-from type=gha \
-                --cache-to type=gha,mode=max \
-                --push \
-                .
-
-              #docker push "$IMAGE"
-
-              echo "Completed : $REPOSITORY"
-            ) &
-          done
-
-          wait
-
-          echo ""
-          echo "======================================"
-          echo "All Selected Docker Images Built & Pushed"
-          echo "======================================"       
+   
 
 
       - name: Create or Reuse Instance
@@ -690,16 +627,16 @@ jobs:
           COMMANDS+="ls -la"$'\n'
 
           # Filebeat
-          COMMANDS+="docker compose -f filebeat.yaml up -d --remove-orphans"$'\n'
+          COMMANDS+="docker compose -f filebeat.yaml up -d"$'\n'
           COMMANDS+="docker compose -f filebeat.yaml ps"$'\n'
 
           # PostgreSQL
-          COMMANDS+="docker compose -f pgsql.yaml up -d --remove-orphans"$'\n'
+          COMMANDS+="docker compose -f pgsql.yaml up -d"$'\n'
           COMMANDS+="until docker exec postgres pg_isready >/dev/null 2>&1; do sleep 2; done"$'\n'
           COMMANDS+="docker compose -f pgsql.yaml ps"$'\n'
 
           # Redis
-          COMMANDS+="docker compose -f redis.yaml up -d --remove-orphans"$'\n'
+          COMMANDS+="docker compose -f redis.yaml up -d"$'\n'
           COMMANDS+="until docker exec redis redis-cli ping >/dev/null 2>&1; do sleep 2; done"$'\n'
           COMMANDS+="docker compose -f redis.yaml ps"$'\n'
 
