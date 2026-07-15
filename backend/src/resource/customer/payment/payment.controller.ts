@@ -5,6 +5,7 @@ import { db } from "@core/database/database";
 import logger from "@utils/logger/logger";
 import { PaymentService } from "./payment.service";
 import { orderSettlementQueue } from "@jobs/queue/worker_queues";
+import { OrderSettlementService } from "@services/order/order_settlement.service";
 
 export class PaymentController {
   private paymentService = new PaymentService();
@@ -141,6 +142,9 @@ export class PaymentController {
 
           await this.orderService.updateOrderStatus(order.id, "IN_PROGRESS");
           await this.orderService.updateOrderMetadata(order.id, paymentEntity);
+
+          const settlementService = new OrderSettlementService();
+          await settlementService.seedOrderStages(order.id, { isNetBanking });
 
           const settlementJobId = `order-settlement-${order.id}`;
           const existingJob = await orderSettlementQueue.getJob(settlementJobId);

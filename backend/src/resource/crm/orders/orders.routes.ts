@@ -184,6 +184,12 @@ router.post(
   crmOrdersController.verifyOrderSettlement
 );
 
+router.post(
+  "/api/crm/orders/:id/resume-settlement",
+  allowAccessMiddleware("CRM"),
+  crmOrdersController.resumeOrderSettlement
+);
+
 router.get(
   "/api/crm/orders/rfq/:orderNumber",
   allowAccessMiddleware("CRM"),

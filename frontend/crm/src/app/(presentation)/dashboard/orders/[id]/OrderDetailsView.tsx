@@ -7,9 +7,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import apiGateway from "@root/apiGateway";
 import { decodeId } from "@/global/utils/url.utils";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2, RefreshCw } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
 import StatusBadge from "@/global/elements/wrapper/badges/StatusBadge";
 import OrderStatusBadge from "@/global/elements/wrapper/badges/OrderStatusBadge";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
@@ -22,16 +22,34 @@ import {
   ShoppingCart,
   CreditCard,
   ArrowRight,
+  ArrowLeft,
   FileText,
   ChevronDown,
   Mail,
   FileDown,
+  Info,
+  Landmark,
+  Handshake,
+  CircleCheck,
+  Route,
+  MoreHorizontal,
+  UserRound,
+  Building2,
 } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
+import LabelView from "@/global/elements/wrapper/LabelView";
 import {
   Dialog,
   DialogContent,
@@ -43,6 +61,20 @@ import {
 import { payinDateTimeToPickerValue } from "@/global/utils/receiptPdfOptions.utils";
 import { OrderPdfDownloadDialog } from "../_components/OrderPdfDownloadDialog";
 import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
+
+const SETTLEMENT_STAGE_META: Record<
+  string,
+  { label: string; Icon: typeof FileText }
+> = {
+  add_isin: { label: "Add ISIN", Icon: FileText },
+  quote_accept: { label: "Quote Accept", Icon: Handshake },
+  deal_propose: { label: "Deal Propose", Icon: Landmark },
+  deal_accept: { label: "Deal Accept", Icon: CircleCheck },
+  pg_routing: { label: "PG Routing", Icon: Route },
+};
+
+/** Mirrors backend `ORDER_STAGE_MAX_ATTEMPTS` in packages/config. */
+const ORDER_STAGE_MAX_ATTEMPTS = 20;
 
 // Helper functions to safely extract values from Record<string, unknown>
 const getBondDetail = (
@@ -92,14 +124,14 @@ function formatBusinessDateLabel(value: unknown): string {
 function statusPillClasses(value: string | null | undefined): string {
   const v = (value ?? "").toUpperCase();
   if (["COMPLETED", "CAPTURED", "APPLIED", "SETTLED"].includes(v))
-    return "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200";
+    return "border border-emerald-200 bg-emerald-50 text-emerald-700";
   if (["CANCELLED", "FAILED", "REJECTED", "EXPIRED"].includes(v))
-    return "bg-rose-100 text-rose-700 ring-1 ring-rose-200";
+    return "border border-rose-200 bg-rose-50 text-rose-700";
   if (["REFUNDED"].includes(v))
-    return "bg-violet-100 text-violet-700 ring-1 ring-violet-200";
+    return "border border-violet-200 bg-violet-50 text-violet-700";
   if (["PENDING", "CREATED", "AUTHORIZED", "IN_PROGRESS"].includes(v))
-    return "bg-amber-100 text-amber-700 ring-1 ring-amber-200";
-  return "bg-slate-100 text-slate-600 ring-1 ring-slate-200";
+    return "border border-amber-200 bg-amber-50 text-amber-700";
+  return "border border-slate-200 bg-slate-50 text-slate-600";
 }
 
 function OrderDetailsView() {
@@ -126,6 +158,9 @@ function OrderDetailsView() {
   } | null>(null);
 
   const [settleDialogOpen, setSettleDialogOpen] = useState(false);
+  const [resumeConfirmOpen, setResumeConfirmOpen] = useState(false);
+  const [stageDetailsId, setStageDetailsId] = useState<number | null>(null);
+  const [resumeSubmitted, setResumeSubmitted] = useState(false);
   const [settleResult, setSettleResult] = useState<{
     ok: boolean;
     message: string;
@@ -261,7 +296,69 @@ function OrderDetailsView() {
     },
   });
 
+  const resumeSettlementMutation = useMutation({
+    mutationFn: () => apiCaller.resumeOrderSettlement(orderId),
+    onSuccess: () => {
+      setResumeConfirmOpen(false);
+      setStageDetailsId(null);
+      // Keep resume controls disabled until stages refresh (WAITING/progress)
+      queryClient.invalidateQueries({ queryKey: ["crm-order", orderId] });
+      window.setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["crm-order", orderId] });
+        setResumeSubmitted(false);
+      }, 4000);
+    },
+    onError: () => {
+      // Allow retry after a failed queue request
+      setResumeSubmitted(false);
+    },
+  });
+
   const order = data?.responseData;
+
+  const pipelineStages = Array.isArray(order?.orderStages)
+    ? [...order.orderStages].sort((a, b) => a.seq - b.seq)
+    : [];
+  const nextResumeStage =
+    pipelineStages.find((s) => s.status !== 1) ?? null;
+  const hasFailedStage = pipelineStages.some((s) => s.status === 2);
+  const hasWaitingStage = pipelineStages.some((s) => s.status === 3);
+  const pipelineIncomplete = pipelineStages.some((s) => s.status !== 1);
+  const resumeInFlight =
+    resumeSubmitted ||
+    resumeSettlementMutation.isPending ||
+    hasWaitingStage;
+  const canResumeSettlement =
+    pipelineStages.length > 0 && pipelineIncomplete;
+  const resumeStageLabel = nextResumeStage
+    ? (SETTLEMENT_STAGE_META[nextResumeStage.stage]?.label ??
+      nextResumeStage.stage.replace(/_/g, " "))
+    : null;
+  const selectedStageDetails =
+    stageDetailsId == null
+      ? null
+      : (pipelineStages.find((s) => s.id === stageDetailsId) ?? null);
+
+  const stageStatusLabel = (status: number) =>
+    status === 1
+      ? "SUCCESS"
+      : status === 2
+        ? "FAILED"
+        : status === 3
+          ? "WAITING"
+          : "NOT STARTED";
+
+  const requestResumeSettlement = () => {
+    if (resumeInFlight) return;
+    // Always confirm when restarting after a break / incomplete pipeline
+    setResumeConfirmOpen(true);
+  };
+
+  const confirmResumeSettlement = () => {
+    if (resumeInFlight) return;
+    setResumeSubmitted(true);
+    resumeSettlementMutation.mutate();
+  };
 
   const openPdfDialog = (type: "order" | "deal") => {
     setPdfDialogType(type);
@@ -338,6 +435,13 @@ function OrderDetailsView() {
   const pricingStampDutyValue = pricingNumber("stampDuty");
   const accrualDaysValue = pricingNumber("noOfAccrualDays");
   const settlementAmountValue = pricingNumber("settlementAmount");
+  // Offered / sell yield from checkout snapshot (`pricing.yield`), then bondDetails.yield.
+  const yieldValue =
+    pricingNumber("yield") ??
+    getBondDetailNumber(
+      (order.bondDetails as Record<string, unknown>) ?? {},
+      "yield",
+    );
 
   const hasPricingSnapshot =
     orderPricing != null &&
@@ -347,6 +451,7 @@ function OrderDetailsView() {
       accruedInterestValue,
       totalConsiderationValue,
       settlementAmountValue,
+      yieldValue,
     ].some((v) => v != null);
 
   const stampDutyDisplay =
@@ -356,86 +461,115 @@ function OrderDetailsView() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <Button
-            variant="ghost"
-            onClick={() => router.back()}
-            className="mb-4"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Orders
-          </Button>
-          <h1 className="text-3xl font-bold">Order Details</h1>
-          <p className="text-muted-foreground mt-1">
-            Order Number: {order.orderNumber}
-          </p>
-        </div>
-        <div className="flex items-center gap-4 flex-wrap justify-end">
-          {order.orderNumber && (
-            <>
-              <Button
-                variant="outline"
-                onClick={() => openPdfDialog("order")}
-              >
-                <FileDown className="mr-2 h-4 w-4" />
-                Order receipt PDF
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => openPdfDialog("deal")}
-              >
-                <FileDown className="mr-2 h-4 w-4" />
-                Deal sheet PDF
-              </Button>
-            </>
-          )}
-          {order.customerProfile?.userType?.toUpperCase() === "CORPORATE" &&
-            order.orderNumber && (
-              <Button variant="outline" asChild>
-                <Link
-                  href={`/dashboard/rfqs/nse/settle-orders/generate/${encodeURIComponent(order.orderNumber)}`}
-                >
-                  <Mail className="mr-2 h-4 w-4" />
-                  Send email
-                </Link>
-              </Button>
-            )}
-          <AllowOnlyView permissions={["edit:orders"]}>
-            {order.paymentProvider === "RAZORPAY" && (
-              <Button
-                variant="outline"
-                onClick={() => verifyPaymentMutation.mutate()}
-                disabled={verifyPaymentMutation.isPending}
-              >
-                {verifyPaymentMutation.isPending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                )}
-                Verify Razorpay Payment
-              </Button>
-            )}
-            {(order.paymentProvider === "CUSTOM" ||
-              (order.paymentProvider === "RAZORPAY" &&
-                order.paymentStatus === "COMPLETED")) && (
-                <Button
-                  variant="outline"
-                  onClick={() => verifySettlementMutation.mutate()}
-                  disabled={verifySettlementMutation.isPending}
-                >
-                  {verifySettlementMutation.isPending ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <RefreshCw className="mr-2 h-4 w-4" />
+      <PageInfoBar
+        showBack
+        title="Order Details"
+        description={`Order ${order.orderNumber}`}
+        actions={
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <OrderStatusBadge
+              status={order.status}
+              paymentStatus={order.paymentStatus}
+            />
+            <Badge variant="outline" className="font-normal">
+              {order.paymentStatus}
+            </Badge>
+            {order.orderNumber ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <MoreHorizontal className="mr-1.5 h-4 w-4" />
+                    Actions
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem onClick={() => openPdfDialog("order")}>
+                    <FileDown className="mr-2 h-4 w-4" />
+                    Order receipt PDF
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => openPdfDialog("deal")}>
+                    <FileDown className="mr-2 h-4 w-4" />
+                    Deal sheet PDF
+                  </DropdownMenuItem>
+                  {((order.customerProfile as { userType?: string } | null)
+                    ?.userType?.toUpperCase() === "CORPORATE") && (
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href={`/dashboard/rfqs/nse/settle-orders/generate/${encodeURIComponent(order.orderNumber)}`}
+                      >
+                        <Mail className="mr-2 h-4 w-4" />
+                        Send email
+                      </Link>
+                    </DropdownMenuItem>
                   )}
-                  Verify Settlement
-                </Button>
-              )}
-          </AllowOnlyView>
-          <OrderStatusBadge status={order.status} paymentStatus={order.paymentStatus} />
-          <Badge variant="outline">{order.paymentStatus}</Badge>
+                  <AllowOnlyView permissions={["edit:orders"]}>
+                    {(order.paymentProvider === "RAZORPAY" ||
+                      order.paymentProvider === "CUSTOM" ||
+                      (order.paymentProvider === "RAZORPAY" &&
+                        order.paymentStatus === "COMPLETED")) && (
+                      <DropdownMenuSeparator />
+                    )}
+                    {order.paymentProvider === "RAZORPAY" && (
+                      <DropdownMenuItem
+                        disabled={verifyPaymentMutation.isPending}
+                        onClick={() => verifyPaymentMutation.mutate()}
+                      >
+                        {verifyPaymentMutation.isPending ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <RefreshCw className="mr-2 h-4 w-4" />
+                        )}
+                        Verify Razorpay Payment
+                      </DropdownMenuItem>
+                    )}
+                    {(order.paymentProvider === "CUSTOM" ||
+                      (order.paymentProvider === "RAZORPAY" &&
+                        order.paymentStatus === "COMPLETED")) && (
+                      <DropdownMenuItem
+                        disabled={verifySettlementMutation.isPending}
+                        onClick={() => verifySettlementMutation.mutate()}
+                      >
+                        {verifySettlementMutation.isPending ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <RefreshCw className="mr-2 h-4 w-4" />
+                        )}
+                        Verify Settlement
+                      </DropdownMenuItem>
+                    )}
+                  </AllowOnlyView>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : null}
+          </div>
+        }
+      />
+
+      {/* Overview strip */}
+      <div className="px-0 py-1">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="grid flex-1 grid-cols-2 gap-x-8 gap-y-4">
+            <LabelView title="ISIN">
+              <p className="text-sm font-medium font-mono text-gray-800">
+                {order.isin}
+              </p>
+            </LabelView>
+            <LabelView title="Bond">
+              <p className="text-sm font-medium text-gray-800 line-clamp-2">
+                {order.bondName}
+              </p>
+            </LabelView>
+          </div>
+          <div className="lg:text-right lg:pl-8 lg:border-l lg:border-gray-100">
+            <p className="text-xs text-gray-500 mb-1">Settlement amount</p>
+            <p className="text-2xl font-semibold tabular-nums text-gray-900 tracking-tight">
+              {formatInrAmount(settlementTotalDisplay)}
+            </p>
+            <p className="text-[11px] text-gray-400 mt-1">
+              Qty {order.quantity.toLocaleString("en-IN")} · Unit ₹
+              {Number(order.unitPrice).toLocaleString("en-IN")}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -515,7 +649,7 @@ function OrderDetailsView() {
                 <dt className="text-muted-foreground">Razorpay Status</dt>
                 <dd className="text-right">
                   <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusPillClasses(
+                    className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-medium ${statusPillClasses(
                       verifyResult.razorpayStatus,
                     )}`}
                   >
@@ -531,7 +665,7 @@ function OrderDetailsView() {
                 </dt>
                 <dd className="flex items-center justify-end gap-1.5">
                   <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusPillClasses(
+                    className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-medium ${statusPillClasses(
                       verifyResult.currentPaymentStatus,
                     )}`}
                   >
@@ -541,7 +675,7 @@ function OrderDetailsView() {
                     <>
                       <ArrowRight className="h-3.5 w-3.5 text-slate-400" />
                       <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusPillClasses(
+                        className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-medium ${statusPillClasses(
                           verifyResult.proposedPaymentStatus,
                         )}`}
                       >
@@ -555,7 +689,7 @@ function OrderDetailsView() {
                 <dt className="text-muted-foreground">Order Status</dt>
                 <dd className="text-right">
                   <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusPillClasses(
+                    className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-medium ${statusPillClasses(
                       verifyResult.proposedOrderStatus,
                     )}`}
                   >
@@ -567,11 +701,11 @@ function OrderDetailsView() {
                 <dt className="text-muted-foreground">Database</dt>
                 <dd className="text-right">
                   <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${verifyResult.applied
-                      ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200"
+                    className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-medium ${verifyResult.applied
+                      ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
                       : verifyResult.willChange
-                        ? "bg-blue-100 text-blue-700 ring-1 ring-blue-200"
-                        : "bg-slate-100 text-slate-600 ring-1 ring-slate-200"
+                        ? "border border-blue-200 bg-blue-50 text-blue-700"
+                        : "border border-slate-200 bg-slate-50 text-slate-600"
                       }`}
                   >
                     {verifyResult.applied
@@ -674,7 +808,7 @@ function OrderDetailsView() {
                 <dt className="text-muted-foreground">NSE Settlement Status</dt>
                 <dd className="text-right">
                   <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusPillClasses(
+                    className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-medium ${statusPillClasses(
                       settleResult.proposedOrderStatus,
                     )}`}
                   >
@@ -692,7 +826,7 @@ function OrderDetailsView() {
                 </dt>
                 <dd className="flex items-center justify-end gap-1.5">
                   <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusPillClasses(
+                    className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-medium ${statusPillClasses(
                       settleResult.currentOrderStatus,
                     )}`}
                   >
@@ -702,7 +836,7 @@ function OrderDetailsView() {
                     <>
                       <ArrowRight className="h-3.5 w-3.5 text-slate-400" />
                       <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusPillClasses(
+                        className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-medium ${statusPillClasses(
                           settleResult.proposedOrderStatus,
                         )}`}
                       >
@@ -716,11 +850,11 @@ function OrderDetailsView() {
                 <dt className="text-muted-foreground">Database</dt>
                 <dd className="text-right">
                   <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${settleResult.applied
-                      ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200"
+                    className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-medium ${settleResult.applied
+                      ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
                       : settleResult.willChange
-                        ? "bg-blue-100 text-blue-700 ring-1 ring-blue-200"
-                        : "bg-slate-100 text-slate-600 ring-1 ring-slate-200"
+                        ? "border border-blue-200 bg-blue-50 text-blue-700"
+                        : "border border-slate-200 bg-slate-50 text-slate-600"
                       }`}
                   >
                     {settleResult.applied
@@ -759,15 +893,20 @@ function OrderDetailsView() {
         </DialogContent>
       </Dialog>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Order Information */}
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-6 items-start">
+        {/* Main column — settlement first for ops */}
+        <div className="flex flex-col gap-6">
           {/* Counterparty information — Meradhan customer (default) or
               external NSE participant (when assigned via the CRM
               assign-rfq-participant flow). */}
-          <Card>
-            <CardHeader>
-              <CardTitle>
+          <Card className="order-2 border-gray-100 shadow-none rounded-lg">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                {order.customerProfile ? (
+                  <UserRound className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <Building2 className="h-4 w-4 text-muted-foreground" />
+                )}
                 {order.customerProfile
                   ? "Customer Information"
                   : "NSE Participant (counterparty)"}
@@ -775,82 +914,85 @@ function OrderDetailsView() {
             </CardHeader>
             <CardContent className="space-y-4">
               {order.customerProfile ? (
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Name</p>
-                    <p className="font-medium">
-                      {order.customerProfile.firstName}{" "}
-                      {order.customerProfile.lastName}
+                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                  <LabelView title="Name">
+                    <p className="text-sm font-medium">
+                      {[
+                        order.customerProfile.firstName,
+                        order.customerProfile.middleName,
+                        order.customerProfile.lastName,
+                      ]
+                        .map((p) => (typeof p === "string" ? p.trim() : ""))
+                        .filter(Boolean)
+                        .join(" ") || "—"}
                     </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Email</p>
-                    <p className="font-medium">
+                  </LabelView>
+                  {order.customerProfile.userName ? (
+                    <LabelView title="User name">
+                      <p className="text-sm font-medium font-mono">
+                        {order.customerProfile.userName}
+                      </p>
+                    </LabelView>
+                  ) : null}
+                  <LabelView title="Email">
+                    <p className="text-sm font-medium">
                       {order.customerProfile.emailAddress}
                     </p>
-                  </div>
+                  </LabelView>
                   {order.customerProfile.phoneNo && (
-                    <div>
-                      <p className="text-sm text-muted-foreground">Phone</p>
-                      <p className="font-medium">
+                    <LabelView title="Phone">
+                      <p className="text-sm font-medium">
                         {order.customerProfile.phoneNo}
                       </p>
-                    </div>
+                    </LabelView>
                   )}
-                  <div>
-                    <p className="text-sm text-muted-foreground">Customer ID</p>
-                    <p className="font-medium">{order.customerProfile.id}</p>
-                  </div>
+                  <LabelView title="Customer ID">
+                    <p className="text-sm font-medium">
+                      {order.customerProfile.id}
+                    </p>
+                  </LabelView>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      Participant code
-                    </p>
-                    <p className="font-medium font-mono">
+                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                  <LabelView title="Participant code">
+                    <p className="text-sm font-medium font-mono">
                       {order.linkedRfqParticipantCode ?? "—"}
                     </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Name</p>
-                    <p className="font-medium">
+                  </LabelView>
+                  <LabelView title="Name">
+                    <p className="text-sm font-medium">
                       {order.rfqParticipantInfo?.nameOverride?.trim() ||
                         order.linkedRfqParticipantCode ||
                         "—"}
                     </p>
-                  </div>
+                  </LabelView>
                   {order.rfqParticipantInfo?.contactPerson && (
-                    <div>
-                      <p className="text-sm text-muted-foreground">Contact</p>
-                      <p className="font-medium">
+                    <LabelView title="Contact">
+                      <p className="text-sm font-medium">
                         {order.rfqParticipantInfo.contactPerson}
                       </p>
-                    </div>
+                    </LabelView>
                   )}
                   {!!order.rfqParticipantInfo?.emailList?.length && (
-                    <div>
-                      <p className="text-sm text-muted-foreground">Email</p>
-                      <p className="font-medium break-all">
+                    <LabelView title="Email">
+                      <p className="text-sm font-medium break-all">
                         {order.rfqParticipantInfo.emailList.join(", ")}
                       </p>
-                    </div>
+                    </LabelView>
                   )}
                   {!!order.rfqParticipantInfo?.mobileList?.length && (
-                    <div>
-                      <p className="text-sm text-muted-foreground">Mobile</p>
-                      <p className="font-medium">
+                    <LabelView title="Mobile">
+                      <p className="text-sm font-medium">
                         {order.rfqParticipantInfo.mobileList.join(", ")}
                       </p>
-                    </div>
+                    </LabelView>
                   )}
                   {order.rfqParticipantInfo?.panNo && (
-                    <div>
-                      <p className="text-sm text-muted-foreground">PAN</p>
-                      <p className="font-medium font-mono">
+                    <LabelView title="PAN">
+                      <p className="text-sm font-medium font-mono">
                         {order.rfqParticipantInfo.panNo}
                       </p>
-                    </div>
+                    </LabelView>
                   )}
                 </div>
               )}
@@ -858,42 +1000,47 @@ function OrderDetailsView() {
           </Card>
 
           {/* Bond Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Bond Information</CardTitle>
+          <Card className="order-3 border-gray-100 shadow-none rounded-lg">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Landmark className="h-4 w-4 text-muted-foreground" />
+                Bond Information
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Bond Name</p>
-                  <p className="font-medium">{order.bondName}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">ISIN</p>
-                  <p className="font-medium">{order.isin}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Face Value</p>
-                  <p className="font-medium">
+              <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                <LabelView title="Bond Name">
+                  <p className="text-sm font-medium">{order.bondName}</p>
+                </LabelView>
+                <LabelView title="ISIN">
+                  <p className="text-sm font-medium font-mono">{order.isin}</p>
+                </LabelView>
+                <LabelView title="Face Value">
+                  <p className="text-sm font-medium">
                     ₹{parseFloat(order.faceValue).toLocaleString("en-IN")}
                   </p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Quantity</p>
-                  <p className="font-medium">{order.quantity}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Unit Price</p>
-                  <p className="font-medium">
-                    ₹{(order.unitPrice)}
-                  </p>
-                </div>
+                </LabelView>
+                <LabelView title="Quantity">
+                  <p className="text-sm font-medium">{order.quantity}</p>
+                </LabelView>
+                <LabelView title="Unit Price">
+                  <p className="text-sm font-medium">₹{order.unitPrice}</p>
+                </LabelView>
               </div>
               {order.bondDetails && (
-                <div className="mt-6 pt-6 border-t">
-                  <h3 className="text-lg font-semibold mb-4">
-                    Additional Bond Details
-                  </h3>
+                <Collapsible className="mt-6 pt-6 border-t">
+                  <CollapsibleTrigger className="flex w-full items-center justify-between group text-left">
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-800">
+                        Additional Bond Details
+                      </h3>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Financials, ratings, dates, and instrument metadata
+                      </p>
+                    </div>
+                    <ChevronDown className="h-4 w-4 text-gray-400 transition-transform group-data-[state=open]:rotate-180" />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-4">
                   <div className="space-y-6">
                     {/* Financial Information */}
                     <div>
@@ -1385,70 +1532,483 @@ function OrderDetailsView() {
                         </div>
                       )}
                   </div>
-                </div>
+                  </CollapsibleContent>
+                </Collapsible>
               )}
             </CardContent>
           </Card>
 
           {/* Payment Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Payment Information</CardTitle>
+          <Card className="order-4 border-gray-100 shadow-none rounded-lg">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <CreditCard className="h-4 w-4 text-muted-foreground" />
+                Payment Information
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-x-6 gap-y-4">
                 {order.paymentProvider && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      Payment Provider
-                    </p>
-                    <p className="font-medium">{order.paymentProvider}</p>
-                  </div>
+                  <LabelView title="Payment Provider">
+                    <p className="text-sm font-medium">{order.paymentProvider}</p>
+                  </LabelView>
                 )}
                 {order.paymentOrderId && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      Payment Order ID
-                    </p>
-                    <p className="font-medium font-mono text-sm">
+                  <LabelView title="Payment Order ID">
+                    <p className="text-sm font-medium font-mono">
                       {order.paymentOrderId}
                     </p>
-                  </div>
+                  </LabelView>
                 )}
                 {order.paymentId && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">Payment ID</p>
-                    <p className="font-medium font-mono text-sm">
+                  <LabelView title="Payment ID">
+                    <p className="text-sm font-medium font-mono">
                       {order.paymentId}
                     </p>
-                  </div>
+                  </LabelView>
                 )}
               </div>
               {order.paymentMetadata && (
-                <div className="mt-4">
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Payment Metadata
-                  </p>
-                  <pre className="bg-muted p-4 rounded-md text-xs overflow-auto">
-                    {JSON.stringify(order.paymentMetadata, null, 2)}
-                  </pre>
-                </div>
+                <Collapsible className="mt-2">
+                  <CollapsibleTrigger className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors group">
+                    Payment metadata
+                    <ChevronDown className="h-3.5 w-3.5 transition-transform group-data-[state=open]:rotate-180" />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-2">
+                    <pre className="bg-muted p-4 rounded-md text-xs overflow-auto">
+                      {JSON.stringify(order.paymentMetadata, null, 2)}
+                    </pre>
+                  </CollapsibleContent>
+                </Collapsible>
               )}
             </CardContent>
           </Card>
 
+          {/* Settlement Pipeline — Stage Timeline */}
+          <Card className="order-1 border-gray-100 shadow-none rounded-lg">
+            <CardHeader className="pb-3">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-base">Settlement Pipeline</CardTitle>
+                </div>
+                <CardDescription>
+                  Workflow stages for NSE settlement. Click a step for details.
+                  Successful steps are skipped on resume.
+                </CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {resumeSettlementMutation.isSuccess ? (
+                <p className="mb-3 text-sm text-green-600">
+                  {resumeSettlementMutation.data?.message ??
+                    "Settlement resume requested."}
+                </p>
+              ) : null}
+              {resumeSettlementMutation.isError ? (
+                <p className="mb-3 text-sm text-red-600">
+                  {(
+                    resumeSettlementMutation.error as {
+                      response?: { data?: { message?: string } };
+                      message?: string;
+                    }
+                  )?.response?.data?.message ||
+                    (resumeSettlementMutation.error as { message?: string })
+                      ?.message ||
+                    "Failed to resume settlement"}
+                </p>
+              ) : null}
+
+              {pipelineStages.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="w-full overflow-x-auto rounded-lg border border-gray-100 px-3 py-5 sm:px-5">
+                    <div
+                      className="grid min-w-[640px] items-start gap-0"
+                      style={{
+                        gridTemplateColumns: `repeat(${pipelineStages.length}, minmax(0, 1fr))`,
+                      }}
+                    >
+                      {pipelineStages.map((stage, index) => {
+                        const meta =
+                          SETTLEMENT_STAGE_META[stage.stage] ?? {
+                            label: stage.stage.replace(/_/g, " "),
+                            Icon: FileText,
+                          };
+                        const StageIcon = meta.Icon;
+                        const isSuccess = stage.status === 1;
+                        const isFailed = stage.status === 2;
+                        const isWaiting = stage.status === 3;
+                        const stagePayload =
+                          stage.payload && typeof stage.payload === "object"
+                            ? (stage.payload as Record<string, unknown>)
+                            : {};
+                        const stageResponse =
+                          stage.response && typeof stage.response === "object"
+                            ? (stage.response as Record<string, unknown>)
+                            : {};
+                        const isSkippedSuccess =
+                          isSuccess &&
+                          (stagePayload.skipped === true ||
+                            stageResponse.skipped === true);
+                        const isNext = nextResumeStage?.id === stage.id;
+                        const isActive = isSuccess || isWaiting || isNext;
+                        const stamp =
+                          isSuccess || isFailed || isWaiting
+                            ? dateTimeUtils.formatDateTime(
+                                stage.updatedAt,
+                                "DD MMM YYYY hh:mm:ss AA",
+                              )
+                            : "—";
+                        const showConnector = index < pipelineStages.length - 1;
+                        const connectorDone = isSuccess;
+                        const retriesLabel = `${stage.attemptCount}/${ORDER_STAGE_MAX_ATTEMPTS}`;
+
+                        return (
+                          <div
+                            key={stage.id}
+                            className="relative flex flex-col items-center px-1 text-center"
+                          >
+                            {showConnector ? (
+                              <div
+                                className={`pointer-events-none absolute top-5 left-1/2 h-0.5 w-full ${
+                                  connectorDone
+                                    ? "bg-primary"
+                                    : "bg-border"
+                                }`}
+                                aria-hidden
+                              />
+                            ) : null}
+
+                            <button
+                              type="button"
+                              onClick={() => setStageDetailsId(stage.id)}
+                              title={`View ${meta.label} details`}
+                              className={`relative z-[1] flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors cursor-pointer hover:opacity-90 ${
+                                isFailed
+                                  ? "border-destructive bg-destructive text-white"
+                                  : isWaiting
+                                    ? "border-yellow-500 bg-yellow-500 text-white"
+                                    : isSkippedSuccess
+                                      ? "border-muted-foreground/40 bg-muted text-muted-foreground"
+                                      : isSuccess
+                                      ? "border-primary bg-primary text-primary-foreground"
+                                      : isNext
+                                        ? "border-primary bg-white text-primary"
+                                        : "border-border bg-muted text-muted-foreground"
+                              }`}
+                            >
+                              {isFailed ? (
+                                <XCircle className="h-5 w-5 text-white stroke-[2.5]" />
+                              ) : isSuccess ? (
+                                <CheckCircle2 className="h-5 w-5" />
+                              ) : (
+                                <StageIcon className="h-4 w-4" />
+                              )}
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => setStageDetailsId(stage.id)}
+                              className={`mt-2 text-sm font-medium capitalize hover:underline ${
+                                isFailed
+                                  ? "text-destructive"
+                                  : isActive
+                                    ? "text-foreground"
+                                    : "text-muted-foreground"
+                              }`}
+                            >
+                              {meta.label}
+                            </button>
+                            <p className="mt-0.5 text-xs text-muted-foreground">
+                              {stamp}
+                            </p>
+                            <p
+                              className={`mt-0.5 text-[11px] font-medium ${
+                                stage.attemptCount > 0
+                                  ? "text-foreground"
+                                  : "text-muted-foreground"
+                              }`}
+                            >
+                              Retries {retriesLabel}
+                            </p>
+                            {isFailed ? (
+                              <Badge variant="destructive" className="mt-1 text-[10px]">
+                                Failed
+                              </Badge>
+                            ) : isWaiting ? (
+                              <Badge variant="outline" className="mt-1 text-[10px]">
+                                Waiting
+                              </Badge>
+                            ) : isNext ? (
+                              <Badge variant="outline" className="mt-1 text-[10px]">
+                                Next
+                              </Badge>
+                            ) : isSkippedSuccess ? (
+                              <Badge variant="outline" className="mt-1 text-[10px]">
+                                Skipped
+                              </Badge>
+                            ) : isSuccess ? (
+                              <Badge variant="secondary" className="mt-1 text-[10px]">
+                                Done
+                              </Badge>
+                            ) : null}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {nextResumeStage ? (
+                    <div
+                      className={`rounded-lg border px-4 py-3.5 ${
+                        nextResumeStage.status === 2
+                          ? "border-rose-200 bg-rose-50/50"
+                          : "border-gray-100 bg-white"
+                      }`}
+                    >
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="space-y-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-800">
+                            Next step:{" "}
+                            {SETTLEMENT_STAGE_META[nextResumeStage.stage]
+                              ?.label ??
+                              nextResumeStage.stage.replace(/_/g, " ")}
+                            <span className="ml-2 text-xs font-normal text-gray-500">
+                              Retries {nextResumeStage.attemptCount}/{ORDER_STAGE_MAX_ATTEMPTS}
+                            </span>
+                          </p>
+                          {nextResumeStage.lastError ? (
+                            <p className="text-sm text-rose-600 break-words">
+                              {nextResumeStage.lastError}
+                            </p>
+                          ) : (
+                            <p className="text-xs text-gray-500">
+                              Continue to resume the workflow from this step.
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap gap-2 shrink-0">
+                          <AllowOnlyView permissions={["edit:orders"]}>
+                            <Button
+                              size="sm"
+                              disabled={resumeInFlight}
+                              onClick={requestResumeSettlement}
+                            >
+                              {resumeInFlight ? (
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                              ) : (
+                                <RefreshCw className="h-4 w-4 mr-2" />
+                              )}
+                              {resumeInFlight ? "Resuming…" : "Continue"}
+                            </Button>
+                          </AllowOnlyView>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-emerald-700">
+                      All settlement stages completed successfully.
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Stages not seeded yet (pre-pipeline order or payment not completed).
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Step details: request / response / metadata */}
+          <Dialog
+            open={stageDetailsId != null}
+            onOpenChange={(open) => {
+              if (!open) setStageDetailsId(null);
+            }}
+          >
+            <DialogContent className="sm:max-w-4xl max-h-[85vh] overflow-y-auto shadow-none border border-gray-100">
+              <DialogHeader>
+                <DialogTitle>
+                  {(selectedStageDetails &&
+                    (SETTLEMENT_STAGE_META[selectedStageDetails.stage]?.label ??
+                      selectedStageDetails.stage.replace(/_/g, " "))) ||
+                    "Stage details"}
+                </DialogTitle>
+                <DialogDescription>
+                  Request, response, and run metadata for this settlement step.
+                </DialogDescription>
+              </DialogHeader>
+
+              {selectedStageDetails ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
+                    <div className="rounded-lg border border-gray-100 p-3">
+                      <p className="text-xs text-muted-foreground">Status</p>
+                      <p className="font-medium">
+                        {stageStatusLabel(selectedStageDetails.status)}
+                      </p>
+                    </div>
+                    <div className="rounded-lg border border-gray-100 p-3">
+                      <p className="text-xs text-muted-foreground">Retries</p>
+                      <p className="font-medium">
+                        {selectedStageDetails.attemptCount}/{ORDER_STAGE_MAX_ATTEMPTS}
+                      </p>
+                    </div>
+                    <div className="rounded-lg border border-gray-100 p-3">
+                      <p className="text-xs text-muted-foreground">Sequence</p>
+                      <p className="font-medium">#{selectedStageDetails.seq}</p>
+                    </div>
+                    <div className="rounded-lg border border-gray-100 p-3">
+                      <p className="text-xs text-muted-foreground">Order No</p>
+                      <p className="font-medium font-mono text-xs">
+                        {selectedStageDetails.orderNo}
+                      </p>
+                    </div>
+                    <div className="rounded-lg border border-gray-100 p-3">
+                      <p className="text-xs text-muted-foreground">Created</p>
+                      <p className="font-medium text-xs">
+                        {dateTimeUtils.formatDateTime(
+                          selectedStageDetails.createdAt,
+                          "DD MMM YYYY hh:mm:ss AA",
+                        )}
+                      </p>
+                    </div>
+                    <div className="rounded-lg border border-gray-100 p-3">
+                      <p className="text-xs text-muted-foreground">Updated</p>
+                      <p className="font-medium text-xs">
+                        {dateTimeUtils.formatDateTime(
+                          selectedStageDetails.updatedAt,
+                          "DD MMM YYYY hh:mm:ss AA",
+                        )}
+                      </p>
+                    </div>
+                  </div>
+
+                  {selectedStageDetails.lastError ? (
+                    <div className="rounded-lg border border-rose-200 bg-rose-50/50 p-3">
+                      <p className="mb-1 text-xs font-medium text-rose-700">
+                        Last error
+                      </p>
+                      <p className="text-sm text-rose-700 whitespace-pre-wrap">
+                        {selectedStageDetails.lastError}
+                      </p>
+                    </div>
+                  ) : null}
+
+                  <div className="rounded-lg border border-gray-100 p-3">
+                    <p className="mb-2 text-xs font-medium text-muted-foreground">
+                      Request (payload)
+                    </p>
+                    <pre className="text-xs overflow-auto whitespace-pre-wrap max-h-56 text-gray-700">
+                      {JSON.stringify(selectedStageDetails.payload ?? {}, null, 2)}
+                    </pre>
+                  </div>
+
+                  <div className="rounded-lg border border-gray-100 p-3">
+                    <p className="mb-2 text-xs font-medium text-muted-foreground">
+                      Response
+                    </p>
+                    <pre className="text-xs overflow-auto whitespace-pre-wrap max-h-56 text-gray-700">
+                      {JSON.stringify(selectedStageDetails.response ?? {}, null, 2)}
+                    </pre>
+                  </div>
+                </div>
+              ) : null}
+
+              <DialogFooter className="gap-2 sm:gap-0">
+                <Button variant="outline" onClick={() => setStageDetailsId(null)}>
+                  Close
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Confirm resume / restart after failure */}
+          <Dialog
+            open={resumeConfirmOpen}
+            onOpenChange={(open) => {
+              if (resumeInFlight) return;
+              setResumeConfirmOpen(open);
+            }}
+          >
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>
+                  {hasFailedStage
+                    ? "Restart settlement from failed step?"
+                    : "Resume settlement workflow?"}
+                </DialogTitle>
+                <DialogDescription>
+                  {hasFailedStage ? (
+                    <>
+                      A previous step failed
+                      {resumeStageLabel ? (
+                        <>
+                          {" "}
+                          at <strong>{resumeStageLabel}</strong>
+                        </>
+                      ) : null}
+                      . Continuing will retry from that step only. Completed
+                      earlier steps will not be re-run on NSE / Razorpay.
+                    </>
+                  ) : (
+                    <>
+                      This will continue the settlement workflow
+                      {resumeStageLabel ? (
+                        <>
+                          {" "}
+                          from <strong>{resumeStageLabel}</strong>
+                        </>
+                      ) : null}
+                      . Completed steps are skipped automatically.
+                    </>
+                  )}
+                </DialogDescription>
+              </DialogHeader>
+              {nextResumeStage?.lastError ? (
+                <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+                  {nextResumeStage.lastError}
+                </div>
+              ) : null}
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setResumeConfirmOpen(false)}
+                  disabled={resumeInFlight}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={confirmResumeSettlement}
+                  disabled={resumeInFlight}
+                >
+                  {resumeInFlight ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                  )}
+                  {resumeInFlight
+                    ? "Resuming…"
+                    : hasFailedStage
+                      ? "Yes, continue from failed step"
+                      : "Yes, resume"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
           {/* Order Logs */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Order Activity Timeline</CardTitle>
+          <Card className="order-5 border-gray-100 shadow-none rounded-lg">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Order Activity Timeline</CardTitle>
             </CardHeader>
             <CardContent>
               {order.orderLogs && order.orderLogs.length > 0 ? (
                 <div className="relative">
                   {/* Timeline line */}
-                  <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-border" />
+                  <div className="absolute left-[17px] top-2 bottom-2 w-px bg-gray-200" />
 
-                  <div className="space-y-6">
+                  <div className="space-y-5">
                     {order.orderLogs.map((log) => {
                       const getStepIcon = () => {
                         const step = log.step.toUpperCase();
@@ -1576,9 +2136,9 @@ function OrderDetailsView() {
                       const hasData = log.outputData || log.details;
 
                       return (
-                        <div key={log.id} className="relative pl-14">
+                        <div key={log.id} className="relative pl-12">
                           {/* Timeline dot */}
-                          <div className="absolute left-0 top-1 flex h-12 w-12 items-center justify-center rounded-full bg-background border-2 border-primary">
+                          <div className="absolute left-0 top-1.5 flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white">
                             {getStatusIcon()}
                           </div>
 
@@ -1587,9 +2147,9 @@ function OrderDetailsView() {
                             <div className="flex items-start justify-between gap-4">
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
-                                  <div className="flex items-center gap-2 text-primary">
+                                  <div className="flex items-center gap-2 text-gray-800">
                                     {getStepIcon()}
-                                    <span className="font-semibold text-sm">
+                                    <span className="font-medium text-sm">
                                       {formatStepName(log.step)}
                                     </span>
                                   </div>
@@ -1734,18 +2294,30 @@ function OrderDetailsView() {
         </div>
 
         {/* Sidebar - Financial Summary */}
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Financial Summary</CardTitle>
+        <div className="space-y-6 lg:sticky lg:top-20">
+          <Card className="border-gray-100 shadow-none rounded-lg">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Financial Summary</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3">
               {hasPricingSnapshot ? (
                 <>
+                  {yieldValue != null && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500">Yield</span>
+                      <span className="font-medium tabular-nums text-gray-800">
+                        {yieldValue.toLocaleString("en-IN", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 4,
+                        })}
+                        %
+                      </span>
+                    </div>
+                  )}
                   {cleanPriceValue != null && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Clean Price</span>
-                      <span className="font-medium">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500">Clean Price</span>
+                      <span className="font-medium tabular-nums text-gray-800">
                         {cleanPriceValue.toLocaleString("en-IN", {
                           minimumFractionDigits: 4,
                           maximumFractionDigits: 4,
@@ -1754,81 +2326,83 @@ function OrderDetailsView() {
                     </div>
                   )}
                   {principalAmountValue != null && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">
-                        Principal Amount
-                      </span>
-                      <span className="font-medium">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500">Principal Amount</span>
+                      <span className="font-medium tabular-nums text-gray-800">
                         {formatInrAmount(principalAmountValue)}
                       </span>
                     </div>
                   )}
                   {accruedInterestValue != null && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">
-                        Accrued interest
-                      </span>
-                      <span className="font-medium">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500">Accrued interest</span>
+                      <span className="font-medium tabular-nums text-gray-800">
                         {formatInrAmount(accruedInterestValue)}
                       </span>
                     </div>
                   )}
                   {totalConsiderationValue != null && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500">
                         Total Consideration w/o Stamp Duty
                       </span>
-                      <span className="font-medium">
+                      <span className="font-medium tabular-nums text-gray-800 text-right pl-4">
                         {formatInrAmount(totalConsiderationValue)}
                       </span>
                     </div>
                   )}
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Stamp duty</span>
-                    <span className="font-medium">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Stamp duty</span>
+                    <span className="font-medium tabular-nums text-gray-800">
                       {formatInrAmount(stampDutyDisplay)}
                     </span>
                   </div>
-                  {/* {accrualDaysValue != null && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">
-                        Accrued Interest Days
-                      </span>
-                      <span className="font-medium">
-                        {accrualDaysValue.toLocaleString("en-IN")}
-                      </span>
-                    </div>
-                  )} */}
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Quantity</span>
-                    <span className="font-medium">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Quantity</span>
+                    <span className="font-medium tabular-nums text-gray-800">
                       {order.quantity.toLocaleString("en-IN")}
                     </span>
                   </div>
-                  <Separator />
-                  <div className="flex justify-between text-lg font-bold">
-                    <span>Settlement Amount</span>
-                    <span>{formatInrAmount(settlementTotalDisplay)}</span>
+                  <Separator className="bg-gray-100" />
+                  <div className="flex justify-between items-baseline gap-3 pt-1">
+                    <span className="text-sm text-gray-600">
+                      Settlement Amount
+                    </span>
+                    <span className="text-base font-semibold tabular-nums text-gray-900">
+                      {formatInrAmount(settlementTotalDisplay)}
+                    </span>
                   </div>
                 </>
               ) : (
                 <>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span className="font-medium">
+                  {yieldValue != null && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500">Yield</span>
+                      <span className="font-medium tabular-nums text-gray-800">
+                        {yieldValue.toLocaleString("en-IN", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 4,
+                        })}
+                        %
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Subtotal</span>
+                    <span className="font-medium tabular-nums text-gray-800">
                       ₹{parseFloat(order.subTotal).toLocaleString("en-IN")}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Stamp Duty</span>
-                    <span className="font-medium">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Stamp Duty</span>
+                    <span className="font-medium tabular-nums text-gray-800">
                       ₹{parseFloat(order.stampDuty).toLocaleString("en-IN")}
                     </span>
                   </div>
-                  <Separator />
-                  <div className="flex justify-between text-lg font-bold">
-                    <span>Total Amount</span>
-                    <span>
+                  <Separator className="bg-gray-100" />
+                  <div className="flex justify-between items-baseline gap-3 pt-1">
+                    <span className="text-sm text-gray-600">Total Amount</span>
+                    <span className="text-base font-semibold tabular-nums text-gray-900">
                       ₹{parseFloat(order.totalAmount).toLocaleString("en-IN")}
                     </span>
                   </div>
@@ -1838,14 +2412,30 @@ function OrderDetailsView() {
           </Card>
 
           {/* Payment Process Logs */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Payment Process Logs</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <Collapsible defaultOpen={false}>
+            <Card className="border-gray-100 shadow-none rounded-lg">
+              <CardHeader className="pb-3">
+                <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 text-left group">
+                  <div>
+                    <CardTitle className="text-base">Payment Process Logs</CardTitle>
+                    {order.settlementAutomationLogs &&
+                    order.settlementAutomationLogs.length > 0 ? (
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        {order.settlementAutomationLogs.length}{" "}
+                        {order.settlementAutomationLogs.length === 1
+                          ? "log"
+                          : "logs"}
+                      </p>
+                    ) : null}
+                  </div>
+                  <ChevronDown className="h-4 w-4 shrink-0 text-gray-400 transition-transform group-data-[state=open]:rotate-180" />
+                </CollapsibleTrigger>
+              </CardHeader>
+              <CollapsibleContent>
+                <CardContent>
               {order.settlementAutomationLogs &&
-                order.settlementAutomationLogs.length > 0 ? (
-                <div className="space-y-4">
+              order.settlementAutomationLogs.length > 0 ? (
+                <div className="space-y-6">
                   {Object.entries(
                     order.settlementAutomationLogs.reduce(
                       (acc, log) => {
@@ -1854,112 +2444,145 @@ function OrderDetailsView() {
                         acc[key].push(log);
                         return acc;
                       },
-                      {} as Record<string, typeof order.settlementAutomationLogs>
-                    )
+                      {} as Record<
+                        string,
+                        typeof order.settlementAutomationLogs
+                      >,
+                    ),
                   ).map(([paymentId, logs]) => (
-                    <div key={paymentId} className="rounded-lg border border-border p-4">
-                      <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                    <div key={paymentId}>
+                      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2 border-b border-gray-100 pb-3">
                         <div>
-                          <p className="text-sm text-muted-foreground">Payment ID</p>
-                          <p className="font-medium font-mono text-sm">{paymentId}</p>
+                          <p className="text-xs text-gray-500">Payment ID</p>
+                          <p className="mt-0.5 font-mono text-sm font-medium text-gray-900">
+                            {paymentId}
+                          </p>
                         </div>
-                        <Badge variant="outline">{logs.length} logs</Badge>
+                        <p className="text-xs text-gray-400">
+                          {logs.length} {logs.length === 1 ? "log" : "logs"}
+                        </p>
                       </div>
 
-                      <div className="space-y-3">
+                      <div className="divide-y divide-gray-100">
                         {logs.map((log) => {
-                          const statusColor =
-                            log.status === "SUCCESS"
-                              ? "text-green-600"
-                              : log.status === "FAILED"
-                                ? "text-red-600"
-                                : "text-yellow-600";
+                          const isSuccess = log.status === "SUCCESS";
+                          const isFailed = log.status === "FAILED";
 
                           return (
-                            <div
-                              key={log.id}
-                              className="rounded-md border border-border/70 bg-muted/30 p-3"
-                            >
-                              <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-                                <div className="space-y-1">
+                            <div key={log.id} className="py-3.5 first:pt-1 last:pb-0">
+                              <div className="flex items-start gap-3">
+                                <div
+                                  className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border ${
+                                    isSuccess
+                                      ? "border-emerald-200 text-emerald-600"
+                                      : isFailed
+                                        ? "border-rose-200 text-rose-600"
+                                        : "border-amber-200 text-amber-600"
+                                  }`}
+                                >
+                                  {isSuccess ? (
+                                    <CheckCircle2 className="h-3.5 w-3.5" />
+                                  ) : isFailed ? (
+                                    <XCircle className="h-3.5 w-3.5" />
+                                  ) : (
+                                    <Clock className="h-3.5 w-3.5" />
+                                  )}
+                                </div>
+
+                                <div className="min-w-0 flex-1 space-y-1">
                                   <div className="flex flex-wrap items-center gap-2">
-                                    <span className="font-medium">
-                                      {log.step.replace(/_/g, " ")}
+                                    <span className="text-sm font-medium text-gray-900 capitalize">
+                                      {log.step.replace(/_/g, " ").toLowerCase()}
                                     </span>
-                                    <Badge
-                                      variant={
-                                        log.status === "SUCCESS"
-                                          ? "secondary"
-                                          : log.status === "FAILED"
-                                            ? "destructive"
-                                            : "outline"
-                                      }
+                                    <span
+                                      className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide ${
+                                        isSuccess
+                                          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                                          : isFailed
+                                            ? "border-rose-200 bg-rose-50 text-rose-700"
+                                            : "border-amber-200 bg-amber-50 text-amber-700"
+                                      }`}
                                     >
                                       {log.status}
-                                    </Badge>
-                                    <Badge variant="outline">{log.batchId}</Badge>
+                                    </span>
                                   </div>
+
                                   {log.message ? (
-                                    <p className="text-sm text-muted-foreground">{log.message}</p>
+                                    <p className="text-sm text-gray-500">
+                                      {log.message}
+                                    </p>
                                   ) : null}
-                                  <p className="text-xs text-muted-foreground">
-                                    {dateTimeUtils.formatDateTime(
-                                      log.createdAt,
-                                      "DD MMM YYYY hh:mm:ss AA"
-                                    )}
-                                  </p>
-                                </div>
-                                <div className={statusColor}>
-                                  {log.status === "SUCCESS" ? (
-                                    <CheckCircle2 className="h-5 w-5" />
-                                  ) : log.status === "FAILED" ? (
-                                    <XCircle className="h-5 w-5" />
-                                  ) : (
-                                    <Clock className="h-5 w-5" />
+
+                                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-400">
+                                    <span>
+                                      {dateTimeUtils.formatDateTime(
+                                        log.createdAt,
+                                        "DD MMM YYYY hh:mm:ss AA",
+                                      )}
+                                    </span>
+                                    {log.batchId ? (
+                                      <span className="font-mono truncate max-w-full">
+                                        {log.batchId}
+                                      </span>
+                                    ) : null}
+                                  </div>
+
+                                  {(log.inputData ||
+                                    log.outputData ||
+                                    log.errorData) && (
+                                    <Collapsible className="pt-1">
+                                      <CollapsibleTrigger className="group flex items-center gap-1 text-xs text-gray-400 transition-colors hover:text-gray-700">
+                                        <span>View payload</span>
+                                        <ChevronDown className="h-3 w-3 transition-transform group-data-[state=open]:rotate-180" />
+                                      </CollapsibleTrigger>
+                                      <CollapsibleContent className="mt-2 space-y-2">
+                                        {log.inputData ? (
+                                          <div className="rounded-lg border border-gray-100 p-3">
+                                            <p className="mb-1.5 text-[11px] font-medium text-gray-500">
+                                              Input
+                                            </p>
+                                            <pre className="overflow-auto text-xs text-gray-700">
+                                              {JSON.stringify(
+                                                log.inputData,
+                                                null,
+                                                2,
+                                              )}
+                                            </pre>
+                                          </div>
+                                        ) : null}
+                                        {log.outputData ? (
+                                          <div className="rounded-lg border border-gray-100 p-3">
+                                            <p className="mb-1.5 text-[11px] font-medium text-gray-500">
+                                              Output
+                                            </p>
+                                            <pre className="overflow-auto text-xs text-gray-700">
+                                              {JSON.stringify(
+                                                log.outputData,
+                                                null,
+                                                2,
+                                              )}
+                                            </pre>
+                                          </div>
+                                        ) : null}
+                                        {log.errorData ? (
+                                          <div className="rounded-lg border border-rose-100 p-3">
+                                            <p className="mb-1.5 text-[11px] font-medium text-rose-600">
+                                              Error
+                                            </p>
+                                            <pre className="overflow-auto text-xs text-rose-700">
+                                              {JSON.stringify(
+                                                log.errorData,
+                                                null,
+                                                2,
+                                              )}
+                                            </pre>
+                                          </div>
+                                        ) : null}
+                                      </CollapsibleContent>
+                                    </Collapsible>
                                   )}
                                 </div>
                               </div>
-
-                              {(log.inputData || log.outputData || log.errorData) && (
-                                <Collapsible className="mt-3">
-                                  <CollapsibleTrigger className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group">
-                                    <span>View payload</span>
-                                    <ChevronDown className="h-3 w-3 transition-transform group-data-[state=open]:rotate-180" />
-                                  </CollapsibleTrigger>
-                                  <CollapsibleContent className="mt-2 space-y-2">
-                                    {log.inputData ? (
-                                      <div className="rounded-md bg-muted/50 p-3">
-                                        <p className="mb-2 text-xs font-medium text-muted-foreground">
-                                          Input Data
-                                        </p>
-                                        <pre className="overflow-auto text-xs">
-                                          {JSON.stringify(log.inputData, null, 2)}
-                                        </pre>
-                                      </div>
-                                    ) : null}
-                                    {log.outputData ? (
-                                      <div className="rounded-md bg-muted/50 p-3">
-                                        <p className="mb-2 text-xs font-medium text-muted-foreground">
-                                          Output Data
-                                        </p>
-                                        <pre className="overflow-auto text-xs">
-                                          {JSON.stringify(log.outputData, null, 2)}
-                                        </pre>
-                                      </div>
-                                    ) : null}
-                                    {log.errorData ? (
-                                      <div className="rounded-md bg-muted/50 p-3">
-                                        <p className="mb-2 text-xs font-medium text-muted-foreground">
-                                          Error Data
-                                        </p>
-                                        <pre className="overflow-auto text-xs">
-                                          {JSON.stringify(log.errorData, null, 2)}
-                                        </pre>
-                                      </div>
-                                    ) : null}
-                                  </CollapsibleContent>
-                                </Collapsible>
-                              )}
                             </div>
                           );
                         })}
@@ -1968,17 +2591,19 @@ function OrderDetailsView() {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-gray-500">
                   No payment process logs found for this order.
                 </p>
               )}
-            </CardContent>
-          </Card>
+                </CardContent>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
 
           {/* Order Metadata */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Order Information</CardTitle>
+          <Card className="border-gray-100 shadow-none rounded-lg">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Order Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -2012,9 +2637,9 @@ function OrderDetailsView() {
 
           {/* Customer Bonds (if exists) */}
           {order.customerBonds && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Customer Bond Record</CardTitle>
+            <Card className="border-gray-100 shadow-none rounded-lg">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Customer Bond Record</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
