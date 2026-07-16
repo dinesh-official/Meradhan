@@ -107,6 +107,26 @@ export class ParticipantManager {
       });
     }
 
+    if (!(corporateKyc.bankAccounts ?? []).length) {
+      throw new AppError(
+        "Corporate KYC has no bank accounts — cannot register on CBRICS without bankAccountList.",
+        {
+          code: "CBRICS_CORPORATE_BANKS_REQUIRED",
+          statusCode: 400,
+        },
+      );
+    }
+
+    if (!(corporateKyc.dematAccounts ?? []).length) {
+      throw new AppError(
+        "Corporate KYC has no demat accounts — cannot register on CBRICS without dpAccountList.",
+        {
+          code: "CBRICS_CORPORATE_DEMATS_REQUIRED",
+          statusCode: 400,
+        },
+      );
+    }
+
     const signatory = corporateKyc.authorisedSignatories?.[0];
     const contactPerson =
       signatory?.fullName?.trim() ||
@@ -271,6 +291,132 @@ export class ParticipantManager {
     });
 
     return saveToMyDb.nseDataSet!.participant;
+  }
+
+  /**
+   * Push corporate KYC bank accounts that are missing on NSE CBRICS
+   * (`POST /unreg/bankacc`). No-op when the customer has no CBRICS
+   * participant yet. Used after Verify & Activate and after corporate KYC
+   * bank saves so profile/local banks are not the only place banks land.
+   */
+  public async syncCorporateKycBanksToCbrics(userId: number): Promise<{
+    added: number;
+    skipped: number;
+    errors: string[];
+    participantCode: string | null;
+  }> {
+    const user = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { id: userId },
+      select: {
+        nseDataSet: {
+          select: {
+            participant: {
+              select: {
+                id: true,
+                loginId: true,
+                bankAccountList: {
+                  select: {
+                    bankAccountNo: true,
+                    bankIFSC: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        corporateKyc: {
+          select: {
+            bankAccounts: {
+              select: {
+                accountNumber: true,
+                ifscCode: true,
+                bankName: true,
+                isPrimaryAccount: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const participant = user?.nseDataSet?.participant;
+    if (!participant?.loginId) {
+      return {
+        added: 0,
+        skipped: 0,
+        errors: [],
+        participantCode: null,
+      };
+    }
+
+    const corporateBanks = user?.corporateKyc?.bankAccounts ?? [];
+    if (corporateBanks.length === 0) {
+      return {
+        added: 0,
+        skipped: 0,
+        errors: [],
+        participantCode: participant.loginId,
+      };
+    }
+
+    const existingKeys = new Set(
+      (participant.bankAccountList ?? []).map(
+        (b) =>
+          `${String(b.bankAccountNo ?? "")
+            .trim()
+            .toUpperCase()}|${String(b.bankIFSC ?? "")
+            .trim()
+            .toUpperCase()}`,
+      ),
+    );
+
+    let added = 0;
+    let skipped = 0;
+    const errors: string[] = [];
+
+    for (const bank of corporateBanks) {
+      const accountNumber = String(bank.accountNumber ?? "").trim();
+      const ifscCode = String(bank.ifscCode ?? "").trim();
+      const bankName = String(bank.bankName ?? "").trim();
+      if (!accountNumber || !ifscCode || !bankName) {
+        errors.push(
+          `Skipped incomplete bank row (account/IFSC/name required): ${accountNumber || "(no acct)"}`,
+        );
+        continue;
+      }
+
+      const key = `${accountNumber.toUpperCase()}|${ifscCode.toUpperCase()}`;
+      if (existingKeys.has(key)) {
+        skipped += 1;
+        continue;
+      }
+
+      try {
+        await this.addBankAccount(userId, {
+          accountNumber,
+          ifscCode,
+          bankName,
+          isPrimary: Boolean(bank.isPrimaryAccount),
+        });
+        existingKeys.add(key);
+        added += 1;
+      } catch (err) {
+        const message =
+          err instanceof AppError
+            ? err.message
+            : err instanceof Error
+              ? err.message
+              : String(err);
+        errors.push(`${accountNumber}: ${message}`);
+      }
+    }
+
+    return {
+      added,
+      skipped,
+      errors,
+      participantCode: participant.loginId,
+    };
   }
 
   public async registerParticipant(userId: number) {

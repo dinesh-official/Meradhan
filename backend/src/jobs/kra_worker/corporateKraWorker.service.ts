@@ -715,6 +715,11 @@ export class CorporateKraWorkerService {
                 user?.nseDataSet?.participant.loginId &&
                 user?.nseDataSet?.participant.userId === customerId
             ) {
+                // Heal: participant exists but corporate banks may never have
+                // been posted (empty bankAccountList on first /unreg).
+                const bankSync =
+                    await cbricsManager.syncCorporateKycBanksToCbrics(customerId);
+
                 // Update Status: VERIFIED
                 await db.dataBase.customerProfileDataModel.update({
                     where: { id: customerId },
@@ -732,7 +737,10 @@ export class CorporateKraWorkerService {
                         kycId: kycDataStoreId,
                         stage: "CBRICS_ALREADY_EXISTS_VERIFIED",
                         requestData: { customerId, kycDataStoreId } as object,
-                        responseData: { message: "CBRICS already exists" } as object,
+                        responseData: {
+                            message: "CBRICS already exists",
+                            bankSync,
+                        } as object,
                         reqTime: nowIso(),
                         resTime: nowIso(),
                     },

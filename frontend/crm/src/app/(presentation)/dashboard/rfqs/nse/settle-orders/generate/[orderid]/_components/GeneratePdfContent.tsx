@@ -47,6 +47,11 @@ import { useState, useEffect, useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { RfqParticipantInfoDialog } from "@/app/(presentation)/dashboard/rfqs/nse/rfq-participants/_components/RfqParticipantInfoDialog";
+import {
+  formatCleanPriceDisplay,
+  formatInrMoneyDisplay,
+  formatYtmDisplay,
+} from "@/global/utils/pricingDecimalDisplay";
 
 /** Backend `sendResponse` errors expose `message` on the JSON body; axios default `Error.message` is generic. */
 function getApiErrorMessage(err: unknown, fallback: string): string {
@@ -639,10 +644,10 @@ function GeneratePdfContent() {
   useEffect(() => {
     if (!rfq || pdfAutofillSettlementDate) return;
     const guess =
+      ddMmmYyyyToPickerValue(rfq.modSettleDate ?? null) ||
       payinDateTimeToPickerValue(rfq.fundsPayinTime ?? null) ||
       payinDateTimeToPickerValue(rfq.secPayinTime ?? null) ||
       payinDateTimeToPickerValue(rfq.payoutTime ?? null) ||
-      ddMmmYyyyToPickerValue(rfq.modSettleDate ?? null) ||
       ddMmmYyyyToPickerValue(rfq.createdAt ?? null);
     if (guess) setPdfAutofillSettlementDate(guess);
   }, [rfq, pdfAutofillSettlementDate]);
@@ -767,6 +772,8 @@ BSE Member ID: 6963`
   };
 
   const buildPdfOptionPayload = (accruedInterestDaysNum: number) => {
+    const settlementDateVal =
+      pdfAutofillSettlementDate.trim() !== "" ? pdfAutofillSettlementDate.trim() : undefined;
     const settlementNumberVal =
       pdfSettlementNumber.trim() !== "" ? pdfSettlementNumber.trim() : undefined;
     const settlementDateTimeVal =
@@ -785,6 +792,7 @@ BSE Member ID: 6963`
         : undefined;
     return {
       accruedInterestDays: accruedInterestDaysNum,
+      ...(settlementDateVal && { settlementDate: settlementDateVal }),
       ...(settlementNumberVal && { settlementNumber: settlementNumberVal }),
       ...(settlementDateTimeVal && { settlementDateTime: settlementDateTimeVal }),
       ...(lastInterestVal && { lastInterestPaymentDate: lastInterestVal }),
@@ -832,6 +840,7 @@ BSE Member ID: 6963`
           lastInterestPaymentDateRaw: string | null;
           lastInterestPaymentDate: string | null;
           interestPaymentDates: string | string[] | null;
+          settlementDate: string;
         };
         message?: string;
       }>(
@@ -845,6 +854,9 @@ BSE Member ID: 6963`
         return;
       }
       setPdfAccruedInterestDays(String(d.accruedInterestDays ?? ""));
+      if (d.settlementDate != null && String(d.settlementDate).trim() !== "") {
+        setPdfAutofillSettlementDate(String(d.settlementDate).trim());
+      }
       if (d.settlementNumber != null) setPdfSettlementNumber(String(d.settlementNumber));
       const rawLast = d.lastInterestPaymentDateRaw;
       const rawLastTrimmed =
@@ -1862,24 +1874,40 @@ BSE Member ID: 6963`
           </Section>
 
           <Section title="Price & value">
-            <InfoRow label="Price" value={rfq.price} />
+            <InfoRow label="Price" value={formatCleanPriceDisplay(rfq.price)} />
             <InfoRow label="Yield Type" value={rfq.yieldType} />
-            <InfoRow label="Yield" value={rfq.yield} />
-            <InfoRow label="Value" value={rfq.value} />
+            <InfoRow label="Yield" value={formatYtmDisplay(rfq.yield)} />
+            <InfoRow
+              label="Value"
+              value={formatInrMoneyDisplay(rfq.value, { withRupee: false })}
+            />
             <InfoRow label="Source" value={rfq.source} />
           </Section>
 
           <Section title="Modification (if any)">
             <InfoRow label="Mod Settle Date" value={rfq.modSettleDate} />
             <InfoRow label="Mod Quantity" value={rfq.modQuantity} />
-            <InfoRow label="Mod Accrued Interest" value={rfq.modAccrInt} />
-            <InfoRow label="Mod Consideration" value={rfq.modConsideration} />
+            <InfoRow
+              label="Mod Accrued Interest"
+              value={formatInrMoneyDisplay(rfq.modAccrInt, { withRupee: false })}
+            />
+            <InfoRow
+              label="Mod Consideration"
+              value={formatInrMoneyDisplay(rfq.modConsideration, {
+                withRupee: false,
+              })}
+            />
           </Section>
 
           <Section title="Settlement">
             <InfoRow label="Settlement No" value={rfq.settlementNo} />
             <InfoRow label="Settle Status" value={rfq.settleStatus} />
-            <InfoRow label="Stamp Duty Amount" value={rfq.stampDutyAmount} />
+            <InfoRow
+              label="Stamp Duty Amount"
+              value={formatInrMoneyDisplay(rfq.stampDutyAmount, {
+                withRupee: false,
+              })}
+            />
             <InfoRow label="Stamp Duty Bearer" value={rfq.stampDutyBearer} />
             <InfoRow label="Buyer Fund Payin Obligation" value={rfq.buyerFundPayinObligation} />
             <InfoRow label="Seller Fund Payout Obligation" value={rfq.sellerFundPayoutObligation} />

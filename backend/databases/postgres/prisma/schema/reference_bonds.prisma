@@ -1,0 +1,34 @@
+model ReferenceBond {
+    isin                     String    @id @db.Text
+    issuerName               String?   @map("issuer_name") @db.Text
+    issuerShortName          String?   @map("issuer_short_name") @db.Text
+    bondCategory             String?   @map("bond_category") @db.Text
+    sector                   String?   @db.Text
+    countryOfIncorporation   String?   @map("country_of_incorporation") @db.Text
+    issueCurrency            String?   @map("issue_currency") @db.Text
+    couponRate               Decimal?  @map("coupon_rate") @db.Decimal
+    couponType               String?   @map("coupon_type") @db.Text
+    interestPaymentFrequency String?   @map("interest_payment_frequency") @db.Text
+    issueDate                DateTime? @map("issue_date") @db.Date
+    maturityDate             DateTime? @map("maturity_date") @db.Date
+    isPerpetual              Boolean?  @map("is_perpetual")
+    issuePrice               Decimal?  @map("issue_price") @db.Decimal
+    faceValue                Decimal?  @map("face_value") @db.Decimal
+    amountIssued             Decimal?  @map("amount_issued") @db.Decimal
+    seniority                String?   @db.Text
+    instrumentNature         String?   @map("instrument_nature") @db.Text
+    bondType                 String?   @map("bond_type") @db.Text
+    isListed                 Boolean?  @map("is_listed")
+    callIndicator            Boolean?  @map("call_indicator")
+    putIndicator             Boolean?  @map("put_indicator")
+    bondDescription          String?   @map("bond_description") @db.Text
+    securityDescription      String?   @map("security_description") @db.Text
+    sourceUpdatedDate        DateTime? @map("source_updated_date") @db.Date
+    data                     Json
+    ingestedAt               DateTime  @default(now()) @map("ingested_at") @db.Timestamptz
+
+    @@index([issuerName], map: "idx_reference_bonds_issuer")
+    @@index([maturityDate], map: "idx_reference_bonds_maturity")
+    @@index([issueCurrency], map: "idx_reference_bonds_currency")
+    @@map("reference_bonds")
+}

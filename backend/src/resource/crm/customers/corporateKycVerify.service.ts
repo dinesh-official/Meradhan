@@ -1,5 +1,6 @@
 import { db } from "@core/database/database";
 import { AppError } from "@utils/error/AppError";
+import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 import { CORPORATE_RISK_PROFILE_QUESTIONS } from "./corporateRiskProfile.constant";
 
 /**
@@ -10,8 +11,13 @@ import { CORPORATE_RISK_PROFILE_QUESTIONS } from "./corporateRiskProfile.constan
  *
  * Triggered by the CRM "Verify & Activate Customer" button on the dedicated
  * KRA page. Idempotency is enforced by the kycStatus === "VERIFIED" check.
+ *
+ * After the local hydrate, any corporate KYC banks missing on NSE CBRICS are
+ * pushed via `/unreg/bankacc` when a participant already exists.
  */
 export class CorporateKycVerifyService {
+  private cbricsManager = new ParticipantManager();
+
   async verifyCorporateCustomer(customerId: number, crmUserId: number | null) {
     // ── Load customer + every satellite + the corporate KYC bundle ──
     const customer = await db.dataBase.customerProfileDataModel.findUnique({
@@ -387,11 +393,41 @@ export class CorporateKycVerifyService {
       });
     });
 
+    // Push corporate KYC banks to CBRICS when a participant already exists
+    // (register may have run earlier with an empty list — heal that gap).
+    let cbricsBankSync: Awaited<
+      ReturnType<ParticipantManager["syncCorporateKycBanksToCbrics"]>
+    > | null = null;
+    try {
+      cbricsBankSync =
+        await this.cbricsManager.syncCorporateKycBanksToCbrics(customerId);
+      if (cbricsBankSync.added > 0) {
+        syncedSections.push(`cbricsBankAccounts(+${cbricsBankSync.added})`);
+      }
+      if (cbricsBankSync.errors.length > 0) {
+        for (const err of cbricsBankSync.errors) {
+          warnings.push(`CBRICS bank sync: ${err}`);
+        }
+      } else if (
+        cbricsBankSync.participantCode == null &&
+        corpBanks.length > 0
+      ) {
+        warnings.push(
+          "CBRICS participant not found yet — corporate banks were saved locally only. They will be sent on CBRICS registration.",
+        );
+      }
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : String(err);
+      warnings.push(`CBRICS bank sync failed: ${message}`);
+    }
+
     return {
       verified: true,
       syncedSections,
       skippedSections,
       warnings,
+      cbricsBankSync,
       kycStatus: "VERIFIED" as const,
       kraStatus: "VERIFIED" as const,
       verifyDate: verifyDate.toISOString(),
