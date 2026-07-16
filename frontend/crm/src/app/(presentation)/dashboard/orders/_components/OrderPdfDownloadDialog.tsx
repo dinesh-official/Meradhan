@@ -121,9 +121,7 @@ export function OrderPdfDownloadDialog({
     setForm((prev) => ({ ...prev, ...patch }));
   };
 
-  // Auto-prefill everything from NSE / bond data as soon as the dialog opens —
-  // no button click. Runs once per open using the settlement date the order
-  // already resolves (modSettleDate → metadata.settlementDate → createdAt).
+  // Auto-prefill from computeBondSettlement (market hours + holidays) on open.
   const autofillRanForRef = useRef<string | null>(null);
   useEffect(() => {
     if (!open) {
@@ -132,8 +130,6 @@ export function OrderPdfDownloadDialog({
       return;
     }
     if (!pdfOptionsFetched) return;
-    // Run once per open. No date seed needed — the backend resolves the
-    // settlement date from the NSE RFQ quote / order metadata / creation date.
     if (autofillRanForRef.current === orderNumber) return;
     autofillRanForRef.current = orderNumber;
     void autofillReceiptPdfOptions("", { silent: true });
@@ -165,8 +161,8 @@ export function OrderPdfDownloadDialog({
     settlementDate: string,
     { silent = false }: { silent?: boolean } = {},
   ) => {
-    // settlementDate may be empty — the backend resolves it from the NSE RFQ
-    // quote ("Add ISIN") → order metadata → order creation date.
+    // settlementDate may be empty — the backend resolves deal/settlement via
+    // computeBondSettlement (market hours + holidays), same as order pricing.
     setAutofilling(true);
     try {
       const resp = await apiClientCaller.post<{
@@ -272,7 +268,9 @@ export function OrderPdfDownloadDialog({
 
     setDownloading(true);
     try {
-      const payload = buildPdfOptionPayload(form, accruedInterestDaysNum);
+      const payload = buildPdfOptionPayload(form, accruedInterestDaysNum, {
+        dealDate: resolvedDealDate,
+      });
       const blob =
         pdfType === "deal"
           ? await ordersApi.getDealSheetPdf(orderNumber, payload)
@@ -346,7 +344,7 @@ export function OrderPdfDownloadDialog({
                 Auto-filling from NSE RFQ &amp; bond data…
               </>
             ) : (
-              "Settlement &amp; deal dates come from the NSE RFQ quote. All fields are prefilled automatically — change the settlement date to re-fetch."
+              "Settlement & deal dates are calculated from trade time (market hours & holidays). Change the settlement date to re-fetch related fields."
             )}
           </p>
 

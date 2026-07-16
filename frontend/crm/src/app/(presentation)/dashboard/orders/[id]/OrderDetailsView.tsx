@@ -15,6 +15,8 @@ import OrderStatusBadge from "@/global/elements/wrapper/badges/OrderStatusBadge"
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import {
   CheckCircle2,
   Clock,
@@ -386,6 +388,39 @@ function OrderDetailsView() {
 
   const dealDateLabel = formatBusinessDateLabel(orderMetadata?.dealDate);
   const settlementDateLabel = formatBusinessDateLabel(orderMetadata?.settlementDate);
+
+  const orderReceiptEmailSentAtRaw =
+    typeof orderMetadata?.orderReceiptEmailSentAt === "string"
+      ? orderMetadata.orderReceiptEmailSentAt.trim()
+      : "";
+  const orderReceiptEmailSentFromLogs = Boolean(
+    order?.settlementAutomationLogs?.some(
+      (log) =>
+        log.step === "SEND_ORDER_RECEIPT_PDF_EMAIL" && log.status === "SUCCESS",
+    ),
+  );
+  const orderReceiptEmailSent =
+    orderReceiptEmailSentAtRaw !== "" || orderReceiptEmailSentFromLogs;
+  const orderReceiptEmailSentAtLabel = orderReceiptEmailSentAtRaw
+    ? dateTimeUtils.formatDateTime(
+        orderReceiptEmailSentAtRaw,
+        "DD MMM YYYY hh:mm AA",
+      )
+    : orderReceiptEmailSentFromLogs
+      ? (() => {
+          const log = order?.settlementAutomationLogs?.find(
+            (l) =>
+              l.step === "SEND_ORDER_RECEIPT_PDF_EMAIL" &&
+              l.status === "SUCCESS",
+          );
+          return log?.completedAt || log?.createdAt
+            ? dateTimeUtils.formatDateTime(
+                String(log.completedAt ?? log.createdAt),
+                "DD MMM YYYY hh:mm AA",
+              )
+            : null;
+        })()
+      : null;
   const orderDateLabel =
     dealDateLabel !== "—"
       ? dealDateLabel
@@ -1831,6 +1866,31 @@ function OrderDetailsView() {
                   Stages not seeded yet (pre-pipeline order or payment not completed).
                 </p>
               )}
+
+              <div className="mt-4 flex items-start gap-3 rounded-lg border border-gray-100 bg-muted/30 px-4 py-3">
+                <Checkbox
+                  id="order-receipt-email-sent"
+                  checked={orderReceiptEmailSent}
+                  disabled
+                  className="mt-0.5"
+                  aria-label="Order receipt email sent"
+                />
+                <div className="min-w-0 space-y-0.5">
+                  <Label
+                    htmlFor="order-receipt-email-sent"
+                    className="text-sm font-medium text-foreground"
+                  >
+                    Order receipt email sent
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    {orderReceiptEmailSent
+                      ? orderReceiptEmailSentAtLabel
+                        ? `Sent ${orderReceiptEmailSentAtLabel}`
+                        : "Receipt PDF was emailed to the customer."
+                      : "Not sent yet (pipeline or CRM email)."}
+                  </p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 

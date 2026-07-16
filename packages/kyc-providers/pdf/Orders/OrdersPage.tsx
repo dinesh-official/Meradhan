@@ -247,7 +247,10 @@ export default function OrdersPage({
     [
       "Date",
       `Deal Date: ${formatDate(dealDate.toISOString(), "DD-MMM-YYYY")}`,
-      `Settlement Date: ${formatDate(new Date(orderData?.metadata?.settlementDate ?? dealDate.toISOString()).toISOString(), "DD-MMM-YYYY")}`,
+      `Settlement Date: ${formatDate(
+        orderData?.metadata?.settlementDate ?? dealDate.toISOString(),
+        "DD-MMM-YYYY",
+      )}`,
     ],
     ["Name of OBPP", "BondNest Capital India Securities Private Limited"],
     [
