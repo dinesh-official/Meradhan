@@ -1,0 +1,64 @@
+---
+description: Frontend-only decimal display rules for order/bond pricing fields (YTM, clean price, unit, INR amounts)
+globs: frontend/crm/**/*,frontend/meradhan/**/*
+alwaysApply: false
+---
+
+# Order / Bond Pricing — Decimal Display (UI only)
+
+**Frontend display only.** Do not change API payloads, DB storage, or calculation precision to match these rules. Format at render time (or via shared format helpers).
+
+Use one shared formatting approach everywhere these fields appear (CRM order detail, lists, drafts, RFQ, MeraDhan checkout, etc.). Prefer shared helpers over ad-hoc `toFixed` / `toLocaleString`.
+
+**CRM shared helpers:** `@/global/utils/pricingDecimalDisplay`
+- `formatYtmDisplay` — YTM ≥2 dp
+- `formatCleanPriceDisplay` — clean price ≥4 dp
+- `formatUnitPriceDisplay` — unit price ≥4 dp
+- `formatInrMoneyDisplay` — principal / accrued / consideration / stamp / settlement ≥2 dp
+
+Also: `formatNumberTS`, `formatCleanPricePercent` (meradhan), `formatInrList` / `formatYtmList` (orders utils wrappers).
+
+## Minimum is a floor — show more when present
+
+| Field | Min decimals | Behavior |
+|-------|--------------|----------|
+| **YTM** / yield % | **2** | Pad to 2; keep extra decimals if the value has them |
+| **Clean price** | **4** | Pad to 4; keep extra decimals if present |
+| **Unit** / unit price | **4** | Pad to 4; keep extra decimals if present |
+| **Principal amount** | **2** | Pad to 2; keep extra decimals if present |
+| **Accrued / accrual interest** | **2** | same |
+| **Total consideration** | **2** | same |
+| **Stamp duty** | **2** | same |
+| **Settlement amount** | **2** | same |
+
+Examples: `98.12` clean → `98.1200`; `98.123456` → `98.123456`. Settlement `100` → `100.00`; `100.123` → `100.123`.
+
+Do **not** use `toFixed(N)` / `maximumFractionDigits: N` with the same N as the minimum when that truncates real extra precision.
+
+## Examples
+
+```typescript
+// ❌ BAD — truncates extra precision to exactly N
+cleanPrice.toFixed(4)
+n.toLocaleString("en-IN", { minimumFractionDigits: 4, maximumFractionDigits: 4 })
+
+// ✅ GOOD — min floor, allow more
+import {
+  formatYtmDisplay,
+  formatCleanPriceDisplay,
+  formatUnitPriceDisplay,
+  formatInrMoneyDisplay,
+} from "@/global/utils/pricingDecimalDisplay";
+
+formatYtmDisplay(ytm)
+formatCleanPriceDisplay(cleanPrice)
+formatUnitPriceDisplay(unitPrice)
+formatInrMoneyDisplay(settlementAmount)
+```
+
+## Do not
+
+- Strip trailing zeros below the minimum (e.g. clean price `98.12` → show `98.1200`)
+- Truncate values that have more than the minimum decimals
+- Invent a new formatter per screen — extend or reuse the shared util
+- Apply these rules to backend serialization or PDF generation unless that surface is explicitly UI-formatted the same way

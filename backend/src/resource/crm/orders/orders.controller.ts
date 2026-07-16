@@ -891,17 +891,13 @@ export class CrmOrdersController {
         message: "Order number is required",
       });
     }
+    // settlementDate is optional — when omitted, the service resolves it from
+    // the NSE RFQ quote ("Add ISIN") → order metadata → order creation date.
     const settlementDate = (req.body as { settlementDate?: unknown })?.settlementDate;
     const settlementDateStr = typeof settlementDate === "string" ? settlementDate.trim() : "";
-    if (!settlementDateStr) {
-      return res.sendResponse({
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: "settlementDate is required (YYYY-MM-DD)",
-      });
-    }
     try {
       const data = await this.ordersService.autofillReceiptPdfOptions(orderNumber, {
-        settlementDate: settlementDateStr,
+        settlementDate: settlementDateStr || null,
       });
       return res.sendResponse({
         statusCode: HttpStatus.OK,
@@ -997,6 +993,7 @@ export class CrmOrdersController {
       messageBody?: string;
       toEmail?: string;
       accruedInterestDays?: number | string;
+      settlementDate?: string;
       settlementNumber?: string;
       settlementDateTime?: string;
       lastInterestPaymentDate?: string;
@@ -1036,6 +1033,10 @@ export class CrmOrdersController {
         messageBody,
         toEmail: body.toEmail,
         accruedInterestDays: body.accruedInterestDays,
+        settlementDate:
+          typeof body.settlementDate === "string" && body.settlementDate.trim() !== ""
+            ? new Date(body.settlementDate)
+            : undefined,
         settlementNumber: body.settlementNumber,
         settlementDateTime: body.settlementDateTime,
         lastInterestPaymentDate: body.lastInterestPaymentDate,

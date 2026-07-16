@@ -124,6 +124,10 @@ export function buildPdfOptionPayload(
   state: ReceiptPdfFormState,
   accruedInterestDaysNum: number,
 ) {
+  const settlementDateVal =
+    state.pdfAutofillSettlementDate.trim() !== ""
+      ? state.pdfAutofillSettlementDate.trim()
+      : undefined;
   const settlementNumberVal =
     state.pdfSettlementNumber.trim() !== "" ? state.pdfSettlementNumber.trim() : undefined;
   const settlementDateTimeVal =
@@ -142,6 +146,7 @@ export function buildPdfOptionPayload(
       : undefined;
   return {
     accruedInterestDays: accruedInterestDaysNum,
+    ...(settlementDateVal && { settlementDate: settlementDateVal }),
     ...(settlementNumberVal && { settlementNumber: settlementNumberVal }),
     ...(settlementDateTimeVal && { settlementDateTime: settlementDateTimeVal }),
     ...(lastInterestVal && { lastInterestPaymentDate: lastInterestVal }),

@@ -2,13 +2,16 @@ export function formatNumberTS(value: number | string): string {
   const n = Number(value);
   if (!isFinite(n)) return String(value);
 
-  // Round to at least 2 decimal places
-  const rounded = Math.round(n * 100) / 100;
+  let maxDigits = 10;
+  if (typeof value === "string") {
+    const match = value.trim().match(/\.(\d+)/);
+    if (match) maxDigits = Math.min(10, Math.max(2, match[1].length));
+  }
 
   return new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(rounded);
+    maximumFractionDigits: maxDigits,
+  }).format(n);
 }
 
 export function formatAmount(num: number | string) {

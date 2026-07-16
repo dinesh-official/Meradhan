@@ -89,6 +89,7 @@ function formatCurrency(value: number | string | null | undefined) {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
+    minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(numeric);
 }
@@ -98,7 +99,8 @@ function formatNumber(value: number | string | null | undefined, digits = 2) {
   if (!Number.isFinite(numeric)) return "—";
   return new Intl.NumberFormat("en-IN", {
     minimumFractionDigits: digits,
-    maximumFractionDigits: digits,
+    // Floor at `digits`; keep extra precision when present (up to 10).
+    maximumFractionDigits: 10,
   }).format(numeric);
 }
 

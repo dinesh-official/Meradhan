@@ -1,4 +1,8 @@
 import type { Order } from "@root/apiGateway";
+import {
+  formatInrMoneyDisplay,
+  formatYtmDisplay,
+} from "@/global/utils/pricingDecimalDisplay";
 
 // Helper functions to safely extract values from Record<string, unknown>
 const getBondDetailString = (
@@ -96,19 +100,18 @@ function asFiniteNumber(value: unknown): number | undefined {
 }
 
 export function formatInrList(n: number | undefined | null, digits = 2): string {
-  if (n == null || !Number.isFinite(n)) return "—";
-  return `₹${n.toLocaleString("en-IN", {
-    minimumFractionDigits: digits,
-    maximumFractionDigits: digits,
-  })}`;
+  if (digits !== 2) {
+    if (n == null || !Number.isFinite(n)) return "—";
+    return `₹${n.toLocaleString("en-IN", {
+      minimumFractionDigits: digits,
+      maximumFractionDigits: 10,
+    })}`;
+  }
+  return formatInrMoneyDisplay(n);
 }
 
 export function formatYtmList(n: number | undefined | null): string {
-  if (n == null || !Number.isFinite(n)) return "—";
-  return `${n.toLocaleString("en-IN", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 4,
-  })}%`;
+  return formatYtmDisplay(n);
 }
 
 /** Pricing fields for CRM orders list (from checkout snapshot + order scalars). */

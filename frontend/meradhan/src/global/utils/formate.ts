@@ -1,19 +1,29 @@
 export function formatNumberTS(value: number | string): string {
   const n = Number(value);
   if (!isFinite(n)) return String(value);
+  let maxDigits = 10;
+  if (typeof value === "string") {
+    const match = value.trim().match(/\.(\d+)/);
+    if (match) maxDigits = Math.min(10, Math.max(2, match[1].length));
+  }
   return new Intl.NumberFormat("en-US", {
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    maximumFractionDigits: maxDigits,
   }).format(n);
 }
 
-/** Clean price as % of face — 4 decimal places (bond order pricing). */
+/** Clean price as % of face — at least 4 decimals; more if present. */
 export function formatCleanPricePercent(value: number | string): string {
   const n = Number(value);
   if (!isFinite(n)) return String(value);
+  let maxDigits = 10;
+  if (typeof value === "string") {
+    const match = value.trim().match(/\.(\d+)/);
+    if (match) maxDigits = Math.min(10, Math.max(4, match[1].length));
+  }
   return new Intl.NumberFormat("en-US", {
     minimumFractionDigits: 4,
-    maximumFractionDigits: 4,
+    maximumFractionDigits: maxDigits,
   }).format(n);
 }
 

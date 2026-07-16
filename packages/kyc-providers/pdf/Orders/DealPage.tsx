@@ -265,7 +265,7 @@ ${getInterestPaymentDatesDisplay()} `,
     [
       "Date",
       `Deal Date: ${formatDate(orderDate?.toISOString(), "DD-MMM-YYYY")} `,
-      `Settlement Date: ${orderData?.metadata?.settlementDate} `,
+      `Settlement Date: ${orderData?.metadata?.settlementDate ? formatDate(orderData.metadata.settlementDate, "DD-MMM-YYYY") : "N/A"} `,
     ],
     ["Principal Amount", `INR ${formatCurrency(totalConsideration - accruedInterest)}`],
     [

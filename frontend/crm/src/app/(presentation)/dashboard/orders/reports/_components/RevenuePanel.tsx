@@ -18,6 +18,7 @@ import {
 } from "recharts";
 import { formatIndianCurrencyCompact } from "./orderReportFormatters";
 import { ReportDataTable, ReportKpiGrid } from "./reportUi";
+import { formatCleanPriceDisplay } from "@/global/utils/pricingDecimalDisplay";
 
 const GREEN = "#22c55e";
 
@@ -69,7 +70,7 @@ const PNL_COLUMNS = [
 ];
 
 function formatCleanPrice(v: number | null) {
-  return v != null && Number.isFinite(v) ? v.toFixed(4) : "—";
+  return formatCleanPriceDisplay(v);
 }
 
 export function RevenuePanel({

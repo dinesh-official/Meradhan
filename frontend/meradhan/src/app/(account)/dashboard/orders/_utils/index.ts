@@ -72,34 +72,16 @@ export type PaymentStatusInput = Order["paymentStatus"] | string | undefined;
 
 export type PaymentProviderInput = Order["paymentProvider"] | string | undefined;
 
-/**
- * Display-only status mapping (does not mutate DB).
- * Razorpay + payment COMPLETED + order PENDING → IN_PROGRESS.
- */
+/** Display-only status normalization (does not mutate DB). */
 export function resolveDisplayOrderStatus({
   orderStatus,
-  paymentProvider,
-  paymentStatus,
+  paymentProvider: _paymentProvider,
+  paymentStatus: _paymentStatus,
 }: {
   orderStatus: OrderStatusInput;
   paymentProvider?: PaymentProviderInput;
   paymentStatus?: PaymentStatusInput;
 }): OrderStatusInput {
-  const provider = String(paymentProvider ?? "")
-    .trim()
-    .toUpperCase();
-  const ps = String(paymentStatus ?? "")
-    .trim()
-    .toUpperCase();
-  const os =
-    typeof orderStatus === "string"
-      ? orderStatus.trim().toUpperCase()
-      : orderStatus;
-
-  if (provider === "RAZORPAY" && ps === "COMPLETED" && os === "PENDING") {
-    return "IN_PROGRESS";
-  }
-
   return typeof orderStatus === "string"
     ? orderStatus.trim().toUpperCase()
     : orderStatus;
@@ -174,14 +156,14 @@ export function getStatusDisplay(
     paymentStatus,
   });
 
-  // Prisma `Order.status` (after Razorpay display mapping) for list filter + display.
+  if (isCheckoutNotCompleted(paymentStatus, effectiveStatus)) {
+    return { text: "Not completed", className: "text-slate-600" };
+  }
+
+  // Prisma `Order.status` after excluding unfinished-checkout states.
   if (typeof effectiveStatus === "string") {
     const fromDb = displayFromDbOrderStatus(effectiveStatus.trim().toUpperCase());
     if (fromDb) return fromDb;
-  }
-
-  if (isCheckoutNotCompleted(paymentStatus, effectiveStatus)) {
-    return { text: "Not completed", className: "text-slate-600" };
   }
 
   if (settleStatus != null) {

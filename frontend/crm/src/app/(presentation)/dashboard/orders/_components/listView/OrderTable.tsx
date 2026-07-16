@@ -10,6 +10,7 @@ import {
   getOrderListDates,
   getOrderListPricing,
 } from "../../utils/orderUtils";
+import { formatCleanPriceDisplay } from "@/global/utils/pricingDecimalDisplay";
 import { FaEye } from "react-icons/fa6";
 import OrderStatusBadge from "@/global/elements/wrapper/badges/OrderStatusBadge";
 import { useRouter } from "next/navigation";
@@ -109,10 +110,7 @@ function OrderTable({ data, pageSize = 10, isLoading }: OrderTableProps) {
                   <span className="text-muted-foreground">Clean</span>
                   <span className="font-medium text-foreground">
                     {p.cleanPrice != null
-                      ? p.cleanPrice.toLocaleString("en-IN", {
-                          minimumFractionDigits: 4,
-                          maximumFractionDigits: 4,
-                        })
+                      ? formatCleanPriceDisplay(p.cleanPrice)
                       : "—"}
                   </span>
                 </div>
@@ -126,18 +124,6 @@ function OrderTable({ data, pageSize = 10, isLoading }: OrderTableProps) {
                   <span className="text-muted-foreground">Settlement</span>
                   <span className="font-medium text-foreground">
                     {formatInrList(p.settlementAmount)}
-                  </span>
-                </div>
-                <div className="flex justify-between gap-3">
-                  <span className="text-muted-foreground">Qty</span>
-                  <span className="font-medium text-foreground">
-                    {p.quantity.toLocaleString("en-IN")}
-                  </span>
-                </div>
-                <div className="flex justify-between gap-3">
-                  <span className="text-muted-foreground">Stamp duty</span>
-                  <span className="font-medium text-foreground">
-                    {formatInrList(p.stampDuty)}
                   </span>
                 </div>
               </div>
