@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { FileDown, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -73,6 +73,7 @@ export function OrderPdfDownloadDialog({
   const [form, setForm] = useState<ReceiptPdfFormState>(EMPTY_FORM);
   const [downloading, setDownloading] = useState(false);
   const [autofilling, setAutofilling] = useState(false);
+  const [resolvedDealDate, setResolvedDealDate] = useState<string | null>(null);
 
   const { data: pdfOptionsQuery, isFetched: pdfOptionsFetched } = useQuery({
     queryKey: ["crm-receipt-pdf-options", orderNumber],
@@ -120,6 +121,21 @@ export function OrderPdfDownloadDialog({
     setForm((prev) => ({ ...prev, ...patch }));
   };
 
+  // Auto-prefill from computeBondSettlement (market hours + holidays) on open.
+  const autofillRanForRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!open) {
+      autofillRanForRef.current = null;
+      setResolvedDealDate(null);
+      return;
+    }
+    if (!pdfOptionsFetched) return;
+    if (autofillRanForRef.current === orderNumber) return;
+    autofillRanForRef.current = orderNumber;
+    void autofillReceiptPdfOptions("", { silent: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, orderNumber, pdfOptionsFetched, defaultAutofillSettlementDate]);
+
   const persistReceiptPdfOptions = async (accruedInterestDaysNum: number) => {
     try {
       await ordersApi.upsertReceiptPdfOptions(orderNumber, {
@@ -141,11 +157,12 @@ export function OrderPdfDownloadDialog({
     }
   };
 
-  const autofillReceiptPdfOptions = async () => {
-    if (!form.pdfAutofillSettlementDate) {
-      toast.error("Settlement date is required for auto-fill.");
-      return;
-    }
+  const autofillReceiptPdfOptions = async (
+    settlementDate: string,
+    { silent = false }: { silent?: boolean } = {},
+  ) => {
+    // settlementDate may be empty — the backend resolves deal/settlement via
+    // computeBondSettlement (market hours + holidays), same as order pricing.
     setAutofilling(true);
     try {
       const resp = await apiClientCaller.post<{
@@ -155,57 +172,91 @@ export function OrderPdfDownloadDialog({
           lastInterestPaymentDateRaw: string | null;
           lastInterestPaymentDate: string | null;
           interestPaymentDates: string | string[] | null;
+          settlementDateTime: string | null;
+          nonAmortizedBond: boolean;
+          amortizedPrincipalPaymentDates: string | null;
+          settlementDate: string;
+          dealDate: string | null;
+          settlementType: number | null;
         };
         message?: string;
       }>(`/crm/orders/receipt-pdf-options/${orderNumber}/autofill`, {
-        settlementDate: form.pdfAutofillSettlementDate,
+        settlementDate,
       });
 
       const d = resp.data?.responseData;
       if (!d) {
-        toast.error(resp.data?.message || "Auto-fill failed.");
+        if (!silent) toast.error(resp.data?.message || "Auto-fill failed.");
         return;
       }
 
       const rawLast = d.lastInterestPaymentDateRaw;
       const rawLastTrimmed =
         rawLast != null && String(rawLast).trim() !== "" ? String(rawLast).trim() : "";
-      let lastRaw = form.pdfLastInterestPaymentDateRaw;
-      let lastDisplay = form.pdfLastInterestPaymentDate;
-      if (rawLastTrimmed !== "") {
-        lastRaw = rawLastTrimmed;
-        const apiDisplay =
-          d.lastInterestPaymentDate != null && String(d.lastInterestPaymentDate).trim() !== ""
-            ? String(d.lastInterestPaymentDate).trim()
-            : "";
-        lastDisplay =
-          apiDisplay && !/^\d{4}-\d{2}-\d{2}$/.test(apiDisplay)
-            ? apiDisplay
-            : formatDateWithDayNameFromPicker(
-                /^\d{4}-\d{2}-\d{2}$/.test(rawLastTrimmed)
-                  ? rawLastTrimmed
-                  : /^\d{4}-\d{2}-\d{2}$/.test(apiDisplay)
-                    ? apiDisplay
-                    : rawLastTrimmed,
-              );
-      } else if (
-        d.lastInterestPaymentDate != null &&
-        String(d.lastInterestPaymentDate).trim() !== ""
-      ) {
-        lastDisplay = String(d.lastInterestPaymentDate).trim();
-      }
+      const settlementNumber =
+        d.settlementNumber != null && String(d.settlementNumber).trim() !== ""
+          ? String(d.settlementNumber).trim()
+          : null;
+      const settlementDateTime =
+        d.settlementDateTime != null && String(d.settlementDateTime).trim() !== ""
+          ? String(d.settlementDateTime).trim()
+          : null;
+      const resolvedSettlementDate =
+        d.settlementDate != null && String(d.settlementDate).trim() !== ""
+          ? String(d.settlementDate).trim()
+          : null;
+      setResolvedDealDate(
+        d.dealDate != null && String(d.dealDate).trim() !== ""
+          ? String(d.dealDate).trim()
+          : null,
+      );
 
-      patchForm({
-        pdfAccruedInterestDays: String(d.accruedInterestDays ?? ""),
-        pdfSettlementNumber:
-          d.settlementNumber != null ? String(d.settlementNumber) : form.pdfSettlementNumber,
-        pdfLastInterestPaymentDateRaw: lastRaw,
-        pdfLastInterestPaymentDate: lastDisplay,
-        pdfInterestPaymentDates: interestPaymentDatesToFormText(d.interestPaymentDates),
+      // Functional update so fallbacks read the current form state, not a
+      // stale closure (the silent auto-run fires before the saved-options
+      // effect has committed). Only overwrite a field when the API gives a
+      // value; otherwise keep whatever is already there.
+      setForm((prev) => {
+        let lastRaw = prev.pdfLastInterestPaymentDateRaw;
+        let lastDisplay = prev.pdfLastInterestPaymentDate;
+        if (rawLastTrimmed !== "") {
+          lastRaw = rawLastTrimmed;
+          const apiDisplay =
+            d.lastInterestPaymentDate != null && String(d.lastInterestPaymentDate).trim() !== ""
+              ? String(d.lastInterestPaymentDate).trim()
+              : "";
+          lastDisplay =
+            apiDisplay && !/^\d{4}-\d{2}-\d{2}$/.test(apiDisplay)
+              ? apiDisplay
+              : formatDateWithDayNameFromPicker(
+                  /^\d{4}-\d{2}-\d{2}$/.test(rawLastTrimmed)
+                    ? rawLastTrimmed
+                    : /^\d{4}-\d{2}-\d{2}$/.test(apiDisplay)
+                      ? apiDisplay
+                      : rawLastTrimmed,
+                );
+        } else if (
+          d.lastInterestPaymentDate != null &&
+          String(d.lastInterestPaymentDate).trim() !== ""
+        ) {
+          lastDisplay = String(d.lastInterestPaymentDate).trim();
+        }
+
+        return {
+          ...prev,
+          pdfAutofillSettlementDate: resolvedSettlementDate ?? prev.pdfAutofillSettlementDate,
+          pdfAccruedInterestDays: String(d.accruedInterestDays ?? ""),
+          pdfSettlementNumber: settlementNumber ?? prev.pdfSettlementNumber,
+          pdfLastInterestPaymentDateRaw: lastRaw,
+          pdfLastInterestPaymentDate: lastDisplay,
+          pdfInterestPaymentDates: interestPaymentDatesToFormText(d.interestPaymentDates),
+          pdfSettlementDateTime: settlementDateTime ?? prev.pdfSettlementDateTime,
+          pdfNonAmortizedBond: d.nonAmortizedBond,
+          pdfAmortizedPrincipalPaymentDates: d.amortizedPrincipalPaymentDates ?? "",
+        };
       });
-      toast.success("Receipt PDF options auto-filled.");
+      if (!silent) toast.success("Receipt PDF options auto-filled.");
     } catch (err) {
-      toast.error(getApiErrorMessage(err, "Auto-fill failed"));
+      if (!silent) toast.error(getApiErrorMessage(err, "Auto-fill failed"));
     } finally {
       setAutofilling(false);
     }
@@ -217,7 +268,9 @@ export function OrderPdfDownloadDialog({
 
     setDownloading(true);
     try {
-      const payload = buildPdfOptionPayload(form, accruedInterestDaysNum);
+      const payload = buildPdfOptionPayload(form, accruedInterestDaysNum, {
+        dealDate: resolvedDealDate,
+      });
       const blob =
         pdfType === "deal"
           ? await ordersApi.getDealSheetPdf(orderNumber, payload)
@@ -251,31 +304,49 @@ export function OrderPdfDownloadDialog({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            Fill the receipt PDF options below for order {orderNumber}. No. of Days is required.
-            Values are saved when you download.
+            Options for order {orderNumber} are prefilled automatically from NSE and bond
+            data — just review and download. Edit any field to override. Values are saved
+            when you download.
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4 sm:grid-cols-2 py-2">
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="order-pdf-autofill-settlement-date">Settlement date (for auto-fill)</Label>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Input
-                id="order-pdf-autofill-settlement-date"
-                type="date"
-                value={form.pdfAutofillSettlementDate}
-                onChange={(e) => patchForm({ pdfAutofillSettlementDate: e.target.value })}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                disabled={autofilling || downloading || !form.pdfAutofillSettlementDate}
-                onClick={() => void autofillReceiptPdfOptions()}
-              >
-                {autofilling ? "Auto-filling..." : "Auto-fill"}
-              </Button>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="order-pdf-autofill-settlement-date">Settlement date</Label>
+            <Input
+              id="order-pdf-autofill-settlement-date"
+              type="date"
+              value={form.pdfAutofillSettlementDate}
+              disabled={autofilling || downloading}
+              onChange={(e) => {
+                const v = e.target.value;
+                patchForm({ pdfAutofillSettlementDate: v });
+                if (v) void autofillReceiptPdfOptions(v);
+              }}
+            />
           </div>
+
+          <div className="space-y-2">
+            <Label>Deal date</Label>
+            <Input
+              value={resolvedDealDate ?? ""}
+              readOnly
+              disabled
+              placeholder="—"
+              className="bg-muted/40"
+            />
+          </div>
+
+          <p className="sm:col-span-2 text-xs text-muted-foreground flex items-center gap-1.5">
+            {autofilling ? (
+              <>
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Auto-filling from NSE RFQ &amp; bond data…
+              </>
+            ) : (
+              "Settlement & deal dates are calculated from trade time (market hours & holidays). Change the settlement date to re-fetch related fields."
+            )}
+          </p>
 
           <div className="space-y-2">
             <Label htmlFor="order-pdf-accrued-days">No. of Days *</Label>

@@ -27,11 +27,11 @@ export function resolveGenderForEmailSalutation(
 
 export function getEmailSalutationFromGender(
   gender: unknown,
-): "Mr." | "Ms." | "Mr. / Ms." {
+): "Mr." | "Ms." | "" {
   const normalized = normalizeGenderValue(gender);
   if (normalized === "FEMALE") return "Ms.";
   if (normalized === "MALE") return "Mr.";
-  return "Mr. / Ms.";
+  return ""
 }
 
 export type EmailTitle = "Mr." | "Ms.";
@@ -39,7 +39,7 @@ export type EmailTitle = "Mr." | "Ms.";
 /** Salutation for "Dear …" lines (profile → PAN → Aadhaar). */
 export function getEmailSalutationFromSources(
   sources: GenderSources | null | undefined,
-): "Mr." | "Ms." | "Mr. / Ms." {
+): "Mr." | "Ms." | "" {
   return getEmailSalutationFromGender(resolveGenderForEmailSalutation(sources));
 }
 

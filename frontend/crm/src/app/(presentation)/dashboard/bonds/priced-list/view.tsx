@@ -27,6 +27,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import Papa from "papaparse";
 import { cn } from "@/lib/utils";
+import {
+  formatCleanPriceDisplay,
+  formatYtmDisplay,
+} from "@/global/utils/pricingDecimalDisplay";
 
 type ListItem = {
   id: number;
@@ -95,18 +99,16 @@ function formatYmdLong(ymd: string): string {
   });
 }
 
-const numberFmt = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 4 });
-const moneyFmt = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 4 });
-
 function formatMaybePercent(value: number | null | undefined): string {
   if (value == null || !Number.isFinite(value)) return "-";
   const v = value > 0 && value <= 1 ? value * 100 : value;
-  return `${numberFmt.format(v)}%`;
+  const formatted = formatYtmDisplay(v);
+  return formatted === "—" ? "-" : formatted;
 }
 
 function formatMoney(value: number | null | undefined): string {
   if (value == null || !Number.isFinite(value)) return "-";
-  return moneyFmt.format(value);
+  return formatCleanPriceDisplay(value);
 }
 
 function formatDate(value: string | null | undefined): string {

@@ -8,7 +8,11 @@ import {
   SourceBadge,
 } from "../_components/bages/NseRfqBadges";
 import { SettleOrderData } from "@root/apiGateway";
-import { formatNumberTS } from "@/global/utils/formate";
+import {
+  formatCleanPriceDisplay,
+  formatInrMoneyDisplay,
+  formatYtmDisplay,
+} from "@/global/utils/pricingDecimalDisplay";
 
 // source 5 = NSE RFQ (manual); 1 = NSE CBRICS, 4 = FTRAC (DIR/automated)
 const isManualOrder = (source?: 1 | 4 | 5) => source === 5;
@@ -145,7 +149,7 @@ function SettleOrdersTable({
             cell(row) {
               const symbol = String(row.symbol ?? "--");
               const y = Number(row.yield);
-              const yieldStr = Number.isFinite(y) ? `${y.toFixed(4)}%` : "--";
+              const yieldStr = Number.isFinite(y) ? formatYtmDisplay(y) : "--";
               const qtyStr = row.modQuantity != null ? row.modQuantity.toLocaleString() : "--";
               return (
                 <div className="flex flex-col">
@@ -201,7 +205,7 @@ function SettleOrdersTable({
             cell(row) {
               return (
                 <div className="text-right">
-                  <span className="font-mono text-sm">{Number(row.price).toFixed(4) || "--"}</span>
+                  <span className="font-mono text-sm">{formatCleanPriceDisplay(row.price)}</span>
                 </div>
               );
             },
@@ -213,7 +217,9 @@ function SettleOrdersTable({
             cell(row) {
               return (
                 <div className="text-right">
-                  <span className="font-mono text-sm">₹ {formatNumberTS(row.value)}</span>
+                  <span className="font-mono text-sm">
+                    {formatInrMoneyDisplay(row.value)}
+                  </span>
                 </div>
               );
             },
@@ -225,7 +231,9 @@ function SettleOrdersTable({
             cell(row) {
               return (
                 <div className="text-right">
-                  <span className="font-mono text-sm">₹ {formatNumberTS(row.modAccrInt || 0)}</span>
+                  <span className="font-mono text-sm">
+                    {formatInrMoneyDisplay(row.modAccrInt || 0)}
+                  </span>
                 </div>
               );
             },
@@ -237,7 +245,9 @@ function SettleOrdersTable({
             cell(row) {
               return (
                 <div className="text-right">
-                  <span className="font-mono text-sm">₹ {(row.stampDutyAmount || 0)}</span>
+                  <span className="font-mono text-sm">
+                    {formatInrMoneyDisplay(row.stampDutyAmount || 0)}
+                  </span>
                 </div>
               );
             },
@@ -251,7 +261,7 @@ function SettleOrdersTable({
                 <div className="text-right">
                   <span className="font-mono text-sm">
                     {row.modConsideration
-                      ? `₹ ${formatNumberTS(row.modConsideration)}`
+                      ? formatInrMoneyDisplay(row.modConsideration)
                       : "--"}
                   </span>
                 </div>
@@ -464,7 +474,7 @@ function SettleOrdersTable({
               return (
                 <span className="font-mono text-sm">
                   {row.fundsPayinAmount
-                    ? `₹ ${row.fundsPayinAmount.toLocaleString()}`
+                    ? formatInrMoneyDisplay(row.fundsPayinAmount)
                     : "--"}
                 </span>
               );
