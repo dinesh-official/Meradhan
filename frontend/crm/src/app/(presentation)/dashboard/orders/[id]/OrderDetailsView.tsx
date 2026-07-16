@@ -15,6 +15,8 @@ import OrderStatusBadge from "@/global/elements/wrapper/badges/OrderStatusBadge"
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import {
   CheckCircle2,
   Clock,
@@ -59,6 +61,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { payinDateTimeToPickerValue } from "@/global/utils/receiptPdfOptions.utils";
+import {
+  formatCleanPriceDisplay,
+  formatInrMoneyDisplay,
+  formatUnitPriceDisplay,
+  formatYtmDisplay,
+} from "@/global/utils/pricingDecimalDisplay";
 import { OrderPdfDownloadDialog } from "../_components/OrderPdfDownloadDialog";
 import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
 
@@ -380,6 +388,39 @@ function OrderDetailsView() {
 
   const dealDateLabel = formatBusinessDateLabel(orderMetadata?.dealDate);
   const settlementDateLabel = formatBusinessDateLabel(orderMetadata?.settlementDate);
+
+  const orderReceiptEmailSentAtRaw =
+    typeof orderMetadata?.orderReceiptEmailSentAt === "string"
+      ? orderMetadata.orderReceiptEmailSentAt.trim()
+      : "";
+  const orderReceiptEmailSentFromLogs = Boolean(
+    order?.settlementAutomationLogs?.some(
+      (log) =>
+        log.step === "SEND_ORDER_RECEIPT_PDF_EMAIL" && log.status === "SUCCESS",
+    ),
+  );
+  const orderReceiptEmailSent =
+    orderReceiptEmailSentAtRaw !== "" || orderReceiptEmailSentFromLogs;
+  const orderReceiptEmailSentAtLabel = orderReceiptEmailSentAtRaw
+    ? dateTimeUtils.formatDateTime(
+        orderReceiptEmailSentAtRaw,
+        "DD MMM YYYY hh:mm AA",
+      )
+    : orderReceiptEmailSentFromLogs
+      ? (() => {
+          const log = order?.settlementAutomationLogs?.find(
+            (l) =>
+              l.step === "SEND_ORDER_RECEIPT_PDF_EMAIL" &&
+              l.status === "SUCCESS",
+          );
+          return log?.completedAt || log?.createdAt
+            ? dateTimeUtils.formatDateTime(
+                String(log.completedAt ?? log.createdAt),
+                "DD MMM YYYY hh:mm AA",
+              )
+            : null;
+        })()
+      : null;
   const orderDateLabel =
     dealDateLabel !== "—"
       ? dealDateLabel
@@ -420,15 +461,22 @@ function OrderDetailsView() {
     return Number.isFinite(n) ? n : undefined;
   };
 
+  // Raw snapshot value (string | number). Passing the raw decimal string to the
+  // display formatter preserves every decimal — `Number()` conversion (and the
+  // `Decimal(15,4)` DB column on `order.unitPrice`) would tweak/truncate them.
+  const pricingRaw = (key: string): string | number | undefined => {
+    const v = orderPricing?.[key];
+    if (typeof v === "number" || typeof v === "string") return v;
+    return undefined;
+  };
+
   const formatInrAmount = (n: number | undefined | null): string =>
-    n == null || !Number.isFinite(n)
-      ? "—"
-      : `₹${n.toLocaleString("en-IN", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })}`;
+    formatInrMoneyDisplay(n);
 
   const cleanPriceValue = pricingNumber("cleanPrice");
+  // Full-precision clean price for display: prefer the checkout snapshot (raw,
+  // untruncated) over the DB `order.unitPrice`, which is rounded to 4 decimals.
+  const unitPriceDisplaySource = pricingRaw("cleanPrice") ?? order.unitPrice;
   const principalAmountValue = pricingNumber("principalAmount");
   const accruedInterestValue = pricingNumber("accruedInterest");
   const totalConsiderationValue = pricingNumber("totalConsideration");
@@ -566,8 +614,8 @@ function OrderDetailsView() {
               {formatInrAmount(settlementTotalDisplay)}
             </p>
             <p className="text-[11px] text-gray-400 mt-1">
-              Qty {order.quantity.toLocaleString("en-IN")} · Unit ₹
-              {Number(order.unitPrice).toLocaleString("en-IN")}
+              Qty {order.quantity.toLocaleString("en-IN")} · Unit{" "}
+              {formatUnitPriceDisplay(unitPriceDisplaySource)}
             </p>
           </div>
         </div>
@@ -1024,7 +1072,9 @@ function OrderDetailsView() {
                   <p className="text-sm font-medium">{order.quantity}</p>
                 </LabelView>
                 <LabelView title="Unit Price">
-                  <p className="text-sm font-medium">₹{order.unitPrice}</p>
+                  <p className="text-sm font-medium">
+                    {formatUnitPriceDisplay(unitPriceDisplaySource)}
+                  </p>
                 </LabelView>
               </div>
               {order.bondDetails && (
@@ -1816,6 +1866,31 @@ function OrderDetailsView() {
                   Stages not seeded yet (pre-pipeline order or payment not completed).
                 </p>
               )}
+
+              <div className="mt-4 flex items-start gap-3 rounded-lg border border-gray-100 bg-muted/30 px-4 py-3">
+                <Checkbox
+                  id="order-receipt-email-sent"
+                  checked={orderReceiptEmailSent}
+                  disabled
+                  className="mt-0.5"
+                  aria-label="Order receipt email sent"
+                />
+                <div className="min-w-0 space-y-0.5">
+                  <Label
+                    htmlFor="order-receipt-email-sent"
+                    className="text-sm font-medium text-foreground"
+                  >
+                    Order receipt email sent
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    {orderReceiptEmailSent
+                      ? orderReceiptEmailSentAtLabel
+                        ? `Sent ${orderReceiptEmailSentAtLabel}`
+                        : "Receipt PDF was emailed to the customer."
+                      : "Not sent yet (pipeline or CRM email)."}
+                  </p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
@@ -2306,11 +2381,7 @@ function OrderDetailsView() {
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-500">Yield</span>
                       <span className="font-medium tabular-nums text-gray-800">
-                        {yieldValue.toLocaleString("en-IN", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 4,
-                        })}
-                        %
+                        {formatYtmDisplay(yieldValue)}
                       </span>
                     </div>
                   )}
@@ -2318,10 +2389,7 @@ function OrderDetailsView() {
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-500">Clean Price</span>
                       <span className="font-medium tabular-nums text-gray-800">
-                        {cleanPriceValue.toLocaleString("en-IN", {
-                          minimumFractionDigits: 4,
-                          maximumFractionDigits: 4,
-                        })}
+                        {formatCleanPriceDisplay(pricingRaw("cleanPrice") ?? cleanPriceValue)}
                       </span>
                     </div>
                   )}
@@ -2379,31 +2447,27 @@ function OrderDetailsView() {
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-500">Yield</span>
                       <span className="font-medium tabular-nums text-gray-800">
-                        {yieldValue.toLocaleString("en-IN", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 4,
-                        })}
-                        %
+                        {formatYtmDisplay(yieldValue)}
                       </span>
                     </div>
                   )}
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Subtotal</span>
                     <span className="font-medium tabular-nums text-gray-800">
-                      ₹{parseFloat(order.subTotal).toLocaleString("en-IN")}
+                      {formatInrMoneyDisplay(order.subTotal)}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Stamp Duty</span>
                     <span className="font-medium tabular-nums text-gray-800">
-                      ₹{parseFloat(order.stampDuty).toLocaleString("en-IN")}
+                      {formatInrMoneyDisplay(order.stampDuty)}
                     </span>
                   </div>
                   <Separator className="bg-gray-100" />
                   <div className="flex justify-between items-baseline gap-3 pt-1">
                     <span className="text-sm text-gray-600">Total Amount</span>
                     <span className="text-base font-semibold tabular-nums text-gray-900">
-                      ₹{parseFloat(order.totalAmount).toLocaleString("en-IN")}
+                      {formatInrMoneyDisplay(order.totalAmount)}
                     </span>
                   </div>
                 </>
@@ -2668,10 +2732,9 @@ function OrderDetailsView() {
                     Purchase Price
                   </p>
                   <p className="font-medium">
-                    ₹
-                    {parseFloat(
-                      order.customerBonds.purchasePrice
-                    ).toLocaleString("en-IN")}
+                    {formatUnitPriceDisplay(
+                      pricingRaw("cleanPrice") ?? order.customerBonds.purchasePrice
+                    )}
                   </p>
                 </div>
               </CardContent>

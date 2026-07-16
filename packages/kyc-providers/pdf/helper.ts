@@ -21,7 +21,13 @@ export function formatDate(
   dateString: string,
   format: DateFormat = "DD-MM-YYYY"
 ): string {
-  const date = new Date(dateString);
+  const raw = String(dateString ?? "").trim();
+  // Calendar dates (YYYY-MM-DD) must not go through UTC Date parsing —
+  // `new Date("2026-07-16")` is UTC midnight and can shift the local day.
+  const ymd = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
+  const date = ymd
+    ? new Date(Number(ymd[1]), Number(ymd[2]) - 1, Number(ymd[3]), 12, 0, 0, 0)
+    : new Date(raw);
 
   if (isNaN(date.getTime())) {
     return dateString;

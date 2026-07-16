@@ -31,6 +31,11 @@ import type { CrmDraftOrderRow } from "@root/apiGateway";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import {
+  formatCleanPriceDisplay,
+  formatInrMoneyDisplay,
+  formatYtmDisplay,
+} from "@/global/utils/pricingDecimalDisplay";
 
 function draftOrderStatusBadgeVariant(
   status: string,
@@ -115,9 +120,19 @@ function formatIsoDateOnlyUtc(value: unknown): string | null {
 }
 
 /** Money-like fields: show exactly 2 digits after the decimal (en-IN grouping). */
-const TWO_DECIMAL_AMOUNT_KEYS = new Set(["settlementAmount", "accruedInterest"]);
+const TWO_DECIMAL_AMOUNT_KEYS = new Set([
+  "settlementAmount",
+  "accruedInterest",
+  "principalAmount",
+  "stampDuty",
+  "totalConsideration",
+  "faceValue",
+]);
 
 const YIELD_KEYS = new Set(["yield", "buyYield"]);
+
+/** Clean price / unit-style fields: exactly 4 decimal places. */
+const FOUR_DECIMAL_PRICE_KEYS = new Set(["cleanPrice"]);
 
 /** Percent fields shown with 4 decimal places, e.g. `10.0000 %`. */
 const FOUR_DECIMAL_PERCENT_KEYS = new Set(["couponRate"]);
@@ -132,12 +147,9 @@ function parseNumericUnknown(value: unknown): number | null {
 }
 
 function draftYieldFromPricing(pricing: Record<string, unknown> | null): string {
-  const n = parseNumericUnknown(pricing?.yield ?? pricing?.buyYield);
-  if (n == null) return "—";
-  return `${n.toLocaleString("en-IN", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 4,
-  })}%`;
+  const raw = pricing?.yield ?? pricing?.buyYield;
+  if (parseNumericUnknown(raw) == null) return "—";
+  return formatYtmDisplay(raw as string | number);
 }
 
 function formatPricingValue(key: string, value: unknown): string {
@@ -145,32 +157,26 @@ function formatPricingValue(key: string, value: unknown): string {
   if (typeof value === "boolean") return value ? "Yes" : "No";
 
   if (TWO_DECIMAL_AMOUNT_KEYS.has(key)) {
-    const n = parseNumericUnknown(value);
-    if (n != null) {
-      return n.toLocaleString("en-IN", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      });
+    if (parseNumericUnknown(value) != null) {
+      return formatInrMoneyDisplay(value as string | number, { withRupee: false });
     }
   }
 
   if (YIELD_KEYS.has(key)) {
-    const n = parseNumericUnknown(value);
-    if (n != null) {
-      return `${n.toLocaleString("en-IN", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 4,
-      })}%`;
+    if (parseNumericUnknown(value) != null) {
+      return formatYtmDisplay(value as string | number);
+    }
+  }
+
+  if (FOUR_DECIMAL_PRICE_KEYS.has(key)) {
+    if (parseNumericUnknown(value) != null) {
+      return formatCleanPriceDisplay(value as string | number);
     }
   }
 
   if (FOUR_DECIMAL_PERCENT_KEYS.has(key)) {
-    const n = parseNumericUnknown(value);
-    if (n != null) {
-      return `${n.toLocaleString("en-IN", {
-        minimumFractionDigits: 4,
-        maximumFractionDigits: 4,
-      })} %`;
+    if (parseNumericUnknown(value) != null) {
+      return `${formatCleanPriceDisplay(value as string | number)} %`;
     }
   }
 

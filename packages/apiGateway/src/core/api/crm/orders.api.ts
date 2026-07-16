@@ -248,6 +248,8 @@ export class CrmOrdersApi {
     orderNumber: string,
     pdfParams?: {
       accruedInterestDays?: number;
+      settlementDate?: string;
+      dealDate?: string;
       settlementNumber?: string;
       settlementDateTime?: string;
       lastInterestPaymentDate?: string;
@@ -259,6 +261,8 @@ export class CrmOrdersApi {
   ): Promise<Blob> {
     const params: Record<string, string | number | undefined> = {};
     if (pdfParams?.accruedInterestDays != null) params.accruedInterestDays = pdfParams.accruedInterestDays;
+    if (pdfParams?.settlementDate != null) params.settlementDate = pdfParams.settlementDate;
+    if (pdfParams?.dealDate != null) params.dealDate = pdfParams.dealDate;
     if (pdfParams?.settlementNumber != null) params.settlementNumber = pdfParams.settlementNumber;
     if (pdfParams?.settlementDateTime != null) params.settlementDateTime = pdfParams.settlementDateTime;
     if (pdfParams?.lastInterestPaymentDate != null) params.lastInterestPaymentDate = pdfParams.lastInterestPaymentDate;
@@ -290,6 +294,8 @@ export class CrmOrdersApi {
     orderNumber: string,
     pdfParams?: {
       accruedInterestDays?: number;
+      settlementDate?: string;
+      dealDate?: string;
       settlementNumber?: string;
       settlementDateTime?: string;
       lastInterestPaymentDate?: string;
@@ -301,6 +307,8 @@ export class CrmOrdersApi {
   ): Promise<Blob> {
     const params: Record<string, string | number | undefined> = {};
     if (pdfParams?.accruedInterestDays != null) params.accruedInterestDays = pdfParams.accruedInterestDays;
+    if (pdfParams?.settlementDate != null) params.settlementDate = pdfParams.settlementDate;
+    if (pdfParams?.dealDate != null) params.dealDate = pdfParams.dealDate;
     if (pdfParams?.settlementNumber != null) params.settlementNumber = pdfParams.settlementNumber;
     if (pdfParams?.settlementDateTime != null) params.settlementDateTime = pdfParams.settlementDateTime;
     if (pdfParams?.lastInterestPaymentDate != null) params.lastInterestPaymentDate = pdfParams.lastInterestPaymentDate;
@@ -336,6 +344,7 @@ export class CrmOrdersApi {
       fromEmail?: string;
       toEmail?: string;
       accruedInterestDays: number;
+      settlementDate?: string;
       settlementNumber?: string;
       settlementDateTime?: string;
       lastInterestPaymentDate?: string;

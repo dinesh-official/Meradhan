@@ -14,7 +14,7 @@ export const ORDER_STATUS_CONFIG: Record<
   CrmOrderStatus,
   { title: string; badgeClass: string }
 > = {
-  PENDING: { title: "Not completed", badgeClass: "bg-slate-100 text-slate-700" },
+  PENDING: { title: "Pending", badgeClass: "bg-orange-100 text-orange-800" },
   IN_PROGRESS: { title: "In progress", badgeClass: "bg-blue-100 text-blue-800" },
   APPLIED: { title: "In progress", badgeClass: "bg-blue-100 text-blue-800" },
   SETTLED: { title: "Settled", badgeClass: "bg-green-100 text-green-800" },
@@ -22,6 +22,12 @@ export const ORDER_STATUS_CONFIG: Record<
   EXPIRED: { title: "Expired", badgeClass: "bg-gray-200 text-gray-700" },
   CANCELLED: { title: "Cancelled", badgeClass: "bg-gray-200 text-gray-700" },
 };
+
+/** Unpaid / abandoned checkout — not a real pending lifecycle state. */
+const NOT_COMPLETED_DISPLAY = {
+  title: "Not completed",
+  badgeClass: "bg-slate-100 text-slate-700",
+} as const;
 
 const PAYMENT_STATUS_LABELS: Record<string, string> = {
   PENDING: "Pending",
@@ -50,13 +56,14 @@ export function getCrmOrderStatusDisplay(
 ): { title: string; badgeClass: string } {
   const normalized = status.trim().toUpperCase();
 
+  // Unpaid checkout must win over raw PENDING → "Pending".
+  if (isCheckoutNotCompleted(paymentStatus, status)) {
+    return { ...NOT_COMPLETED_DISPLAY };
+  }
+
   const fromConfig = ORDER_STATUS_CONFIG[normalized as CrmOrderStatus];
   if (fromConfig) {
     return { title: fromConfig.title, badgeClass: fromConfig.badgeClass };
-  }
-
-  if (isCheckoutNotCompleted(paymentStatus, status)) {
-    return ORDER_STATUS_CONFIG.PENDING;
   }
 
   return { title: status, badgeClass: "bg-gray-100 text-gray-800" };

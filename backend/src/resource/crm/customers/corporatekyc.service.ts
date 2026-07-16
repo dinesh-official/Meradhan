@@ -1,6 +1,7 @@
 import type { CreateCorporateKycPayload } from "@root/schema";
 import { db } from "@core/database/database";
 import { AppError, HttpStatus } from "@utils/error/AppError";
+import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 import { CorporateKycRepo } from "./corporatekyc.repo";
 
 function parseDate(s: string | undefined): Date | undefined {
@@ -391,7 +392,33 @@ function mapPayloadToPrismaCreate(customerId: number, payload: CreateCorporateKy
 }
 
 export class CorporateKycService {
+  private cbricsManager = new ParticipantManager();
+
   constructor(private repo: CorporateKycRepo) {}
+
+  /**
+   * Best-effort: push newly saved corporate KYC banks to CBRICS when a
+   * participant already exists. Never fails the KYC save itself.
+   */
+  private async syncBanksToCbricsBestEffort(customerId: number): Promise<void> {
+    try {
+      const result =
+        await this.cbricsManager.syncCorporateKycBanksToCbrics(customerId);
+      if (result.errors.length > 0) {
+        console.error(
+          "[CorporateKycService] CBRICS bank sync errors",
+          customerId,
+          result.errors,
+        );
+      }
+    } catch (err) {
+      console.error(
+        "[CorporateKycService] CBRICS bank sync failed",
+        customerId,
+        err,
+      );
+    }
+  }
 
   async getByCustomerId(customerId: number) {
     await this.repo.ensureCustomerExists(customerId);
@@ -652,6 +679,8 @@ export class CorporateKycService {
         return this.mapToResponse(refreshed ?? updated);
       }
 
+      // Banks were wiped+recreated — push any missing ones to CBRICS.
+      await this.syncBanksToCbricsBestEffort(customerId);
       return this.mapToResponse(updated);
     }
 
@@ -668,6 +697,7 @@ export class CorporateKycService {
         authorisedSignatories: true,
       },
     });
+    await this.syncBanksToCbricsBestEffort(customerId);
     return this.mapToResponse(created);
   }
 
