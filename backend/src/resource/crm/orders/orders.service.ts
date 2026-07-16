@@ -21,8 +21,7 @@ import { env } from "@packages/config/src/env";
 import { loadInvestorCouponScheduleForPdf } from "@services/order/investor-coupon-entitlement";
 import { SettlementNoService } from "@services/refq/nse/settlement-no.service";
 import {
-  DEFAULT_BOND_MARKET_HOLIDAYS,
-  firstWorkingDayAfter,
+  computeBondSettlement,
   settlementDateFromYmd,
 } from "@services/order/order-pricing-helper";
 import { sendBackOfficeEmail } from "@communication/email_communication";
@@ -287,35 +286,74 @@ function toBusinessYmd(input: string | null | undefined): string | null {
   return parsed ? toYyyyMmDd(parsed) : null;
 }
 
-function resolveSettlementDateYmdForPdf(input: {
-  requestedSettlementDate?: string | null;
-  rfqSettlementDate?: string | null;
-  acceptedSettlementDate?: string | null;
-  settleOrderSettlementDate?: string | null;
-  metadataSettlementDate?: string | null;
-  dealDate?: string | null;
+/**
+ * Deal / settlement dates for CRM receipt + deal-sheet PDFs.
+ * Uses the same market-hours / holiday logic as order pricing
+ * (`computeBondSettlement`). NSE settlementType 0 → T+0 (settle = deal).
+ * Explicit picker overrides still win when provided.
+ */
+function resolvePdfDealAndSettlementDates(input: {
+  executionDateTime: Date;
   settlementType?: number | null;
-  fallbackDate: Date;
-}): string {
-  const explicitRequested = toBusinessYmd(input.requestedSettlementDate);
-  if (explicitRequested) return explicitRequested;
+  requestedDealDate?: string | null;
+  requestedSettlementDate?: string | null;
+}): { dealDateYmd: string; settlementDateYmd: string; dealDate: Date } {
+  const settlement = computeBondSettlement(input.executionDateTime);
+  let dealDateYmd = settlement.dealDate;
+  let settlementDateYmd = settlement.settlementDate;
 
-  const savedNseSettlement =
-    toBusinessYmd(input.rfqSettlementDate) ??
-    toBusinessYmd(input.acceptedSettlementDate) ??
-    toBusinessYmd(input.settleOrderSettlementDate) ??
-    toBusinessYmd(input.metadataSettlementDate);
-  if (savedNseSettlement) return savedNseSettlement;
-
-  const dealDate = parseLooseDate(input.dealDate ?? "");
-  if (dealDate && input.settlementType === 1) {
-    return toYyyyMmDd(firstWorkingDayAfter(dealDate, new Set(DEFAULT_BOND_MARKET_HOLIDAYS)));
-  }
-  if (dealDate && input.settlementType === 0) {
-    return toYyyyMmDd(dealDate);
+  // Match computeBondOrderPricingData: T+0 forces settlement = deal.
+  if (input.settlementType === 0) {
+    settlementDateYmd = dealDateYmd;
   }
 
-  return toYyyyMmDd(input.fallbackDate);
+  const overrideDeal = toBusinessYmd(input.requestedDealDate);
+  if (overrideDeal) {
+    dealDateYmd = overrideDeal;
+    if (input.settlementType === 0 && !toBusinessYmd(input.requestedSettlementDate)) {
+      settlementDateYmd = dealDateYmd;
+    }
+  }
+
+  const overrideSettle = toBusinessYmd(input.requestedSettlementDate);
+  if (overrideSettle) {
+    settlementDateYmd = overrideSettle;
+  }
+
+  const dealDate = parseLooseDate(dealDateYmd) ?? input.executionDateTime;
+  // Preserve quote/order clock time on the computed deal calendar day.
+  dealDate.setHours(
+    input.executionDateTime.getHours(),
+    input.executionDateTime.getMinutes(),
+    input.executionDateTime.getSeconds(),
+    input.executionDateTime.getMilliseconds(),
+  );
+
+  return { dealDateYmd, settlementDateYmd, dealDate };
+}
+
+/**
+ * Settlement number for PDFs: look up `nse_settlement_no` by settlement date first.
+ * Form override / settle_order / metadata are used only when no row exists for that date.
+ */
+async function resolveSettlementNumberForPdf(input: {
+  settlementDateYmd: string;
+  requestedSettlementNumber?: string | null;
+  settleOrderSettlementNo?: string | null;
+  metadataSettlementNumber?: string | null;
+}): Promise<string | null> {
+  const byDate = await new SettlementNoService()
+    .getSettlementNo(input.settlementDateYmd)
+    .catch(() => null);
+  const fromDate = byDate?.settlementNo?.trim();
+  if (fromDate) return fromDate;
+
+  return (
+    input.requestedSettlementNumber?.trim() ||
+    input.settleOrderSettlementNo?.trim() ||
+    input.metadataSettlementNumber?.trim() ||
+    null
+  );
 }
 
 function diffDays(start: Date, end: Date): number {
@@ -1311,10 +1349,8 @@ export class CrmOrdersService {
       return s !== "" ? s : null;
     };
 
-    // The NSE RFQ quote ("Add ISIN") carries the authoritative settlement date,
-    // deal date and settlement type. Resolve it via the same chain the receipt
-    // PDF uses (settle order → negotiation → RFQ master), with a direct
-    // fallback by RFQ number captured on the order.
+    // Resolve RFQ master via settle order → negotiation (same chain as PDF generate),
+    // with a direct fallback by RFQ number captured on the order.
     const negotiation = settleOrder?.orderNumber
       ? await db.dataBase.rFQNegotiation.findFirst({
           where: { tradeNumber: settleOrder.orderNumber },
@@ -1330,25 +1366,21 @@ export class CrmOrdersService {
         })
       : null;
 
-    // Prefer the saved NSE Add ISIN / negotiation settlement date in DB.
-    // Only use caller input for an explicit user override from the date picker.
-    const createdAtIso =
-      order.createdAt instanceof Date
-        ? order.createdAt.toISOString()
-        : String(order.createdAt);
-    const dealDateRaw =
-      (rfqDetails?.date?.trim() || null) || pickMetaStr(orderMeta.dealDate);
-    const settlementYmd = resolveSettlementDateYmdForPdf({
-      requestedSettlementDate:
-        typeof input.settlementDate === "string" ? input.settlementDate : null,
-      rfqSettlementDate: rfqDetails?.settlementDate ?? null,
-      acceptedSettlementDate: negotiation?.acceptedSettlementDate ?? null,
-      settleOrderSettlementDate: settleOrder?.modSettleDate ?? null,
-      metadataSettlementDate: pickMetaStr(orderMeta.settlementDate),
-      dealDate: dealDateRaw,
-      settlementType: rfqDetails?.settlementType ?? negotiation?.acceptedSettlementType ?? null,
-      fallbackDate: order.createdAt,
-    });
+    // Same deal/settlement calendar as order pricing (`computeBondSettlement`).
+    const executionDateTime = parseRfqMasterDateTime(
+      rfqDetails?.date,
+      rfqDetails?.quoteTime,
+      order.createdAt,
+    );
+    const settlementTypeNum =
+      rfqDetails?.settlementType ?? negotiation?.acceptedSettlementType ?? null;
+    const { dealDateYmd, settlementDateYmd: settlementYmd } =
+      resolvePdfDealAndSettlementDates({
+        executionDateTime,
+        settlementType: settlementTypeNum,
+        requestedSettlementDate:
+          typeof input.settlementDate === "string" ? input.settlementDate : null,
+      });
 
     const settlementDt = parseLooseDate(settlementYmd);
     if (!settlementDt) {
@@ -1358,14 +1390,6 @@ export class CrmOrdersService {
       });
     }
     const settlementForCoupons = settlementDateFromYmd(settlementYmd);
-    const dealDt = dealDateRaw ? parseLooseDate(dealDateRaw) : null;
-    const dealDateYmd = dealDt
-      ? [
-          dealDt.getFullYear(),
-          String(dealDt.getMonth() + 1).padStart(2, "0"),
-          String(dealDt.getDate()).padStart(2, "0"),
-        ].join("-")
-      : null;
 
     // Prefer checkout DeriData pricing snapshot on the order — never bonds-table calc columns.
     const orderSnap = orderPricingSnapshot(order.bondDetails);
@@ -1422,20 +1446,13 @@ export class CrmOrdersService {
       settlementForCoupons,
     );
 
-    // Settlement number: prefer the NSE settle_order, then fall back to
-    // whatever the order captured in its metadata (settlementNumber / settlementNo).
-    let settlementNumber =
-      settleOrder?.settlementNo?.trim() ||
-      pickMetaStr(orderMeta.settlementNumber) ||
-      pickMetaStr(orderMeta.settlementNo);
-    // Final fallback: NSE assigns one settlement number per settlement date —
-    // look it up from the date-keyed table using the resolved settlement date.
-    if (!settlementNumber) {
-      const byDate = await new SettlementNoService()
-        .getSettlementNo(settlementYmd)
-        .catch(() => null);
-      settlementNumber = byDate?.settlementNo?.trim() || null;
-    }
+    // Settlement number is keyed by settlement date in `nse_settlement_no`.
+    const settlementNumber = await resolveSettlementNumberForPdf({
+      settlementDateYmd: settlementYmd,
+      settleOrderSettlementNo: settleOrder?.settlementNo,
+      metadataSettlementNumber:
+        pickMetaStr(orderMeta.settlementNumber) ?? pickMetaStr(orderMeta.settlementNo),
+    });
 
     // For amortising bonds, turn the principal cashflow rows into the
     // "DD-MMM-YYYY pct%" schedule the receipt renders in place of "100.0000%".
@@ -1464,7 +1481,7 @@ export class CrmOrdersService {
       amortizedPrincipalPaymentDates,
       settlementDate: settlementYmd,
       dealDate: dealDateYmd,
-      settlementType: rfqDetails?.settlementType ?? null,
+      settlementType: settlementTypeNum,
     };
   }
 
@@ -2107,30 +2124,22 @@ export class CrmOrdersService {
       },
     });
     const metadata = (order.metadata as Record<string, unknown> | null) ?? {};
-    const pickMetaStr = (v: unknown): string | null => {
-      if (v == null) return null;
-      const s = String(v).trim();
-      return s !== "" ? s : null;
-    };
-
 
     const fallbackOrderDate =
       order.createdAt instanceof Date ? order.createdAt : new Date(order.createdAt);
-    const orderDateForPdf = pdfQuery.dealDate ? new Date(pdfQuery.dealDate) : parseRfqMasterDateTime(
+    const executionDateTime = parseRfqMasterDateTime(
       rfqDetails?.date,
       rfqDetails?.quoteTime,
       fallbackOrderDate,
     );
-    const resolvedSettlementDate = resolveSettlementDateYmdForPdf({
-      requestedSettlementDate: pdfQuery.settlementDate,
-      rfqSettlementDate: rfqDetails?.settlementDate ?? null,
-      acceptedSettlementDate: negotation?.acceptedSettlementDate ?? null,
-      settleOrderSettlementDate: settleOrder?.modSettleDate ?? null,
-      metadataSettlementDate: pickMetaStr(metadata.settlementDate),
-      dealDate: rfqDetails?.date ?? pickMetaStr(metadata.dealDate),
-      settlementType: rfqDetails?.settlementType ?? negotation?.acceptedSettlementType ?? null,
-      fallbackDate: orderDateForPdf,
-    });
+    const { dealDate: orderDateForPdf, settlementDateYmd: resolvedSettlementDate } =
+      resolvePdfDealAndSettlementDates({
+        executionDateTime,
+        settlementType:
+          rfqDetails?.settlementType ?? negotation?.acceptedSettlementType ?? null,
+        requestedDealDate: pdfQuery.dealDate ?? null,
+        requestedSettlementDate: pdfQuery.settlementDate ?? null,
+      });
     const [bankName, dpName] = await Promise.all([
       settleOrder?.ifscCode
         ? fetchBankNameFromIfsc(settleOrder.ifscCode)
@@ -2193,6 +2202,16 @@ export class CrmOrdersService {
       accruedInterestDaysParam,
     );
 
+    const resolvedSettlementNumber = await resolveSettlementNumberForPdf({
+      settlementDateYmd: resolvedSettlementDate,
+      requestedSettlementNumber: settlementNumberParam,
+      settleOrderSettlementNo: settleOrder?.settlementNo,
+      metadataSettlementNumber:
+        (typeof metadata.settlementNumber === "string" && metadata.settlementNumber.trim()) ||
+        (typeof metadata.settlementNo === "string" && metadata.settlementNo.trim()) ||
+        null,
+    });
+
     const buffer = await generateOrderPdfBuffer({
       user,
       orderId: order.orderNumber,
@@ -2228,8 +2247,7 @@ export class CrmOrdersService {
             : undefined,
           accruedInterest: pdfFinancials.accruedInterest,
           accruedInterestDays: pdfFinancials.accruedInterestDays,
-          settlementNumber:
-            settlementNumberParam ?? (settleOrder as { settlementNo?: string } | undefined)?.settlementNo,
+          settlementNumber: resolvedSettlementNumber ?? undefined,
           settlementDateTime: settlementDateTimeParam,
           lastInterestPaymentDate: lastInterestPaymentDateParam,
           nonAmortizedBond: nonAmortizedBondParam,
@@ -2379,28 +2397,21 @@ export class CrmOrdersService {
       },
     });
     const metadata = (order.metadata as Record<string, unknown> | null) ?? {};
-    const pickMetaStr = (v: unknown): string | null => {
-      if (v == null) return null;
-      const s = String(v).trim();
-      return s !== "" ? s : null;
-    };
     const fallbackOrderDateDeal =
       order.createdAt instanceof Date ? order.createdAt : new Date(order.createdAt);
-    const orderDateForPdf = parseRfqMasterDateTime(
+    const executionDateTimeDeal = parseRfqMasterDateTime(
       rfqDetails?.date,
       rfqDetails?.quoteTime,
       fallbackOrderDateDeal,
     );
-    const resolvedSettlementDate = resolveSettlementDateYmdForPdf({
-      requestedSettlementDate: pdfQuery.settlementDate,
-      rfqSettlementDate: rfqDetails?.settlementDate ?? null,
-      acceptedSettlementDate: negotation?.acceptedSettlementDate ?? null,
-      settleOrderSettlementDate: settleOrder?.modSettleDate ?? null,
-      metadataSettlementDate: pickMetaStr(metadata.settlementDate),
-      dealDate: rfqDetails?.date ?? pickMetaStr(metadata.dealDate),
-      settlementType: rfqDetails?.settlementType ?? negotation?.acceptedSettlementType ?? null,
-      fallbackDate: orderDateForPdf,
-    });
+    const { dealDate: orderDateForPdf, settlementDateYmd: resolvedSettlementDate } =
+      resolvePdfDealAndSettlementDates({
+        executionDateTime: executionDateTimeDeal,
+        settlementType:
+          rfqDetails?.settlementType ?? negotation?.acceptedSettlementType ?? null,
+        requestedDealDate: pdfQuery.dealDate ?? null,
+        requestedSettlementDate: pdfQuery.settlementDate ?? null,
+      });
 
     const [bankName, dpName] = await Promise.all([
       settleOrder?.ifscCode
@@ -2465,6 +2476,16 @@ export class CrmOrdersService {
       accruedInterestDaysParam,
     );
 
+    const resolvedSettlementNumberDeal = await resolveSettlementNumberForPdf({
+      settlementDateYmd: resolvedSettlementDate,
+      requestedSettlementNumber: settlementNumberParam,
+      settleOrderSettlementNo: settleOrder?.settlementNo,
+      metadataSettlementNumber:
+        (typeof metadata.settlementNumber === "string" && metadata.settlementNumber.trim()) ||
+        (typeof metadata.settlementNo === "string" && metadata.settlementNo.trim()) ||
+        null,
+    });
+
     const buffer = await generateDealPdfBuffer({
       user,
       orderId: order.orderNumber,
@@ -2500,9 +2521,7 @@ export class CrmOrdersService {
             : undefined,
           accruedInterest: pdfFinancials.accruedInterest,
           accruedInterestDays: pdfFinancials.accruedInterestDays,
-          settlementNumber:
-            settlementNumberParam ??
-            (settleOrder as { settlementNo?: string } | undefined)?.settlementNo,
+          settlementNumber: resolvedSettlementNumberDeal ?? undefined,
           settlementDateTime: settlementDateTimeParam,
           lastInterestPaymentDate: lastInterestPaymentDateParam,
           nonAmortizedBond: nonAmortizedBondParamDeal,
@@ -2783,6 +2802,26 @@ export class CrmOrdersService {
       html: htmlBody,
       text: messageBody,
       attachments,
+    });
+
+    // Persist send flags so CRM order details (Settlement Pipeline) can show
+    // whether the order receipt / deal sheet email was delivered.
+    const sentAt = new Date().toISOString();
+    const existingMeta = (order.metadata as Record<string, unknown> | null) ?? {};
+    const metaPatch: Record<string, unknown> = { ...existingMeta };
+    if (pdfType === "order" || pdfType === "both") {
+      metaPatch.orderReceiptEmailSentAt = sentAt;
+      metaPatch.orderReceiptEmailMessageId = messageId;
+      metaPatch.orderReceiptEmailTo = recipientEmail;
+    }
+    if (pdfType === "deal" || pdfType === "both") {
+      metaPatch.dealSheetEmailSentAt = sentAt;
+      metaPatch.dealSheetEmailMessageId = messageId;
+      metaPatch.dealSheetEmailTo = recipientEmail;
+    }
+    await db.dataBase.order.update({
+      where: { id: order.id },
+      data: { metadata: metaPatch as Prisma.InputJsonValue },
     });
 
     return {

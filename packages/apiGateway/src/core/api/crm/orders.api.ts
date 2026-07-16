@@ -249,6 +249,7 @@ export class CrmOrdersApi {
     pdfParams?: {
       accruedInterestDays?: number;
       settlementDate?: string;
+      dealDate?: string;
       settlementNumber?: string;
       settlementDateTime?: string;
       lastInterestPaymentDate?: string;
@@ -261,6 +262,7 @@ export class CrmOrdersApi {
     const params: Record<string, string | number | undefined> = {};
     if (pdfParams?.accruedInterestDays != null) params.accruedInterestDays = pdfParams.accruedInterestDays;
     if (pdfParams?.settlementDate != null) params.settlementDate = pdfParams.settlementDate;
+    if (pdfParams?.dealDate != null) params.dealDate = pdfParams.dealDate;
     if (pdfParams?.settlementNumber != null) params.settlementNumber = pdfParams.settlementNumber;
     if (pdfParams?.settlementDateTime != null) params.settlementDateTime = pdfParams.settlementDateTime;
     if (pdfParams?.lastInterestPaymentDate != null) params.lastInterestPaymentDate = pdfParams.lastInterestPaymentDate;
@@ -293,6 +295,7 @@ export class CrmOrdersApi {
     pdfParams?: {
       accruedInterestDays?: number;
       settlementDate?: string;
+      dealDate?: string;
       settlementNumber?: string;
       settlementDateTime?: string;
       lastInterestPaymentDate?: string;
@@ -305,6 +308,7 @@ export class CrmOrdersApi {
     const params: Record<string, string | number | undefined> = {};
     if (pdfParams?.accruedInterestDays != null) params.accruedInterestDays = pdfParams.accruedInterestDays;
     if (pdfParams?.settlementDate != null) params.settlementDate = pdfParams.settlementDate;
+    if (pdfParams?.dealDate != null) params.dealDate = pdfParams.dealDate;
     if (pdfParams?.settlementNumber != null) params.settlementNumber = pdfParams.settlementNumber;
     if (pdfParams?.settlementDateTime != null) params.settlementDateTime = pdfParams.settlementDateTime;
     if (pdfParams?.lastInterestPaymentDate != null) params.lastInterestPaymentDate = pdfParams.lastInterestPaymentDate;
