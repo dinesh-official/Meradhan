@@ -166,7 +166,12 @@ function OrderTable({ data, pageSize = 10, isLoading }: OrderTableProps) {
         {
           key: "status",
           label: "Status",
-          cell: (row) => <OrderStatusBadge status={row.status} />,
+          cell: (row) => (
+            <OrderStatusBadge
+              status={row.status}
+              paymentStatus={row.paymentStatus}
+            />
+          ),
         },
         {
           key: "actions",

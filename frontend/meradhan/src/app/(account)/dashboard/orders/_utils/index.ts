@@ -337,8 +337,8 @@ export function formatOrderYieldPercent(order: Order): string {
   const pricing = b.pricing;
   const pricingYield =
     pricing != null &&
-    typeof pricing === "object" &&
-    !Array.isArray(pricing)
+      typeof pricing === "object" &&
+      !Array.isArray(pricing)
       ? parseNumericUnknown((pricing as Record<string, unknown>).yield)
       : null;
   const y =
