@@ -690,8 +690,14 @@ jobs:
           COMMANDS+="ls -la"$'\n'
 
           # Filebeat
-          COMMANDS+="docker compose -f filebeat.yaml up -d"$'\n'
+          COMMANDS+="echo '===== FILEBEAT STATUS ====='"$'\n'
           COMMANDS+="docker compose -f filebeat.yaml ps"$'\n'
+
+          COMMANDS+="echo '===== FILEBEAT LOGS ====='"$'\n'
+          COMMANDS+="docker compose -f filebeat.yaml logs --tail=100"$'\n'
+
+          COMMANDS+="echo '===== FILEBEAT CONTAINER ====='"$'\n'
+          COMMANDS+="docker ps -a | grep filebeat || true"$'\n'
 
           # PostgreSQL
           COMMANDS+="docker compose -f pgsql.yaml up -d"$'\n'
