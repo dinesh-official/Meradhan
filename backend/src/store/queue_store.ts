@@ -17,6 +17,7 @@ export class QueueStore {
 
   public getInstance(): Redis {
     if (!QueueStore.instance) {
+
       const redis = new Redis({
         username: env.REDIS_USERNAME,
         password: env.REDIS_PASSWORD,
@@ -25,16 +26,15 @@ export class QueueStore {
         maxRetriesPerRequest: null,
         enableReadyCheck: false,
       });
+
+      // flush all keys in the database
       redis.on("connect", () => logger.logInfo("🟢 Redis is connecting..."));
-      redis.on("ready", () =>
-        logger.logInfo("✅ Redis connection established and ready to use.")
-      );
-      redis.on("error", (err) =>
-        logger.logError("🔴 Redis connection error:", err)
-      );
+      redis.on("ready", () => logger.logInfo("✅ Redis connection established and ready to use."));
+      redis.on("error", (err) => logger.logError("🔴 Redis connection error:", err));
       redis.on("end", () => logger.logInfo("⚪️ Redis connection closed."));
       QueueStore.instance = redis;
     }
+
     return QueueStore.instance;
   }
 
