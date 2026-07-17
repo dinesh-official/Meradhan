@@ -806,7 +806,7 @@ jobs:
           echo "======================================"
 
 
-      - name: Get Listener ARN
+      - name: Get Listener ARN & VPC ID
         id: get_listener
         shell: bash
         run: |
@@ -814,28 +814,62 @@ jobs:
 
           if [ "${{ inputs.environment }}" = "stage" ]; then
             LISTENER_ARN_VAL="${{ vars.STAGE_LISTENER_ARN }}"
+            VPC_ID_VAL="${{ vars.STAGE_VPC_ID }}"
+            MISSING_LISTENER_VAR="STAGE_LISTENER_ARN"
+            MISSING_VPC_VAR="STAGE_VPC_ID"
           else
             LISTENER_ARN_VAL="${{ vars.PROD_LISTENER_ARN }}"
+            VPC_ID_VAL="${{ vars.PROD_VPC_ID }}"
+            MISSING_LISTENER_VAR="PROD_LISTENER_ARN"
+            MISSING_VPC_VAR="PROD_VPC_ID"
           fi
 
+          # Trim accidental whitespace/newlines
+          LISTENER_ARN_VAL="$(echo -n "$LISTENER_ARN_VAL" | xargs)"
+          VPC_ID_VAL="$(echo -n "$VPC_ID_VAL" | xargs)"
+
+          echo "======================================"
+          echo "Environment requested : ${{ inputs.environment }}"
+          echo "======================================"
+
           if [ -z "$LISTENER_ARN_VAL" ] || [ "$LISTENER_ARN_VAL" = "None" ]; then
+            echo ""
             echo "ERROR: No Listener ARN configured for environment '${{ inputs.environment }}'."
-            echo "Set STAGE_LISTENER_ARN / PROD_LISTENER_ARN as repo or environment variables."
+            echo "Fix: add '${MISSING_LISTENER_VAR}' as a variable:"
+            echo "  Settings -> Environments -> ${{ inputs.environment == 'stage' && 'staging' || 'production' }} -> Variables"
+            exit 1
+          fi
+
+          if [[ ! "$LISTENER_ARN_VAL" =~ ^arn:aws:elasticloadbalancing:.*:listener/ ]]; then
+            echo "ERROR: '${MISSING_LISTENER_VAR}' does not look like a valid ELBv2 listener ARN:"
+            echo "  Got: $LISTENER_ARN_VAL"
+            exit 1
+          fi
+
+          if [ -z "$VPC_ID_VAL" ] || [ "$VPC_ID_VAL" = "None" ]; then
+            echo ""
+            echo "ERROR: No VPC ID configured for environment '${{ inputs.environment }}'."
+            echo "Fix: add '${MISSING_VPC_VAR}' as a variable:"
+            echo "  Settings -> Environments -> ${{ inputs.environment == 'stage' && 'staging' || 'production' }} -> Variables"
+            exit 1
+          fi
+
+          if [[ ! "$VPC_ID_VAL" =~ ^vpc-[a-z0-9]+$ ]]; then
+            echo "ERROR: '${MISSING_VPC_VAR}' does not look like a valid VPC ID:"
+            echo "  Got: $VPC_ID_VAL"
             exit 1
           fi
 
           echo "LISTENER_ARN=$LISTENER_ARN_VAL" >> "$GITHUB_ENV"
+          echo "VPC_ID=$VPC_ID_VAL" >> "$GITHUB_ENV"
 
-          echo "======================================"
-          echo "Environment  : ${{ inputs.environment }}"
-          echo "Listener ARN : $LISTENER_ARN_VAL"
+          echo "Resolved Listener ARN : $LISTENER_ARN_VAL"
+          echo "Resolved VPC ID       : $VPC_ID_VAL"
           echo "======================================"
 
       - name: Create or Reuse Target Groups & Listener Rules
         id: tg_listener
         shell: bash
-        env:
-          VPC_ID: ${{ vars.VPC_ID }}
         run: |
           set -e
 
@@ -845,6 +879,16 @@ jobs:
           HEALTH_TIMEOUT_SECONDS=300     # 5 min max wait per target
           HEALTH_POLL_INTERVAL=10
           MAX_PRIORITY_RETRIES=10
+
+          if [ -z "$VPC_ID" ]; then
+            echo "ERROR: VPC_ID was not exported by the 'Get Listener ARN & VPC ID' step."
+            exit 1
+          fi
+
+          if [ -z "$LISTENER_ARN" ]; then
+            echo "ERROR: LISTENER_ARN was not exported by the 'Get Listener ARN & VPC ID' step."
+            exit 1
+          fi
 
           declare -A TARGET_GROUPS=()   # tg_name -> "port:idtag"
           declare -A HOST_HEADERS=()    # tg_name -> full domain
@@ -898,7 +942,7 @@ jobs:
           }
 
           # ---------------------------------------------------------
-          # Helper: get all currently used priorities (as a space list)
+          # Helper: get all currently used priorities
           # ---------------------------------------------------------
           get_used_priorities() {
             aws elbv2 describe-rules \
@@ -909,8 +953,7 @@ jobs:
           }
 
           # ---------------------------------------------------------
-          # Helper: create a rule with retry-on-priority-conflict.
-          # Re-scans used priorities each attempt to survive concurrent runs.
+          # Helper: create a rule with retry-on-priority-conflict
           # ---------------------------------------------------------
           create_rule_with_retry() {
             local HOST="$1"
@@ -1016,6 +1059,7 @@ jobs:
           echo "======================================"
           echo "Environment    : ${{ inputs.environment }}"
           echo "Listener ARN   : $LISTENER_ARN"
+          echo "VPC ID         : $VPC_ID"
           echo "Instance ID    : $INSTANCE_ID"
           echo "Services       : ${!TARGET_GROUPS[@]}"
           echo "======================================"
