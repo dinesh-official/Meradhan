@@ -141,20 +141,27 @@ export class DigioSDK {
       name,
       useKraKyc,
       pageCount,
+      signPages,
       reason,
     }: {
       email: string;
       name: string;
       useKraKyc?: boolean;
       /**
-       * Number of pages to draw the signature on. Defaults to the
-       * KYC-flow page counts (`ESIGN_PAGE_COUNT_KRA` / `ESIGN_PAGE_COUNT_DEFAULT`).
-       * For arbitrary documents (e.g. corporate KYC PDFs uploaded by a
-       * CRM operator), the caller should compute the real page count via
-       * {@link getPdfPageCount} and pass it here — otherwise Digio rejects
-       * the request when `sign_coordinates` references non-existent pages.
+       * Total PDF page count (used to validate `signPages` and as the
+       * fallback when signing every page). Defaults to the KYC-flow page
+       * counts (`ESIGN_PAGE_COUNT_KRA` / `ESIGN_PAGE_COUNT_DEFAULT`).
+       * For arbitrary documents (e.g. corporate KYC PDFs), the caller
+       * should compute the real page count via {@link getPdfPageCount}.
        */
       pageCount?: number;
+      /**
+       * Optional 1-based page numbers to place Digio signature boxes on.
+       * When omitted, signatures are placed on every page up to
+       * `pageCount` (individual KYC behaviour). Corporate e-sign should
+       * pass only the declaration pages to avoid stamps on every page.
+       */
+      signPages?: number[];
       /** Free-text "reason" stamped on the Digio signing screen. Defaults to KYC copy. */
       reason?: string;
     },
@@ -167,6 +174,14 @@ export class DigioSDK {
         (useKraKyc
           ? DigioSDK.ESIGN_PAGE_COUNT_KRA
           : DigioSDK.ESIGN_PAGE_COUNT_DEFAULT);
+
+      const pagesToSignRaw =
+        signPages != null && signPages.length > 0
+          ? [...new Set(signPages.filter((p) => p >= 1 && p <= signPageCount))]
+          : Array.from({ length: signPageCount }, (_, i) => i + 1);
+      // Never send Digio an empty coordinate map — fall back to last page.
+      const pagesToSign =
+        pagesToSignRaw.length > 0 ? pagesToSignRaw : [signPageCount];
 
       // Attach the PDF as binary
       // Attach the PDF file as binary stream
@@ -185,8 +200,8 @@ export class DigioSDK {
           display_on_page: "custom",
           sign_coordinates: {
             [email]: Object.fromEntries(
-              Array.from({ length: signPageCount }, (_, i) => [
-                (i + 1).toString(),
+              pagesToSign.map((page) => [
+                page.toString(),
                 [{ llx: 420, lly: 50, urx: 555, ury: 100 }],
               ]),
             ),
