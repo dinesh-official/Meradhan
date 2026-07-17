@@ -136,7 +136,12 @@ function CustomerDetail({
           <span key="d" className="whitespace-nowrap text-xs text-slate-500">{formatOrderDate(o.createdAt)}</span>,
           <span key="v" className="tabular-nums font-medium">{formatValueCr(Number(o.totalAmount))}</span>,
           <span key="y" className="tabular-nums text-xs">{yld}</span>,
-          <OrderStatusBadge key="s" status={o.status} paymentStatus={o.paymentStatus} />,
+          <OrderStatusBadge
+            key="s"
+            status={o.status}
+            paymentStatus={o.paymentStatus}
+            paymentProvider={o.paymentProvider}
+          />,
         ],
       };
     }),

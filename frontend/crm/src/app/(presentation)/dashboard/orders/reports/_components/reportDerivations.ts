@@ -48,8 +48,10 @@ export function deriveBondCategory(bondName: string, isin?: string): string {
 export function mapOrderWorkflowStatus(
   orderStatus: string,
   paymentStatus: string,
+  paymentProvider?: string | null,
 ): string {
-  return getCrmOrderStatusDisplay(orderStatus, paymentStatus).title;
+  return getCrmOrderStatusDisplay(orderStatus, paymentStatus, paymentProvider)
+    .title;
 }
 
 export function isActiveWorkflowStatus(label: string): boolean {
