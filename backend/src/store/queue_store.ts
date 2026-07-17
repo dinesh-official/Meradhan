@@ -6,7 +6,7 @@ export class QueueStore {
   private static instance: Redis | null = null;
   private static store: QueueStore | null = null;
 
-  private constructor() {}
+  private constructor() { }
 
   public static getStore(): QueueStore {
     if (!QueueStore.store) {
@@ -33,7 +33,6 @@ export class QueueStore {
         logger.logError("🔴 Redis connection error:", err)
       );
       redis.on("end", () => logger.logInfo("⚪️ Redis connection closed."));
-
       QueueStore.instance = redis;
     }
     return QueueStore.instance;
