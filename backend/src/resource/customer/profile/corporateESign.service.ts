@@ -285,8 +285,9 @@ export class CustomerCorporateESignService {
    *
    *   1. Loads the request + customer profile (with ownership guard).
    *   2. Streams the operator-uploaded PDF from S3 into a temp file.
-   *   3. Counts the PDF's pages so the `sign_coordinates` Digio expects
-   *      match the actual document (the SDK's default is KYC-PDF sized).
+   *   3. Counts the PDF's pages and places Digio signature coordinates only
+   *      on the corporate declaration pages (or the last page for uploads),
+   *      not every page.
    *   4. Calls Digio's `esignRequest` with the logged-in customer's
    *      email + name as the signer.
    *   5. Persists `digioDocumentId` / `digioAccessTokenId` /
@@ -384,13 +385,20 @@ export class CustomerCorporateESignService {
 
       const pageCount = Math.max(1, getPdfPageCount(pdfBuffer));
 
+      // Avoid Digio stamps on every page (corporate "double / multi sign").
+      // Backend-generated packs have "Applicant e-Sign" boxes on pages 4–5;
+      // operator-uploaded PDFs get a single stamp on the last page only.
+      const signPages = isBackendGeneratedESignPdf(request.eSignDocumentUrl!)
+        ? [4, 5].filter((p) => p <= pageCount)
+        : [];
+      const pagesForDigio =
+        signPages.length > 0 ? signPages : [pageCount];
+
       const digioResponse = await this.digio.esignRequest(tempFile, {
         email: customer.emailAddress,
         name: fullName,
-        // The KYC default (44/46) would over-spec sign_coordinates for
-        // the operator-uploaded corporate PDF. Pass the actual page count
-        // so Digio places a signature on every existing page.
         pageCount,
+        signPages: pagesForDigio,
         reason: "Corporate KYC e-sign",
       });
 
