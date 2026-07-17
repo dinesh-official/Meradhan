@@ -804,3 +804,359 @@ jobs:
           echo "======================================"
           echo "Deployment Completed Successfully"
           echo "======================================"
+
+
+      - name: Get Listener ARN
+        id: get_listener
+        shell: bash
+        run: |
+          set -e
+
+          if [ "${{ inputs.environment }}" = "stage" ]; then
+            LISTENER_ARN_VAL="${{ vars.STAGE_LISTENER_ARN }}"
+          else
+            LISTENER_ARN_VAL="${{ vars.PROD_LISTENER_ARN }}"
+          fi
+
+          if [ -z "$LISTENER_ARN_VAL" ] || [ "$LISTENER_ARN_VAL" = "None" ]; then
+            echo "ERROR: No Listener ARN configured for environment '${{ inputs.environment }}'."
+            echo "Set STAGE_LISTENER_ARN / PROD_LISTENER_ARN as repo or environment variables."
+            exit 1
+          fi
+
+          echo "LISTENER_ARN=$LISTENER_ARN_VAL" >> "$GITHUB_ENV"
+
+          echo "======================================"
+          echo "Environment  : ${{ inputs.environment }}"
+          echo "Listener ARN : $LISTENER_ARN_VAL"
+          echo "======================================"
+
+      - name: Create or Reuse Target Groups & Listener Rules
+        id: tg_listener
+        shell: bash
+        env:
+          VPC_ID: ${{ vars.VPC_ID }}
+        run: |
+          set -e
+
+          ROOT_DOMAIN="devkng.com"
+          INSTANCE_ID="${{ steps.create_ec2.outputs.instance_id }}"
+
+          HEALTH_TIMEOUT_SECONDS=300     # 5 min max wait per target
+          HEALTH_POLL_INTERVAL=10
+          MAX_PRIORITY_RETRIES=10
+
+          declare -A TARGET_GROUPS=()   # tg_name -> "port:idtag"
+          declare -A HOST_HEADERS=()    # tg_name -> full domain
+
+          if [ "${{ inputs.backend }}" = "true" ]; then
+            TARGET_GROUPS["tg-$BACKEND_NAME"]="4000:$BACKEND_NAME"
+            HOST_HEADERS["tg-$BACKEND_NAME"]="${BACKEND_NAME}.${ROOT_DOMAIN}"
+          fi
+
+          if [ "${{ inputs.crm }}" = "true" ]; then
+            TARGET_GROUPS["tg-$CRM_NAME"]="4001:$CRM_NAME"
+            HOST_HEADERS["tg-$CRM_NAME"]="${CRM_NAME}.${ROOT_DOMAIN}"
+          fi
+
+          if [ "${{ inputs.frontend }}" = "true" ]; then
+            TARGET_GROUPS["tg-$FRONTEND_NAME"]="4002:$FRONTEND_NAME"
+            HOST_HEADERS["tg-$FRONTEND_NAME"]="${FRONTEND_NAME}.${ROOT_DOMAIN}"
+          fi
+
+          if [ ${#TARGET_GROUPS[@]} -eq 0 ]; then
+            echo "No services selected — nothing to do."
+            {
+              echo "## Target Group / Listener Summary"
+              echo "No services were selected in workflow inputs."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          # ---------------------------------------------------------
+          # Helper: find an existing listener rule for an exact host-header
+          # Robust against both legacy Values[] and HostHeaderConfig.Values[]
+          # ---------------------------------------------------------
+          find_rule_arn_for_host() {
+            local HOST="$1"
+
+            aws elbv2 describe-rules \
+              --listener-arn "$LISTENER_ARN" \
+              --output json \
+            | jq -r --arg HOST "$HOST" '
+                .Rules[]
+                | select(
+                    (.Conditions[]?
+                      | select(.Field == "host-header")
+                      | ((.Values // [])
+                          + ((.HostHeaderConfig.Values) // []))
+                      | index($HOST)) != null
+                  )
+                | .RuleArn
+              ' \
+            | head -n 1
+          }
+
+          # ---------------------------------------------------------
+          # Helper: get all currently used priorities (as a space list)
+          # ---------------------------------------------------------
+          get_used_priorities() {
+            aws elbv2 describe-rules \
+              --listener-arn "$LISTENER_ARN" \
+              --query "Rules[?Priority!='default'].Priority" \
+              --output text 2>/dev/null \
+            | tr '\t' '\n'
+          }
+
+          # ---------------------------------------------------------
+          # Helper: create a rule with retry-on-priority-conflict.
+          # Re-scans used priorities each attempt to survive concurrent runs.
+          # ---------------------------------------------------------
+          create_rule_with_retry() {
+            local HOST="$1"
+            local TG_ARN="$2"
+            local ATTEMPT=1
+            local RULE_ARN=""
+
+            while [ "$ATTEMPT" -le "$MAX_PRIORITY_RETRIES" ]; do
+
+              local USED_PRIORITIES
+              USED_PRIORITIES=$(get_used_priorities)
+
+              local CANDIDATE=1
+              while echo "$USED_PRIORITIES" | grep -qx "$CANDIDATE"; do
+                CANDIDATE=$((CANDIDATE + 1))
+              done
+
+              echo "Attempt ${ATTEMPT}: trying priority ${CANDIDATE}..."
+
+              set +e
+              RULE_ARN=$(aws elbv2 create-rule \
+                --listener-arn "$LISTENER_ARN" \
+                --priority "$CANDIDATE" \
+                --conditions Field=host-header,Values="$HOST" \
+                --actions Type=forward,TargetGroupArn="$TG_ARN" \
+                --query "Rules[0].RuleArn" \
+                --output text 2>/tmp/create_rule_err.log)
+              local RC=$?
+              set -e
+
+              if [ "$RC" -eq 0 ] && [ -n "$RULE_ARN" ] && [ "$RULE_ARN" != "None" ]; then
+                echo "$RULE_ARN"
+                return 0
+              fi
+
+              if grep -qi "PriorityInUse" /tmp/create_rule_err.log; then
+                echo "Priority ${CANDIDATE} taken by a concurrent run. Retrying..."
+                ATTEMPT=$((ATTEMPT + 1))
+                sleep $((RANDOM % 3 + 1))
+                continue
+              fi
+
+              echo "ERROR creating listener rule:"
+              cat /tmp/create_rule_err.log
+              return 1
+
+            done
+
+            echo "ERROR: Exhausted ${MAX_PRIORITY_RETRIES} attempts to find a free priority."
+            return 1
+          }
+
+          # ---------------------------------------------------------
+          # Helper: is instance already registered on this TG/port?
+          # ---------------------------------------------------------
+          is_target_registered() {
+            local TG_ARN="$1"
+            local PORT="$2"
+
+            aws elbv2 describe-target-health \
+              --target-group-arn "$TG_ARN" \
+              --query "TargetHealthDescriptions[?Target.Id=='${INSTANCE_ID}' && Target.Port==\`${PORT}\`] | length(@)" \
+              --output text 2>/dev/null || echo "0"
+          }
+
+          # ---------------------------------------------------------
+          # Helper: wait for target to become healthy (bounded timeout)
+          # ---------------------------------------------------------
+          wait_for_target_health() {
+            local TG_ARN="$1"
+            local PORT="$2"
+            local ELAPSED=0
+            local STATE="unknown"
+
+            while [ "$ELAPSED" -lt "$HEALTH_TIMEOUT_SECONDS" ]; do
+
+              STATE=$(aws elbv2 describe-target-health \
+                --target-group-arn "$TG_ARN" \
+                --targets Id="$INSTANCE_ID",Port="$PORT" \
+                --query "TargetHealthDescriptions[0].TargetHealth.State" \
+                --output text 2>/dev/null || echo "unknown")
+
+              echo "Health check (${ELAPSED}s elapsed) : $STATE"
+
+              if [ "$STATE" = "healthy" ]; then
+                return 0
+              fi
+
+              sleep "$HEALTH_POLL_INTERVAL"
+              ELAPSED=$((ELAPSED + HEALTH_POLL_INTERVAL))
+
+            done
+
+            echo "STATE=$STATE"
+            return 1
+          }
+
+          # ---------------------------------------------------------
+          # Main loop
+          # ---------------------------------------------------------
+          SUMMARY_ROWS=""
+
+          echo "======================================"
+          echo "Environment    : ${{ inputs.environment }}"
+          echo "Listener ARN   : $LISTENER_ARN"
+          echo "Instance ID    : $INSTANCE_ID"
+          echo "Services       : ${!TARGET_GROUPS[@]}"
+          echo "======================================"
+
+          for TG_NAME in "${!TARGET_GROUPS[@]}"
+          do
+            INFO="${TARGET_GROUPS[$TG_NAME]}"
+            PORT="${INFO%%:*}"
+            ID_TAG="${INFO##*:}"
+            HOST_HEADER="${HOST_HEADERS[$TG_NAME]}"
+
+            echo ""
+            echo "--------------------------------------"
+            echo "Service      : $ID_TAG"
+            echo "Target Group : $TG_NAME"
+            echo "Port         : $PORT"
+            echo "Host Header  : $HOST_HEADER"
+            echo "--------------------------------------"
+
+            # -----------------------------------------------------
+            # 1. Create or reuse Target Group
+            # -----------------------------------------------------
+            TG_ARN=$(aws elbv2 describe-target-groups \
+              --names "$TG_NAME" \
+              --query "TargetGroups[0].TargetGroupArn" \
+              --output text 2>/dev/null || true)
+
+            TG_STATUS="Reused"
+
+            if [ -z "$TG_ARN" ] || [ "$TG_ARN" = "None" ]; then
+
+              echo "Target group not found. Creating..."
+
+              TG_ARN=$(aws elbv2 create-target-group \
+                --name "$TG_NAME" \
+                --protocol HTTP \
+                --port "$PORT" \
+                --vpc-id "$VPC_ID" \
+                --target-type instance \
+                --health-check-protocol HTTP \
+                --health-check-port traffic-port \
+                --health-check-path "/" \
+                --query "TargetGroups[0].TargetGroupArn" \
+                --output text)
+
+              aws elbv2 add-tags \
+                --resource-arns "$TG_ARN" \
+                --tags \
+                  Key=Name,Value="$TG_NAME" \
+                  Key=ID,Value="$ID_TAG" \
+                  Key=Environment,Value="${{ inputs.environment }}"
+
+              TG_STATUS="Created"
+              echo "Target group created : $TG_ARN"
+
+            else
+              echo "Target group already exists. Reusing : $TG_ARN"
+            fi
+
+            # -----------------------------------------------------
+            # 2. Register instance (skip if already registered on this port)
+            # -----------------------------------------------------
+            ALREADY_REGISTERED=$(is_target_registered "$TG_ARN" "$PORT")
+
+            if [ "$ALREADY_REGISTERED" != "0" ] && [ -n "$ALREADY_REGISTERED" ]; then
+              echo "Instance already registered on ${TG_NAME}:${PORT}. Skipping registration."
+            else
+              echo "Registering instance ${INSTANCE_ID} on port ${PORT}..."
+              aws elbv2 register-targets \
+                --target-group-arn "$TG_ARN" \
+                --targets Id="$INSTANCE_ID",Port="$PORT"
+            fi
+
+            # -----------------------------------------------------
+            # 3. Wait until target is healthy (bounded)
+            # -----------------------------------------------------
+            echo "Waiting for target to become healthy (timeout ${HEALTH_TIMEOUT_SECONDS}s)..."
+
+            if wait_for_target_health "$TG_ARN" "$PORT"; then
+              HEALTH_STATE="healthy"
+              echo "Target is healthy."
+            else
+              HEALTH_STATE="unhealthy/timeout"
+              echo "ERROR: Target did not become healthy within ${HEALTH_TIMEOUT_SECONDS}s."
+              echo "Check security groups, health-check path, and app startup time on port ${PORT}."
+              exit 1
+            fi
+
+            # -----------------------------------------------------
+            # 4. Create or reuse Listener Rule (exact host-header match)
+            # -----------------------------------------------------
+            EXISTING_RULE_ARN=$(find_rule_arn_for_host "$HOST_HEADER")
+
+            RULE_STATUS="Reused"
+
+            if [ -n "$EXISTING_RULE_ARN" ]; then
+
+              echo "Listener rule already exists for ${HOST_HEADER}. Updating target group binding..."
+
+              aws elbv2 modify-rule \
+                --rule-arn "$EXISTING_RULE_ARN" \
+                --actions Type=forward,TargetGroupArn="$TG_ARN" >/dev/null
+
+              RULE_ARN="$EXISTING_RULE_ARN"
+
+            else
+
+              echo "No existing rule found for ${HOST_HEADER}. Creating..."
+
+              RULE_ARN=$(create_rule_with_retry "$HOST_HEADER" "$TG_ARN")
+
+              if [ -z "$RULE_ARN" ]; then
+                echo "ERROR: Failed to create listener rule for ${HOST_HEADER}."
+                exit 1
+              fi
+
+              RULE_STATUS="Created"
+
+            fi
+
+            echo "Rule ARN : $RULE_ARN"
+
+            SUMMARY_ROWS="${SUMMARY_ROWS}| ${ID_TAG} | ${TG_NAME} | ${TG_STATUS} | https://${HOST_HEADER} | ${RULE_STATUS} | ${HEALTH_STATE} |\n"
+
+          done
+
+          # ---------------------------------------------------------
+          # Write summary table to GitHub Actions UI
+          # ---------------------------------------------------------
+          {
+            echo "## Target Group & Listener Rule Summary"
+            echo ""
+            echo "**Environment:** ${{ inputs.environment }}  "
+            echo "**Instance ID:** ${INSTANCE_ID}  "
+            echo ""
+            echo "| Service | Target Group | TG Status | URL | Rule Status | Health |"
+            echo "|---|---|---|---|---|---|"
+            echo -e "$SUMMARY_ROWS"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          echo ""
+          echo "======================================"
+          echo "All Target Groups & Listener Rules Configured"
+          echo "======================================"
