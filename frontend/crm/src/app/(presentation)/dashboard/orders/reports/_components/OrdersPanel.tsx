@@ -180,7 +180,12 @@ export function OrdersPanel({
           <span key="q" className="tabular-nums">{r.quantity.toLocaleString("en-IN")}</span>,
           <span key="v" className="tabular-nums">{formatValueCr(Number(r.totalAmount))}</span>,
           <span key="y" className="tabular-nums text-sm">{yieldStr}</span>,
-          <OrderStatusBadge key="s" status={r.status} paymentStatus={r.paymentStatus} />,
+          <OrderStatusBadge
+            key="s"
+            status={r.status}
+            paymentStatus={r.paymentStatus}
+            paymentProvider={r.paymentProvider}
+          />,
           <span key="d" className="whitespace-nowrap text-xs text-muted-foreground">
             {formatOrderDate(r.createdAt)}
           </span>,

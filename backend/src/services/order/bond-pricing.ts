@@ -58,11 +58,11 @@ export function calculateBondPricing(
     quantity,
     faceValue,
     cleanPrice,
-    accruedInterestPerUnit,
-    principalAmount,
-    accruedInterest,
-    totalConsideration,
+    accruedInterestPerUnit: Number(accruedInterestPerUnit.toFixed(2)),
+    principalAmount: Number(principalAmount.toFixed(2)),
+    accruedInterest: Number(accruedInterest.toFixed(2)),
+    totalConsideration: Number(totalConsideration.toFixed(2)),
     stampDuty,
-    settlementAmount,
+    settlementAmount: Number(settlementAmount.toFixed(2)),
   };
 }
