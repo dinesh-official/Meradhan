@@ -919,7 +919,6 @@ jobs:
 
           # ---------------------------------------------------------
           # Helper: find an existing listener rule for an exact host-header
-          # Robust against both legacy Values[] and HostHeaderConfig.Values[]
           # ---------------------------------------------------------
           find_rule_arn_for_host() {
             local HOST="$1"
@@ -1134,22 +1133,10 @@ jobs:
             fi
 
             # -----------------------------------------------------
-            # 3. Wait until target is healthy (bounded)
-            # -----------------------------------------------------
-            echo "Waiting for target to become healthy (timeout ${HEALTH_TIMEOUT_SECONDS}s)..."
-
-            if wait_for_target_health "$TG_ARN" "$PORT"; then
-              HEALTH_STATE="healthy"
-              echo "Target is healthy."
-            else
-              HEALTH_STATE="unhealthy/timeout"
-              echo "ERROR: Target did not become healthy within ${HEALTH_TIMEOUT_SECONDS}s."
-              echo "Check security groups, health-check path, and app startup time on port ${PORT}."
-              exit 1
-            fi
-
-            # -----------------------------------------------------
-            # 4. Create or reuse Listener Rule (exact host-header match)
+            # 3. Create or reuse Listener Rule FIRST.
+            #    This attaches the target group to the ALB so that
+            #    the ALB actually starts health-checking the target.
+            #    Without this, the target stays "unused" forever.
             # -----------------------------------------------------
             EXISTING_RULE_ARN=$(find_rule_arn_for_host "$HOST_HEADER")
 
@@ -1181,6 +1168,21 @@ jobs:
             fi
 
             echo "Rule ARN : $RULE_ARN"
+
+            # -----------------------------------------------------
+            # 4. NOW wait until target is healthy (bounded)
+            # -----------------------------------------------------
+            echo "Waiting for target to become healthy (timeout ${HEALTH_TIMEOUT_SECONDS}s)..."
+
+            if wait_for_target_health "$TG_ARN" "$PORT"; then
+              HEALTH_STATE="healthy"
+              echo "Target is healthy."
+            else
+              HEALTH_STATE="unhealthy/timeout"
+              echo "ERROR: Target did not become healthy within ${HEALTH_TIMEOUT_SECONDS}s."
+              echo "Check security groups, health-check path, and app startup time on port ${PORT}."
+              exit 1
+            fi
 
             SUMMARY_ROWS="${SUMMARY_ROWS}| ${ID_TAG} | ${TG_NAME} | ${TG_STATUS} | https://${HOST_HEADER} | ${RULE_STATUS} | ${HEALTH_STATE} |\n"
 
