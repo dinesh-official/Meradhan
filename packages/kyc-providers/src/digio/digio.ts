@@ -158,8 +158,8 @@ export class DigioSDK {
       /**
        * Optional 1-based page numbers to place Digio signature boxes on.
        * When omitted, signatures are placed on every page up to
-       * `pageCount` (individual KYC behaviour). Corporate e-sign should
-       * pass only the declaration pages to avoid stamps on every page.
+       * `pageCount`. Corporate e-sign passes `1..pageCount` after counting
+       * the real PDF so every page is signed.
        */
       signPages?: number[];
       /** Free-text "reason" stamped on the Digio signing screen. Defaults to KYC copy. */
@@ -255,6 +255,11 @@ export class DigioSDK {
  * for arbitrary CRM-uploaded PDFs — no `pdf-lib`/`pdfkit` runtime dep.
  * Returns at least `1`, so a corrupt / non-PDF buffer doesn't blow up the
  * request: Digio will reject it cleanly with a clearer error.
+ *
+ * Note: PDFs saved with object streams (pdf-lib default) hide `/Type /Page`
+ * inside compressed streams, so this can under-count. Prefer `pdf-parse`
+ * when available, and save merged corporate packs with
+ * `useObjectStreams: false`.
  */
 export function getPdfPageCount(buffer: Buffer): number {
   // PDF objects are 8-bit clean; reading as latin1 preserves byte values
@@ -262,6 +267,24 @@ export function getPdfPageCount(buffer: Buffer): number {
   const text = buffer.toString("latin1");
   // `/Type /Page` with optional whitespace + a non-`s` lookahead so the
   // parent `/Type /Pages` (the page-tree root) isn't counted.
-  const matches = text.match(/\/Type\s*\/Page(?!s)/g);
-  return matches?.length ?? 1;
+  const typePageMatches = text.match(/\/Type\s*\/Page(?!s)/g);
+  const typePageCount = typePageMatches?.length ?? 0;
+
+  // Fallback when page dicts are compressed: take the largest `/Count N`
+  // near a `/Type /Pages` node (page-tree root usually stays readable).
+  let pagesTreeCount = 0;
+  for (const m of text.matchAll(
+    /\/Type\s*\/Pages\b[\s\S]{0,200}?\/Count\s+(\d+)/g,
+  )) {
+    const n = Number(m[1]);
+    if (Number.isFinite(n) && n > pagesTreeCount) pagesTreeCount = n;
+  }
+  for (const m of text.matchAll(
+    /\/Count\s+(\d+)[\s\S]{0,200}?\/Type\s*\/Pages\b/g,
+  )) {
+    const n = Number(m[1]);
+    if (Number.isFinite(n) && n > pagesTreeCount) pagesTreeCount = n;
+  }
+
+  return Math.max(typePageCount, pagesTreeCount, 1);
 }

@@ -123,6 +123,30 @@ function isBackendGeneratedESignPdf(eSignDocumentUrl: string): boolean {
 }
 
 /**
+ * Accurate page count for Digio coordinates. Prefer `pdf-parse` (handles
+ * object streams); fall back to the byte-scan helper.
+ */
+async function countCorporateESignPdfPages(buffer: Buffer): Promise<number> {
+  try {
+    type PdfParseFn = (b: Buffer) => Promise<{ numpages?: number }>;
+    // Import the library module directly — pdf-parse@1's package index runs a
+    // debug sample-PDF load when `module.parent` is falsy under bun/ESM.
+    const pdfParseSpecifier = "pdf-parse/lib/pdf-parse.js";
+    const mod = (await import(pdfParseSpecifier)) as
+      | { default?: PdfParseFn }
+      | PdfParseFn;
+    const pdfParse: PdfParseFn =
+      typeof mod === "function" ? mod : (mod.default as PdfParseFn);
+    const parsed = await pdfParse(buffer);
+    const n = Number(parsed?.numpages);
+    if (Number.isFinite(n) && n >= 1) return Math.floor(n);
+  } catch {
+    // Fall through to byte scan.
+  }
+  return Math.max(1, getPdfPageCount(buffer));
+}
+
+/**
  * CRM operator uploads land under `corporate-kyc/e-sign/` but not `.../generated/`.
  * Those are signed as-is; only auto-generated rows are refreshed via pdf-service.
  */
@@ -285,9 +309,8 @@ export class CustomerCorporateESignService {
    *
    *   1. Loads the request + customer profile (with ownership guard).
    *   2. Streams the operator-uploaded PDF from S3 into a temp file.
-   *   3. Counts the PDF's pages and places Digio signature coordinates only
-   *      on the corporate declaration pages (or the last page for uploads),
-   *      not every page.
+   *   3. Counts the PDF's pages (via pdf-parse) and places Digio signature
+   *      coordinates on every page of that document.
    *   4. Calls Digio's `esignRequest` with the logged-in customer's
    *      email + name as the signer.
    *   5. Persists `digioDocumentId` / `digioAccessTokenId` /
@@ -383,22 +406,15 @@ export class CustomerCorporateESignService {
         lastName: customer.lastName ?? undefined,
       }).trim() || "Authorised Signatory";
 
-      const pageCount = Math.max(1, getPdfPageCount(pdfBuffer));
-
-      // Avoid Digio stamps on every page (corporate "double / multi sign").
-      // Backend-generated packs have "Applicant e-Sign" boxes on pages 4–5;
-      // operator-uploaded PDFs get a single stamp on the last page only.
-      const signPages = isBackendGeneratedESignPdf(request.eSignDocumentUrl!)
-        ? [4, 5].filter((p) => p <= pageCount)
-        : [];
-      const pagesForDigio =
-        signPages.length > 0 ? signPages : [pageCount];
+      // Count real pages, then ask Digio to stamp every page (1..N).
+      const pageCount = await countCorporateESignPdfPages(pdfBuffer);
+      const signPages = Array.from({ length: pageCount }, (_, i) => i + 1);
 
       const digioResponse = await this.digio.esignRequest(tempFile, {
         email: customer.emailAddress,
         name: fullName,
         pageCount,
-        signPages: pagesForDigio,
+        signPages,
         reason: "Corporate KYC e-sign",
       });
 
