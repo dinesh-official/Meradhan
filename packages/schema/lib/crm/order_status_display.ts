@@ -50,18 +50,49 @@ function isCheckoutNotCompleted(
   return false;
 }
 
+/**
+ * Display-only: Razorpay + payment COMPLETED + order PENDING → In progress.
+ * Does not mutate DB status.
+ */
+function resolveDisplayStatus(
+  status: string,
+  paymentStatus?: string | null,
+  paymentProvider?: string | null,
+): string {
+  const normalized = status.trim().toUpperCase();
+  const provider =
+    paymentProvider == null ? "" : paymentProvider.trim().toUpperCase();
+  const payStatus =
+    paymentStatus == null ? "" : paymentStatus.trim().toUpperCase();
+
+  if (
+    normalized === "PENDING" &&
+    provider === "RAZORPAY" &&
+    payStatus === "COMPLETED"
+  ) {
+    return "IN_PROGRESS";
+  }
+
+  return normalized;
+}
+
 export function getCrmOrderStatusDisplay(
   status: string,
   paymentStatus?: string | null,
+  paymentProvider?: string | null,
 ): { title: string; badgeClass: string } {
-  const normalized = status.trim().toUpperCase();
-
   // Unpaid checkout must win over raw PENDING → "Pending".
   if (isCheckoutNotCompleted(paymentStatus, status)) {
     return { ...NOT_COMPLETED_DISPLAY };
   }
 
-  const fromConfig = ORDER_STATUS_CONFIG[normalized as CrmOrderStatus];
+  const displayStatus = resolveDisplayStatus(
+    status,
+    paymentStatus,
+    paymentProvider,
+  );
+
+  const fromConfig = ORDER_STATUS_CONFIG[displayStatus as CrmOrderStatus];
   if (fromConfig) {
     return { title: fromConfig.title, badgeClass: fromConfig.badgeClass };
   }
@@ -72,8 +103,9 @@ export function getCrmOrderStatusDisplay(
 export function getOrderStatusLabel(
   status: string,
   paymentStatus?: string | null,
+  paymentProvider?: string | null,
 ): string {
-  return getCrmOrderStatusDisplay(status, paymentStatus).title;
+  return getCrmOrderStatusDisplay(status, paymentStatus, paymentProvider).title;
 }
 
 export function getPaymentStatusLabel(paymentStatus: string): string {

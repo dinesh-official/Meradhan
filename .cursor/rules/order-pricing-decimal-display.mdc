@@ -6,59 +6,42 @@ alwaysApply: false
 
 # Order / Bond Pricing — Decimal Display (UI only)
 
-**Frontend display only.** Do not change API payloads, DB storage, or calculation precision to match these rules. Format at render time (or via shared format helpers).
+Apply these rules only at render time. Never reduce API, database, or calculation precision.
 
-Use one shared formatting approach everywhere these fields appear (CRM order detail, lists, drafts, RFQ, MeraDhan checkout, etc.). Prefer shared helpers over ad-hoc `toFixed` / `toLocaleString`.
+Use `truncateDecimals` (toward zero — **not** round) before formatting money and clean price.
 
-**CRM shared helpers:** `@/global/utils/pricingDecimalDisplay`
-- `formatYtmDisplay` — YTM ≥2 dp
-- `formatCleanPriceDisplay` — clean price ≥4 dp
-- `formatUnitPriceDisplay` — unit price ≥4 dp
-- `formatInrMoneyDisplay` — principal / accrued / consideration / stamp / settlement ≥2 dp
+## Exact truncated display
 
-Also: `formatNumberTS`, `formatCleanPricePercent` (meradhan), `formatInrList` / `formatYtmList` (orders utils wrappers).
+| Field | Decimals | Behavior |
+|-------|----------|----------|
+| Principal amount | **2** | Truncate, then exactly 2 |
+| Accrued / accrual interest | **2** | Truncate, then exactly 2 |
+| Settlement amount | **2** | Truncate, then exactly 2 |
+| Clean price | **4** | Truncate, then exactly 4 |
 
-## Minimum is a floor — show more when present
+Examples (truncate, not round):
+- Amounts: `100.126` → `100.12` (display `100.12`)
+- Clean price: `98.123456` → `98.1234`
 
-| Field | Min decimals | Behavior |
-|-------|--------------|----------|
-| **YTM** / yield % | **2** | Pad to 2; keep extra decimals if the value has them |
-| **Clean price** | **4** | Pad to 4; keep extra decimals if present |
-| **Unit** / unit price | **4** | Pad to 4; keep extra decimals if present |
-| **Principal amount** | **2** | Pad to 2; keep extra decimals if present |
-| **Accrued / accrual interest** | **2** | same |
-| **Total consideration** | **2** | same |
-| **Stamp duty** | **2** | same |
-| **Settlement amount** | **2** | same |
+```ts
+function truncateDecimals(value: number, decimals = 2) {
+  const factor = 10 ** decimals;
+  return Math.trunc(value * factor) / factor;
+}
 
-Examples: `98.12` clean → `98.1200`; `98.123456` → `98.123456`. Settlement `100` → `100.00`; `100.123` → `100.123`.
-
-Do **not** use `toFixed(N)` / `maximumFractionDigits: N` with the same N as the minimum when that truncates real extra precision.
-
-## Examples
-
-```typescript
-// ❌ BAD — truncates extra precision to exactly N
-cleanPrice.toFixed(4)
-n.toLocaleString("en-IN", { minimumFractionDigits: 4, maximumFractionDigits: 4 })
-
-// ✅ GOOD — min floor, allow more
-import {
-  formatYtmDisplay,
-  formatCleanPriceDisplay,
-  formatUnitPriceDisplay,
-  formatInrMoneyDisplay,
-} from "@/global/utils/pricingDecimalDisplay";
-
-formatYtmDisplay(ytm)
-formatCleanPriceDisplay(cleanPrice)
-formatUnitPriceDisplay(unitPrice)
-formatInrMoneyDisplay(settlementAmount)
+truncateDecimals(n, 2).toLocaleString("en-IN", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+})
 ```
 
-## Do not
+**CRM:** `formatInrMoneyDisplay` / `formatCleanPriceDisplay` in `@/global/utils/pricingDecimalDisplay`  
+**MeraDhan:** `formatInrMoney2dp` / `formatAmount` / `formatCleanPricePercent` in `@/global/utils/formate`
 
-- Strip trailing zeros below the minimum (e.g. clean price `98.12` → show `98.1200`)
-- Truncate values that have more than the minimum decimals
-- Invent a new formatter per screen — extend or reuse the shared util
-- Apply these rules to backend serialization or PDF generation unless that surface is explicitly UI-formatted the same way
+Deal date and settlement date are calendar dates — do not run them through `truncateDecimals`.
+
+## Other pricing fields
+
+- YTM / yield: minimum 2 decimals; preserve additional precision.
+- Unit price: minimum 4 decimals; preserve additional precision.
+- Total consideration and stamp duty: same truncate-to-2 as other INR money when shown via the money helpers.

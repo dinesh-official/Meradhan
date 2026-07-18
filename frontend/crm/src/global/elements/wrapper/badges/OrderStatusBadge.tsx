@@ -7,11 +7,17 @@ import { getCrmOrderStatusDisplay } from "@/global/constants/order";
 export default function OrderStatusBadge({
   status,
   paymentStatus,
+  paymentProvider,
 }: {
   status: string;
   paymentStatus?: string | null;
+  paymentProvider?: string | null;
 }) {
-  const display = getCrmOrderStatusDisplay(status, paymentStatus);
+  const display = getCrmOrderStatusDisplay(
+    status,
+    paymentStatus,
+    paymentProvider,
+  );
 
   return (
     <Badge

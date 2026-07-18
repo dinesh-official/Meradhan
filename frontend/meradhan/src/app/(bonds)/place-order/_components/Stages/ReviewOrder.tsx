@@ -18,7 +18,11 @@ import {
 } from "@/components/ui/select";
 import { BondInfoLabel } from "@/global/components/Bond/BondInfoLabel";
 import { dateTimeUtils, formatDateCustom } from "@/global/utils/datetime.utils";
-import { formatCleanPricePercent, formatNumberTS } from "@/global/utils/formate";
+import {
+  formatCleanPricePercent,
+  formatInrMoney2dp,
+  formatNumberTS,
+} from "@/global/utils/formate";
 import {
   BondDetailsResponse,
   BondOrderPricingData,
@@ -371,7 +375,7 @@ function ReviewOrder({
           <div>
             <p className="text-lg text-black flex items-center gap-1 font-medium">
               <PiCurrencyInrBold aria-hidden="true" />{" "}
-              {isPricingFetching ? "…" : formatNumberTS(settlementAmount)}
+              {isPricingFetching ? "…" : formatInrMoney2dp(settlementAmount)}
             </p>
             <Dialog>
               <DialogTrigger asChild>
@@ -398,26 +402,26 @@ function ReviewOrder({
                       <div className="flex justify-between">
                         <span>Principal Amount</span>
                         <span className="font-medium">
-                          Rs. {formatNumberTS(principalScaled ?? 0)}
+                          Rs. {formatInrMoney2dp(principalScaled ?? 0)}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Accrued interest</span>
                         <span className="font-medium">
-                          Rs. {formatNumberTS(accruedScaled ?? 0)}
+                          Rs. {formatInrMoney2dp(accruedScaled ?? 0)}
                         </span>
                       </div>
 
                       <div className="flex justify-between">
                         <span>Total Consideration</span>
                         <span className="font-medium">
-                          Rs. {formatNumberTS(totalConsideration)}
+                          Rs. {formatInrMoney2dp(totalConsideration)}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Stamp duty</span>
                         <span className="font-medium">
-                          Rs. {formatNumberTS(stampScaled)}
+                          Rs. {formatInrMoney2dp(stampScaled)}
                         </span>
                       </div>
                       {/* <div className="flex justify-between ">
@@ -440,7 +444,7 @@ function ReviewOrder({
                   <div className="border-t pt-3 flex justify-between text-base">
                     <span className="font-semibold">Settlement Amount</span>
                     <span className="font-semibold">
-                      Rs. {formatNumberTS(settlementAmount)}
+                      Rs. {formatInrMoney2dp(settlementAmount)}
                     </span>
                   </div>
                 </div>

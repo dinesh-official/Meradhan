@@ -32,7 +32,11 @@ function assertFiniteNumber(value: number, field: string): number {
   }
   return value;
 }
-
+// PRINCIPLE = CLEAN_PRICE * FV/100
+// ACCURET_INTERSET = ACCURET_INTERSET * QUN
+// TC = PRINCIPLE + ACCURET_INTERSET
+// STAMP_DYTY = EXISTING
+// SETTLEMENT_AMOUNT = TC + STAMP_DYTY
 export function calculateBondPricing(
   input: BondPricingInput,
 ): BondPricingSnapshot {
@@ -45,8 +49,7 @@ export function calculateBondPricing(
   );
 
   const principalAmount = (cleanPrice * faceValue * quantity) / 100;
-  const accruedInterest =
-    (accruedInterestPerUnit * faceValue * quantity) / 100;
+  const accruedInterest = accruedInterestPerUnit * quantity;
   const totalConsideration = principalAmount + accruedInterest;
   const stampDuty =
     input.stampDutyOverride != null && Number.isFinite(input.stampDutyOverride)
@@ -58,11 +61,11 @@ export function calculateBondPricing(
     quantity,
     faceValue,
     cleanPrice,
-    accruedInterestPerUnit,
-    principalAmount,
-    accruedInterest,
-    totalConsideration,
+    accruedInterestPerUnit: Number(accruedInterestPerUnit.toFixed(2)),
+    principalAmount: Number(principalAmount.toFixed(2)),
+    accruedInterest: Number(accruedInterest.toFixed(2)),
+    totalConsideration: Number(totalConsideration.toFixed(2)),
     stampDuty,
-    settlementAmount,
+    settlementAmount: Number(settlementAmount.toFixed(2)),
   };
 }

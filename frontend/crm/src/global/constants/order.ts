@@ -31,8 +31,10 @@ export const bondTypeOptions = [
 export function getOrderStatusBadgeClass(
   status: string,
   paymentStatus?: string | null,
+  paymentProvider?: string | null,
 ): string {
-  return getCrmOrderStatusDisplay(status, paymentStatus).badgeClass;
+  return getCrmOrderStatusDisplay(status, paymentStatus, paymentProvider)
+    .badgeClass;
 }
 
 export function isCrmOrderStatus(status: string): status is CrmOrderStatus {

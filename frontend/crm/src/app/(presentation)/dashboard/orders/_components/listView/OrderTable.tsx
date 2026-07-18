@@ -170,6 +170,7 @@ function OrderTable({ data, pageSize = 10, isLoading }: OrderTableProps) {
             <OrderStatusBadge
               status={row.status}
               paymentStatus={row.paymentStatus}
+              paymentProvider={row.paymentProvider}
             />
           ),
         },
