@@ -318,7 +318,7 @@ jobs:
 
           set -e
 
-          ROOT_DOMAIN="devkng.com"
+          ROOT_DOMAIN="meradhan.co"
 
           update_env() {
             local KEY="$1"
@@ -873,7 +873,7 @@ jobs:
         run: |
           set -e
 
-          ROOT_DOMAIN="devkng.com"
+          ROOT_DOMAIN="meradhan.co"
           INSTANCE_ID="${{ steps.create_ec2.outputs.instance_id }}"
 
           HEALTH_TIMEOUT_SECONDS=300     # 5 min max wait per target
