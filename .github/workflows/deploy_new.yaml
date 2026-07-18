@@ -879,6 +879,7 @@ jobs:
           HEALTH_TIMEOUT_SECONDS=300     # 5 min max wait per target
           HEALTH_POLL_INTERVAL=10
           MAX_PRIORITY_RETRIES=10
+          PRIORITY_OFFSET=2               # new rule priority = MAX_PRIORITY + PRIORITY_OFFSET
 
           if [ -z "$VPC_ID" ]; then
             echo "ERROR: VPC_ID was not exported by the 'Get Listener ARN & VPC ID' step."
@@ -892,20 +893,24 @@ jobs:
 
           declare -A TARGET_GROUPS=()   # tg_name -> "port:idtag"
           declare -A HOST_HEADERS=()    # tg_name -> full domain
+          declare -A HEALTH_PATHS=()    # tg_name -> health check path
 
           if [ "${{ inputs.backend }}" = "true" ]; then
             TARGET_GROUPS["tg-$BACKEND_NAME"]="4000:$BACKEND_NAME"
             HOST_HEADERS["tg-$BACKEND_NAME"]="${BACKEND_NAME}.${ROOT_DOMAIN}"
+            HEALTH_PATHS["tg-$BACKEND_NAME"]="/health"
           fi
 
           if [ "${{ inputs.crm }}" = "true" ]; then
             TARGET_GROUPS["tg-$CRM_NAME"]="4001:$CRM_NAME"
             HOST_HEADERS["tg-$CRM_NAME"]="${CRM_NAME}.${ROOT_DOMAIN}"
+            HEALTH_PATHS["tg-$CRM_NAME"]="/login"
           fi
 
           if [ "${{ inputs.frontend }}" = "true" ]; then
             TARGET_GROUPS["tg-$FRONTEND_NAME"]="4002:$FRONTEND_NAME"
             HOST_HEADERS["tg-$FRONTEND_NAME"]="${FRONTEND_NAME}.${ROOT_DOMAIN}"
+            HEALTH_PATHS["tg-$FRONTEND_NAME"]="/"
           fi
 
           if [ ${#TARGET_GROUPS[@]} -eq 0 ]; then
@@ -941,7 +946,26 @@ jobs:
           }
 
           # ---------------------------------------------------------
-          # Helper: get all currently used priorities
+          # Helper: get current highest numeric priority on the listener
+          # ---------------------------------------------------------
+          get_max_priority() {
+            local EXISTING_PRIORITIES
+            EXISTING_PRIORITIES=$(aws elbv2 describe-rules \
+              --listener-arn "$LISTENER_ARN" \
+              --query "Rules[?Priority!='default'].Priority" \
+              --output text 2>/dev/null \
+            | tr '\t' '\n' \
+            | sort -n)
+
+            if [ -z "$EXISTING_PRIORITIES" ]; then
+              echo 0
+            else
+              echo "$EXISTING_PRIORITIES" | tail -n 1
+            fi
+          }
+
+          # ---------------------------------------------------------
+          # Helper: get all currently used priorities (for collision check)
           # ---------------------------------------------------------
           get_used_priorities() {
             aws elbv2 describe-rules \
@@ -952,7 +976,9 @@ jobs:
           }
 
           # ---------------------------------------------------------
-          # Helper: create a rule with retry-on-priority-conflict
+          # Helper: create a rule with retry-on-priority-conflict.
+          # Starting candidate = MAX_PRIORITY + PRIORITY_OFFSET (i.e. +2),
+          # then increments by 1 on each conflict retry.
           # ---------------------------------------------------------
           create_rule_with_retry() {
             local HOST="$1"
@@ -960,12 +986,19 @@ jobs:
             local ATTEMPT=1
             local RULE_ARN=""
 
+            local MAX_PRIORITY
+            MAX_PRIORITY=$(get_max_priority)
+            local CANDIDATE=$((MAX_PRIORITY + PRIORITY_OFFSET))
+
+            echo "Highest existing priority : $MAX_PRIORITY"
+            echo "Priority offset           : +${PRIORITY_OFFSET}"
+            echo "Initial candidate priority: $CANDIDATE"
+
             while [ "$ATTEMPT" -le "$MAX_PRIORITY_RETRIES" ]; do
 
               local USED_PRIORITIES
               USED_PRIORITIES=$(get_used_priorities)
 
-              local CANDIDATE=1
               while echo "$USED_PRIORITIES" | grep -qx "$CANDIDATE"; do
                 CANDIDATE=$((CANDIDATE + 1))
               done
@@ -984,13 +1017,15 @@ jobs:
               set -e
 
               if [ "$RC" -eq 0 ] && [ -n "$RULE_ARN" ] && [ "$RULE_ARN" != "None" ]; then
-                echo "$RULE_ARN"
+                echo "LISTENER_PRIORITY=$CANDIDATE" >> "$GITHUB_ENV"
+                echo "$RULE_ARN|$CANDIDATE"
                 return 0
               fi
 
               if grep -qi "PriorityInUse" /tmp/create_rule_err.log; then
                 echo "Priority ${CANDIDATE} taken by a concurrent run. Retrying..."
                 ATTEMPT=$((ATTEMPT + 1))
+                CANDIDATE=$((CANDIDATE + 1))
                 sleep $((RANDOM % 3 + 1))
                 continue
               fi
@@ -1069,13 +1104,15 @@ jobs:
             PORT="${INFO%%:*}"
             ID_TAG="${INFO##*:}"
             HOST_HEADER="${HOST_HEADERS[$TG_NAME]}"
+            HEALTH_PATH="${HEALTH_PATHS[$TG_NAME]}"
 
             echo ""
             echo "--------------------------------------"
-            echo "Service      : $ID_TAG"
-            echo "Target Group : $TG_NAME"
-            echo "Port         : $PORT"
-            echo "Host Header  : $HOST_HEADER"
+            echo "Service       : $ID_TAG"
+            echo "Target Group  : $TG_NAME"
+            echo "Port          : $PORT"
+            echo "Host Header   : $HOST_HEADER"
+            echo "Health Path   : $HEALTH_PATH"
             echo "--------------------------------------"
 
             # -----------------------------------------------------
@@ -1100,7 +1137,7 @@ jobs:
                 --target-type instance \
                 --health-check-protocol HTTP \
                 --health-check-port traffic-port \
-                --health-check-path "/" \
+                --health-check-path "$HEALTH_PATH" \
                 --query "TargetGroups[0].TargetGroupArn" \
                 --output text)
 
@@ -1116,6 +1153,20 @@ jobs:
 
             else
               echo "Target group already exists. Reusing : $TG_ARN"
+
+              CURRENT_HEALTH_PATH=$(aws elbv2 describe-target-groups \
+                --target-group-arns "$TG_ARN" \
+                --query "TargetGroups[0].HealthCheckPath" \
+                --output text 2>/dev/null || echo "")
+
+              if [ "$CURRENT_HEALTH_PATH" != "$HEALTH_PATH" ]; then
+                echo "Updating health check path: '${CURRENT_HEALTH_PATH}' -> '${HEALTH_PATH}'"
+                aws elbv2 modify-target-group \
+                  --target-group-arn "$TG_ARN" \
+                  --health-check-path "$HEALTH_PATH" >/dev/null
+              else
+                echo "Health check path already correct : $HEALTH_PATH"
+              fi
             fi
 
             # -----------------------------------------------------
@@ -1134,13 +1185,13 @@ jobs:
 
             # -----------------------------------------------------
             # 3. Create or reuse Listener Rule FIRST.
-            #    This attaches the target group to the ALB so that
-            #    the ALB actually starts health-checking the target.
-            #    Without this, the target stays "unused" forever.
+            #    New rules get priority = MAX_PRIORITY + 2 (offset),
+            #    incrementing further only if that slot is taken.
             # -----------------------------------------------------
             EXISTING_RULE_ARN=$(find_rule_arn_for_host "$HOST_HEADER")
 
             RULE_STATUS="Reused"
+            USED_PRIORITY="n/a (reused)"
 
             if [ -n "$EXISTING_RULE_ARN" ]; then
 
@@ -1152,22 +1203,31 @@ jobs:
 
               RULE_ARN="$EXISTING_RULE_ARN"
 
+              USED_PRIORITY=$(aws elbv2 describe-rules \
+                --rule-arns "$RULE_ARN" \
+                --query "Rules[0].Priority" \
+                --output text 2>/dev/null || echo "unknown")
+
             else
 
               echo "No existing rule found for ${HOST_HEADER}. Creating..."
 
-              RULE_ARN=$(create_rule_with_retry "$HOST_HEADER" "$TG_ARN")
+              RESULT=$(create_rule_with_retry "$HOST_HEADER" "$TG_ARN")
 
-              if [ -z "$RULE_ARN" ]; then
+              if [ -z "$RESULT" ]; then
                 echo "ERROR: Failed to create listener rule for ${HOST_HEADER}."
                 exit 1
               fi
+
+              RULE_ARN="${RESULT%%|*}"
+              USED_PRIORITY="${RESULT##*|}"
 
               RULE_STATUS="Created"
 
             fi
 
-            echo "Rule ARN : $RULE_ARN"
+            echo "Rule ARN      : $RULE_ARN"
+            echo "Rule Priority : $USED_PRIORITY"
 
             # -----------------------------------------------------
             # 4. NOW wait until target is healthy (bounded)
@@ -1180,11 +1240,11 @@ jobs:
             else
               HEALTH_STATE="unhealthy/timeout"
               echo "ERROR: Target did not become healthy within ${HEALTH_TIMEOUT_SECONDS}s."
-              echo "Check security groups, health-check path, and app startup time on port ${PORT}."
+              echo "Check security groups, health-check path (${HEALTH_PATH}), and app startup time on port ${PORT}."
               exit 1
             fi
 
-            SUMMARY_ROWS="${SUMMARY_ROWS}| ${ID_TAG} | ${TG_NAME} | ${TG_STATUS} | https://${HOST_HEADER} | ${RULE_STATUS} | ${HEALTH_STATE} |\n"
+            SUMMARY_ROWS="${SUMMARY_ROWS}| ${ID_TAG} | ${TG_NAME} | ${TG_STATUS} | https://${HOST_HEADER} | ${HEALTH_PATH} | ${RULE_STATUS} | ${USED_PRIORITY} | ${HEALTH_STATE} |\n"
 
           done
 
@@ -1197,8 +1257,8 @@ jobs:
             echo "**Environment:** ${{ inputs.environment }}  "
             echo "**Instance ID:** ${INSTANCE_ID}  "
             echo ""
-            echo "| Service | Target Group | TG Status | URL | Rule Status | Health |"
-            echo "|---|---|---|---|---|---|"
+            echo "| Service | Target Group | TG Status | URL | Health Path | Rule Status | Priority | Health |"
+            echo "|---|---|---|---|---|---|---|---|"
             echo -e "$SUMMARY_ROWS"
           } >> "$GITHUB_STEP_SUMMARY"
 
