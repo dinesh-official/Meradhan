@@ -192,7 +192,7 @@ jobs:
 
           RECORD_TYPE="CNAME"
           TARGET="$DNS_VAL"
-          ROOT_DOMAIN="devkng.com"
+          ROOT_DOMAIN="meradhan.co"
 
           declare -A SERVICES=(
             ["frontend"]="$FRONTEND_NAME"
