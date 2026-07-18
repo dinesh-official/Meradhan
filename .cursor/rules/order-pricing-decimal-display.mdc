@@ -8,37 +8,40 @@ alwaysApply: false
 
 Apply these rules only at render time. Never reduce API, database, or calculation precision.
 
-## Exact decimal caps (UI only)
+Use `truncateDecimals` (toward zero — **not** round) before formatting money and clean price.
+
+## Exact truncated display
 
 | Field | Decimals | Behavior |
 |-------|----------|----------|
-| Principal amount | **2** | Exactly 2 — never more |
-| Accrued / accrual interest | **2** | Exactly 2 — never more |
-| Settlement amount | **2** | Exactly 2 — never more |
-| Clean price | **4** | Exactly 4 — never more |
+| Principal amount | **2** | Truncate, then exactly 2 |
+| Accrued / accrual interest | **2** | Truncate, then exactly 2 |
+| Settlement amount | **2** | Truncate, then exactly 2 |
+| Clean price | **4** | Truncate, then exactly 4 |
 
-Examples:
-- Amounts: `100` → `100.00`, `100.1` → `100.10`, `100.126` → `100.13`
-- Clean price: `98.12` → `98.1200`, `98.123456` → `98.1235`
+Examples (truncate, not round):
+- Amounts: `100.126` → `100.12` (display `100.12`)
+- Clean price: `98.123456` → `98.1234`
 
 ```ts
-// Amounts (principal / accrued / settlement)
-value.toLocaleString("en-IN", {
+function truncateDecimals(value: number, decimals = 2) {
+  const factor = 10 ** decimals;
+  return Math.trunc(value * factor) / factor;
+}
+
+truncateDecimals(n, 2).toLocaleString("en-IN", {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 })
-
-// Clean price
-value.toLocaleString("en-IN", {
-  minimumFractionDigits: 4,
-  maximumFractionDigits: 4,
-})
 ```
 
-Prefer extending existing shared frontend formatting helpers over formatting inline.
+**CRM:** `formatInrMoneyDisplay` / `formatCleanPriceDisplay` in `@/global/utils/pricingDecimalDisplay`  
+**MeraDhan:** `formatInrMoney2dp` / `formatAmount` / `formatCleanPricePercent` in `@/global/utils/formate`
+
+Deal date and settlement date are calendar dates — do not run them through `truncateDecimals`.
 
 ## Other pricing fields
 
 - YTM / yield: minimum 2 decimals; preserve additional precision.
 - Unit price: minimum 4 decimals; preserve additional precision.
-- Total consideration and stamp duty: minimum 2 decimals; preserve additional precision unless separately requested.
+- Total consideration and stamp duty: same truncate-to-2 as other INR money when shown via the money helpers.
