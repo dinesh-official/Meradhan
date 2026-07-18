@@ -897,6 +897,12 @@ jobs:
             exit 1
           fi
 
+          if [ -z "$KIBANA_NAME" ]; then
+            echo "ERROR: KIBANA_NAME was not exported by the 'Generate Resource IDs' step."
+            echo "Add: KIBANA_NAME=\"\${ENV_CODE}\${BRANCH_CODE}e\"  and export it via GITHUB_ENV."
+            exit 1
+          fi
+
           declare -A TARGET_GROUPS=()   # tg_name -> "port:idtag"
           declare -A HOST_HEADERS=()    # tg_name -> full domain
           declare -A HEALTH_PATHS=()    # tg_name -> health check path
@@ -918,6 +924,13 @@ jobs:
             HOST_HEADERS["tg-$FRONTEND_NAME"]="${FRONTEND_NAME}.${ROOT_DOMAIN}"
             HEALTH_PATHS["tg-$FRONTEND_NAME"]="/"
           fi
+
+          # Kibana / observability UI target group (port 5601)
+          # Always created (no toggle input) — add an `inputs.kibana` boolean
+          # gate here later if you want it optional like the others.
+          TARGET_GROUPS["tg-$KIBANA_NAME"]="5601:$KIBANA_NAME"
+          HOST_HEADERS["tg-$KIBANA_NAME"]="${KIBANA_NAME}.${ROOT_DOMAIN}"
+          HEALTH_PATHS["tg-$KIBANA_NAME"]="/"
 
           if [ ${#TARGET_GROUPS[@]} -eq 0 ]; then
             echo "No services selected — nothing to do."
