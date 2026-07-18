@@ -10,6 +10,7 @@ import {
     calculateYieldToPrice,
 } from "@services/deridata/deridata.calculator.client";
 import { AppError, HttpStatus } from "@utils/error/AppError";
+import { truncateDecimals } from "@utils/truncateDecimals";
 import { calculateStampDuty } from "./stamp-duty";
 import { calculateBondPricing } from "./bond-pricing";
 import { resolveBondStampDuty } from "./stamp-duty";
@@ -869,14 +870,15 @@ export async function computeStoredBondOrderPricing(opts: {
         lastCouponDate,
         settlementOrder: settlement.settlementOrder,
         settlementDay: settlement.settlementDay,
-        principalAmount,
-        accruedInterest: accruedInterestAmount,
+        principalAmount: truncateDecimals(principalAmount),
+        principalAmountRaw: principalAmount,
+        accruedInterest: truncateDecimals(accruedInterestAmount),
         stampDuty,
         noOfAccrualDays: accruedMeta.noOfAccrualDays,
         isUnderShutPeriod: accruedMeta.isUnderShutPeriod,
         recordDate: recordDate || (accruedMeta.recordDate ? toUTCISODate(accruedMeta.recordDate) : ""),
-        settlementAmount,
-        totalConsideration,
+        settlementAmount: truncateDecimals(settlementAmount),
+        totalConsideration: truncateDecimals(totalConsideration),
         yield:
             bond.yield != null && Number.isFinite(Number(bond.yield))
                 ? Number(bond.yield)

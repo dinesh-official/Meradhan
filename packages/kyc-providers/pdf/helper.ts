@@ -325,6 +325,53 @@ export const getFileUrl = (file: string) => {
   return url;
 };
 
+/**
+ * Truncate toward zero to `decimals` places via string slicing (does not round).
+ * When `formatted` is true, returns a comma-grouped string (e.g. "1,234.56").
+ */
+export function truncateDecimals(
+  value: number | string,
+  decimals?: number,
+  formatted?: false,
+): number;
+export function truncateDecimals(
+  value: number | string,
+  decimals: number | undefined,
+  formatted: true,
+): string;
+export function truncateDecimals(
+  value: number | string,
+  decimals = 2,
+  formatted = false,
+): number | string {
+  const str = (typeof value === "string" ? value : String(value)).trim();
+  const negative = str.startsWith("-");
+  const raw = negative ? str.slice(1) : str;
+
+  const dot = raw.indexOf(".");
+  const intPart = dot === -1 ? raw : raw.slice(0, dot);
+  const decPart = dot === -1 ? "" : raw.slice(dot + 1, dot + 1 + decimals);
+  const sign = negative ? "-" : "";
+
+  if (formatted) {
+    const withCommas = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    if (decimals === 0) {
+      return `${sign}${withCommas}`;
+    }
+    return `${sign}${withCommas}.${decPart.padEnd(decimals, "0")}`;
+  }
+
+  if (!decPart || /^0+$/.test(decPart)) {
+    return Number(`${sign}${intPart}`);
+  }
+
+  const trimmed = decPart.replace(/0+$/, "");
+  const result = trimmed
+    ? `${sign}${intPart}.${trimmed}`
+    : `${sign}${intPart}`;
+  return Number(result);
+}
+
 /** Popup / PDF security label: `{Coupon}% {bondName} Maturity date {date}` */
 export function formatBondSecurityLabel(bond: {
   couponRate?: number | null;
