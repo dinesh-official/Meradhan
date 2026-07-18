@@ -32,3 +32,24 @@ model ReferenceBond {
     @@index([issueCurrency], map: "idx_reference_bonds_currency")
     @@map("reference_bonds")
 }
+
+/// Incremental-sync memo: baseline-frozen + not-found ISINs.
+model ReferenceBondSyncState {
+    isin          String   @id
+    status        String // 'baseline' | 'not_found'
+    attempts      Int      @default(1)
+    firstSeenAt   DateTime @default(now()) @map("first_seen_at") @db.Timestamptz(6)
+    lastAttemptAt DateTime @default(now()) @map("last_attempt_at") @db.Timestamptz(6)
+
+    @@index([status], map: "idx_reference_bonds_sync_state_status")
+    @@map("reference_bonds_sync_state")
+}
+
+/// Incremental-sync marker (key = 'baseline_established_at').
+model ReferenceBondSyncMeta {
+    key       String   @id
+    value     String?
+    updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+    @@map("reference_bonds_sync_meta")
+}

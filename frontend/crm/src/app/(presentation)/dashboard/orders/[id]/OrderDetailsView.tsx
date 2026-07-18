@@ -518,6 +518,7 @@ function OrderDetailsView() {
             <OrderStatusBadge
               status={order.status}
               paymentStatus={order.paymentStatus}
+              paymentProvider={order.paymentProvider}
             />
             <Badge variant="outline" className="font-normal">
               {order.paymentStatus}

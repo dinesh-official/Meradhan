@@ -2,12 +2,22 @@
  * Shared UI decimal display for order / bond pricing fields.
  * See `.cursor/rules/order-pricing-decimal-display.mdc`.
  *
- * Minimum decimals are a floor (always pad to at least N).
- * Extra significant decimals beyond the minimum are shown (up to MAX_FRACTION_DIGITS).
+ * Money amounts (principal / accrued / settlement): truncate then show exactly 2 dp.
+ * Clean price: truncate then show exactly 4 dp.
+ * YTM / unit: min floor; extra precision kept when present.
  */
 
-/** Cap to avoid float noise; still allows more than each field's minimum. */
+/** Cap to avoid float noise for fields that allow extra precision. */
 const MAX_FRACTION_DIGITS = 10;
+
+/**
+ * Truncate toward zero to `decimals` places (does not round).
+ * e.g. truncateDecimals(100.126, 2) → 100.12
+ */
+export function truncateDecimals(value: number, decimals = 2): number {
+  const factor = 10 ** decimals;
+  return Math.trunc(value * factor) / factor;
+}
 
 function asFinite(value: number | string | null | undefined): number | null {
   if (value == null) return null;
@@ -27,8 +37,6 @@ function formatWithMinDecimals(
   const n = asFinite(value);
   if (n == null) return null;
 
-  // Prefer raw string fractional length when the API sent a decimal string,
-  // so we don't lose trailing precision to Number() rounding.
   let preferredMax = MAX_FRACTION_DIGITS;
   if (typeof value === "string") {
     const match = value.trim().match(/\.(\d+)/);
@@ -46,6 +54,19 @@ function formatWithMinDecimals(
   });
 }
 
+/** Truncate then format with an exact digit count (no extra decimals). */
+function formatExactTruncated(
+  value: number | string | null | undefined,
+  decimals: number,
+): string | null {
+  const n = asFinite(value);
+  if (n == null) return null;
+  return truncateDecimals(n, decimals).toLocaleString("en-IN", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
+}
+
 /** YTM / yield % — at least 2 decimals; more if present. */
 export function formatYtmDisplay(
   value: number | string | null | undefined,
@@ -54,11 +75,11 @@ export function formatYtmDisplay(
   return formatted == null ? "—" : `${formatted}%`;
 }
 
-/** Clean price — at least 4 decimals; more if present. */
+/** Clean price — truncate to exactly 4 decimals. */
 export function formatCleanPriceDisplay(
   value: number | string | null | undefined,
 ): string {
-  return formatWithMinDecimals(value, 4) ?? "—";
+  return formatExactTruncated(value, 4) ?? "—";
 }
 
 /** Unit / unit price — at least 4 decimals; more if present (optional ₹). */
@@ -72,14 +93,14 @@ export function formatUnitPriceDisplay(
 }
 
 /**
- * Principal, accrued interest, total consideration, stamp duty, settlement —
- * at least 2 decimals; more if present (optional ₹).
+ * Principal, accrued interest, settlement (and other INR money) —
+ * truncate to exactly 2 decimals (optional ₹).
  */
 export function formatInrMoneyDisplay(
   value: number | string | null | undefined,
   opts?: { withRupee?: boolean },
 ): string {
-  const formatted = formatWithMinDecimals(value, 2);
+  const formatted = formatExactTruncated(value, 2);
   if (formatted == null) return "—";
   return opts?.withRupee === false ? formatted : `₹${formatted}`;
 }

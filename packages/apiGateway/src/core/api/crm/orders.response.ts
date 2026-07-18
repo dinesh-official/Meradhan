@@ -22,6 +22,8 @@ export interface CrmOrder {
   faceValue: string;
   stampDuty?: string;
   totalAmount: string;
+  paymentStatus?: "PENDING" | "COMPLETED" | "REFUNDED" | "CANCELLED" | string | null;
+  paymentProvider?: string | null;
   status: CrmOrderStatus;
   bondDetails: Record<string, unknown>;
   metadata?: Record<string, unknown> | null;
