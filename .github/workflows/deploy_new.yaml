@@ -885,7 +885,7 @@ jobs:
           HEALTH_TIMEOUT_SECONDS=300     # 5 min max wait per target
           HEALTH_POLL_INTERVAL=10
           MAX_PRIORITY_RETRIES=10
-          PRIORITY_OFFSET=2               # new rule priority = MAX_PRIORITY + PRIORITY_OFFSET
+          PRIORITY_OFFSET=1          # new rule priority = MAX_PRIORITY + PRIORITY_OFFSET
 
           if [ -z "$VPC_ID" ]; then
             echo "ERROR: VPC_ID was not exported by the 'Get Listener ARN & VPC ID' step."
