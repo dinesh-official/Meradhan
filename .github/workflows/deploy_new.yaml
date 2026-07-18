@@ -897,11 +897,7 @@ jobs:
             exit 1
           fi
 
-          if [ -z "$KIBANA_NAME" ]; then
-            echo "ERROR: KIBANA_NAME was not exported by the 'Generate Resource IDs' step."
-            echo "Add: KIBANA_NAME=\"\${ENV_CODE}\${BRANCH_CODE}e\"  and export it via GITHUB_ENV."
-            exit 1
-          fi
+          KIBANA_NAME="${ENV_CODE}${BRANCH_CODE}e"
 
           declare -A TARGET_GROUPS=()   # tg_name -> "port:idtag"
           declare -A HOST_HEADERS=()    # tg_name -> full domain
