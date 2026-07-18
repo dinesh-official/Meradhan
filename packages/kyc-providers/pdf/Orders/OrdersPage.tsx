@@ -8,6 +8,7 @@ import {
   formatDate,
   formatLastInterestPaymentDateDisplay,
   getPdfDearGreeting,
+  truncateDecimals,
 } from "../helper";
 import { getInterestPaymentSchedule } from "./interestPaymentSchedule";
 import { resolveOrderPdfFinancials } from "./resolveOrderPdfFinancials";
@@ -134,14 +135,6 @@ export default function OrdersPage({
     faceValue: Number(bond.faceValue) || null,
   });
   const faceValue = Number(bond.faceValue) || 1000;
-  // Format amounts
-  const formatCurrency = (amount: number, fixed = 2) => {
-    return `${amount.toLocaleString("en-IN", {
-      minimumFractionDigits: fixed,
-      maximumFractionDigits: fixed,
-    })}`;
-  };
-
   const resolveYieldPct = (): string => {
     const fromPricing = orderData?.bondDetails?.pricing?.yield;
     const fromBond = bond.yield;
@@ -238,11 +231,11 @@ export default function OrdersPage({
       `${bond.couponRate.toFixed(2) || "N/A"}%`,
       `Yield: ${yieldDisplay}`,
     ],
-    ["Face Value", `INR ${formatCurrency(faceValue)}`],
+    ["Face Value", `INR ${truncateDecimals(faceValue, 2, true)}`],
     [
       "Quantum",
-      `INR ${formatCurrency(faceValue * effectiveQun)} (No. of Bonds: ${effectiveQun})`,
-      `Clean Price: INR ${formatCurrency(orderData?.price || 0, 4)}`,
+      `INR ${truncateDecimals(faceValue * effectiveQun, 2, true)} (No. of Bonds: ${effectiveQun})`,
+      `Clean Price: INR ${truncateDecimals(orderData?.price || 0, 4, true)}`,
     ],
     [
       "Date",
@@ -305,22 +298,22 @@ ${getInterestPaymentDatesDisplay()}`,
         ? (bond as { putCallOptionDetails?: string }).putCallOptionDetails
         : null) || "N.A / N.A",
     ],
-    ["Principal Amount", `INR ${formatCurrency(totalConsideration - accruedInterest)}`],
+    ["Principal Amount", `INR ${truncateDecimals(totalConsideration - accruedInterest, 2, true)}`],
     [
       "Accrued / Ex Interest",
-      `${accruedInterest >= 0 ? `INR ${formatCurrency(accruedInterest)}` : `${`INR (${formatCurrency(accruedInterest)})`.replaceAll("-", "")}`}`,
+      `${accruedInterest >= 0 ? `INR ${truncateDecimals(accruedInterest, 2, true)}` : `${`INR (${truncateDecimals(accruedInterest, 2, true)})`.replaceAll("-", "")}`}`,
     ],
-    ["Total Consideration", `INR ${formatCurrency(totalConsideration)}`],
+    ["Total Consideration", `INR ${truncateDecimals(totalConsideration, 2, true)}`],
     [
       "Stamp Duty (To be paid by Buyer)",
-      `INR ${formatCurrency(
-        stampDutyAmount, 0
+      `INR ${truncateDecimals(
+        stampDutyAmount, 0, true
       )} (${numberToWords(stampDutyAmount)}) To be Retained by Exchange`,
     ],
-    ["Brokerage / Convenience Charges", `INR ${formatCurrency(0)}`],
+    ["Brokerage / Convenience Charges", `INR ${truncateDecimals(0, 2, true)}`],
     [
       "Settlement Amount (inclusive of Stamp Duty)",
-      `INR ${formatCurrency(settlementAmount)} (${numberToWords(settlementAmount)})`,
+      `INR ${truncateDecimals(settlementAmount, 2, true)} (${numberToWords(settlementAmount)})`,
     ],
 
   ]
