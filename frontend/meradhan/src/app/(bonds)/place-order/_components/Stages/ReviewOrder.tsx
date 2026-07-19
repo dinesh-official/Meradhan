@@ -19,6 +19,7 @@ import {
 import { BondInfoLabel } from "@/global/components/Bond/BondInfoLabel";
 import { dateTimeUtils, formatDateCustom } from "@/global/utils/datetime.utils";
 import {
+  calculateTotalConsideration,
   formatCleanPricePercent,
   formatInrMoney2dp,
   formatNumberTS,
@@ -136,8 +137,7 @@ function ReviewOrder({
   const stampScaled = orderPricing?.stampDuty ?? 0;
   const settlementAmount = orderPricing?.settlementAmount ?? 0
   const totalConsideration =
-    orderPricing?.totalConsideration ??
-    ((principalScaled ?? 0) + (accruedScaled ?? 0));
+    orderPricing?.totalConsideration ?? calculateTotalConsideration(Number(principalScaled) ?? 0, Number(accruedScaled) ?? 0);
 
   return (
     <div className="container">

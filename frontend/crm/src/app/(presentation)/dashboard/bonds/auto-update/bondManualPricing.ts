@@ -1,3 +1,4 @@
+import { truncateDecimals } from "@/global/utils/formate";
 import type { BondDealAutofillResponse } from "@root/apiGateway";
 
 export type ManualBondPricingSnapshot = {
@@ -11,6 +12,13 @@ export type ManualBondPricingSnapshot = {
   stampDuty: number;
   settlementAmount: number;
 };
+
+export function calculateTotalConsideration(principalAmount: number, accruedInterest: number): number {
+  const principalAmountTruncated = Math.round(Number(truncateDecimals(principalAmount, 2)) * 100);
+  const accruedInterestTruncated = Math.round(Number(truncateDecimals(accruedInterest, 2)) * 100);
+  return (principalAmountTruncated + accruedInterestTruncated) / 100;
+}
+
 
 /** Stamp duty from total consideration (matches backend `stamp-duty.ts`). */
 export function calculateStampDuty(totalConsideration: number): number {
@@ -34,7 +42,7 @@ export function calculateBondPricing(input: {
   const principalAmount = (cleanPrice * faceValue * quantity) / 100;
   const accruedInterest =
     (accruedInterestPerUnit * faceValue * quantity) / 100;
-  const totalConsideration = principalAmount + accruedInterest;
+  const totalConsideration = calculateTotalConsideration(principalAmount, accruedInterest);
   const stampDuty = calculateStampDuty(totalConsideration);
   const settlementAmount = totalConsideration + stampDuty;
 
@@ -67,8 +75,8 @@ export function resolveManualPricingFromAutofill(
   const accruedInterestPerUnit =
     autofill.pricing.accruedInterestPerUnit ??
     (autofill.pricing.totalAccruedInterest != null &&
-    Number.isFinite(autofill.pricing.totalAccruedInterest) &&
-    quantity > 0
+      Number.isFinite(autofill.pricing.totalAccruedInterest) &&
+      quantity > 0
       ? autofill.pricing.totalAccruedInterest / quantity
       : undefined);
 
