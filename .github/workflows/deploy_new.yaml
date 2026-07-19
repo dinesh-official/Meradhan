@@ -351,7 +351,7 @@ jobs:
 
           update_env "STRAPI_API_URL" "https://${STRAPI_NAME}.${ROOT_DOMAIN}/api"
 
-          update_env "NEXT_PUBLIC_HOST_URL" "https://${BACKEND_NAME}.${ROOT_DOMAIN}"
+          update_env "NEXT_PUBLIC_HOST_URL" "https://${FRONTEND_NAME}.${ROOT_DOMAIN}"
 
 
           #update_env "NEXT_PUBLIC_ENV" "${{ inputs.environment }}"
