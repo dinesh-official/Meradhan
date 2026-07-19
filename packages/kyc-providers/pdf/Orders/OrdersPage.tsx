@@ -298,7 +298,7 @@ ${getInterestPaymentDatesDisplay()}`,
         ? (bond as { putCallOptionDetails?: string }).putCallOptionDetails
         : null) || "N.A / N.A",
     ],
-    ["Principal Amount", `INR ${truncateDecimals(totalConsideration - accruedInterest, 2, true)}`],
+    ["Principal Amount", `INR ${orderData?.bondDetails?.pricing?.principalAmount}`],
     [
       "Accrued / Ex Interest",
       `${accruedInterest >= 0 ? `INR ${truncateDecimals(accruedInterest, 2, true)}` : `${`INR (${truncateDecimals(accruedInterest, 2, true)})`.replaceAll("-", "")}`}`,

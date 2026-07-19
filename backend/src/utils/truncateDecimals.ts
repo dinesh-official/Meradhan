@@ -21,3 +21,9 @@ export function truncateDecimals(value: number | string, decimals = 2, formatted
   const result = trimmed ? `${sign}${intPart}.${trimmed}` : `${sign}${intPart}`;
   return Number(result);
 }
+
+export function calculateTotalConsideration(principalAmount: number, accruedInterest: number): number {
+  const principalAmountTruncated = Math.round(Number(truncateDecimals(principalAmount, 2)) * 100);
+  const accruedInterestTruncated = Math.round(Number(truncateDecimals(accruedInterest, 2)) * 100);
+  return (principalAmountTruncated + accruedInterestTruncated) / 100;
+}

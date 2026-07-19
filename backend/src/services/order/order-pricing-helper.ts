@@ -10,7 +10,7 @@ import {
     calculateYieldToPrice,
 } from "@services/deridata/deridata.calculator.client";
 import { AppError, HttpStatus } from "@utils/error/AppError";
-import { truncateDecimals } from "@utils/truncateDecimals";
+import { calculateTotalConsideration, truncateDecimals } from "@utils/truncateDecimals";
 import { calculateStampDuty } from "./stamp-duty";
 import { calculateBondPricing } from "./bond-pricing";
 import { resolveBondStampDuty } from "./stamp-duty";
@@ -807,7 +807,7 @@ export async function computeStoredBondOrderPricing(opts: {
     const accruedInterestAmount =
         (savedAccruedAmount / pricingQuantity) * quantity;
     const principalAmount = (cleanPrice * faceValue * quantity) / 100;
-    const totalConsideration = principalAmount + accruedInterestAmount;
+    const totalConsideration = calculateTotalConsideration(principalAmount, accruedInterestAmount);
     const stampDuty = resolveBondStampDuty({
         totalConsideration,
         quantity,

@@ -35,6 +35,7 @@ import { getBondInfoCalcData } from "@resource/bonds/fill-bonds-auto";
 import { OrderService } from "@resource/customer/order/order.service";
 import { orderSettlementQueue } from "@jobs/queue/worker_queues";
 import { OrderSettlementService } from "@services/order/order_settlement.service";
+import { calculateTotalConsideration } from "@utils/truncateDecimals";
 
 function formatDraftOrderCustomerName(profile: {
   firstName: string;
@@ -186,7 +187,7 @@ function buildPdfFinancialFields(
       : snap?.totalConsideration ??
       (Number.isFinite(Number(order.totalAmount))
         ? Number(order.totalAmount)
-        : principal + (accruedInterest ?? 0));
+        : calculateTotalConsideration(Number(principal), Number(accruedInterest ?? 0)));
 
   const settlementAmount =
     snap?.settlementAmount ??
@@ -1353,8 +1354,8 @@ export class CrmOrdersService {
     // with a direct fallback by RFQ number captured on the order.
     const negotiation = settleOrder?.orderNumber
       ? await db.dataBase.rFQNegotiation.findFirst({
-          where: { tradeNumber: settleOrder.orderNumber },
-        })
+        where: { tradeNumber: settleOrder.orderNumber },
+      })
       : null;
     const rfqNumberForLookup =
       negotiation?.rfqNumber ||
@@ -1362,8 +1363,8 @@ export class CrmOrdersService {
       (existingOrder?.reqOrderNumber?.trim() || null);
     const rfqDetails = rfqNumberForLookup
       ? await db.dataBase.rFQMasterISIN.findFirst({
-          where: { number: rfqNumberForLookup },
-        })
+        where: { number: rfqNumberForLookup },
+      })
       : null;
 
     // Same deal/settlement calendar as order pricing (`computeBondSettlement`).
@@ -1459,10 +1460,10 @@ export class CrmOrdersService {
     const amortizedPrincipalPaymentDates =
       isAmortizingBond && calcCfRows
         ? buildAmortizedPrincipalPaymentDates(
-            calcCfRows,
-            order.quantity,
-            Number(bond.faceValue),
-          )
+          calcCfRows,
+          order.quantity,
+          Number(bond.faceValue),
+        )
         : null;
 
     return {
