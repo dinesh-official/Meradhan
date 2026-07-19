@@ -127,6 +127,9 @@ export class OrderPdfService {
       },
     };
 
+    console.log(orderData);
+
+
     const user = await this.customerRepo.getFullCustomerProfile(userId);
 
     return generateTempOrderPdf({

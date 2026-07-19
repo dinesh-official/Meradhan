@@ -82,6 +82,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { useProposalFetcher, type ProposalFetchResult } from "./useProposalFetcher";
 import { useRouter } from "nextjs-toploader/app";
+import { calculateTotalConsideration } from "../../../bonds/auto-update/bondManualPricing";
 
 function formatCurrency(value: number | string | null | undefined) {
   const numeric = Number(value);
@@ -947,12 +948,7 @@ function ProposalManagementView() {
     const accruedInterest = toNumber(
       currentPricing?.accruedInterest ?? currentDealAutofill?.pricing.totalAccruedInterest
     );
-    const totalConsideration = toNumber(
-      currentDealAutofill?.pricing.totalConsideration ??
-      (principalAmount != null && accruedInterest != null
-        ? principalAmount + accruedInterest
-        : null)
-    );
+    const totalConsideration = calculateTotalConsideration(principalAmount ?? 0, accruedInterest ?? 0);
     const stampDuty = toNumber(currentPricing?.stampDuty);
     const settlementAmount = toNumber(
       currentDealAutofill?.pricing.settlementAmount ?? currentPricing?.settlementAmount
