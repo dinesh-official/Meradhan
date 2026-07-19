@@ -3,6 +3,7 @@ import { appSchema, getEmailSalutationFromSources } from "@root/schema";
 import {
     computeStoredBondOrderPricing,
 } from "@services/order/order-pricing-helper";
+import { calculateTotalConsideration } from "@utils/truncateDecimals";
 import type { z } from "zod";
 
 const MONTH_ABBREV = [
@@ -232,8 +233,7 @@ export const placeOrderEmailCustomer = async (orderData: z.infer<typeof appSchem
     const accruedInterest = pricing?.accruedInterest ?? 0;
     const accrualDays = pricing?.noOfAccrualDays ?? 0;
     const stampDuty = pricing?.stampDuty ?? 0;
-    const totalConsideration =
-        pricing?.totalConsideration ?? Number(principalAmount) + Number(accruedInterest);
+    const totalConsideration = pricing?.totalConsideration ?? calculateTotalConsideration(Number(principalAmount) ?? 0, Number(accruedInterest) ?? 0);
     const settlementAmount = pricing?.settlementAmount ?? orderData.settlementAmount;
     const ytm = pricing?.yield ?? orderData.yield;
     // (No. of Days: ${accrualDays})
@@ -255,7 +255,7 @@ export const placeOrderEmailCustomer = async (orderData: z.infer<typeof appSchem
             "Accrued / Ex Interest",
             `${formatInrCurrency(Number(accruedInterest))}`,
         ],
-        ["Total Consideration", formatInrCurrency(totalConsideration)],
+        ["Total Consideration", formatInrCurrency(Number(totalConsideration))],
         ["Stamp Duty", formatInrNumber(Number(stampDuty), 2)],
         ["Settlement Amount", formatInrCurrency(Number(settlementAmount))],
         ["Amount in Words", amountToWords(Number(settlementAmount))],
