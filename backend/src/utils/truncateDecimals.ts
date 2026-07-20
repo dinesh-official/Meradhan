@@ -27,3 +27,13 @@ export function calculateTotalConsideration(principalAmount: number, accruedInte
   const accruedInterestTruncated = Math.round(Number(truncateDecimals(accruedInterest, 2)) * 100);
   return (principalAmountTruncated + accruedInterestTruncated) / 100;
 }
+
+export function calculateAccruedInterest(savedAccruedAmount: number, pricingQuantity: number, quantity: number): number {
+  const accruedInterest = (savedAccruedAmount / pricingQuantity) * quantity;
+  return Number(truncateDecimals(Math.round(Number(accruedInterest) * 100) / 100, 2));
+}
+
+export function calculatePrincipalAmount(cleanPrice: number, faceValue: number, quantity: number): number {
+  const principalAmount = (cleanPrice * faceValue * quantity) / 100;
+  return Number(truncateDecimals(Math.round(Number(principalAmount) * 100) / 100, 2));
+}

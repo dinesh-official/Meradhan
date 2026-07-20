@@ -1,4 +1,4 @@
-import { calculateTotalConsideration } from "@utils/truncateDecimals";
+import { calculateAccruedInterest, calculatePrincipalAmount, calculateTotalConsideration } from "@utils/truncateDecimals";
 import { calculateStampDuty } from "./stamp-duty";
 
 export type BondPricingInput = {
@@ -49,8 +49,8 @@ export function calculateBondPricing(
     "accruedInterest",
   );
 
-  const principalAmount = (cleanPrice * faceValue * quantity) / 100;
-  const accruedInterest = accruedInterestPerUnit * quantity;
+  const principalAmount = calculatePrincipalAmount(cleanPrice, faceValue, quantity);
+  const accruedInterest = calculateAccruedInterest(accruedInterestPerUnit, 1, quantity);
   const totalConsideration = calculateTotalConsideration(principalAmount, accruedInterest);
   const stampDuty =
     input.stampDutyOverride != null && Number.isFinite(input.stampDutyOverride)
