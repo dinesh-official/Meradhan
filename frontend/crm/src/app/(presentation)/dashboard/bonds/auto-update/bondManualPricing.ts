@@ -20,6 +20,16 @@ export function calculateTotalConsideration(principalAmount: number, accruedInte
 }
 
 
+export function calculateAccruedInterest(savedAccruedAmount: number, pricingQuantity: number, quantity: number): number {
+  const accruedInterest = (savedAccruedAmount / pricingQuantity) * quantity;
+  return Number(truncateDecimals(Math.round(Number(accruedInterest) * 100) / 100, 2));
+}
+
+export function calculatePrincipalAmount(cleanPrice: number, faceValue: number, quantity: number): number {
+  const principalAmount = (cleanPrice * faceValue * quantity) / 100;
+  return Number(truncateDecimals(Math.round(Number(principalAmount) * 100) / 100, 2));
+}
+
 /** Stamp duty from total consideration (matches backend `stamp-duty.ts`). */
 export function calculateStampDuty(totalConsideration: number): number {
   const raw = totalConsideration * 0.000001;
@@ -39,9 +49,8 @@ export function calculateBondPricing(input: {
   const cleanPrice = input.cleanPrice;
   const accruedInterestPerUnit = input.accruedInterestPerUnit;
 
-  const principalAmount = (cleanPrice * faceValue * quantity) / 100;
-  const accruedInterest =
-    (accruedInterestPerUnit * faceValue * quantity) / 100;
+  const principalAmount = calculatePrincipalAmount(cleanPrice, faceValue, quantity);
+  const accruedInterest = calculateAccruedInterest(accruedInterestPerUnit, 1, quantity);
   const totalConsideration = calculateTotalConsideration(principalAmount, accruedInterest);
   const stampDuty = calculateStampDuty(totalConsideration);
   const settlementAmount = totalConsideration + stampDuty;

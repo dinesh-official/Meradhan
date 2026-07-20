@@ -1,5 +1,7 @@
-import { truncateDecimals } from "@utils/truncateDecimals";
+import { calculateAccruedInterest, calculatePrincipalAmount, truncateDecimals } from "@utils/truncateDecimals";
 
-const principalAmount = 9858.63;
-const accruedInterest = 42.74;
-const totalConsideration = (Math.round(Number(truncateDecimals(principalAmount, 2)) * 100) + Math.round(Number(truncateDecimals(accruedInterest, 2)) * 100)) / 100;
+const accruedInterestAmount = calculateAccruedInterest(36.16, 1, 100);
+console.log(accruedInterestAmount);
+
+const principalAmount = calculatePrincipalAmount(98.7027, 10000, 100);
+console.log(principalAmount);
