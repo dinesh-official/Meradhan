@@ -235,6 +235,7 @@ export class BondAutoUpdateAutofillService {
     try {
       const { item } = await fetchIssueDetailItem(isin);
       issueDetailMapped = mapDeriDataIssueDetailToBondFields(item);
+      console.log(issueDetailMapped);
       usedDeriDataIssueDetail = true;
     } catch (err) {
       // Issue-detail is preferred for master fields but should not block pricing
@@ -334,8 +335,8 @@ export class BondAutoUpdateAutofillService {
     // Phase 2 — always call DeriData live with cashflow_shut_flag = computed shut for real-time prices.
     const probeYield =
       ctx.pricingYield != null &&
-      Number.isFinite(ctx.pricingYield) &&
-      ctx.pricingYield > 0
+        Number.isFinite(ctx.pricingYield) &&
+        ctx.pricingYield > 0
         ? ctx.pricingYield
         : 10.5;
     const probeShut = true;
@@ -518,7 +519,11 @@ export class BondAutoUpdateAutofillService {
         parseDeriDataRecordDateYmd(deriDataResponse.record_date) ??
         toYyyyMmDd(ctx.pricing.recordDate) ??
         null,
-      recordDays: shutFields?.recordDays ?? ctx.couponDate.recordDays ?? null,
+      recordDays:
+        (hasDd ? dd.recordDays : null) ??
+        shutFields?.recordDays ??
+        ctx.couponDate.recordDays ??
+        null,
       dueDate: ctx.dueDateYmd ?? null,
       dayConvention: hasDd ? null : (bond?.dayConvention ?? bondData?.dayConvention ?? null),
       interestPaymentFrequency: hasDd
