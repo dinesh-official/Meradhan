@@ -10,7 +10,7 @@ import {
     calculateYieldToPrice,
 } from "@services/deridata/deridata.calculator.client";
 import { AppError, HttpStatus } from "@utils/error/AppError";
-import { calculateTotalConsideration, truncateDecimals } from "@utils/truncateDecimals";
+import { calculateAccruedInterest, calculatePrincipalAmount, calculateTotalConsideration, truncateDecimals } from "@utils/truncateDecimals";
 import { calculateStampDuty } from "./stamp-duty";
 import { calculateBondPricing } from "./bond-pricing";
 import { resolveBondStampDuty } from "./stamp-duty";
@@ -804,9 +804,8 @@ export async function computeStoredBondOrderPricing(opts: {
 
     // Scale CRM-saved ₹ accrued (for pricingQuantity) to the order quantity.
     // Do not call DeriData here — amounts come from autofill-saved bond fields.
-    const accruedInterestAmount =
-        (savedAccruedAmount / pricingQuantity) * quantity;
-    const principalAmount = (cleanPrice * faceValue * quantity) / 100;
+    const accruedInterestAmount = calculateAccruedInterest(savedAccruedAmount, pricingQuantity, quantity);
+    const principalAmount = calculatePrincipalAmount(cleanPrice, faceValue, quantity);
     const totalConsideration = calculateTotalConsideration(principalAmount, accruedInterestAmount);
     const stampDuty = resolveBondStampDuty({
         totalConsideration,
