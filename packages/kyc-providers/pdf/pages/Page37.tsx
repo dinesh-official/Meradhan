@@ -106,6 +106,26 @@ Lower Parel, Mumbai, Maharashtra 400013`}
           of availing such service, upon your consent
         </TextList>
       </View>
+
+      <View
+        style={{
+          marginTop: 10,
+          marginBottom: 16,
+          borderWidth: 1,
+          borderStyle: "solid",
+          borderColor: "#002C59",
+          backgroundColor: "#E8F0FC",
+          paddingVertical: 10,
+          paddingHorizontal: 12,
+        }}
+      >
+        <Text style={{ fontSize: 9, lineHeight: 1.45, textAlign: "justify" }}>
+          Bondnest Capital India Securities Private Limited hereby informs its
+          clients that it undertakes proprietary trading activities in addition
+          to client-based business. This disclosure is made pursuant to SEBI
+          Circular No. SEBI/MRD/SE/Cir-42/2003 dated November 19, 2003.
+        </Text>
+      </View>
     </View>
   );
 }
