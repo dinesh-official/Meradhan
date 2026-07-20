@@ -235,7 +235,6 @@ export class BondAutoUpdateAutofillService {
     try {
       const { item } = await fetchIssueDetailItem(isin);
       issueDetailMapped = mapDeriDataIssueDetailToBondFields(item);
-      console.log(issueDetailMapped);
       usedDeriDataIssueDetail = true;
     } catch (err) {
       // Issue-detail is preferred for master fields but should not block pricing
