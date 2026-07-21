@@ -28,8 +28,8 @@ function Page37() {
   return (
     <View style={tw(`w-[90%]  px-4  mx-auto mt-6 text-xs`)}>
       <Text style={tw(`font-[600] text-center text-sm`)}>TARIFF SHEET</Text>
-      <Text style={tw(`text-center mt-3`)}>Tariff Sheet - Trading Account</Text>
-      <Text style={tw(`leading-4 mt-8`)}>
+      <Text style={tw(`text-center mt-2`)}>Tariff Sheet - Trading Account</Text>
+      <Text style={tw(`leading-4 mt-4`)}>
         {`To
 BondNest Capital India Securities Private Limited
 TBQ, Suite No 511,
@@ -40,14 +40,14 @@ Lower Parel, Mumbai, Maharashtra 400013`}
       <Text style={tw(`font-[600] mt-2`)}>
         Charges for BondNest Trading Services
       </Text>
-      <Text style={tw(`leading-3 mt-3`)}>
+      <Text style={tw(`leading-3 mt-2`)}>
         I/We agree to pay the charges as per the following charges structure for
         our Trading account with BondNest effective from {today}
       </Text>
 
       <View
         style={tw(
-          `border-t border-b mx-auto flex flex-row border-gray-200 mt-5`,
+          `border-t border-b mx-auto flex flex-row border-gray-200 mt-2`,
         )}
       >
         <View
@@ -77,7 +77,7 @@ Lower Parel, Mumbai, Maharashtra 400013`}
         );
       })}
 
-      <View style={tw(`flex flex-col gap-2 mt-5 leading-3`)}>
+      <View style={tw(`flex flex-col gap-2 mt-2 leading-3`)}>
         <Text>
           Clients who requests to receive physical Order Receipt/Deal
           Sheet/Quote Receipt will be charged INR 100 per Order Receipt/Deal
@@ -105,6 +105,17 @@ Lower Parel, Mumbai, Maharashtra 400013`}
           Charges for other value-added services will be applicable at the time
           of availing such service, upon your consent
         </TextList>
+      </View>
+
+      <View
+        style={tw(`mt-2 bg-white p-4 border border-gray-200`)}
+      >
+        <Text style={{ fontSize: 9, lineHeight: 1.45, textAlign: "justify" }}>
+          Bondnest Capital India Securities Private Limited hereby informs its
+          clients that it undertakes proprietary trading activities in addition
+          to client-based business. This disclosure is made pursuant to SEBI
+          Circular No. SEBI/MRD/SE/Cir-42/2003 dated November 19, 2003.
+        </Text>
       </View>
     </View>
   );

@@ -162,21 +162,13 @@ export function formatOrderBusinessDate(value: unknown): string {
 }
 
 export function getOrderListDates(order: {
-  createdAt: string;
-  metadata?: Record<string, unknown> | null;
   bondDetails?: Record<string, unknown> | null;
 }) {
-  const meta = (order.metadata ?? {}) as Record<string, unknown>;
   const pricing = (order.bondDetails as Record<string, unknown> | undefined)
     ?.pricing as Record<string, unknown> | undefined;
 
-  const dealDate =
-    meta.dealDate ?? pricing?.dealDate ?? null;
-  const settlementDate =
-    meta.settlementDate ?? pricing?.settlementDate ?? null;
-
   return {
-    dealDate: formatOrderBusinessDate(dealDate),
-    settlementDate: formatOrderBusinessDate(settlementDate),
+    tradeDate: formatOrderBusinessDate(pricing?.dealDate ?? null),
+    settlementDate: formatOrderBusinessDate(pricing?.settlementDate ?? null),
   };
 }

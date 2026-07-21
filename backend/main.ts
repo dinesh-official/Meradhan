@@ -44,6 +44,8 @@ import orderRoutes from "@resource/customer/order/order.routes";
 import paymentRoutes from "@resource/customer/payment/payment.routes";
 import portfolioRoutes from "@resource/customer/portfolio/portfolio.routes";
 import customerProfileRoutes from "@resource/customer/profile/customer.profile.routes";
+import customerServiceRequestsRoutes from "@resource/customer/service_requests/service_requests.routes";
+import crmServiceRequestsRoutes from "@resource/crm/service_requests/crm_service_requests.routes";
 import watchListRoutes from "@resource/customer/watchlist/watchlist.routes";
 import kraRoutes from "@resource/kra/kra.routes";
 import logger from "@utils/logger/logger";
@@ -87,6 +89,7 @@ server.addRoutes([
   crmAuthRoutes,
   crmUsersRoutes,
   crmCustomersRoutes,
+  crmServiceRequestsRoutes,
   crmBondPricedListRoutes,
   crmBondReferenceDataRoutes,
   crmBondMarginRoutes,
@@ -121,6 +124,7 @@ server.addRoutes([
   // customer routes
   customerAuthRoutes,
   customerProfileRoutes,
+  customerServiceRequestsRoutes,
   kycRoutes,
   orderRoutes,
   customerBondsRoutes,

@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { allowAccessMiddleware } from "@middlewares/auth_middleware";
+import { allowAccessMiddleware, verifyCustomerJwtOnly } from "@middlewares/auth_middleware";
 import { withRateLimit } from "@middlewares/ratelimit_midddleare";
 import { CustomerAuthController } from "./customer.auth.controller";
 
@@ -9,7 +9,7 @@ const controller = new CustomerAuthController();
 
 customerAuthRoutes.all(
   "/api/customer/session",
-  allowAccessMiddleware("USER"),
+  verifyCustomerJwtOnly,
   (req, res) => controller.session(req, res)
 );
 

@@ -247,20 +247,29 @@ function CustomerManagementForm({
           error={manager?.errors?.kycStatus?.[0]}
         />
 
-        <SelectField
-          label="Status"
-          defaultValue={manager.state.status}
-          options={[
-            { label: "Active", value: "ACTIVE" },
-            { label: "Suspended", value: "SUSPENDED" },
-          ]}
-          value={manager.state.status}
-          onChangeAction={(e) =>
-            manager.setCustomerData("status", e as CustomerFormData["status"])
-          }
-          required
-          error={manager?.errors?.status?.[0]}
-        />
+        {manager.state.status === "CLOSED" && updateMode ? (
+          <div className="flex flex-col gap-2">
+            <Label>Status</Label>
+            <p className="text-sm text-muted-foreground">
+              Closed — use Service Requests to manage account closure.
+            </p>
+          </div>
+        ) : (
+          <SelectField
+            label="Status"
+            defaultValue={manager.state.status}
+            options={[
+              { label: "Active", value: "ACTIVE" },
+              { label: "Suspended", value: "SUSPENDED" },
+            ]}
+            value={manager.state.status}
+            onChangeAction={(e) =>
+              manager.setCustomerData("status", e as CustomerFormData["status"])
+            }
+            required
+            error={manager?.errors?.status?.[0]}
+          />
+        )}
       </div>
 
       {/* Relationship Manager + Total Investment */}

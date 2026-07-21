@@ -329,6 +329,15 @@ export const NAV_ITEMS: NavItem[] = [
   },
 
   {
+    label: "Service Requests",
+    icon: ClipboardList,
+    path: "/dashboard/service-requests",
+    module: "service_requests",
+    allowOnly: ["view:service_requests"],
+    roles: ["ADMIN", "SUPER_ADMIN"],
+  },
+
+  {
     label: "User Management",
     icon: Briefcase,
     allowOnly: ["view:user", "create:user", "edit:user"],

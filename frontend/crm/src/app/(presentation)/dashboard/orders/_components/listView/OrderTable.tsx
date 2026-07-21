@@ -148,9 +148,9 @@ function OrderTable({ data, pageSize = 10, isLoading }: OrderTableProps) {
                   </span>
                 </div>
                 <div className="flex justify-between gap-3">
-                  <span className="text-muted-foreground">Deal</span>
+                  <span className="text-muted-foreground">Trade</span>
                   <span className="font-medium text-foreground tabular-nums">
-                    {dates.dealDate}
+                    {dates.tradeDate}
                   </span>
                 </div>
                 <div className="flex justify-between gap-3">

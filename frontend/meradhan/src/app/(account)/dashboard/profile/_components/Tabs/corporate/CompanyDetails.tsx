@@ -8,6 +8,7 @@ import type {
 import Link from "next/link";
 import { FaCheckSquare } from "react-icons/fa";
 import ProfileContactFields from "../../ProfileContactFields";
+import AccountClosureSection from "../../AccountClosureSection";
 import NeedKyc from "../../NeedKyc";
 import { canAccessKycSections } from "../../../_utils/profileKyc";
 import { formatEntityConstitutionType } from "../../../_utils/formatEntityType";
@@ -143,9 +144,9 @@ export default function CompanyDetails({
           <p className="font-medium text-sm">
             {showEntityValues
               ? formatEntityConstitutionType(
-                  entity?.entityConstitutionType,
-                  entity?.otherConstitutionType,
-                )
+                entity?.entityConstitutionType,
+                entity?.otherConstitutionType,
+              )
               : "--"}
           </p>
         </DataInfoLabel>
@@ -191,6 +192,7 @@ export default function CompanyDetails({
           />
         </>
       )}
+      {/* <AccountClosureSection /> */}
     </>
   );
 }

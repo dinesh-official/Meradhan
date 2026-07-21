@@ -227,7 +227,12 @@ export const updateCustomerProfileSchema = createNewCustomerSchemaBase.partial()
     return typeof data.legalEntityName === "string" && data.legalEntityName.trim().length > 0;
   },
   { message: "Legal entity name is required for Trust, Corporate, HUF, LLP, or Partnership Firm", path: ["legalEntityName"] }
+).refine(
+  (data) => data.status !== "CLOSED",
+  { message: "Account closure must be processed via Service Requests", path: ["status"] }
 );
+
+export * from "./service_requests.schema";
 
 export const createBankAccountSchema = z.object({
   accountHolderName: z.string().min(1, "Account holder name is required"),
