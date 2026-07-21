@@ -1,6 +1,8 @@
 import { cookieOptions } from "@config/cookie";
 import { appSchema, getOptionalEmailTitleFromSources } from "@root/schema";
 import { AppError, HttpStatus } from "@utils/error/AppError";
+import { tokenUtils } from "@utils/token/JwtToken_utils";
+import type { CustomerJwtPayload } from "@services/customer/customer_auth_token.helper";
 import type { Request, Response } from "express";
 
 import { CustomerAuthService } from "./customer.auth.service";
@@ -352,14 +354,54 @@ export class CustomerAuthController {
     if (!id) {
       throw new AppError("Session not found");
     }
-    const sessionCheck = await db.dataBase.customerProfileDataModel.findUnique({
-      where: { id }
-    });
-    if (!sessionCheck) {
-      throw new AppError("User not found");
+
+    const authHeader = req.headers.authorization?.startsWith("Bearer ")
+      ? req.headers.authorization.split(" ")[1]
+      : undefined;
+    const token = authHeader || req.cookies?.token;
+    let jwtPayload: CustomerJwtPayload | null = null;
+    if (token) {
+      try {
+        jwtPayload = tokenUtils.verifyToken<CustomerJwtPayload>(token);
+      } catch {
+        jwtPayload = null;
+      }
     }
+
+    const auth = await db.dataBase.customersAuthDataModel.findFirst({
+      where: {
+        customerProfileDataModel: { id, isDeleted: false },
+      },
+      select: { accountStatus: true, tokenVersion: true },
+    });
+
+    const clearSessionCookies = () => {
+      res.cookie("token", "", { ...cookieOptions, expires: new Date(0) });
+      res.cookie("userId", "", { ...cookieOptions, expires: new Date(0) });
+    };
+
+    const tokenVersion = jwtPayload?.tv ?? 0;
+    const sessionInvalid =
+      !auth ||
+      auth.accountStatus !== "ACTIVE" ||
+      tokenVersion !== auth.tokenVersion;
+
+    if (sessionInvalid) {
+      clearSessionCookies();
+      return res.status(401).json({
+        status: false,
+        code: auth?.accountStatus === "CLOSED" ? "ACCOUNT_CLOSED" : "ACCESS_DENIED",
+        message:
+          auth?.accountStatus === "CLOSED"
+            ? "Your account has been closed. Please contact us to open new account"
+            : auth?.accountStatus === "SUSPENDED"
+              ? "Your account has been suspended"
+              : "Access Denied! Session is expired or invalid.",
+      });
+    }
+
     const session = await db.dataBase.customerProfileDataModel.findUnique({
-      where: { id, isDeleted: false, utility: { accountStatus: "ACTIVE" } },
+      where: { id, isDeleted: false },
       select: {
         id: true,
         firstName: true,
@@ -374,33 +416,37 @@ export class CustomerAuthController {
       },
     });
 
-    const hasRekycExpiredFlow = session
-      ? await db.dataBase.kYC_FLOW.findFirst({
-        where: { kycUserId: id, markExpired: true },
-        select: { id: true },
-      }).then((row) => !!row)
-      : false;
-    const kycFlow = session
-      ? await db.dataBase.kYC_FLOW.findFirst({
-        where: { userID: id },
-        select: { step: true, complete: true },
-      })
-      : null;
+    if (!session) {
+      clearSessionCookies();
+      return res.status(401).json({
+        status: false,
+        code: "ACCESS_DENIED",
+        message: "Access Denied! Session is expired or invalid.",
+      });
+    }
+
+    const hasRekycExpiredFlow = await db.dataBase.kYC_FLOW.findFirst({
+      where: { kycUserId: id, markExpired: true },
+      select: { id: true },
+    }).then((row) => !!row);
+
+    const kycFlow = await db.dataBase.kYC_FLOW.findFirst({
+      where: { userID: id },
+      select: { step: true, complete: true },
+    });
 
     res.sendResponse({
       statusCode: HttpStatus.OK,
       message: "session",
-      responseData: session
-        ? {
-          ...session,
-          hasRekycExpiredFlow,
-          kycProgress: {
-            hasStarted: Boolean(kycFlow && !kycFlow.complete),
-            step: kycFlow?.step ?? 0,
-            complete: kycFlow?.complete ?? false,
-          },
-        }
-        : undefined,
+      responseData: {
+        ...session,
+        hasRekycExpiredFlow,
+        kycProgress: {
+          hasStarted: Boolean(kycFlow && !kycFlow.complete),
+          step: kycFlow?.step ?? 0,
+          complete: kycFlow?.complete ?? false,
+        },
+      },
     });
   }
 

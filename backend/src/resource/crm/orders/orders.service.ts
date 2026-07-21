@@ -18,10 +18,12 @@ import { getDpName } from "dp-id-lookup";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import crypto from "crypto";
 import { env } from "@packages/config/src/env";
-import { loadInvestorCouponScheduleForPdf } from "@services/order/investor-coupon-entitlement";
+import {
+  formatLastInterestPaymentDateDisplay,
+  loadInvestorCouponScheduleForPdf,
+} from "@services/order/investor-coupon-entitlement";
 import { SettlementNoService } from "@services/refq/nse/settlement-no.service";
 import {
-  computeBondSettlement,
   settlementDateFromYmd,
 } from "@services/order/order-pricing-helper";
 import { sendBackOfficeEmail } from "@communication/email_communication";
@@ -287,50 +289,108 @@ function toBusinessYmd(input: string | null | undefined): string | null {
   return parsed ? toYyyyMmDd(parsed) : null;
 }
 
-/**
- * Deal / settlement dates for CRM receipt + deal-sheet PDFs.
- * Uses the same market-hours / holiday logic as order pricing
- * (`computeBondSettlement`). NSE settlementType 0 → T+0 (settle = deal).
- * Explicit picker overrides still win when provided.
- */
-function resolvePdfDealAndSettlementDates(input: {
-  executionDateTime: Date;
-  settlementType?: number | null;
-  requestedDealDate?: string | null;
-  requestedSettlementDate?: string | null;
-}): { dealDateYmd: string; settlementDateYmd: string; dealDate: Date } {
-  const settlement = computeBondSettlement(input.executionDateTime);
-  let dealDateYmd = settlement.dealDate;
-  let settlementDateYmd = settlement.settlementDate;
+function snapStr(v: unknown): string | null {
+  if (v == null) return null;
+  const s = String(v).trim();
+  return s !== "" ? s : null;
+}
 
-  // Match computeBondOrderPricingData: T+0 forces settlement = deal.
-  if (input.settlementType === 0) {
-    settlementDateYmd = dealDateYmd;
+/**
+ * Deal / settlement dates from checkout snapshot on `order.bondDetails.pricing`.
+ * Reuses values stored at order placement — does not re-run settlement calculation.
+ */
+function resolveDatesFromOrderPricingSnapshot(
+  bondDetails: unknown,
+  overrides?: {
+    requestedDealDate?: string | null;
+    requestedSettlementDate?: string | null;
+  },
+): {
+  dealDateYmd: string;
+  settlementDateYmd: string;
+  dealDate: Date;
+  settlementType: number | null;
+} {
+  if (!bondDetails || typeof bondDetails !== "object" || Array.isArray(bondDetails)) {
+    throw new AppError(
+      "Order pricing snapshot is missing. bondDetails.pricing must include dealDate and settlementDate.",
+      { statusCode: HttpStatus.BAD_REQUEST, code: "PRICING_SNAPSHOT_MISSING" },
+    );
+  }
+  const pricing = (bondDetails as Record<string, unknown>).pricing;
+  if (!pricing || typeof pricing !== "object" || Array.isArray(pricing)) {
+    throw new AppError(
+      "Order pricing snapshot is missing. bondDetails.pricing must include dealDate and settlementDate.",
+      { statusCode: HttpStatus.BAD_REQUEST, code: "PRICING_SNAPSHOT_MISSING" },
+    );
+  }
+  const snap = pricing as Record<string, unknown>;
+
+  const dealFromSnap = toBusinessYmd(snapStr(snap.dealDate));
+  const settleFromSnap = toBusinessYmd(snapStr(snap.settlementDate));
+  if (!dealFromSnap && !settleFromSnap) {
+    throw new AppError(
+      "Order pricing snapshot is missing dealDate and settlementDate.",
+      { statusCode: HttpStatus.BAD_REQUEST, code: "PRICING_SNAPSHOT_MISSING" },
+    );
   }
 
-  const overrideDeal = toBusinessYmd(input.requestedDealDate);
+  let dealDateYmd = dealFromSnap ?? settleFromSnap!;
+  let settlementDateYmd = settleFromSnap ?? dealFromSnap!;
+
+  const overrideDeal = toBusinessYmd(overrides?.requestedDealDate);
   if (overrideDeal) {
     dealDateYmd = overrideDeal;
-    if (input.settlementType === 0 && !toBusinessYmd(input.requestedSettlementDate)) {
-      settlementDateYmd = dealDateYmd;
-    }
   }
 
-  const overrideSettle = toBusinessYmd(input.requestedSettlementDate);
+  const overrideSettle = toBusinessYmd(overrides?.requestedSettlementDate);
   if (overrideSettle) {
     settlementDateYmd = overrideSettle;
   }
 
-  const dealDate = parseLooseDate(dealDateYmd) ?? input.executionDateTime;
-  // Preserve quote/order clock time on the computed deal calendar day.
-  dealDate.setHours(
-    input.executionDateTime.getHours(),
-    input.executionDateTime.getMinutes(),
-    input.executionDateTime.getSeconds(),
-    input.executionDateTime.getMilliseconds(),
-  );
+  const dealDate = parseLooseDate(dealDateYmd);
+  if (!dealDate) {
+    throw new AppError("Invalid dealDate in order pricing snapshot.", {
+      statusCode: HttpStatus.BAD_REQUEST,
+      code: "PRICING_SNAPSHOT_INVALID",
+    });
+  }
 
-  return { dealDateYmd, settlementDateYmd, dealDate };
+  let settlementType: number | null = null;
+  const settlementOrder = snapStr(snap.settlementOrder);
+  if (settlementOrder === "T+0" || dealDateYmd === settlementDateYmd) {
+    settlementType = 0;
+  } else if (settlementOrder === "T+1") {
+    settlementType = 1;
+  }
+
+  return { dealDateYmd, settlementDateYmd, dealDate, settlementType };
+}
+
+/** Last coupon date from checkout snapshot on `order.bondDetails.pricing`. */
+function lastCouponDatesFromOrderPricingSnapshot(bondDetails: unknown): {
+  lastInterestPaymentDateRaw: string | null;
+  lastInterestPaymentDate: string | null;
+} {
+  if (!bondDetails || typeof bondDetails !== "object" || Array.isArray(bondDetails)) {
+    return { lastInterestPaymentDateRaw: null, lastInterestPaymentDate: null };
+  }
+  const pricing = (bondDetails as Record<string, unknown>).pricing;
+  if (!pricing || typeof pricing !== "object" || Array.isArray(pricing)) {
+    return { lastInterestPaymentDateRaw: null, lastInterestPaymentDate: null };
+  }
+
+  const ymd = toBusinessYmd(snapStr((pricing as Record<string, unknown>).lastCouponDate));
+  if (!ymd) {
+    return { lastInterestPaymentDateRaw: null, lastInterestPaymentDate: null };
+  }
+
+  return {
+    lastInterestPaymentDateRaw: ymd,
+    lastInterestPaymentDate: formatLastInterestPaymentDateDisplay(
+      settlementDateFromYmd(ymd),
+    ),
+  };
 }
 
 /**
@@ -1350,38 +1410,14 @@ export class CrmOrdersService {
       return s !== "" ? s : null;
     };
 
-    // Resolve RFQ master via settle order → negotiation (same chain as PDF generate),
-    // with a direct fallback by RFQ number captured on the order.
-    const negotiation = settleOrder?.orderNumber
-      ? await db.dataBase.rFQNegotiation.findFirst({
-        where: { tradeNumber: settleOrder.orderNumber },
-      })
-      : null;
-    const rfqNumberForLookup =
-      negotiation?.rfqNumber ||
-      pickMetaStr(orderMeta.rfqNumber) ||
-      (existingOrder?.reqOrderNumber?.trim() || null);
-    const rfqDetails = rfqNumberForLookup
-      ? await db.dataBase.rFQMasterISIN.findFirst({
-        where: { number: rfqNumberForLookup },
-      })
-      : null;
-
-    // Same deal/settlement calendar as order pricing (`computeBondSettlement`).
-    const executionDateTime = parseRfqMasterDateTime(
-      rfqDetails?.date,
-      rfqDetails?.quoteTime,
-      order.createdAt,
-    );
-    const settlementTypeNum =
-      rfqDetails?.settlementType ?? negotiation?.acceptedSettlementType ?? null;
-    const { dealDateYmd, settlementDateYmd: settlementYmd } =
-      resolvePdfDealAndSettlementDates({
-        executionDateTime,
-        settlementType: settlementTypeNum,
-        requestedSettlementDate:
-          typeof input.settlementDate === "string" ? input.settlementDate : null,
-      });
+    const {
+      dealDateYmd,
+      settlementDateYmd: settlementYmd,
+      settlementType: settlementTypeNum,
+    } = resolveDatesFromOrderPricingSnapshot(order.bondDetails, {
+      requestedSettlementDate:
+        typeof input.settlementDate === "string" ? input.settlementDate : null,
+    });
 
     const settlementDt = parseLooseDate(settlementYmd);
     if (!settlementDt) {
@@ -1446,6 +1482,7 @@ export class CrmOrdersService {
       bond.isin,
       settlementForCoupons,
     );
+    const pricingLastCoupon = lastCouponDatesFromOrderPricingSnapshot(order.bondDetails);
 
     // Settlement number is keyed by settlement date in `nse_settlement_no`.
     const settlementNumber = await resolveSettlementNumberForPdf({
@@ -1471,8 +1508,12 @@ export class CrmOrdersService {
         ? accruedInterestDays
         : 0,
       settlementNumber,
-      lastInterestPaymentDateRaw: investorCoupons.lastInterestPaymentDateRaw,
-      lastInterestPaymentDate: investorCoupons.lastInterestPaymentDate,
+      lastInterestPaymentDateRaw:
+        pricingLastCoupon.lastInterestPaymentDateRaw ??
+        investorCoupons.lastInterestPaymentDateRaw,
+      lastInterestPaymentDate:
+        pricingLastCoupon.lastInterestPaymentDate ??
+        investorCoupons.lastInterestPaymentDate,
       interestPaymentDates:
         investorCoupons.interestPaymentDates.length > 0
           ? investorCoupons.interestPaymentDates
@@ -2126,18 +2167,8 @@ export class CrmOrdersService {
     });
     const metadata = (order.metadata as Record<string, unknown> | null) ?? {};
 
-    const fallbackOrderDate =
-      order.createdAt instanceof Date ? order.createdAt : new Date(order.createdAt);
-    const executionDateTime = parseRfqMasterDateTime(
-      rfqDetails?.date,
-      rfqDetails?.quoteTime,
-      fallbackOrderDate,
-    );
     const { dealDate: orderDateForPdf, settlementDateYmd: resolvedSettlementDate } =
-      resolvePdfDealAndSettlementDates({
-        executionDateTime,
-        settlementType:
-          rfqDetails?.settlementType ?? negotation?.acceptedSettlementType ?? null,
+      resolveDatesFromOrderPricingSnapshot(order.bondDetails, {
         requestedDealDate: pdfQuery.dealDate ?? null,
         requestedSettlementDate: pdfQuery.settlementDate ?? null,
       });
@@ -2398,18 +2429,8 @@ export class CrmOrdersService {
       },
     });
     const metadata = (order.metadata as Record<string, unknown> | null) ?? {};
-    const fallbackOrderDateDeal =
-      order.createdAt instanceof Date ? order.createdAt : new Date(order.createdAt);
-    const executionDateTimeDeal = parseRfqMasterDateTime(
-      rfqDetails?.date,
-      rfqDetails?.quoteTime,
-      fallbackOrderDateDeal,
-    );
     const { dealDate: orderDateForPdf, settlementDateYmd: resolvedSettlementDate } =
-      resolvePdfDealAndSettlementDates({
-        executionDateTime: executionDateTimeDeal,
-        settlementType:
-          rfqDetails?.settlementType ?? negotation?.acceptedSettlementType ?? null,
+      resolveDatesFromOrderPricingSnapshot(order.bondDetails, {
         requestedDealDate: pdfQuery.dealDate ?? null,
         requestedSettlementDate: pdfQuery.settlementDate ?? null,
       });

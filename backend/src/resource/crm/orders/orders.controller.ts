@@ -885,20 +885,21 @@ export class CrmOrdersController {
   /** Computes “Receipt PDF options” fields from settlement date for one-click auto-fill. */
   autofillReceiptPdfOptions = async (req: Request, res: Response) => {
     const orderNumber = req.params.orderNumber;
+    console.log("orderNumber", orderNumber);
     if (!orderNumber || typeof orderNumber !== "string") {
       return res.sendResponse({
         statusCode: HttpStatus.BAD_REQUEST,
         message: "Order number is required",
       });
     }
-    // settlementDate is optional — when omitted, the service resolves it from
-    // the NSE RFQ quote ("Add ISIN") → order metadata → order creation date.
+    // settlementDate is optional — when provided, it overrides bondDetails.pricing.settlementDate.
     const settlementDate = (req.body as { settlementDate?: unknown })?.settlementDate;
     const settlementDateStr = typeof settlementDate === "string" ? settlementDate.trim() : "";
     try {
       const data = await this.ordersService.autofillReceiptPdfOptions(orderNumber, {
         settlementDate: settlementDateStr || null,
       });
+      console.log("data", data);
       return res.sendResponse({
         statusCode: HttpStatus.OK,
         responseData: data,
@@ -1238,16 +1239,16 @@ export class CrmOrdersController {
     let order =
       orderId != null && !Number.isNaN(orderId)
         ? await db.dataBase.order.findUnique({
-            where: { id: orderId },
-            select: {
-              id: true,
-              orderNumber: true,
-              reqOrderNumber: true,
-              status: true,
-              metadata: true,
-              customerProfileId: true,
-            },
-          })
+          where: { id: orderId },
+          select: {
+            id: true,
+            orderNumber: true,
+            reqOrderNumber: true,
+            status: true,
+            metadata: true,
+            customerProfileId: true,
+          },
+        })
         : null;
 
     const nseKey =

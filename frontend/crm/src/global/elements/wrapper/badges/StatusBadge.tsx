@@ -43,6 +43,7 @@ function getStatusClass(value: string) {
       return "bg-blue-100 text-blue-800";
 
     case "suspended":
+    case "closed":
     case "not started":
     case "not available":
       return "bg-gray-200 text-gray-700";

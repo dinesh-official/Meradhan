@@ -6,7 +6,10 @@ export const CrmUserROLEEnum = z.enum(
    UserRoles
 );
 
-export const AccountStatusEnum = z.enum(["SUSPENDED", "ACTIVE"]);
+export const AccountStatusEnum = z.enum(["SUSPENDED", "ACTIVE", "CLOSED"]);
+export const ServiceRequestTypeEnum = z.enum(["CLOSURE"]);
+export const ServiceRequestStatusEnum = z.enum(["PENDING", "DONE", "REJECTED"]);
+export const ServiceRequestReasonStatusEnum = z.enum(["ACTIVE", "INACTIVE"]);
 export const gender = ["MALE", "FEMALE", "OTHER"] as const;
 export const GenderEnum = z.enum(gender, { error: "Invalid select valid gender type" });
 

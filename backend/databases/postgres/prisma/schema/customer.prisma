@@ -17,6 +17,8 @@ model CustomersAuthDataModel {
     twoFactorEnabled          Boolean   @default(false)
     twoFactorPasscodeHash     String?
     lastLogin                 DateTime?
+    /// Incremented on account closure to invalidate outstanding JWTs
+    tokenVersion              Int       @default(0)
 
     relationshipManager CRMUserDataModel? @relation(fields: [cRMUserDataModelId], references: [id])
     cRMUserDataModelId  Int?
@@ -106,6 +108,7 @@ model CustomerProfileDataModel {
 
     notificationSavedListMembers CrmNotificationSavedListMemberModel[]
     notificationRecipientLogs    NotificationRecipientLogModel[]
+    serviceRequests              UserServiceRequestModel[]
 
     @@index([emailAddress, userName])
     @@map("customers_profile_data")

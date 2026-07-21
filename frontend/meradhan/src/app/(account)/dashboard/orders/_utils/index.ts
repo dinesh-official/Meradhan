@@ -252,6 +252,22 @@ function bondDetailsRecord(order: Order): Record<string, unknown> {
 export function getOrderSettlementDateInput(order: Order): string | undefined {
   const top = order.settlementDate;
   if (top != null && String(top).trim() !== "") return String(top).trim();
+  return getOrderPricingSettlementDateInput(order);
+}
+
+/** Trade (deal) date from checkout `bondDetails.pricing.dealDate`. */
+export function getOrderTradeDateInput(order: Order): string | undefined {
+  const b = bondDetailsRecord(order);
+  const p = b.pricing;
+  if (p && typeof p === "object" && !Array.isArray(p)) {
+    const dd = (p as Record<string, unknown>).dealDate;
+    if (typeof dd === "string" && dd.trim()) return dd.trim();
+  }
+  return undefined;
+}
+
+/** Settlement date from checkout `bondDetails.pricing.settlementDate`. */
+export function getOrderPricingSettlementDateInput(order: Order): string | undefined {
   const b = bondDetailsRecord(order);
   const p = b.pricing;
   if (p && typeof p === "object" && !Array.isArray(p)) {

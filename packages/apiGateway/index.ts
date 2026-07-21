@@ -7,6 +7,7 @@ export type * from "./src/core/connection/apiCaller.interface";
 
 export * from "./src/core/connection/error";
 export * from "./src/core/constants/role";
+export type * from "./src/types/service_requests.types";
 export * from "./src/types/response.types";
 
 import * as auth from "./src/core/api/auth.api";
@@ -67,6 +68,8 @@ export type * from "./src/core/api/meradhan/corporateKyc/CorporateKyc.api";
 
 import { CustomerOrderApi } from "./src/core/api/meradhan/order/order.api";
 import { CustomerPortfolioApi } from "./src/core/api/meradhan/portfolio/portfolio.api";
+import { CustomerServiceRequestsApi } from "./src/core/api/meradhan/serviceRequests.api";
+import { CrmServiceRequestsApi } from "./src/core/api/crm/serviceRequests.api";
 export type { CustomerOrderPdfQueryParams } from "./src/core/api/meradhan/order/order.api";
 export type * from "./src/core/api/meradhan/order/order.response";
 export type * from "./src/core/api/meradhan/portfolio/portfolio.response";
@@ -95,6 +98,9 @@ export default {
     notifications: {
       CrmNotificationsApi,
     },
+    serviceRequests: {
+      CrmServiceRequestsApi,
+    },
     auditlogs,
     rfq: {
       participants,
@@ -110,6 +116,7 @@ export default {
     customerCorporateKycApi,
     customerOrderApi: CustomerOrderApi,
     customerPortfolioApi: CustomerPortfolioApi,
+    customerServiceRequestsApi: CustomerServiceRequestsApi,
     commonApi,
   },
   bondsApi,
