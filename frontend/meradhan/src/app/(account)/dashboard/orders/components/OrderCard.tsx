@@ -9,7 +9,8 @@ import {
   isOrderSettled,
   formatOrderHistoryDate,
   formatOrderYieldPercent,
-  getOrderSettlementDateInput,
+  getOrderPricingSettlementDateInput,
+  getOrderTradeDateInput,
   getOrderAccruedInterest,
   getOrderSettlementAmount,
 } from "../_utils";
@@ -30,8 +31,10 @@ function OrderCard({ order, showSeparator = false }: OrderCardProps) {
     order.settleStatus,
     order.paymentProvider,
   );
-  const tradeDate = formatOrderHistoryDate(order.createdAt);
-  const settlementDate = formatOrderHistoryDate(getOrderSettlementDateInput(order));
+  const tradeDate = formatOrderHistoryDate(getOrderTradeDateInput(order));
+  const settlementDate = formatOrderHistoryDate(
+    getOrderPricingSettlementDateInput(order),
+  );
   const faceValue = formatAmount(parseFloat(order.faceValue));
   const accruedInterest = getOrderAccruedInterest(order);
   const settlementAmount = getOrderSettlementAmount(order);

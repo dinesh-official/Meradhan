@@ -10,6 +10,14 @@ import useAppCookie from "@/hooks/useAppCookie.hook";
 import { getSessionId } from "@/analytics/analytics";
 import { useUserTracking } from "@/analytics/UserTrackingProvider";
 
+const getLoginErrorMessage = (error: ApiError) => {
+  const data = error.response?.data as { code?: string; message?: string } | undefined;
+  if (data?.code === "ACCOUNT_CLOSED" && data.message) {
+    return data.message;
+  }
+  return data?.message || error.message || "Something went wrong";
+};
+
 /**
  * Utility function to validate input as either email or phone number
  */
@@ -163,11 +171,7 @@ export const useLoginFormHook = () => {
       dataStore.setActivationStep("prompt");
       dataStore.setActivationChannel(null);
       if (error instanceof ApiError) {
-        dataStore.setErrorMessage(
-          error.response?.data?.message ||
-          error.message ||
-          "Something went wrong",
-        );
+        dataStore.setErrorMessage(getLoginErrorMessage(error));
       }
     },
   });
@@ -194,11 +198,7 @@ export const useLoginFormHook = () => {
     },
     onError: (error) => {
       if (error instanceof ApiError) {
-        dataStore.setErrorMessage(
-          error.response?.data?.message ||
-          error.message ||
-          "Something went wrong",
-        );
+        dataStore.setErrorMessage(getLoginErrorMessage(error));
       }
     },
   });
@@ -265,11 +265,7 @@ export const useLoginFormHook = () => {
     },
     onError: (error) => {
       if (error instanceof ApiError) {
-        dataStore.setErrorMessage(
-          error.response?.data?.message ||
-          error.message ||
-          "Something went wrong",
-        );
+        dataStore.setErrorMessage(getLoginErrorMessage(error));
       } else {
         toast.error(error.message);
       }
@@ -294,11 +290,7 @@ export const useLoginFormHook = () => {
     },
     onError: (error) => {
       if (error instanceof ApiError) {
-        dataStore.setErrorMessage(
-          error.response?.data?.message ||
-          error.message ||
-          "Something went wrong",
-        );
+        dataStore.setErrorMessage(getLoginErrorMessage(error));
       } else {
         toast.error(error.message);
       }
@@ -331,11 +323,7 @@ export const useLoginFormHook = () => {
     },
     onError: (error) => {
       if (error instanceof ApiError) {
-        dataStore.setErrorMessage(
-          error.response?.data?.message ||
-          error.message ||
-          "Something went wrong",
-        );
+        dataStore.setErrorMessage(getLoginErrorMessage(error));
       } else {
         toast.error(error.message);
       }
@@ -371,11 +359,7 @@ export const useLoginFormHook = () => {
     },
     onError: (error) => {
       if (error instanceof ApiError) {
-        dataStore.setErrorMessage(
-          error.response?.data?.message ||
-          error.message ||
-          "Something went wrong",
-        );
+        dataStore.setErrorMessage(getLoginErrorMessage(error));
       }
     },
   });
@@ -409,11 +393,7 @@ export const useLoginFormHook = () => {
     },
     onError: (error) => {
       if (error instanceof ApiError) {
-        dataStore.setErrorMessage(
-          error.response?.data?.message ||
-          error.message ||
-          "Something went wrong",
-        );
+        dataStore.setErrorMessage(getLoginErrorMessage(error));
       }
     },
   });
@@ -440,10 +420,7 @@ export const useLoginFormHook = () => {
     },
     onError: (error) => {
       if (error instanceof ApiError) {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.message ||
-          "Something went wrong";
+        const errorMessage = getLoginErrorMessage(error);
         dataStore.setSuccessMessage("");
         dataStore.setErrorMessage(errorMessage);
         toast.error(errorMessage);

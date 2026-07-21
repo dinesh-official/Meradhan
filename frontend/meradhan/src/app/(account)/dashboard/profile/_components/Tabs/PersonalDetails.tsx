@@ -3,6 +3,7 @@ import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { GetCustomerResponseById } from "@root/apiGateway";
 import { FaCheckSquare } from "react-icons/fa";
 import ProfileContactFields from "../ProfileContactFields";
+import AccountClosureSection from "../AccountClosureSection";
 
 function PersonalDetails({
   profile,
@@ -125,9 +126,9 @@ function FullKycInfo({
         <p className="font-medium text-sm">
           {profile.personalInformation?.dateOfBirth
             ? dateTimeUtils.formatDateTime(
-                profile.personalInformation?.dateOfBirth,
-                "DD MMM YYYY",
-              )
+              profile.personalInformation?.dateOfBirth,
+              "DD MMM YYYY",
+            )
             : "--"}
         </p>
       </DataInfoLabel>
