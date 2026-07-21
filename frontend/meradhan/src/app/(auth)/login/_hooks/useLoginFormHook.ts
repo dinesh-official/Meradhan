@@ -10,8 +10,10 @@ import useAppCookie from "@/hooks/useAppCookie.hook";
 import { getSessionId } from "@/analytics/analytics";
 import { useUserTracking } from "@/analytics/UserTrackingProvider";
 
-const getLoginErrorMessage = (error: ApiError) => {
-  const data = error.response?.data as { code?: string; message?: string } | undefined;
+type LoginApiErrorPayload = { code?: string; message?: string };
+
+const getLoginErrorMessage = (error: ApiError<LoginApiErrorPayload, unknown>) => {
+  const data = error.response?.data;
   if (data?.code === "ACCOUNT_CLOSED" && data.message) {
     return data.message;
   }
