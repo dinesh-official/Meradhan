@@ -4,6 +4,7 @@ import ProfilePage from "./ProfilePage";
 import apiServerCaller from "@/core/connection/apiServerCaller";
 import { cookies } from "next/headers";
 import { getAccountPagesMetaData } from "@/graphql/getAccountPagesMetaData";
+import AccountClosureSection from "./_components/AccountClosureSection";
 
 export const revalidate = 0;
 
@@ -31,6 +32,7 @@ async function page() {
       }
     >
       <ProfilePage profileData={userData.data.responseData} />
+      {/* <AccountClosureSection /> */}
     </AccountViewPort>
   );
 }

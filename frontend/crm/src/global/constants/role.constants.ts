@@ -17,6 +17,7 @@ export const MODULES = [
   "webanalytics",
   "bonds",
   "orders",
+  "service_requests",
 ] as const;
 export type ModuleName = (typeof MODULES)[number];
 
@@ -97,6 +98,9 @@ export const PERMISSIONS: Permission[] = [
   "create:orders",
   "edit:orders",
   "delete:orders",
+
+  "view:service_requests",
+  "edit:service_requests",
 ];
 
 // 6️ Map roles to permissions
@@ -107,7 +111,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
       p !== "delete:user"
   ),
 
-  SUPER_ADMIN: [...PERMISSIONS], // full access including KYC view and customer delete
+  SUPER_ADMIN: [...PERMISSIONS],
 
   SALES: [
     "view:dashboard",
