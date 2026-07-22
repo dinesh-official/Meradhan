@@ -306,6 +306,7 @@ ${getInterestPaymentDatesDisplay()} `,
     [
       "Settlement Date & Time",
       formatPdfSettlementDateTime(
+        // Prefer full NSE payoutTime (DD-MM-YYYY HH:MM:SS), then RFQ settlement date.
         orderData?.metadata?.payoutTime,
         orderData?.metadata?.settlementDateTime,
         orderData?.metadata?.settlementDate,

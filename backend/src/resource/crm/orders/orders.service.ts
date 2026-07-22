@@ -2785,7 +2785,7 @@ export class CrmOrdersService {
           settlementOrderNumber: negotation?.rfqNumber ?? settleOrder?.orderNumber ?? undefined,
           dealDate: dealDateDisplay ?? undefined,
           settlementDate: settlementDateDisplay ?? resolvedSettlementDate,
-          payoutTime: (settleOrder?.payoutTime || settlementDateTimeParam || settleOrder?.modSettleDate) ?? undefined as string | undefined,
+          payoutTime: settleOrder?.payoutTime?.trim() || settlementDateTimeParam || undefined,
           settlementType: rfqDetails?.settlementType ?? 0,
           valueDate: bond.maturityDate
             ? new Date(bond.maturityDate).toISOString()
@@ -3074,7 +3074,7 @@ export class CrmOrdersService {
           settlementOrderNumber: negotation?.rfqNumber ?? settleOrder?.orderNumber ?? undefined,
           dealDate: dealDateDisplay ?? undefined,
           settlementDate: settlementDateDisplay ?? resolvedSettlementDate,
-          payoutTime: settleOrder?.payoutTime || settlementDateTimeParam || settleOrder?.modSettleDate,
+          payoutTime: settleOrder?.payoutTime?.trim() || settlementDateTimeParam || undefined,
           valueDate: bond.maturityDate
             ? new Date(bond.maturityDate).toISOString()
             : undefined,
