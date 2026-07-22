@@ -10,6 +10,64 @@ export const CRM_ORDER_STATUS_VALUES = [
 
 export type CrmOrderStatus = (typeof CRM_ORDER_STATUS_VALUES)[number];
 
+/** Normalized order snapshot from backend `getOrderInfo` / `getOrdersInfo`. */
+export interface CrmOrderInfo {
+  orderDocId: string;
+  orderId: string;
+  dealId: string;
+  orderStatus: string;
+  bond: {
+    name: string;
+    description: string;
+    faceValue: number;
+    isin: string;
+    couponRate: number;
+    couponFrequency: string;
+    allotmentDate: string;
+    maturityDate: string;
+    secured: string;
+    putCall: string;
+  };
+  customer: {
+    name: string;
+    email: string;
+    phone: string;
+    userId: string;
+    userName: string;
+  };
+  pricing: {
+    cleanPrice: number;
+    yieldToMaturity: number;
+    accruedInterest: number;
+    quantum: number;
+    principal: number;
+    is_under_surtpriode: boolean;
+    totalConsiderationAmount: number;
+    stampDuty: number;
+    quantity: number;
+    recordDate: string;
+    interestDays: number;
+    settlementAmount: number;
+  };
+  date: {
+    lastCouponDate: string;
+    nextCouponDate: string;
+    dealDate: string;
+    settlementDate: string;
+    settlementNo: string;
+    cashFlowDate: string[];
+  };
+  payment: {
+    paymentProvider: string;
+    paymentId: string;
+    paymentStatus: string;
+  };
+  rfqNumber: string;
+  /** True when settle_order exists, RFQ master status is T, or negotiation is C/A. */
+  rfqCompleted: boolean;
+  orderDate: string;
+}
+
 export interface CrmOrder {
   id: number;
   orderNumber: string;
@@ -50,6 +108,8 @@ export interface CrmOrder {
   } | null;
   /** Settlement pipeline steps (list view). */
   orderStages?: Pick<CrmOrderStage, "stage" | "status" | "seq">[];
+  /** Normalized display snapshot — prefer this for list columns. */
+  orderInfo?: CrmOrderInfo | null;
 }
 
 export interface GetCrmOrdersResponse {
@@ -233,6 +293,8 @@ export interface CrmOrderDetails {
     createdAt: string;
     updatedAt: string;
   } | null;
+  /** Normalized display snapshot — prefer this for CRM details UI. */
+  orderInfo?: CrmOrderInfo | null;
 }
 
 export interface GetCrmOrderDetailsResponse {

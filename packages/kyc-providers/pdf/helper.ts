@@ -83,6 +83,29 @@ export function formatDate(
   }
 }
 
+/**
+ * Prefer exact RFQ-saved calendar labels (DD-MMM-YYYY). Otherwise format via
+ * formatDate. Empty → "N/A" unless a fallback ISO/ymd is provided.
+ */
+export function formatPdfCalendarDate(
+  preferred?: string | null,
+  fallback?: string | null,
+): string {
+  const raw = String(preferred ?? "").trim();
+  if (/^\d{1,2}-[A-Za-z]{3}-\d{4}$/i.test(raw)) {
+    const m = /^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/i.exec(raw)!;
+    const dd = String(Number(m[1])).padStart(2, "0");
+    const monKey = (m[2] ?? "").toLowerCase();
+    const mon =
+      monKey.charAt(0).toUpperCase() + monKey.slice(1, 3);
+    return `${dd}-${mon}-${m[3]}`;
+  }
+  if (raw) return formatDate(raw, "DD-MMM-YYYY");
+  const fb = String(fallback ?? "").trim();
+  if (fb) return formatDate(fb, "DD-MMM-YYYY");
+  return "N/A";
+}
+
 /** Receipt/deal PDF: show Last IP as DD-MMM-YYYY (DayName); accepts YYYY-MM-DD from calc API. */
 export function formatLastInterestPaymentDateDisplay(raw: string): string {
   const trimmed = raw.trim();

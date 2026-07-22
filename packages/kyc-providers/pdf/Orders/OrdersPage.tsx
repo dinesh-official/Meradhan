@@ -7,6 +7,7 @@ import {
   formatBondSecurityLabel,
   formatDate,
   formatLastInterestPaymentDateDisplay,
+  formatPdfCalendarDate,
   getPdfDearGreeting,
   truncateDecimals,
 } from "../helper";
@@ -61,6 +62,8 @@ interface OrderData {
     accruedInterest?: number;
     /** No. of days for Accrued / Ex Interest */
     accruedInterestDays?: number;
+    /** RFQ master `date` (often DD-MMM-YYYY) — preferred for Deal Date display */
+    dealDate?: string;
     settlementDate?: string;
     payoutTime?: string;
     settlementDateTime?: string;
@@ -239,10 +242,13 @@ export default function OrdersPage({
     ],
     [
       "Date",
-      `Deal Date: ${formatDate(dealDate.toISOString(), "DD-MMM-YYYY")}`,
-      `Settlement Date: ${formatDate(
-        orderData?.metadata?.settlementDate ?? dealDate.toISOString(),
-        "DD-MMM-YYYY",
+      `Deal Date: ${formatPdfCalendarDate(
+        orderData?.metadata?.dealDate,
+        dealDate.toISOString(),
+      )}`,
+      `Settlement Date: ${formatPdfCalendarDate(
+        orderData?.metadata?.settlementDate,
+        dealDate.toISOString(),
       )}`,
     ],
     ["Name of OBPP", "BondNest Capital India Securities Private Limited"],
@@ -298,7 +304,7 @@ ${getInterestPaymentDatesDisplay()}`,
         ? (bond as { putCallOptionDetails?: string }).putCallOptionDetails
         : null) || "N.A / N.A",
     ],
-    ["Principal Amount", `INR ${orderData?.bondDetails?.pricing?.principalAmount}`],
+    ["Principal Amount", `INR ${truncateDecimals(principalAmount, 2, true)}`],
     [
       "Accrued / Ex Interest",
       `${accruedInterest >= 0 ? `INR ${truncateDecimals(accruedInterest, 2, true)}` : `${`INR (${truncateDecimals(accruedInterest, 2, true)})`.replaceAll("-", "")}`}`,
