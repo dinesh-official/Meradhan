@@ -336,13 +336,18 @@ export async function loadInvestorCouponScheduleForPdf(
       const due =
         r.dueDateIst instanceof Date && !Number.isNaN(r.dueDateIst.getTime())
           ? r.dueDateIst
-          : null;
+          : r.dueDate instanceof Date && !Number.isNaN(r.dueDate.getTime())
+            ? r.dueDate
+            : null;
       if (!due) return null;
       const recordDateYmd =
         r.recordDateIst instanceof Date &&
         !Number.isNaN(r.recordDateIst.getTime())
           ? toUtcYmd(r.recordDateIst)
-          : null;
+          : r.recordDate instanceof Date &&
+              !Number.isNaN(r.recordDate.getTime())
+            ? toUtcYmd(r.recordDate)
+            : null;
       const recordDays =
         typeof r.recordDays === "number" && Number.isFinite(r.recordDays)
           ? Math.floor(r.recordDays)

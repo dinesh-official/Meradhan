@@ -43,7 +43,7 @@ import {
   getEmailSalutationFromGender,
   resolveGenderForEmailSalutation,
 } from "@root/schema";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { RfqParticipantInfoDialog } from "@/app/(presentation)/dashboard/rfqs/nse/rfq-participants/_components/RfqParticipantInfoDialog";
@@ -194,6 +194,39 @@ function ddMmmYyyyToPickerValue(input?: string | null): string {
   return `${yyyy}-${String(mm).padStart(2, "0")}-${String(dd).padStart(2, "0")}`;
 }
 
+/**
+ * Last-resort settlement YMD from settle_order pay-in fields only.
+ * Prefer RFQ master `settlementDate` / `dealDate` from the autofill API —
+ * do not use modSettleDate as the primary seed (it can be a delayed settle day).
+ */
+function settlementDateFallbackFromSettleOrder(
+  rfq: Pick<
+    RfqByOrderNumberSettleOrder,
+    "modSettleDate" | "fundsPayinTime" | "secPayinTime" | "payoutTime" | "createdAt"
+  >,
+): string {
+  return (
+    payinDateTimeToPickerValue(rfq.fundsPayinTime ?? null) ||
+    payinDateTimeToPickerValue(rfq.secPayinTime ?? null) ||
+    payinDateTimeToPickerValue(rfq.payoutTime ?? null) ||
+    ddMmmYyyyToPickerValue(rfq.modSettleDate ?? null) ||
+    ddMmmYyyyToPickerValue(rfq.createdAt ?? null) ||
+    ""
+  );
+}
+
+/** Normalize autofill API deal/settlement values to YYYY-MM-DD for the date picker. */
+function toPickerYmd(value: string | null | undefined): string {
+  const raw = String(value ?? "").trim();
+  if (!raw) return "";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  return (
+    ddMmmYyyyToPickerValue(raw) ||
+    payinDateTimeToPickerValue(raw) ||
+    ""
+  );
+}
+
 function payinDateTimeToPickerValue(input?: string | null): string {
   const s = String(input ?? "").trim();
   if (!s) return "";
@@ -319,6 +352,7 @@ function GeneratePdfContent() {
   const [pdfInterestPaymentDates, setPdfInterestPaymentDates] = useState("");
   const [pdfNonAmortizedBond, setPdfNonAmortizedBond] = useState(true);
   const [pdfAmortizedPrincipalPaymentDates, setPdfAmortizedPrincipalPaymentDates] = useState("");
+  const autoAutofillRanForRef = useRef<string | null>(null);
   const ordersApi = new apiGateway.crm.crmOrdersApi(apiClientCaller);
   const customerApi = new apiGateway.crm.customer.CrmCustomerApi(apiClientCaller);
   const participantsApi = new apiGateway.crm.rfq.participants.RfqParticipantsApi(
@@ -570,7 +604,12 @@ function GeneratePdfContent() {
   const effectiveOrderSide: "BUY" | "SELL" =
     metaSide === "BUY" || metaSide === "SELL" ? metaSide : orderSide;
   const transactionLabel = effectiveOrderSide === "SELL" ? "sell" : "buy";
-  const dealDateText = formatDealDateForEmail(rfq?.modSettleDate ?? rfq?.createdAt ?? null);
+  const dealDateText = formatDealDateForEmail(
+    pdfResolvedDealDate ??
+      rfq?.modSettleDate ??
+      rfq?.createdAt ??
+      null,
+  );
 
   const openParticipantInfoDialog = () => {
     if (!linkedParticipantCode) return;
@@ -608,7 +647,9 @@ function GeneratePdfContent() {
 
   useEffect(() => {
     if (!orderNumber) return;
+    autoAutofillRanForRef.current = null;
     setPdfAutofillSettlementDate("");
+    setPdfResolvedDealDate(null);
     setAutofillingPdfOptions(false);
     setPdfAccruedInterestDays("");
     setPdfSettlementNumber("");
@@ -624,61 +665,41 @@ function GeneratePdfContent() {
     if (!pdfOptionsFetched || !orderNumber) return;
     const row = pdfOptionsQuery?.responseData;
     if (!row || row.orderNumber !== orderNumber) return;
-    if (row.accruedInterestDays != null) {
-      setPdfAccruedInterestDays(String(row.accruedInterestDays));
-    }
-    setPdfSettlementNumber(row.settlementNumber ?? "");
-    setPdfSettlementDateTime(row.settlementDateTime ?? "");
-    setPdfLastInterestPaymentDateRaw(row.lastInterestPaymentDateRaw ?? "");
-    setPdfLastInterestPaymentDate(row.lastInterestPaymentDate ?? "");
-    setPdfInterestPaymentDates(interestPaymentDatesToFormText(row.interestPaymentDates));
+    // Keep saved settlement datetime / amortizing flags; coupon + days come from
+    // RFQ autofill (settlement-date dependent) so we don't restore stale values.
+    if (row.settlementDateTime) setPdfSettlementDateTime(row.settlementDateTime);
     setPdfNonAmortizedBond(row.nonAmortizedBond);
     setPdfAmortizedPrincipalPaymentDates(row.amortizedPrincipalPaymentDates ?? "");
   }, [orderNumber, pdfOptionsFetched, pdfOptionsQuery?.responseData]);
 
+  // Seed settlement no from settle_order only. Settlement / deal dates come from
+  // the RFQ master autofill response (not modSettleDate).
   useEffect(() => {
-    if (pdfOptionsQuery?.responseData) return;
-    if (rfq?.settlementNo == null || pdfSettlementNumber !== "") return;
-    setPdfSettlementNumber(String(rfq.settlementNo));
-  }, [rfq?.settlementNo, pdfSettlementNumber, pdfOptionsQuery?.responseData]);
+    if (!rfq) return;
+    if (rfq.settlementNo != null) {
+      setPdfSettlementNumber((prev) =>
+        prev.trim() !== "" ? prev : String(rfq.settlementNo),
+      );
+    }
+  }, [rfq]);
 
-  useEffect(() => {
-    if (!orderNumber || pdfAutofillSettlementDate) return;
-    // Prefer pricing-helper settlement (via autofill) over NSE modSettleDate guesses.
-    void (async () => {
-      try {
-        const resp = await apiClientCaller.post<{
-          responseData?: {
-            settlementDate?: string;
-            dealDate?: string | null;
-          };
-        }>(`/crm/orders/receipt-pdf-options/${orderNumber}/autofill`, {
-          settlementDate: null,
-        });
-        const d = resp.data?.responseData;
-        if (d?.settlementDate != null && String(d.settlementDate).trim() !== "") {
-          setPdfAutofillSettlementDate(String(d.settlementDate).trim());
-        }
-        if (d?.dealDate != null && String(d.dealDate).trim() !== "") {
-          setPdfResolvedDealDate(String(d.dealDate).trim());
-        }
-      } catch {
-        // Fallback: guess from settle-order pay-in / mod settle fields.
-        if (!rfq) return;
-        const guess =
-          ddMmmYyyyToPickerValue(rfq.modSettleDate ?? null) ||
-          payinDateTimeToPickerValue(rfq.fundsPayinTime ?? null) ||
-          payinDateTimeToPickerValue(rfq.secPayinTime ?? null) ||
-          payinDateTimeToPickerValue(rfq.payoutTime ?? null) ||
-          ddMmmYyyyToPickerValue(rfq.createdAt ?? null);
-        if (guess) setPdfAutofillSettlementDate(guess);
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orderNumber, rfq, pdfAutofillSettlementDate]);
-
-  const autofillReceiptPdfOptions = async () => {
+  const autofillReceiptPdfOptions = async (options?: {
+    settlementDate?: string | null;
+    /** When true, omit settlementDate so the backend uses saved RFQ master dates. */
+    preferRfqMasterDates?: boolean;
+    silent?: boolean;
+  }) => {
     if (!orderNumber) return;
+    const preferRfqMaster = options?.preferRfqMasterDates === true;
+    const settlementDate = preferRfqMaster
+      ? ""
+      : (options?.settlementDate != null
+          ? String(options.settlementDate).trim()
+          : "") ||
+        pdfAutofillSettlementDate.trim() ||
+        "";
+    const silent = options?.silent === true;
+
     setAutofillingPdfOptions(true);
     try {
       const resp = await apiClientCaller.post<{
@@ -690,26 +711,43 @@ function GeneratePdfContent() {
           interestPaymentDates: string | string[] | null;
           settlementDate: string;
           dealDate: string | null;
+          settlementDateTime?: string | null;
         };
         message?: string;
       }>(
         `/crm/orders/receipt-pdf-options/${orderNumber}/autofill`,
-        { settlementDate: pdfAutofillSettlementDate || null },
+        // null → backend resolves settlement + deal from saved RFQ master response
+        { settlementDate: settlementDate || null },
       );
 
       const d = resp.data?.responseData;
       if (!d) {
-        toast.error(resp.data?.message || "Auto-fill failed.");
+        if (!silent) toast.error(resp.data?.message || "Auto-fill failed.");
         return;
       }
       setPdfAccruedInterestDays(String(d.accruedInterestDays ?? ""));
-      if (d.settlementDate != null && String(d.settlementDate).trim() !== "") {
-        setPdfAutofillSettlementDate(String(d.settlementDate).trim());
+      const settlementFromApi = toPickerYmd(d.settlementDate);
+      if (settlementFromApi) {
+        setPdfAutofillSettlementDate(settlementFromApi);
+      } else if (settlementDate) {
+        setPdfAutofillSettlementDate(settlementDate);
+      } else if (rfq) {
+        const fallback = settlementDateFallbackFromSettleOrder(rfq);
+        if (fallback) setPdfAutofillSettlementDate(fallback);
       }
       if (d.dealDate != null && String(d.dealDate).trim() !== "") {
-        setPdfResolvedDealDate(String(d.dealDate).trim());
+        setPdfResolvedDealDate(
+          formatDealDateForEmail(String(d.dealDate).trim()) ||
+            String(d.dealDate).trim(),
+        );
       }
       if (d.settlementNumber != null) setPdfSettlementNumber(String(d.settlementNumber));
+      if (
+        d.settlementDateTime != null &&
+        String(d.settlementDateTime).trim() !== ""
+      ) {
+        setPdfSettlementDateTime(String(d.settlementDateTime).trim());
+      }
       const rawLast = d.lastInterestPaymentDateRaw;
       const rawLastTrimmed =
         rawLast != null && String(rawLast).trim() !== "" ? String(rawLast).trim() : "";
@@ -737,13 +775,26 @@ function GeneratePdfContent() {
         setPdfLastInterestPaymentDate(String(d.lastInterestPaymentDate).trim());
       }
       setPdfInterestPaymentDates(interestPaymentDatesToFormText(d.interestPaymentDates));
-      toast.success("Receipt PDF options auto-filled.");
+      if (!silent) toast.success("Receipt PDF options auto-filled.");
     } catch (err) {
-      toast.error(getApiErrorMessage(err, "Auto-fill failed"));
+      if (!silent) toast.error(getApiErrorMessage(err, "Auto-fill failed"));
     } finally {
       setAutofillingPdfOptions(false);
     }
   };
+
+  // Once RFQ is loaded (and owner assigned so the PDF section is shown), autofill
+  // from saved RFQ master settlement + deal dates — not delayed modSettleDate.
+  useEffect(() => {
+    if (!orderNumber || !rfq || !hasAssignedOwner || !pdfOptionsFetched) return;
+    if (autoAutofillRanForRef.current === orderNumber) return;
+    autoAutofillRanForRef.current = orderNumber;
+    void autofillReceiptPdfOptions({
+      preferRfqMasterDates: true,
+      silent: true,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orderNumber, rfq, hasAssignedOwner, pdfOptionsFetched]);
 
   useEffect(() => {
     if (emailTo) return;
@@ -1254,29 +1305,36 @@ BSE Member ID: 6963`
         {hasAssignedOwner && (
           <Section title="Receipt PDF options (fill before generating PDF)">
             <p className="text-muted-foreground text-sm mb-3">
-              Accrued / Ex Interest is taken from settlement (negotiations) data. Values you use are saved for this order number when you download or email a PDF, and will auto-fill next time.
+              Values are auto-filled from the saved RFQ response (deal date + settlement date) when this page opens. You can still edit fields before download or email.
             </p>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2 sm:col-span-2">
-                <Label htmlFor="pdf-autofill-settlement-date">Settlement date (for auto-fill)</Label>
+                <Label htmlFor="pdf-autofill-settlement-date">Settlement date</Label>
                 <div className="flex flex-col sm:flex-row gap-2">
                   <Input
                     id="pdf-autofill-settlement-date"
                     type="date"
                     value={pdfAutofillSettlementDate}
                     onChange={(e) => setPdfAutofillSettlementDate(e.target.value)}
+                    disabled={autofillingPdfOptions}
                   />
                   <Button
                     type="button"
                     variant="outline"
                     disabled={autofillingPdfOptions || downloadingOrderPdf || downloadingDealPdf || !orderNumber}
-                    onClick={() => void autofillReceiptPdfOptions()}
+                    onClick={() =>
+                      void autofillReceiptPdfOptions({
+                        // Empty date → re-resolve from saved RFQ master response
+                        settlementDate: pdfAutofillSettlementDate.trim() || null,
+                        preferRfqMasterDates: !pdfAutofillSettlementDate.trim(),
+                      })
+                    }
                   >
-                    {autofillingPdfOptions ? "Auto-filling..." : "Auto-fill"}
+                    {autofillingPdfOptions ? "Auto-filling..." : "Refresh auto-fill"}
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Settlement & deal dates are calculated from trade time (market hours & holidays). Auto-fill also populates No. of Days, Settlement No., and coupon fields.
+                  Taken from the saved RFQ response settlement date (not delayed mod settle). Change the date and refresh if you need a different settlement.
                 </p>
               </div>
               {pdfResolvedDealDate ? (
@@ -2091,7 +2149,10 @@ BSE Member ID: 6963`
               <div><span className="font-medium text-foreground">ISIN:</span> {rfq?.symbol ?? "—"}</div>
               <div><span className="font-medium text-foreground">Bond:</span> {securityName}</div>
               <div><span className="font-medium text-foreground">Side:</span> {effectiveOrderSide}</div>
-              <div><span className="font-medium text-foreground">Settlement date:</span> {rfq?.modSettleDate ?? "—"}</div>
+              <div><span className="font-medium text-foreground">Settlement date:</span> {pdfAutofillSettlementDate || rfq?.modSettleDate || "—"}</div>
+              {pdfResolvedDealDate ? (
+                <div><span className="font-medium text-foreground">Deal date:</span> {pdfResolvedDealDate}</div>
+              ) : null}
             </div>
           </div>
 
