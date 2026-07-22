@@ -106,6 +106,131 @@ export function formatPdfCalendarDate(
   return "N/A";
 }
 
+const MONTH_SHORT_TO_INDEX: Record<string, number> = {
+  jan: 0,
+  feb: 1,
+  mar: 2,
+  apr: 3,
+  may: 4,
+  jun: 5,
+  jul: 6,
+  aug: 7,
+  sep: 8,
+  oct: 9,
+  nov: 10,
+  dec: 11,
+};
+
+/**
+ * Settlement Date & Time for deal/receipt PDFs:
+ * - date always as DD-MMM-YYYY
+ * - append HH:MM:SS only when a real time is present
+ */
+export function formatPdfSettlementDateTime(
+  ...candidates: Array<string | null | undefined>
+): string {
+  const monthNamesShort = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
+  const formatParts = (
+    day: number,
+    monthIndex: number,
+    year: number,
+    hh?: number,
+    mm?: number,
+    ss?: number,
+    hasTime?: boolean,
+  ): string => {
+    const datePart = `${String(day).padStart(2, "0")}-${monthNamesShort[monthIndex]}-${year}`;
+    if (!hasTime) return datePart;
+    const timePart = `${String(hh ?? 0).padStart(2, "0")}:${String(mm ?? 0).padStart(2, "0")}:${String(ss ?? 0).padStart(2, "0")}`;
+    return `${datePart} ${timePart}`;
+  };
+
+  for (const candidate of candidates) {
+    const raw = String(candidate ?? "").trim();
+    if (!raw) continue;
+
+    // "23-Jul-2026 17:30:00" or "23-Jul-2026"
+    const ddMmm = /^(\d{1,2})-([A-Za-z]{3})-(\d{4})(?:[ T]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/i.exec(
+      raw,
+    );
+    if (ddMmm) {
+      const day = Number(ddMmm[1]);
+      const monKey = (ddMmm[2] ?? "").slice(0, 3).toLowerCase();
+      const monthIndex = MONTH_SHORT_TO_INDEX[monKey];
+      const year = Number(ddMmm[3]);
+      if (monthIndex == null || !Number.isFinite(day) || !Number.isFinite(year)) {
+        continue;
+      }
+      const hasTime = ddMmm[4] != null;
+      return formatParts(
+        day,
+        monthIndex,
+        year,
+        Number(ddMmm[4] ?? 0),
+        Number(ddMmm[5] ?? 0),
+        Number(ddMmm[6] ?? 0),
+        hasTime,
+      );
+    }
+
+    // YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS...
+    const iso = /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?/.exec(raw);
+    if (iso) {
+      const year = Number(iso[1]);
+      const monthIndex = Number(iso[2]) - 1;
+      const day = Number(iso[3]);
+      const hasTime = iso[4] != null;
+      if (
+        !Number.isFinite(year) ||
+        monthIndex < 0 ||
+        monthIndex > 11 ||
+        !Number.isFinite(day)
+      ) {
+        continue;
+      }
+      return formatParts(
+        day,
+        monthIndex,
+        year,
+        Number(iso[4] ?? 0),
+        Number(iso[5] ?? 0),
+        Number(iso[6] ?? 0),
+        hasTime,
+      );
+    }
+
+    const parsed = new Date(raw);
+    if (!Number.isNaN(parsed.getTime())) {
+      const hasTime = /[T ]\d{1,2}:\d{2}/.test(raw);
+      return formatParts(
+        parsed.getDate(),
+        parsed.getMonth(),
+        parsed.getFullYear(),
+        parsed.getHours(),
+        parsed.getMinutes(),
+        parsed.getSeconds(),
+        hasTime,
+      );
+    }
+  }
+
+  return "N/A";
+}
+
 /** Receipt/deal PDF: show Last IP as DD-MMM-YYYY (DayName); accepts YYYY-MM-DD from calc API. */
 export function formatLastInterestPaymentDateDisplay(raw: string): string {
   const trimmed = raw.trim();

@@ -8,6 +8,7 @@ import {
   formatDate,
   formatLastInterestPaymentDateDisplay,
   formatPdfCalendarDate,
+  formatPdfSettlementDateTime,
   getPdfDearGreeting,
   truncateDecimals,
 } from "../helper";
@@ -304,7 +305,11 @@ ${getInterestPaymentDatesDisplay()} `,
     ["Exchange Order ID", orderData?.metadata?.rfqNumber || "N.A"],
     [
       "Settlement Date & Time",
-      orderData?.metadata?.payoutTime ? orderData?.metadata?.payoutTime : orderData?.metadata?.settlementDate ? formatDate(orderData?.metadata?.settlementDate, "DD-MMM-YYYY") : "N/A"
+      formatPdfSettlementDateTime(
+        orderData?.metadata?.payoutTime,
+        orderData?.metadata?.settlementDateTime,
+        orderData?.metadata?.settlementDate,
+      ),
     ],
   ]
 
