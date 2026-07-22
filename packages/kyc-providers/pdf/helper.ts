@@ -83,6 +83,154 @@ export function formatDate(
   }
 }
 
+/**
+ * Prefer exact RFQ-saved calendar labels (DD-MMM-YYYY). Otherwise format via
+ * formatDate. Empty → "N/A" unless a fallback ISO/ymd is provided.
+ */
+export function formatPdfCalendarDate(
+  preferred?: string | null,
+  fallback?: string | null,
+): string {
+  const raw = String(preferred ?? "").trim();
+  if (/^\d{1,2}-[A-Za-z]{3}-\d{4}$/i.test(raw)) {
+    const m = /^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/i.exec(raw)!;
+    const dd = String(Number(m[1])).padStart(2, "0");
+    const monKey = (m[2] ?? "").toLowerCase();
+    const mon =
+      monKey.charAt(0).toUpperCase() + monKey.slice(1, 3);
+    return `${dd}-${mon}-${m[3]}`;
+  }
+  if (raw) return formatDate(raw, "DD-MMM-YYYY");
+  const fb = String(fallback ?? "").trim();
+  if (fb) return formatDate(fb, "DD-MMM-YYYY");
+  return "N/A";
+}
+
+const MONTH_SHORT_TO_INDEX: Record<string, number> = {
+  jan: 0,
+  feb: 1,
+  mar: 2,
+  apr: 3,
+  may: 4,
+  jun: 5,
+  jul: 6,
+  aug: 7,
+  sep: 8,
+  oct: 9,
+  nov: 10,
+  dec: 11,
+};
+
+/**
+ * Settlement Date & Time for deal/receipt PDFs:
+ * - date always as DD-MMM-YYYY
+ * - append HH:MM:SS only when a real time is present
+ */
+export function formatPdfSettlementDateTime(
+  ...candidates: Array<string | null | undefined>
+): string {
+  const monthNamesShort = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
+  const formatParts = (
+    day: number,
+    monthIndex: number,
+    year: number,
+    hh?: number,
+    mm?: number,
+    ss?: number,
+    hasTime?: boolean,
+  ): string => {
+    const datePart = `${String(day).padStart(2, "0")}-${monthNamesShort[monthIndex]}-${year}`;
+    if (!hasTime) return datePart;
+    const timePart = `${String(hh ?? 0).padStart(2, "0")}:${String(mm ?? 0).padStart(2, "0")}:${String(ss ?? 0).padStart(2, "0")}`;
+    return `${datePart} ${timePart}`;
+  };
+
+  for (const candidate of candidates) {
+    const raw = String(candidate ?? "").trim();
+    if (!raw) continue;
+
+    // "23-Jul-2026 17:30:00" or "23-Jul-2026"
+    const ddMmm = /^(\d{1,2})-([A-Za-z]{3})-(\d{4})(?:[ T]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/i.exec(
+      raw,
+    );
+    if (ddMmm) {
+      const day = Number(ddMmm[1]);
+      const monKey = (ddMmm[2] ?? "").slice(0, 3).toLowerCase();
+      const monthIndex = MONTH_SHORT_TO_INDEX[monKey];
+      const year = Number(ddMmm[3]);
+      if (monthIndex == null || !Number.isFinite(day) || !Number.isFinite(year)) {
+        continue;
+      }
+      const hasTime = ddMmm[4] != null;
+      return formatParts(
+        day,
+        monthIndex,
+        year,
+        Number(ddMmm[4] ?? 0),
+        Number(ddMmm[5] ?? 0),
+        Number(ddMmm[6] ?? 0),
+        hasTime,
+      );
+    }
+
+    // YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS...
+    const iso = /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?/.exec(raw);
+    if (iso) {
+      const year = Number(iso[1]);
+      const monthIndex = Number(iso[2]) - 1;
+      const day = Number(iso[3]);
+      const hasTime = iso[4] != null;
+      if (
+        !Number.isFinite(year) ||
+        monthIndex < 0 ||
+        monthIndex > 11 ||
+        !Number.isFinite(day)
+      ) {
+        continue;
+      }
+      return formatParts(
+        day,
+        monthIndex,
+        year,
+        Number(iso[4] ?? 0),
+        Number(iso[5] ?? 0),
+        Number(iso[6] ?? 0),
+        hasTime,
+      );
+    }
+
+    const parsed = new Date(raw);
+    if (!Number.isNaN(parsed.getTime())) {
+      const hasTime = /[T ]\d{1,2}:\d{2}/.test(raw);
+      return formatParts(
+        parsed.getDate(),
+        parsed.getMonth(),
+        parsed.getFullYear(),
+        parsed.getHours(),
+        parsed.getMinutes(),
+        parsed.getSeconds(),
+        hasTime,
+      );
+    }
+  }
+
+  return "N/A";
+}
+
 /** Receipt/deal PDF: show Last IP as DD-MMM-YYYY (DayName); accepts YYYY-MM-DD from calc API. */
 export function formatLastInterestPaymentDateDisplay(raw: string): string {
   const trimmed = raw.trim();
