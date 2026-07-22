@@ -31,7 +31,7 @@ export function useServiceRequestsApiHook() {
             ? undefined
             : (filters.status as "PENDING" | "DONE" | "REJECTED"),
       });
-      return res.data.responseData;
+      return res.responseData;
     },
   });
 
