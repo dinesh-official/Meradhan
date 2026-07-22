@@ -48,7 +48,7 @@ export class CrmServiceRequestService {
       filters.customerProfileDataModel = { isDeleted: false };
     }
 
-    const total = await this.repo.count({ where: filters });
+    const total = await this.repo.count(filters);
     const rows = await this.repo.findMany({
       where: filters,
       skip,
