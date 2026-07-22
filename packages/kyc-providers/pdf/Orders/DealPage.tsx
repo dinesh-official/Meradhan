@@ -7,6 +7,8 @@ import {
   formatBondSecurityLabel,
   formatDate,
   formatLastInterestPaymentDateDisplay,
+  formatPdfCalendarDate,
+  formatPdfSettlementDateTime,
   getPdfDearGreeting,
   truncateDecimals,
 } from "../helper";
@@ -257,8 +259,13 @@ ${getInterestPaymentDatesDisplay()} `,
     ],
     [
       "Date",
-      `Deal Date: ${formatDate(orderDate?.toISOString(), "DD-MMM-YYYY")} `,
-      `Settlement Date: ${orderData?.metadata?.settlementDate ? formatDate(orderData.metadata.settlementDate, "DD-MMM-YYYY") : "N/A"} `,
+      `Deal Date: ${formatPdfCalendarDate(
+        orderData?.metadata?.dealDate,
+        orderDate?.toISOString(),
+      )} `,
+      `Settlement Date: ${formatPdfCalendarDate(
+        orderData?.metadata?.settlementDate,
+      )} `,
     ],
     ["Principal Amount", `INR ${truncateDecimals(totalConsideration - accruedInterest, 2, true)}`],
     [
@@ -298,7 +305,11 @@ ${getInterestPaymentDatesDisplay()} `,
     ["Exchange Order ID", orderData?.metadata?.rfqNumber || "N.A"],
     [
       "Settlement Date & Time",
-      orderData?.metadata?.payoutTime ? orderData?.metadata?.payoutTime : orderData?.metadata?.settlementDate ? formatDate(orderData?.metadata?.settlementDate, "DD-MMM-YYYY") : "N/A"
+      formatPdfSettlementDateTime(
+        orderData?.metadata?.payoutTime,
+        orderData?.metadata?.settlementDateTime,
+        orderData?.metadata?.settlementDate,
+      ),
     ],
   ]
 

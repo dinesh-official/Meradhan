@@ -14,19 +14,40 @@ export const ORDER_STATUS_CONFIG: Record<
   CrmOrderStatus,
   { title: string; badgeClass: string }
 > = {
-  PENDING: { title: "Pending", badgeClass: "bg-orange-100 text-orange-800" },
-  IN_PROGRESS: { title: "In progress", badgeClass: "bg-blue-100 text-blue-800" },
-  APPLIED: { title: "In progress", badgeClass: "bg-blue-100 text-blue-800" },
-  SETTLED: { title: "Settled", badgeClass: "bg-green-100 text-green-800" },
-  REJECTED: { title: "Rejected", badgeClass: "bg-red-100 text-red-800" },
-  EXPIRED: { title: "Expired", badgeClass: "bg-gray-200 text-gray-700" },
-  CANCELLED: { title: "Cancelled", badgeClass: "bg-gray-200 text-gray-700" },
+  PENDING: {
+    title: "Pending",
+    badgeClass: "border border-amber-200 bg-amber-50 text-amber-700",
+  },
+  IN_PROGRESS: {
+    title: "In progress",
+    badgeClass: "border border-blue-200 bg-blue-50 text-blue-700",
+  },
+  APPLIED: {
+    title: "In progress",
+    badgeClass: "border border-blue-200 bg-blue-50 text-blue-700",
+  },
+  SETTLED: {
+    title: "Settled",
+    badgeClass: "border border-emerald-200 bg-emerald-50 text-emerald-700",
+  },
+  REJECTED: {
+    title: "Rejected",
+    badgeClass: "border border-rose-200 bg-rose-50 text-rose-700",
+  },
+  EXPIRED: {
+    title: "Expired",
+    badgeClass: "border border-slate-200 bg-slate-100 text-slate-700",
+  },
+  CANCELLED: {
+    title: "Cancelled",
+    badgeClass: "border border-slate-200 bg-slate-100 text-slate-700",
+  },
 };
 
 /** Unpaid / abandoned checkout — not a real pending lifecycle state. */
 const NOT_COMPLETED_DISPLAY = {
   title: "Not completed",
-  badgeClass: "bg-slate-100 text-slate-700",
+  badgeClass: "border border-slate-200 bg-slate-100 text-slate-700",
 } as const;
 
 const PAYMENT_STATUS_LABELS: Record<string, string> = {
@@ -97,7 +118,7 @@ export function getCrmOrderStatusDisplay(
     return { title: fromConfig.title, badgeClass: fromConfig.badgeClass };
   }
 
-  return { title: status, badgeClass: "bg-gray-100 text-gray-800" };
+  return { title: status, badgeClass: "border border-slate-200 bg-slate-50 text-slate-600" };
 }
 
 export function getOrderStatusLabel(

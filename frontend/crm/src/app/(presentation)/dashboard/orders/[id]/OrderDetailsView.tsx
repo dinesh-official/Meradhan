@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import apiGateway from "@root/apiGateway";
@@ -51,7 +51,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
-import LabelView from "@/global/elements/wrapper/LabelView";
 import {
   Dialog,
   DialogContent,
@@ -119,6 +118,53 @@ const getBondDetailNumber = (
   const parsed = Number(value);
   return isNaN(parsed) ? undefined : parsed;
 };
+
+function DetailCell({
+  label,
+  children,
+  className,
+  mono,
+}: {
+  label: string;
+  children: ReactNode;
+  className?: string;
+  mono?: boolean;
+}) {
+  return (
+    <div
+      className={`rounded-md border border-gray-100 bg-gray-50/40 px-3 py-2.5 ${className ?? ""}`}
+    >
+      <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+        {label}
+      </p>
+      <div
+        className={`mt-1 text-sm font-medium text-gray-900 ${mono ? "font-mono" : ""
+          }`}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function SummaryRow({
+  label,
+  children,
+  muted,
+}: {
+  label: string;
+  children: ReactNode;
+  muted?: boolean;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-3 py-2.5 text-sm">
+      <span className={muted ? "text-gray-400" : "text-gray-500"}>{label}</span>
+      <span className="shrink-0 text-right font-medium tabular-nums text-gray-800">
+        {children}
+      </span>
+    </div>
+  );
+}
 
 function formatBusinessDateLabel(value: unknown): string {
   if (value == null || String(value).trim() === "") return "—";
@@ -323,6 +369,7 @@ function OrderDetailsView() {
   });
 
   const order = data?.responseData;
+  const orderInfo = order?.orderInfo ?? null;
 
   const pipelineStages = Array.isArray(order?.orderStages)
     ? [...order.orderStages].sort((a, b) => a.seq - b.seq)
@@ -375,19 +422,31 @@ function OrderDetailsView() {
 
   const orderMetadata = order?.metadata as Record<string, unknown> | undefined;
   const defaultSettlementNumber =
-    orderMetadata?.settlementNumber != null
+    orderInfo?.date.settlementNo ||
+    (orderMetadata?.settlementNumber != null
       ? String(orderMetadata.settlementNumber)
       : orderMetadata?.settlementNo != null
         ? String(orderMetadata.settlementNo)
-        : null;
+        : null);
   const metadataSettlement =
-    orderMetadata?.settlementDate != null ? String(orderMetadata.settlementDate) : null;
+    orderInfo?.date.settlementDate ||
+    (orderMetadata?.settlementDate != null ? String(orderMetadata.settlementDate) : null);
   const defaultAutofillSettlementDate =
     payinDateTimeToPickerValue(metadataSettlement) ||
     payinDateTimeToPickerValue(order?.createdAt ?? null);
 
-  const dealDateLabel = formatBusinessDateLabel(orderMetadata?.dealDate);
-  const settlementDateLabel = formatBusinessDateLabel(orderMetadata?.settlementDate);
+  const dealDateLabel = orderInfo?.date.dealDate
+    ? formatBusinessDateLabel(orderInfo.date.dealDate)
+    : formatBusinessDateLabel(orderMetadata?.dealDate);
+  const settlementDateLabel = orderInfo?.date.settlementDate
+    ? formatBusinessDateLabel(orderInfo.date.settlementDate)
+    : formatBusinessDateLabel(orderMetadata?.settlementDate);
+  const lastCouponDateLabel = orderInfo?.date.lastCouponDate
+    ? formatBusinessDateLabel(orderInfo.date.lastCouponDate)
+    : "—";
+  const nextCouponDateLabel = orderInfo?.date.nextCouponDate
+    ? formatBusinessDateLabel(orderInfo.date.nextCouponDate)
+    : "—";
 
   const orderReceiptEmailSentAtRaw =
     typeof orderMetadata?.orderReceiptEmailSentAt === "string"
@@ -403,30 +462,29 @@ function OrderDetailsView() {
     orderReceiptEmailSentAtRaw !== "" || orderReceiptEmailSentFromLogs;
   const orderReceiptEmailSentAtLabel = orderReceiptEmailSentAtRaw
     ? dateTimeUtils.formatDateTime(
-        orderReceiptEmailSentAtRaw,
-        "DD MMM YYYY hh:mm AA",
-      )
+      orderReceiptEmailSentAtRaw,
+      "DD MMM YYYY hh:mm AA",
+    )
     : orderReceiptEmailSentFromLogs
       ? (() => {
-          const log = order?.settlementAutomationLogs?.find(
-            (l) =>
-              l.step === "SEND_ORDER_RECEIPT_PDF_EMAIL" &&
-              l.status === "SUCCESS",
-          );
-          return log?.completedAt || log?.createdAt
-            ? dateTimeUtils.formatDateTime(
-                String(log.completedAt ?? log.createdAt),
-                "DD MMM YYYY hh:mm AA",
-              )
-            : null;
-        })()
+        const log = order?.settlementAutomationLogs?.find(
+          (l) =>
+            l.step === "SEND_ORDER_RECEIPT_PDF_EMAIL" &&
+            l.status === "SUCCESS",
+        );
+        return log?.completedAt || log?.createdAt
+          ? dateTimeUtils.formatDateTime(
+            String(log.completedAt ?? log.createdAt),
+            "DD MMM YYYY hh:mm AA",
+          )
+          : null;
+      })()
       : null;
-  const orderDateLabel =
-    dealDateLabel !== "—"
-      ? dealDateLabel
-      : order?.createdAt
-        ? dateTimeUtils.formatDateTime(order.createdAt, "DD MMM YYYY")
-        : "—";
+  const orderDateLabel = orderInfo?.orderDate
+    ? formatBusinessDateLabel(orderInfo.orderDate)
+    : order?.createdAt
+      ? dateTimeUtils.formatDateTime(order.createdAt, "DD MMM YYYY")
+      : "—";
 
   if (isLoading) {
     return (
@@ -450,7 +508,7 @@ function OrderDetailsView() {
     );
   }
 
-  // Bond order pricing snapshot captured at checkout (`bondDetails.pricing`).
+  // Prefer normalized `orderInfo`; fall back to bondDetails.pricing snapshot.
   const orderPricing = (order.bondDetails as Record<string, unknown> | undefined)
     ?.pricing as Record<string, unknown> | undefined;
 
@@ -461,9 +519,6 @@ function OrderDetailsView() {
     return Number.isFinite(n) ? n : undefined;
   };
 
-  // Raw snapshot value (string | number). Passing the raw decimal string to the
-  // display formatter preserves every decimal — `Number()` conversion (and the
-  // `Decimal(15,4)` DB column on `order.unitPrice`) would tweak/truncate them.
   const pricingRaw = (key: string): string | number | undefined => {
     const v = orderPricing?.[key];
     if (typeof v === "number" || typeof v === "string") return v;
@@ -473,26 +528,42 @@ function OrderDetailsView() {
   const formatInrAmount = (n: number | undefined | null): string =>
     formatInrMoneyDisplay(n);
 
-  const cleanPriceValue = pricingNumber("cleanPrice");
-  // Full-precision clean price for display: prefer the checkout snapshot (raw,
-  // untruncated) over the DB `order.unitPrice`, which is rounded to 4 decimals.
-  const unitPriceDisplaySource = pricingRaw("cleanPrice") ?? order.unitPrice;
-  const principalAmountValue = pricingNumber("principalAmount");
-  const accruedInterestValue = pricingNumber("accruedInterest");
-  const totalConsiderationValue = pricingNumber("totalConsideration");
-  const pricingStampDutyValue = pricingNumber("stampDuty");
-  const accrualDaysValue = pricingNumber("noOfAccrualDays");
-  const settlementAmountValue = pricingNumber("settlementAmount");
-  // Offered / sell yield from checkout snapshot (`pricing.yield`), then bondDetails.yield.
-  const yieldValue =
-    pricingNumber("yield") ??
-    getBondDetailNumber(
-      (order.bondDetails as Record<string, unknown>) ?? {},
-      "yield",
-    );
+  const cleanPriceValue = orderInfo
+    ? orderInfo.pricing.cleanPrice
+    : pricingNumber("cleanPrice");
+  const unitPriceDisplaySource = orderInfo
+    ? orderInfo.pricing.cleanPrice
+    : (pricingRaw("cleanPrice") ?? order.unitPrice);
+  const principalAmountValue = orderInfo
+    ? orderInfo.pricing.principal
+    : pricingNumber("principalAmount");
+  const accruedInterestValue = orderInfo
+    ? orderInfo.pricing.accruedInterest
+    : pricingNumber("accruedInterest");
+  const totalConsiderationValue = orderInfo
+    ? orderInfo.pricing.totalConsiderationAmount
+    : pricingNumber("totalConsideration");
+  const pricingStampDutyValue = orderInfo
+    ? orderInfo.pricing.stampDuty
+    : pricingNumber("stampDuty");
+  const settlementAmountValue = orderInfo
+    ? orderInfo.pricing.settlementAmount
+    : pricingNumber("settlementAmount");
+  const quantumValue = orderInfo
+    ? orderInfo.pricing.quantum
+    : pricingNumber("quantum");
+  const yieldValue = orderInfo
+    ? orderInfo.pricing.yieldToMaturity
+    : (pricingNumber("yield") ??
+      getBondDetailNumber(
+        (order.bondDetails as Record<string, unknown>) ?? {},
+        "yield",
+      ));
+  const quantityDisplay = orderInfo?.pricing.quantity ?? order.quantity;
 
-  const hasPricingSnapshot =
-    orderPricing != null &&
+  const hasPricingSnapshot = orderInfo
+    ? true
+    : orderPricing != null &&
     [
       cleanPriceValue,
       principalAmountValue,
@@ -503,9 +574,71 @@ function OrderDetailsView() {
     ].some((v) => v != null);
 
   const stampDutyDisplay =
-    pricingStampDutyValue ?? parseFloat(order.stampDuty);
+    orderInfo?.pricing.stampDuty ??
+    pricingStampDutyValue ??
+    parseFloat(order.stampDuty);
   const settlementTotalDisplay =
-    settlementAmountValue ?? parseFloat(order.totalAmount);
+    orderInfo?.pricing.settlementAmount ??
+    settlementAmountValue ??
+    parseFloat(order.totalAmount);
+
+  const customerDisplayName =
+    orderInfo?.customer.name ||
+    (order.customerProfile
+      ? [
+        order.customerProfile.firstName,
+        order.customerProfile.middleName,
+        order.customerProfile.lastName,
+      ]
+        .map((p) => (typeof p === "string" ? p.trim() : ""))
+        .filter(Boolean)
+        .join(" ")
+      : null) ||
+    order.rfqParticipantInfo?.nameOverride?.trim() ||
+    order.linkedRfqParticipantCode ||
+    null;
+  const customerInitial = (customerDisplayName || "C")
+    .trim()
+    .charAt(0)
+    .toUpperCase();
+  const isMeradhanCustomer = !!(
+    order.customerProfile || orderInfo?.customer.name
+  );
+  const customerEmail =
+    orderInfo?.customer.email ||
+    order.customerProfile?.emailAddress ||
+    null;
+  const customerPhone =
+    orderInfo?.customer.phone || order.customerProfile?.phoneNo || null;
+  const customerUserName =
+    orderInfo?.customer.userName || order.customerProfile?.userName || null;
+  const customerId =
+    orderInfo?.customer.userId || order.customerProfile?.id || null;
+  const paymentProviderDisplay =
+    orderInfo?.payment.paymentProvider || order.paymentProvider || null;
+  const paymentStatusDisplay =
+    orderInfo?.payment.paymentStatus || order.paymentStatus || null;
+  const paymentIdDisplay =
+    orderInfo?.payment.paymentId || order.paymentId || null;
+  const isCustomPaymentProvider =
+    String(paymentProviderDisplay ?? order.paymentProvider ?? "")
+      .trim()
+      .toUpperCase() === "CUSTOM";
+  const linkedRfqNumber =
+    orderInfo?.rfqNumber?.trim() ||
+    order.reqOrderNumber?.trim() ||
+    (typeof order.metadata?.rfqNumber === "string"
+      ? order.metadata.rfqNumber.trim()
+      : "") ||
+    "";
+  // PDF / settlement actions need a completed RFQ when one is linked.
+  const showOrderActions =
+    Boolean(order.orderNumber) &&
+    (!linkedRfqNumber || orderInfo?.rfqCompleted === true);
+  const bondNameDisplay = orderInfo?.bond.name || order.bondName;
+  const bondIsinDisplay = orderInfo?.bond.isin || order.isin;
+  const faceValueDisplay =
+    orderInfo?.bond.faceValue ?? parseFloat(order.faceValue);
 
   return (
     <div className="space-y-6">
@@ -519,11 +652,12 @@ function OrderDetailsView() {
               status={order.status}
               paymentStatus={order.paymentStatus}
               paymentProvider={order.paymentProvider}
+              prefix="Settlement"
             />
-            <Badge variant="outline" className="font-normal">
-              {order.paymentStatus}
-            </Badge>
-            {order.orderNumber ? (
+            {paymentStatusDisplay ? (
+              <StatusBadge value={paymentStatusDisplay} prefix="Payment" />
+            ) : null}
+            {showOrderActions ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm">
@@ -542,22 +676,22 @@ function OrderDetailsView() {
                   </DropdownMenuItem>
                   {((order.customerProfile as { userType?: string } | null)
                     ?.userType?.toUpperCase() === "CORPORATE") && (
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href={`/dashboard/rfqs/nse/settle-orders/generate/${encodeURIComponent(order.orderNumber)}`}
-                      >
-                        <Mail className="mr-2 h-4 w-4" />
-                        Send email
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
+                      <DropdownMenuItem asChild>
+                        <Link
+                          href={`/dashboard/rfqs/nse/settle-orders/generate/${encodeURIComponent(order.orderNumber)}`}
+                        >
+                          <Mail className="mr-2 h-4 w-4" />
+                          Send email
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                   <AllowOnlyView permissions={["edit:orders"]}>
                     {(order.paymentProvider === "RAZORPAY" ||
                       order.paymentProvider === "CUSTOM" ||
                       (order.paymentProvider === "RAZORPAY" &&
                         order.paymentStatus === "COMPLETED")) && (
-                      <DropdownMenuSeparator />
-                    )}
+                        <DropdownMenuSeparator />
+                      )}
                     {order.paymentProvider === "RAZORPAY" && (
                       <DropdownMenuItem
                         disabled={verifyPaymentMutation.isPending}
@@ -574,18 +708,18 @@ function OrderDetailsView() {
                     {(order.paymentProvider === "CUSTOM" ||
                       (order.paymentProvider === "RAZORPAY" &&
                         order.paymentStatus === "COMPLETED")) && (
-                      <DropdownMenuItem
-                        disabled={verifySettlementMutation.isPending}
-                        onClick={() => verifySettlementMutation.mutate()}
-                      >
-                        {verifySettlementMutation.isPending ? (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <RefreshCw className="mr-2 h-4 w-4" />
-                        )}
-                        Verify Settlement
-                      </DropdownMenuItem>
-                    )}
+                        <DropdownMenuItem
+                          disabled={verifySettlementMutation.isPending}
+                          onClick={() => verifySettlementMutation.mutate()}
+                        >
+                          {verifySettlementMutation.isPending ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <RefreshCw className="mr-2 h-4 w-4" />
+                          )}
+                          Verify Settlement
+                        </DropdownMenuItem>
+                      )}
                   </AllowOnlyView>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -594,33 +728,131 @@ function OrderDetailsView() {
         }
       />
 
-      {/* Overview strip */}
-      <div className="px-0 py-1">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div className="grid flex-1 grid-cols-2 gap-x-8 gap-y-4">
-            <LabelView title="ISIN">
-              <p className="text-sm font-medium font-mono text-gray-800">
-                {order.isin}
-              </p>
-            </LabelView>
-            <LabelView title="Bond">
-              <p className="text-sm font-medium text-gray-800 line-clamp-2">
-                {order.bondName}
-              </p>
-            </LabelView>
+      {/* Overview — primary scan surface for ops */}
+      <Card className="border-gray-100 shadow-none rounded-lg overflow-hidden">
+        <CardContent className="p-0">
+          <div className="flex flex-col gap-0 lg:flex-row">
+            <div className="flex-1 space-y-4 p-5 lg:p-6">
+              <div className="space-y-1.5">
+                <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+                  Bond
+                </p>
+                <h2 className="text-lg font-semibold text-gray-900 leading-snug">
+                  {orderInfo?.bond.name || order.bondName}
+                </h2>
+                <p className="font-mono text-sm text-gray-500">
+                  {orderInfo?.bond.isin || order.isin}
+                </p>
+              </div>
+
+              {(orderInfo?.customer.name ||
+                order.customerProfile ||
+                order.linkedRfqParticipantCode ||
+                orderInfo?.rfqNumber ||
+                order.reqOrderNumber ||
+                defaultSettlementNumber) && (
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    {(orderInfo?.customer.name ||
+                      order.customerProfile ||
+                      order.linkedRfqParticipantCode) && (
+                        <span className="inline-flex items-center gap-1.5 rounded-md border border-gray-100 bg-gray-50 px-2.5 py-1 text-xs text-gray-700">
+                          {order.customerProfile || orderInfo?.customer.name ? (
+                            <UserRound className="h-3.5 w-3.5 text-gray-400" />
+                          ) : (
+                            <Building2 className="h-3.5 w-3.5 text-gray-400" />
+                          )}
+                          <span className="font-medium">
+                            {orderInfo?.customer.name ||
+                              (order.customerProfile
+                                ? [
+                                  order.customerProfile.firstName,
+                                  order.customerProfile.lastName,
+                                ]
+                                  .filter(Boolean)
+                                  .join(" ")
+                                : null) ||
+                              order.rfqParticipantInfo?.nameOverride ||
+                              order.linkedRfqParticipantCode ||
+                              "—"}
+                          </span>
+                        </span>
+                      )}
+                    {(orderInfo?.rfqNumber || order.reqOrderNumber) && (
+                      <span className="inline-flex items-center rounded-md border border-gray-100 px-2.5 py-1 font-mono text-[11px] text-gray-500">
+                        RFQ {orderInfo?.rfqNumber || order.reqOrderNumber}
+                      </span>
+                    )}
+                    {defaultSettlementNumber ? (
+                      <span className="inline-flex items-center rounded-md border border-gray-100 px-2.5 py-1 font-mono text-[11px] text-gray-500">
+                        Settle #{defaultSettlementNumber}
+                      </span>
+                    ) : null}
+                  </div>
+                )}
+
+              <div className="grid grid-cols-2 gap-3 pt-2 sm:grid-cols-4">
+                <div className="rounded-lg border border-gray-100 bg-white px-3 py-2.5">
+                  <p className="text-[11px] text-gray-400">Deal date</p>
+                  <p className="mt-0.5 text-sm font-medium tabular-nums text-gray-800">
+                    {dealDateLabel}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-gray-100 bg-white px-3 py-2.5">
+                  <p className="text-[11px] text-gray-400">Settlement date</p>
+                  <p className="mt-0.5 text-sm font-medium tabular-nums text-gray-800">
+                    {settlementDateLabel}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-gray-100 bg-white px-3 py-2.5">
+                  <p className="text-[11px] text-gray-400">Clean price</p>
+                  <p className="mt-0.5 text-sm font-medium tabular-nums text-gray-800">
+                    {formatUnitPriceDisplay(unitPriceDisplaySource)}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-gray-100 bg-white px-3 py-2.5">
+                  <p className="text-[11px] text-gray-400">YTM</p>
+                  <p className="mt-0.5 text-sm font-medium tabular-nums text-gray-800">
+                    {yieldValue != null ? formatYtmDisplay(yieldValue) : "—"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col justify-between gap-3 border-t border-gray-100 bg-gray-50/60 p-5 lg:w-72 lg:border-t-0 lg:border-l lg:p-6">
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+                  Settlement amount
+                </p>
+                <p className="mt-1.5 text-2xl font-semibold tracking-tight tabular-nums text-gray-900 sm:text-3xl">
+                  {formatInrAmount(settlementTotalDisplay)}
+                </p>
+              </div>
+              <div className="space-y-1.5 text-xs text-gray-500">
+                <div className="flex justify-between gap-3">
+                  <span>Quantity</span>
+                  <span className="font-medium tabular-nums text-gray-700">
+                    {quantityDisplay.toLocaleString("en-IN")}
+                  </span>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span>Unit price</span>
+                  <span className="font-medium tabular-nums text-gray-700">
+                    {formatUnitPriceDisplay(unitPriceDisplaySource)}
+                  </span>
+                </div>
+                {quantumValue != null && quantumValue > 0 && (
+                  <div className="flex justify-between gap-3">
+                    <span>Quantum</span>
+                    <span className="font-medium tabular-nums text-gray-700">
+                      {formatInrAmount(quantumValue)}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-          <div className="lg:text-right lg:pl-8 lg:border-l lg:border-gray-100">
-            <p className="text-xs text-gray-500 mb-1">Settlement amount</p>
-            <p className="text-2xl font-semibold tabular-nums text-gray-900 tracking-tight">
-              {formatInrAmount(settlementTotalDisplay)}
-            </p>
-            <p className="text-[11px] text-gray-400 mt-1">
-              Qty {order.quantity.toLocaleString("en-IN")} · Unit{" "}
-              {formatUnitPriceDisplay(unitPriceDisplaySource)}
-            </p>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {order.orderNumber ? (
         <OrderPdfDownloadDialog
@@ -630,6 +862,7 @@ function OrderDetailsView() {
           pdfType={pdfDialogType}
           defaultSettlementNumber={defaultSettlementNumber}
           defaultAutofillSettlementDate={defaultAutofillSettlementDate}
+          defaultLastCouponDate={orderInfo?.date.lastCouponDate || null}
         />
       ) : null}
 
@@ -942,141 +1175,151 @@ function OrderDetailsView() {
         </DialogContent>
       </Dialog>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-6 items-start">
         {/* Main column — settlement first for ops */}
         <div className="flex flex-col gap-6">
           {/* Counterparty information — Meradhan customer (default) or
               external NSE participant (when assigned via the CRM
               assign-rfq-participant flow). */}
-          <Card className="order-2 border-gray-100 shadow-none rounded-lg">
-            <CardHeader className="pb-3">
+          <Card className="order-2 border-gray-100 shadow-none rounded-lg overflow-hidden">
+            <CardHeader className="pb-3 border-b border-gray-50">
               <CardTitle className="flex items-center gap-2 text-base">
-                {order.customerProfile ? (
+                {isMeradhanCustomer ? (
                   <UserRound className="h-4 w-4 text-muted-foreground" />
                 ) : (
                   <Building2 className="h-4 w-4 text-muted-foreground" />
                 )}
-                {order.customerProfile
+                {isMeradhanCustomer
                   ? "Customer Information"
                   : "NSE Participant (counterparty)"}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {order.customerProfile ? (
-                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-                  <LabelView title="Name">
-                    <p className="text-sm font-medium">
-                      {[
-                        order.customerProfile.firstName,
-                        order.customerProfile.middleName,
-                        order.customerProfile.lastName,
-                      ]
-                        .map((p) => (typeof p === "string" ? p.trim() : ""))
-                        .filter(Boolean)
-                        .join(" ") || "—"}
-                    </p>
-                  </LabelView>
-                  {order.customerProfile.userName ? (
-                    <LabelView title="User name">
-                      <p className="text-sm font-medium font-mono">
-                        {order.customerProfile.userName}
+            <CardContent className="space-y-4 pt-5">
+              {isMeradhanCustomer ? (
+                <>
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-semibold text-gray-700">
+                      {customerInitial}
+                    </div>
+                    <div className="min-w-0 space-y-1">
+                      <p className="truncate text-base font-semibold text-gray-900">
+                        {customerDisplayName || "—"}
                       </p>
-                    </LabelView>
-                  ) : null}
-                  <LabelView title="Email">
-                    <p className="text-sm font-medium">
-                      {order.customerProfile.emailAddress}
-                    </p>
-                  </LabelView>
-                  {order.customerProfile.phoneNo && (
-                    <LabelView title="Phone">
-                      <p className="text-sm font-medium">
-                        {order.customerProfile.phoneNo}
-                      </p>
-                    </LabelView>
-                  )}
-                  <LabelView title="Customer ID">
-                    <p className="text-sm font-medium">
-                      {order.customerProfile.id}
-                    </p>
-                  </LabelView>
-                </div>
+                      {customerUserName ? (
+                        <p className="font-mono text-xs text-gray-500">
+                          @{customerUserName}
+                        </p>
+                      ) : null}
+                      {customerEmail ? (
+                        <p className="truncate text-sm text-gray-600">
+                          {customerEmail}
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                    {customerPhone ? (
+                      <DetailCell label="Phone">{customerPhone}</DetailCell>
+                    ) : null}
+                    <DetailCell label="Customer ID" mono>
+                      {customerId ?? "—"}
+                    </DetailCell>
+                  </div>
+                </>
               ) : (
-                <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-                  <LabelView title="Participant code">
-                    <p className="text-sm font-medium font-mono">
+                <>
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-600">
+                      <Building2 className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0 space-y-1">
+                      <p className="truncate text-base font-semibold text-gray-900">
+                        {customerDisplayName || "—"}
+                      </p>
+                      <p className="font-mono text-xs text-gray-500">
+                        {order.linkedRfqParticipantCode ?? "—"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                    <DetailCell label="Participant code" mono>
                       {order.linkedRfqParticipantCode ?? "—"}
-                    </p>
-                  </LabelView>
-                  <LabelView title="Name">
-                    <p className="text-sm font-medium">
-                      {order.rfqParticipantInfo?.nameOverride?.trim() ||
-                        order.linkedRfqParticipantCode ||
-                        "—"}
-                    </p>
-                  </LabelView>
-                  {order.rfqParticipantInfo?.contactPerson && (
-                    <LabelView title="Contact">
-                      <p className="text-sm font-medium">
+                    </DetailCell>
+                    {order.rfqParticipantInfo?.contactPerson ? (
+                      <DetailCell label="Contact">
                         {order.rfqParticipantInfo.contactPerson}
-                      </p>
-                    </LabelView>
-                  )}
-                  {!!order.rfqParticipantInfo?.emailList?.length && (
-                    <LabelView title="Email">
-                      <p className="text-sm font-medium break-all">
-                        {order.rfqParticipantInfo.emailList.join(", ")}
-                      </p>
-                    </LabelView>
-                  )}
-                  {!!order.rfqParticipantInfo?.mobileList?.length && (
-                    <LabelView title="Mobile">
-                      <p className="text-sm font-medium">
+                      </DetailCell>
+                    ) : null}
+                    {!!order.rfqParticipantInfo?.emailList?.length && (
+                      <DetailCell label="Email" className="sm:col-span-2">
+                        <span className="break-all">
+                          {order.rfqParticipantInfo.emailList.join(", ")}
+                        </span>
+                      </DetailCell>
+                    )}
+                    {!!order.rfqParticipantInfo?.mobileList?.length && (
+                      <DetailCell label="Mobile">
                         {order.rfqParticipantInfo.mobileList.join(", ")}
-                      </p>
-                    </LabelView>
-                  )}
-                  {order.rfqParticipantInfo?.panNo && (
-                    <LabelView title="PAN">
-                      <p className="text-sm font-medium font-mono">
+                      </DetailCell>
+                    )}
+                    {order.rfqParticipantInfo?.panNo ? (
+                      <DetailCell label="PAN" mono>
                         {order.rfqParticipantInfo.panNo}
-                      </p>
-                    </LabelView>
-                  )}
-                </div>
+                      </DetailCell>
+                    ) : null}
+                  </div>
+                </>
               )}
             </CardContent>
           </Card>
 
           {/* Bond Information */}
-          <Card className="order-3 border-gray-100 shadow-none rounded-lg">
-            <CardHeader className="pb-3">
+          <Card className="order-3 border-gray-100 shadow-none rounded-lg overflow-hidden">
+            <CardHeader className="pb-3 border-b border-gray-50">
               <CardTitle className="flex items-center gap-2 text-base">
                 <Landmark className="h-4 w-4 text-muted-foreground" />
                 Bond Information
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-                <LabelView title="Bond Name">
-                  <p className="text-sm font-medium">{order.bondName}</p>
-                </LabelView>
-                <LabelView title="ISIN">
-                  <p className="text-sm font-medium font-mono">{order.isin}</p>
-                </LabelView>
-                <LabelView title="Face Value">
-                  <p className="text-sm font-medium">
-                    ₹{parseFloat(order.faceValue).toLocaleString("en-IN")}
-                  </p>
-                </LabelView>
-                <LabelView title="Quantity">
-                  <p className="text-sm font-medium">{order.quantity}</p>
-                </LabelView>
-                <LabelView title="Unit Price">
-                  <p className="text-sm font-medium">
+            <CardContent className="space-y-4 pt-5">
+              <div className="space-y-1.5">
+                <p className="text-base font-semibold leading-snug text-gray-900">
+                  {bondNameDisplay}
+                </p>
+                <p className="inline-flex items-center rounded-md border border-gray-100 bg-gray-50 px-2 py-0.5 font-mono text-xs text-gray-600">
+                  {bondIsinDisplay}
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+                <DetailCell label="Face Value">
+                  <span className="tabular-nums">
+                    ₹{faceValueDisplay.toLocaleString("en-IN")}
+                  </span>
+                </DetailCell>
+                <DetailCell label="Quantity">
+                  <span className="tabular-nums">
+                    {quantityDisplay.toLocaleString("en-IN")}
+                  </span>
+                </DetailCell>
+                <DetailCell label="Unit Price">
+                  <span className="tabular-nums">
                     {formatUnitPriceDisplay(unitPriceDisplaySource)}
-                  </p>
-                </LabelView>
+                  </span>
+                </DetailCell>
+                {orderInfo?.bond.couponRate ? (
+                  <DetailCell label="Coupon Rate">
+                    <span className="tabular-nums">
+                      {orderInfo.bond.couponRate}%
+                    </span>
+                  </DetailCell>
+                ) : null}
+                {orderInfo?.bond.maturityDate ? (
+                  <DetailCell label="Maturity Date" className="sm:col-span-2">
+                    <span className="tabular-nums">
+                      {formatBusinessDateLabel(orderInfo.bond.maturityDate)}
+                    </span>
+                  </DetailCell>
+                ) : null}
               </div>
               {order.bondDetails && (
                 <Collapsible className="mt-6 pt-6 border-t">
@@ -1092,497 +1335,497 @@ function OrderDetailsView() {
                     <ChevronDown className="h-4 w-4 text-gray-400 transition-transform group-data-[state=open]:rotate-180" />
                   </CollapsibleTrigger>
                   <CollapsibleContent className="mt-4">
-                  <div className="space-y-6">
-                    {/* Financial Information */}
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
-                        Financial Information
-                      </h4>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {hasBondDetail(order.bondDetails, "couponRate") && (
+                    <div className="space-y-6">
+                      {/* Financial Information */}
+                      <div>
+                        <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
+                          Financial Information
+                        </h4>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                          {hasBondDetail(order.bondDetails, "couponRate") && (
+                            <div>
+                              <p className="text-sm text-muted-foreground">
+                                Coupon Rate
+                              </p>
+                              <p className="font-medium">
+                                {getBondDetailString(
+                                  order.bondDetails,
+                                  "couponRate"
+                                )}
+                                %
+                              </p>
+                            </div>
+                          )}
+                          {hasBondDetail(order.bondDetails, "issuePrice") && (
+                            <div>
+                              <p className="text-sm text-muted-foreground">
+                                Issue Price
+                              </p>
+                              <p className="font-medium">
+                                ₹
+                                {getBondDetailNumber(
+                                  order.bondDetails,
+                                  "issuePrice"
+                                )?.toLocaleString("en-IN")}
+                              </p>
+                            </div>
+                          )}
+                          {hasBondDetail(order.bondDetails, "totalIssueSize") && (
+                            <div>
+                              <p className="text-sm text-muted-foreground">
+                                Total Issue Size
+                              </p>
+                              <p className="font-medium">
+                                ₹
+                                {getBondDetailNumber(
+                                  order.bondDetails,
+                                  "totalIssueSize"
+                                )?.toLocaleString("en-IN")}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Dates */}
+                      {(hasBondDetail(order.bondDetails, "maturityDate") ||
+                        hasBondDetail(order.bondDetails, "redemptionDate") ||
+                        hasBondDetail(order.bondDetails, "dateOfAllotment")) && (
                           <div>
-                            <p className="text-sm text-muted-foreground">
-                              Coupon Rate
-                            </p>
-                            <p className="font-medium">
+                            <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
+                              Important Dates
+                            </h4>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                               {getBondDetailString(
                                 order.bondDetails,
-                                "couponRate"
-                              )}
-                              %
-                            </p>
-                          </div>
-                        )}
-                        {hasBondDetail(order.bondDetails, "issuePrice") && (
-                          <div>
-                            <p className="text-sm text-muted-foreground">
-                              Issue Price
-                            </p>
-                            <p className="font-medium">
-                              ₹
-                              {getBondDetailNumber(
-                                order.bondDetails,
-                                "issuePrice"
-                              )?.toLocaleString("en-IN")}
-                            </p>
-                          </div>
-                        )}
-                        {hasBondDetail(order.bondDetails, "totalIssueSize") && (
-                          <div>
-                            <p className="text-sm text-muted-foreground">
-                              Total Issue Size
-                            </p>
-                            <p className="font-medium">
-                              ₹
-                              {getBondDetailNumber(
-                                order.bondDetails,
-                                "totalIssueSize"
-                              )?.toLocaleString("en-IN")}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Dates */}
-                    {(hasBondDetail(order.bondDetails, "maturityDate") ||
-                      hasBondDetail(order.bondDetails, "redemptionDate") ||
-                      hasBondDetail(order.bondDetails, "dateOfAllotment")) && (
-                        <div>
-                          <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
-                            Important Dates
-                          </h4>
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            {getBondDetailString(
-                              order.bondDetails,
-                              "maturityDate"
-                            ) && (
-                                <div>
-                                  <p className="text-sm text-muted-foreground">
-                                    Maturity Date
-                                  </p>
-                                  <p className="font-medium">
-                                    {dateTimeUtils.formatDateTime(
-                                      getBondDetailString(
-                                        order.bondDetails,
-                                        "maturityDate"
-                                      )!,
-                                      "DD MMM YYYY"
-                                    )}
-                                  </p>
-                                </div>
-                              )}
-                            {getBondDetailString(
-                              order.bondDetails,
-                              "redemptionDate"
-                            ) && (
-                                <div>
-                                  <p className="text-sm text-muted-foreground">
-                                    Redemption Date
-                                  </p>
-                                  <p className="font-medium">
-                                    {dateTimeUtils.formatDateTime(
-                                      getBondDetailString(
-                                        order.bondDetails,
-                                        "redemptionDate"
-                                      )!,
-                                      "DD MMM YYYY"
-                                    )}
-                                  </p>
-                                </div>
-                              )}
-                            {getBondDetailString(
-                              order.bondDetails,
-                              "dateOfAllotment"
-                            ) && (
-                                <div>
-                                  <p className="text-sm text-muted-foreground">
-                                    Date of Allotment
-                                  </p>
-                                  <p className="font-medium">
-                                    {dateTimeUtils.formatDateTime(
-                                      getBondDetailString(
-                                        order.bondDetails,
-                                        "dateOfAllotment"
-                                      )!,
-                                      "DD MMM YYYY"
-                                    )}
-                                  </p>
-                                </div>
-                              )}
-                          </div>
-                        </div>
-                      )}
-
-                    {/* Rating & Status */}
-                    {(hasBondDetail(order.bondDetails, "creditRating") ||
-                      hasBondDetail(order.bondDetails, "taxStatus") ||
-                      hasBondDetail(order.bondDetails, "isListed")) && (
-                        <div>
-                          <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
-                            Rating & Status
-                          </h4>
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            {getBondDetailString(
-                              order.bondDetails,
-                              "creditRating"
-                            ) && (
-                                <div>
-                                  <p className="text-sm text-muted-foreground">
-                                    Credit Rating
-                                  </p>
-                                  <p className="font-medium">
-                                    {getBondDetailString(
-                                      order.bondDetails,
-                                      "creditRating"
-                                    )}
-                                  </p>
-                                </div>
-                              )}
-                            {getBondDetailString(
-                              order.bondDetails,
-                              "taxStatus"
-                            ) && (
-                                <div>
-                                  <p className="text-sm text-muted-foreground">
-                                    Tax Status
-                                  </p>
-                                  <p className="font-medium">
-                                    {getBondDetailString(
-                                      order.bondDetails,
-                                      "taxStatus"
-                                    )}
-                                  </p>
-                                </div>
-                              )}
-                            {hasBondDetail(order.bondDetails, "isListed") && (
-                              <div>
-                                <p className="text-sm text-muted-foreground">
-                                  Listing Status
-                                </p>
-                                <Badge variant="outline">
-                                  {getBondDetailString(
-                                    order.bondDetails,
-                                    "isListed"
-                                  )}
-                                </Badge>
-                              </div>
-                            )}
-                          </div>
-                          {getBondDetailString(
-                            order.bondDetails,
-                            "creditRatingInfo"
-                          ) && (
-                              <div className="mt-3">
-                                <p className="text-sm text-muted-foreground">
-                                  Credit Rating Info
-                                </p>
-                                <p className="font-medium text-sm">
-                                  {getBondDetailString(
-                                    order.bondDetails,
-                                    "creditRatingInfo"
-                                  )}
-                                </p>
-                              </div>
-                            )}
-                          {getBondDetailString(
-                            order.bondDetails,
-                            "ratingAgencyName"
-                          ) && (
-                              <div className="mt-3">
-                                <p className="text-sm text-muted-foreground">
-                                  Rating Agency
-                                </p>
-                                <p className="font-medium">
-                                  {getBondDetailString(
-                                    order.bondDetails,
-                                    "ratingAgencyName"
-                                  )}
-                                </p>
-                              </div>
-                            )}
-                        </div>
-                      )}
-
-                    {/* Payment & Interest Details */}
-                    {(hasBondDetail(order.bondDetails, "interestPaymentMode") ||
-                      hasBondDetail(
-                        order.bondDetails,
-                        "interestPaymentFrequency"
-                      )) && (
-                        <div>
-                          <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
-                            Payment & Interest
-                          </h4>
-                          <div className="grid grid-cols-2 gap-4">
-                            {getBondDetailString(
-                              order.bondDetails,
-                              "interestPaymentMode"
-                            ) && (
-                                <div>
-                                  <p className="text-sm text-muted-foreground">
-                                    Interest Payment Mode
-                                  </p>
-                                  <p className="font-medium">
-                                    {getBondDetailString(
-                                      order.bondDetails,
-                                      "interestPaymentMode"
-                                    )}
-                                  </p>
-                                </div>
-                              )}
-                            {getBondDetailString(
-                              order.bondDetails,
-                              "interestPaymentFrequency"
-                            ) && (
-                                <div>
-                                  <p className="text-sm text-muted-foreground">
-                                    Payment Frequency
-                                  </p>
-                                  <p className="font-medium">
-                                    {getBondDetailString(
-                                      order.bondDetails,
-                                      "interestPaymentFrequency"
-                                    )}
-                                  </p>
-                                </div>
-                              )}
-                          </div>
-                        </div>
-                      )}
-
-                    {/* Additional Information */}
-                    {(hasBondDetail(order.bondDetails, "description") ||
-                      hasBondDetail(order.bondDetails, "instrumentName") ||
-                      hasBondDetail(order.bondDetails, "sectorName") ||
-                      hasBondDetail(order.bondDetails, "categories")) && (
-                        <div>
-                          <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
-                            Additional Information
-                          </h4>
-                          <div className="space-y-3">
-                            {getBondDetailString(
-                              order.bondDetails,
-                              "description"
-                            ) && (
-                                <div>
-                                  <p className="text-sm text-muted-foreground">
-                                    Description
-                                  </p>
-                                  <p className="font-medium text-sm">
-                                    {getBondDetailString(
-                                      order.bondDetails,
-                                      "description"
-                                    )}
-                                  </p>
-                                </div>
-                              )}
-                            {getBondDetailString(
-                              order.bondDetails,
-                              "instrumentName"
-                            ) && (
-                                <div>
-                                  <p className="text-sm text-muted-foreground">
-                                    Instrument Name
-                                  </p>
-                                  <p className="font-medium text-sm">
-                                    {getBondDetailString(
-                                      order.bondDetails,
-                                      "instrumentName"
-                                    )}
-                                  </p>
-                                </div>
-                              )}
-                            {getBondDetailString(
-                              order.bondDetails,
-                              "sectorName"
-                            ) && (
-                                <div>
-                                  <p className="text-sm text-muted-foreground">
-                                    Sector
-                                  </p>
-                                  <p className="font-medium">
-                                    {getBondDetailString(
-                                      order.bondDetails,
-                                      "sectorName"
-                                    )}
-                                  </p>
-                                </div>
-                              )}
-                            {Array.isArray(
-                              getBondDetail(order.bondDetails, "categories")
-                            ) &&
-                              (
-                                getBondDetail(
-                                  order.bondDetails,
-                                  "categories"
-                                ) as unknown[]
-                              ).length > 0 && (
-                                <div>
-                                  <p className="text-sm text-muted-foreground mb-2">
-                                    Categories
-                                  </p>
-                                  <div className="flex flex-wrap gap-2">
-                                    {(
-                                      getBondDetail(
-                                        order.bondDetails,
-                                        "categories"
-                                      ) as unknown[]
-                                    ).map((cat: unknown, idx: number) => (
-                                      <Badge key={idx} variant="secondary">
-                                        {String(cat)}
-                                      </Badge>
-                                    ))}
+                                "maturityDate"
+                              ) && (
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">
+                                      Maturity Date
+                                    </p>
+                                    <p className="font-medium">
+                                      {dateTimeUtils.formatDateTime(
+                                        getBondDetailString(
+                                          order.bondDetails,
+                                          "maturityDate"
+                                        )!,
+                                        "DD MMM YYYY"
+                                      )}
+                                    </p>
                                   </div>
-                                </div>
-                              )}
+                                )}
+                              {getBondDetailString(
+                                order.bondDetails,
+                                "redemptionDate"
+                              ) && (
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">
+                                      Redemption Date
+                                    </p>
+                                    <p className="font-medium">
+                                      {dateTimeUtils.formatDateTime(
+                                        getBondDetailString(
+                                          order.bondDetails,
+                                          "redemptionDate"
+                                        )!,
+                                        "DD MMM YYYY"
+                                      )}
+                                    </p>
+                                  </div>
+                                )}
+                              {getBondDetailString(
+                                order.bondDetails,
+                                "dateOfAllotment"
+                              ) && (
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">
+                                      Date of Allotment
+                                    </p>
+                                    <p className="font-medium">
+                                      {dateTimeUtils.formatDateTime(
+                                        getBondDetailString(
+                                          order.bondDetails,
+                                          "dateOfAllotment"
+                                        )!,
+                                        "DD MMM YYYY"
+                                      )}
+                                    </p>
+                                  </div>
+                                )}
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
 
-                    {/* Registrar & Trustee Details */}
-                    {(hasBondDetail(order.bondDetails, "registrarDetails") ||
-                      hasBondDetail(order.bondDetails, "debentureTrustee") ||
-                      hasBondDetail(
-                        order.bondDetails,
-                        "certificateNumbers"
-                      )) && (
-                        <div>
-                          <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
-                            Registrar & Trustee
-                          </h4>
-                          <div className="space-y-3">
-                            {getBondDetailString(
-                              order.bondDetails,
-                              "registrarDetails"
-                            ) && (
+                      {/* Rating & Status */}
+                      {(hasBondDetail(order.bondDetails, "creditRating") ||
+                        hasBondDetail(order.bondDetails, "taxStatus") ||
+                        hasBondDetail(order.bondDetails, "isListed")) && (
+                          <div>
+                            <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
+                              Rating & Status
+                            </h4>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                              {getBondDetailString(
+                                order.bondDetails,
+                                "creditRating"
+                              ) && (
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">
+                                      Credit Rating
+                                    </p>
+                                    <p className="font-medium">
+                                      {getBondDetailString(
+                                        order.bondDetails,
+                                        "creditRating"
+                                      )}
+                                    </p>
+                                  </div>
+                                )}
+                              {getBondDetailString(
+                                order.bondDetails,
+                                "taxStatus"
+                              ) && (
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">
+                                      Tax Status
+                                    </p>
+                                    <p className="font-medium">
+                                      {getBondDetailString(
+                                        order.bondDetails,
+                                        "taxStatus"
+                                      )}
+                                    </p>
+                                  </div>
+                                )}
+                              {hasBondDetail(order.bondDetails, "isListed") && (
                                 <div>
                                   <p className="text-sm text-muted-foreground">
-                                    Registrar Details
+                                    Listing Status
+                                  </p>
+                                  <Badge variant="outline">
+                                    {getBondDetailString(
+                                      order.bondDetails,
+                                      "isListed"
+                                    )}
+                                  </Badge>
+                                </div>
+                              )}
+                            </div>
+                            {getBondDetailString(
+                              order.bondDetails,
+                              "creditRatingInfo"
+                            ) && (
+                                <div className="mt-3">
+                                  <p className="text-sm text-muted-foreground">
+                                    Credit Rating Info
                                   </p>
                                   <p className="font-medium text-sm">
                                     {getBondDetailString(
                                       order.bondDetails,
-                                      "registrarDetails"
+                                      "creditRatingInfo"
                                     )}
                                   </p>
                                 </div>
                               )}
                             {getBondDetailString(
                               order.bondDetails,
-                              "debentureTrustee"
+                              "ratingAgencyName"
                             ) && (
-                                <div>
+                                <div className="mt-3">
                                   <p className="text-sm text-muted-foreground">
-                                    Debenture Trustee
+                                    Rating Agency
                                   </p>
-                                  <p className="font-medium text-sm">
+                                  <p className="font-medium">
                                     {getBondDetailString(
                                       order.bondDetails,
-                                      "debentureTrustee"
-                                    )}
-                                  </p>
-                                </div>
-                              )}
-                            {getBondDetailString(
-                              order.bondDetails,
-                              "certificateNumbers"
-                            ) && (
-                                <div>
-                                  <p className="text-sm text-muted-foreground">
-                                    Certificate Numbers
-                                  </p>
-                                  <p className="font-medium text-sm">
-                                    {getBondDetailString(
-                                      order.bondDetails,
-                                      "certificateNumbers"
+                                      "ratingAgencyName"
                                     )}
                                   </p>
                                 </div>
                               )}
                           </div>
-                        </div>
-                      )}
+                        )}
 
-                    {/* Options & Other Details */}
-                    {(hasBondDetail(
-                      order.bondDetails,
-                      "putCallOptionDetails"
-                    ) ||
-                      hasBondDetail(
-                        order.bondDetails,
-                        "physicalSecurityAddress"
-                      ) ||
-                      hasBondDetail(
-                        order.bondDetails,
-                        "defaultedInRedemption"
-                      ) ||
-                      hasBondDetail(order.bondDetails, "remarks")) && (
-                        <div>
-                          <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
-                            Options & Other Details
-                          </h4>
-                          <div className="space-y-3">
-                            {(() => {
-                              const value = getBondDetailString(
+                      {/* Payment & Interest Details */}
+                      {(hasBondDetail(order.bondDetails, "interestPaymentMode") ||
+                        hasBondDetail(
+                          order.bondDetails,
+                          "interestPaymentFrequency"
+                        )) && (
+                          <div>
+                            <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
+                              Payment & Interest
+                            </h4>
+                            <div className="grid grid-cols-2 gap-4">
+                              {getBondDetailString(
                                 order.bondDetails,
-                                "putCallOptionDetails"
-                              );
-                              return value && value.trim() ? (
-                                <div>
-                                  <p className="text-sm text-muted-foreground">
-                                    Put/Call Option Details
-                                  </p>
-                                  <p className="font-medium text-sm">{value}</p>
-                                </div>
-                              ) : null;
-                            })()}
-                            {(() => {
-                              const value = getBondDetailString(
+                                "interestPaymentMode"
+                              ) && (
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">
+                                      Interest Payment Mode
+                                    </p>
+                                    <p className="font-medium">
+                                      {getBondDetailString(
+                                        order.bondDetails,
+                                        "interestPaymentMode"
+                                      )}
+                                    </p>
+                                  </div>
+                                )}
+                              {getBondDetailString(
                                 order.bondDetails,
-                                "physicalSecurityAddress"
-                              );
-                              return value && value.trim() ? (
-                                <div>
-                                  <p className="text-sm text-muted-foreground">
-                                    Physical Security Address
-                                  </p>
-                                  <p className="font-medium text-sm">{value}</p>
-                                </div>
-                              ) : null;
-                            })()}
-                            {(() => {
-                              const value = getBondDetailString(
-                                order.bondDetails,
-                                "defaultedInRedemption"
-                              );
-                              return value && value.trim() ? (
-                                <div>
-                                  <p className="text-sm text-muted-foreground">
-                                    Defaulted in Redemption
-                                  </p>
-                                  <p className="font-medium text-sm">{value}</p>
-                                </div>
-                              ) : null;
-                            })()}
-                            {(() => {
-                              const value = getBondDetailString(
-                                order.bondDetails,
-                                "remarks"
-                              );
-                              return value && value.trim() ? (
-                                <div>
-                                  <p className="text-sm text-muted-foreground">
-                                    Remarks
-                                  </p>
-                                  <p className="font-medium text-sm">{value}</p>
-                                </div>
-                              ) : null;
-                            })()}
+                                "interestPaymentFrequency"
+                              ) && (
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">
+                                      Payment Frequency
+                                    </p>
+                                    <p className="font-medium">
+                                      {getBondDetailString(
+                                        order.bondDetails,
+                                        "interestPaymentFrequency"
+                                      )}
+                                    </p>
+                                  </div>
+                                )}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                  </div>
+                        )}
+
+                      {/* Additional Information */}
+                      {(hasBondDetail(order.bondDetails, "description") ||
+                        hasBondDetail(order.bondDetails, "instrumentName") ||
+                        hasBondDetail(order.bondDetails, "sectorName") ||
+                        hasBondDetail(order.bondDetails, "categories")) && (
+                          <div>
+                            <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
+                              Additional Information
+                            </h4>
+                            <div className="space-y-3">
+                              {getBondDetailString(
+                                order.bondDetails,
+                                "description"
+                              ) && (
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">
+                                      Description
+                                    </p>
+                                    <p className="font-medium text-sm">
+                                      {getBondDetailString(
+                                        order.bondDetails,
+                                        "description"
+                                      )}
+                                    </p>
+                                  </div>
+                                )}
+                              {getBondDetailString(
+                                order.bondDetails,
+                                "instrumentName"
+                              ) && (
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">
+                                      Instrument Name
+                                    </p>
+                                    <p className="font-medium text-sm">
+                                      {getBondDetailString(
+                                        order.bondDetails,
+                                        "instrumentName"
+                                      )}
+                                    </p>
+                                  </div>
+                                )}
+                              {getBondDetailString(
+                                order.bondDetails,
+                                "sectorName"
+                              ) && (
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">
+                                      Sector
+                                    </p>
+                                    <p className="font-medium">
+                                      {getBondDetailString(
+                                        order.bondDetails,
+                                        "sectorName"
+                                      )}
+                                    </p>
+                                  </div>
+                                )}
+                              {Array.isArray(
+                                getBondDetail(order.bondDetails, "categories")
+                              ) &&
+                                (
+                                  getBondDetail(
+                                    order.bondDetails,
+                                    "categories"
+                                  ) as unknown[]
+                                ).length > 0 && (
+                                  <div>
+                                    <p className="text-sm text-muted-foreground mb-2">
+                                      Categories
+                                    </p>
+                                    <div className="flex flex-wrap gap-2">
+                                      {(
+                                        getBondDetail(
+                                          order.bondDetails,
+                                          "categories"
+                                        ) as unknown[]
+                                      ).map((cat: unknown, idx: number) => (
+                                        <Badge key={idx} variant="secondary">
+                                          {String(cat)}
+                                        </Badge>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                            </div>
+                          </div>
+                        )}
+
+                      {/* Registrar & Trustee Details */}
+                      {(hasBondDetail(order.bondDetails, "registrarDetails") ||
+                        hasBondDetail(order.bondDetails, "debentureTrustee") ||
+                        hasBondDetail(
+                          order.bondDetails,
+                          "certificateNumbers"
+                        )) && (
+                          <div>
+                            <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
+                              Registrar & Trustee
+                            </h4>
+                            <div className="space-y-3">
+                              {getBondDetailString(
+                                order.bondDetails,
+                                "registrarDetails"
+                              ) && (
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">
+                                      Registrar Details
+                                    </p>
+                                    <p className="font-medium text-sm">
+                                      {getBondDetailString(
+                                        order.bondDetails,
+                                        "registrarDetails"
+                                      )}
+                                    </p>
+                                  </div>
+                                )}
+                              {getBondDetailString(
+                                order.bondDetails,
+                                "debentureTrustee"
+                              ) && (
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">
+                                      Debenture Trustee
+                                    </p>
+                                    <p className="font-medium text-sm">
+                                      {getBondDetailString(
+                                        order.bondDetails,
+                                        "debentureTrustee"
+                                      )}
+                                    </p>
+                                  </div>
+                                )}
+                              {getBondDetailString(
+                                order.bondDetails,
+                                "certificateNumbers"
+                              ) && (
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">
+                                      Certificate Numbers
+                                    </p>
+                                    <p className="font-medium text-sm">
+                                      {getBondDetailString(
+                                        order.bondDetails,
+                                        "certificateNumbers"
+                                      )}
+                                    </p>
+                                  </div>
+                                )}
+                            </div>
+                          </div>
+                        )}
+
+                      {/* Options & Other Details */}
+                      {(hasBondDetail(
+                        order.bondDetails,
+                        "putCallOptionDetails"
+                      ) ||
+                        hasBondDetail(
+                          order.bondDetails,
+                          "physicalSecurityAddress"
+                        ) ||
+                        hasBondDetail(
+                          order.bondDetails,
+                          "defaultedInRedemption"
+                        ) ||
+                        hasBondDetail(order.bondDetails, "remarks")) && (
+                          <div>
+                            <h4 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
+                              Options & Other Details
+                            </h4>
+                            <div className="space-y-3">
+                              {(() => {
+                                const value = getBondDetailString(
+                                  order.bondDetails,
+                                  "putCallOptionDetails"
+                                );
+                                return value && value.trim() ? (
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">
+                                      Put/Call Option Details
+                                    </p>
+                                    <p className="font-medium text-sm">{value}</p>
+                                  </div>
+                                ) : null;
+                              })()}
+                              {(() => {
+                                const value = getBondDetailString(
+                                  order.bondDetails,
+                                  "physicalSecurityAddress"
+                                );
+                                return value && value.trim() ? (
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">
+                                      Physical Security Address
+                                    </p>
+                                    <p className="font-medium text-sm">{value}</p>
+                                  </div>
+                                ) : null;
+                              })()}
+                              {(() => {
+                                const value = getBondDetailString(
+                                  order.bondDetails,
+                                  "defaultedInRedemption"
+                                );
+                                return value && value.trim() ? (
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">
+                                      Defaulted in Redemption
+                                    </p>
+                                    <p className="font-medium text-sm">{value}</p>
+                                  </div>
+                                ) : null;
+                              })()}
+                              {(() => {
+                                const value = getBondDetailString(
+                                  order.bondDetails,
+                                  "remarks"
+                                );
+                                return value && value.trim() ? (
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">
+                                      Remarks
+                                    </p>
+                                    <p className="font-medium text-sm">{value}</p>
+                                  </div>
+                                ) : null;
+                              })()}
+                            </div>
+                          </div>
+                        )}
+                    </div>
                   </CollapsibleContent>
                 </Collapsible>
               )}
@@ -1590,43 +1833,44 @@ function OrderDetailsView() {
           </Card>
 
           {/* Payment Information */}
-          <Card className="order-4 border-gray-100 shadow-none rounded-lg">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <CreditCard className="h-4 w-4 text-muted-foreground" />
-                Payment Information
-              </CardTitle>
+          <Card className="order-4 border-gray-100 shadow-none rounded-lg overflow-hidden">
+            <CardHeader className="pb-3 border-b border-gray-50">
+              <div className="flex items-center justify-between gap-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <CreditCard className="h-4 w-4 text-muted-foreground" />
+                  Payment Information
+                </CardTitle>
+                {paymentStatusDisplay ? (
+                  <StatusBadge value={paymentStatusDisplay} />
+                ) : null}
+              </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-                {order.paymentProvider && (
-                  <LabelView title="Payment Provider">
-                    <p className="text-sm font-medium">{order.paymentProvider}</p>
-                  </LabelView>
-                )}
-                {order.paymentOrderId && (
-                  <LabelView title="Payment Order ID">
-                    <p className="text-sm font-medium font-mono">
-                      {order.paymentOrderId}
-                    </p>
-                  </LabelView>
-                )}
-                {order.paymentId && (
-                  <LabelView title="Payment ID">
-                    <p className="text-sm font-medium font-mono">
-                      {order.paymentId}
-                    </p>
-                  </LabelView>
-                )}
+            <CardContent className="space-y-4 pt-5">
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                {paymentProviderDisplay ? (
+                  <DetailCell label="Provider">
+                    {paymentProviderDisplay}
+                  </DetailCell>
+                ) : null}
+                {!isCustomPaymentProvider && order.paymentOrderId ? (
+                  <DetailCell label="Payment Order ID" mono className="sm:col-span-2">
+                    <span className="break-all">{order.paymentOrderId}</span>
+                  </DetailCell>
+                ) : null}
+                {!isCustomPaymentProvider && paymentIdDisplay ? (
+                  <DetailCell label="Payment ID" mono className="sm:col-span-2">
+                    <span className="break-all">{paymentIdDisplay}</span>
+                  </DetailCell>
+                ) : null}
               </div>
               {order.paymentMetadata && (
-                <Collapsible className="mt-2">
+                <Collapsible>
                   <CollapsibleTrigger className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors group">
                     Payment metadata
                     <ChevronDown className="h-3.5 w-3.5 transition-transform group-data-[state=open]:rotate-180" />
                   </CollapsibleTrigger>
                   <CollapsibleContent className="mt-2">
-                    <pre className="bg-muted p-4 rounded-md text-xs overflow-auto">
+                    <pre className="overflow-auto rounded-md border border-gray-100 bg-gray-50 p-3 text-xs">
                       {JSON.stringify(order.paymentMetadata, null, 2)}
                     </pre>
                   </CollapsibleContent>
@@ -1637,7 +1881,7 @@ function OrderDetailsView() {
 
           {/* Settlement Pipeline — Stage Timeline */}
           <Card className="order-1 border-gray-100 shadow-none rounded-lg">
-            <CardHeader className="pb-3">
+            <CardHeader className="pb-3 border-b border-gray-50">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
@@ -1706,9 +1950,9 @@ function OrderDetailsView() {
                         const stamp =
                           isSuccess || isFailed || isWaiting
                             ? dateTimeUtils.formatDateTime(
-                                stage.updatedAt,
-                                "DD MMM YYYY hh:mm:ss AA",
-                              )
+                              stage.updatedAt,
+                              "DD MMM YYYY hh:mm:ss AA",
+                            )
                             : "—";
                         const showConnector = index < pipelineStages.length - 1;
                         const connectorDone = isSuccess;
@@ -1721,11 +1965,10 @@ function OrderDetailsView() {
                           >
                             {showConnector ? (
                               <div
-                                className={`pointer-events-none absolute top-5 left-1/2 h-0.5 w-full ${
-                                  connectorDone
-                                    ? "bg-primary"
-                                    : "bg-border"
-                                }`}
+                                className={`pointer-events-none absolute top-5 left-1/2 h-0.5 w-full ${connectorDone
+                                  ? "bg-primary"
+                                  : "bg-border"
+                                  }`}
                                 aria-hidden
                               />
                             ) : null}
@@ -1734,19 +1977,18 @@ function OrderDetailsView() {
                               type="button"
                               onClick={() => setStageDetailsId(stage.id)}
                               title={`View ${meta.label} details`}
-                              className={`relative z-[1] flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors cursor-pointer hover:opacity-90 ${
-                                isFailed
-                                  ? "border-destructive bg-destructive text-white"
-                                  : isWaiting
-                                    ? "border-yellow-500 bg-yellow-500 text-white"
-                                    : isSkippedSuccess
-                                      ? "border-muted-foreground/40 bg-muted text-muted-foreground"
-                                      : isSuccess
+                              className={`relative z-[1] flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors cursor-pointer hover:opacity-90 ${isFailed
+                                ? "border-destructive bg-destructive text-white"
+                                : isWaiting
+                                  ? "border-yellow-500 bg-yellow-500 text-white"
+                                  : isSkippedSuccess
+                                    ? "border-muted-foreground/40 bg-muted text-muted-foreground"
+                                    : isSuccess
                                       ? "border-primary bg-primary text-primary-foreground"
                                       : isNext
                                         ? "border-primary bg-white text-primary"
                                         : "border-border bg-muted text-muted-foreground"
-                              }`}
+                                }`}
                             >
                               {isFailed ? (
                                 <XCircle className="h-5 w-5 text-white stroke-[2.5]" />
@@ -1760,13 +2002,12 @@ function OrderDetailsView() {
                             <button
                               type="button"
                               onClick={() => setStageDetailsId(stage.id)}
-                              className={`mt-2 text-sm font-medium capitalize hover:underline ${
-                                isFailed
-                                  ? "text-destructive"
-                                  : isActive
-                                    ? "text-foreground"
-                                    : "text-muted-foreground"
-                              }`}
+                              className={`mt-2 text-sm font-medium capitalize hover:underline ${isFailed
+                                ? "text-destructive"
+                                : isActive
+                                  ? "text-foreground"
+                                  : "text-muted-foreground"
+                                }`}
                             >
                               {meta.label}
                             </button>
@@ -1774,32 +2015,46 @@ function OrderDetailsView() {
                               {stamp}
                             </p>
                             <p
-                              className={`mt-0.5 text-[11px] font-medium ${
-                                stage.attemptCount > 0
-                                  ? "text-foreground"
-                                  : "text-muted-foreground"
-                              }`}
+                              className={`mt-0.5 text-[11px] font-medium ${stage.attemptCount > 0
+                                ? "text-foreground"
+                                : "text-muted-foreground"
+                                }`}
                             >
                               Retries {retriesLabel}
                             </p>
                             {isFailed ? (
-                              <Badge variant="destructive" className="mt-1 text-[10px]">
+                              <Badge
+                                variant="outline"
+                                className="mt-1 border-rose-200 bg-rose-50 text-[10px] text-rose-700 shadow-none"
+                              >
                                 Failed
                               </Badge>
                             ) : isWaiting ? (
-                              <Badge variant="outline" className="mt-1 text-[10px]">
+                              <Badge
+                                variant="outline"
+                                className="mt-1 border-amber-200 bg-amber-50 text-[10px] text-amber-700 shadow-none"
+                              >
                                 Waiting
                               </Badge>
                             ) : isNext ? (
-                              <Badge variant="outline" className="mt-1 text-[10px]">
+                              <Badge
+                                variant="outline"
+                                className="mt-1 border-blue-200 bg-blue-50 text-[10px] text-blue-700 shadow-none"
+                              >
                                 Next
                               </Badge>
                             ) : isSkippedSuccess ? (
-                              <Badge variant="outline" className="mt-1 text-[10px]">
+                              <Badge
+                                variant="outline"
+                                className="mt-1 border-slate-200 bg-slate-50 text-[10px] text-slate-600 shadow-none"
+                              >
                                 Skipped
                               </Badge>
                             ) : isSuccess ? (
-                              <Badge variant="secondary" className="mt-1 text-[10px]">
+                              <Badge
+                                variant="outline"
+                                className="mt-1 border-emerald-200 bg-emerald-50 text-[10px] text-emerald-700 shadow-none"
+                              >
                                 Done
                               </Badge>
                             ) : null}
@@ -1811,11 +2066,10 @@ function OrderDetailsView() {
 
                   {nextResumeStage ? (
                     <div
-                      className={`rounded-lg border px-4 py-3.5 ${
-                        nextResumeStage.status === 2
-                          ? "border-rose-200 bg-rose-50/50"
-                          : "border-gray-100 bg-white"
-                      }`}
+                      className={`rounded-lg border px-4 py-3.5 ${nextResumeStage.status === 2
+                        ? "border-rose-200 bg-rose-50/50"
+                        : "border-gray-100 bg-white"
+                        }`}
                     >
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="space-y-1 min-w-0">
@@ -2075,8 +2329,11 @@ function OrderDetailsView() {
 
           {/* Order Logs */}
           <Card className="order-5 border-gray-100 shadow-none rounded-lg">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Order Activity Timeline</CardTitle>
+            <CardHeader className="pb-3 border-b border-gray-50">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                Order Activity Timeline
+              </CardTitle>
             </CardHeader>
             <CardContent>
               {order.orderLogs && order.orderLogs.length > 0 ? (
@@ -2370,104 +2627,104 @@ function OrderDetailsView() {
         </div>
 
         {/* Sidebar - Financial Summary */}
-        <div className="space-y-6 lg:sticky lg:top-20">
-          <Card className="border-gray-100 shadow-none rounded-lg">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Financial Summary</CardTitle>
+        <div className="space-y-6 lg:sticky lg:top-[10px]">
+          <Card className="border-gray-100 shadow-none rounded-lg overflow-hidden">
+            <CardHeader className="pb-3 border-b border-gray-50">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                Financial Summary
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-0 p-0">
               {hasPricingSnapshot ? (
                 <>
-                  {yieldValue != null && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Yield</span>
-                      <span className="font-medium tabular-nums text-gray-800">
-                        {formatYtmDisplay(yieldValue)}
-                      </span>
+                  <div className="space-y-4 px-5 py-4">
+                    <div>
+                      <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-gray-400">
+                        Pricing
+                      </p>
+                      <div className="divide-y divide-gray-50">
+                        {yieldValue != null && (
+                          <SummaryRow label="Yield">
+                            {formatYtmDisplay(yieldValue)}
+                          </SummaryRow>
+                        )}
+                        {cleanPriceValue != null && (
+                          <SummaryRow label="Clean Price">
+                            {orderInfo
+                              ? formatCleanPriceDisplay(cleanPriceValue)
+                              : formatCleanPriceDisplay(
+                                pricingRaw("cleanPrice") ?? cleanPriceValue,
+                              )}
+                          </SummaryRow>
+                        )}
+                        <SummaryRow label="Quantity">
+                          {quantityDisplay.toLocaleString("en-IN")}
+                        </SummaryRow>
+                        {quantumValue != null && quantumValue > 0 && (
+                          <SummaryRow label="Quantum">
+                            {formatInrAmount(quantumValue)}
+                          </SummaryRow>
+                        )}
+                      </div>
                     </div>
-                  )}
-                  {cleanPriceValue != null && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Clean Price</span>
-                      <span className="font-medium tabular-nums text-gray-800">
-                        {formatCleanPriceDisplay(pricingRaw("cleanPrice") ?? cleanPriceValue)}
-                      </span>
+
+                    <div>
+                      <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-gray-400">
+                        Amounts
+                      </p>
+                      <div className="divide-y divide-gray-50">
+                        {principalAmountValue != null && (
+                          <SummaryRow label="Principal">
+                            {formatInrAmount(principalAmountValue)}
+                          </SummaryRow>
+                        )}
+                        {accruedInterestValue != null && (
+                          <SummaryRow label="Accrued interest">
+                            {formatInrAmount(accruedInterestValue)}
+                          </SummaryRow>
+                        )}
+                        {totalConsiderationValue != null && (
+                          <SummaryRow label="Consideration (ex stamp)">
+                            {formatInrAmount(totalConsiderationValue)}
+                          </SummaryRow>
+                        )}
+                        <SummaryRow label="Stamp duty">
+                          {formatInrAmount(stampDutyDisplay)}
+                        </SummaryRow>
+                      </div>
                     </div>
-                  )}
-                  {principalAmountValue != null && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Principal Amount</span>
-                      <span className="font-medium tabular-nums text-gray-800">
-                        {formatInrAmount(principalAmountValue)}
-                      </span>
-                    </div>
-                  )}
-                  {accruedInterestValue != null && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Accrued interest</span>
-                      <span className="font-medium tabular-nums text-gray-800">
-                        {formatInrAmount(accruedInterestValue)}
-                      </span>
-                    </div>
-                  )}
-                  {totalConsiderationValue != null && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">
-                        Total Consideration w/o Stamp Duty
-                      </span>
-                      <span className="font-medium tabular-nums text-gray-800 text-right pl-4">
-                        {formatInrAmount(totalConsiderationValue)}
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Stamp duty</span>
-                    <span className="font-medium tabular-nums text-gray-800">
-                      {formatInrAmount(stampDutyDisplay)}
-                    </span>
+
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Quantity</span>
-                    <span className="font-medium tabular-nums text-gray-800">
-                      {order.quantity.toLocaleString("en-IN")}
-                    </span>
-                  </div>
-                  <Separator className="bg-gray-100" />
-                  <div className="flex justify-between items-baseline gap-3 pt-1">
-                    <span className="text-sm text-gray-600">
+                  <div className="flex items-baseline justify-between gap-3 border-t border-gray-100 bg-gray-50/70 px-5 py-4">
+                    <span className="text-sm font-medium text-gray-600">
                       Settlement Amount
                     </span>
-                    <span className="text-base font-semibold tabular-nums text-gray-900">
+                    <span className="text-lg font-semibold tabular-nums text-gray-900">
                       {formatInrAmount(settlementTotalDisplay)}
                     </span>
                   </div>
                 </>
               ) : (
                 <>
-                  {yieldValue != null && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Yield</span>
-                      <span className="font-medium tabular-nums text-gray-800">
+                  <div className="divide-y divide-gray-50 px-5 py-1">
+                    {yieldValue != null && (
+                      <SummaryRow label="Yield">
                         {formatYtmDisplay(yieldValue)}
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Subtotal</span>
-                    <span className="font-medium tabular-nums text-gray-800">
+                      </SummaryRow>
+                    )}
+                    <SummaryRow label="Subtotal">
                       {formatInrMoneyDisplay(order.subTotal)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Stamp Duty</span>
-                    <span className="font-medium tabular-nums text-gray-800">
+                    </SummaryRow>
+                    <SummaryRow label="Stamp Duty">
                       {formatInrMoneyDisplay(order.stampDuty)}
-                    </span>
+                    </SummaryRow>
                   </div>
-                  <Separator className="bg-gray-100" />
-                  <div className="flex justify-between items-baseline gap-3 pt-1">
-                    <span className="text-sm text-gray-600">Total Amount</span>
-                    <span className="text-base font-semibold tabular-nums text-gray-900">
+                  <div className="flex items-baseline justify-between gap-3 border-t border-gray-100 bg-gray-50/70 px-5 py-4">
+                    <span className="text-sm font-medium text-gray-600">
+                      Total Amount
+                    </span>
+                    <span className="text-lg font-semibold tabular-nums text-gray-900">
                       {formatInrMoneyDisplay(order.totalAmount)}
                     </span>
                   </div>
@@ -2479,12 +2736,15 @@ function OrderDetailsView() {
           {/* Payment Process Logs */}
           <Collapsible defaultOpen={false}>
             <Card className="border-gray-100 shadow-none rounded-lg">
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-3 border-b border-gray-50">
                 <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 text-left group">
                   <div>
-                    <CardTitle className="text-base">Payment Process Logs</CardTitle>
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <CreditCard className="h-4 w-4 text-muted-foreground" />
+                      Payment Process Logs
+                    </CardTitle>
                     {order.settlementAutomationLogs &&
-                    order.settlementAutomationLogs.length > 0 ? (
+                      order.settlementAutomationLogs.length > 0 ? (
                       <p className="text-xs text-gray-500 mt-0.5">
                         {order.settlementAutomationLogs.length}{" "}
                         {order.settlementAutomationLogs.length === 1
@@ -2498,249 +2758,247 @@ function OrderDetailsView() {
               </CardHeader>
               <CollapsibleContent>
                 <CardContent>
-              {order.settlementAutomationLogs &&
-              order.settlementAutomationLogs.length > 0 ? (
-                <div className="space-y-6">
-                  {Object.entries(
-                    order.settlementAutomationLogs.reduce(
-                      (acc, log) => {
-                        const key = log.paymentId || "unknown-payment";
-                        if (!acc[key]) acc[key] = [];
-                        acc[key].push(log);
-                        return acc;
-                      },
-                      {} as Record<
-                        string,
-                        typeof order.settlementAutomationLogs
-                      >,
-                    ),
-                  ).map(([paymentId, logs]) => (
-                    <div key={paymentId}>
-                      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2 border-b border-gray-100 pb-3">
-                        <div>
-                          <p className="text-xs text-gray-500">Payment ID</p>
-                          <p className="mt-0.5 font-mono text-sm font-medium text-gray-900">
-                            {paymentId}
-                          </p>
-                        </div>
-                        <p className="text-xs text-gray-400">
-                          {logs.length} {logs.length === 1 ? "log" : "logs"}
-                        </p>
-                      </div>
-
-                      <div className="divide-y divide-gray-100">
-                        {logs.map((log) => {
-                          const isSuccess = log.status === "SUCCESS";
-                          const isFailed = log.status === "FAILED";
-
-                          return (
-                            <div key={log.id} className="py-3.5 first:pt-1 last:pb-0">
-                              <div className="flex items-start gap-3">
-                                <div
-                                  className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border ${
-                                    isSuccess
-                                      ? "border-emerald-200 text-emerald-600"
-                                      : isFailed
-                                        ? "border-rose-200 text-rose-600"
-                                        : "border-amber-200 text-amber-600"
-                                  }`}
-                                >
-                                  {isSuccess ? (
-                                    <CheckCircle2 className="h-3.5 w-3.5" />
-                                  ) : isFailed ? (
-                                    <XCircle className="h-3.5 w-3.5" />
-                                  ) : (
-                                    <Clock className="h-3.5 w-3.5" />
-                                  )}
-                                </div>
-
-                                <div className="min-w-0 flex-1 space-y-1">
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    <span className="text-sm font-medium text-gray-900 capitalize">
-                                      {log.step.replace(/_/g, " ").toLowerCase()}
-                                    </span>
-                                    <span
-                                      className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide ${
-                                        isSuccess
-                                          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                                          : isFailed
-                                            ? "border-rose-200 bg-rose-50 text-rose-700"
-                                            : "border-amber-200 bg-amber-50 text-amber-700"
-                                      }`}
-                                    >
-                                      {log.status}
-                                    </span>
-                                  </div>
-
-                                  {log.message ? (
-                                    <p className="text-sm text-gray-500">
-                                      {log.message}
-                                    </p>
-                                  ) : null}
-
-                                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-400">
-                                    <span>
-                                      {dateTimeUtils.formatDateTime(
-                                        log.createdAt,
-                                        "DD MMM YYYY hh:mm:ss AA",
-                                      )}
-                                    </span>
-                                    {log.batchId ? (
-                                      <span className="font-mono truncate max-w-full">
-                                        {log.batchId}
-                                      </span>
-                                    ) : null}
-                                  </div>
-
-                                  {(log.inputData ||
-                                    log.outputData ||
-                                    log.errorData) && (
-                                    <Collapsible className="pt-1">
-                                      <CollapsibleTrigger className="group flex items-center gap-1 text-xs text-gray-400 transition-colors hover:text-gray-700">
-                                        <span>View payload</span>
-                                        <ChevronDown className="h-3 w-3 transition-transform group-data-[state=open]:rotate-180" />
-                                      </CollapsibleTrigger>
-                                      <CollapsibleContent className="mt-2 space-y-2">
-                                        {log.inputData ? (
-                                          <div className="rounded-lg border border-gray-100 p-3">
-                                            <p className="mb-1.5 text-[11px] font-medium text-gray-500">
-                                              Input
-                                            </p>
-                                            <pre className="overflow-auto text-xs text-gray-700">
-                                              {JSON.stringify(
-                                                log.inputData,
-                                                null,
-                                                2,
-                                              )}
-                                            </pre>
-                                          </div>
-                                        ) : null}
-                                        {log.outputData ? (
-                                          <div className="rounded-lg border border-gray-100 p-3">
-                                            <p className="mb-1.5 text-[11px] font-medium text-gray-500">
-                                              Output
-                                            </p>
-                                            <pre className="overflow-auto text-xs text-gray-700">
-                                              {JSON.stringify(
-                                                log.outputData,
-                                                null,
-                                                2,
-                                              )}
-                                            </pre>
-                                          </div>
-                                        ) : null}
-                                        {log.errorData ? (
-                                          <div className="rounded-lg border border-rose-100 p-3">
-                                            <p className="mb-1.5 text-[11px] font-medium text-rose-600">
-                                              Error
-                                            </p>
-                                            <pre className="overflow-auto text-xs text-rose-700">
-                                              {JSON.stringify(
-                                                log.errorData,
-                                                null,
-                                                2,
-                                              )}
-                                            </pre>
-                                          </div>
-                                        ) : null}
-                                      </CollapsibleContent>
-                                    </Collapsible>
-                                  )}
-                                </div>
-                              </div>
+                  {order.settlementAutomationLogs &&
+                    order.settlementAutomationLogs.length > 0 ? (
+                    <div className="space-y-6">
+                      {Object.entries(
+                        order.settlementAutomationLogs.reduce(
+                          (acc, log) => {
+                            const key = log.paymentId || "unknown-payment";
+                            if (!acc[key]) acc[key] = [];
+                            acc[key].push(log);
+                            return acc;
+                          },
+                          {} as Record<
+                            string,
+                            typeof order.settlementAutomationLogs
+                          >,
+                        ),
+                      ).map(([paymentId, logs]) => (
+                        <div key={paymentId}>
+                          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2 border-b border-gray-100 pb-3">
+                            <div>
+                              <p className="text-xs text-gray-500">Payment ID</p>
+                              <p className="mt-0.5 font-mono text-sm font-medium text-gray-900">
+                                {paymentId}
+                              </p>
                             </div>
-                          );
-                        })}
-                      </div>
+                            <p className="text-xs text-gray-400">
+                              {logs.length} {logs.length === 1 ? "log" : "logs"}
+                            </p>
+                          </div>
+
+                          <div className="divide-y divide-gray-100">
+                            {logs.map((log) => {
+                              const isSuccess = log.status === "SUCCESS";
+                              const isFailed = log.status === "FAILED";
+
+                              return (
+                                <div key={log.id} className="py-3.5 first:pt-1 last:pb-0">
+                                  <div className="flex items-start gap-3">
+                                    <div
+                                      className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border ${isSuccess
+                                        ? "border-emerald-200 text-emerald-600"
+                                        : isFailed
+                                          ? "border-rose-200 text-rose-600"
+                                          : "border-amber-200 text-amber-600"
+                                        }`}
+                                    >
+                                      {isSuccess ? (
+                                        <CheckCircle2 className="h-3.5 w-3.5" />
+                                      ) : isFailed ? (
+                                        <XCircle className="h-3.5 w-3.5" />
+                                      ) : (
+                                        <Clock className="h-3.5 w-3.5" />
+                                      )}
+                                    </div>
+
+                                    <div className="min-w-0 flex-1 space-y-1">
+                                      <div className="flex flex-wrap items-center gap-2">
+                                        <span className="text-sm font-medium text-gray-900 capitalize">
+                                          {log.step.replace(/_/g, " ").toLowerCase()}
+                                        </span>
+                                        <span
+                                          className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide ${isSuccess
+                                            ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                                            : isFailed
+                                              ? "border-rose-200 bg-rose-50 text-rose-700"
+                                              : "border-amber-200 bg-amber-50 text-amber-700"
+                                            }`}
+                                        >
+                                          {log.status}
+                                        </span>
+                                      </div>
+
+                                      {log.message ? (
+                                        <p className="text-sm text-gray-500">
+                                          {log.message}
+                                        </p>
+                                      ) : null}
+
+                                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-400">
+                                        <span>
+                                          {dateTimeUtils.formatDateTime(
+                                            log.createdAt,
+                                            "DD MMM YYYY hh:mm:ss AA",
+                                          )}
+                                        </span>
+                                        {log.batchId ? (
+                                          <span className="font-mono truncate max-w-full">
+                                            {log.batchId}
+                                          </span>
+                                        ) : null}
+                                      </div>
+
+                                      {(log.inputData ||
+                                        log.outputData ||
+                                        log.errorData) && (
+                                          <Collapsible className="pt-1">
+                                            <CollapsibleTrigger className="group flex items-center gap-1 text-xs text-gray-400 transition-colors hover:text-gray-700">
+                                              <span>View payload</span>
+                                              <ChevronDown className="h-3 w-3 transition-transform group-data-[state=open]:rotate-180" />
+                                            </CollapsibleTrigger>
+                                            <CollapsibleContent className="mt-2 space-y-2">
+                                              {log.inputData ? (
+                                                <div className="rounded-lg border border-gray-100 p-3">
+                                                  <p className="mb-1.5 text-[11px] font-medium text-gray-500">
+                                                    Input
+                                                  </p>
+                                                  <pre className="overflow-auto text-xs text-gray-700">
+                                                    {JSON.stringify(
+                                                      log.inputData,
+                                                      null,
+                                                      2,
+                                                    )}
+                                                  </pre>
+                                                </div>
+                                              ) : null}
+                                              {log.outputData ? (
+                                                <div className="rounded-lg border border-gray-100 p-3">
+                                                  <p className="mb-1.5 text-[11px] font-medium text-gray-500">
+                                                    Output
+                                                  </p>
+                                                  <pre className="overflow-auto text-xs text-gray-700">
+                                                    {JSON.stringify(
+                                                      log.outputData,
+                                                      null,
+                                                      2,
+                                                    )}
+                                                  </pre>
+                                                </div>
+                                              ) : null}
+                                              {log.errorData ? (
+                                                <div className="rounded-lg border border-rose-100 p-3">
+                                                  <p className="mb-1.5 text-[11px] font-medium text-rose-600">
+                                                    Error
+                                                  </p>
+                                                  <pre className="overflow-auto text-xs text-rose-700">
+                                                    {JSON.stringify(
+                                                      log.errorData,
+                                                      null,
+                                                      2,
+                                                    )}
+                                                  </pre>
+                                                </div>
+                                              ) : null}
+                                            </CollapsibleContent>
+                                          </Collapsible>
+                                        )}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500">
-                  No payment process logs found for this order.
-                </p>
-              )}
+                  ) : (
+                    <p className="text-sm text-gray-500">
+                      No payment process logs found for this order.
+                    </p>
+                  )}
                 </CardContent>
               </CollapsibleContent>
             </Card>
           </Collapsible>
 
           {/* Order Metadata */}
-          <Card className="border-gray-100 shadow-none rounded-lg">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Order Information</CardTitle>
+          <Card className="border-gray-100 shadow-none rounded-lg overflow-hidden">
+            <CardHeader className="pb-3 border-b border-gray-50">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Info className="h-4 w-4 text-muted-foreground" />
+                Order Information
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Created At</p>
-                <p className="font-medium">
+            <CardContent className="p-0">
+              <div className="divide-y divide-gray-50 px-5 py-1">
+                <SummaryRow label="Order Date">{orderDateLabel}</SummaryRow>
+                {orderInfo?.dealId ? (
+                  <SummaryRow label="Deal ID">
+                    <span className="font-mono">{orderInfo.dealId}</span>
+                  </SummaryRow>
+                ) : null}
+                {(orderInfo?.rfqNumber || order.reqOrderNumber) && (
+                  <SummaryRow label="RFQ Number">
+                    <span className="font-mono">
+                      {orderInfo?.rfqNumber || order.reqOrderNumber}
+                    </span>
+                  </SummaryRow>
+                )}
+                {dealDateLabel !== "—" && (
+                  <SummaryRow label="Deal Date">{dealDateLabel}</SummaryRow>
+                )}
+                {settlementDateLabel !== "—" && (
+                  <SummaryRow label="Settlement Date">
+                    {settlementDateLabel}
+                  </SummaryRow>
+                )}
+                {defaultSettlementNumber ? (
+                  <SummaryRow label="Settlement No">
+                    <span className="font-mono">{defaultSettlementNumber}</span>
+                  </SummaryRow>
+                ) : null}
+                {lastCouponDateLabel !== "—" && (
+                  <SummaryRow label="Last Coupon Date">
+                    {lastCouponDateLabel}
+                  </SummaryRow>
+                )}
+                {nextCouponDateLabel !== "—" && (
+                  <SummaryRow label="Next Coupon Date">
+                    {nextCouponDateLabel}
+                  </SummaryRow>
+                )}
+                <SummaryRow label="Created At">
                   {dateTimeUtils.formatDateTime(
                     order.createdAt,
-                    "DD MMM YYYY hh:mm AA"
+                    "DD MMM YYYY hh:mm AA",
                   )}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Last Updated</p>
-                <p className="font-medium">
+                </SummaryRow>
+                <SummaryRow label="Last Updated">
                   {dateTimeUtils.formatDateTime(
                     order.updatedAt,
-                    "DD MMM YYYY hh:mm AA"
+                    "DD MMM YYYY hh:mm AA",
                   )}
-                </p>
+                </SummaryRow>
               </div>
               {order.metadata && (
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">Metadata</p>
-                  <pre className="bg-muted p-3 rounded-md text-xs overflow-auto">
-                    {JSON.stringify(order.metadata, null, 2)}
-                  </pre>
+                <div className="border-t border-gray-50 px-5 py-3">
+                  <Collapsible>
+                    <CollapsibleTrigger className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors group">
+                      Raw metadata
+                      <ChevronDown className="h-3.5 w-3.5 transition-transform group-data-[state=open]:rotate-180" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="mt-2">
+                      <pre className="overflow-auto rounded-md border border-gray-100 bg-gray-50 p-3 text-xs">
+                        {JSON.stringify(order.metadata, null, 2)}
+                      </pre>
+                    </CollapsibleContent>
+                  </Collapsible>
                 </div>
               )}
             </CardContent>
           </Card>
-
-          {/* Customer Bonds (if exists) */}
-          {order.customerBonds && (
-            <Card className="border-gray-100 shadow-none rounded-lg">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Customer Bond Record</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Order Date</p>
-                  <p className="font-medium">{orderDateLabel}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Deal Date</p>
-                  <p className="font-medium">{dealDateLabel}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Settlement Date</p>
-                  <p className="font-medium">
-                    {settlementDateLabel !== "—"
-                      ? settlementDateLabel
-                      : order.customerBonds.purchaseDate
-                        ? dateTimeUtils.formatDateTime(
-                          order.customerBonds.purchaseDate,
-                          "DD MMM YYYY",
-                        )
-                        : "—"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">
-                    Purchase Price
-                  </p>
-                  <p className="font-medium">
-                    {formatUnitPriceDisplay(
-                      pricingRaw("cleanPrice") ?? order.customerBonds.purchasePrice
-                    )}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
       </div>
     </div>

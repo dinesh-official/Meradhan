@@ -59,6 +59,8 @@ type OrderPdfDownloadDialogProps = {
   pdfType: "order" | "deal";
   defaultSettlementNumber?: string | null;
   defaultAutofillSettlementDate?: string | null;
+  /** Settlement+record last-coupon (YYYY-MM-DD) from orderInfo — seeds the field before autofill. */
+  defaultLastCouponDate?: string | null;
 };
 
 export function OrderPdfDownloadDialog({
@@ -68,12 +70,17 @@ export function OrderPdfDownloadDialog({
   pdfType,
   defaultSettlementNumber,
   defaultAutofillSettlementDate,
+  defaultLastCouponDate,
 }: OrderPdfDownloadDialogProps) {
   const ordersApi = new apiGateway.crm.crmOrdersApi(apiClientCaller);
   const [form, setForm] = useState<ReceiptPdfFormState>(EMPTY_FORM);
   const [downloading, setDownloading] = useState(false);
   const [autofilling, setAutofilling] = useState(false);
   const [resolvedDealDate, setResolvedDealDate] = useState<string | null>(null);
+  // Bumped whenever saved options are hydrated so autofill always re-runs
+  // afterward (avoids race where hydrate clears last coupon and autofill is skipped).
+  const [optionsHydrateEpoch, setOptionsHydrateEpoch] = useState(0);
+  const optionsHydrateEpochRef = useRef(0);
 
   const { data: pdfOptionsQuery, isFetched: pdfOptionsFetched } = useQuery({
     queryKey: ["crm-receipt-pdf-options", orderNumber],
@@ -81,13 +88,33 @@ export function OrderPdfDownloadDialog({
     enabled: open && Boolean(orderNumber),
   });
 
+  const savedPdfOptions = pdfOptionsQuery?.responseData;
+  const savedPdfOptionsFingerprint =
+    savedPdfOptions && savedPdfOptions.orderNumber === orderNumber
+      ? [
+          savedPdfOptions.orderNumber,
+          savedPdfOptions.accruedInterestDays ?? "",
+          savedPdfOptions.settlementNumber ?? "",
+          savedPdfOptions.settlementDateTime ?? "",
+          String(savedPdfOptions.nonAmortizedBond),
+          savedPdfOptions.amortizedPrincipalPaymentDates ?? "",
+        ].join("|")
+      : "";
+
   useEffect(() => {
     if (!open) {
       setForm(EMPTY_FORM);
+      optionsHydrateEpochRef.current = 0;
+      setOptionsHydrateEpoch(0);
+      setResolvedDealDate(null);
       return;
     }
     if (!pdfOptionsFetched) return;
-    const row = pdfOptionsQuery?.responseData;
+    const row = savedPdfOptions;
+    const seedLastRaw = defaultLastCouponDate?.trim() || "";
+    const seedLastDisplay = seedLastRaw
+      ? formatDateWithDayNameFromPicker(seedLastRaw)
+      : "";
     if (row && row.orderNumber === orderNumber) {
       setForm({
         pdfAutofillSettlementDate: defaultAutofillSettlementDate?.trim() || "",
@@ -95,46 +122,40 @@ export function OrderPdfDownloadDialog({
           row.accruedInterestDays != null ? String(row.accruedInterestDays) : "",
         pdfSettlementNumber: row.settlementNumber ?? defaultSettlementNumber ?? "",
         pdfSettlementDateTime: row.settlementDateTime ?? "",
-        pdfLastInterestPaymentDateRaw: row.lastInterestPaymentDateRaw ?? "",
-        pdfLastInterestPaymentDate: row.lastInterestPaymentDate ?? "",
-        pdfInterestPaymentDates: interestPaymentDatesToFormText(row.interestPaymentDates),
+        // Prefer orderInfo last coupon immediately; autofill may refine (shut formula).
+        pdfLastInterestPaymentDateRaw: seedLastRaw,
+        pdfLastInterestPaymentDate: seedLastDisplay,
+        pdfInterestPaymentDates: "",
         pdfNonAmortizedBond: row.nonAmortizedBond,
         pdfAmortizedPrincipalPaymentDates: row.amortizedPrincipalPaymentDates ?? "",
       });
-      return;
+    } else {
+      setForm({
+        ...EMPTY_FORM,
+        pdfAutofillSettlementDate: defaultAutofillSettlementDate?.trim() || "",
+        pdfSettlementNumber: defaultSettlementNumber?.trim() || "",
+        pdfLastInterestPaymentDateRaw: seedLastRaw,
+        pdfLastInterestPaymentDate: seedLastDisplay,
+      });
     }
-    setForm({
-      ...EMPTY_FORM,
-      pdfAutofillSettlementDate: defaultAutofillSettlementDate?.trim() || "",
-      pdfSettlementNumber: defaultSettlementNumber?.trim() || "",
+    setOptionsHydrateEpoch((epoch) => {
+      const next = epoch + 1;
+      optionsHydrateEpochRef.current = next;
+      return next;
     });
   }, [
     open,
     orderNumber,
     pdfOptionsFetched,
-    pdfOptionsQuery?.responseData,
+    savedPdfOptionsFingerprint,
     defaultSettlementNumber,
     defaultAutofillSettlementDate,
+    defaultLastCouponDate,
   ]);
 
   const patchForm = (patch: Partial<ReceiptPdfFormState>) => {
     setForm((prev) => ({ ...prev, ...patch }));
   };
-
-  // Auto-prefill from computeBondSettlement (market hours + holidays) on open.
-  const autofillRanForRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (!open) {
-      autofillRanForRef.current = null;
-      setResolvedDealDate(null);
-      return;
-    }
-    if (!pdfOptionsFetched) return;
-    if (autofillRanForRef.current === orderNumber) return;
-    autofillRanForRef.current = orderNumber;
-    void autofillReceiptPdfOptions("", { silent: true });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, orderNumber, pdfOptionsFetched, defaultAutofillSettlementDate]);
 
   const persistReceiptPdfOptions = async (accruedInterestDaysNum: number) => {
     try {
@@ -159,7 +180,10 @@ export function OrderPdfDownloadDialog({
 
   const autofillReceiptPdfOptions = async (
     settlementDate: string,
-    { silent = false }: { silent?: boolean } = {},
+    {
+      silent = false,
+      hydrateEpoch,
+    }: { silent?: boolean; hydrateEpoch?: number } = {},
   ) => {
     // settlementDate may be empty — the backend resolves deal/settlement via
     // computeBondSettlement (market hours + holidays), same as order pricing.
@@ -183,6 +207,14 @@ export function OrderPdfDownloadDialog({
       }>(`/crm/orders/receipt-pdf-options/${orderNumber}/autofill`, {
         settlementDate,
       });
+
+      // A newer hydrate cleared the form — drop this stale response.
+      if (
+        hydrateEpoch != null &&
+        hydrateEpoch !== optionsHydrateEpochRef.current
+      ) {
+        return;
+      }
 
       const d = resp.data?.responseData;
       if (!d) {
@@ -212,10 +244,16 @@ export function OrderPdfDownloadDialog({
       );
 
       // Functional update so fallbacks read the current form state, not a
-      // stale closure (the silent auto-run fires before the saved-options
-      // effect has committed). Only overwrite a field when the API gives a
-      // value; otherwise keep whatever is already there.
+      // stale closure. Only overwrite a field when the API gives a value;
+      // otherwise keep whatever is already there.
       setForm((prev) => {
+        if (
+          hydrateEpoch != null &&
+          hydrateEpoch !== optionsHydrateEpochRef.current
+        ) {
+          return prev;
+        }
+
         let lastRaw = prev.pdfLastInterestPaymentDateRaw;
         let lastDisplay = prev.pdfLastInterestPaymentDate;
         if (rawLastTrimmed !== "") {
@@ -262,6 +300,17 @@ export function OrderPdfDownloadDialog({
     }
   };
 
+  // Auto-prefill after saved options hydrate (last coupon uses shut-period formula).
+  useEffect(() => {
+    if (!open || !pdfOptionsFetched || optionsHydrateEpoch === 0) return;
+    const settlementForAutofill = defaultAutofillSettlementDate?.trim() || "";
+    void autofillReceiptPdfOptions(settlementForAutofill, {
+      silent: true,
+      hydrateEpoch: optionsHydrateEpoch,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, orderNumber, pdfOptionsFetched, defaultAutofillSettlementDate, optionsHydrateEpoch]);
+
   const handleDownload = async () => {
     const accruedInterestDaysNum = getValidatedAccruedInterestDays(form.pdfAccruedInterestDays);
     if (accruedInterestDaysNum == null) return;
@@ -304,9 +353,10 @@ export function OrderPdfDownloadDialog({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            Options for order {orderNumber} are prefilled automatically from NSE and bond
-            data — just review and download. Edit any field to override. Values are saved
-            when you download.
+            Options for order {orderNumber} are prefilled from order info. Last
+            coupon date is computed from the settlement date and whether the trade
+            is in the shut / surtpriode window. Change settlement date to
+            recompute. Edit any field to override — values save on download.
           </DialogDescription>
         </DialogHeader>
 
@@ -341,7 +391,7 @@ export function OrderPdfDownloadDialog({
             {autofilling ? (
               <>
                 <Loader2 className="h-3 w-3 animate-spin" />
-                Auto-filling from NSE RFQ &amp; bond data…
+                Auto-filling from order info…
               </>
             ) : (
               "Settlement & deal dates are calculated from trade time (market hours & holidays). Change the settlement date to re-fetch related fields."
