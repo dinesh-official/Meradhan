@@ -17,21 +17,18 @@ RUN apt-get update && apt-get install -y \
 
 
 WORKDIR /app/packages/apiGateway
-RUN npm ci || npm install
+RUN npm install
 WORKDIR /app/packages/config
-RUN npm ci || npm install
+RUN npm install
 WORKDIR /app/packages/kyc-providers
-RUN npm ci || npm install
-RUN rm -rf node_modules/react node_modules/react-dom
+RUN npm install
 WORKDIR /app/packages/schema
-RUN npm ci || npm install
+RUN npm install
 WORKDIR /app
 COPY .env /app/frontend/meradhan/
 
 WORKDIR /app/frontend/meradhan
-RUN npm ci || npm install
-RUN rm -rf ../../packages/kyc-providers/node_modules/react \
-           ../../packages/kyc-providers/node_modules/react-dom
+RUN npm install
 RUN npm run build
 
 EXPOSE 4002
