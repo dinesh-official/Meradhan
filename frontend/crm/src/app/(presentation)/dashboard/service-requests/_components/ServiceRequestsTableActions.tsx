@@ -22,7 +22,7 @@ export default function ServiceRequestsTableActions({
   const handleClose = async () => {
     const result = await Swal.fire({
       title: "Close account?",
-      text: "Are you sure you want to close this account? This action will log the customer out and block future logins.",
+      text: "This will soft-delete the account (move to trash), mark it as closed, log the customer out, and block future logins. The account is not permanently deleted.",
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Close Account",

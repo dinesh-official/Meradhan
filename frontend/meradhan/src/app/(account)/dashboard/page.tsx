@@ -1,14 +1,8 @@
-import { FaPercent, FaTag, FaUser } from "react-icons/fa";
-import { FaSackDollar } from "react-icons/fa6";
-import { PiCurrencyInrBold } from "react-icons/pi";
 import NameTitleView from "../_components/UserView/NameTitileView";
 import AccountViewPort from "../_components/wrapper/AccountViewPort";
 import DashBoardDataViewCard from "./_components/_cards/DashBoardDataViewCard";
-import { DashBoardSatsCard } from "./_components/_cards/DashBoardSatsCard";
 import OngoingDealsCard from "./_components/_cards/OngoingDealsCard";
 import { getAccountPagesMetaData } from "@/graphql/getAccountPagesMetaData";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import apiServerCaller from "@/core/connection/apiServerCaller";
 import apiGateway from "@root/apiGateway";
 import type { Order, InvestmentByIssuerTypeResponse } from "@root/apiGateway";
@@ -16,6 +10,7 @@ import { cookies } from "next/headers";
 import { DashboardOrdersPreview } from "./_components/DashboardOrdersPreview";
 import { DashboardPortfolioDonut } from "./_components/DashboardPortfolioDonut";
 import CorporateESignBanner from "./_components/_banners/CorporateESignBanner";
+import DashboardStatsCards from "./_components/DashboardStatsCards";
 
 export const revalidate = 0;
 export const generateMetadata = async () => {
@@ -48,7 +43,7 @@ async function DashBoardPage() {
   const kycStatus = profileData.data.responseData.kycStatus;
   const hasKycStarted =
     kycStatus == "PENDING" &&
-    profileData.data.responseData.kycProgress?.hasStarted;
+    Boolean(profileData.data.responseData.kycProgress?.hasStarted);
 
   const userIdNum = Number(id);
   const hasSession = Number.isFinite(userIdNum) && userIdNum > 0;
@@ -123,85 +118,12 @@ async function DashBoardPage() {
           <p>Explore your portfolio, offers, and deals — all in one place.</p>
         </div>
 
-        <div className="gap-5 grid md:grid-cols-2 lg:grid-cols-4">
-          <DashBoardSatsCard
-            title="My Investments"
-            icon={<FaSackDollar size={25} className="text-primary" />}
-          >
-            <div>
-              <p className="flex items-center font-medium text-primary text-3xl">
-                <PiCurrencyInrBold aria-hidden />
-                <span className="ml-0.5 tabular-nums">
-                  {investedDisplay.replace(/^₹\s*/, "")}
-                </span>
-              </p>
-            </div>
-          </DashBoardSatsCard>
-          <DashBoardSatsCard
-            title="Interest Earned"
-            icon={<FaPercent size={18} className="text-primary" />}
-          >
-            <p className="flex items-center font-medium text-primary text-3xl">
-              <PiCurrencyInrBold aria-hidden />
-              <span className="ml-0.5 tabular-nums">
-                {interestEarnedDisplay.replace(/^₹\s*/, "")}
-              </span>
-            </p>
-          </DashBoardSatsCard>
-          <DashBoardSatsCard
-            title="My KYC"
-            icon={
-              <FaUser
-                size={19}
-                className={
-                  kycStatus == "VERIFIED" ? "text-primary" : "text-secondary"
-                }
-              />
-            }
-            className={
-              kycStatus == "VERIFIED"
-                ? undefined
-                : "bg-accent text-secondary"
-            }
-          >
-            {kycStatus == "PENDING" && (
-              <div className="flex items-end flex-row justify-between gap-2">
-                <p className="text-3xl font-medium">
-                  {hasKycStarted ? "Pending" : "Not Started"}
-                </p>
-                <Link href={`/dashboard/kyc`}>
-                  <Button variant="secondary">
-                    {hasKycStarted ? "Complete KYC" : "Start KYC"}
-                  </Button>
-                </Link>
-              </div>
-            )}
-            {kycStatus == "RE_KYC" && (
-              <div className="flex items-end flex-row justify-between gap-2">
-                <p className="text-3xl font-medium">Update Required</p>
-                <Link href={`/dashboard/kyc`}>
-                  <Button variant="secondary">
-                    Re KYC
-                  </Button>
-                </Link>
-              </div>
-            )}
-            {kycStatus == "VERIFIED" && <div className="flex items-end flex-row justify-between gap-2">
-              <p className="text-3xl font-medium text-primary">Verified</p>
-            </div>}
-            {kycStatus == "UNDER_REVIEW" && <div className="flex items-end flex-row justify-between gap-2">
-              <p className="text-3xl font-medium">Under Review</p>
-            </div>}
-          </DashBoardSatsCard>
-          <DashBoardSatsCard
-            title="My Offers"
-            icon={<FaTag size={20} className="text-primary" />}
-          >
-            <p className="flex items-center font-medium text-primary text-3xl">
-              Explore
-            </p>
-          </DashBoardSatsCard>
-        </div>
+        <DashboardStatsCards
+          investedDisplay={investedDisplay}
+          interestEarnedDisplay={interestEarnedDisplay}
+          kycStatus={kycStatus}
+          hasKycStarted={hasKycStarted}
+        />
         <div className="gap-5 grid lg:grid-cols-2">
           <DashBoardDataViewCard
             titleId="dashboard-portfolio-preview-title"

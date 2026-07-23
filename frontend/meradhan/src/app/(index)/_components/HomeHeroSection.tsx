@@ -1,8 +1,9 @@
+"use client";
+
 import SectionWrapper from "@/global/components/basic/section/SectionWrapper";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { FaCheck } from "react-icons/fa";
-import DhanGptHeroInput from "./elements/DhanGptHeroInput";
 import Squares from "./elements/Squares";
 
 const FEATURE_BADGES = [

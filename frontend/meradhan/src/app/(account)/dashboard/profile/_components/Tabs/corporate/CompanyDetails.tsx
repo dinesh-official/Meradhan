@@ -1,3 +1,5 @@
+"use client";
+
 import DataInfoLabel from "@/app/(account)/_components/cards/DataInfoLabel";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { genMediaUrl } from "@/global/utils/url.utils";
@@ -8,7 +10,6 @@ import type {
 import Link from "next/link";
 import { FaCheckSquare } from "react-icons/fa";
 import ProfileContactFields from "../../ProfileContactFields";
-import AccountClosureSection from "../../AccountClosureSection";
 import NeedKyc from "../../NeedKyc";
 import { canAccessKycSections } from "../../../_utils/profileKyc";
 import { formatEntityConstitutionType } from "../../../_utils/formatEntityType";
@@ -193,7 +194,6 @@ export default function CompanyDetails({
           />
         </>
       )}
-      {/* <AccountClosureSection /> */}
     </>
   );
 }

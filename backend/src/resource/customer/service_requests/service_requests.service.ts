@@ -6,6 +6,11 @@ import type z from "zod";
 import { EmailCommunication } from "@communication/email_communication";
 import { getEmailSalutationFromSources } from "@root/schema";
 import { meraDhanClosureRequestSubmittedEmailText } from "@emails/text/meraDhanClosureRequestSubmittedEmailText";
+import { meraDhanClosureRequestAdminEmailText } from "@emails/text/meraDhanClosureRequestAdminEmailText";
+import { env } from "@packages/config/env";
+
+/** Ops inbox notified when a customer raises an account closure request. */
+const ACCOUNT_CLOSURE_ADMIN_EMAIL = "support@meradhan.co";
 
 export class CustomerServiceRequestService {
   constructor(private repo: ServiceRequestRepo) {}
@@ -25,7 +30,9 @@ export class CustomerServiceRequestService {
         firstName: true,
         middleName: true,
         lastName: true,
+        userName: true,
         emailAddress: true,
+        phoneNo: true,
         gender: true,
         panCard: { select: { gender: true } },
         aadhaarCard: { select: { gender: true } },
@@ -79,19 +86,40 @@ export class CustomerServiceRequestService {
       .filter(Boolean)
       .join(" ")
       .trim();
+    const reasonText = created.reason?.text ?? reason.text;
+    const reasonRemark = created.reasonRemark;
+    const uatPrefix = env.CBRICS_ENV === "UAT" ? "[UAT] " : "";
 
+    // Non-blocking: request is persisted even if either email fails
     try {
       const emailSend = new EmailCommunication();
-      await emailSend.sendEmail({
-        to: profile.emailAddress,
-        subject: "MeraDhan — Account closure request received",
-        html: meraDhanClosureRequestSubmittedEmailText({
-          customerName,
-          salutation,
+      await Promise.allSettled([
+        emailSend.sendEmail({
+          to: profile.emailAddress,
+          subject: `${uatPrefix}Acknowledgement of Account Deletion Request`,
+          html: meraDhanClosureRequestSubmittedEmailText({
+            customerName,
+            salutation,
+            clientId: profile.userName,
+          }),
         }),
-      });
+        emailSend.sendEmail({
+          to: ACCOUNT_CLOSURE_ADMIN_EMAIL,
+          subject: `${uatPrefix}Account closure request #${created.id} — ${customerName || profile.emailAddress}`,
+          html: meraDhanClosureRequestAdminEmailText({
+            requestId: created.id,
+            customerId: profile.id,
+            customerName: customerName || profile.emailAddress,
+            customerEmail: profile.emailAddress,
+            customerPhone: profile.phoneNo,
+            reasonText,
+            reasonRemark,
+            submittedAt: created.createdAt,
+          }),
+        }),
+      ]);
     } catch {
-      // Non-blocking: request is persisted even if email fails
+      // swallow — emails must never block request creation
     }
 
     return created;

@@ -37,20 +37,22 @@ const nextConfig: NextConfig = {
   devIndicators: {
     position: "bottom-left",
   },
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
     // Linked packages (kyc-providers → @react-pdf/renderer) can install a nested
-    // React copy. In Docker that leads to "createContext is not a function"
-    // while collecting page data (e.g. /dashboard/rfqs/nse).
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      react: reactDir,
-      "react$": reactDir,
-      "react/jsx-runtime": path.join(reactDir, "jsx-runtime.js"),
-      "react/jsx-dev-runtime": path.join(reactDir, "jsx-dev-runtime.js"),
-      "react-dom": reactDomDir,
-      "react-dom$": reactDomDir,
-      "react-dom/client": path.join(reactDomDir, "client.js"),
-    };
+    // React copy. Deduplicate on the client only — aliasing React on the server
+    // breaks Next DevTools SSR (useContext null / invalid hook via SegmentTrieNode).
+    if (!isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        react: reactDir,
+        "react$": reactDir,
+        "react/jsx-runtime": path.join(reactDir, "jsx-runtime.js"),
+        "react/jsx-dev-runtime": path.join(reactDir, "jsx-dev-runtime.js"),
+        "react-dom": reactDomDir,
+        "react-dom$": reactDomDir,
+        "react-dom/client": path.join(reactDomDir, "client.js"),
+      };
+    }
     return config;
   },
   images: {
