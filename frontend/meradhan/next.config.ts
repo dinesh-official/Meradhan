@@ -1,6 +1,7 @@
 // next.config.ts
 import { BASES_URLS } from "@/core/config/base.urls";
 import type { NextConfig } from "next";
+import path from "path";
 
 // Next.js configuration
 const nextConfig: NextConfig = {
@@ -17,6 +18,14 @@ const nextConfig: NextConfig = {
     config.plugins.push(
       new webpack.IgnorePlugin({ resourceRegExp: /^webworker-threads$/ }),
     );
+
+    // Monorepo / Docker installs can pull duplicate React copies; that makes
+    // createContext undefined during SSR page-data collection (e.g. /_not-found).
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      react: path.resolve(__dirname, "node_modules/react"),
+      "react-dom": path.resolve(__dirname, "node_modules/react-dom"),
+    };
 
     return config;
   },

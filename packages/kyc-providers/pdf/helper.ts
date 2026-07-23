@@ -122,9 +122,8 @@ const MONTH_SHORT_TO_INDEX: Record<string, number> = {
 };
 
 /**
- * Settlement Date & Time for deal/receipt PDFs:
- * - date always as DD-MMM-YYYY
- * - append HH:MM:SS only when a real time is present
+ * Settlement Date & Time for deal/receipt PDFs.
+ * Always `DD-MMM-YYYY HH:MM:SS` (uses 00:00:00 when no real time is present).
  */
 export function formatPdfSettlementDateTime(
   ...candidates: Array<string | null | undefined>
@@ -144,91 +143,165 @@ export function formatPdfSettlementDateTime(
     "Dec",
   ];
 
-  const formatParts = (
-    day: number,
-    monthIndex: number,
-    year: number,
-    hh?: number,
-    mm?: number,
-    ss?: number,
-    hasTime?: boolean,
-  ): string => {
-    const datePart = `${String(day).padStart(2, "0")}-${monthNamesShort[monthIndex]}-${year}`;
-    if (!hasTime) return datePart;
-    const timePart = `${String(hh ?? 0).padStart(2, "0")}:${String(mm ?? 0).padStart(2, "0")}:${String(ss ?? 0).padStart(2, "0")}`;
+  type Parsed = {
+    day: number;
+    monthIndex: number;
+    year: number;
+    hh: number;
+    mm: number;
+    ss: number;
+    hasTime: boolean;
+  };
+
+  const formatParts = (p: Parsed): string => {
+    const datePart = `${String(p.day).padStart(2, "0")}-${monthNamesShort[p.monthIndex]}-${p.year}`;
+    const timePart = `${String(p.hasTime ? p.hh : 0).padStart(2, "0")}:${String(p.hasTime ? p.mm : 0).padStart(2, "0")}:${String(p.hasTime ? p.ss : 0).padStart(2, "0")}`;
     return `${datePart} ${timePart}`;
   };
 
-  for (const candidate of candidates) {
-    const raw = String(candidate ?? "").trim();
-    if (!raw) continue;
+  const tryParse = (rawInput: string): Parsed | null => {
+    const raw = rawInput.trim();
+    if (!raw) return null;
 
     // "23-Jul-2026 17:30:00" or "23-Jul-2026"
-    const ddMmm = /^(\d{1,2})-([A-Za-z]{3})-(\d{4})(?:[ T]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/i.exec(
-      raw,
-    );
+    const ddMmm =
+      /^(\d{1,2})-([A-Za-z]{3})-(\d{4})(?:[ T]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/i.exec(
+        raw,
+      );
     if (ddMmm) {
       const day = Number(ddMmm[1]);
       const monKey = (ddMmm[2] ?? "").slice(0, 3).toLowerCase();
       const monthIndex = MONTH_SHORT_TO_INDEX[monKey];
       const year = Number(ddMmm[3]);
       if (monthIndex == null || !Number.isFinite(day) || !Number.isFinite(year)) {
-        continue;
+        return null;
       }
-      const hasTime = ddMmm[4] != null;
-      return formatParts(
+      return {
         day,
         monthIndex,
         year,
-        Number(ddMmm[4] ?? 0),
-        Number(ddMmm[5] ?? 0),
-        Number(ddMmm[6] ?? 0),
-        hasTime,
+        hh: Number(ddMmm[4] ?? 0),
+        mm: Number(ddMmm[5] ?? 0),
+        ss: Number(ddMmm[6] ?? 0),
+        hasTime: ddMmm[4] != null,
+      };
+    }
+
+    // NSE payoutTime / modSettleDate: "14-07-2026 19:23:48" or "14-07-2026"
+    const ddMmYyyy =
+      /^(\d{1,2})-(\d{1,2})-(\d{4})(?:[ T]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/.exec(
+        raw,
       );
+    if (ddMmYyyy) {
+      const day = Number(ddMmYyyy[1]);
+      const monthIndex = Number(ddMmYyyy[2]) - 1;
+      const year = Number(ddMmYyyy[3]);
+      if (
+        !Number.isFinite(day) ||
+        monthIndex < 0 ||
+        monthIndex > 11 ||
+        !Number.isFinite(year)
+      ) {
+        return null;
+      }
+      return {
+        day,
+        monthIndex,
+        year,
+        hh: Number(ddMmYyyy[4] ?? 0),
+        mm: Number(ddMmYyyy[5] ?? 0),
+        ss: Number(ddMmYyyy[6] ?? 0),
+        hasTime: ddMmYyyy[4] != null,
+      };
     }
 
     // YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS...
-    const iso = /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?/.exec(raw);
+    const iso =
+      /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?/.exec(raw);
     if (iso) {
       const year = Number(iso[1]);
       const monthIndex = Number(iso[2]) - 1;
       const day = Number(iso[3]);
-      const hasTime = iso[4] != null;
+      const hh = Number(iso[4] ?? 0);
+      const mm = Number(iso[5] ?? 0);
+      const ss = Number(iso[6] ?? 0);
+      const hasExplicitTime = iso[4] != null;
+      // Treat midnight-only ISO as date-only (no real payout clock time).
+      const hasTime =
+        hasExplicitTime && !(hh === 0 && mm === 0 && ss === 0);
       if (
         !Number.isFinite(year) ||
         monthIndex < 0 ||
         monthIndex > 11 ||
         !Number.isFinite(day)
       ) {
-        continue;
+        return null;
       }
-      return formatParts(
-        day,
-        monthIndex,
-        year,
-        Number(iso[4] ?? 0),
-        Number(iso[5] ?? 0),
-        Number(iso[6] ?? 0),
-        hasTime,
-      );
+      return { day, monthIndex, year, hh, mm, ss, hasTime };
+    }
+
+    // Time-only "HH:MM:SS" / "HH:MM"
+    const timeOnly = /^(\d{1,2}):(\d{2})(?::(\d{2}))?$/.exec(raw);
+    if (timeOnly) {
+      return {
+        day: 1,
+        monthIndex: 0,
+        year: 1970,
+        hh: Number(timeOnly[1]),
+        mm: Number(timeOnly[2]),
+        ss: Number(timeOnly[3] ?? 0),
+        hasTime: true,
+      };
     }
 
     const parsed = new Date(raw);
     if (!Number.isNaN(parsed.getTime())) {
       const hasTime = /[T ]\d{1,2}:\d{2}/.test(raw);
-      return formatParts(
-        parsed.getDate(),
-        parsed.getMonth(),
-        parsed.getFullYear(),
-        parsed.getHours(),
-        parsed.getMinutes(),
-        parsed.getSeconds(),
-        hasTime,
-      );
+      const hh = parsed.getHours();
+      const mm = parsed.getMinutes();
+      const ss = parsed.getSeconds();
+      return {
+        day: parsed.getDate(),
+        monthIndex: parsed.getMonth(),
+        year: parsed.getFullYear(),
+        hh,
+        mm,
+        ss,
+        hasTime: hasTime && !(hh === 0 && mm === 0 && ss === 0),
+      };
     }
+
+    return null;
+  };
+
+  let datePart: Parsed | null = null;
+  let timePart: Parsed | null = null;
+
+  for (const candidate of candidates) {
+    const parsed = tryParse(String(candidate ?? ""));
+    if (!parsed) continue;
+    // Skip sentinel time-only rows for the date slot
+    if (parsed.year === 1970 && parsed.monthIndex === 0 && parsed.day === 1) {
+      if (parsed.hasTime && !timePart) timePart = parsed;
+      continue;
+    }
+    if (!datePart) datePart = parsed;
+    if (parsed.hasTime && !timePart) timePart = parsed;
+    if (datePart && timePart) break;
   }
 
-  return "N/A";
+  if (!datePart) return "N/A";
+
+  return formatParts({
+    day: datePart.day,
+    monthIndex: datePart.monthIndex,
+    year: datePart.year,
+    hh: timePart?.hh ?? 0,
+    mm: timePart?.mm ?? 0,
+    ss: timePart?.ss ?? 0,
+    // Always render HH:MM:SS (00:00:00 when no real time).
+    hasTime: true,
+  });
 }
 
 /** Receipt/deal PDF: show Last IP as DD-MMM-YYYY (DayName); accepts YYYY-MM-DD from calc API. */
@@ -292,6 +365,18 @@ type PdfGreetingUser = Pick<
   lastName?: string | null;
 };
 
+/** Consistent person name: "First Middle Last" with single spaces; skips empty parts. */
+export function formatPdfPersonName(parts: {
+  firstName?: string | null;
+  middleName?: string | null;
+  lastName?: string | null;
+}): string {
+  return [parts.firstName, parts.middleName, parts.lastName]
+    .map((part) => String(part ?? "").trim())
+    .filter((part) => part.length > 0)
+    .join(" ");
+}
+
 /** NSE RFQ participants use a shim user with a negative id. */
 export function isNseRfqParticipantUser(
   user: Pick<PdfGreetingUser, "id">,
@@ -307,10 +392,7 @@ export function getPdfDearGreeting(
   if (isNseRfqParticipantUser(user, orderData)) {
     return "Dear Sir / Madam,";
   }
-  const fullname =
-    (user.firstName ?? "") +
-    `${user.middleName ? `${user.middleName} ` : " "}` +
-    (user.lastName ?? "");
+  const fullname = formatPdfPersonName(user);
   const salutation = getEmailSalutationFromSources({
     gender: user?.gender,
     panCard: user?.panCard,

@@ -2785,7 +2785,7 @@ export class CrmOrdersService {
           settlementOrderNumber: negotation?.rfqNumber ?? settleOrder?.orderNumber ?? undefined,
           dealDate: dealDateDisplay ?? undefined,
           settlementDate: settlementDateDisplay ?? resolvedSettlementDate,
-          payoutTime: (settleOrder?.payoutTime || settlementDateTimeParam || settleOrder?.modSettleDate) ?? undefined as string | undefined,
+          payoutTime: settleOrder?.payoutTime?.trim() || settlementDateTimeParam || undefined,
           settlementType: rfqDetails?.settlementType ?? 0,
           valueDate: bond.maturityDate
             ? new Date(bond.maturityDate).toISOString()
@@ -2887,48 +2887,9 @@ export class CrmOrdersService {
       this.resolveSettleOrderTradeKey(order),
     );
 
-    // Settlement status
-    // 0 = Settlement Pending
-    // 1 = Securities Payin Done
-    // 2 = Funds Payin Done
-    // 3 = Payin Completed
-    // 4 = Payout Done Successfully
-    // 5 = Payin reversed
-    // 6 = Settle order expired
-    // 7 = Order not settleable
-    // 8 = Settlement of order cancelled
-    // 9 = Document not received for unregistered participant
-
-    const validSettlementStatus = {
-      0: "Settlement Pending",
-      1: "Securities Payin Done",
-      2: "Funds Payin Done",
-      3: "Payin Completed",
-      4: "Payout Done Successfully",
-      5: "Payin reversed",
-      6: "Settle order expired",
-      7: "Order not settleable",
-      8: "Settlement of order cancelled",
-      9: "Document not received for unregistered participant",
-    }
-
-    // TODO: Add the logic to check the settlement status orders table
-
-    const orderData = await db.dataBase.order.findFirst({
-      where: {
-        orderNumber: orderNumber,
-      },
-    });
-
-    if (orderData?.status !== "SETTLED") {
-      if (env.CBRICS_ENV === "PROD") {
-        throw new AppError(`Settlement is not completed. Please wait for the settlement to complete. ${validSettlementStatus[settleOrder?.settleStatus as keyof typeof validSettlementStatus] ?? "Unknown"}`, {
-          statusCode: HttpStatus.BAD_REQUEST,
-          code: "SETTLEMENT_NOT_COMPLETED",
-        });
-      }
-    }
-
+    // Deal sheets are allowed before CRM order status is SETTLED (draft /
+    // pre-settlement). Settlement Date & Time uses payoutTime when present;
+    // otherwise the PDF leaves that field blank — do not block generation.
     const getUserPrimaryBankAccount = actor.primaryBank;
     const primaryDematAccount = actor.primaryDemat;
     const negotation = await db.dataBase.rFQNegotiation.findFirst({
@@ -3074,7 +3035,7 @@ export class CrmOrdersService {
           settlementOrderNumber: negotation?.rfqNumber ?? settleOrder?.orderNumber ?? undefined,
           dealDate: dealDateDisplay ?? undefined,
           settlementDate: settlementDateDisplay ?? resolvedSettlementDate,
-          payoutTime: settleOrder?.payoutTime || settlementDateTimeParam || settleOrder?.modSettleDate,
+          payoutTime: settleOrder?.payoutTime?.trim() || settlementDateTimeParam || undefined,
           valueDate: bond.maturityDate
             ? new Date(bond.maturityDate).toISOString()
             : undefined,

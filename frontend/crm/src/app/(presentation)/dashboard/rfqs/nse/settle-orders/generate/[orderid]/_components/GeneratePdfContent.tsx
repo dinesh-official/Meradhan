@@ -979,6 +979,18 @@ BSE Member ID: 6963`
     const accruedInterestDaysNum = getValidatedAccruedInterestDays();
     if (accruedInterestDaysNum == null) return;
 
+    if (type === "deal") {
+      const payoutTime = String(rfq?.payoutTime ?? "").trim();
+      if (!payoutTime) {
+        const proceed = window.confirm(
+          "Payout time is not available for this order yet.\n\n" +
+            "Settlement Date & Time will be left blank on the deal sheet.\n\n" +
+            "Do you still want to generate the deal sheet PDF?",
+        );
+        if (!proceed) return;
+      }
+    }
+
     if (type === "order") setDownloadingOrderPdf(true);
     if (type === "deal") setDownloadingDealPdf(true);
     try {
@@ -1020,6 +1032,18 @@ BSE Member ID: 6963`
     if (!emailTo.trim()) {
       toast.error("Client email is not available.");
       return;
+    }
+
+    if (emailPdfType === "deal") {
+      const payoutTime = String(rfq?.payoutTime ?? "").trim();
+      if (!payoutTime) {
+        const proceed = window.confirm(
+          "Payout time is not available for this order yet.\n\n" +
+            "Settlement Date & Time will be left blank on the deal sheet.\n\n" +
+            "Do you still want to email the deal sheet PDF?",
+        );
+        if (!proceed) return;
+      }
     }
 
     setSendingPdfEmail(true);

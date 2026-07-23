@@ -779,7 +779,8 @@ function OrderDetailsView() {
                       )}
                     {(orderInfo?.rfqNumber || order.reqOrderNumber) && (
                       <span className="inline-flex items-center rounded-md border border-gray-100 px-2.5 py-1 font-mono text-[11px] text-gray-500">
-                        RFQ {orderInfo?.rfqNumber || order.reqOrderNumber}
+                        Settlement Order Number{" "}
+                        {orderInfo?.rfqNumber || order.reqOrderNumber}
                       </span>
                     )}
                     {defaultSettlementNumber ? (
@@ -863,6 +864,9 @@ function OrderDetailsView() {
           defaultSettlementNumber={defaultSettlementNumber}
           defaultAutofillSettlementDate={defaultAutofillSettlementDate}
           defaultLastCouponDate={orderInfo?.date.lastCouponDate || null}
+          settleOrderTradeNumber={
+            orderInfo?.rfqNumber || order.reqOrderNumber || null
+          }
         />
       ) : null}
 
@@ -2940,7 +2944,7 @@ function OrderDetailsView() {
                   </SummaryRow>
                 ) : null}
                 {(orderInfo?.rfqNumber || order.reqOrderNumber) && (
-                  <SummaryRow label="RFQ Number">
+                  <SummaryRow label="Settlement Order Number">
                     <span className="font-mono">
                       {orderInfo?.rfqNumber || order.reqOrderNumber}
                     </span>

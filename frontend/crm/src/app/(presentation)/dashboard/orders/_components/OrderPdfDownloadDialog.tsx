@@ -61,6 +61,8 @@ type OrderPdfDownloadDialogProps = {
   defaultAutofillSettlementDate?: string | null;
   /** Settlement+record last-coupon (YYYY-MM-DD) from orderInfo — seeds the field before autofill. */
   defaultLastCouponDate?: string | null;
+  /** NSE settle_order trade number — used to detect missing payoutTime before deal PDF. */
+  settleOrderTradeNumber?: string | null;
 };
 
 export function OrderPdfDownloadDialog({
@@ -71,6 +73,7 @@ export function OrderPdfDownloadDialog({
   defaultSettlementNumber,
   defaultAutofillSettlementDate,
   defaultLastCouponDate,
+  settleOrderTradeNumber,
 }: OrderPdfDownloadDialogProps) {
   const ordersApi = new apiGateway.crm.crmOrdersApi(apiClientCaller);
   const [form, setForm] = useState<ReceiptPdfFormState>(EMPTY_FORM);
@@ -314,6 +317,28 @@ export function OrderPdfDownloadDialog({
   const handleDownload = async () => {
     const accruedInterestDaysNum = getValidatedAccruedInterestDays(form.pdfAccruedInterestDays);
     if (accruedInterestDaysNum == null) return;
+
+    if (pdfType === "deal") {
+      const tradeKey =
+        settleOrderTradeNumber?.trim() || orderNumber.trim() || "";
+      let payoutTime = "";
+      if (tradeKey) {
+        try {
+          const rfqRes = await ordersApi.getRfqByOrderNumber(tradeKey);
+          payoutTime = String(rfqRes.responseData?.payoutTime ?? "").trim();
+        } catch {
+          // If settle order cannot be loaded, still warn as missing.
+        }
+      }
+      if (!payoutTime) {
+        const proceed = window.confirm(
+          "Payout time is not available for this order yet.\n\n" +
+            "Settlement Date & Time will be left blank on the deal sheet.\n\n" +
+            "Do you still want to generate the deal sheet PDF?",
+        );
+        if (!proceed) return;
+      }
+    }
 
     setDownloading(true);
     try {
