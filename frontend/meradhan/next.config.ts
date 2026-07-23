@@ -34,10 +34,9 @@ const nextConfig: NextConfig = {
       new webpack.IgnorePlugin({ resourceRegExp: /^webworker-threads$/ }),
     );
 
-    // Deduplicate React. Always on the client; on the server only for production
-    // builds (Docker page-data collection). Skipping server alias in `next dev`
-    // avoids Next DevTools SSR breakage (useContext null / SegmentTrieNode).
-    if (!isServer || process.env.NODE_ENV === "production") {
+    // Deduplicate nested React on the client only — server alias breaks SSR hooks
+    // (NextTopLoader useEffect null). Strip nested react in Dockerfiles instead.
+    if (!isServer) {
       config.resolve.alias = {
         ...config.resolve.alias,
         react: reactDir,

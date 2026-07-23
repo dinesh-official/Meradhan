@@ -40,11 +40,9 @@ const nextConfig: NextConfig = {
     position: "bottom-left",
   },
   webpack: (config, { isServer }) => {
-    // Linked packages (kyc-providers → @react-pdf/renderer) nest a second React.
-    // Always dedupe on the client; on the server only for production builds so
-    // Docker page-data collection (e.g. /dashboard/rfqs/nse) gets one React.
-    // Skipping server alias in `next dev` avoids Next DevTools SSR breakage.
-    if (!isServer || process.env.NODE_ENV === "production") {
+    // Deduplicate nested React on the client only — server alias breaks SSR hooks
+    // (NextTopLoader useEffect null). Strip nested react in Dockerfiles instead.
+    if (!isServer) {
       config.resolve.alias = {
         ...config.resolve.alias,
         react: reactDir,
