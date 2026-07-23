@@ -458,69 +458,7 @@ jobs:
               --username AWS \
               --password-stdin 450321244603.dkr.ecr.ap-south-1.amazonaws.com
 
-      - name: Build & Push Docker Images
-        shell: bash
-        run: |
 
-          set -e
-
-          declare -A SERVICES=()
-
-          if [ "${{ inputs.frontend }}" = "true" ]; then
-            SERVICES["$FRONTEND_NAME"]="frontendDockerfile"
-          fi
-
-          if [ "${{ inputs.backend }}" = "true" ]; then
-            SERVICES["$BACKEND_NAME"]="backenddocker"
-          fi
-
-          if [ "${{ inputs.crm }}" = "true" ]; then
-            SERVICES["$CRM_NAME"]="crmdockerfile"
-          fi
-
-          if [ "${{ inputs.worker }}" = "true" ]; then
-            SERVICES["$WORKER_NAME"]="workerDocker"
-          fi
-
-          if [ ${#SERVICES[@]} -eq 0 ]; then
-            echo "No services selected."
-            #exit 1 
-          fi
-
-          echo "======================================"
-          echo "Building Docker Images"
-          echo "======================================"
-
-          for REPOSITORY in "${!SERVICES[@]}"
-          do
-            (
-              DOCKERFILE="${SERVICES[$REPOSITORY]}"
-              IMAGE="450321244603.dkr.ecr.ap-south-1.amazonaws.com/${REPOSITORY}:latest"
-
-              echo ""
-              echo "Repository : $REPOSITORY"
-              echo "Dockerfile : $DOCKERFILE"
-
-              docker buildx build \
-                --file "$DOCKERFILE" \
-                --tag "$IMAGE" \
-                --cache-from type=gha \
-                --cache-to type=gha,mode=max \
-                --push \
-                .
-
-              #docker push "$IMAGE"
-
-              echo "Completed : $REPOSITORY"
-            ) &
-          done
-
-          wait
-
-          echo ""
-          echo "======================================"
-          echo "All Selected Docker Images Built & Pushed"
-          echo "======================================"
 
       - name: Create or Reuse Instance
         id: create_ec2
@@ -896,6 +834,29 @@ jobs:
             exit 1
           fi
 
+          # ---------------------------------------------------------
+          # Output accumulators
+          #
+          # Written via an EXIT trap so that a downstream cleanup job
+          # still learns what was created even if this step fails
+          # (e.g. a target never becomes healthy).
+          # ---------------------------------------------------------
+          RULE_ARNS=""
+          TARGET_GROUP_ARNS=""
+          TG_RULE_MAP=""     # service|tg_arn|rule_arn triplets, comma separated
+
+          write_outputs() {
+            local RC=$?
+            {
+              echo "rule_arns=${RULE_ARNS%,}"
+              echo "target_group_arns=${TARGET_GROUP_ARNS%,}"
+              echo "tg_rule_map=${TG_RULE_MAP%,}"
+            } >> "$GITHUB_OUTPUT" || true
+            return $RC
+          }
+
+          trap write_outputs EXIT
+
           KIBANA_NAME="${ENV_CODE}${BRANCH_CODE}e"
 
           declare -A TARGET_GROUPS=()   # tg_name -> "port:idtag"
@@ -991,8 +952,10 @@ jobs:
 
           # ---------------------------------------------------------
           # Helper: create a rule with retry-on-priority-conflict.
-          # Starting candidate = MAX_PRIORITY + PRIORITY_OFFSET (i.e. +2),
-          # then increments by 1 on each conflict retry.
+          #
+          # IMPORTANT: stdout of this function is CAPTURED by the caller,
+          # so every human-readable line goes to stderr (>&2). The ONLY
+          # thing written to stdout is the final "RULE_ARN|PRIORITY".
           # ---------------------------------------------------------
           create_rule_with_retry() {
             local HOST="$1"
@@ -1004,9 +967,9 @@ jobs:
             MAX_PRIORITY=$(get_max_priority)
             local CANDIDATE=$((MAX_PRIORITY + PRIORITY_OFFSET))
 
-            echo "Highest existing priority : $MAX_PRIORITY"
-            echo "Priority offset           : +${PRIORITY_OFFSET}"
-            echo "Initial candidate priority: $CANDIDATE"
+            echo "Highest existing priority : $MAX_PRIORITY" >&2
+            echo "Priority offset           : +${PRIORITY_OFFSET}" >&2
+            echo "Initial candidate priority: $CANDIDATE" >&2
 
             while [ "$ATTEMPT" -le "$MAX_PRIORITY_RETRIES" ]; do
 
@@ -1017,7 +980,7 @@ jobs:
                 CANDIDATE=$((CANDIDATE + 1))
               done
 
-              echo "Attempt ${ATTEMPT}: trying priority ${CANDIDATE}..."
+              echo "Attempt ${ATTEMPT}: trying priority ${CANDIDATE}..." >&2
 
               set +e
               RULE_ARN=$(aws elbv2 create-rule \
@@ -1032,25 +995,26 @@ jobs:
 
               if [ "$RC" -eq 0 ] && [ -n "$RULE_ARN" ] && [ "$RULE_ARN" != "None" ]; then
                 echo "LISTENER_PRIORITY=$CANDIDATE" >> "$GITHUB_ENV"
+                # The ONLY stdout line — this is what the caller parses.
                 echo "$RULE_ARN|$CANDIDATE"
                 return 0
               fi
 
               if grep -qi "PriorityInUse" /tmp/create_rule_err.log; then
-                echo "Priority ${CANDIDATE} taken by a concurrent run. Retrying..."
+                echo "Priority ${CANDIDATE} taken by a concurrent run. Retrying..." >&2
                 ATTEMPT=$((ATTEMPT + 1))
                 CANDIDATE=$((CANDIDATE + 1))
                 sleep $((RANDOM % 3 + 1))
                 continue
               fi
 
-              echo "ERROR creating listener rule:"
-              cat /tmp/create_rule_err.log
+              echo "ERROR creating listener rule:" >&2
+              cat /tmp/create_rule_err.log >&2
               return 1
 
             done
 
-            echo "ERROR: Exhausted ${MAX_PRIORITY_RETRIES} attempts to find a free priority."
+            echo "ERROR: Exhausted ${MAX_PRIORITY_RETRIES} attempts to find a free priority." >&2
             return 1
           }
 
@@ -1183,6 +1147,10 @@ jobs:
               fi
             fi
 
+            # Record the TG ARN as soon as it exists, so a TG created here
+            # is still reported even if the listener rule step below fails.
+            TARGET_GROUP_ARNS="${TARGET_GROUP_ARNS}${TG_ARN},"
+
             # -----------------------------------------------------
             # 2. Register instance (skip if already registered on this port)
             # -----------------------------------------------------
@@ -1199,7 +1167,7 @@ jobs:
 
             # -----------------------------------------------------
             # 3. Create or reuse Listener Rule FIRST.
-            #    New rules get priority = MAX_PRIORITY + 2 (offset),
+            #    New rules get priority = MAX_PRIORITY + PRIORITY_OFFSET,
             #    incrementing further only if that slot is taken.
             # -----------------------------------------------------
             EXISTING_RULE_ARN=$(find_rule_arn_for_host "$HOST_HEADER")
@@ -1243,6 +1211,10 @@ jobs:
             echo "Rule ARN      : $RULE_ARN"
             echo "Rule Priority : $USED_PRIORITY"
 
+            # Record the rule ARN + the service -> tg -> rule mapping.
+            RULE_ARNS="${RULE_ARNS}${RULE_ARN},"
+            TG_RULE_MAP="${TG_RULE_MAP}${ID_TAG}|${TG_ARN}|${RULE_ARN},"
+
             # -----------------------------------------------------
             # 4. NOW wait until target is healthy (bounded)
             # -----------------------------------------------------
@@ -1274,9 +1246,18 @@ jobs:
             echo "| Service | Target Group | TG Status | URL | Health Path | Rule Status | Priority | Health |"
             echo "|---|---|---|---|---|---|---|---|"
             echo -e "$SUMMARY_ROWS"
+            echo ""
+            echo "**Target Group ARNs:** \`${TARGET_GROUP_ARNS%,}\`  "
+            echo "**Rule ARNs:** \`${RULE_ARNS%,}\`  "
           } >> "$GITHUB_STEP_SUMMARY"
 
           echo ""
+          echo "======================================"
+          echo "Collected Output"
+          echo "======================================"
+          echo "target_group_arns : ${TARGET_GROUP_ARNS%,}"
+          echo "rule_arns         : ${RULE_ARNS%,}"
+          echo "tg_rule_map       : ${TG_RULE_MAP%,}"
           echo "======================================"
           echo "All Target Groups & Listener Rules Configured"
           echo "======================================"
