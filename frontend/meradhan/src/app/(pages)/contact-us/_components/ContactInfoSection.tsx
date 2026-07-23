@@ -1,3 +1,5 @@
+"use client";
+
 import { CONTACT_INFO } from "@/constants/contact";
 import { ContactCard } from "./ContactCard";
 

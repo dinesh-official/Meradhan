@@ -1,9 +1,10 @@
+"use client";
+
 import DataInfoLabel from "@/app/(account)/_components/cards/DataInfoLabel";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { GetCustomerResponseById } from "@root/apiGateway";
 import { FaCheckSquare } from "react-icons/fa";
 import ProfileContactFields from "../ProfileContactFields";
-import AccountClosureSection from "../AccountClosureSection";
 
 function PersonalDetails({
   profile,

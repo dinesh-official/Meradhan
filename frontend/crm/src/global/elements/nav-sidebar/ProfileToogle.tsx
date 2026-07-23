@@ -1,6 +1,6 @@
 "use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ASSETS_URL } from "@/global/constants/domains";
+import { genMediaUrl } from "@/global/utils/url.utils";
 import { UserSessionDataResponse } from "@root/apiGateway";
 import { User2 } from "lucide-react";
 import ProfileToggleAction from "./actions/ProfileToogleAction";
@@ -17,7 +17,9 @@ function ProfileTopView({
           <p className="text-gray-500 text-xs">{session?.role}</p>
         </div>
         <Avatar>
-          <AvatarImage src={ASSETS_URL + session?.avatar} />
+          <AvatarImage
+            src={session?.avatar ? genMediaUrl(session.avatar) : undefined}
+          />
           <AvatarFallback>
             <User2 size={15} className="text-gray-500" />
           </AvatarFallback>

@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
   devIndicators: {
     position: "bottom-left",
   },
-  webpack: (config, { webpack }) => {
+  webpack: (config, { isServer, webpack }) => {
     // Prevent canvas.node from being bundled
     config.externals.push({
       canvas: "commonjs canvas",
@@ -19,13 +19,23 @@ const nextConfig: NextConfig = {
       new webpack.IgnorePlugin({ resourceRegExp: /^webworker-threads$/ }),
     );
 
-    // Monorepo / Docker installs can pull duplicate React copies; that makes
-    // createContext undefined during SSR page-data collection (e.g. /_not-found).
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      react: path.resolve(__dirname, "node_modules/react"),
-      "react-dom": path.resolve(__dirname, "node_modules/react-dom"),
-    };
+    // Deduplicate React on the client only. Aliasing on the server breaks Next's
+    // SSR/devtools (useContext null / invalid hook call via SegmentTrieNode).
+    if (!isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        react: path.resolve(__dirname, "node_modules/react"),
+        "react-dom": path.resolve(__dirname, "node_modules/react-dom"),
+        "react/jsx-runtime": path.resolve(
+          __dirname,
+          "node_modules/react/jsx-runtime.js",
+        ),
+        "react/jsx-dev-runtime": path.resolve(
+          __dirname,
+          "node_modules/react/jsx-dev-runtime.js",
+        ),
+      };
+    }
 
     return config;
   },
