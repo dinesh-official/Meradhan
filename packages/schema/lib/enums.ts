@@ -13,3 +13,9 @@ export const ServiceRequestReasonStatusEnum = z.enum(["ACTIVE", "INACTIVE"]);
 export const gender = ["MALE", "FEMALE", "OTHER"] as const;
 export const GenderEnum = z.enum(gender, { error: "Invalid select valid gender type" });
 
+/** CRM-assigned risk profile on customer profile (not KYC questionnaire). */
+export const crmRiskProfileValues = ["LOW", "MEDIUM", "HIGH"] as const;
+export const CrmRiskProfileEnum = z.enum(crmRiskProfileValues, {
+  error: "Invalid risk profile. Choose LOW, MEDIUM, or HIGH",
+});
+

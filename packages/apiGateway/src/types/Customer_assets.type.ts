@@ -4,6 +4,8 @@ export type BankAccountType = "SAVING" | "CURRENT" | "SALARY";
 export type DepositoryName = "NSDL" | "CDSL";
 export type DematAccountType = "SOLO" | "JOINT";
 export type AccountStatus = "ACTIVE" | "SUSPENDED" | "CLOSED";
+/** CRM-assigned risk profile (independent of KYC questionnaire answers). */
+export type CrmRiskProfile = "LOW" | "MEDIUM" | "HIGH";
 export type SigninWith = "CREDENTIALS" | "GOOGLE" | "GITHUB" | "APPLE";
 export type CustomerUserType =
   | "INDIVIDUAL"
