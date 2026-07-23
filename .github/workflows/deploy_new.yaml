@@ -873,37 +873,19 @@ jobs:
           echo "Resolved VPC ID       : $VPC_ID_VAL"
           echo "======================================"
 
-          
       - name: Create or Reuse Target Groups & Listener Rules
         id: tg_listener
         shell: bash
         run: |
-          set -eo pipefail
+          set -e
 
-          # ===========================================================
-          # Config
-          # ===========================================================
           ROOT_DOMAIN="meradhan.co"
           INSTANCE_ID="${{ steps.create_ec2.outputs.instance_id }}"
 
+          HEALTH_TIMEOUT_SECONDS=300     # 5 min max wait per target
           HEALTH_POLL_INTERVAL=10
           MAX_PRIORITY_RETRIES=10
           PRIORITY_OFFSET=1          # new rule priority = MAX_PRIORITY + PRIORITY_OFFSET
-
-          # Set to "false" if you want failed targets left registered
-          # so you can inspect them in the console after a failed run.
-          ROLLBACK_ON_FAILURE="true"
-
-          # ALB health-check tuning. Applied to created AND reused TGs.
-          # 10s interval x 2 healthy checks => target flips healthy ~20s
-          # after the app actually starts answering.
-          HC_INTERVAL=10
-          HC_TIMEOUT=5
-          HC_HEALTHY_THRESHOLD=2
-          HC_UNHEALTHY_THRESHOLD=5
-
-          VPC_ID="${VPC_ID:-}"
-          LISTENER_ARN="${LISTENER_ARN:-}"
 
           if [ -z "$VPC_ID" ]; then
             echo "ERROR: VPC_ID was not exported by the 'Get Listener ARN & VPC ID' step."
@@ -915,70 +897,36 @@ jobs:
             exit 1
           fi
 
-          if [ -z "$INSTANCE_ID" ] || [ "$INSTANCE_ID" = "None" ]; then
-            echo "ERROR: INSTANCE_ID is empty — did the 'create_ec2' step succeed?"
-            exit 1
-          fi
-
           KIBANA_NAME="${ENV_CODE}${BRANCH_CODE}e"
 
-          # If `inputs.kibana` is not declared on the workflow, this
-          # expression renders empty and we default to enabled, which
-          # preserves the previous always-on behaviour.
-          KIBANA_ENABLED="${{ inputs.kibana }}"
-          if [ -z "$KIBANA_ENABLED" ]; then
-            KIBANA_ENABLED="true"
-          fi
-
-          declare -A TARGET_GROUPS=()    # tg_name -> "port:idtag"
-          declare -A HOST_HEADERS=()     # tg_name -> full domain
-          declare -A HEALTH_PATHS=()     # tg_name -> health check path
-          declare -A HEALTH_MATCHERS=()  # tg_name -> acceptable HTTP codes
-          declare -A HEALTH_TIMEOUTS=()  # tg_name -> max seconds to wait
+          declare -A TARGET_GROUPS=()   # tg_name -> "port:idtag"
+          declare -A HOST_HEADERS=()    # tg_name -> full domain
+          declare -A HEALTH_PATHS=()    # tg_name -> health check path
 
           if [ "${{ inputs.backend }}" = "true" ]; then
             TARGET_GROUPS["tg-$BACKEND_NAME"]="4000:$BACKEND_NAME"
             HOST_HEADERS["tg-$BACKEND_NAME"]="${BACKEND_NAME}.${ROOT_DOMAIN}"
             HEALTH_PATHS["tg-$BACKEND_NAME"]="/health"
-            HEALTH_MATCHERS["tg-$BACKEND_NAME"]="200"
-            HEALTH_TIMEOUTS["tg-$BACKEND_NAME"]=300
           fi
 
           if [ "${{ inputs.crm }}" = "true" ]; then
             TARGET_GROUPS["tg-$CRM_NAME"]="4001:$CRM_NAME"
             HOST_HEADERS["tg-$CRM_NAME"]="${CRM_NAME}.${ROOT_DOMAIN}"
             HEALTH_PATHS["tg-$CRM_NAME"]="/login"
-            # /login often 302s to an SSO or locale route — widen if so.
-            HEALTH_MATCHERS["tg-$CRM_NAME"]="200"
-            HEALTH_TIMEOUTS["tg-$CRM_NAME"]=300
           fi
 
           if [ "${{ inputs.frontend }}" = "true" ]; then
             TARGET_GROUPS["tg-$FRONTEND_NAME"]="4002:$FRONTEND_NAME"
             HOST_HEADERS["tg-$FRONTEND_NAME"]="${FRONTEND_NAME}.${ROOT_DOMAIN}"
             HEALTH_PATHS["tg-$FRONTEND_NAME"]="/"
-            HEALTH_MATCHERS["tg-$FRONTEND_NAME"]="200"
-            HEALTH_TIMEOUTS["tg-$FRONTEND_NAME"]=300
           fi
 
-          if [ "$KIBANA_ENABLED" = "true" ]; then
-            # Kibana / observability UI (port 5601).
-            #
-            # NOTE: /api/status returns 503 (not 200) until Elasticsearch
-            # is reachable and every plugin has finished loading. Do NOT
-            # add 503 to the matcher to "fix" a failing check — that just
-            # marks a broken Kibana as healthy. Give it time instead.
-            #
-            # If kibana.yml sets `server.basePath`, the real path is
-            # /<basePath>/api/status — update HEALTH_PATHS accordingly.
-            TARGET_GROUPS["tg-$KIBANA_NAME"]="5601:$KIBANA_NAME"
-            HOST_HEADERS["tg-$KIBANA_NAME"]="${KIBANA_NAME}.${ROOT_DOMAIN}"
-            HEALTH_PATHS["tg-$KIBANA_NAME"]="/api/status"
-            HEALTH_MATCHERS["tg-$KIBANA_NAME"]="200"
-            HEALTH_TIMEOUTS["tg-$KIBANA_NAME"]=600
-          else
-            echo "Kibana disabled via inputs.kibana — skipping tg-${KIBANA_NAME}."
-          fi
+          # Kibana / observability UI target group (port 5601)
+          # Always created (no toggle input) — add an `inputs.kibana` boolean
+          # gate here later if you want it optional like the others.
+          TARGET_GROUPS["tg-$KIBANA_NAME"]="5601:$KIBANA_NAME"
+          HOST_HEADERS["tg-$KIBANA_NAME"]="${KIBANA_NAME}.${ROOT_DOMAIN}"
+          HEALTH_PATHS["tg-$KIBANA_NAME"]="/api/status"
 
           if [ ${#TARGET_GROUPS[@]} -eq 0 ]; then
             echo "No services selected — nothing to do."
@@ -989,64 +937,9 @@ jobs:
             exit 0
           fi
 
-          # ===========================================================
-          # Rollback bookkeeping — only touches things THIS run created
-          # ===========================================================
-          declare -a RB_DEREGISTER=()    # "tg_arn port"
-          declare -a RB_DELETE_RULE=()   # "rule_arn"
-          declare -a RB_RESTORE_RULE=()  # "rule_arn prev_tg_arn"
-
-          rollback() {
-            if [ "$ROLLBACK_ON_FAILURE" != "true" ]; then
-              echo ""
-              echo "Rollback disabled (ROLLBACK_ON_FAILURE=false)."
-              echo "Resources left in place for debugging."
-              return 0
-            fi
-
-            echo ""
-            echo "===== ROLLBACK ==============================="
-
-            if [ ${#RB_RESTORE_RULE[@]} -gt 0 ]; then
-              for ENTRY in "${RB_RESTORE_RULE[@]}"; do
-                local R_ARN="${ENTRY%% *}"
-                local P_TG="${ENTRY##* }"
-                if [ -n "$P_TG" ] && [ "$P_TG" != "None" ]; then
-                  echo "Restoring rule ${R_ARN} -> previous target group ${P_TG}"
-                  aws elbv2 modify-rule \
-                    --rule-arn "$R_ARN" \
-                    --actions Type=forward,TargetGroupArn="$P_TG" >/dev/null 2>&1 \
-                    || echo "  (restore failed — check this rule manually)"
-                fi
-              done
-            fi
-
-            if [ ${#RB_DELETE_RULE[@]} -gt 0 ]; then
-              for R_ARN in "${RB_DELETE_RULE[@]}"; do
-                echo "Deleting listener rule created by this run: ${R_ARN}"
-                aws elbv2 delete-rule --rule-arn "$R_ARN" >/dev/null 2>&1 \
-                  || echo "  (delete failed — check this rule manually)"
-              done
-            fi
-
-            if [ ${#RB_DEREGISTER[@]} -gt 0 ]; then
-              for ENTRY in "${RB_DEREGISTER[@]}"; do
-                local T_ARN="${ENTRY%% *}"
-                local T_PORT="${ENTRY##* }"
-                echo "Deregistering ${INSTANCE_ID}:${T_PORT} from ${T_ARN}"
-                aws elbv2 deregister-targets \
-                  --target-group-arn "$T_ARN" \
-                  --targets Id="$INSTANCE_ID",Port="$T_PORT" >/dev/null 2>&1 \
-                  || echo "  (deregister failed — check this target manually)"
-              done
-            fi
-
-            echo "=============================================="
-          }
-
-          # ===========================================================
+          # ---------------------------------------------------------
           # Helper: find an existing listener rule for an exact host-header
-          # ===========================================================
+          # ---------------------------------------------------------
           find_rule_arn_for_host() {
             local HOST="$1"
 
@@ -1067,9 +960,9 @@ jobs:
             | head -n 1
           }
 
-          # ===========================================================
-          # Helper: current highest numeric priority on the listener
-          # ===========================================================
+          # ---------------------------------------------------------
+          # Helper: get current highest numeric priority on the listener
+          # ---------------------------------------------------------
           get_max_priority() {
             local EXISTING_PRIORITIES
             EXISTING_PRIORITIES=$(aws elbv2 describe-rules \
@@ -1086,9 +979,9 @@ jobs:
             fi
           }
 
-          # ===========================================================
-          # Helper: all currently used priorities (collision check)
-          # ===========================================================
+          # ---------------------------------------------------------
+          # Helper: get all currently used priorities (for collision check)
+          # ---------------------------------------------------------
           get_used_priorities() {
             aws elbv2 describe-rules \
               --listener-arn "$LISTENER_ARN" \
@@ -1097,14 +990,11 @@ jobs:
             | tr '\t' '\n'
           }
 
-          # ===========================================================
+          # ---------------------------------------------------------
           # Helper: create a rule with retry-on-priority-conflict.
-          #
-          # IMPORTANT: every diagnostic here goes to stderr (>&2).
-          # stdout is reserved for the single "ARN|PRIORITY" result line,
-          # because the caller captures it with $( ). This was the bug in
-          # the previous version.
-          # ===========================================================
+          # Starting candidate = MAX_PRIORITY + PRIORITY_OFFSET (i.e. +2),
+          # then increments by 1 on each conflict retry.
+          # ---------------------------------------------------------
           create_rule_with_retry() {
             local HOST="$1"
             local TG_ARN="$2"
@@ -1115,9 +1005,9 @@ jobs:
             MAX_PRIORITY=$(get_max_priority)
             local CANDIDATE=$((MAX_PRIORITY + PRIORITY_OFFSET))
 
-            echo "Highest existing priority : $MAX_PRIORITY" >&2
-            echo "Priority offset           : +${PRIORITY_OFFSET}" >&2
-            echo "Initial candidate priority: $CANDIDATE" >&2
+            echo "Highest existing priority : $MAX_PRIORITY"
+            echo "Priority offset           : +${PRIORITY_OFFSET}"
+            echo "Initial candidate priority: $CANDIDATE"
 
             while [ "$ATTEMPT" -le "$MAX_PRIORITY_RETRIES" ]; do
 
@@ -1128,7 +1018,7 @@ jobs:
                 CANDIDATE=$((CANDIDATE + 1))
               done
 
-              echo "Attempt ${ATTEMPT}: trying priority ${CANDIDATE}..." >&2
+              echo "Attempt ${ATTEMPT}: trying priority ${CANDIDATE}..."
 
               set +e
               RULE_ARN=$(aws elbv2 create-rule \
@@ -1142,31 +1032,32 @@ jobs:
               set -e
 
               if [ "$RC" -eq 0 ] && [ -n "$RULE_ARN" ] && [ "$RULE_ARN" != "None" ]; then
-                echo "${RULE_ARN}|${CANDIDATE}"
+                echo "LISTENER_PRIORITY=$CANDIDATE" >> "$GITHUB_ENV"
+                echo "$RULE_ARN|$CANDIDATE"
                 return 0
               fi
 
               if grep -qi "PriorityInUse" /tmp/create_rule_err.log; then
-                echo "Priority ${CANDIDATE} taken by a concurrent run. Retrying..." >&2
+                echo "Priority ${CANDIDATE} taken by a concurrent run. Retrying..."
                 ATTEMPT=$((ATTEMPT + 1))
                 CANDIDATE=$((CANDIDATE + 1))
                 sleep $((RANDOM % 3 + 1))
                 continue
               fi
 
-              echo "ERROR creating listener rule:" >&2
-              cat /tmp/create_rule_err.log >&2
+              echo "ERROR creating listener rule:"
+              cat /tmp/create_rule_err.log
               return 1
 
             done
 
-            echo "ERROR: Exhausted ${MAX_PRIORITY_RETRIES} attempts to find a free priority." >&2
+            echo "ERROR: Exhausted ${MAX_PRIORITY_RETRIES} attempts to find a free priority."
             return 1
           }
 
-          # ===========================================================
+          # ---------------------------------------------------------
           # Helper: is instance already registered on this TG/port?
-          # ===========================================================
+          # ---------------------------------------------------------
           is_target_registered() {
             local TG_ARN="$1"
             local PORT="$2"
@@ -1177,160 +1068,43 @@ jobs:
               --output text 2>/dev/null || echo "0"
           }
 
-          # ===========================================================
-          # Helper: wait for target health, reporting Reason + Description
-          # ===========================================================
-          HEALTH_LAST_STATE="unknown"
-          HEALTH_LAST_REASON="-"
-          HEALTH_LAST_DESC="-"
-
+          # ---------------------------------------------------------
+          # Helper: wait for target to become healthy (bounded timeout)
+          # ---------------------------------------------------------
           wait_for_target_health() {
             local TG_ARN="$1"
             local PORT="$2"
-            local TIMEOUT="$3"
             local ELAPSED=0
-            local OUT STATE REASON DESC
+            local STATE="unknown"
 
-            while [ "$ELAPSED" -lt "$TIMEOUT" ]; do
+            while [ "$ELAPSED" -lt "$HEALTH_TIMEOUT_SECONDS" ]; do
 
-              OUT=$(aws elbv2 describe-target-health \
+              STATE=$(aws elbv2 describe-target-health \
                 --target-group-arn "$TG_ARN" \
                 --targets Id="$INSTANCE_ID",Port="$PORT" \
-                --query "TargetHealthDescriptions[0].TargetHealth.[State,Reason,Description]" \
-                --output text 2>/dev/null || true)
+                --query "TargetHealthDescriptions[0].TargetHealth.State" \
+                --output text 2>/dev/null || echo "unknown")
 
-              [ -n "$OUT" ] || OUT=$'unknown\t-\t-'
-
-              IFS=$'\t' read -r STATE REASON DESC <<< "$OUT"
-
-              HEALTH_LAST_STATE="${STATE:-unknown}"
-              HEALTH_LAST_REASON="${REASON:--}"
-              HEALTH_LAST_DESC="${DESC:--}"
-
-              printf 'Health check (%4ss) : %-12s | %-30s | %s\n' \
-                "$ELAPSED" "$HEALTH_LAST_STATE" "$HEALTH_LAST_REASON" "$HEALTH_LAST_DESC"
+              echo "Health check (${ELAPSED}s elapsed) : $STATE"
 
               if [ "$STATE" = "healthy" ]; then
                 return 0
               fi
-
-              # These never recover on their own — stop burning 5 minutes.
-              case "$REASON" in
-                Target.NotRegistered|Target.InvalidState|Target.IpUnusable|Target.NotInUse)
-                  echo "Reason '${REASON}' will not self-heal. Aborting wait early."
-                  return 1
-                  ;;
-              esac
 
               sleep "$HEALTH_POLL_INTERVAL"
               ELAPSED=$((ELAPSED + HEALTH_POLL_INTERVAL))
 
             done
 
+            echo "STATE=$STATE"
             return 1
           }
 
-          # ===========================================================
-          # Helper: AWS-side diagnostics when a target won't go healthy
-          # ===========================================================
-          diagnose_unhealthy() {
-            local TG_ARN="$1"
-            local PORT="$2"
-            local HEALTH_PATH="$3"
-
-            echo ""
-            echo "===== DIAGNOSTICS ============================"
-
-            echo "--- Target health ---"
-            aws elbv2 describe-target-health \
-              --target-group-arn "$TG_ARN" \
-              --targets Id="$INSTANCE_ID",Port="$PORT" \
-              --query "TargetHealthDescriptions[0].TargetHealth" \
-              --output json 2>/dev/null || echo "(unavailable)"
-
-            echo "--- Target group health-check config ---"
-            aws elbv2 describe-target-groups \
-              --target-group-arns "$TG_ARN" \
-              --query "TargetGroups[0].{Proto:HealthCheckProtocol,Path:HealthCheckPath,Port:HealthCheckPort,Interval:HealthCheckIntervalSeconds,Timeout:HealthCheckTimeoutSeconds,Healthy:HealthyThresholdCount,Unhealthy:UnhealthyThresholdCount,Matcher:Matcher.HttpCode}" \
-              --output table 2>/dev/null || echo "(unavailable)"
-
-            local ALB_ARN ALB_SGS INSTANCE_SGS
-            ALB_ARN=$(aws elbv2 describe-listeners \
-              --listener-arns "$LISTENER_ARN" \
-              --query "Listeners[0].LoadBalancerArn" \
-              --output text 2>/dev/null || echo "")
-
-            if [ -n "$ALB_ARN" ] && [ "$ALB_ARN" != "None" ]; then
-              ALB_SGS=$(aws elbv2 describe-load-balancers \
-                --load-balancer-arns "$ALB_ARN" \
-                --query "LoadBalancers[0].SecurityGroups" \
-                --output text 2>/dev/null || echo "")
-              echo "--- Security groups ---"
-              echo "ALB security groups      : ${ALB_SGS:-unknown}"
-            fi
-
-            INSTANCE_SGS=$(aws ec2 describe-instances \
-              --instance-ids "$INSTANCE_ID" \
-              --query "Reservations[0].Instances[0].SecurityGroups[].GroupId" \
-              --output text 2>/dev/null || echo "")
-            echo "Instance security groups : ${INSTANCE_SGS:-unknown}"
-
-            if [ -n "$INSTANCE_SGS" ]; then
-              echo "--- Instance SG ingress rules covering port ${PORT} ---"
-              # shellcheck disable=SC2086
-              aws ec2 describe-security-groups \
-                --group-ids $INSTANCE_SGS \
-                --output json 2>/dev/null \
-              | jq -r --argjson PORT "$PORT" '
-                  .SecurityGroups[]
-                  | .GroupId as $gid
-                  | .IpPermissions[]
-                  | select(
-                      (.IpProtocol == "-1")
-                      or (((.FromPort // 0) <= $PORT) and ((.ToPort // 65535) >= $PORT))
-                    )
-                  | "  \($gid)  proto=\(.IpProtocol)  ports=\(.FromPort // "all")-\(.ToPort // "all")  from=\((([.IpRanges[]?.CidrIp] + [.UserIdGroupPairs[]?.GroupId]) | join(",")))"
-                ' 2>/dev/null || echo "  (could not parse)"
-              echo ""
-              echo "If nothing is listed above, port ${PORT} is NOT open from the ALB."
-            fi
-
-            echo ""
-            echo "Most common causes, in order:"
-            echo "  1. App bound to 127.0.0.1 instead of 0.0.0.0"
-            echo "     -> on the box: ss -tlnp | grep ${PORT}"
-            echo "     -> Kibana: set server.host: \"0.0.0.0\" in kibana.yml"
-            echo "  2. Port ${PORT} not allowed from the ALB security group"
-            echo "  3. App still starting, or dependency (Elasticsearch) unreachable"
-            echo "     -> Kibana returns 503 on /api/status until fully ready"
-            echo "  4. Wrong path: ${HEALTH_PATH} (check server.basePath for Kibana)"
-            echo "  5. Service not installed on this instance at all"
-            echo "=============================================="
-          }
-
-          # ===========================================================
-          # Summary writer (called on success AND failure)
-          # ===========================================================
-          SUMMARY_ROWS=""
-          RUN_RESULT="Success"
-
-          write_summary() {
-            {
-              echo "## Target Group & Listener Rule Summary"
-              echo ""
-              echo "**Result:** ${RUN_RESULT}  "
-              echo "**Environment:** ${{ inputs.environment }}  "
-              echo "**Instance ID:** ${INSTANCE_ID}  "
-              echo ""
-              echo "| Service | Target Group | TG Status | URL | Health Path | Rule Status | Priority | Health |"
-              echo "|---|---|---|---|---|---|---|---|"
-              echo -e "$SUMMARY_ROWS"
-            } >> "$GITHUB_STEP_SUMMARY"
-          }
-
-          # ===========================================================
+          # ---------------------------------------------------------
           # Main loop
-          # ===========================================================
+          # ---------------------------------------------------------
+          SUMMARY_ROWS=""
+
           echo "======================================"
           echo "Environment    : ${{ inputs.environment }}"
           echo "Listener ARN   : $LISTENER_ARN"
@@ -1346,8 +1120,6 @@ jobs:
             ID_TAG="${INFO##*:}"
             HOST_HEADER="${HOST_HEADERS[$TG_NAME]}"
             HEALTH_PATH="${HEALTH_PATHS[$TG_NAME]}"
-            HEALTH_MATCHER="${HEALTH_MATCHERS[$TG_NAME]}"
-            HEALTH_TIMEOUT="${HEALTH_TIMEOUTS[$TG_NAME]}"
 
             echo ""
             echo "--------------------------------------"
@@ -1356,17 +1128,7 @@ jobs:
             echo "Port          : $PORT"
             echo "Host Header   : $HOST_HEADER"
             echo "Health Path   : $HEALTH_PATH"
-            echo "Match Codes   : $HEALTH_MATCHER"
-            echo "Health Budget : ${HEALTH_TIMEOUT}s"
             echo "--------------------------------------"
-
-            # ALB target group names are capped at 32 characters.
-            if [ ${#TG_NAME} -gt 32 ]; then
-              echo "ERROR: Target group name '${TG_NAME}' is ${#TG_NAME} chars (AWS limit: 32)."
-              RUN_RESULT="Failed (target group name too long)"
-              write_summary
-              exit 1
-            fi
 
             # -----------------------------------------------------
             # 1. Create or reuse Target Group
@@ -1391,11 +1153,6 @@ jobs:
                 --health-check-protocol HTTP \
                 --health-check-port traffic-port \
                 --health-check-path "$HEALTH_PATH" \
-                --health-check-interval-seconds "$HC_INTERVAL" \
-                --health-check-timeout-seconds "$HC_TIMEOUT" \
-                --healthy-threshold-count "$HC_HEALTHY_THRESHOLD" \
-                --unhealthy-threshold-count "$HC_UNHEALTHY_THRESHOLD" \
-                --matcher HttpCode="$HEALTH_MATCHER" \
                 --query "TargetGroups[0].TargetGroupArn" \
                 --output text)
 
@@ -1412,27 +1169,23 @@ jobs:
             else
               echo "Target group already exists. Reusing : $TG_ARN"
 
-              # Reused TGs may still carry the slow AWS defaults
-              # (30s interval, 5 healthy checks => ~150s to flip healthy).
-              # Re-apply the full health-check config every run so old and
-              # new target groups behave identically.
-              echo "Re-applying health-check config to existing target group..."
-              aws elbv2 modify-target-group \
-                --target-group-arn "$TG_ARN" \
-                --health-check-protocol HTTP \
-                --health-check-port traffic-port \
-                --health-check-path "$HEALTH_PATH" \
-                --health-check-interval-seconds "$HC_INTERVAL" \
-                --health-check-timeout-seconds "$HC_TIMEOUT" \
-                --healthy-threshold-count "$HC_HEALTHY_THRESHOLD" \
-                --unhealthy-threshold-count "$HC_UNHEALTHY_THRESHOLD" \
-                --matcher HttpCode="$HEALTH_MATCHER" >/dev/null
+              CURRENT_HEALTH_PATH=$(aws elbv2 describe-target-groups \
+                --target-group-arns "$TG_ARN" \
+                --query "TargetGroups[0].HealthCheckPath" \
+                --output text 2>/dev/null || echo "")
 
-              echo "Health-check config applied : ${HEALTH_PATH} (${HEALTH_MATCHER}), ${HC_INTERVAL}s x ${HC_HEALTHY_THRESHOLD}"
+              if [ "$CURRENT_HEALTH_PATH" != "$HEALTH_PATH" ]; then
+                echo "Updating health check path: '${CURRENT_HEALTH_PATH}' -> '${HEALTH_PATH}'"
+                aws elbv2 modify-target-group \
+                  --target-group-arn "$TG_ARN" \
+                  --health-check-path "$HEALTH_PATH" >/dev/null
+              else
+                echo "Health check path already correct : $HEALTH_PATH"
+              fi
             fi
 
             # -----------------------------------------------------
-            # 2. Register instance (skip if already on this port)
+            # 2. Register instance (skip if already registered on this port)
             # -----------------------------------------------------
             ALREADY_REGISTERED=$(is_target_registered "$TG_ARN" "$PORT")
 
@@ -1443,12 +1196,12 @@ jobs:
               aws elbv2 register-targets \
                 --target-group-arn "$TG_ARN" \
                 --targets Id="$INSTANCE_ID",Port="$PORT"
-              RB_DEREGISTER+=("${TG_ARN} ${PORT}")
             fi
 
             # -----------------------------------------------------
-            # 3. Create or reuse Listener Rule FIRST, to claim the
-            #    priority slot before a concurrent run takes it.
+            # 3. Create or reuse Listener Rule FIRST.
+            #    New rules get priority = MAX_PRIORITY + 2 (offset),
+            #    incrementing further only if that slot is taken.
             # -----------------------------------------------------
             EXISTING_RULE_ARN=$(find_rule_arn_for_host "$HOST_HEADER")
 
@@ -1459,20 +1212,9 @@ jobs:
 
               echo "Listener rule already exists for ${HOST_HEADER}. Updating target group binding..."
 
-              # Capture the current binding so a failed health check can
-              # put live traffic back where it was.
-              PREV_TG_ARN=$(aws elbv2 describe-rules \
-                --rule-arns "$EXISTING_RULE_ARN" \
-                --query "Rules[0].Actions[?Type=='forward'].TargetGroupArn | [0]" \
-                --output text 2>/dev/null || echo "")
-
               aws elbv2 modify-rule \
                 --rule-arn "$EXISTING_RULE_ARN" \
                 --actions Type=forward,TargetGroupArn="$TG_ARN" >/dev/null
-
-              if [ -n "$PREV_TG_ARN" ] && [ "$PREV_TG_ARN" != "None" ] && [ "$PREV_TG_ARN" != "$TG_ARN" ]; then
-                RB_RESTORE_RULE+=("${EXISTING_RULE_ARN} ${PREV_TG_ARN}")
-              fi
 
               RULE_ARN="$EXISTING_RULE_ARN"
 
@@ -1485,28 +1227,17 @@ jobs:
 
               echo "No existing rule found for ${HOST_HEADER}. Creating..."
 
-              set +e
               RESULT=$(create_rule_with_retry "$HOST_HEADER" "$TG_ARN")
-              CR_RC=$?
-              set -e
 
-              if [ "$CR_RC" -ne 0 ] || [ -z "$RESULT" ]; then
+              if [ -z "$RESULT" ]; then
                 echo "ERROR: Failed to create listener rule for ${HOST_HEADER}."
-                RUN_RESULT="Failed (listener rule creation)"
-                SUMMARY_ROWS="${SUMMARY_ROWS}| ${ID_TAG} | ${TG_NAME} | ${TG_STATUS} | https://${HOST_HEADER} | ${HEALTH_PATH} | Failed | - | not checked |\n"
-                write_summary
-                rollback
                 exit 1
               fi
 
               RULE_ARN="${RESULT%%|*}"
               USED_PRIORITY="${RESULT##*|}"
+
               RULE_STATUS="Created"
-
-              RB_DELETE_RULE+=("$RULE_ARN")
-
-              PRIORITY_VAR="LISTENER_PRIORITY_$(echo "$ID_TAG" | tr '[:lower:]' '[:upper:]' | tr -c 'A-Z0-9_' '_')"
-              echo "${PRIORITY_VAR}=${USED_PRIORITY}" >> "$GITHUB_ENV"
 
             fi
 
@@ -1514,27 +1245,17 @@ jobs:
             echo "Rule Priority : $USED_PRIORITY"
 
             # -----------------------------------------------------
-            # 4. Wait until the target is healthy (bounded)
+            # 4. NOW wait until target is healthy (bounded)
             # -----------------------------------------------------
-            echo "Waiting for target to become healthy (timeout ${HEALTH_TIMEOUT}s)..."
+            echo "Waiting for target to become healthy (timeout ${HEALTH_TIMEOUT_SECONDS}s)..."
 
-            if wait_for_target_health "$TG_ARN" "$PORT" "$HEALTH_TIMEOUT"; then
+            if wait_for_target_health "$TG_ARN" "$PORT"; then
               HEALTH_STATE="healthy"
               echo "Target is healthy."
             else
-              HEALTH_STATE="${HEALTH_LAST_STATE} (${HEALTH_LAST_REASON})"
-              echo ""
-              echo "ERROR: ${ID_TAG} did not become healthy within ${HEALTH_TIMEOUT}s."
-              echo "Last state  : ${HEALTH_LAST_STATE}"
-              echo "Last reason : ${HEALTH_LAST_REASON}"
-              echo "Description : ${HEALTH_LAST_DESC}"
-
-              diagnose_unhealthy "$TG_ARN" "$PORT" "$HEALTH_PATH"
-
-              RUN_RESULT="Failed (${ID_TAG} unhealthy)"
-              SUMMARY_ROWS="${SUMMARY_ROWS}| ${ID_TAG} | ${TG_NAME} | ${TG_STATUS} | https://${HOST_HEADER} | ${HEALTH_PATH} | ${RULE_STATUS} | ${USED_PRIORITY} | ${HEALTH_STATE} |\n"
-              write_summary
-              rollback
+              HEALTH_STATE="unhealthy/timeout"
+              echo "ERROR: Target did not become healthy within ${HEALTH_TIMEOUT_SECONDS}s."
+              echo "Check security groups, health-check path (${HEALTH_PATH}), and app startup time on port ${PORT}."
               exit 1
             fi
 
@@ -1542,7 +1263,19 @@ jobs:
 
           done
 
-          write_summary
+          # ---------------------------------------------------------
+          # Write summary table to GitHub Actions UI
+          # ---------------------------------------------------------
+          {
+            echo "## Target Group & Listener Rule Summary"
+            echo ""
+            echo "**Environment:** ${{ inputs.environment }}  "
+            echo "**Instance ID:** ${INSTANCE_ID}  "
+            echo ""
+            echo "| Service | Target Group | TG Status | URL | Health Path | Rule Status | Priority | Health |"
+            echo "|---|---|---|---|---|---|---|---|"
+            echo -e "$SUMMARY_ROWS"
+          } >> "$GITHUB_STEP_SUMMARY"
 
           echo ""
           echo "======================================"
