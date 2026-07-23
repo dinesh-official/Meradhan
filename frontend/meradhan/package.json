@@ -106,6 +106,10 @@
     "zod": "^4.1.12",
     "zustand": "^5.0.8"
   },
+  "overrides": {
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
