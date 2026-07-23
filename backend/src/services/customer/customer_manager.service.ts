@@ -126,6 +126,9 @@ export class CustomerProfileManager {
           ...(data.userType !== undefined && { userType: data.userType }),
           ...(data.gender !== undefined && { gender: data.gender }),
           ...(data.kycStatus !== undefined && { kycStatus: data.kycStatus }),
+          ...(data.crmRiskProfile !== undefined && {
+            crmRiskProfile: data.crmRiskProfile,
+          }),
           utility: {
             update: {
               ...(data.status !== undefined && { accountStatus: data.status }),

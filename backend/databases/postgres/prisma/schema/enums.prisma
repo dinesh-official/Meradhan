@@ -91,6 +91,13 @@ enum KYCStatus {
   RE_KYC
 }
 
+/// CRM-assigned investment risk profile (admin-managed; independent of KYC questionnaire)
+enum CrmRiskProfile {
+  LOW
+  MEDIUM
+  HIGH
+}
+
 // Lead Sources
 enum LeadSource {
   WEBSITE

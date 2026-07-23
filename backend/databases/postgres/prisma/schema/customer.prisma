@@ -97,6 +97,9 @@ model CustomerProfileDataModel {
     isAPep           Boolean @default(false)
     allowSEBITerms   Boolean @default(false)
 
+    /// CRM-only risk level (LOW / MEDIUM / HIGH). Not used by KYC questionnaire or customer app.
+    crmRiskProfile CrmRiskProfile?
+
     createdAt     DateTime        @default(now())
     updatedAt     DateTime        @updatedAt
     createdBy     Int?

@@ -4,6 +4,7 @@ import type {
   AccountStatus,
   Address,
   BankAccount,
+  CrmRiskProfile,
   CustomerUserType,
   DematAccount,
   Gender,
@@ -11,6 +12,8 @@ import type {
   PanCard,
   SigninWith,
 } from "./Customer_assets.type";
+
+export type { CrmRiskProfile } from "./Customer_assets.type";
 
 type Role = (typeof ROLES)[number];
 
@@ -334,6 +337,8 @@ export type CustomerByIdPayload = {
   allowSEBITerms: boolean;
   kycSubmitDate: string | null;
   isAPep: boolean;
+  /** CRM-only risk level. Independent of KYC questionnaire `riskProfile`. */
+  crmRiskProfile: CrmRiskProfile | null;
   utility: DetailCustomerUtility;
 };
 
