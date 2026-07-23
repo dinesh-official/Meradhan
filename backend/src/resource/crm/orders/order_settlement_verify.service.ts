@@ -7,9 +7,10 @@ import { processCbricsSettlementWebhook } from "@services/notifications/cbrics_s
 
 /**
  * NSE `settle_order.settleStatus` → human label (as documented by CBRICS).
+ * Status 0 is shown as In Progress for CRM (settlement has started / is pending payout).
  */
 const SETTLE_STATUS_LABELS: Record<number, string> = {
-  0: "Settlement Pending",
+  0: "In Progress",
   1: "Securities Payin Done",
   2: "Funds Payin Done",
   3: "Payin Completed",
@@ -60,13 +61,12 @@ export class OrderSettlementVerifyService {
 
   /**
    * NSE `settleStatus` → Prisma `OrderStatus`.
-   * 0 Pending · 1–3 In progress · 4 Settled · 5/7/9 Rejected · 6 Expired · 8 Cancelled
+   * 0–3 In progress · 4 Settled · 5/7/9 Rejected · 6 Expired · 8 Cancelled
    */
   private mapSettleStatus(settleStatus: number | null | undefined): OrderStatus | null {
     if (settleStatus == null || !Number.isInteger(settleStatus)) return null;
     switch (settleStatus) {
       case 0:
-        return OrderStatus.PENDING;
       case 1:
       case 2:
       case 3:

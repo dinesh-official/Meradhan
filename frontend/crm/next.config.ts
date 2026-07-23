@@ -1,5 +1,9 @@
 import type { NextConfig } from "next";
+import path from "path";
 import { BASES_URLS } from "./src/core/config/base.urls";
+
+const reactDir = path.resolve(__dirname, "node_modules/react");
+const reactDomDir = path.resolve(__dirname, "node_modules/react-dom");
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -7,6 +11,14 @@ const nextConfig: NextConfig = {
   trailingSlash: false,
   reactStrictMode: false,
   transpilePackages: ["@root/apiGateway", "@root/schema", "kyc-providers"],
+  // Keep PDF/native deps out of the RSC server graph (avoids createContext errors).
+  serverExternalPackages: [
+    "@react-pdf/renderer",
+    "@ag-media/react-pdf-table",
+    "canvas",
+    "pdf-poppler",
+    "pdf-to-img",
+  ],
   experimental: {
     // Increase request-body buffering limit (default 10mb) for large uploads proxied through Next.js.
     // Docs: https://nextjs.org/docs/15/pages/api-reference/config/next-config-js/middlewareClientMaxBodySize
@@ -24,6 +36,22 @@ const nextConfig: NextConfig = {
   typescript: { ignoreBuildErrors: true },
   devIndicators: {
     position: "bottom-left",
+  },
+  webpack: (config) => {
+    // Linked packages (kyc-providers → @react-pdf/renderer) can install a nested
+    // React copy. In Docker that leads to "createContext is not a function"
+    // while collecting page data (e.g. /dashboard/rfqs/nse).
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      react: reactDir,
+      "react$": reactDir,
+      "react/jsx-runtime": path.join(reactDir, "jsx-runtime.js"),
+      "react/jsx-dev-runtime": path.join(reactDir, "jsx-dev-runtime.js"),
+      "react-dom": reactDomDir,
+      "react-dom$": reactDomDir,
+      "react-dom/client": path.join(reactDomDir, "client.js"),
+    };
+    return config;
   },
   images: {
     unoptimized: true,

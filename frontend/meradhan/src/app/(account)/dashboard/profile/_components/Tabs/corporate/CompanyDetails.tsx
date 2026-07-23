@@ -166,6 +166,7 @@ export default function CompanyDetails({
         <ProfileContactFields profile={profile} variant="corporate" />
       </div>
 
+
       {kycAccessible && (
         <>
           <AddressBlock
