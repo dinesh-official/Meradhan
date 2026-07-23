@@ -3,11 +3,26 @@ import { BASES_URLS } from "@/core/config/base.urls";
 import type { NextConfig } from "next";
 import path from "path";
 
+const reactDir = path.resolve(__dirname, "node_modules/react");
+const reactDomDir = path.resolve(__dirname, "node_modules/react-dom");
+
 // Next.js configuration
 const nextConfig: NextConfig = {
   devIndicators: {
     position: "bottom-left",
   },
+  transpilePackages: ["@root/apiGateway", "@root/schema"],
+  // Linked apiGateway → kyc-providers can pull PDF/native deps into the RSC graph
+  // and break page-data collection with "createContext is not a function".
+  serverExternalPackages: [
+    "@react-pdf/renderer",
+    "@ag-media/react-pdf-table",
+    "canvas",
+    "pdf-poppler",
+    "pdf-to-img",
+    "pdf2pic",
+    "react-pdf-tailwind",
+  ],
   webpack: (config, { isServer, webpack }) => {
     // Prevent canvas.node from being bundled
     config.externals.push({
@@ -19,21 +34,19 @@ const nextConfig: NextConfig = {
       new webpack.IgnorePlugin({ resourceRegExp: /^webworker-threads$/ }),
     );
 
-    // Deduplicate React on the client only. Aliasing on the server breaks Next's
-    // SSR/devtools (useContext null / invalid hook call via SegmentTrieNode).
-    if (!isServer) {
+    // Deduplicate React. Always on the client; on the server only for production
+    // builds (Docker page-data collection). Skipping server alias in `next dev`
+    // avoids Next DevTools SSR breakage (useContext null / SegmentTrieNode).
+    if (!isServer || process.env.NODE_ENV === "production") {
       config.resolve.alias = {
         ...config.resolve.alias,
-        react: path.resolve(__dirname, "node_modules/react"),
-        "react-dom": path.resolve(__dirname, "node_modules/react-dom"),
-        "react/jsx-runtime": path.resolve(
-          __dirname,
-          "node_modules/react/jsx-runtime.js",
-        ),
-        "react/jsx-dev-runtime": path.resolve(
-          __dirname,
-          "node_modules/react/jsx-dev-runtime.js",
-        ),
+        react: reactDir,
+        "react$": reactDir,
+        "react/jsx-runtime": path.join(reactDir, "jsx-runtime.js"),
+        "react/jsx-dev-runtime": path.join(reactDir, "jsx-dev-runtime.js"),
+        "react-dom": reactDomDir,
+        "react-dom$": reactDomDir,
+        "react-dom/client": path.join(reactDomDir, "client.js"),
       };
     }
 
