@@ -1261,3 +1261,223 @@ jobs:
           echo "======================================"
           echo "All Target Groups & Listener Rules Configured"
           echo "======================================"
+
+
+      - name: Send Cleanup Event to EventBridge
+        shell: bash
+        run: |
+          set -e
+
+          INSTANCE_ID="${{ steps.create_ec2.outputs.instance_id }}"
+          RULE_ARNS_CSV="${{ steps.tg_listener.outputs.rule_arns }}"
+          TG_ARNS_CSV="${{ steps.tg_listener.outputs.target_group_arns }}"
+
+          # ---------------------------------------------------------
+          # Build the detail payload with jq.
+          # No heredoc, no manual quoting — an empty CSV yields [] rather
+          # than [""] , which a naive split(",") would produce.
+          # ---------------------------------------------------------
+          EVENT_DETAIL=$(jq -nc \
+            --arg instance_id "$INSTANCE_ID" \
+            --arg rules "$RULE_ARNS_CSV" \
+            --arg tgs "$TG_ARNS_CSV" \
+            '{
+               instance_id: $instance_id,
+               resources: [
+                 {
+                   rule_arns:
+                     (if $rules == "" then [] else ($rules | split(",")) end),
+                   target_group_arns:
+                     (if $tgs   == "" then [] else ($tgs   | split(",")) end)
+                 }
+               ]
+             }')
+
+          echo "======================================"
+          echo "Cleanup Event Payload"
+          echo "======================================"
+          echo "$EVENT_DETAIL" | jq .
+
+          # ---------------------------------------------------------
+          # EventBridge's Detail field is a JSON *string*, not an object.
+          # Passing --arg (not --argjson) is what escapes it correctly.
+          # ---------------------------------------------------------
+          ENTRIES=$(jq -nc \
+            --arg detail "$EVENT_DETAIL" \
+            '[{
+               Source: "preview.cleanup",
+               DetailType: "DeletePreviewResources",
+               EventBusName: "default",
+               Detail: $detail
+             }]')
+
+          RESPONSE=$(aws events put-events --entries "$ENTRIES")
+
+          echo "======================================"
+          echo "PutEvents Response"
+          echo "======================================"
+          echo "$RESPONSE" | jq .
+
+          # put-events returns HTTP 200 even when individual entries are
+          # rejected, so the exit code alone is not enough.
+          FAILED=$(echo "$RESPONSE" | jq -r '.FailedEntryCount')
+
+          if [ "$FAILED" != "0" ]; then
+            echo "ERROR: EventBridge rejected ${FAILED} entry/entries."
+            echo "$RESPONSE" | jq -r '.Entries[] | select(.ErrorCode) | "  \(.ErrorCode): \(.ErrorMessage)"'
+            exit 1
+          fi
+
+          echo "Cleanup event published."
+
+
+      - name: Schedule Cleanup (EventBridge Scheduler)
+        if: always()
+        shell: bash
+        env:
+          SCHEDULER_ROLE_ARN: ${{ vars.SCHEDULER_ROLE_ARN }}
+        run: |
+          set -e
+
+          INSTANCE_ID="${{ steps.create_ec2.outputs.instance_id }}"
+          RULE_ARNS_CSV="${{ steps.tg_listener.outputs.rule_arns }}"
+          TG_ARNS_CSV="${{ steps.tg_listener.outputs.target_group_arns }}"
+          LIVE_TIME="${{ inputs.live_time }}"
+
+          # Wall-clock timezone the schedule is expressed in. The AWS console
+          # will show the fire time in this zone, so keep it as the one you
+          # think in. Change to "UTC" if you'd rather read it that way.
+          SCHEDULE_TZ="Asia/Kolkata"
+
+          if [ -z "$INSTANCE_ID" ] || [ "$INSTANCE_ID" = "None" ]; then
+            echo "No instance was created — nothing to schedule cleanup for."
+            exit 0
+          fi
+
+          if [ -z "$SCHEDULER_ROLE_ARN" ]; then
+            echo "ERROR: SCHEDULER_ROLE_ARN is not set."
+            echo "Add it under Settings -> Environments -> Variables."
+            echo "It must be a role trusted by scheduler.amazonaws.com with events:PutEvents."
+            exit 1
+          fi
+
+          # ---------------------------------------------------------
+          # 1. Parse live_time -> hours
+          #    Strips the "hr" suffix, so adding 48hr/72hr to the input
+          #    options later needs no change here.
+          # ---------------------------------------------------------
+          HOURS="${LIVE_TIME%hr}"
+
+          if ! [[ "$HOURS" =~ ^[0-9]+$ ]]; then
+            echo "ERROR: could not parse live_time '${LIVE_TIME}' into a number of hours."
+            exit 1
+          fi
+
+          # ---------------------------------------------------------
+          # 2. now + HOURS
+          #    Scheduler wants at(yyyy-mm-ddThh:mm:ss) with NO trailing Z
+          #    and no UTC offset — the zone is passed separately.
+          # ---------------------------------------------------------
+          NOW_LOCAL=$(TZ="$SCHEDULE_TZ" date '+%Y-%m-%d %H:%M:%S')
+          DESTROY_AT=$(TZ="$SCHEDULE_TZ" date -d "+${HOURS} hours" '+%Y-%m-%dT%H:%M:%S')
+          DESTROY_AT_UTC=$(date -u -d "+${HOURS} hours" '+%Y-%m-%dT%H:%M:%SZ')
+
+          echo "======================================"
+          echo "Cleanup Schedule"
+          echo "======================================"
+          echo "Timezone     : $SCHEDULE_TZ"
+          echo "Now          : $NOW_LOCAL"
+          echo "Lifetime     : ${HOURS}h  (input: ${LIVE_TIME})"
+          echo "Destroy at   : ${DESTROY_AT/T/ }  (${SCHEDULE_TZ})"
+          echo "Destroy at   : $DESTROY_AT_UTC  (UTC)"
+          echo "======================================"
+
+          # ---------------------------------------------------------
+          # 3. Build the payload, innermost first.
+          #    Each --arg stringifies the previous layer, which is what
+          #    both Detail and Input require.
+          # ---------------------------------------------------------
+          EVENT_DETAIL=$(jq -nc \
+            --arg instance_id "$INSTANCE_ID" \
+            --arg rules "$RULE_ARNS_CSV" \
+            --arg tgs "$TG_ARNS_CSV" \
+            --arg live_time "$LIVE_TIME" \
+            --arg destroy_at "$DESTROY_AT_UTC" \
+            '{
+               instance_id: $instance_id,
+               live_time:   $live_time,
+               destroy_at:  $destroy_at,
+               resources: [
+                 {
+                   rule_arns:
+                     (if $rules == "" then [] else ($rules | split(",")) end),
+                   target_group_arns:
+                     (if $tgs   == "" then [] else ($tgs   | split(",")) end)
+                 }
+               ]
+             }')
+
+          PUT_EVENTS_INPUT=$(jq -nc \
+            --arg detail "$EVENT_DETAIL" \
+            '{
+               Entries: [
+                 {
+                   Source:       "preview.cleanup",
+                   DetailType:   "DeletePreviewResources",
+                   EventBusName: "default",
+                   Detail:       $detail
+                 }
+               ]
+             }')
+
+          TARGET=$(jq -nc \
+            --arg role "$SCHEDULER_ROLE_ARN" \
+            --arg input "$PUT_EVENTS_INPUT" \
+            '{
+               Arn:     "arn:aws:scheduler:::aws-sdk:eventbridge:putEvents",
+               RoleArn: $role,
+               Input:   $input,
+               RetryPolicy: { MaximumRetryAttempts: 3 }
+             }')
+
+          echo "Event that will be published at the scheduled time:"
+          echo "$EVENT_DETAIL" | jq .
+
+          # ---------------------------------------------------------
+          # 4. Create or update the one-time schedule.
+          #    Name must match [0-9a-zA-Z-_.]+ and be <= 64 chars.
+          #    Re-running the workflow pushes the destroy time back
+          #    rather than erroring with ConflictException.
+          # ---------------------------------------------------------
+          SCHEDULE_NAME="cleanup-${ENV_CODE}${BRANCH_CODE}-${INSTANCE_ID}"
+
+          if aws scheduler get-schedule --name "$SCHEDULE_NAME" >/dev/null 2>&1; then
+            ACTION="update-schedule"
+            echo "Schedule '${SCHEDULE_NAME}' exists — extending destroy time."
+          else
+            ACTION="create-schedule"
+            echo "Creating schedule '${SCHEDULE_NAME}'."
+          fi
+
+          aws scheduler "$ACTION" \
+            --name "$SCHEDULE_NAME" \
+            --schedule-expression "at(${DESTROY_AT})" \
+            --schedule-expression-timezone "$SCHEDULE_TZ" \
+            --flexible-time-window Mode=OFF \
+            --action-after-completion DELETE \
+            --description "Destroy preview env ${ENV_CODE}${BRANCH_CODE} (${INSTANCE_ID}) after ${LIVE_TIME}" \
+            --target "$TARGET" >/dev/null
+
+          echo "Schedule set."
+
+          {
+            echo "## Cleanup Scheduled"
+            echo ""
+            echo "| Field | Value |"
+            echo "|---|---|"
+            echo "| Instance | \`${INSTANCE_ID}\` |"
+            echo "| Lifetime | ${LIVE_TIME} |"
+            echo "| Destroys at | ${DESTROY_AT/T/ } (${SCHEDULE_TZ}) |"
+            echo "| Destroys at | ${DESTROY_AT_UTC} |"
+            echo "| Schedule | \`${SCHEDULE_NAME}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
