@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: false,
   transpilePackages: ["@root/apiGateway", "@root/schema", "kyc-providers"],
   // Keep PDF/native deps out of the RSC server graph (avoids createContext errors).
+  // Do not also list kyc-providers here — it conflicts with transpilePackages.
   serverExternalPackages: [
     "@react-pdf/renderer",
     "@ag-media/react-pdf-table",
@@ -41,7 +42,7 @@ const nextConfig: NextConfig = {
   },
   webpack: (config, { isServer }) => {
     // Deduplicate nested React on the client only — server alias breaks SSR hooks
-    // (NextTopLoader useEffect null). Strip nested react in Dockerfiles instead.
+    // (NextTopLoader useEffect null).
     if (!isServer) {
       config.resolve.alias = {
         ...config.resolve.alias,
@@ -53,6 +54,23 @@ const nextConfig: NextConfig = {
         "react-dom$": reactDomDir,
         "react-dom/client": path.join(reactDomDir, "client.js"),
       };
+    } else {
+      // Extra guard: never bundle react-pdf into the server graph during page-data collection.
+      const prev = config.externals;
+      config.externals = [
+        ...(Array.isArray(prev) ? prev : prev ? [prev] : []),
+        ({ request }: { request?: string }, callback: (err?: Error | null, result?: string) => void) => {
+          if (
+            request &&
+            (/^@react-pdf\//.test(request) ||
+              request === "react-pdf-tailwind" ||
+              request === "@ag-media/react-pdf-table")
+          ) {
+            return callback(null, `commonjs ${request}`);
+          }
+          callback();
+        },
+      ];
     }
     return config;
   },

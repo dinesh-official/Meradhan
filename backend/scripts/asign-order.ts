@@ -11,8 +11,8 @@ import { BondService } from "@resource/bonds/bond.service";
 import {
   generateDealPdfBuffer,
   generateOrderPdfBuffer,
-  getInterestPaymentSchedule,
-} from "kyc-providers";
+} from "kyc-providers/pdf";
+import { getInterestPaymentSchedule } from "kyc-providers";
 
 import { fetchBankNameFromIfsc } from "@utils/razorpayIfsc";
 import { getDpName } from "dp-id-lookup";

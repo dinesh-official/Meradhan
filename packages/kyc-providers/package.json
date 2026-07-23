@@ -5,6 +5,7 @@
   "private": true,
   "exports": {
     ".": "./index.ts",
+    "./pdf": "./src/renderpdf/pdf.ts",
     "./corporate-pdf-payload": "./pdf/corporate/corporatePdfServicePayload.ts"
   },
   "scripts": {

@@ -3,7 +3,8 @@ export * from "./src/digio/genPdfForSign";
 export * from "./src/digio/digio.response";
 export * from "./src/NSDL/NSDLApi.response";
 export * from "./src/response.types";
-export * from "./src/renderpdf/pdf";
+// PDF renderer (@react-pdf) lives on `kyc-providers/pdf` — keep it off the
+// main entry so Next.js CRM/FE page-data collection does not pull a nested React.
 export {
   applyCorporateRiskProfileToSavedPdfPayload,
   applyParticipantCodeToSavedPdfPayload,

@@ -35,7 +35,7 @@ const nextConfig: NextConfig = {
     );
 
     // Deduplicate nested React on the client only — server alias breaks SSR hooks
-    // (NextTopLoader useEffect null). Strip nested react in Dockerfiles instead.
+    // (NextTopLoader useEffect null).
     if (!isServer) {
       config.resolve.alias = {
         ...config.resolve.alias,
@@ -47,6 +47,20 @@ const nextConfig: NextConfig = {
         "react-dom$": reactDomDir,
         "react-dom/client": path.join(reactDomDir, "client.js"),
       };
+    } else {
+      config.externals.push(
+        ({ request }: { request?: string }, callback: (err?: Error | null, result?: string) => void) => {
+          if (
+            request &&
+            (/^@react-pdf\//.test(request) ||
+              request === "react-pdf-tailwind" ||
+              request === "@ag-media/react-pdf-table")
+          ) {
+            return callback(null, `commonjs ${request}`);
+          }
+          callback();
+        },
+      );
     }
 
     return config;

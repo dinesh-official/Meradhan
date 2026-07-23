@@ -8,11 +8,11 @@ import * as fs from "fs";
 import {
   CDSLApi,
   DigioSDK,
-  generateKycPdf,
   NSDLApi,
   type DigioAadharPanData,
   type DigioFaceDataResponse,
 } from "kyc-providers";
+import { generateKycPdf } from "kyc-providers/pdf";
 import os from "os";
 import * as path from "path";
 

@@ -35,12 +35,12 @@ import axios from "axios";
 import * as fs from "fs";
 import {
   DigioSDK,
-  generateCorporatePdfFromServicePayload,
   getPdfPageCount,
   isCorporateRiskProfileCompleteForPdf,
   normalizeCorporateRiskProfileAnswers,
   prepareCorporatePdfServicePayloadForEsign,
 } from "kyc-providers";
+import { generateCorporatePdfFromServicePayload } from "kyc-providers/pdf";
 import os from "os";
 import * as path from "path";
 import { Readable } from "stream";
