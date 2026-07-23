@@ -873,30 +873,7 @@ jobs:
           echo "Resolved VPC ID       : $VPC_ID_VAL"
           echo "======================================"
 
-# =============================================================
-      # Create or Reuse Target Groups & Listener Rules
-      #
-      # Fixes vs. previous version:
-      #   1. Health-check tuning applied to BOTH new and reused TGs
-      #      (AWS defaults of 30s x 5 mean ~150s before healthy).
-      #   2. Wait loop surfaces Reason + Description, not just State,
-      #      and fails fast on reasons that never self-heal.
-      #   3. Kibana is now gated behind `inputs.kibana` (defaults to
-      #      enabled if the input is not declared, so this is a
-      #      drop-in replacement).
-      #   4. Per-service health timeouts — Kibana gets longer because
-      #      it returns 503 on /api/status until Elasticsearch is
-      #      reachable AND all plugins have loaded.
-      #   5. BUG FIX: create_rule_with_retry wrote its progress logs
-      #      to stdout, so $(create_rule_with_retry ...) captured them
-      #      along with the ARN, producing a garbled RULE_ARN. All
-      #      diagnostics now go to stderr.
-      #   6. On failure: prints AWS-side diagnostics (health reason,
-      #      HC config, security-group ingress) and rolls back what
-      #      this run created, instead of leaving a live listener rule
-      #      pointing at a dead target.
-      #   7. Summary table is written on failure too, not just success.
-      # =============================================================
+          
       - name: Create or Reuse Target Groups & Listener Rules
         id: tg_listener
         shell: bash
