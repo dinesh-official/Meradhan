@@ -8,6 +8,7 @@ import {
   formatDate,
   formatLastInterestPaymentDateDisplay,
   formatPdfCalendarDate,
+  formatPdfPersonName,
   formatPdfSettlementDateTime,
   getPdfDearGreeting,
   truncateDecimals,
@@ -103,10 +104,7 @@ export default function DealPage({
   releasedOrder?: boolean;
   orderData?: OrderData;
 }) {
-  const fullname =
-    user.firstName +
-    `${user.middleName ? `${user.middleName} ` : " "}` +
-    user.lastName;
+  const fullname = formatPdfPersonName(user);
 
   const dearGreeting = getPdfDearGreeting(user, orderData);
 
@@ -305,12 +303,12 @@ ${getInterestPaymentDatesDisplay()} `,
     ["Exchange Order ID", orderData?.metadata?.rfqNumber || "N.A"],
     [
       "Settlement Date & Time",
-      formatPdfSettlementDateTime(
-        // Prefer full NSE payoutTime (DD-MM-YYYY HH:MM:SS), then RFQ settlement date.
-        orderData?.metadata?.payoutTime,
-        orderData?.metadata?.settlementDateTime,
-        orderData?.metadata?.settlementDate,
-      ),
+      // payoutTime is optional — leave blank when NSE has not set it yet.
+      orderData?.metadata?.payoutTime?.trim()
+        ? formatPdfSettlementDateTime(orderData.metadata.payoutTime)
+        : orderData?.metadata?.settlementDateTime?.trim()
+          ? formatPdfSettlementDateTime(orderData.metadata.settlementDateTime)
+          : "",
     ],
   ]
 

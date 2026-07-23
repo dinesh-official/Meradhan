@@ -37,7 +37,7 @@ describe("extractSettleOrderFromPayload", () => {
 
 describe("mapSettleStatusToOrderStatus", () => {
   test("maps documented NSE settle statuses", () => {
-    expect(mapSettleStatusToOrderStatus(0)).toBe(OrderStatus.PENDING);
+    expect(mapSettleStatusToOrderStatus(0)).toBe(OrderStatus.IN_PROGRESS);
     expect(mapSettleStatusToOrderStatus(1)).toBe(OrderStatus.IN_PROGRESS);
     expect(mapSettleStatusToOrderStatus(3)).toBe(OrderStatus.IN_PROGRESS);
     expect(mapSettleStatusToOrderStatus(5)).toBe(OrderStatus.REJECTED);

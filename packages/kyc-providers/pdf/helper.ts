@@ -365,6 +365,18 @@ type PdfGreetingUser = Pick<
   lastName?: string | null;
 };
 
+/** Consistent person name: "First Middle Last" with single spaces; skips empty parts. */
+export function formatPdfPersonName(parts: {
+  firstName?: string | null;
+  middleName?: string | null;
+  lastName?: string | null;
+}): string {
+  return [parts.firstName, parts.middleName, parts.lastName]
+    .map((part) => String(part ?? "").trim())
+    .filter((part) => part.length > 0)
+    .join(" ");
+}
+
 /** NSE RFQ participants use a shim user with a negative id. */
 export function isNseRfqParticipantUser(
   user: Pick<PdfGreetingUser, "id">,
@@ -380,10 +392,7 @@ export function getPdfDearGreeting(
   if (isNseRfqParticipantUser(user, orderData)) {
     return "Dear Sir / Madam,";
   }
-  const fullname =
-    (user.firstName ?? "") +
-    `${user.middleName ? `${user.middleName} ` : " "}` +
-    (user.lastName ?? "");
+  const fullname = formatPdfPersonName(user);
   const salutation = getEmailSalutationFromSources({
     gender: user?.gender,
     panCard: user?.panCard,
