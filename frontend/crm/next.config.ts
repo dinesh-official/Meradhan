@@ -18,6 +18,8 @@ const nextConfig: NextConfig = {
     "canvas",
     "pdf-poppler",
     "pdf-to-img",
+    "pdf2pic",
+    "react-pdf-tailwind",
   ],
   experimental: {
     // Increase request-body buffering limit (default 10mb) for large uploads proxied through Next.js.
@@ -38,10 +40,11 @@ const nextConfig: NextConfig = {
     position: "bottom-left",
   },
   webpack: (config, { isServer }) => {
-    // Linked packages (kyc-providers → @react-pdf/renderer) can install a nested
-    // React copy. Deduplicate on the client only — aliasing React on the server
-    // breaks Next DevTools SSR (useContext null / invalid hook via SegmentTrieNode).
-    if (!isServer) {
+    // Linked packages (kyc-providers → @react-pdf/renderer) nest a second React.
+    // Always dedupe on the client; on the server only for production builds so
+    // Docker page-data collection (e.g. /dashboard/rfqs/nse) gets one React.
+    // Skipping server alias in `next dev` avoids Next DevTools SSR breakage.
+    if (!isServer || process.env.NODE_ENV === "production") {
       config.resolve.alias = {
         ...config.resolve.alias,
         react: reactDir,
