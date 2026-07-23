@@ -8,6 +8,7 @@ import {
   formatDate,
   formatLastInterestPaymentDateDisplay,
   formatPdfCalendarDate,
+  formatPdfPersonName,
   getPdfDearGreeting,
   truncateDecimals,
 } from "../helper";
@@ -107,10 +108,7 @@ export default function OrdersPage({
   releasedOrder?: boolean;
   orderData?: OrderData;
 }) {
-  const fullname =
-    user.firstName +
-    `${user.middleName ? `${user.middleName} ` : " "}` +
-    user.lastName;
+  const fullname = formatPdfPersonName(user);
 
   const dearGreeting = getPdfDearGreeting(user, orderData);
 
