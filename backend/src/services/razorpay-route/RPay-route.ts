@@ -1,6 +1,6 @@
 import { db } from "@core/database/database"
 import { ApiError } from "@packages/apiGateway";
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
 import axios from "axios";
 
 type RazorpayStakeholderResponse = {

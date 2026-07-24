@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AccountStatusEnum, GenderEnum } from "../enums";
+import { AccountStatusEnum, CrmRiskProfileEnum, GenderEnum } from "../enums";
 
 export const UserAccountType = [
   "INDIVIDUAL",
@@ -202,6 +202,9 @@ const createNewCustomerSchemaBase = z.object({
   gender: GenderEnum.optional(),
 
   relationshipManagerId: z.number().optional(),
+
+  /** CRM-only: LOW | MEDIUM | HIGH. Independent of KYC risk questionnaire. */
+  crmRiskProfile: CrmRiskProfileEnum.nullable().optional(),
 
   // totalInvestment: z.string({
   //     error: "Total investment value is required",

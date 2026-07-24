@@ -313,11 +313,22 @@ export default function AccountClosureSection() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirm account deletion?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to submit your account deletion request? Our
-              team will review it, and once approved your login access will be
-              permanently disabled.
+            <AlertDialogTitle>
+              Are you sure you want to delete your account?
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3 text-muted-foreground text-sm">
+                <p>
+                  Please note: Once your account is deleted, this action cannot
+                  be undone. You will no longer be able to sign in to MeraDhan,
+                  and your transaction history and portfolio details will no
+                  longer be accessible.
+                </p>
+                <p>
+                  Your personal data will be deleted in accordance with
+                  applicable regulatory requirements.
+                </p>
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

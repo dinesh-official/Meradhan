@@ -2,7 +2,7 @@ import axios, { type AxiosInstance } from "axios";
 import FormData from "form-data";
 import fs from "fs";
 import { v4 as uuid } from "uuid";
-import { env } from "@packages/config/env";
+import { env } from "@root/config/env";
 import type {
   DigioSignatureResponse,
   TDigioWithTemplateResponse,

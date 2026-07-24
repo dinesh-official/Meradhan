@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { ImCheckboxChecked } from "react-icons/im";
 import { IoIosInformationCircle } from "react-icons/io";

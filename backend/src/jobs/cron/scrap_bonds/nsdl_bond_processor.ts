@@ -6,7 +6,7 @@ import fs from "fs";
 import { absoluteDataApiFromEnv } from "@modules/absolutedata/absolutedata.api";
 import { mergeAbsoluteDataIntoBond } from "@modules/absolutedata/absolutedata.bonds.mapper";
 import type { AbsoluteDataGetBondByIsinResult } from "@modules/absolutedata/absolutedata.types";
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
 
 const NSDL_RATING_TOKENS = [
   "AAA",

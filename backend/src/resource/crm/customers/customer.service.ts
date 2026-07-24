@@ -1,7 +1,7 @@
 import type { DataBaseSchema } from "@core/database/database";
 import { db } from "@core/database/database";
 import type { appSchema } from "@root/schema";
-import { generateCorporateRatePdfBuffer } from "@packages/kyc-providers";
+import { generateCorporateRatePdfBuffer } from "@root/kyc-providers/pdf";
 import { CustomerProfileManager } from "@services/customer/customer_manager.service";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import type z from "zod";

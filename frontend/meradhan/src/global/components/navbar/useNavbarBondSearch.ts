@@ -65,10 +65,9 @@ export function useNavbarBondSearch() {
     staleTime: 30_000,
   });
 
-  const bonds = data?.responseData?.data ?? [];
-
   // Show ISIN format if any returned bond's ISIN starts with the query — handles partial ISINs naturally.
   const suggestions: SearchSuggestion[] = useMemo(() => {
+    const bonds = data?.responseData?.data ?? [];
     const upperQuery = debouncedQuery.toUpperCase();
     const hasISINMatch = bonds.some((b) =>
       b.isin.toUpperCase().startsWith(upperQuery)
@@ -80,7 +79,7 @@ export function useNavbarBondSearch() {
         bondName: b.bondName,
       }))
       : deduplicateByName(bonds);
-  }, [bonds, debouncedQuery]);
+  }, [data?.responseData?.data, debouncedQuery]);
 
   const handleSelect = useCallback(
     (suggestion: SearchSuggestion) => {

@@ -1,5 +1,5 @@
 import { TiStarFullOutline } from "react-icons/ti";
-import { getRatingColor } from "@/global/components/Bond/CreaditRatingBadge";
+import { getRatingColor } from "@/global/components/Bond/ratingColors";
 import { MdDelete } from "react-icons/md";
 import { useRouter } from "nextjs-toploader/app";
 import { useRazorpay } from "../_hooks/useRazorpay";

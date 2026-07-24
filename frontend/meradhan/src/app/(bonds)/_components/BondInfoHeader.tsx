@@ -1,3 +1,5 @@
+"use client";
+
 import { formatBondListingYield } from "@/global/utils/bondListingYield";
 import { cn } from "@/lib/utils";
 import { BondDetailResponse } from "@root/apiGateway";

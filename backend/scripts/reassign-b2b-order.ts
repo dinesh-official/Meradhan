@@ -17,7 +17,7 @@
  * Custom:
  *   bun run scripts/reassign-b2b-order.ts --to BONDBAZAAR  --orders MD-ASSIST-20072026-BUY-244 --apply
  */
-import "@packages/config/env";
+import "@root/config/env";
 
 import { db } from "@core/database/database";
 import type { Prisma } from "@databases/generated/prisma/postgres";

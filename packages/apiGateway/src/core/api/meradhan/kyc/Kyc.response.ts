@@ -1,11 +1,11 @@
-import {
-  type DemateVerifyResponse,
-  type DigioAadharPanData,
-  type DigioBankVerifyResponse,
-  type DigioFaceDataResponse,
-  type DigioSignatureResponse,
-  type TDigioWithTemplateResponse,
-} from "kyc-providers";
+import type {
+  DemateVerifyResponse,
+  DigioAadharPanData,
+  DigioBankVerifyResponse,
+  DigioFaceDataResponse,
+  DigioSignatureResponse,
+  TDigioWithTemplateResponse,
+} from "@root/kyc-providers";
 import type { BaseResponseData } from "../../../../types/base";
 
 // pan

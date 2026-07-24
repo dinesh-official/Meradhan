@@ -1,4 +1,4 @@
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
 import jwt, { type SignOptions } from "jsonwebtoken";
 import type { ITokenUtils } from "./token_interface";
 

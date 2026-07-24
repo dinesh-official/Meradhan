@@ -1,12 +1,13 @@
 import Footer from "@/global/components/footer/Footer";
-import React, { memo, ReactNode } from "react";
+import React, { type ReactNode } from "react";
 import AccountNavBar from "../NavBar/AccountNavBar";
 import ActionSideBar from "../NavBar/ActionSideBar";
 import { getSession } from "@/core/auth/_server/getSession";
 
 export const revalidate = 0;
 
-async function AccountViewPort({
+/** Async Server Component — do not wrap with memo/forwardRef (breaks RSC → client children). */
+export default async function AccountViewPort({
   children,
   showFooter = true,
   title,
@@ -42,5 +43,3 @@ async function AccountViewPort({
     </div>
   );
 }
-
-export default memo(AccountViewPort);

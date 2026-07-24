@@ -2,7 +2,7 @@ import { db } from "@core/database/database";
 import {
   OrderPipelineStage,
   OrderStageStatus,
-} from "@packages/config/constants";
+} from "@root/config/constants";
 import { OrderStatus, PaymentStatus } from "@databases/generated/prisma/postgres";
 import { cacheStorage } from "@store/redis_store";
 import logger from "@utils/logger/logger";

@@ -16,7 +16,7 @@
  *     --from MD-DIR-08062026-BUY-131 --to MD-ASSIST-04062026-BUY-131 --apply
  *   bun run backend/scripts/rename-order-number.ts --apply --no-deal-id
  */
-import "@packages/config/env";
+import "@root/config/env";
 
 import { db } from "@core/database/database";
 import type { Prisma } from "@databases/generated/prisma/postgres";

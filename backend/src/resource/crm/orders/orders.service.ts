@@ -10,14 +10,14 @@ import { BondService } from "@resource/bonds/bond.service";
 import {
   generateDealPdfBuffer,
   generateOrderPdfBuffer,
-  getInterestPaymentSchedule,
-} from "kyc-providers";
+} from "@root/kyc-providers/pdf";
+import { getInterestPaymentSchedule } from "@root/kyc-providers";
 
 import { fetchBankNameFromIfsc } from "@utils/razorpayIfsc";
-import { getDpName } from "dp-id-lookup";
+import { getDpName } from "@root/dp-id-lookup";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import crypto from "crypto";
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
 import {
   formatLastInterestPaymentDateDisplay,
   loadInvestorCouponScheduleForPdf,

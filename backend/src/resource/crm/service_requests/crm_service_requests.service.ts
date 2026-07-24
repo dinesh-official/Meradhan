@@ -32,10 +32,10 @@ export class CrmServiceRequestService {
       filters.status = payload.status;
     }
 
+    // Include soft-deleted (closed) customers so historical closure requests stay visible.
     const searchTrimmed = payload.search?.trim();
     if (searchTrimmed) {
       filters.customerProfileDataModel = {
-        isDeleted: false,
         OR: [
           { firstName: { contains: searchTrimmed, mode: "insensitive" } },
           { middleName: { contains: searchTrimmed, mode: "insensitive" } },
@@ -44,8 +44,6 @@ export class CrmServiceRequestService {
           { phoneNo: { contains: searchTrimmed, mode: "insensitive" } },
         ],
       };
-    } else {
-      filters.customerProfileDataModel = { isDeleted: false };
     }
 
     const total = await this.repo.count(filters);
@@ -132,7 +130,7 @@ export class CrmServiceRequestService {
 
     const profile = await db.dataBase.customerProfileDataModel.findUnique({
       where: { id: customer.id },
-      select: { customersAuthDataModelId: true },
+      select: { id: true },
     });
 
     if (!profile) {
@@ -153,11 +151,17 @@ export class CrmServiceRequestService {
         include: { reason: { select: { id: true, text: true } } },
       });
 
-      await tx.customersAuthDataModel.update({
-        where: { id: profile.customersAuthDataModelId },
+      // Soft-delete only — never hard-delete. Mark CLOSED and invalidate sessions.
+      await tx.customerProfileDataModel.update({
+        where: { id: customer.id },
         data: {
-          accountStatus: "CLOSED",
-          tokenVersion: { increment: 1 },
+          isDeleted: true,
+          utility: {
+            update: {
+              accountStatus: "CLOSED",
+              tokenVersion: { increment: 1 },
+            },
+          },
         },
       });
 
@@ -170,6 +174,7 @@ export class CrmServiceRequestService {
         firstName: true,
         middleName: true,
         lastName: true,
+        userName: true,
         emailAddress: true,
         gender: true,
         panCard: { select: { gender: true } },
@@ -187,8 +192,12 @@ export class CrmServiceRequestService {
         const emailSend = new EmailCommunication();
         await emailSend.sendEmail({
           to: fullProfile.emailAddress,
-          subject: "MeraDhan — Your account has been closed",
-          html: meraDhanAccountClosedEmailText({ customerName, salutation }),
+          subject: "Confirmation of Account Deletion",
+          html: meraDhanAccountClosedEmailText({
+            customerName,
+            salutation,
+            clientId: fullProfile.userName,
+          }),
         });
       } catch {
         // non-blocking

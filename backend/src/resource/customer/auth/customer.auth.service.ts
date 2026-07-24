@@ -6,7 +6,7 @@ import {
   sendKycReminderNotStartedEmail,
 } from "@jobs/helper/send_emails";
 import { sendMobileOtp } from "@jobs/helper/send_sms";
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
 import type { appSchema } from "@root/schema";
 import { CustomerProfileManager } from "@services/customer/customer_manager.service";
 import {
