@@ -1335,7 +1335,7 @@ jobs:
         if: always()
         shell: bash
         env:
-          SCHEDULER_ROLE_ARN: ${{ vars.SCHEDULER_ROLE_ARN }}
+          SCHEDULER_ROLE_ARN: ${{ secrets.SCHEDULER_ROLE_ARN }}
         run: |
           set -e
 
