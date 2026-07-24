@@ -8,7 +8,7 @@ import { getStateCode } from "@modules/RFQ/nse/values";
 import {
   removeLastCommaChunks,
   splitAddressInto3BalancedLines,
-} from "@packages/kyc-providers";
+} from "@root/kyc-providers";
 import { AppError } from "@utils/error/AppError";
 import { removeCountryCode } from "@utils/filters/convert";
 

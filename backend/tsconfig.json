@@ -34,9 +34,7 @@
       "@resource/*": ["./src/resource/*"],
       "@store/*": ["./src/store/*"],
       "@services/*": ["./src/services/*"],
-      "@root/*": ["./src/*"],
-      "@types/*": ["./types/*"],
-      "@packages/*": ["../packages/*"]
+      "@types/*": ["./types/*"]
     },
 
     // Some stricter flags (disabled by default)

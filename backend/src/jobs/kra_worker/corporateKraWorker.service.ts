@@ -1,5 +1,5 @@
 import { db } from "@core/database/database";
-import { env } from "@packages/config/env";
+import { env } from "@root/config/env";
 import { cacheStorage } from "@store/redis_store";
 import { isAxiosError, type AxiosError } from "axios";
 import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
@@ -7,8 +7,8 @@ import type {
     KraNonIndAppReqRoot,
     T_APP_PAN_INQ,
     T_NON_INDIVIDUAL_PAN_DOWNLOAD,
-} from "kyc-providers";
-import { KraSDK } from "kyc-providers";
+} from "@root/kyc-providers";
+import { KraSDK } from "@root/kyc-providers";
 import { addKraWorkerJob, type KraWorkerJobData } from "./kraWroker.helper";
 import {
     checkKraProcessCheckStatus,

@@ -16,7 +16,7 @@
  *   bun run backend/scripts/reassign-orders-to-participant.ts --code EMFL \
  *     --orders MD-ASSIST-29052026-BUY-130,MD-ASSIST-11062026-BUY-141
  */
-import "@packages/config/env";
+import "@root/config/env";
 
 import { db } from "@core/database/database";
 import type { Prisma } from "@databases/generated/prisma/postgres";

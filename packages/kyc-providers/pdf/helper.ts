@@ -1,6 +1,6 @@
 export const strApi = process.env.NEXT_PUBLIC_STRAPI_HOST_URL;
 
-import { env } from "@packages/config/env";
+import { env } from "@root/config/env";
 import { getEmailSalutationFromSources, type GenderSources } from "@root/schema";
 import axios from "axios";
 import { pdf } from "pdf-to-img";

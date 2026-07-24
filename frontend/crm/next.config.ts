@@ -2,17 +2,23 @@ import type { NextConfig } from "next";
 import path from "path";
 import { BASES_URLS } from "./src/core/config/base.urls";
 
-const reactDir = path.resolve(__dirname, "node_modules/react");
-const reactDomDir = path.resolve(__dirname, "node_modules/react-dom");
+const reactDir = path.dirname(require.resolve("react/package.json"));
+const reactDomDir = path.dirname(require.resolve("react-dom/package.json"));
 
 const nextConfig: NextConfig = {
   /* config options here */
+  outputFileTracingRoot: path.join(__dirname, "../.."),
   typedRoutes: true,
   trailingSlash: false,
   reactStrictMode: false,
-  transpilePackages: ["@root/apiGateway", "@root/schema", "kyc-providers"],
+  transpilePackages: [
+    "@root/apiGateway",
+    "@root/schema",
+    "@root/kyc-providers",
+    "@root/config",
+  ],
   // Keep PDF/native deps out of the RSC server graph (avoids createContext errors).
-  // Do not also list kyc-providers here — it conflicts with transpilePackages.
+  // Do not also list @root/kyc-providers here — it conflicts with transpilePackages.
   serverExternalPackages: [
     "@react-pdf/renderer",
     "@ag-media/react-pdf-table",

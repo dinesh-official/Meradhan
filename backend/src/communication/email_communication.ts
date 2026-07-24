@@ -1,4 +1,4 @@
-import { env } from "@packages/config/env";
+import { env } from "@root/config/env";
 import nodemailer from "nodemailer";
 
 export class EmailCommunication {

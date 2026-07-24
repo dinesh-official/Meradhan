@@ -7,7 +7,7 @@ import { EmailCommunication } from "@communication/email_communication";
 import { getEmailSalutationFromSources } from "@root/schema";
 import { meraDhanClosureRequestSubmittedEmailText } from "@emails/text/meraDhanClosureRequestSubmittedEmailText";
 import { meraDhanClosureRequestAdminEmailText } from "@emails/text/meraDhanClosureRequestAdminEmailText";
-import { env } from "@packages/config/env";
+import { env } from "@root/config/env";
 
 /** Ops inbox notified when a customer raises an account closure request. */
 const ACCOUNT_CLOSURE_ADMIN_EMAIL = "support@meradhan.co";

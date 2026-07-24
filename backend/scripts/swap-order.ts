@@ -18,7 +18,7 @@
  * You can also tweak the constants in `main()` below before running.
  */
 
-import "@packages/config/env";
+import "@root/config/env";
 
 import { db } from "@core/database/database";
 import type { Prisma } from "@databases/generated/prisma/postgres";

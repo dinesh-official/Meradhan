@@ -1,5 +1,5 @@
 {
-  "name": "dp-id-lookup",
+  "name": "@root/dp-id-lookup",
   "version": "1.0.0",
   "private": true,
   "main": "index.ts",

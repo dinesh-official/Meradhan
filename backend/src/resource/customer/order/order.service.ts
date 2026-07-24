@@ -6,7 +6,7 @@ import type {
 
   Prisma,
 } from "@databases/generated/prisma/postgres";
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
 import {
   generateDealId,
   generateOrderId,

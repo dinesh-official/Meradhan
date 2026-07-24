@@ -8,8 +8,8 @@ import { AppError } from "@utils/error/AppError";
 import { makeFullname } from "@utils/generate/generate_username";
 import type z from "zod";
 import { KycProvider } from "./kyc_provider";
-import { KraSDK, type T_APP_PAN_INQ_DOWNLOAD } from "@packages/kyc-providers";
-import { env } from "@packages/config/src/env";
+import { KraSDK, type T_APP_PAN_INQ_DOWNLOAD } from "@root/kyc-providers";
+import { env } from "@root/config/env";
 import { checkKraProcessCheckStatus } from "@jobs/kra_worker/CheckKraStatus";
 
 export class CustomerKycKycService {

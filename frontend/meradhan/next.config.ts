@@ -3,17 +3,18 @@ import { BASES_URLS } from "@/core/config/base.urls";
 import type { NextConfig } from "next";
 import path from "path";
 
-const reactDir = path.resolve(__dirname, "node_modules/react");
-const reactDomDir = path.resolve(__dirname, "node_modules/react-dom");
+const reactDir = path.dirname(require.resolve("react/package.json"));
+const reactDomDir = path.dirname(require.resolve("react-dom/package.json"));
 
 // Next.js configuration
 const nextConfig: NextConfig = {
+  // Monorepo: silence multi-lockfile root inference
+  outputFileTracingRoot: path.join(__dirname, "../.."),
   devIndicators: {
     position: "bottom-left",
   },
-  transpilePackages: ["@root/apiGateway", "@root/schema"],
-  // Linked apiGateway → kyc-providers can pull PDF/native deps into the RSC graph
-  // and break page-data collection with "createContext is not a function".
+  transpilePackages: ["@root/apiGateway", "@root/schema", "@root/config"],
+  // Keep PDF/native deps out of the RSC server graph (avoids createContext errors).
   serverExternalPackages: [
     "@react-pdf/renderer",
     "@ag-media/react-pdf-table",
