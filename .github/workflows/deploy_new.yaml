@@ -18,7 +18,6 @@ on:
         type: choice
         default: 1hr
         options:
-          - 10min
           - 1hr
           - 2hr
           - 4hr
@@ -1264,155 +1263,385 @@ jobs:
           echo "======================================"
 
 
+      - name: Build / Validate Cleanup Event Payload
+        shell: bash
+        env:
+          EVENT_BUS_NAME: Branch_deploy
+          INSTANCE_ID:    ${{ steps.create_ec2.outputs.instance_id }}
+          RULE_ARNS_CSV:  ${{ steps.tg_listener.outputs.rule_arns }}
+          TG_ARNS_CSV:    ${{ steps.tg_listener.outputs.target_group_arns }}
+          PUBLISH_NOW:    ${{ inputs.publish_cleanup_now || 'false' }}
+        run: |
+          set -euo pipefail
+ 
+          if [ -z "${INSTANCE_ID}" ] || [ "${INSTANCE_ID}" = "None" ]; then
+            echo "No instance was created — nothing to build a payload for."
+            exit 0
+          fi
+ 
+          # An empty CSV must yield [] , not [""] .
+          EVENT_DETAIL=$(jq -nc \
+            --arg instance_id "$INSTANCE_ID" \
+            --arg rules       "$RULE_ARNS_CSV" \
+            --arg tgs         "$TG_ARNS_CSV" \
+            '{
+               instance_id: $instance_id,
+               resources: [
+                 {
+                   rule_arns:
+                     (if $rules == "" then [] else ($rules | split(",")) end),
+                   target_group_arns:
+                     (if $tgs   == "" then [] else ($tgs   | split(",")) end)
+                 }
+               ]
+             }')
+ 
+          echo "======================================"
+          echo "Cleanup Event Payload (detail)"
+          echo "======================================"
+          echo "$EVENT_DETAIL" | jq .
+ 
+          if [ "${PUBLISH_NOW}" != "true" ]; then
+            echo "PUBLISH_NOW is not 'true' — payload validated, nothing published."
+            exit 0
+          fi
+ 
+          echo "WARNING: publishing cleanup event NOW. The environment will be destroyed."
+ 
+          # Detail is a JSON *string*, not an object -> --arg, never --argjson.
+          ENTRIES=$(jq -nc \
+            --arg detail "$EVENT_DETAIL" \
+            --arg bus    "$EVENT_BUS_NAME" \
+            '[{
+               Source:       "preview.cleanup",
+               DetailType:   "DeletePreviewResources",
+               EventBusName: $bus,
+               Detail:       $detail
+             }]')
+ 
+          RESPONSE=$(aws events put-events --entries "$ENTRIES")
+ 
+          echo "======================================"
+          echo "PutEvents Response"
+          echo "======================================"
+          echo "$RESPONSE" | jq .
+ 
+          # put-events returns HTTP 200 even when individual entries are
+          # rejected, so the exit code alone is not enough.
+          FAILED=$(echo "$RESPONSE" | jq -r '.FailedEntryCount')
+ 
+          if [ "$FAILED" != "0" ]; then
+            echo "ERROR: EventBridge rejected ${FAILED} entry/entries."
+            echo "$RESPONSE" | jq -r '.Entries[] | select(.ErrorCode) | "  \(.ErrorCode): \(.ErrorMessage)"'
+            exit 1
+          fi
+ 
+          # NOTE: FailedEntryCount == 0 only means the bus ACCEPTED the event.
+          # It says nothing about whether any rule matched or any target fired.
+          echo "Cleanup event accepted by bus '${EVENT_BUS_NAME}'."
+ 
+ 
+# ---------------------------------------------------------------------
+# STEP 2 — Create/update the one-time schedule.
+# ---------------------------------------------------------------------
       - name: Schedule Cleanup (EventBridge Scheduler)
         if: always()
         shell: bash
         env:
           SCHEDULER_ROLE_ARN: ${{ secrets.SCHEDULER_ROLE_ARN }}
-          EVENT_BUS_NAME: Branch_deploy
+          EVENT_BUS_NAME:     Branch_deploy
+          SCHEDULE_GROUP:     default
+          SCHEDULE_TZ:        Asia/Kolkata
+          # Optional but strongly recommended — without it, a failed target
+          # invocation is completely silent. SQS queue ARN.
+          DLQ_ARN:            ${{ secrets.CLEANUP_DLQ_ARN }}
+          INSTANCE_ID:        ${{ steps.create_ec2.outputs.instance_id }}
+          RULE_ARNS_CSV:      ${{ steps.tg_listener.outputs.rule_arns }}
+          TG_ARNS_CSV:        ${{ steps.tg_listener.outputs.target_group_arns }}
+          LIVE_TIME:          ${{ inputs.live_time }}
         run: |
-          set -e
-
-          INSTANCE_ID="${{ steps.create_ec2.outputs.instance_id }}"
-          RULE_ARNS_CSV="${{ steps.tg_listener.outputs.rule_arns }}"
-          TG_ARNS_CSV="${{ steps.tg_listener.outputs.target_group_arns }}"
-          LIVE_TIME="${{ inputs.live_time }}"
-
-          SCHEDULE_TZ="Asia/Kolkata"
-
-          if [ -z "$INSTANCE_ID" ] || [ "$INSTANCE_ID" = "None" ]; then
+          set -euo pipefail
+ 
+          # =========================================================
+          # 0. Preconditions
+          # =========================================================
+          if [ -z "${INSTANCE_ID}" ] || [ "${INSTANCE_ID}" = "None" ]; then
             echo "No instance was created — nothing to schedule cleanup for."
             exit 0
           fi
-
-          if [ -z "$SCHEDULER_ROLE_ARN" ]; then
+ 
+          if [ -z "${SCHEDULER_ROLE_ARN}" ]; then
             echo "ERROR: SCHEDULER_ROLE_ARN is not set."
+            echo "Add it under Settings -> Secrets and variables -> Actions -> Secrets."
+            echo "It must be a role trusted by scheduler.amazonaws.com with"
+            echo "events:PutEvents on the ${EVENT_BUS_NAME} bus."
             exit 1
           fi
-
-          #
-          # Parse live_time (supports ±minutes and ±hours)
-          #
-          case "$LIVE_TIME" in
-            *hr)
-              VALUE="${LIVE_TIME%hr}"
-              UNIT="hours"
-              ;;
-            *min)
-              VALUE="${LIVE_TIME%min}"
-              UNIT="minutes"
-              ;;
-            *)
-              echo "ERROR: Invalid live_time '${LIVE_TIME}'"
-              exit 1
-              ;;
-          esac
-
-          if ! [[ "$VALUE" =~ ^-?[0-9]+$ ]]; then
-            echo "ERROR: Invalid live_time '${LIVE_TIME}'"
+ 
+          # These come from an earlier step (job env / GITHUB_ENV).
+          # If either is empty the schedule name collapses to "cleanup--i-xxxx",
+          # which collides across environments and makes the existence check
+          # match the wrong schedule.
+          : "${ENV_CODE:?ENV_CODE is empty - schedule names would collide}"
+          : "${BRANCH_CODE:?BRANCH_CODE is empty - schedule names would collide}"
+ 
+          DLQ_ARN="${DLQ_ARN:-}"
+ 
+          # =========================================================
+          # 1. Resolve account + region -> full bus ARN
+          #    Using the ARN (not the bare name) removes any ambiguity
+          #    about which bus/region/account is targeted.
+          # =========================================================
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          REGION="${AWS_REGION:-${AWS_DEFAULT_REGION:-}}"
+          if [ -z "$REGION" ]; then
+            REGION=$(aws configure get region)
+          fi
+          if [ -z "$REGION" ]; then
+            echo "ERROR: could not determine AWS region."
             exit 1
           fi
-
-          NOW_LOCAL=$(TZ="$SCHEDULE_TZ" date '+%Y-%m-%d %H:%M:%S')
-
-          if [[ "$VALUE" == -* ]]; then
-            OFFSET="${VALUE#-} ${UNIT} ago"
+ 
+          BUS_ARN="arn:aws:events:${REGION}:${ACCOUNT_ID}:event-bus/${EVENT_BUS_NAME}"
+ 
+          # =========================================================
+          # 2. Preflight: does the delivery path actually exist?
+          #    A schedule that fires into a bus with no matching rule
+          #    "succeeds" and silently does nothing.
+          # =========================================================
+          echo "======================================"
+          echo "Preflight"
+          echo "======================================"
+ 
+          if ! aws events describe-event-bus --name "$EVENT_BUS_NAME" >/dev/null 2>&1; then
+            echo "ERROR: event bus '${EVENT_BUS_NAME}' not found in ${REGION}."
+            exit 1
+          fi
+          echo "Bus            : ${BUS_ARN}  [OK]"
+ 
+          # Non-fatal: needs events:ListRules / events:ListTargetsByRule.
+          MATCHING_RULE=""
+          if RULES_JSON=$(aws events list-rules \
+                            --event-bus-name "$EVENT_BUS_NAME" \
+                            --output json 2>/dev/null); then
+            MATCHING_RULE=$(echo "$RULES_JSON" | jq -r '
+              .Rules[]
+              | select(.EventPattern != null)
+              | select(
+                  (.EventPattern | fromjson)
+                  | (."detail-type" // []) | index("DeletePreviewResources")
+                )
+              | .Name' | head -n1)
+ 
+            if [ -z "$MATCHING_RULE" ]; then
+              echo "WARNING: no rule on bus '${EVENT_BUS_NAME}' matches"
+              echo "         detail-type 'DeletePreviewResources'."
+              echo "         The schedule will fire and nothing will happen."
+              echo "         Check the rule was created ON THIS BUS, not on 'default'."
+            else
+              echo "Rule           : ${MATCHING_RULE}  [OK]"
+ 
+              STATE=$(echo "$RULES_JSON" | jq -r --arg n "$MATCHING_RULE" \
+                        '.Rules[] | select(.Name==$n) | .State')
+              [ "$STATE" = "ENABLED" ] \
+                && echo "Rule state     : ENABLED  [OK]" \
+                || echo "WARNING: rule '${MATCHING_RULE}' state is ${STATE}."
+ 
+              TARGET_COUNT=$(aws events list-targets-by-rule \
+                               --rule "$MATCHING_RULE" \
+                               --event-bus-name "$EVENT_BUS_NAME" \
+                               --query 'length(Targets)' --output text 2>/dev/null || echo "?")
+              if [ "$TARGET_COUNT" = "0" ]; then
+                echo "WARNING: rule '${MATCHING_RULE}' has no targets attached."
+              else
+                echo "Rule targets   : ${TARGET_COUNT}  [OK]"
+              fi
+            fi
           else
-            OFFSET="${VALUE} ${UNIT}"
+            echo "(skipped rule check — missing events:ListRules permission)"
           fi
-
-          DESTROY_AT=$(TZ="$SCHEDULE_TZ" date -d "$OFFSET" '+%Y-%m-%dT%H:%M:%S')
-          DESTROY_AT_UTC=$(date -u -d "$OFFSET" '+%Y-%m-%dT%H:%M:%SZ')
-
+ 
+          # =========================================================
+          # 3. Parse live_time -> hours
+          #    Accepts "24hr", "24h" or "24".
+          # =========================================================
+          HOURS="${LIVE_TIME%hr}"
+          HOURS="${HOURS%h}"
+ 
+          if ! [[ "$HOURS" =~ ^[0-9]+$ ]] || [ "$HOURS" -lt 1 ]; then
+            echo "ERROR: could not parse live_time '${LIVE_TIME}' into hours."
+            exit 1
+          fi
+ 
+          # =========================================================
+          # 4. Compute the fire time.
+          #    Scheduler wants at(yyyy-mm-ddThh:mm:ss) with NO trailing Z
+          #    and no offset — the zone is passed separately.
+          # =========================================================
+          NOW_LOCAL=$(TZ="$SCHEDULE_TZ" date '+%Y-%m-%d %H:%M:%S')
+          DESTROY_AT=$(TZ="$SCHEDULE_TZ" date -d "+${HOURS} hours" '+%Y-%m-%dT%H:%M:%S')
+          DESTROY_AT_UTC=$(date -u -d "+${HOURS} hours" '+%Y-%m-%dT%H:%M:%SZ')
+ 
           echo "======================================"
           echo "Cleanup Schedule"
           echo "======================================"
           echo "Timezone     : $SCHEDULE_TZ"
           echo "Now          : $NOW_LOCAL"
-          echo "Lifetime     : ${LIVE_TIME}"
-          echo "Destroy at   : ${DESTROY_AT/T/ } (${SCHEDULE_TZ})"
-          echo "Destroy at   : ${DESTROY_AT_UTC} (UTC)"
+          echo "Lifetime     : ${HOURS}h  (input: ${LIVE_TIME})"
+          echo "Destroy at   : ${DESTROY_AT/T/ }  (${SCHEDULE_TZ})"
+          echo "Destroy at   : $DESTROY_AT_UTC  (UTC)"
+          echo "Bus          : $BUS_ARN"
           echo "======================================"
-
+ 
+          # =========================================================
+          # 5. Build the payload.
+          #
+          #    Using Scheduler's NATIVE EventBridge target:
+          #      Target.Arn                       = the event bus ARN
+          #      Target.Input                     = the event Detail (a JSON string)
+          #      Target.EventBridgeParameters     = Source + DetailType
+          #
+          #    This is one level of nesting shallower than the universal
+          #    target (arn:aws:scheduler:::aws-sdk:eventbridge:putEvents),
+          #    which needs a full {"Entries":[...]} envelope with Detail
+          #    double-escaped inside it. Same end result, far less to get
+          #    wrong. The universal-target equivalent is at the bottom
+          #    of this file if you prefer to keep it.
+          # =========================================================
           EVENT_DETAIL=$(jq -nc \
             --arg instance_id "$INSTANCE_ID" \
-            --arg rules "$RULE_ARNS_CSV" \
-            --arg tgs "$TG_ARNS_CSV" \
-            --arg live_time "$LIVE_TIME" \
-            --arg destroy_at "$DESTROY_AT_UTC" \
+            --arg rules       "$RULE_ARNS_CSV" \
+            --arg tgs         "$TG_ARNS_CSV" \
+            --arg live_time   "$LIVE_TIME" \
+            --arg destroy_at  "$DESTROY_AT_UTC" \
             '{
-              instance_id: $instance_id,
-              live_time: $live_time,
-              destroy_at: $destroy_at,
-              resources: [
-                {
-                  rule_arns:
-                    (if $rules == "" then [] else ($rules | split(",")) end),
-                  target_group_arns:
-                    (if $tgs == "" then [] else ($tgs | split(",")) end)
-                }
-              ]
-            }')
-
-          PUT_EVENTS_INPUT=$(jq -nc \
-            --arg detail "$EVENT_DETAIL" \
-            --arg bus "$EVENT_BUS_NAME" \
-            '{
-              Entries: [
-                {
-                  Source: "preview.cleanup",
-                  DetailType: "DeletePreviewResources",
-                  EventBusName: $bus,
-                  Detail: $detail
-                }
-              ]
-            }')
-
+               instance_id: $instance_id,
+               live_time:   $live_time,
+               destroy_at:  $destroy_at,
+               resources: [
+                 {
+                   rule_arns:
+                     (if $rules == "" then [] else ($rules | split(",")) end),
+                   target_group_arns:
+                     (if $tgs   == "" then [] else ($tgs   | split(",")) end)
+                 }
+               ]
+             }')
+ 
           TARGET=$(jq -nc \
-            --arg role "$SCHEDULER_ROLE_ARN" \
-            --arg input "$PUT_EVENTS_INPUT" \
+            --arg bus_arn "$BUS_ARN" \
+            --arg role    "$SCHEDULER_ROLE_ARN" \
+            --arg input   "$EVENT_DETAIL" \
+            --arg dlq     "$DLQ_ARN" \
             '{
-              Arn: "arn:aws:scheduler:::aws-sdk:eventbridge:putEvents",
-              RoleArn: $role,
-              Input: $input,
-              RetryPolicy: {
-                MaximumRetryAttempts: 3
-              }
-            }')
-
-          echo "Scheduled Event:"
+               Arn:     $bus_arn,
+               RoleArn: $role,
+               Input:   $input,
+               EventBridgeParameters: {
+                 Source:     "preview.cleanup",
+                 DetailType: "DeletePreviewResources"
+               },
+               RetryPolicy: {
+                 MaximumRetryAttempts:     3,
+                 MaximumEventAgeInSeconds: 3600
+               }
+             }
+             + (if $dlq == "" then {} else { DeadLetterConfig: { Arn: $dlq } } end)')
+ 
+          echo "Event that will be published at the scheduled time:"
           echo "$EVENT_DETAIL" | jq .
-
-          SCHEDULE_NAME="cleanup-${ENV_CODE}${BRANCH_CODE}-${INSTANCE_ID}"
-
-          if aws scheduler get-schedule --name "$SCHEDULE_NAME" >/dev/null 2>&1; then
-            ACTION="update-schedule"
-            echo "Updating existing schedule..."
-          else
-            ACTION="create-schedule"
-            echo "Creating new schedule..."
+ 
+          if [ -z "$DLQ_ARN" ]; then
+            echo "WARNING: no DLQ configured. If PutEvents fails at fire time,"
+            echo "         the failure will be silent and the schedule will still"
+            echo "         self-delete. Set CLEANUP_DLQ_ARN to catch this."
           fi
-
+ 
+          # =========================================================
+          # 6. Schedule name: must match [0-9a-zA-Z-_.]+ and be <= 64 chars.
+          # =========================================================
+          RAW_NAME="cleanup-${ENV_CODE}${BRANCH_CODE}-${INSTANCE_ID}"
+          SCHEDULE_NAME=$(printf '%s' "$RAW_NAME" | tr -c '[:alnum:]._-' '-' | cut -c1-64)
+ 
+          if [ "$SCHEDULE_NAME" != "$RAW_NAME" ]; then
+            echo "NOTE: schedule name sanitised: '${RAW_NAME}' -> '${SCHEDULE_NAME}'"
+          fi
+ 
+          # =========================================================
+          # 7. Create or update.
+          #    The original swallowed ALL errors from get-schedule, so an
+          #    AccessDenied looked identical to "doesn't exist" and led to
+          #    a create that then failed. Distinguish the two.
+          # =========================================================
+          ERR_FILE=$(mktemp)
+ 
+          if aws scheduler get-schedule \
+               --name "$SCHEDULE_NAME" \
+               --group-name "$SCHEDULE_GROUP" >/dev/null 2>"$ERR_FILE"; then
+            ACTION="update-schedule"
+            echo "Schedule '${SCHEDULE_NAME}' exists — extending destroy time."
+          elif grep -q 'ResourceNotFoundException' "$ERR_FILE"; then
+            ACTION="create-schedule"
+            echo "Creating schedule '${SCHEDULE_NAME}'."
+          else
+            echo "ERROR: get-schedule failed for a reason other than 'not found':"
+            cat "$ERR_FILE"
+            rm -f "$ERR_FILE"
+            exit 1
+          fi
+          rm -f "$ERR_FILE"
+ 
+          # update-schedule has PUT semantics — every field must be supplied
+          # or it is reset to its default. Both branches pass the identical
+          # complete set, including --state.
           aws scheduler "$ACTION" \
             --name "$SCHEDULE_NAME" \
+            --group-name "$SCHEDULE_GROUP" \
             --schedule-expression "at(${DESTROY_AT})" \
             --schedule-expression-timezone "$SCHEDULE_TZ" \
             --flexible-time-window Mode=OFF \
             --action-after-completion DELETE \
-            --description "Destroy preview environment after ${LIVE_TIME}" \
-            --target "$TARGET"
-
-          echo "Schedule successfully configured."
-
+            --state ENABLED \
+            --description "Destroy preview env ${ENV_CODE}${BRANCH_CODE} (${INSTANCE_ID}) after ${LIVE_TIME}" \
+            --target "$TARGET" >/dev/null
+ 
+          echo "Schedule set."
+ 
+          # =========================================================
+          # 8. Read it back — proves the API accepted what we think it did.
+          # =========================================================
+          echo "======================================"
+          echo "Schedule as stored by AWS"
+          echo "======================================"
+          aws scheduler get-schedule \
+            --name "$SCHEDULE_NAME" \
+            --group-name "$SCHEDULE_GROUP" \
+            --query '{
+              Name:       Name,
+              State:      State,
+              Expression: ScheduleExpression,
+              Timezone:   ScheduleExpressionTimezone,
+              TargetArn:  Target.Arn,
+              RoleArn:    Target.RoleArn,
+              Source:     Target.EventBridgeParameters.Source,
+              DetailType: Target.EventBridgeParameters.DetailType,
+              DLQ:        Target.DeadLetterConfig.Arn
+            }' --output table
+ 
+          # =========================================================
+          # 9. Step summary
+          # =========================================================
           {
             echo "## Cleanup Scheduled"
             echo ""
             echo "| Field | Value |"
-            echo "|------|-------|"
+            echo "|---|---|"
             echo "| Instance | \`${INSTANCE_ID}\` |"
             echo "| Event Bus | \`${EVENT_BUS_NAME}\` |"
+            echo "| Rule matched | \`${MATCHING_RULE:-NONE FOUND}\` |"
             echo "| Lifetime | ${LIVE_TIME} |"
-            echo "| Destroy Time (Local) | ${DESTROY_AT/T/ } (${SCHEDULE_TZ}) |"
-            echo "| Destroy Time (UTC) | ${DESTROY_AT_UTC} |"
+            echo "| Destroys at | ${DESTROY_AT/T/ } (${SCHEDULE_TZ}) |"
+            echo "| Destroys at | ${DESTROY_AT_UTC} |"
             echo "| Schedule | \`${SCHEDULE_NAME}\` |"
+            echo "| DLQ | \`${DLQ_ARN:-none}\` |"
           } >> "$GITHUB_STEP_SUMMARY"
