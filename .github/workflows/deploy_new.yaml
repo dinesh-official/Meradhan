@@ -1264,74 +1264,6 @@ jobs:
           echo "======================================"
 
 
-      - name: Send Cleanup Event to EventBridge
-        shell: bash
-        run: |
-          set -e
-
-          INSTANCE_ID="${{ steps.create_ec2.outputs.instance_id }}"
-          RULE_ARNS_CSV="${{ steps.tg_listener.outputs.rule_arns }}"
-          TG_ARNS_CSV="${{ steps.tg_listener.outputs.target_group_arns }}"
-
-          # ---------------------------------------------------------
-          # Build the detail payload with jq.
-          # No heredoc, no manual quoting — an empty CSV yields [] rather
-          # than [""] , which a naive split(",") would produce.
-          # ---------------------------------------------------------
-          EVENT_DETAIL=$(jq -nc \
-            --arg instance_id "$INSTANCE_ID" \
-            --arg rules "$RULE_ARNS_CSV" \
-            --arg tgs "$TG_ARNS_CSV" \
-            '{
-               instance_id: $instance_id,
-               resources: [
-                 {
-                   rule_arns:
-                     (if $rules == "" then [] else ($rules | split(",")) end),
-                   target_group_arns:
-                     (if $tgs   == "" then [] else ($tgs   | split(",")) end)
-                 }
-               ]
-             }')
-
-          echo "======================================"
-          echo "Cleanup Event Payload"
-          echo "======================================"
-          echo "$EVENT_DETAIL" | jq .
-
-          # ---------------------------------------------------------
-          # EventBridge's Detail field is a JSON *string*, not an object.
-          # Passing --arg (not --argjson) is what escapes it correctly.
-          # ---------------------------------------------------------
-          ENTRIES=$(jq -nc \
-            --arg detail "$EVENT_DETAIL" \
-            '[{
-               Source: "preview.cleanup",
-               DetailType: "DeletePreviewResources",
-               EventBusName: "default",
-               Detail: $detail
-             }]')
-
-          RESPONSE=$(aws events put-events --entries "$ENTRIES")
-
-          echo "======================================"
-          echo "PutEvents Response"
-          echo "======================================"
-          echo "$RESPONSE" | jq .
-
-          # put-events returns HTTP 200 even when individual entries are
-          # rejected, so the exit code alone is not enough.
-          FAILED=$(echo "$RESPONSE" | jq -r '.FailedEntryCount')
-
-          if [ "$FAILED" != "0" ]; then
-            echo "ERROR: EventBridge rejected ${FAILED} entry/entries."
-            echo "$RESPONSE" | jq -r '.Entries[] | select(.ErrorCode) | "  \(.ErrorCode): \(.ErrorMessage)"'
-            exit 1
-          fi
-
-          echo "Cleanup event published."
-
-
       - name: Schedule Cleanup (EventBridge Scheduler)
         if: always()
         shell: bash
@@ -1358,25 +1290,48 @@ jobs:
             exit 1
           fi
 
-          HOURS="${LIVE_TIME%hr}"
+          #
+          # Parse live_time (supports ±minutes and ±hours)
+          #
+          case "$LIVE_TIME" in
+            *hr)
+              VALUE="${LIVE_TIME%hr}"
+              UNIT="hours"
+              ;;
+            *min)
+              VALUE="${LIVE_TIME%min}"
+              UNIT="minutes"
+              ;;
+            *)
+              echo "ERROR: Invalid live_time '${LIVE_TIME}'"
+              exit 1
+              ;;
+          esac
 
-          if ! [[ "$HOURS" =~ ^[0-9]+$ ]]; then
-            echo "ERROR: could not parse live_time '${LIVE_TIME}'"
+          if ! [[ "$VALUE" =~ ^-?[0-9]+$ ]]; then
+            echo "ERROR: Invalid live_time '${LIVE_TIME}'"
             exit 1
           fi
 
           NOW_LOCAL=$(TZ="$SCHEDULE_TZ" date '+%Y-%m-%d %H:%M:%S')
-          DESTROY_AT=$(TZ="$SCHEDULE_TZ" date -d "+${HOURS} hours" '+%Y-%m-%dT%H:%M:%S')
-          DESTROY_AT_UTC=$(date -u -d "+${HOURS} hours" '+%Y-%m-%dT%H:%M:%SZ')
+
+          if [[ "$VALUE" == -* ]]; then
+            OFFSET="${VALUE#-} ${UNIT} ago"
+          else
+            OFFSET="${VALUE} ${UNIT}"
+          fi
+
+          DESTROY_AT=$(TZ="$SCHEDULE_TZ" date -d "$OFFSET" '+%Y-%m-%dT%H:%M:%S')
+          DESTROY_AT_UTC=$(date -u -d "$OFFSET" '+%Y-%m-%dT%H:%M:%SZ')
 
           echo "======================================"
           echo "Cleanup Schedule"
           echo "======================================"
           echo "Timezone     : $SCHEDULE_TZ"
           echo "Now          : $NOW_LOCAL"
-          echo "Lifetime     : ${HOURS}h"
+          echo "Lifetime     : ${LIVE_TIME}"
           echo "Destroy at   : ${DESTROY_AT/T/ } (${SCHEDULE_TZ})"
-          echo "Destroy at   : $DESTROY_AT_UTC (UTC)"
+          echo "Destroy at   : ${DESTROY_AT_UTC} (UTC)"
           echo "======================================"
 
           EVENT_DETAIL=$(jq -nc \
