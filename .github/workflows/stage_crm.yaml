@@ -3,7 +3,7 @@ name: stage crm deploy
 on:
   push:
     branches:
-      - staging-stable
+      - staging
     paths:
       - 'frontend/crm/**'
       - 'packages/**'
