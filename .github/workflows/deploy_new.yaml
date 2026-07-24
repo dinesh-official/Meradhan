@@ -1336,6 +1336,7 @@ jobs:
         shell: bash
         env:
           SCHEDULER_ROLE_ARN: ${{ secrets.SCHEDULER_ROLE_ARN }}
+          EVENT_BUS_NAME: Branch_deploy
         run: |
           set -e
 
@@ -1344,9 +1345,6 @@ jobs:
           TG_ARNS_CSV="${{ steps.tg_listener.outputs.target_group_arns }}"
           LIVE_TIME="${{ inputs.live_time }}"
 
-          # Wall-clock timezone the schedule is expressed in. The AWS console
-          # will show the fire time in this zone, so keep it as the one you
-          # think in. Change to "UTC" if you'd rather read it that way.
           SCHEDULE_TZ="Asia/Kolkata"
 
           if [ -z "$INSTANCE_ID" ] || [ "$INSTANCE_ID" = "None" ]; then
@@ -1356,28 +1354,16 @@ jobs:
 
           if [ -z "$SCHEDULER_ROLE_ARN" ]; then
             echo "ERROR: SCHEDULER_ROLE_ARN is not set."
-            echo "Add it under Settings -> Environments -> Variables."
-            echo "It must be a role trusted by scheduler.amazonaws.com with events:PutEvents."
             exit 1
           fi
 
-          # ---------------------------------------------------------
-          # 1. Parse live_time -> hours
-          #    Strips the "hr" suffix, so adding 48hr/72hr to the input
-          #    options later needs no change here.
-          # ---------------------------------------------------------
           HOURS="${LIVE_TIME%hr}"
 
           if ! [[ "$HOURS" =~ ^[0-9]+$ ]]; then
-            echo "ERROR: could not parse live_time '${LIVE_TIME}' into a number of hours."
+            echo "ERROR: could not parse live_time '${LIVE_TIME}'"
             exit 1
           fi
 
-          # ---------------------------------------------------------
-          # 2. now + HOURS
-          #    Scheduler wants at(yyyy-mm-ddThh:mm:ss) with NO trailing Z
-          #    and no UTC offset — the zone is passed separately.
-          # ---------------------------------------------------------
           NOW_LOCAL=$(TZ="$SCHEDULE_TZ" date '+%Y-%m-%d %H:%M:%S')
           DESTROY_AT=$(TZ="$SCHEDULE_TZ" date -d "+${HOURS} hours" '+%Y-%m-%dT%H:%M:%S')
           DESTROY_AT_UTC=$(date -u -d "+${HOURS} hours" '+%Y-%m-%dT%H:%M:%SZ')
@@ -1387,16 +1373,11 @@ jobs:
           echo "======================================"
           echo "Timezone     : $SCHEDULE_TZ"
           echo "Now          : $NOW_LOCAL"
-          echo "Lifetime     : ${HOURS}h  (input: ${LIVE_TIME})"
-          echo "Destroy at   : ${DESTROY_AT/T/ }  (${SCHEDULE_TZ})"
-          echo "Destroy at   : $DESTROY_AT_UTC  (UTC)"
+          echo "Lifetime     : ${HOURS}h"
+          echo "Destroy at   : ${DESTROY_AT/T/ } (${SCHEDULE_TZ})"
+          echo "Destroy at   : $DESTROY_AT_UTC (UTC)"
           echo "======================================"
 
-          # ---------------------------------------------------------
-          # 3. Build the payload, innermost first.
-          #    Each --arg stringifies the previous layer, which is what
-          #    both Detail and Input require.
-          # ---------------------------------------------------------
           EVENT_DETAIL=$(jq -nc \
             --arg instance_id "$INSTANCE_ID" \
             --arg rules "$RULE_ARNS_CSV" \
@@ -1404,59 +1385,56 @@ jobs:
             --arg live_time "$LIVE_TIME" \
             --arg destroy_at "$DESTROY_AT_UTC" \
             '{
-               instance_id: $instance_id,
-               live_time:   $live_time,
-               destroy_at:  $destroy_at,
-               resources: [
-                 {
-                   rule_arns:
-                     (if $rules == "" then [] else ($rules | split(",")) end),
-                   target_group_arns:
-                     (if $tgs   == "" then [] else ($tgs   | split(",")) end)
-                 }
-               ]
-             }')
+              instance_id: $instance_id,
+              live_time: $live_time,
+              destroy_at: $destroy_at,
+              resources: [
+                {
+                  rule_arns:
+                    (if $rules == "" then [] else ($rules | split(",")) end),
+                  target_group_arns:
+                    (if $tgs == "" then [] else ($tgs | split(",")) end)
+                }
+              ]
+            }')
 
           PUT_EVENTS_INPUT=$(jq -nc \
             --arg detail "$EVENT_DETAIL" \
+            --arg bus "$EVENT_BUS_NAME" \
             '{
-               Entries: [
-                 {
-                   Source:       "preview.cleanup",
-                   DetailType:   "DeletePreviewResources",
-                   EventBusName: "default",
-                   Detail:       $detail
-                 }
-               ]
-             }')
+              Entries: [
+                {
+                  Source: "preview.cleanup",
+                  DetailType: "DeletePreviewResources",
+                  EventBusName: $bus,
+                  Detail: $detail
+                }
+              ]
+            }')
 
           TARGET=$(jq -nc \
             --arg role "$SCHEDULER_ROLE_ARN" \
             --arg input "$PUT_EVENTS_INPUT" \
             '{
-               Arn:     "arn:aws:scheduler:::aws-sdk:eventbridge:putEvents",
-               RoleArn: $role,
-               Input:   $input,
-               RetryPolicy: { MaximumRetryAttempts: 3 }
-             }')
+              Arn: "arn:aws:scheduler:::aws-sdk:eventbridge:putEvents",
+              RoleArn: $role,
+              Input: $input,
+              RetryPolicy: {
+                MaximumRetryAttempts: 3
+              }
+            }')
 
-          echo "Event that will be published at the scheduled time:"
+          echo "Scheduled Event:"
           echo "$EVENT_DETAIL" | jq .
 
-          # ---------------------------------------------------------
-          # 4. Create or update the one-time schedule.
-          #    Name must match [0-9a-zA-Z-_.]+ and be <= 64 chars.
-          #    Re-running the workflow pushes the destroy time back
-          #    rather than erroring with ConflictException.
-          # ---------------------------------------------------------
           SCHEDULE_NAME="cleanup-${ENV_CODE}${BRANCH_CODE}-${INSTANCE_ID}"
 
           if aws scheduler get-schedule --name "$SCHEDULE_NAME" >/dev/null 2>&1; then
             ACTION="update-schedule"
-            echo "Schedule '${SCHEDULE_NAME}' exists — extending destroy time."
+            echo "Updating existing schedule..."
           else
             ACTION="create-schedule"
-            echo "Creating schedule '${SCHEDULE_NAME}'."
+            echo "Creating new schedule..."
           fi
 
           aws scheduler "$ACTION" \
@@ -1465,19 +1443,20 @@ jobs:
             --schedule-expression-timezone "$SCHEDULE_TZ" \
             --flexible-time-window Mode=OFF \
             --action-after-completion DELETE \
-            --description "Destroy preview env ${ENV_CODE}${BRANCH_CODE} (${INSTANCE_ID}) after ${LIVE_TIME}" \
-            --target "$TARGET" >/dev/null
+            --description "Destroy preview environment after ${LIVE_TIME}" \
+            --target "$TARGET"
 
-          echo "Schedule set."
+          echo "Schedule successfully configured."
 
           {
             echo "## Cleanup Scheduled"
             echo ""
             echo "| Field | Value |"
-            echo "|---|---|"
+            echo "|------|-------|"
             echo "| Instance | \`${INSTANCE_ID}\` |"
+            echo "| Event Bus | \`${EVENT_BUS_NAME}\` |"
             echo "| Lifetime | ${LIVE_TIME} |"
-            echo "| Destroys at | ${DESTROY_AT/T/ } (${SCHEDULE_TZ}) |"
-            echo "| Destroys at | ${DESTROY_AT_UTC} |"
+            echo "| Destroy Time (Local) | ${DESTROY_AT/T/ } (${SCHEDULE_TZ}) |"
+            echo "| Destroy Time (UTC) | ${DESTROY_AT_UTC} |"
             echo "| Schedule | \`${SCHEDULE_NAME}\` |"
           } >> "$GITHUB_STEP_SUMMARY"
