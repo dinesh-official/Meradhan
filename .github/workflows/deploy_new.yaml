@@ -18,6 +18,7 @@ on:
         type: choice
         default: 1hr
         options:
+          - 0.2hr
           - 1hr
           - 2hr
           - 4hr
