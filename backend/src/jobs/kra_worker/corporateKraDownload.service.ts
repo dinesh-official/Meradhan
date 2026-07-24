@@ -13,8 +13,8 @@
  */
 
 import { db } from "@core/database/database";
-import { env } from "@packages/config/env";
-import { KraSDK, type T_NON_INDIVIDUAL_PAN_DOWNLOAD } from "kyc-providers";
+import { env } from "@root/config/env";
+import { KraSDK, type T_NON_INDIVIDUAL_PAN_DOWNLOAD } from "@root/kyc-providers";
 import { isAxiosError, type AxiosError } from "axios";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import { normalizeKraStateName } from "@root/schema";

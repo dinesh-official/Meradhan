@@ -1,4 +1,4 @@
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
 import { appSchema } from "@root/schema";
 import type { z } from "zod";
 

@@ -2,8 +2,8 @@ import type { CustomerProfileDataModel } from "@core/database/database";
 import {
   type T_APP_PAN_INQ,
   type T_APP_PAN_INQ_DOWNLOAD,
-} from "@packages/kyc-providers";
-import type { Root } from "@packages/kyc-providers/pdf/dataMapper";
+} from "@root/kyc-providers";
+import type { Root } from "@root/kyc-providers/pdf/dataMapper";
 import { KraProcess } from "./KraWorker.service";
 
 

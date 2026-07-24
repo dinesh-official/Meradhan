@@ -1,4 +1,4 @@
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
 import {
   getKraStateCodeForName,
   lookupKraStateByName,

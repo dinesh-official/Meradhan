@@ -20,7 +20,7 @@ import type { UnregisteredParticipantRequest } from "@modules/RFQ/nse/cbrics.typ
 import {
   removeLastCommaChunks,
   splitAddressInto3BalancedLines,
-} from "@packages/kyc-providers";
+} from "@root/kyc-providers";
 import { removeCountryCode } from "@utils/filters/convert";
 
 /**

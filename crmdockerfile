@@ -15,23 +15,13 @@ RUN apt-get update && apt-get install -y \
     librsvg2-dev \
     && rm -rf /var/lib/apt/lists/*
 
-
-WORKDIR /app/packages/apiGateway
-RUN npm install
-WORKDIR /app/packages/config
-RUN npm install
-WORKDIR /app/packages/kyc-providers
-RUN npm install
-RUN rm -rf node_modules/react node_modules/react-dom
-WORKDIR /app/packages/schema
-RUN npm install
+# Workspace install: one shared node_modules (single React) for packages + frontends
 WORKDIR /app
+RUN npm install --legacy-peer-deps
+
 COPY .env /app/frontend/crm/
 
 WORKDIR /app/frontend/crm
-RUN npm install --legacy-peer-deps
-RUN rm -rf ../../packages/kyc-providers/node_modules/react \
-           ../../packages/kyc-providers/node_modules/react-dom
 RUN npm run build
 
 EXPOSE 4001

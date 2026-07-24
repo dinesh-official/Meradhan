@@ -2,7 +2,7 @@ import axios, { type AxiosInstance } from "axios";
 import * as crypto from "crypto";
 import type { BoPanRequest, BoPanResponse } from "./CDSLApi.response";
 import type { DemateVerifyResponse } from "../response.types";
-import { env } from "@packages/config/env";
+import { env } from "@root/config/env";
 
 const StatusCodeMessages: Record<string, string> = {
   "01": "Valid BO-PAN",

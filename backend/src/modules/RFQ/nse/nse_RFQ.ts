@@ -75,7 +75,7 @@ import type {
 } from "./rfq.types";
 import { AppError } from "@utils/error/AppError";
 import { cacheStorage } from "@store/redis_store";
-import { env } from "@packages/config/env";
+import { env } from "@root/config/env";
 
 // :: NOTE -
 // All dates, times and datetimes are represented as strings and in Indian standard time.

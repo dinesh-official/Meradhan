@@ -15,26 +15,15 @@ RUN apt-get update && apt-get install -y \
     librsvg2-dev \
     && rm -rf /var/lib/apt/lists/*
 
-
-WORKDIR /app/packages/apiGateway
-RUN npm install
-WORKDIR /app/packages/config
-RUN npm install
-WORKDIR /app/packages/kyc-providers
-RUN npm install
-RUN rm -rf node_modules/react node_modules/react-dom
-WORKDIR /app/packages/schema
-RUN npm install
+# Workspace install: one shared node_modules (single React) for packages + frontends
 WORKDIR /app
+RUN npm install
+
 COPY .env /app/frontend/meradhan/
 
 WORKDIR /app/frontend/meradhan
-RUN npm install
-RUN rm -rf ../../packages/kyc-providers/node_modules/react \
-           ../../packages/kyc-providers/node_modules/react-dom
 RUN npm run build
 
 EXPOSE 4002
 
-# CMD ["npm", "start"]
 CMD ["npx", "next", "start", "-p", "4002", "-H", "0.0.0.0"]

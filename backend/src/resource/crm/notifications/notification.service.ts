@@ -12,7 +12,7 @@ import {
   NotificationMedium,
   NotificationRecipientDeliveryStatus,
 } from "@databases/generated/prisma/postgres";
-import { env } from "@packages/config/env";
+import { env } from "@root/config/env";
 
 const sms = new SMSCommunication();
 

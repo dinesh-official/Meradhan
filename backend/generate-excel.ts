@@ -2,7 +2,7 @@
  * Standalone script to download customer data and generate an Excel file.
  * Run from backend: bun run generate-excel.ts
  */
-import "@packages/config/env";
+import "@root/config/env";
 import { db } from "@core/database/database";
 import fs from "fs";
 import path from "path";

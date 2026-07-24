@@ -1,6 +1,6 @@
 import axios, { Axios, AxiosError } from "axios";
 
-import { env } from "@packages/config/env";
+import { env } from "@root/config/env";
 import { cacheStorage } from "@store/redis_store";
 import { AppError } from "@utils/error/AppError";
 import logger from "@utils/logger/logger";

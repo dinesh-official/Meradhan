@@ -1,5 +1,5 @@
 import axios, { type AxiosInstance, isAxiosError } from "axios";
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
 import {
     assertAbsoluteDataIsin,
     parseAbsoluteDataGetBondByIsinResponse,

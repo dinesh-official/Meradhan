@@ -1,7 +1,7 @@
 import type { Axios } from "axios"
 import axios, { isAxiosError } from "axios";
 import type { Accept_DEAL_PROPOSE_API, Accept_Negotiation_API, DEAL_PROPOSE_API, ISIN_ADD_API, LoginAPI } from "./nse.types";
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
 
 export const nseKeys = {
     domain: env.RFQ_CBRICS_DOMAIN,

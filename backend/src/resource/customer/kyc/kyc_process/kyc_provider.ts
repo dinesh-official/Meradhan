@@ -1,6 +1,6 @@
 import { db } from "@core/database/database";
 import { saveFileOnCloud } from "@modules/file_upload/helpers/save_file_on_cloud";
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
 import { AppError } from "@utils/error/AppError";
 import AdmZip from "adm-zip";
 import { AxiosError } from "axios";
@@ -11,8 +11,8 @@ import {
   NSDLApi,
   type DigioAadharPanData,
   type DigioFaceDataResponse,
-} from "kyc-providers";
-import { generateKycPdf } from "kyc-providers/pdf";
+} from "@root/kyc-providers";
+import { generateKycPdf } from "@root/kyc-providers/pdf";
 import os from "os";
 import * as path from "path";
 

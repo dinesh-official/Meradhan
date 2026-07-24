@@ -1,0 +1,19 @@
+{
+  "name": "meradhan-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "frontend/*",
+    "backend"
+  ],
+  "overrides": {
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
+  "scripts": {
+    "build:meradhan": "npm run build -w meradhan",
+    "build:crm": "npm run build -w frontend",
+    "dev:meradhan": "npm run dev -w meradhan",
+    "dev:crm": "npm run dev -w frontend"
+  }
+}

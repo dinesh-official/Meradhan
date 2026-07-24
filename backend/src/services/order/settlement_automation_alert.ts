@@ -1,5 +1,5 @@
 import { sendBackOfficeEmail } from "@communication/email_communication";
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
 import logger from "@utils/logger/logger";
 import { AxiosError } from "axios";
 

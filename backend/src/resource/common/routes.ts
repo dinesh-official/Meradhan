@@ -1,5 +1,5 @@
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
 import { Router } from "express";
 import { CommonApiController } from "./controller";
 import { Readable } from "stream";
