@@ -1264,6 +1264,7 @@ jobs:
           echo "======================================"
 
 
+# ---------------------------------------------------------------------
       - name: Build / Validate Cleanup Event Payload
         shell: bash
         env:
@@ -1463,32 +1464,58 @@ jobs:
           fi
  
           # =========================================================
-          # 3. Parse live_time -> hours
-          #    Accepts "24hr", "24h" or "24".
+          # 3. Parse live_time -> minutes
+          #    Accepts the dropdown values 10min / 1hr / 2hr / 4hr /
+          #    8hr / 24hr, and also tolerates "90min", "1h" and a bare
+          #    number (treated as hours, preserving the old behaviour).
+          #    Everything is normalised to MINUTES so a single unit
+          #    drives the date arithmetic below.
           # =========================================================
-          HOURS="${LIVE_TIME%hr}"
-          HOURS="${HOURS%h}"
+          RAW_TIME="${LIVE_TIME// /}"    # strip any stray spaces
  
-          if ! [[ "$HOURS" =~ ^[0-9]+$ ]] || [ "$HOURS" -lt 1 ]; then
-            echo "ERROR: could not parse live_time '${LIVE_TIME}' into hours."
+          if   [[ "$RAW_TIME" =~ ^([0-9]+)min$ ]]; then
+            MINUTES="${BASH_REMATCH[1]}"
+          elif [[ "$RAW_TIME" =~ ^([0-9]+)(hr|h)$ ]]; then
+            MINUTES=$(( ${BASH_REMATCH[1]} * 60 ))
+          elif [[ "$RAW_TIME" =~ ^([0-9]+)$ ]]; then
+            MINUTES=$(( ${BASH_REMATCH[1]} * 60 ))   # bare number -> hours
+          else
+            echo "ERROR: could not parse live_time '${LIVE_TIME}'."
+            echo "Expected one of: 10min, 1hr, 2hr, 4hr, 8hr, 24hr (also 90min, 1h)."
             exit 1
+          fi
+ 
+          if [ "$MINUTES" -lt 1 ]; then
+            echo "ERROR: live_time '${LIVE_TIME}' resolves to ${MINUTES} minute(s)."
+            exit 1
+          fi
+ 
+          # Human-readable lifetime for logs / summary (e.g. "10m", "2h", "1h 30m").
+          if   [ "$MINUTES" -lt 60 ]; then
+            LIFETIME_HUMAN="${MINUTES}m"
+          elif [ $(( MINUTES % 60 )) -eq 0 ]; then
+            LIFETIME_HUMAN="$(( MINUTES / 60 ))h"
+          else
+            LIFETIME_HUMAN="$(( MINUTES / 60 ))h $(( MINUTES % 60 ))m"
           fi
  
           # =========================================================
           # 4. Compute the fire time.
           #    Scheduler wants at(yyyy-mm-ddThh:mm:ss) with NO trailing Z
           #    and no offset — the zone is passed separately.
+          #    10min is well within Scheduler's one-minute granularity,
+          #    and a one-time at() schedule only has to be in the future.
           # =========================================================
           NOW_LOCAL=$(TZ="$SCHEDULE_TZ" date '+%Y-%m-%d %H:%M:%S')
-          DESTROY_AT=$(TZ="$SCHEDULE_TZ" date -d "+${HOURS} hours" '+%Y-%m-%dT%H:%M:%S')
-          DESTROY_AT_UTC=$(date -u -d "+${HOURS} hours" '+%Y-%m-%dT%H:%M:%SZ')
+          DESTROY_AT=$(TZ="$SCHEDULE_TZ" date -d "+${MINUTES} minutes" '+%Y-%m-%dT%H:%M:%S')
+          DESTROY_AT_UTC=$(date -u -d "+${MINUTES} minutes" '+%Y-%m-%dT%H:%M:%SZ')
  
           echo "======================================"
           echo "Cleanup Schedule"
           echo "======================================"
           echo "Timezone     : $SCHEDULE_TZ"
           echo "Now          : $NOW_LOCAL"
-          echo "Lifetime     : ${HOURS}h  (input: ${LIVE_TIME})"
+          echo "Lifetime     : ${LIFETIME_HUMAN}  (${MINUTES}m, input: ${LIVE_TIME})"
           echo "Destroy at   : ${DESTROY_AT/T/ }  (${SCHEDULE_TZ})"
           echo "Destroy at   : $DESTROY_AT_UTC  (UTC)"
           echo "Bus          : $BUS_ARN"
