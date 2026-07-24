@@ -1463,6 +1463,94 @@ jobs:
             echo "(skipped rule check — missing events:ListRules permission)"
           fi
  
+          # ---------------------------------------------------------
+          # 2b. Can the SCHEDULER'S role actually publish to THIS bus?
+          #     THIS is the check that catches the silent failure the
+          #     whole "Lambda never runs" symptom comes down to: at fire
+          #     time the schedule calls PutEvents AS its execution role
+          #     (e.g. Eventbridge_custom). If that role only has
+          #     events:PutEvents on 'default', the event is dropped, the
+          #     schedule still self-deletes, and nothing downstream runs
+          #     — with no error logged anywhere.
+          #
+          #     A manual `aws events put-events` test (and STEP 1 above)
+          #     does NOT catch this: those run as the WORKFLOW's role,
+          #     not the scheduler's. simulate-principal-policy evaluates
+          #     the scheduler role WITHOUT assuming it. Fatal on a proven
+          #     deny; skipped only if we lack iam:SimulatePrincipalPolicy.
+          # ---------------------------------------------------------
+          echo "Scheduler role : ${SCHEDULER_ROLE_ARN}"
+          SIM=$(aws iam simulate-principal-policy \
+                  --policy-source-arn "$SCHEDULER_ROLE_ARN" \
+                  --action-names events:PutEvents \
+                  --resource-arns "$BUS_ARN" \
+                  --query 'EvaluationResults[0].EvalDecision' \
+                  --output text 2>/dev/null || echo "unknown")
+ 
+          case "$SIM" in
+            allowed)
+              echo "PutEvents sim  : allowed on ${EVENT_BUS_NAME}  [OK]"
+              ;;
+            explicitDeny|implicitDeny)
+              echo "======================================"
+              echo "ERROR: scheduler role is NOT allowed events:PutEvents on this bus."
+              echo "  Role     : ${SCHEDULER_ROLE_ARN}"
+              echo "  Bus      : ${BUS_ARN}"
+              echo "  Decision : ${SIM}"
+              echo ""
+              echo "This is why the schedule fires but nothing gets deleted."
+              echo "Attach this to that role (note the bus name is NOT 'default'):"
+              echo ""
+              echo "  {"
+              echo "    \"Effect\":   \"Allow\","
+              echo "    \"Action\":   \"events:PutEvents\","
+              echo "    \"Resource\": \"${BUS_ARN}\""
+              echo "  }"
+              echo "======================================"
+              exit 1
+              ;;
+            *)
+              echo "PutEvents sim  : skipped (need iam:SimulatePrincipalPolicy)  [--]"
+              ;;
+          esac
+ 
+          # ---------------------------------------------------------
+          # 2c. Does each Lambda target allow EventBridge to invoke it?
+          #     A missing/again-wrong resource-based policy is the other
+          #     classic "rule matches, target never fires, no error"
+          #     cause. Heuristic (checks the principal, not the exact
+          #     source ARN). Non-fatal: needs lambda:GetPolicy.
+          # ---------------------------------------------------------
+          if [ -n "$MATCHING_RULE" ]; then
+            LAMBDA_ARNS=$(aws events list-targets-by-rule \
+                            --rule "$MATCHING_RULE" \
+                            --event-bus-name "$EVENT_BUS_NAME" \
+                            --query "Targets[?starts_with(Arn, 'arn:aws:lambda:')].Arn" \
+                            --output text 2>/dev/null || echo "")
+ 
+            for L in $LAMBDA_ARNS; do
+              FN="${L##*:function:}"
+              FN="${FN%%:*}"                 # strip any :alias / :version suffix
+              if POLICY=$(aws lambda get-policy --function-name "$FN" \
+                            --query Policy --output text 2>/dev/null); then
+                if echo "$POLICY" | grep -q 'events.amazonaws.com'; then
+                  echo "Lambda policy  : ${FN} allows EventBridge  [OK]"
+                else
+                  echo "WARNING: Lambda '${FN}' has a resource policy but none of it"
+                  echo "         grants events.amazonaws.com invoke — it will not fire."
+                fi
+              else
+                echo "WARNING: Lambda '${FN}' has NO resource-based policy;"
+                echo "         EventBridge cannot invoke it. Add one with:"
+                echo "         aws lambda add-permission --function-name ${FN} \\"
+                echo "           --statement-id allow-${MATCHING_RULE} \\"
+                echo "           --action lambda:InvokeFunction \\"
+                echo "           --principal events.amazonaws.com \\"
+                echo "           --source-arn <arn-of-rule-${MATCHING_RULE}>"
+              fi
+            done
+          fi
+ 
           # =========================================================
           # 3. Parse live_time -> minutes
           #    Accepts the dropdown values 10min / 1hr / 2hr / 4hr /
