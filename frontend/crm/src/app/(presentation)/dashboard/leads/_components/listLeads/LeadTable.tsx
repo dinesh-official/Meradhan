@@ -72,10 +72,10 @@ function LeadTable({ data, pageSize = 10, isLoading }: LeadsTableProps) {
             <span>
               {typeof row.exInvestmentAmount === "number"
                 ? new Intl.NumberFormat("en-IN", {
-                    style: "currency",
-                    currency: "INR",
-                    maximumFractionDigits: 0,
-                  }).format(row.exInvestmentAmount)
+                  style: "currency",
+                  currency: "INR",
+                  maximumFractionDigits: 0,
+                }).format(row.exInvestmentAmount)
                 : "-"}
             </span>
           ),

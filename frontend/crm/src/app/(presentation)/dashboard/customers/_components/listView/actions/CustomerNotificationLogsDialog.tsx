@@ -108,48 +108,48 @@ export default function CustomerNotificationLogsDialog({
               </thead>
               <tbody>
                 <TooltipProvider delayDuration={100}>
-                {rows.map((r) => {
-                  const msgText = r.notificationLog.messagePreview
-                    ?? (r.notificationLog.templateVariables
+                  {rows.map((r) => {
+                    const msgText = r.notificationLog.messagePreview
+                      ?? (r.notificationLog.templateVariables
                         ? `Variables: ${JSON.stringify(r.notificationLog.templateVariables)}`
                         : null);
 
-                  return (
-                  <tr key={r.id} className="odd:bg-background even:bg-muted/30 hover:bg-muted/60 transition-colors">
-                    <td className="p-3 align-top whitespace-nowrap">
-                      {formatDate(r.notificationLog.sentAt)}
-                    </td>
-                    <td className="p-3 align-top">{r.notificationLog.medium}</td>
-                    <td className="p-3 align-top font-mono text-xs">
-                      {r.notificationLog.dltTemplateId}
-                    </td>
-                    <td className="p-3 align-top">
-                      {r.notificationLog.deliveryStatus}
-                    </td>
-                    <td className="p-3 align-top">{r.deliveryStatus}</td>
-                    <td className="p-3 align-top font-mono text-xs">{r.phone}</td>
-                    <td className="p-3 align-top text-center">
-                      {msgText ? (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span className="inline-flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors">
-                              <MessageSquareText className="w-4 h-4" />
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent
-                            side="left"
-                            className="max-w-xs text-xs leading-relaxed whitespace-pre-wrap break-words"
-                          >
-                            {msgText}
-                          </TooltipContent>
-                        </Tooltip>
-                      ) : (
-                        <span className="text-muted-foreground/40 text-xs">—</span>
-                      )}
-                    </td>
-                  </tr>
-                  );
-                })}
+                    return (
+                      <tr key={r.id} className="odd:bg-background even:bg-muted/30 hover:bg-muted/60 transition-colors">
+                        <td className="p-3 align-top whitespace-nowrap">
+                          {formatDate(r.notificationLog.sentAt)}
+                        </td>
+                        <td className="p-3 align-top">{r.notificationLog.medium}</td>
+                        <td className="p-3 align-top font-mono text-xs">
+                          {r.notificationLog.dltTemplateId}
+                        </td>
+                        <td className="p-3 align-top">
+                          {r.notificationLog.deliveryStatus}
+                        </td>
+                        <td className="p-3 align-top">{r.deliveryStatus}</td>
+                        <td className="p-3 align-top font-mono text-xs">{r.phone}</td>
+                        <td className="p-3 align-top text-center">
+                          {msgText ? (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="inline-flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors">
+                                  <MessageSquareText className="w-4 h-4" />
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent
+                                side="left"
+                                className="max-w-xs text-xs leading-relaxed whitespace-pre-wrap break-words"
+                              >
+                                {msgText}
+                              </TooltipContent>
+                            </Tooltip>
+                          ) : (
+                            <span className="text-muted-foreground/40 text-xs">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </TooltipProvider>
               </tbody>
             </table>
