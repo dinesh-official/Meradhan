@@ -126,6 +126,9 @@ export class CustomerProfileManager {
           ...(data.userType !== undefined && { userType: data.userType }),
           ...(data.gender !== undefined && { gender: data.gender }),
           ...(data.kycStatus !== undefined && { kycStatus: data.kycStatus }),
+          ...(data.crmRiskProfile !== undefined && {
+            crmRiskProfile: data.crmRiskProfile,
+          }),
           utility: {
             update: {
               ...(data.status !== undefined && { accountStatus: data.status }),
@@ -171,14 +174,21 @@ export class CustomerProfileManager {
       });
     }
 
+    // Soft-delete only (trash). Mark CLOSED and bump tokenVersion so login/sessions fail.
     const deleteCustomer = await db.dataBase.customerProfileDataModel.update({
       where: { id: customerProfileId },
       data: {
         isDeleted: true,
+        utility: {
+          update: {
+            accountStatus: "CLOSED",
+            tokenVersion: { increment: 1 },
+          },
+        },
       },
     });
 
-    return deleteCustomer; // we can change this
+    return deleteCustomer;
   }
 
   /** KYC and KRA must both be VERIFIED before bond purchase / place-order flows. */

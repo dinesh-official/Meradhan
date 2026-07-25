@@ -3,9 +3,6 @@ node_modules
 bun_modules
 # Keep package-lock.json for reproducible Docker installs (do not use *.lock)
 bun.lock
-bun.lockb
-yarn.lock
-pnpm-lock.yaml
 
 # Logs
 npm-debug.log

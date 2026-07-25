@@ -24,8 +24,8 @@ import {
   decodeRejectionReason,
   NDML_CODE_REFERENCE,
 } from "@jobs/kra_worker/kraCodes";
-import { buildKraNonIndividualAppReqRootXml } from "kyc-providers";
-import { env } from "@packages/config/env";
+import { buildKraNonIndividualAppReqRootXml } from "@root/kyc-providers";
+import { env } from "@root/config/env";
 import { CorporateKraDownloadService } from "@jobs/kra_worker/corporateKraDownload.service";
 import { CorporateKycVerifyService } from "./corporateKycVerify.service";
 import { CrmCustomerVerifyOtpService } from "./crmCustomerVerifyOtp.service";

@@ -1,6 +1,8 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import React, { memo } from "react";
+import React from "react";
 import { FaInstagramSquare } from "react-icons/fa";
 import {
   FaFacebook,
@@ -11,7 +13,7 @@ import {
 } from "react-icons/fa6";
 import { MdEmail } from "react-icons/md";
 
-function Footer({ lightModded }: { lightModded?: boolean }) {
+export default function Footer({ lightModded }: { lightModded?: boolean }) {
   return (
     <footer role="contentinfo">
       <div className={cn("bg-[#f5f5f5] py-12", lightModded && "bg-white")}>
@@ -38,7 +40,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
 
               <ul className="flex gap-4 text-primary text-xl">
                 <li>
-                  <Link
+                  <a
                     href="https://www.facebook.com/MeraDhanCo/"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -46,10 +48,10 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     aria-label="Facebook"
                   >
                     <FaFacebook aria-hidden="true" />
-                  </Link>
+                  </a>
                 </li>
                 <li>
-                  <Link
+                  <a
                     href="https://www.instagram.com/meradhan/"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -57,10 +59,10 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     aria-label="Instagram"
                   >
                     <FaInstagramSquare aria-hidden="true" />
-                  </Link>
+                  </a>
                 </li>
                 <li>
-                  <Link
+                  <a
                     href="https://in.pinterest.com/meradhanco/"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -68,10 +70,10 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     aria-label="Pinterest"
                   >
                     <FaPinterest aria-hidden="true" />
-                  </Link>
+                  </a>
                 </li>
                 <li>
-                  <Link
+                  <a
                     href="https://www.linkedin.com/company/meradhan/"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -79,10 +81,10 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     aria-label="LinkedIn"
                   >
                     <FaLinkedin aria-hidden="true" />
-                  </Link>
+                  </a>
                 </li>
                 <li>
-                  <Link
+                  <a
                     href="https://x.com/MeraDhanCo"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -90,7 +92,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     aria-label="Twitter (X)"
                   >
                     <FaXTwitter aria-hidden="true" />
-                  </Link>
+                  </a>
                 </li>
               </ul>
               <div className="flex flex-col gap-2 text-xs">
@@ -287,5 +289,3 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
     </footer>
   );
 }
-
-export default memo(Footer);

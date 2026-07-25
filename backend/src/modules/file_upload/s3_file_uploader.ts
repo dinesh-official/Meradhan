@@ -1,6 +1,6 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getMimeType } from "@utils/generate/get_mime_type";
-import { env } from "@packages/config/src/env"; // ✅ Import env
+import { env } from "@root/config/env"; // ✅ Import env
 import fs from "fs";
 import path from "path";
 

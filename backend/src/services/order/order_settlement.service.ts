@@ -14,7 +14,7 @@ import {
   ORDER_STAGE_SEQUENCE,
   ORDER_STAGE_MAX_ATTEMPTS,
   ORDER_STAGE_LOCK_TTL_SECONDS,
-} from "@packages/config/constants";
+} from "@root/config/constants";
 import { NseCBRICS } from "@modules/RFQ/nse/nse_CBRICS";
 import { NseRfq } from "@modules/RFQ/nse/nse_RFQ";
 import { RfqMasterDbSyncManager } from "@resource/crm/refq/nse/rfq_master/rfq_master.manager";
@@ -23,7 +23,7 @@ import { AppError } from "@utils/error/AppError";
 import logger from "@utils/logger/logger";
 import { db } from "@core/database/database";
 import type { BondDetailsResponse } from "@packages/apiGateway";
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
 import { makeRazorpayRouteTransition, resolveRazorpayRouteEligibility } from "@services/razorpay-route/RPay-route";
 import { CrmOrdersService } from "@resource/crm/orders/orders.service";
 import { CustomerProfileRepo } from "@resource/crm/customers/customer.repo";

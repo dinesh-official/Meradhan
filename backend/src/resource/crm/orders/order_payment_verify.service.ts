@@ -1,7 +1,7 @@
 import { db } from "@core/database/database";
 import type { Prisma } from "@databases/generated/prisma/postgres";
 import { OrderStatus, PaymentStatus } from "@databases/generated/prisma/postgres";
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import axios from "axios";
 

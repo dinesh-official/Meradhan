@@ -1,4 +1,4 @@
-import { generateTempOrderPdf } from "@packages/kyc-providers";
+import { generateTempOrderPdf } from "@root/kyc-providers/pdf";
 import { BondService } from "@resource/bonds/bond.service";
 import { CustomerProfileRepo } from "@resource/crm/customers/customer.repo";
 import { RfqMasterService } from "@resource/crm/refq/nse/rfq_master/rfq_master.service";

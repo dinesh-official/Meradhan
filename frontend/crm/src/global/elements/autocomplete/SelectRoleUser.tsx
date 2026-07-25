@@ -21,7 +21,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Check, Loader2 } from "lucide-react";
 import * as React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ASSETS_URL } from "@/global/constants/domains";
+import { genMediaUrl } from "@/global/utils/url.utils";
 
 interface ContactSelectProps {
   onSelect?: (contact: CrmUsersProfile | null) => void;
@@ -102,7 +102,9 @@ function RoleUserCommand({
               >
                 <div className="flex flex-row gap-2">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={ASSETS_URL + "/" + user.avatar} />
+                    <AvatarImage
+                      src={user.avatar ? genMediaUrl(user.avatar) : undefined}
+                    />
                     <AvatarFallback />
                   </Avatar>
                   <div className="min-w-0">

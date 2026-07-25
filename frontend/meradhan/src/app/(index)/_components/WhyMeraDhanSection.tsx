@@ -1,3 +1,5 @@
+"use client";
+
 import { Card, CardContent } from "@/components/ui/card";
 import SectionTitleDesc from "@/global/components/basic/section/SectionTitleDesc";
 import SectionWrapper from "@/global/components/basic/section/SectionWrapper";

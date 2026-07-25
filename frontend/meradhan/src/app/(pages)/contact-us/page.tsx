@@ -7,10 +7,8 @@ import {
 } from "@/app/(pages)/contact-us/_components";
 import {
   ADDRESSES,
-  CONTACT_INFO,
   REGULATORY_INFO,
   SECTION_CONTENT,
-  SOCIAL_MEDIA_LINKS,
 } from "@/constants/contact";
 import ViewPort from "@/global/components/wrapper/ViewPort";
 import ContactForm from "./_components/ContactForm";
@@ -54,14 +52,14 @@ const ContactUsPage = () => {
           title={ADDRESSES.registered.title}
           address={ADDRESSES.registered.address}
           highlightedWord="Address"
-          contact={CONTACT_INFO.grievances}
+          contactKey="grievances"
         />
 
         <AddressSection
           title={ADDRESSES.communication.title}
           address={ADDRESSES.communication.address}
           highlightedWord="Address"
-          contact={CONTACT_INFO.phone2}
+          contactKey="phone2"
         />
       </div>
 
@@ -69,7 +67,7 @@ const ContactUsPage = () => {
       <RegulatoryInfo items={REGULATORY_INFO} />
 
       {/* Social Media Links */}
-      <SocialMediaLinks socialLinks={SOCIAL_MEDIA_LINKS} />
+      <SocialMediaLinks />
     </ViewPort>
   );
 };

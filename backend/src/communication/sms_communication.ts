@@ -1,4 +1,4 @@
-import { env } from "@packages/config/env";
+import { env } from "@root/config/env";
 import { removeCountryCode } from "@utils/filters/convert";
 import axios from "axios";
 

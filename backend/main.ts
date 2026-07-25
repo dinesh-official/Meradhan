@@ -5,7 +5,7 @@ import {
   PrometheusMonitorProvider,
   PrometheusResponseTimeMonitor,
 } from "@modules/monitoring/prometheus";
-import { env } from "@packages/config/env";
+import { env } from "@root/config/env";
 import bondRoute from "@resource/bonds/bond.routes";
 import commonApiRoutes from "@resource/common/routes";
 import crmAuditlogsRoutes from "@resource/crm/auditlogs/auditlogs.routes";

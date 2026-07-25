@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { Globe, Mail, Phone } from "lucide-react";
 import { FaCircleCheck } from "react-icons/fa6";

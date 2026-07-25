@@ -26,7 +26,7 @@
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { db } from "@core/database/database";
 import { saveFileOnCloud } from "@modules/file_upload/helpers/save_file_on_cloud";
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
 import { CorporateKycRepo } from "@resource/crm/customers/corporatekyc.repo";
 import { CorporateKycService } from "@resource/crm/customers/corporatekyc.service";
 import { AppError, HttpStatus } from "@utils/error/AppError";
@@ -35,12 +35,12 @@ import axios from "axios";
 import * as fs from "fs";
 import {
   DigioSDK,
-  generateCorporatePdfFromServicePayload,
   getPdfPageCount,
   isCorporateRiskProfileCompleteForPdf,
   normalizeCorporateRiskProfileAnswers,
   prepareCorporatePdfServicePayloadForEsign,
-} from "kyc-providers";
+} from "@root/kyc-providers";
+import { generateCorporatePdfFromServicePayload } from "@root/kyc-providers/pdf";
 import os from "os";
 import * as path from "path";
 import { Readable } from "stream";
