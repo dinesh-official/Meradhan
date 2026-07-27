@@ -22,6 +22,10 @@ import {
   formatLastInterestPaymentDateDisplay,
   loadInvestorCouponScheduleForPdf,
 } from "@services/order/investor-coupon-entitlement";
+import {
+  acceptOrderPricingFromNseSavedData,
+  proposeOrderPricingFromNseSavedData,
+} from "@services/order/order-pricing-snapshot-from-nse.service";
 import { SettlementNoService } from "@services/refq/nse/settlement-no.service";
 import {
   getLastNextCouponDateBasedOnSettlementDate,
@@ -1397,6 +1401,21 @@ export class CrmOrdersService {
     return db.dataBase.crmOrderReceiptPdfOptions.findUnique({
       where: { orderNumber },
     });
+  }
+
+  /**
+   * Propose checkout `bondDetails.pricing` from NSE rows already saved in DB.
+   * Does not write — used by CRM reconfirm popup before PDF download.
+   */
+  async proposeOrderPricingSnapshotFromNse(orderNumber: string) {
+    return proposeOrderPricingFromNseSavedData(orderNumber);
+  }
+
+  /**
+   * Persist proposed NSE pricing onto `orders.bondDetails.pricing`.
+   */
+  async acceptOrderPricingSnapshotFromNse(orderNumber: string) {
+    return acceptOrderPricingFromNseSavedData(orderNumber);
   }
 
   async autofillReceiptPdfOptions(

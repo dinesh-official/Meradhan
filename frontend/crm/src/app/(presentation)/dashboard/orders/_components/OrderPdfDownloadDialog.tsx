@@ -40,6 +40,73 @@ function getApiErrorMessage(err: unknown, fallback: string): string {
   return fallback;
 }
 
+async function getApiErrorDetails(err: unknown): Promise<{
+  message: string;
+  code?: string;
+}> {
+  if (err instanceof ApiError) {
+    const data = err.response?.data as unknown;
+    if (data && typeof data === "object" && !(data instanceof Blob)) {
+      const obj = data as { message?: string; code?: string };
+      return {
+        message: obj.message?.trim() || err.message,
+        code: typeof obj.code === "string" ? obj.code : undefined,
+      };
+    }
+    if (data instanceof Blob) {
+      try {
+        const j = JSON.parse(await data.text()) as {
+          message?: string;
+          code?: string;
+        };
+        return {
+          message: j.message?.trim() || err.message,
+          code: typeof j.code === "string" ? j.code : undefined,
+        };
+      } catch {
+        // ignore parse errors
+      }
+    }
+    return { message: err.message };
+  }
+  if (err instanceof Error) {
+    return { message: err.message };
+  }
+  return { message: "Unknown error" };
+}
+
+function isPricingSnapshotMissingError(details: {
+  message: string;
+  code?: string;
+}): boolean {
+  if (details.code === "PRICING_SNAPSHOT_MISSING") return true;
+  const msg = details.message.toLowerCase();
+  return (
+    msg.includes("pricing snapshot is missing") ||
+    msg.includes("bonddetails.pricing must include")
+  );
+}
+
+type ProposedPricingState = {
+  orderNumber: string;
+  isin: string;
+  bondName: string;
+  tradeNumber: string;
+  sources: {
+    settleOrderNumber: string;
+    rfqNumber: string;
+    rfqMasterNumber: string | null;
+  };
+  pricing: Record<string, unknown>;
+};
+
+function formatPricingField(value: unknown): string {
+  if (value == null) return "—";
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  if (Array.isArray(value)) return value.join(", ");
+  return String(value);
+}
+
 const EMPTY_FORM: ReceiptPdfFormState = {
   pdfAutofillSettlementDate: "",
   pdfAccruedInterestDays: "",
@@ -84,6 +151,11 @@ export function OrderPdfDownloadDialog({
   // afterward (avoids race where hydrate clears last coupon and autofill is skipped).
   const [optionsHydrateEpoch, setOptionsHydrateEpoch] = useState(0);
   const optionsHydrateEpochRef = useRef(0);
+  const [pricingConfirmOpen, setPricingConfirmOpen] = useState(false);
+  const [proposedPricing, setProposedPricing] =
+    useState<ProposedPricingState | null>(null);
+  const [proposingPricing, setProposingPricing] = useState(false);
+  const [acceptingPricing, setAcceptingPricing] = useState(false);
 
   const { data: pdfOptionsQuery, isFetched: pdfOptionsFetched } = useQuery({
     queryKey: ["crm-receipt-pdf-options", orderNumber],
@@ -110,6 +182,10 @@ export function OrderPdfDownloadDialog({
       optionsHydrateEpochRef.current = 0;
       setOptionsHydrateEpoch(0);
       setResolvedDealDate(null);
+      setPricingConfirmOpen(false);
+      setProposedPricing(null);
+      setProposingPricing(false);
+      setAcceptingPricing(false);
       return;
     }
     if (!pdfOptionsFetched) return;
@@ -314,6 +390,143 @@ export function OrderPdfDownloadDialog({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, orderNumber, pdfOptionsFetched, defaultAutofillSettlementDate, optionsHydrateEpoch]);
 
+  const openPricingConfirmFromError = async () => {
+    setProposingPricing(true);
+    try {
+      const resp = await ordersApi.proposeOrderPricingSnapshot(orderNumber);
+      const data = resp.responseData;
+      if (!data?.pricing) {
+        toast.error("Could not build pricing from saved NSE data for this order.");
+        return;
+      }
+      setProposedPricing({
+        orderNumber: data.orderNumber,
+        isin: data.isin,
+        bondName: data.bondName,
+        tradeNumber: data.tradeNumber,
+        sources: data.sources,
+        pricing: data.pricing,
+      });
+      setPricingConfirmOpen(true);
+    } catch (err) {
+      toast.error(
+        getApiErrorMessage(
+          err,
+          "Failed to load proposed pricing from NSE saved data",
+        ),
+      );
+    } finally {
+      setProposingPricing(false);
+    }
+  };
+
+  const downloadPdfWithCurrentForm = async () => {
+    const accruedInterestDaysNum = getValidatedAccruedInterestDays(
+      form.pdfAccruedInterestDays,
+    );
+    if (accruedInterestDaysNum == null) return false;
+
+    const payload = buildPdfOptionPayload(form, accruedInterestDaysNum, {
+      dealDate: resolvedDealDate,
+    });
+    const blob =
+      pdfType === "deal"
+        ? await ordersApi.getDealSheetPdf(orderNumber, payload)
+        : await ordersApi.getOrderReceiptPdf(orderNumber, payload);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download =
+      pdfType === "deal"
+        ? `deal-sheet-${orderNumber}.pdf`
+        : `order-receipt-${orderNumber}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(
+      pdfType === "deal"
+        ? "Deal sheet PDF downloaded."
+        : "Order receipt PDF downloaded.",
+    );
+    void persistReceiptPdfOptions(accruedInterestDaysNum);
+    return true;
+  };
+
+  const handleAcceptPricingAndDownload = async () => {
+    if (!proposedPricing) return;
+    setAcceptingPricing(true);
+    try {
+      await ordersApi.acceptOrderPricingSnapshot(orderNumber);
+      toast.success("Order pricing updated from NSE saved data.");
+
+      const pricing = proposedPricing.pricing;
+      const settlementDate =
+        typeof pricing.settlementDate === "string"
+          ? pricing.settlementDate
+          : form.pdfAutofillSettlementDate;
+      const dealDate =
+        typeof pricing.dealDate === "string" ? pricing.dealDate : resolvedDealDate;
+      const accruedFromPricing =
+        typeof pricing.noOfAccrualDays === "number" &&
+        Number.isFinite(pricing.noOfAccrualDays)
+          ? Math.max(0, Math.floor(pricing.noOfAccrualDays))
+          : getValidatedAccruedInterestDays(form.pdfAccruedInterestDays);
+
+      if (accruedFromPricing == null) {
+        toast.error("Accrued interest days are required before download.");
+        return;
+      }
+
+      if (dealDate) setResolvedDealDate(dealDate);
+      patchForm({
+        pdfAutofillSettlementDate: settlementDate || form.pdfAutofillSettlementDate,
+        pdfAccruedInterestDays: String(accruedFromPricing),
+      });
+
+      setPricingConfirmOpen(false);
+      setProposedPricing(null);
+
+      // Refresh other PDF options now that pricing exists.
+      await autofillReceiptPdfOptions(settlementDate || "", { silent: true });
+
+      setDownloading(true);
+      const payload = buildPdfOptionPayload(
+        {
+          ...form,
+          pdfAutofillSettlementDate: settlementDate || form.pdfAutofillSettlementDate,
+          pdfAccruedInterestDays: String(accruedFromPricing),
+        },
+        accruedFromPricing,
+        { dealDate: dealDate ?? resolvedDealDate },
+      );
+      const blob =
+        pdfType === "deal"
+          ? await ordersApi.getDealSheetPdf(orderNumber, payload)
+          : await ordersApi.getOrderReceiptPdf(orderNumber, payload);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download =
+        pdfType === "deal"
+          ? `deal-sheet-${orderNumber}.pdf`
+          : `order-receipt-${orderNumber}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success(
+        pdfType === "deal"
+          ? "Deal sheet PDF downloaded."
+          : "Order receipt PDF downloaded.",
+      );
+      void persistReceiptPdfOptions(accruedFromPricing);
+      onOpenChange(false);
+    } catch (err) {
+      const details = await getApiErrorDetails(err);
+      toast.error(details.message || "Failed to update pricing / download PDF");
+    } finally {
+      setAcceptingPricing(false);
+      setDownloading(false);
+    }
+  };
+
   const handleDownload = async () => {
     const accruedInterestDaysNum = getValidatedAccruedInterestDays(form.pdfAccruedInterestDays);
     if (accruedInterestDaysNum == null) return;
@@ -342,29 +555,19 @@ export function OrderPdfDownloadDialog({
 
     setDownloading(true);
     try {
-      const payload = buildPdfOptionPayload(form, accruedInterestDaysNum, {
-        dealDate: resolvedDealDate,
-      });
-      const blob =
-        pdfType === "deal"
-          ? await ordersApi.getDealSheetPdf(orderNumber, payload)
-          : await ordersApi.getOrderReceiptPdf(orderNumber, payload);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download =
-        pdfType === "deal"
-          ? `deal-sheet-${orderNumber}.pdf`
-          : `order-receipt-${orderNumber}.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
-      toast.success(
-        pdfType === "deal" ? "Deal sheet PDF downloaded." : "Order receipt PDF downloaded.",
-      );
-      void persistReceiptPdfOptions(accruedInterestDaysNum);
-      onOpenChange(false);
+      const ok = await downloadPdfWithCurrentForm();
+      if (ok) onOpenChange(false);
     } catch (err) {
-      toast.error(getApiErrorMessage(err, "Failed to download PDF"));
+      const details = await getApiErrorDetails(err);
+      if (isPricingSnapshotMissingError(details)) {
+        toast.message("Pricing data missing for this order", {
+          description:
+            "Review the proposed values from saved NSE data, then accept to update and download.",
+        });
+        await openPricingConfirmFromError();
+      } else {
+        toast.error(details.message || "Failed to download PDF");
+      }
     } finally {
       setDownloading(false);
     }
@@ -372,7 +575,23 @@ export function OrderPdfDownloadDialog({
 
   const title = pdfType === "deal" ? "Download deal sheet PDF" : "Download order receipt PDF";
 
+  const pricingRows: Array<{ label: string; key: string }> = [
+    { label: "Deal date", key: "dealDate" },
+    { label: "Settlement date", key: "settlementDate" },
+    { label: "Settlement order", key: "settlementOrder" },
+    { label: "Quantity", key: "quantity" },
+    { label: "Clean price", key: "cleanPrice" },
+    { label: "Yield", key: "yield" },
+    { label: "Accrued interest", key: "accruedInterest" },
+    { label: "Principal amount", key: "principalAmount" },
+    { label: "Stamp duty", key: "stampDuty" },
+    { label: "Settlement amount", key: "settlementAmount" },
+    { label: "Total consideration", key: "totalConsideration" },
+    { label: "No. of accrual days", key: "noOfAccrualDays" },
+  ];
+
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -392,7 +611,7 @@ export function OrderPdfDownloadDialog({
               id="order-pdf-autofill-settlement-date"
               type="date"
               value={form.pdfAutofillSettlementDate}
-              disabled={autofilling || downloading}
+              disabled={autofilling || downloading || proposingPricing || acceptingPricing}
               onChange={(e) => {
                 const v = e.target.value;
                 patchForm({ pdfAutofillSettlementDate: v });
@@ -413,10 +632,12 @@ export function OrderPdfDownloadDialog({
           </div>
 
           <p className="sm:col-span-2 text-xs text-muted-foreground flex items-center gap-1.5">
-            {autofilling ? (
+            {autofilling || proposingPricing ? (
               <>
                 <Loader2 className="h-3 w-3 animate-spin" />
-                Auto-filling from order info…
+                {proposingPricing
+                  ? "Loading proposed pricing from NSE saved data…"
+                  : "Auto-filling from order info…"}
               </>
             ) : (
               "Settlement & deal dates are calculated from trade time (market hours & holidays). Change the settlement date to re-fetch related fields."
@@ -540,17 +761,26 @@ export function OrderPdfDownloadDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={downloading}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={downloading || proposingPricing || acceptingPricing}
+          >
             Cancel
           </Button>
           <Button
             onClick={() => void handleDownload()}
-            disabled={downloading || form.pdfAccruedInterestDays.trim() === ""}
+            disabled={
+              downloading ||
+              proposingPricing ||
+              acceptingPricing ||
+              form.pdfAccruedInterestDays.trim() === ""
+            }
           >
-            {downloading ? (
+            {downloading || proposingPricing ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generating...
+                {proposingPricing ? "Checking pricing…" : "Generating..."}
               </>
             ) : (
               <>
@@ -562,5 +792,95 @@ export function OrderPdfDownloadDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <Dialog
+      open={pricingConfirmOpen}
+      onOpenChange={(next) => {
+        if (acceptingPricing) return;
+        setPricingConfirmOpen(next);
+        if (!next) setProposedPricing(null);
+      }}
+    >
+      <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Pricing update required</DialogTitle>
+          <DialogDescription>
+            This order is missing <code>bondDetails.pricing</code> (deal date /
+            settlement date), so the PDF cannot be generated yet. Review the
+            values proposed from NSE data already saved in our database, then
+            accept to update the order and continue download.
+          </DialogDescription>
+        </DialogHeader>
+
+        {proposedPricing ? (
+          <div className="space-y-4 py-2">
+            <div className="rounded-md border bg-muted/30 p-3 text-sm space-y-1">
+              <p>
+                <span className="text-muted-foreground">Order:</span>{" "}
+                {proposedPricing.orderNumber}
+              </p>
+              <p>
+                <span className="text-muted-foreground">Bond:</span>{" "}
+                {proposedPricing.bondName} ({proposedPricing.isin})
+              </p>
+              <p>
+                <span className="text-muted-foreground">NSE trade:</span>{" "}
+                {proposedPricing.tradeNumber}
+              </p>
+              <p>
+                <span className="text-muted-foreground">Sources:</span>{" "}
+                settle_order {proposedPricing.sources.settleOrderNumber}
+                {" · "}
+                RFQ {proposedPricing.sources.rfqNumber}
+                {proposedPricing.sources.rfqMasterNumber
+                  ? ` · master ${proposedPricing.sources.rfqMasterNumber}`
+                  : ""}
+              </p>
+            </div>
+
+            <div className="rounded-md border divide-y">
+              {pricingRows.map((row) => (
+                <div
+                  key={row.key}
+                  className="flex items-center justify-between gap-4 px-3 py-2 text-sm"
+                >
+                  <span className="text-muted-foreground">{row.label}</span>
+                  <span className="font-mono text-right">
+                    {formatPricingField(proposedPricing.pricing[row.key])}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setPricingConfirmOpen(false);
+              setProposedPricing(null);
+            }}
+            disabled={acceptingPricing}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={() => void handleAcceptPricingAndDownload()}
+            disabled={acceptingPricing || !proposedPricing}
+          >
+            {acceptingPricing ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Updating & downloading…
+              </>
+            ) : (
+              "Accept & download PDF"
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
