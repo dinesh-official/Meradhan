@@ -1265,24 +1265,29 @@ jobs:
 
 
 # ---------------------------------------------------------------------
-      - name: Build / Validate Cleanup Event Payload
+      # STEP 1 — Build / validate cleanup payload (no bus, no PutEvents).
+      #          Kept for parity with the old "publish_cleanup_now" behaviour:
+      #          if requested, this now invokes the Lambda directly and
+      #          synchronously instead of publishing to an event bus.
+      # ---------------------------------------------------------------------
+      - name: Build / Validate Cleanup Payload
         shell: bash
         env:
-          EVENT_BUS_NAME: Branch_deploy
+          LAMBDA_ARN:     arn:aws:lambda:ap-south-1:450321244603:function:Branch_deploy
           INSTANCE_ID:    ${{ steps.create_ec2.outputs.instance_id }}
           RULE_ARNS_CSV:  ${{ steps.tg_listener.outputs.rule_arns }}
           TG_ARNS_CSV:    ${{ steps.tg_listener.outputs.target_group_arns }}
           PUBLISH_NOW:    ${{ inputs.publish_cleanup_now || 'false' }}
         run: |
           set -euo pipefail
- 
+
           if [ -z "${INSTANCE_ID}" ] || [ "${INSTANCE_ID}" = "None" ]; then
             echo "No instance was created — nothing to build a payload for."
             exit 0
           fi
- 
+
           # An empty CSV must yield [] , not [""] .
-          EVENT_DETAIL=$(jq -nc \
+          PAYLOAD=$(jq -nc \
             --arg instance_id "$INSTANCE_ID" \
             --arg rules       "$RULE_ARNS_CSV" \
             --arg tgs         "$TG_ARNS_CSV" \
@@ -1297,61 +1302,54 @@ jobs:
                  }
                ]
              }')
- 
+
           echo "======================================"
-          echo "Cleanup Event Payload (detail)"
+          echo "Cleanup Payload"
           echo "======================================"
-          echo "$EVENT_DETAIL" | jq .
- 
+          echo "$PAYLOAD" | jq .
+
           if [ "${PUBLISH_NOW}" != "true" ]; then
-            echo "PUBLISH_NOW is not 'true' — payload validated, nothing published."
+            echo "PUBLISH_NOW is not 'true' — payload validated, nothing invoked."
             exit 0
           fi
- 
-          echo "WARNING: publishing cleanup event NOW. The environment will be destroyed."
- 
-          # Detail is a JSON *string*, not an object -> --arg, never --argjson.
-          ENTRIES=$(jq -nc \
-            --arg detail "$EVENT_DETAIL" \
-            --arg bus    "$EVENT_BUS_NAME" \
-            '[{
-               Source:       "preview.cleanup",
-               DetailType:   "DeletePreviewResources",
-               EventBusName: $bus,
-               Detail:       $detail
-             }]')
- 
-          RESPONSE=$(aws events put-events --entries "$ENTRIES")
- 
+
+          echo "WARNING: invoking Lambda NOW. The environment will be destroyed."
+
+          # Synchronous invoke so failures surface in this job instead of
+          # disappearing into an async/event-bus path.
+          RESPONSE=$(aws lambda invoke \
+            --function-name "$LAMBDA_ARN" \
+            --cli-binary-format raw-in-base64-out \
+            --payload "$PAYLOAD" \
+            --log-type Tail \
+            /tmp/lambda-response.json)
+
+          STATUS=$(echo "$RESPONSE" | jq -r '.StatusCode')
+          FUNC_ERROR=$(echo "$RESPONSE" | jq -r '.FunctionError // empty')
+
           echo "======================================"
-          echo "PutEvents Response"
+          echo "Lambda Invoke Response"
           echo "======================================"
-          echo "$RESPONSE" | jq .
- 
-          # put-events returns HTTP 200 even when individual entries are
-          # rejected, so the exit code alone is not enough.
-          FAILED=$(echo "$RESPONSE" | jq -r '.FailedEntryCount')
- 
-          if [ "$FAILED" != "0" ]; then
-            echo "ERROR: EventBridge rejected ${FAILED} entry/entries."
-            echo "$RESPONSE" | jq -r '.Entries[] | select(.ErrorCode) | "  \(.ErrorCode): \(.ErrorMessage)"'
+          echo "StatusCode: $STATUS"
+          cat /tmp/lambda-response.json | jq . || cat /tmp/lambda-response.json
+
+          if [ -n "$FUNC_ERROR" ]; then
+            echo "ERROR: Lambda returned a function error: ${FUNC_ERROR}"
             exit 1
           fi
- 
-          # NOTE: FailedEntryCount == 0 only means the bus ACCEPTED the event.
-          # It says nothing about whether any rule matched or any target fired.
-          echo "Cleanup event accepted by bus '${EVENT_BUS_NAME}'."
- 
- 
+
+          echo "Lambda invoked successfully."
+
+
 # ---------------------------------------------------------------------
-# STEP 2 — Create/update the one-time schedule.
+# STEP 2 — Create/update the one-time schedule (direct Lambda target).
 # ---------------------------------------------------------------------
-      - name: Schedule Cleanup (EventBridge Scheduler)
+      - name: Schedule Cleanup (EventBridge Scheduler -> Lambda Invoke)
         if: always()
         shell: bash
         env:
           SCHEDULER_ROLE_ARN: ${{ secrets.SCHEDULER_ROLE_ARN }}
-          EVENT_BUS_NAME:     Branch_deploy
+          LAMBDA_ARN:         arn:aws:lambda:ap-south-1:450321244603:function:Branch_deploy
           SCHEDULE_GROUP:     default
           SCHEDULE_TZ:        Asia/Kolkata
           # Optional but strongly recommended — without it, a failed target
@@ -1363,7 +1361,7 @@ jobs:
           LIVE_TIME:          ${{ inputs.live_time }}
         run: |
           set -euo pipefail
- 
+
           # =========================================================
           # 0. Preconditions
           # =========================================================
@@ -1371,188 +1369,108 @@ jobs:
             echo "No instance was created — nothing to schedule cleanup for."
             exit 0
           fi
- 
+
           if [ -z "${SCHEDULER_ROLE_ARN}" ]; then
             echo "ERROR: SCHEDULER_ROLE_ARN is not set."
             echo "Add it under Settings -> Secrets and variables -> Actions -> Secrets."
             echo "It must be a role trusted by scheduler.amazonaws.com with"
-            echo "events:PutEvents on the ${EVENT_BUS_NAME} bus."
+            echo "lambda:InvokeFunction on ${LAMBDA_ARN}."
             exit 1
           fi
- 
+
           # These come from an earlier step (job env / GITHUB_ENV).
           # If either is empty the schedule name collapses to "cleanup--i-xxxx",
           # which collides across environments and makes the existence check
           # match the wrong schedule.
           : "${ENV_CODE:?ENV_CODE is empty - schedule names would collide}"
           : "${BRANCH_CODE:?BRANCH_CODE is empty - schedule names would collide}"
- 
+
           DLQ_ARN="${DLQ_ARN:-}"
- 
+
           # =========================================================
-          # 1. Resolve account + region -> full bus ARN
-          #    Using the ARN (not the bare name) removes any ambiguity
-          #    about which bus/region/account is targeted.
-          # =========================================================
-          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-          REGION="${AWS_REGION:-${AWS_DEFAULT_REGION:-}}"
-          if [ -z "$REGION" ]; then
-            REGION=$(aws configure get region)
-          fi
-          if [ -z "$REGION" ]; then
-            echo "ERROR: could not determine AWS region."
-            exit 1
-          fi
- 
-          BUS_ARN="arn:aws:events:${REGION}:${ACCOUNT_ID}:event-bus/${EVENT_BUS_NAME}"
- 
-          # =========================================================
-          # 2. Preflight: does the delivery path actually exist?
-          #    A schedule that fires into a bus with no matching rule
-          #    "succeeds" and silently does nothing.
+          # 1. Preflight: does the Lambda exist, and can the scheduler
+          #    role actually invoke it?
+          #
+          #    NOTE: unlike an EventBridge Rule -> Lambda target, a
+          #    Scheduler -> Lambda target does NOT need a Lambda
+          #    resource-based policy statement. Scheduler assumes
+          #    SCHEDULER_ROLE_ARN and calls lambda:InvokeFunction as
+          #    that IAM principal, so IAM alone governs it. There is
+          #    no bus, no rule, and nothing for events.amazonaws.com
+          #    to be granted on the function.
           # =========================================================
           echo "======================================"
           echo "Preflight"
           echo "======================================"
- 
-          if ! aws events describe-event-bus --name "$EVENT_BUS_NAME" >/dev/null 2>&1; then
-            echo "ERROR: event bus '${EVENT_BUS_NAME}' not found in ${REGION}."
+
+          if ! aws lambda get-function --function-name "$LAMBDA_ARN" >/dev/null 2>&1; then
+            echo "ERROR: Lambda function not found: ${LAMBDA_ARN}"
             exit 1
           fi
-          echo "Bus            : ${BUS_ARN}  [OK]"
- 
-          # Non-fatal: needs events:ListRules / events:ListTargetsByRule.
-          MATCHING_RULE=""
-          if RULES_JSON=$(aws events list-rules \
-                            --event-bus-name "$EVENT_BUS_NAME" \
-                            --output json 2>/dev/null); then
-            MATCHING_RULE=$(echo "$RULES_JSON" | jq -r '
-              .Rules[]
-              | select(.EventPattern != null)
-              | select(
-                  (.EventPattern | fromjson)
-                  | (."detail-type" // []) | index("DeletePreviewResources")
-                )
-              | .Name' | head -n1)
- 
-            if [ -z "$MATCHING_RULE" ]; then
-              echo "WARNING: no rule on bus '${EVENT_BUS_NAME}' matches"
-              echo "         detail-type 'DeletePreviewResources'."
-              echo "         The schedule will fire and nothing will happen."
-              echo "         Check the rule was created ON THIS BUS, not on 'default'."
-            else
-              echo "Rule           : ${MATCHING_RULE}  [OK]"
- 
-              STATE=$(echo "$RULES_JSON" | jq -r --arg n "$MATCHING_RULE" \
-                        '.Rules[] | select(.Name==$n) | .State')
-              [ "$STATE" = "ENABLED" ] \
-                && echo "Rule state     : ENABLED  [OK]" \
-                || echo "WARNING: rule '${MATCHING_RULE}' state is ${STATE}."
- 
-              TARGET_COUNT=$(aws events list-targets-by-rule \
-                               --rule "$MATCHING_RULE" \
-                               --event-bus-name "$EVENT_BUS_NAME" \
-                               --query 'length(Targets)' --output text 2>/dev/null || echo "?")
-              if [ "$TARGET_COUNT" = "0" ]; then
-                echo "WARNING: rule '${MATCHING_RULE}' has no targets attached."
-              else
-                echo "Rule targets   : ${TARGET_COUNT}  [OK]"
-              fi
-            fi
-          else
-            echo "(skipped rule check — missing events:ListRules permission)"
-          fi
- 
-          # ---------------------------------------------------------
-          # 2b. Can the SCHEDULER'S role actually publish to THIS bus?
-          #     THIS is the check that catches the silent failure the
-          #     whole "Lambda never runs" symptom comes down to: at fire
-          #     time the schedule calls PutEvents AS its execution role
-          #     (e.g. Eventbridge_custom). If that role only has
-          #     events:PutEvents on 'default', the event is dropped, the
-          #     schedule still self-deletes, and nothing downstream runs
-          #     — with no error logged anywhere.
-          #
-          #     A manual `aws events put-events` test (and STEP 1 above)
-          #     does NOT catch this: those run as the WORKFLOW's role,
-          #     not the scheduler's. simulate-principal-policy evaluates
-          #     the scheduler role WITHOUT assuming it. Fatal on a proven
-          #     deny; skipped only if we lack iam:SimulatePrincipalPolicy.
-          # ---------------------------------------------------------
+          echo "Lambda         : ${LAMBDA_ARN}  [OK]"
+
           echo "Scheduler role : ${SCHEDULER_ROLE_ARN}"
           SIM=$(aws iam simulate-principal-policy \
                   --policy-source-arn "$SCHEDULER_ROLE_ARN" \
-                  --action-names events:PutEvents \
-                  --resource-arns "$BUS_ARN" \
+                  --action-names lambda:InvokeFunction \
+                  --resource-arns "$LAMBDA_ARN" \
                   --query 'EvaluationResults[0].EvalDecision' \
                   --output text 2>/dev/null || echo "unknown")
- 
+
           case "$SIM" in
             allowed)
-              echo "PutEvents sim  : allowed on ${EVENT_BUS_NAME}  [OK]"
+              echo "InvokeFunction sim : allowed on ${LAMBDA_ARN}  [OK]"
               ;;
             explicitDeny|implicitDeny)
               echo "======================================"
-              echo "ERROR: scheduler role is NOT allowed events:PutEvents on this bus."
+              echo "ERROR: scheduler role is NOT allowed lambda:InvokeFunction on this function."
               echo "  Role     : ${SCHEDULER_ROLE_ARN}"
-              echo "  Bus      : ${BUS_ARN}"
+              echo "  Function : ${LAMBDA_ARN}"
               echo "  Decision : ${SIM}"
               echo ""
-              echo "This is why the schedule fires but nothing gets deleted."
-              echo "Attach this to that role (note the bus name is NOT 'default'):"
+              echo "This is why the schedule would fire but the Lambda never runs."
+              echo "Attach this to that role:"
               echo ""
               echo "  {"
               echo "    \"Effect\":   \"Allow\","
-              echo "    \"Action\":   \"events:PutEvents\","
-              echo "    \"Resource\": \"${BUS_ARN}\""
+              echo "    \"Action\":   \"lambda:InvokeFunction\","
+              echo "    \"Resource\": \"${LAMBDA_ARN}\""
               echo "  }"
               echo "======================================"
               exit 1
               ;;
             *)
-              echo "PutEvents sim  : skipped (need iam:SimulatePrincipalPolicy)  [--]"
+              echo "InvokeFunction sim : skipped (need iam:SimulatePrincipalPolicy)  [--]"
               ;;
           esac
- 
-          # ---------------------------------------------------------
-          # 2c. Does each Lambda target allow EventBridge to invoke it?
-          #     A missing/again-wrong resource-based policy is the other
-          #     classic "rule matches, target never fires, no error"
-          #     cause. Heuristic (checks the principal, not the exact
-          #     source ARN). Non-fatal: needs lambda:GetPolicy.
-          # ---------------------------------------------------------
-          if [ -n "$MATCHING_RULE" ]; then
-            LAMBDA_ARNS=$(aws events list-targets-by-rule \
-                            --rule "$MATCHING_RULE" \
-                            --event-bus-name "$EVENT_BUS_NAME" \
-                            --query "Targets[?starts_with(Arn, 'arn:aws:lambda:')].Arn" \
-                            --output text 2>/dev/null || echo "")
- 
-            for L in $LAMBDA_ARNS; do
-              FN="${L##*:function:}"
-              FN="${FN%%:*}"                 # strip any :alias / :version suffix
-              if POLICY=$(aws lambda get-policy --function-name "$FN" \
-                            --query Policy --output text 2>/dev/null); then
-                if echo "$POLICY" | grep -q 'events.amazonaws.com'; then
-                  echo "Lambda policy  : ${FN} allows EventBridge  [OK]"
-                else
-                  echo "WARNING: Lambda '${FN}' has a resource policy but none of it"
-                  echo "         grants events.amazonaws.com invoke — it will not fire."
-                fi
-              else
-                echo "WARNING: Lambda '${FN}' has NO resource-based policy;"
-                echo "         EventBridge cannot invoke it. Add one with:"
-                echo "         aws lambda add-permission --function-name ${FN} \\"
-                echo "           --statement-id allow-${MATCHING_RULE} \\"
-                echo "           --action lambda:InvokeFunction \\"
-                echo "           --principal events.amazonaws.com \\"
-                echo "           --source-arn <arn-of-rule-${MATCHING_RULE}>"
-              fi
-            done
+
+          if [ -n "$DLQ_ARN" ]; then
+            SIM_DLQ=$(aws iam simulate-principal-policy \
+                        --policy-source-arn "$SCHEDULER_ROLE_ARN" \
+                        --action-names sqs:SendMessage \
+                        --resource-arns "$DLQ_ARN" \
+                        --query 'EvaluationResults[0].EvalDecision' \
+                        --output text 2>/dev/null || echo "unknown")
+            case "$SIM_DLQ" in
+              allowed)
+                echo "SendMessage sim    : allowed on DLQ  [OK]"
+                ;;
+              explicitDeny|implicitDeny)
+                echo "WARNING: scheduler role cannot sqs:SendMessage on DLQ ${DLQ_ARN}."
+                echo "         Failed invocations will not be captured."
+                ;;
+              *)
+                echo "SendMessage sim    : skipped (need iam:SimulatePrincipalPolicy)  [--]"
+                ;;
+            esac
+          else
+            echo "WARNING: no DLQ configured. If the Lambda invoke fails at fire time,"
+            echo "         the failure will be silent and the schedule will still"
+            echo "         self-delete. Set CLEANUP_DLQ_ARN to catch this."
           fi
- 
+
           # =========================================================
-          # 3. Parse live_time -> minutes
+          # 2. Parse live_time -> minutes
           #    Accepts the dropdown values 10min / 1hr / 2hr / 4hr /
           #    8hr / 24hr, and also tolerates "90min", "1h" and a bare
           #    number (treated as hours, preserving the old behaviour).
@@ -1560,7 +1478,7 @@ jobs:
           #    drives the date arithmetic below.
           # =========================================================
           RAW_TIME="${LIVE_TIME// /}"    # strip any stray spaces
- 
+
           if   [[ "$RAW_TIME" =~ ^([0-9]+)min$ ]]; then
             MINUTES="${BASH_REMATCH[1]}"
           elif [[ "$RAW_TIME" =~ ^([0-9]+)(hr|h)$ ]]; then
@@ -1572,12 +1490,12 @@ jobs:
             echo "Expected one of: 10min, 1hr, 2hr, 4hr, 8hr, 24hr (also 90min, 1h)."
             exit 1
           fi
- 
+
           if [ "$MINUTES" -lt 1 ]; then
             echo "ERROR: live_time '${LIVE_TIME}' resolves to ${MINUTES} minute(s)."
             exit 1
           fi
- 
+
           # Human-readable lifetime for logs / summary (e.g. "10m", "2h", "1h 30m").
           if   [ "$MINUTES" -lt 60 ]; then
             LIFETIME_HUMAN="${MINUTES}m"
@@ -1586,9 +1504,9 @@ jobs:
           else
             LIFETIME_HUMAN="$(( MINUTES / 60 ))h $(( MINUTES % 60 ))m"
           fi
- 
+
           # =========================================================
-          # 4. Compute the fire time.
+          # 3. Compute the fire time.
           #    Scheduler wants at(yyyy-mm-ddThh:mm:ss) with NO trailing Z
           #    and no offset — the zone is passed separately.
           #    10min is well within Scheduler's one-minute granularity,
@@ -1597,7 +1515,7 @@ jobs:
           NOW_LOCAL=$(TZ="$SCHEDULE_TZ" date '+%Y-%m-%d %H:%M:%S')
           DESTROY_AT=$(TZ="$SCHEDULE_TZ" date -d "+${MINUTES} minutes" '+%Y-%m-%dT%H:%M:%S')
           DESTROY_AT_UTC=$(date -u -d "+${MINUTES} minutes" '+%Y-%m-%dT%H:%M:%SZ')
- 
+
           echo "======================================"
           echo "Cleanup Schedule"
           echo "======================================"
@@ -1606,25 +1524,15 @@ jobs:
           echo "Lifetime     : ${LIFETIME_HUMAN}  (${MINUTES}m, input: ${LIVE_TIME})"
           echo "Destroy at   : ${DESTROY_AT/T/ }  (${SCHEDULE_TZ})"
           echo "Destroy at   : $DESTROY_AT_UTC  (UTC)"
-          echo "Bus          : $BUS_ARN"
+          echo "Target       : $LAMBDA_ARN"
           echo "======================================"
- 
+
           # =========================================================
-          # 5. Build the payload.
-          #
-          #    Using Scheduler's NATIVE EventBridge target:
-          #      Target.Arn                       = the event bus ARN
-          #      Target.Input                     = the event Detail (a JSON string)
-          #      Target.EventBridgeParameters     = Source + DetailType
-          #
-          #    This is one level of nesting shallower than the universal
-          #    target (arn:aws:scheduler:::aws-sdk:eventbridge:putEvents),
-          #    which needs a full {"Entries":[...]} envelope with Detail
-          #    double-escaped inside it. Same end result, far less to get
-          #    wrong. The universal-target equivalent is at the bottom
-          #    of this file if you prefer to keep it.
+          # 4. Build the payload — sent directly as Target.Input.
+          #    No Detail/DetailType/Source wrapper: the Lambda receives
+          #    exactly this object as its event.
           # =========================================================
-          EVENT_DETAIL=$(jq -nc \
+          PAYLOAD=$(jq -nc \
             --arg instance_id "$INSTANCE_ID" \
             --arg rules       "$RULE_ARNS_CSV" \
             --arg tgs         "$TG_ARNS_CSV" \
@@ -1643,54 +1551,44 @@ jobs:
                  }
                ]
              }')
- 
+
           TARGET=$(jq -nc \
-            --arg bus_arn "$BUS_ARN" \
-            --arg role    "$SCHEDULER_ROLE_ARN" \
-            --arg input   "$EVENT_DETAIL" \
-            --arg dlq     "$DLQ_ARN" \
+            --arg lambda_arn "$LAMBDA_ARN" \
+            --arg role       "$SCHEDULER_ROLE_ARN" \
+            --arg input      "$PAYLOAD" \
+            --arg dlq        "$DLQ_ARN" \
             '{
-               Arn:     $bus_arn,
+               Arn:     $lambda_arn,
                RoleArn: $role,
                Input:   $input,
-               EventBridgeParameters: {
-                 Source:     "preview.cleanup",
-                 DetailType: "DeletePreviewResources"
-               },
                RetryPolicy: {
                  MaximumRetryAttempts:     3,
                  MaximumEventAgeInSeconds: 3600
                }
              }
              + (if $dlq == "" then {} else { DeadLetterConfig: { Arn: $dlq } } end)')
- 
-          echo "Event that will be published at the scheduled time:"
-          echo "$EVENT_DETAIL" | jq .
- 
-          if [ -z "$DLQ_ARN" ]; then
-            echo "WARNING: no DLQ configured. If PutEvents fails at fire time,"
-            echo "         the failure will be silent and the schedule will still"
-            echo "         self-delete. Set CLEANUP_DLQ_ARN to catch this."
-          fi
- 
+
+          echo "Payload that will be sent to the Lambda at the scheduled time:"
+          echo "$PAYLOAD" | jq .
+
           # =========================================================
-          # 6. Schedule name: must match [0-9a-zA-Z-_.]+ and be <= 64 chars.
+          # 5. Schedule name: must match [0-9a-zA-Z-_.]+ and be <= 64 chars.
           # =========================================================
           RAW_NAME="cleanup-${ENV_CODE}${BRANCH_CODE}-${INSTANCE_ID}"
           SCHEDULE_NAME=$(printf '%s' "$RAW_NAME" | tr -c '[:alnum:]._-' '-' | cut -c1-64)
- 
+
           if [ "$SCHEDULE_NAME" != "$RAW_NAME" ]; then
             echo "NOTE: schedule name sanitised: '${RAW_NAME}' -> '${SCHEDULE_NAME}'"
           fi
- 
+
           # =========================================================
-          # 7. Create or update.
+          # 6. Create or update.
           #    The original swallowed ALL errors from get-schedule, so an
           #    AccessDenied looked identical to "doesn't exist" and led to
           #    a create that then failed. Distinguish the two.
           # =========================================================
           ERR_FILE=$(mktemp)
- 
+
           if aws scheduler get-schedule \
                --name "$SCHEDULE_NAME" \
                --group-name "$SCHEDULE_GROUP" >/dev/null 2>"$ERR_FILE"; then
@@ -1706,7 +1604,7 @@ jobs:
             exit 1
           fi
           rm -f "$ERR_FILE"
- 
+
           # update-schedule has PUT semantics — every field must be supplied
           # or it is reset to its default. Both branches pass the identical
           # complete set, including --state.
@@ -1720,11 +1618,11 @@ jobs:
             --state ENABLED \
             --description "Destroy preview env ${ENV_CODE}${BRANCH_CODE} (${INSTANCE_ID}) after ${LIVE_TIME}" \
             --target "$TARGET" >/dev/null
- 
+
           echo "Schedule set."
- 
+
           # =========================================================
-          # 8. Read it back — proves the API accepted what we think it did.
+          # 7. Read it back — proves the API accepted what we think it did.
           # =========================================================
           echo "======================================"
           echo "Schedule as stored by AWS"
@@ -1739,13 +1637,11 @@ jobs:
               Timezone:   ScheduleExpressionTimezone,
               TargetArn:  Target.Arn,
               RoleArn:    Target.RoleArn,
-              Source:     Target.EventBridgeParameters.Source,
-              DetailType: Target.EventBridgeParameters.DetailType,
               DLQ:        Target.DeadLetterConfig.Arn
             }' --output table
- 
+
           # =========================================================
-          # 9. Step summary
+          # 8. Step summary
           # =========================================================
           {
             echo "## Cleanup Scheduled"
@@ -1753,8 +1649,7 @@ jobs:
             echo "| Field | Value |"
             echo "|---|---|"
             echo "| Instance | \`${INSTANCE_ID}\` |"
-            echo "| Event Bus | \`${EVENT_BUS_NAME}\` |"
-            echo "| Rule matched | \`${MATCHING_RULE:-NONE FOUND}\` |"
+            echo "| Target Lambda | \`${LAMBDA_ARN}\` |"
             echo "| Lifetime | ${LIVE_TIME} |"
             echo "| Destroys at | ${DESTROY_AT/T/ } (${SCHEDULE_TZ}) |"
             echo "| Destroys at | ${DESTROY_AT_UTC} |"
