@@ -1273,20 +1273,22 @@ jobs:
           INSTANCE_ID:    ${{ steps.create_ec2.outputs.instance_id }}
           RULE_ARNS_CSV:  ${{ steps.tg_listener.outputs.rule_arns }}
           TG_ARNS_CSV:    ${{ steps.tg_listener.outputs.target_group_arns }}
+          ECR_REPOS_CSV:  ${{ steps.create_ecr.outputs.repository_names }}
           PUBLISH_NOW:    ${{ inputs.publish_cleanup_now || 'false' }}
         run: |
           set -euo pipefail
- 
+
           if [ -z "${INSTANCE_ID}" ] || [ "${INSTANCE_ID}" = "None" ]; then
             echo "No instance was created — nothing to build a payload for."
             exit 0
           fi
- 
+
           # An empty CSV must yield [] , not [""] .
           EVENT_DETAIL=$(jq -nc \
             --arg instance_id "$INSTANCE_ID" \
             --arg rules       "$RULE_ARNS_CSV" \
             --arg tgs         "$TG_ARNS_CSV" \
+            --arg ecrs        "$ECR_REPOS_CSV" \
             '{
                instance_id: $instance_id,
                resources: [
@@ -1294,23 +1296,25 @@ jobs:
                    rule_arns:
                      (if $rules == "" then [] else ($rules | split(",")) end),
                    target_group_arns:
-                     (if $tgs   == "" then [] else ($tgs   | split(",")) end)
+                     (if $tgs   == "" then [] else ($tgs   | split(",")) end),
+                   ecr_repositories:
+                     (if $ecrs  == "" then [] else ($ecrs  | split(",")) end)
                  }
                ]
              }')
- 
+
           echo "======================================"
           echo "Cleanup Event Payload (detail)"
           echo "======================================"
           echo "$EVENT_DETAIL" | jq .
- 
+
           if [ "${PUBLISH_NOW}" != "true" ]; then
             echo "PUBLISH_NOW is not 'true' — payload validated, nothing published."
             exit 0
           fi
- 
+
           echo "WARNING: publishing cleanup event NOW. The environment will be destroyed."
- 
+
           # Detail is a JSON *string*, not an object -> --arg, never --argjson.
           ENTRIES=$(jq -nc \
             --arg detail "$EVENT_DETAIL" \
@@ -1321,28 +1325,27 @@ jobs:
                EventBusName: $bus,
                Detail:       $detail
              }]')
- 
+
           RESPONSE=$(aws events put-events --entries "$ENTRIES")
- 
+
           echo "======================================"
           echo "PutEvents Response"
           echo "======================================"
           echo "$RESPONSE" | jq .
- 
+
           # put-events returns HTTP 200 even when individual entries are
           # rejected, so the exit code alone is not enough.
           FAILED=$(echo "$RESPONSE" | jq -r '.FailedEntryCount')
- 
+
           if [ "$FAILED" != "0" ]; then
             echo "ERROR: EventBridge rejected ${FAILED} entry/entries."
             echo "$RESPONSE" | jq -r '.Entries[] | select(.ErrorCode) | "  \(.ErrorCode): \(.ErrorMessage)"'
             exit 1
           fi
- 
+
           # NOTE: FailedEntryCount == 0 only means the bus ACCEPTED the event.
           # It says nothing about whether any rule matched or any target fired.
           echo "Cleanup event accepted by bus '${EVENT_BUS_NAME}'."
- 
  
 # ---------------------------------------------------------------------
 # STEP 2 — Create/update the one-time schedule.
