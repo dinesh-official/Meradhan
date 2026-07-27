@@ -1073,12 +1073,15 @@ export class CrmOrdersController {
       toEmail?: string;
       accruedInterestDays?: number | string;
       settlementDate?: string;
+      dealDate?: string;
       settlementNumber?: string;
       settlementDateTime?: string;
       lastInterestPaymentDate?: string;
       interestPaymentDates?: string;
       nonAmortizedBond?: boolean;
       amortizedPrincipalPaymentDates?: string;
+      /** One-shot NSE pricing for PDF yield/amounts — not persisted. */
+      pricingSnapshot?: Record<string, unknown> | string;
     };
 
     const pdfType = body.pdfType;
@@ -1116,12 +1119,17 @@ export class CrmOrdersController {
           typeof body.settlementDate === "string" && body.settlementDate.trim() !== ""
             ? new Date(body.settlementDate)
             : undefined,
+        dealDate:
+          typeof body.dealDate === "string" && body.dealDate.trim() !== ""
+            ? new Date(body.dealDate)
+            : undefined,
         settlementNumber: body.settlementNumber,
         settlementDateTime: body.settlementDateTime,
         lastInterestPaymentDate: body.lastInterestPaymentDate,
         interestPaymentDates: body.interestPaymentDates,
         nonAmortizedBond: body.nonAmortizedBond,
         amortizedPrincipalPaymentDates: body.amortizedPrincipalPaymentDates,
+        pricingSnapshot: body.pricingSnapshot,
       });
 
       return res.sendResponse({
