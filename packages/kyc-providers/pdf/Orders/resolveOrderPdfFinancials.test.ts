@@ -32,4 +32,31 @@ describe("resolveOrderPdfFinancials", () => {
     expect(result.settlementAmount).toBe(2_011_734.5);
     expect(result.accruedInterestDays).toBe(12);
   });
+
+  test("settlement amount always includes stamp duty even when snapshot omits it", () => {
+    const result = resolveOrderPdfFinancials({
+      qun: 1,
+      faceValue: 1_000,
+      orderData: {
+        stampDuty: 100,
+        bondDetails: {
+          pricing: {
+            totalConsideration: 1_000_000,
+            stampDuty: 100,
+            settlementAmount: 1_000_000, // wrong snapshot without stamp
+          },
+        },
+        metadata: {
+          settleOrder: {
+            modConsideration: 1_000_000,
+            stampDutyAmount: 100,
+          },
+        },
+      },
+    });
+
+    expect(result.totalConsideration).toBe(1_000_000);
+    expect(result.stampDutyAmount).toBe(100);
+    expect(result.settlementAmount).toBe(1_000_100);
+  });
 });

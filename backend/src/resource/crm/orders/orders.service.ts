@@ -122,6 +122,9 @@ function orderPricingSnapshot(bondDetails: unknown): {
 /**
  * Optional in-request pricing (from CRM “Use NSE saved data” checkbox).
  * Merged into `bondDetails.pricing` for this PDF only — never persisted.
+ *
+ * Prefer `useNseSavedPricing=true` so the backend reloads from settle_order /
+ * RFQ tables (avoids large GET query truncation of `pricingSnapshot`).
  */
 function parsePricingSnapshotOverride(
   pdfQuery: Record<string, string | undefined>,
@@ -163,6 +166,33 @@ function bondDetailsWithPricingOverride(
       ...pricingOverride,
     },
   };
+}
+
+function wantsNseSavedPricing(pdfQuery: Record<string, string | undefined>): boolean {
+  const flag = String(pdfQuery.useNseSavedPricing ?? "").trim().toLowerCase();
+  return flag === "1" || flag === "true" || flag === "yes";
+}
+
+/**
+ * Resolve bondDetails for PDF: optionally rebuild pricing from NSE settle_order
+ * (same source as the CRM checkbox preview).
+ */
+async function resolveBondDetailsForPdf(
+  orderNumber: string,
+  bondDetails: unknown,
+  pdfQuery: Record<string, string | undefined>,
+): Promise<unknown> {
+  if (wantsNseSavedPricing(pdfQuery)) {
+    const proposed = await proposeOrderPricingFromNseSavedData(orderNumber);
+    return bondDetailsWithPricingOverride(
+      bondDetails,
+      proposed.pricing as Record<string, unknown>,
+    );
+  }
+  return bondDetailsWithPricingOverride(
+    bondDetails,
+    parsePricingSnapshotOverride(pdfQuery),
+  );
 }
 
 /**
@@ -244,11 +274,8 @@ function buildPdfFinancialFields(
         ? Number(order.totalAmount)
         : calculateTotalConsideration(Number(principal), Number(accruedInterest ?? 0)));
 
-  const settlementAmount =
-    snap?.settlementAmount ??
-    (settleOrder?.modConsideration != null
-      ? Number(settleOrder.modConsideration) + stampDuty
-      : totalConsideration + stampDuty);
+  // Settlement amount on PDF is always consideration + stamp duty.
+  const settlementAmount = totalConsideration + stampDuty;
 
   const settlePrice = numFromSnap(
     (settleOrder as { price?: unknown } | null | undefined)?.price,
@@ -2695,11 +2722,11 @@ export class CrmOrdersService {
     const getUserPrimaryBankAccount = actor.primaryBank;
     const primaryDematAccount = actor.primaryDemat;
 
-    // CRM NSE checkbox may send a one-shot pricing snapshot for this PDF only.
-    const pricingOverride = parsePricingSnapshotOverride(pdfQuery);
-    const bondDetailsForPdf = bondDetailsWithPricingOverride(
+    // CRM NSE checkbox: rebuild pricing from settle_order / RFQ (same as propose).
+    const bondDetailsForPdf = await resolveBondDetailsForPdf(
+      orderNumber,
       order.bondDetails,
-      pricingOverride,
+      pdfQuery,
     );
     const orderForPdf = { ...order, bondDetails: bondDetailsForPdf };
 
@@ -2947,10 +2974,10 @@ export class CrmOrdersService {
     const order = actor.orderForPdf;
     const user = actor.user;
 
-    const pricingOverride = parsePricingSnapshotOverride(pdfQuery);
-    const bondDetailsForPdf = bondDetailsWithPricingOverride(
+    const bondDetailsForPdf = await resolveBondDetailsForPdf(
+      orderNumber,
       order.bondDetails,
-      pricingOverride,
+      pdfQuery,
     );
     const orderForPdf = { ...order, bondDetails: bondDetailsForPdf };
 
@@ -3212,6 +3239,8 @@ export class CrmOrdersService {
       nonAmortizedBond?: boolean;
       amortizedPrincipalPaymentDates?: string;
       pricingSnapshot?: Record<string, unknown> | string;
+      /** When true, rebuild pricing from settle_order / NSE rows for this PDF only. */
+      useNseSavedPricing?: boolean;
     },
   ): Promise<{ messageId?: string; messageIds?: string[] }> {
     const pdfType = body.pdfType;
@@ -3283,6 +3312,9 @@ export class CrmOrdersService {
     }
     if (body.dealDate) {
       pdfQuery.dealDate = body.dealDate.toISOString();
+    }
+    if (body.useNseSavedPricing === true) {
+      pdfQuery.useNseSavedPricing = "true";
     }
     if (body.pricingSnapshot != null) {
       pdfQuery.pricingSnapshot =

@@ -1082,6 +1082,7 @@ export class CrmOrdersController {
       amortizedPrincipalPaymentDates?: string;
       /** One-shot NSE pricing for PDF yield/amounts — not persisted. */
       pricingSnapshot?: Record<string, unknown> | string;
+      useNseSavedPricing?: boolean;
     };
 
     const pdfType = body.pdfType;
@@ -1130,6 +1131,7 @@ export class CrmOrdersController {
         nonAmortizedBond: body.nonAmortizedBond,
         amortizedPrincipalPaymentDates: body.amortizedPrincipalPaymentDates,
         pricingSnapshot: body.pricingSnapshot,
+        useNseSavedPricing: body.useNseSavedPricing === true,
       });
 
       return res.sendResponse({

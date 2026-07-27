@@ -338,9 +338,10 @@ async function buildPricingSnapshot(input: {
     numFromDecimal(input.settle.modConsideration) ??
     numFromDecimal(input.orderTotalAmount);
 
+  // NSE `modConsideration` / accepted consideration are exclusive of stamp duty.
   let totalConsideration =
     considerationFromNse != null
-      ? Number(truncateDecimals(Math.max(0, considerationFromNse - stampDuty), 2))
+      ? Number(truncateDecimals(Math.max(0, considerationFromNse), 2))
       : calculateTotalConsideration(principalAmount, accruedInterestAmount ?? 0);
 
   if (accruedInterestAmount == null && considerationFromNse != null) {
@@ -356,10 +357,10 @@ async function buildPricingSnapshot(input: {
     totalConsideration = calculateTotalConsideration(principalAmount, accruedInterestAmount);
   }
 
-  const settlementAmount =
-    considerationFromNse != null
-      ? Number(truncateDecimals(considerationFromNse, 2))
-      : Number(truncateDecimals(totalConsideration + stampDuty, 2));
+  // Final settlement on PDF / checkout = consideration + stamp duty.
+  const settlementAmount = Number(
+    truncateDecimals(totalConsideration + stampDuty, 2),
+  );
 
   const settlementDt = settlementDateFromYmd(input.dates.settlementDateYmd);
   const couponDates = await resolveCouponDatesForSettlement(
@@ -396,8 +397,8 @@ async function buildPricingSnapshot(input: {
     input.dates.dealDateYmd === input.dates.settlementDateYmd ? "T+0" : "T+1";
 
   const offeredYield =
-    input.negotiation.acceptedYield ??
     numFromDecimal(input.settle.yield) ??
+    input.negotiation.acceptedYield ??
     input.bond.yield ??
     undefined;
 
