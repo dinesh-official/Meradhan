@@ -388,45 +388,68 @@ jobs:
         id: create_ecr
         shell: bash
         run: |
+          set -euo pipefail
 
-          set -e
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          REGION="${AWS_REGION:-${AWS_DEFAULT_REGION:-$(aws configure get region)}}"
 
-          REPOSITORIES=(
-            "$FRONTEND_NAME"
-            "$BACKEND_NAME"
-            "$CRM_NAME"
-            "$WORKER_NAME"
-          )
+          echo "======================================"
+          echo "AWS Account : $ACCOUNT_ID"
+          echo "AWS Region  : $REGION"
+          echo "======================================"
 
+          REPOSITORIES=()
+
+          # Add only the selected applications
+          if [ "${{ inputs.frontend }}" = "true" ]; then
+            REPOSITORIES+=("$FRONTEND_NAME")
+          fi
+
+          if [ "${{ inputs.backend }}" = "true" ]; then
+            REPOSITORIES+=("$BACKEND_NAME")
+          fi
+
+          if [ "${{ inputs.crm }}" = "true" ]; then
+            REPOSITORIES+=("$CRM_NAME")
+          fi
+
+          if [ "${{ inputs.worker }}" = "true" ]; then
+            REPOSITORIES+=("$WORKER_NAME")
+          fi
+
+          if [ ${#REPOSITORIES[@]} -eq 0 ]; then
+            echo "ERROR: No repositories selected."
+            exit 1
+          fi
+
+          REPOSITORY_NAMES=""
           REPOSITORY_URIS=""
 
           echo "======================================"
-          echo "Creating ECR Repositories"
+          echo "Repositories Selected"
+          printf ' - %s\n' "${REPOSITORIES[@]}"
           echo "======================================"
 
-          for REPO in "${REPOSITORIES[@]}"
-          do
-
-            [ -z "$REPO" ] && continue
+          for REPO in "${REPOSITORIES[@]}"; do
 
             echo ""
             echo "Repository : $REPO"
 
-            EXISTS=$(aws ecr describe-repositories \
-              --repository-names "$REPO" \
-              --query "repositories[0].repositoryName" \
-              --output text 2>/dev/null || true)
-
-            if [ "$EXISTS" = "$REPO" ]; then
+            if aws ecr describe-repositories \
+                --repository-names "$REPO" \
+                --region "$REGION" >/dev/null 2>&1; then
 
               echo "Status : Already Exists"
 
             else
 
+              echo "Creating repository..."
+
               aws ecr create-repository \
                 --repository-name "$REPO" \
                 --image-scanning-configuration scanOnPush=true \
-                --image-tag-mutability MUTABLE >/dev/null
+                --image-tag-mutability MUTABLE \
+                --region "$REGION" >/dev/null
 
               echo "Status : Created"
 
@@ -434,26 +457,48 @@ jobs:
 
             URI=$(aws ecr describe-repositories \
               --repository-names "$REPO" \
+              --region "$REGION" \
               --query "repositories[0].repositoryUri" \
               --output text)
 
-            REPOSITORY_URIS="${REPOSITORY_URIS}${URI},"
+            if [ -z "$URI" ] || [ "$URI" = "None" ]; then
+              echo "ERROR: Failed to verify repository '$REPO'."
+              exit 1
+            fi
+
+            REPOSITORY_NAMES+="${REPO},"
+            REPOSITORY_URIS+="${URI},"
 
             echo "Repository URI : $URI"
             echo "--------------------------------------"
 
           done
 
+          REPOSITORY_NAMES="${REPOSITORY_NAMES%,}"
+          REPOSITORY_URIS="${REPOSITORY_URIS%,}"
+
           echo ""
           echo "======================================"
           echo "ECR Repositories Ready"
           echo "======================================"
+          echo "Repository Names : $REPOSITORY_NAMES"
+          echo "Repository URIs  : $REPOSITORY_URIS"
 
-          echo "Repository URIs : ${REPOSITORY_URIS%,}"
+          echo "repository_names=$REPOSITORY_NAMES" >> "$GITHUB_OUTPUT"
+          echo "repository_uris=$REPOSITORY_URIS" >> "$GITHUB_OUTPUT"
 
-          echo "repository_uris=${REPOSITORY_URIS%,}" >> "$GITHUB_OUTPUT"    
+          echo ""
+          echo "======================================"
+          echo "Verification"
+          echo "======================================"
 
-
+          for REPO in "${REPOSITORIES[@]}"; do
+            aws ecr describe-repositories \
+              --repository-names "$REPO" \
+              --region "$REGION" \
+              --query "repositories[0].{Name:repositoryName,URI:repositoryUri}" \
+              --output table
+          done          
 
       - name: Build & Push Docker Images
         shell: bash
