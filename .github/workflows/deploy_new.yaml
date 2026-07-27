@@ -1265,7 +1265,6 @@ jobs:
           echo "======================================"
 
 
-# ---------------------------------------------------------------------
       - name: Build / Validate Cleanup Event Payload
         shell: bash
         env:
@@ -1359,7 +1358,8 @@ jobs:
           # NOTE: FailedEntryCount == 0 only means the bus ACCEPTED the event.
           # It says nothing about whether any rule matched or any target fired.
           echo "Cleanup event accepted by bus '${EVENT_BUS_NAME}'."
- 
+
+
 # ---------------------------------------------------------------------
 # STEP 2 — Create/update the one-time schedule.
 # ---------------------------------------------------------------------
@@ -1378,9 +1378,11 @@ jobs:
           RULE_ARNS_CSV:      ${{ steps.tg_listener.outputs.rule_arns }}
           TG_ARNS_CSV:        ${{ steps.tg_listener.outputs.target_group_arns }}
           LIVE_TIME:          ${{ inputs.live_time }}
+          # FRONTEND_NAME / BACKEND_NAME / CRM_NAME / WORKER_NAME come from
+          # $GITHUB_ENV (set in the "Generate Resource IDs" step).
         run: |
           set -euo pipefail
- 
+
           # =========================================================
           # 0. Preconditions
           # =========================================================
@@ -1388,7 +1390,7 @@ jobs:
             echo "No instance was created — nothing to schedule cleanup for."
             exit 0
           fi
- 
+
           if [ -z "${SCHEDULER_ROLE_ARN}" ]; then
             echo "ERROR: SCHEDULER_ROLE_ARN is not set."
             echo "Add it under Settings -> Secrets and variables -> Actions -> Secrets."
@@ -1396,16 +1398,28 @@ jobs:
             echo "events:PutEvents on the ${EVENT_BUS_NAME} bus."
             exit 1
           fi
- 
+
           # These come from an earlier step (job env / GITHUB_ENV).
           # If either is empty the schedule name collapses to "cleanup--i-xxxx",
           # which collides across environments and makes the existence check
           # match the wrong schedule.
           : "${ENV_CODE:?ENV_CODE is empty - schedule names would collide}"
           : "${BRANCH_CODE:?BRANCH_CODE is empty - schedule names would collide}"
- 
+
           DLQ_ARN="${DLQ_ARN:-}"
- 
+
+          # Build the ECR repo CSV directly from the same names used to
+          # create the repos — same approach as Step 1, kept in sync so
+          # the SCHEDULED payload actually carries the repos too.
+          ECR_REPOS_CSV=""
+          for REPO in "$FRONTEND_NAME" "$BACKEND_NAME" "$CRM_NAME" "$WORKER_NAME"; do
+            [ -z "$REPO" ] && continue
+            ECR_REPOS_CSV="${ECR_REPOS_CSV}${REPO},"
+          done
+          ECR_REPOS_CSV="${ECR_REPOS_CSV%,}"
+
+          echo "ECR repos for scheduled cleanup: ${ECR_REPOS_CSV:-none}"
+
           # =========================================================
           # 1. Resolve account + region -> full bus ARN
           #    Using the ARN (not the bare name) removes any ambiguity
@@ -1420,9 +1434,9 @@ jobs:
             echo "ERROR: could not determine AWS region."
             exit 1
           fi
- 
+
           BUS_ARN="arn:aws:events:${REGION}:${ACCOUNT_ID}:event-bus/${EVENT_BUS_NAME}"
- 
+
           # =========================================================
           # 2. Preflight: does the delivery path actually exist?
           #    A schedule that fires into a bus with no matching rule
@@ -1431,13 +1445,13 @@ jobs:
           echo "======================================"
           echo "Preflight"
           echo "======================================"
- 
+
           if ! aws events describe-event-bus --name "$EVENT_BUS_NAME" >/dev/null 2>&1; then
             echo "ERROR: event bus '${EVENT_BUS_NAME}' not found in ${REGION}."
             exit 1
           fi
           echo "Bus            : ${BUS_ARN}  [OK]"
- 
+
           # Non-fatal: needs events:ListRules / events:ListTargetsByRule.
           MATCHING_RULE=""
           if RULES_JSON=$(aws events list-rules \
@@ -1451,7 +1465,7 @@ jobs:
                   | (."detail-type" // []) | index("DeletePreviewResources")
                 )
               | .Name' | head -n1)
- 
+
             if [ -z "$MATCHING_RULE" ]; then
               echo "WARNING: no rule on bus '${EVENT_BUS_NAME}' matches"
               echo "         detail-type 'DeletePreviewResources'."
@@ -1459,13 +1473,13 @@ jobs:
               echo "         Check the rule was created ON THIS BUS, not on 'default'."
             else
               echo "Rule           : ${MATCHING_RULE}  [OK]"
- 
+
               STATE=$(echo "$RULES_JSON" | jq -r --arg n "$MATCHING_RULE" \
                         '.Rules[] | select(.Name==$n) | .State')
               [ "$STATE" = "ENABLED" ] \
                 && echo "Rule state     : ENABLED  [OK]" \
                 || echo "WARNING: rule '${MATCHING_RULE}' state is ${STATE}."
- 
+
               TARGET_COUNT=$(aws events list-targets-by-rule \
                                --rule "$MATCHING_RULE" \
                                --event-bus-name "$EVENT_BUS_NAME" \
@@ -1479,22 +1493,9 @@ jobs:
           else
             echo "(skipped rule check — missing events:ListRules permission)"
           fi
- 
+
           # ---------------------------------------------------------
           # 2b. Can the SCHEDULER'S role actually publish to THIS bus?
-          #     THIS is the check that catches the silent failure the
-          #     whole "Lambda never runs" symptom comes down to: at fire
-          #     time the schedule calls PutEvents AS its execution role
-          #     (e.g. Eventbridge_custom). If that role only has
-          #     events:PutEvents on 'default', the event is dropped, the
-          #     schedule still self-deletes, and nothing downstream runs
-          #     — with no error logged anywhere.
-          #
-          #     A manual `aws events put-events` test (and STEP 1 above)
-          #     does NOT catch this: those run as the WORKFLOW's role,
-          #     not the scheduler's. simulate-principal-policy evaluates
-          #     the scheduler role WITHOUT assuming it. Fatal on a proven
-          #     deny; skipped only if we lack iam:SimulatePrincipalPolicy.
           # ---------------------------------------------------------
           echo "Scheduler role : ${SCHEDULER_ROLE_ARN}"
           SIM=$(aws iam simulate-principal-policy \
@@ -1503,7 +1504,7 @@ jobs:
                   --resource-arns "$BUS_ARN" \
                   --query 'EvaluationResults[0].EvalDecision' \
                   --output text 2>/dev/null || echo "unknown")
- 
+
           case "$SIM" in
             allowed)
               echo "PutEvents sim  : allowed on ${EVENT_BUS_NAME}  [OK]"
@@ -1530,13 +1531,9 @@ jobs:
               echo "PutEvents sim  : skipped (need iam:SimulatePrincipalPolicy)  [--]"
               ;;
           esac
- 
+
           # ---------------------------------------------------------
           # 2c. Does each Lambda target allow EventBridge to invoke it?
-          #     A missing/again-wrong resource-based policy is the other
-          #     classic "rule matches, target never fires, no error"
-          #     cause. Heuristic (checks the principal, not the exact
-          #     source ARN). Non-fatal: needs lambda:GetPolicy.
           # ---------------------------------------------------------
           if [ -n "$MATCHING_RULE" ]; then
             LAMBDA_ARNS=$(aws events list-targets-by-rule \
@@ -1544,7 +1541,7 @@ jobs:
                             --event-bus-name "$EVENT_BUS_NAME" \
                             --query "Targets[?starts_with(Arn, 'arn:aws:lambda:')].Arn" \
                             --output text 2>/dev/null || echo "")
- 
+
             for L in $LAMBDA_ARNS; do
               FN="${L##*:function:}"
               FN="${FN%%:*}"                 # strip any :alias / :version suffix
@@ -1567,17 +1564,12 @@ jobs:
               fi
             done
           fi
- 
+
           # =========================================================
           # 3. Parse live_time -> minutes
-          #    Accepts the dropdown values 10min / 1hr / 2hr / 4hr /
-          #    8hr / 24hr, and also tolerates "90min", "1h" and a bare
-          #    number (treated as hours, preserving the old behaviour).
-          #    Everything is normalised to MINUTES so a single unit
-          #    drives the date arithmetic below.
           # =========================================================
           RAW_TIME="${LIVE_TIME// /}"    # strip any stray spaces
- 
+
           if   [[ "$RAW_TIME" =~ ^([0-9]+)min$ ]]; then
             MINUTES="${BASH_REMATCH[1]}"
           elif [[ "$RAW_TIME" =~ ^([0-9]+)(hr|h)$ ]]; then
@@ -1589,12 +1581,12 @@ jobs:
             echo "Expected one of: 10min, 1hr, 2hr, 4hr, 8hr, 24hr (also 90min, 1h)."
             exit 1
           fi
- 
+
           if [ "$MINUTES" -lt 1 ]; then
             echo "ERROR: live_time '${LIVE_TIME}' resolves to ${MINUTES} minute(s)."
             exit 1
           fi
- 
+
           # Human-readable lifetime for logs / summary (e.g. "10m", "2h", "1h 30m").
           if   [ "$MINUTES" -lt 60 ]; then
             LIFETIME_HUMAN="${MINUTES}m"
@@ -1603,18 +1595,14 @@ jobs:
           else
             LIFETIME_HUMAN="$(( MINUTES / 60 ))h $(( MINUTES % 60 ))m"
           fi
- 
+
           # =========================================================
           # 4. Compute the fire time.
-          #    Scheduler wants at(yyyy-mm-ddThh:mm:ss) with NO trailing Z
-          #    and no offset — the zone is passed separately.
-          #    10min is well within Scheduler's one-minute granularity,
-          #    and a one-time at() schedule only has to be in the future.
           # =========================================================
           NOW_LOCAL=$(TZ="$SCHEDULE_TZ" date '+%Y-%m-%d %H:%M:%S')
           DESTROY_AT=$(TZ="$SCHEDULE_TZ" date -d "+${MINUTES} minutes" '+%Y-%m-%dT%H:%M:%S')
           DESTROY_AT_UTC=$(date -u -d "+${MINUTES} minutes" '+%Y-%m-%dT%H:%M:%SZ')
- 
+
           echo "======================================"
           echo "Cleanup Schedule"
           echo "======================================"
@@ -1625,26 +1613,15 @@ jobs:
           echo "Destroy at   : $DESTROY_AT_UTC  (UTC)"
           echo "Bus          : $BUS_ARN"
           echo "======================================"
- 
+
           # =========================================================
-          # 5. Build the payload.
-          #
-          #    Using Scheduler's NATIVE EventBridge target:
-          #      Target.Arn                       = the event bus ARN
-          #      Target.Input                     = the event Detail (a JSON string)
-          #      Target.EventBridgeParameters     = Source + DetailType
-          #
-          #    This is one level of nesting shallower than the universal
-          #    target (arn:aws:scheduler:::aws-sdk:eventbridge:putEvents),
-          #    which needs a full {"Entries":[...]} envelope with Detail
-          #    double-escaped inside it. Same end result, far less to get
-          #    wrong. The universal-target equivalent is at the bottom
-          #    of this file if you prefer to keep it.
+          # 5. Build the payload — now includes ecr_repositories.
           # =========================================================
           EVENT_DETAIL=$(jq -nc \
             --arg instance_id "$INSTANCE_ID" \
             --arg rules       "$RULE_ARNS_CSV" \
             --arg tgs         "$TG_ARNS_CSV" \
+            --arg ecrs        "$ECR_REPOS_CSV" \
             --arg live_time   "$LIVE_TIME" \
             --arg destroy_at  "$DESTROY_AT_UTC" \
             '{
@@ -1656,11 +1633,13 @@ jobs:
                    rule_arns:
                      (if $rules == "" then [] else ($rules | split(",")) end),
                    target_group_arns:
-                     (if $tgs   == "" then [] else ($tgs   | split(",")) end)
+                     (if $tgs   == "" then [] else ($tgs   | split(",")) end),
+                   ecr_repositories:
+                     (if $ecrs  == "" then [] else ($ecrs  | split(",")) end)
                  }
                ]
              }')
- 
+
           TARGET=$(jq -nc \
             --arg bus_arn "$BUS_ARN" \
             --arg role    "$SCHEDULER_ROLE_ARN" \
@@ -1680,34 +1659,31 @@ jobs:
                }
              }
              + (if $dlq == "" then {} else { DeadLetterConfig: { Arn: $dlq } } end)')
- 
+
           echo "Event that will be published at the scheduled time:"
           echo "$EVENT_DETAIL" | jq .
- 
+
           if [ -z "$DLQ_ARN" ]; then
             echo "WARNING: no DLQ configured. If PutEvents fails at fire time,"
             echo "         the failure will be silent and the schedule will still"
             echo "         self-delete. Set CLEANUP_DLQ_ARN to catch this."
           fi
- 
+
           # =========================================================
           # 6. Schedule name: must match [0-9a-zA-Z-_.]+ and be <= 64 chars.
           # =========================================================
           RAW_NAME="cleanup-${ENV_CODE}${BRANCH_CODE}-${INSTANCE_ID}"
           SCHEDULE_NAME=$(printf '%s' "$RAW_NAME" | tr -c '[:alnum:]._-' '-' | cut -c1-64)
- 
+
           if [ "$SCHEDULE_NAME" != "$RAW_NAME" ]; then
             echo "NOTE: schedule name sanitised: '${RAW_NAME}' -> '${SCHEDULE_NAME}'"
           fi
- 
+
           # =========================================================
           # 7. Create or update.
-          #    The original swallowed ALL errors from get-schedule, so an
-          #    AccessDenied looked identical to "doesn't exist" and led to
-          #    a create that then failed. Distinguish the two.
           # =========================================================
           ERR_FILE=$(mktemp)
- 
+
           if aws scheduler get-schedule \
                --name "$SCHEDULE_NAME" \
                --group-name "$SCHEDULE_GROUP" >/dev/null 2>"$ERR_FILE"; then
@@ -1723,10 +1699,7 @@ jobs:
             exit 1
           fi
           rm -f "$ERR_FILE"
- 
-          # update-schedule has PUT semantics — every field must be supplied
-          # or it is reset to its default. Both branches pass the identical
-          # complete set, including --state.
+
           aws scheduler "$ACTION" \
             --name "$SCHEDULE_NAME" \
             --group-name "$SCHEDULE_GROUP" \
@@ -1737,11 +1710,11 @@ jobs:
             --state ENABLED \
             --description "Destroy preview env ${ENV_CODE}${BRANCH_CODE} (${INSTANCE_ID}) after ${LIVE_TIME}" \
             --target "$TARGET" >/dev/null
- 
+
           echo "Schedule set."
- 
+
           # =========================================================
-          # 8. Read it back — proves the API accepted what we think it did.
+          # 8. Read it back.
           # =========================================================
           echo "======================================"
           echo "Schedule as stored by AWS"
@@ -1760,7 +1733,7 @@ jobs:
               DetailType: Target.EventBridgeParameters.DetailType,
               DLQ:        Target.DeadLetterConfig.Arn
             }' --output table
- 
+
           # =========================================================
           # 9. Step summary
           # =========================================================
@@ -1772,6 +1745,7 @@ jobs:
             echo "| Instance | \`${INSTANCE_ID}\` |"
             echo "| Event Bus | \`${EVENT_BUS_NAME}\` |"
             echo "| Rule matched | \`${MATCHING_RULE:-NONE FOUND}\` |"
+            echo "| ECR Repos | \`${ECR_REPOS_CSV:-none}\` |"
             echo "| Lifetime | ${LIVE_TIME} |"
             echo "| Destroys at | ${DESTROY_AT/T/ } (${SCHEDULE_TZ}) |"
             echo "| Destroys at | ${DESTROY_AT_UTC} |"
