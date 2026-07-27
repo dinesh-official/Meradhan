@@ -14,6 +14,8 @@ import type {
   SendOrderPdfEmailResponse,
   GetReceiptPdfOptionsResponse,
   UpsertReceiptPdfOptionsResponse,
+  ProposeOrderPricingSnapshotResponse,
+  AcceptOrderPricingSnapshotResponse,
   GetPaymentGatewaySettingsResponse,
   GetPaymentProcessLogsResponse,
   PaymentGatewayMode,
@@ -427,6 +429,31 @@ export class CrmOrdersApi {
     const { data } = await this.apiClient.put<UpsertReceiptPdfOptionsResponse>(
       `/crm/orders/receipt-pdf-options/${encodeURIComponent(orderNumber)}`,
       payload,
+      config
+    );
+    return data;
+  }
+
+  /** Propose checkout pricing from NSE rows already saved in DB (no write). */
+  async proposeOrderPricingSnapshot(
+    orderNumber: string,
+    config?: AxiosRequestConfig
+  ): Promise<ProposeOrderPricingSnapshotResponse> {
+    const { data } = await this.apiClient.get<ProposeOrderPricingSnapshotResponse>(
+      `/crm/orders/${encodeURIComponent(orderNumber)}/pricing-snapshot/propose`,
+      config
+    );
+    return data;
+  }
+
+  /** Persist proposed NSE pricing onto `orders.bondDetails.pricing`. */
+  async acceptOrderPricingSnapshot(
+    orderNumber: string,
+    config?: AxiosRequestConfig
+  ): Promise<AcceptOrderPricingSnapshotResponse> {
+    const { data } = await this.apiClient.post<AcceptOrderPricingSnapshotResponse>(
+      `/crm/orders/${encodeURIComponent(orderNumber)}/pricing-snapshot/accept`,
+      {},
       config
     );
     return data;

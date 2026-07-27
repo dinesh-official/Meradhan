@@ -233,6 +233,18 @@ router.post(
 );
 
 router.get(
+  "/api/crm/orders/:orderNumber/pricing-snapshot/propose",
+  allowAccessMiddleware("CRM"),
+  crmOrdersController.proposeOrderPricingSnapshot
+);
+
+router.post(
+  "/api/crm/orders/:orderNumber/pricing-snapshot/accept",
+  allowAccessMiddleware("CRM"),
+  crmOrdersController.acceptOrderPricingSnapshot
+);
+
+router.get(
   "/api/crm/orders/receipt-pdf/:orderNumber",
   allowAccessMiddleware("CRM"),
   crmOrdersController.getOrderReceiptPdf

@@ -6,7 +6,7 @@ export const responseHandler = (
     next: NextFunction
 ) => {
     res.sendResponse = function (
-        { message = "Request successful", statusCode, success, responseData = undefined },
+        { message = "Request successful", statusCode, success, responseData = undefined, code },
     ) {
         const isSuccess = success ?? (statusCode >= 200 && statusCode < 300);
         // Match your errorHandler response shape
@@ -14,6 +14,7 @@ export const responseHandler = (
             statusCode: statusCode,
             success: isSuccess,
             message,
+            ...(code ? { code } : {}),
             responseData,
         });
     };

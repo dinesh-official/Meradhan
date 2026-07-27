@@ -22,6 +22,10 @@ import {
   formatLastInterestPaymentDateDisplay,
   loadInvestorCouponScheduleForPdf,
 } from "@services/order/investor-coupon-entitlement";
+import {
+  acceptOrderPricingFromNseSavedData,
+  proposeOrderPricingFromNseSavedData,
+} from "@services/order/order-pricing-snapshot-from-nse.service";
 import { SettlementNoService } from "@services/refq/nse/settlement-no.service";
 import {
   getLastNextCouponDateBasedOnSettlementDate,
@@ -305,7 +309,8 @@ function snapStr(v: unknown): string | null {
 
 /**
  * Deal / settlement dates from checkout snapshot on `order.bondDetails.pricing`.
- * Reuses values stored at order placement — does not re-run settlement calculation.
+ * Request overrides may supply dates when the snapshot is missing so PDFs can be
+ * generated without persisting pricing onto the order.
  */
 function resolveDatesFromOrderPricingSnapshot(
   bondDetails: unknown,
@@ -319,41 +324,37 @@ function resolveDatesFromOrderPricingSnapshot(
   dealDate: Date;
   settlementType: number | null;
 } {
-  if (!bondDetails || typeof bondDetails !== "object" || Array.isArray(bondDetails)) {
-    throw new AppError(
-      "Order pricing snapshot is missing. bondDetails.pricing must include dealDate and settlementDate.",
-      { statusCode: HttpStatus.BAD_REQUEST, code: "PRICING_SNAPSHOT_MISSING" },
-    );
-  }
-  const pricing = (bondDetails as Record<string, unknown>).pricing;
-  if (!pricing || typeof pricing !== "object" || Array.isArray(pricing)) {
-    throw new AppError(
-      "Order pricing snapshot is missing. bondDetails.pricing must include dealDate and settlementDate.",
-      { statusCode: HttpStatus.BAD_REQUEST, code: "PRICING_SNAPSHOT_MISSING" },
-    );
-  }
-  const snap = pricing as Record<string, unknown>;
-
-  const dealFromSnap = toBusinessYmd(snapStr(snap.dealDate));
-  const settleFromSnap = toBusinessYmd(snapStr(snap.settlementDate));
-  if (!dealFromSnap && !settleFromSnap) {
-    throw new AppError(
-      "Order pricing snapshot is missing dealDate and settlementDate.",
-      { statusCode: HttpStatus.BAD_REQUEST, code: "PRICING_SNAPSHOT_MISSING" },
-    );
-  }
-
-  let dealDateYmd = dealFromSnap ?? settleFromSnap!;
-  let settlementDateYmd = settleFromSnap ?? dealFromSnap!;
-
   const overrideDeal = toBusinessYmd(overrides?.requestedDealDate);
-  if (overrideDeal) {
-    dealDateYmd = overrideDeal;
-  }
-
   const overrideSettle = toBusinessYmd(overrides?.requestedSettlementDate);
-  if (overrideSettle) {
-    settlementDateYmd = overrideSettle;
+
+  const snap =
+    bondDetails &&
+    typeof bondDetails === "object" &&
+    !Array.isArray(bondDetails) &&
+    typeof (bondDetails as Record<string, unknown>).pricing === "object" &&
+    (bondDetails as Record<string, unknown>).pricing != null &&
+    !Array.isArray((bondDetails as Record<string, unknown>).pricing)
+      ? ((bondDetails as Record<string, unknown>).pricing as Record<
+          string,
+          unknown
+        >)
+      : null;
+
+  const dealFromSnap = snap ? toBusinessYmd(snapStr(snap.dealDate)) : null;
+  const settleFromSnap = snap
+    ? toBusinessYmd(snapStr(snap.settlementDate))
+    : null;
+
+  const dealDateYmd =
+    overrideDeal ?? dealFromSnap ?? settleFromSnap ?? overrideSettle ?? null;
+  const settlementDateYmd =
+    overrideSettle ?? settleFromSnap ?? dealFromSnap ?? overrideDeal ?? null;
+
+  if (!dealDateYmd || !settlementDateYmd) {
+    throw new AppError(
+      "Order pricing snapshot is missing. bondDetails.pricing must include dealDate and settlementDate.",
+      { statusCode: HttpStatus.BAD_REQUEST, code: "PRICING_SNAPSHOT_MISSING" },
+    );
   }
 
   const dealDate = parseLooseDate(dealDateYmd);
@@ -365,7 +366,7 @@ function resolveDatesFromOrderPricingSnapshot(
   }
 
   let settlementType: number | null = null;
-  const settlementOrder = snapStr(snap.settlementOrder);
+  const settlementOrder = snap ? snapStr(snap.settlementOrder) : null;
   if (settlementOrder === "T+0" || dealDateYmd === settlementDateYmd) {
     settlementType = 0;
   } else if (settlementOrder === "T+1") {
@@ -1399,6 +1400,21 @@ export class CrmOrdersService {
     });
   }
 
+  /**
+   * Propose checkout `bondDetails.pricing` from NSE rows already saved in DB.
+   * Does not write — used by CRM reconfirm popup before PDF download.
+   */
+  async proposeOrderPricingSnapshotFromNse(orderNumber: string) {
+    return proposeOrderPricingFromNseSavedData(orderNumber);
+  }
+
+  /**
+   * Persist proposed NSE pricing onto `orders.bondDetails.pricing`.
+   */
+  async acceptOrderPricingSnapshotFromNse(orderNumber: string) {
+    return acceptOrderPricingFromNseSavedData(orderNumber);
+  }
+
   async autofillReceiptPdfOptions(
     orderNumber: string,
     input: { settlementDate?: string | null },
@@ -1524,6 +1540,7 @@ export class CrmOrdersService {
     const investorCoupons = await loadInvestorCouponScheduleForPdf(
       bond.isin,
       settlementForCoupons,
+      { interestPaymentFrequency: bond.interestPaymentFrequency },
     );
     if (investorCoupons.lastInterestPaymentDateRaw) {
       lastInterestPaymentDateRaw = investorCoupons.lastInterestPaymentDateRaw;
@@ -1702,6 +1719,7 @@ export class CrmOrdersService {
     const investorCoupons = await loadInvestorCouponScheduleForPdf(
       bond.isin,
       settlementForCoupons,
+      { interestPaymentFrequency: bond.interestPaymentFrequency },
     );
     if (investorCoupons.lastInterestPaymentDateRaw) {
       lastInterestPaymentDateRaw = investorCoupons.lastInterestPaymentDateRaw;
@@ -1795,10 +1813,10 @@ export class CrmOrdersService {
     const amortizedPrincipalPaymentDates =
       isAmortizingBond && calcCfRows
         ? buildAmortizedPrincipalPaymentDates(
-            calcCfRows,
-            orderInfo.pricing.quantity,
-            Number(bond.faceValue),
-          )
+          calcCfRows,
+          orderInfo.pricing.quantity,
+          Number(bond.faceValue),
+        )
         : null;
 
     return {
@@ -1970,6 +1988,7 @@ export class CrmOrdersService {
     const investorCoupons = await loadInvestorCouponScheduleForPdf(
       bond.isin,
       settlementForCoupons,
+      { interestPaymentFrequency: bond.interestPaymentFrequency },
     );
     const pricingLastCoupon = lastCouponDatesFromOrderPricingSnapshot(order.bondDetails);
 

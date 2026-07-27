@@ -4,6 +4,7 @@ import {
   formatLastInterestPaymentDateDisplay,
   isBuyerEntitledToCoupon,
   isCashflowShutForUpcomingCoupon,
+  maxBuyerCashFlowsForFrequency,
   resolveInvestorCouponScheduleForPdf,
 } from "./investor-coupon-entitlement";
 
@@ -121,6 +122,49 @@ describe("investor-coupon-entitlement", () => {
         recordDays: 10,
       }),
     ).toBe(true);
+  });
+});
+
+describe("frequency-aware PDF cash-flow caps", () => {
+  const yearlyCoupons = [
+    { dueDateYmd: "2026-07-02", recordDays: 15 },
+    { dueDateYmd: "2027-07-02", recordDays: 15 },
+    { dueDateYmd: "2028-07-02", recordDays: 15 },
+    { dueDateYmd: "2029-07-02", recordDays: 15 },
+    { dueDateYmd: "2030-07-02", recordDays: 15 },
+  ];
+
+  test("maxBuyerCashFlowsForFrequency maps yearly → 1", () => {
+    expect(maxBuyerCashFlowsForFrequency("YEARLY")).toBe(1);
+    expect(maxBuyerCashFlowsForFrequency("Annual")).toBe(1);
+    expect(maxBuyerCashFlowsForFrequency("MONTHLY")).toBe(12);
+    expect(maxBuyerCashFlowsForFrequency("QUARTERLY")).toBe(4);
+    expect(maxBuyerCashFlowsForFrequency("HALF_YEARLY")).toBe(2);
+  });
+
+  test("YEARLY: one cash-flow date for the order (whole-year one-time payment)", () => {
+    const result = resolveInvestorCouponScheduleForPdf({
+      settlementYmd: "2026-07-27",
+      coupons: yearlyCoupons,
+      interestPaymentFrequency: "YEARLY",
+    });
+
+    expect(result.interestPaymentDates).toHaveLength(1);
+    expect(result.interestPaymentDates[0]).toBe("2-Jul");
+    expect(result.buyerEntitledToNextCoupon).toBe(true);
+  });
+
+  test("YEARLY shut: still only the next entitled yearly payment", () => {
+    // recordDays=15 → record 2027-06-17; settle after record → skip 2027-07-02
+    const result = resolveInvestorCouponScheduleForPdf({
+      settlementYmd: "2027-06-20",
+      coupons: yearlyCoupons,
+      interestPaymentFrequency: "YEARLY",
+    });
+
+    expect(result.cashflowShutFlag).toBe(true);
+    expect(result.interestPaymentDates).toHaveLength(1);
+    expect(result.interestPaymentDates[0]).toBe("2-Jul"); // 2028
   });
 });
 
