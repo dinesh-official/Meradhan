@@ -258,6 +258,8 @@ export class CrmOrdersApi {
       interestPaymentDates?: string;
       nonAmortizedBond?: boolean;
       amortizedPrincipalPaymentDates?: string;
+      /** One-shot NSE pricing for PDF (yield etc.) — not persisted. */
+      pricingSnapshot?: Record<string, unknown> | string;
     },
     config?: AxiosRequestConfig
   ): Promise<Blob> {
@@ -271,6 +273,12 @@ export class CrmOrdersApi {
     if (pdfParams?.interestPaymentDates != null) params.interestPaymentDates = pdfParams.interestPaymentDates;
     if (pdfParams?.nonAmortizedBond !== undefined) params.nonAmortizedBond = String(pdfParams.nonAmortizedBond);
     if (pdfParams?.amortizedPrincipalPaymentDates != null) params.amortizedPrincipalPaymentDates = pdfParams.amortizedPrincipalPaymentDates;
+    if (pdfParams?.pricingSnapshot != null) {
+      params.pricingSnapshot =
+        typeof pdfParams.pricingSnapshot === "string"
+          ? pdfParams.pricingSnapshot
+          : JSON.stringify(pdfParams.pricingSnapshot);
+    }
     const response = await this.apiClient.get<Blob>(
       `/crm/orders/receipt-pdf/${encodeURIComponent(orderNumber)}`,
       { ...config, params: { ...config?.params, ...params }, responseType: "blob" }
@@ -304,6 +312,7 @@ export class CrmOrdersApi {
       interestPaymentDates?: string;
       nonAmortizedBond?: boolean;
       amortizedPrincipalPaymentDates?: string;
+      pricingSnapshot?: Record<string, unknown> | string;
     },
     config?: AxiosRequestConfig
   ): Promise<Blob> {
@@ -317,6 +326,12 @@ export class CrmOrdersApi {
     if (pdfParams?.interestPaymentDates != null) params.interestPaymentDates = pdfParams.interestPaymentDates;
     if (pdfParams?.nonAmortizedBond !== undefined) params.nonAmortizedBond = String(pdfParams.nonAmortizedBond);
     if (pdfParams?.amortizedPrincipalPaymentDates != null) params.amortizedPrincipalPaymentDates = pdfParams.amortizedPrincipalPaymentDates;
+    if (pdfParams?.pricingSnapshot != null) {
+      params.pricingSnapshot =
+        typeof pdfParams.pricingSnapshot === "string"
+          ? pdfParams.pricingSnapshot
+          : JSON.stringify(pdfParams.pricingSnapshot);
+    }
     const response = await this.apiClient.get<Blob>(
       `/crm/orders/deal-pdf/${encodeURIComponent(orderNumber)}`,
       { ...config, params: { ...config?.params, ...params }, responseType: "blob" }
@@ -347,12 +362,14 @@ export class CrmOrdersApi {
       toEmail?: string;
       accruedInterestDays: number;
       settlementDate?: string;
+      dealDate?: string;
       settlementNumber?: string;
       settlementDateTime?: string;
       lastInterestPaymentDate?: string;
       interestPaymentDates?: string;
       nonAmortizedBond?: boolean;
       amortizedPrincipalPaymentDates?: string;
+      pricingSnapshot?: Record<string, unknown> | string;
     },
     config?: AxiosRequestConfig
   ): Promise<SendOrderPdfEmailResponse> {
