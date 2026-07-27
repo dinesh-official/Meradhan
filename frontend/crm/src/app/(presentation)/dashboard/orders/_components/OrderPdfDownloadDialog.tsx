@@ -480,6 +480,7 @@ export function OrderPdfDownloadDialog({
     settlementDate?: string;
     dealDate?: string;
     accruedInterestDays?: number;
+    pricingSnapshot?: Record<string, unknown>;
   }> => {
     if (hasPricingSnapshot === true) return { ok: true };
     if (!useNsePricing) {
@@ -514,13 +515,20 @@ export function OrderPdfDownloadDialog({
       toast.error("Could not resolve deal/settlement dates from NSE data.");
       return { ok: false };
     }
-    return { ok: true, settlementDate, dealDate, accruedInterestDays };
+    return {
+      ok: true,
+      settlementDate,
+      dealDate,
+      accruedInterestDays,
+      pricingSnapshot: pricing,
+    };
   };
 
   const downloadPdfWithCurrentForm = async (overrides?: {
     settlementDate?: string;
     dealDate?: string;
     accruedInterestDays?: number;
+    pricingSnapshot?: Record<string, unknown>;
   }) => {
     const accruedInterestDaysNum =
       overrides?.accruedInterestDays ??
@@ -538,9 +546,14 @@ export function OrderPdfDownloadDialog({
           }
         : form;
 
-    const payload = buildPdfOptionPayload(formForPayload, accruedInterestDaysNum, {
-      dealDate: overrides?.dealDate ?? resolvedDealDate,
-    });
+    const payload = {
+      ...buildPdfOptionPayload(formForPayload, accruedInterestDaysNum, {
+        dealDate: overrides?.dealDate ?? resolvedDealDate,
+      }),
+      ...(overrides?.pricingSnapshot
+        ? { pricingSnapshot: overrides.pricingSnapshot }
+        : {}),
+    };
     const blob =
       pdfType === "deal"
         ? await ordersApi.getDealSheetPdf(orderNumber, payload)
@@ -602,6 +615,7 @@ export function OrderPdfDownloadDialog({
         settlementDate: pricing.settlementDate,
         dealDate: pricing.dealDate,
         accruedInterestDays: pricing.accruedInterestDays,
+        pricingSnapshot: pricing.pricingSnapshot,
       });
       if (ok) onOpenChange(false);
     } catch (err) {

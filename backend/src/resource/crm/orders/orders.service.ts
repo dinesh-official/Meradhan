@@ -120,6 +120,52 @@ function orderPricingSnapshot(bondDetails: unknown): {
 }
 
 /**
+ * Optional in-request pricing (from CRM “Use NSE saved data” checkbox).
+ * Merged into `bondDetails.pricing` for this PDF only — never persisted.
+ */
+function parsePricingSnapshotOverride(
+  pdfQuery: Record<string, string | undefined>,
+): Record<string, unknown> | null {
+  const raw = pdfQuery.pricingSnapshot;
+  if (raw == null || typeof raw !== "string" || raw.trim() === "") return null;
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return null;
+    }
+    return parsed as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+function bondDetailsWithPricingOverride(
+  bondDetails: unknown,
+  pricingOverride: Record<string, unknown> | null,
+): unknown {
+  if (!pricingOverride) return bondDetails;
+  const base =
+    bondDetails &&
+    typeof bondDetails === "object" &&
+    !Array.isArray(bondDetails)
+      ? { ...(bondDetails as Record<string, unknown>) }
+      : {};
+  const existingPricing =
+    base.pricing &&
+    typeof base.pricing === "object" &&
+    !Array.isArray(base.pricing)
+      ? (base.pricing as Record<string, unknown>)
+      : {};
+  return {
+    ...base,
+    pricing: {
+      ...existingPricing,
+      ...pricingOverride,
+    },
+  };
+}
+
+/**
  * Build the receipt's amortized principal schedule string
  * (e.g. "20-Nov-2026 50.0000%, 20-May-2027 50.0000%") from the DeriData calc
  * cashflow rows. Each row's `principal` ("-" for coupon-only rows, a formatted
@@ -2649,6 +2695,14 @@ export class CrmOrdersService {
     const getUserPrimaryBankAccount = actor.primaryBank;
     const primaryDematAccount = actor.primaryDemat;
 
+    // CRM NSE checkbox may send a one-shot pricing snapshot for this PDF only.
+    const pricingOverride = parsePricingSnapshotOverride(pdfQuery);
+    const bondDetailsForPdf = bondDetailsWithPricingOverride(
+      order.bondDetails,
+      pricingOverride,
+    );
+    const orderForPdf = { ...order, bondDetails: bondDetailsForPdf };
+
     const bondService = new BondService();
     const bond = await bondService.getBondDetails(order.isin);
     if (!bond) {
@@ -2676,7 +2730,7 @@ export class CrmOrdersService {
       settleTradeNumber: settleOrder?.orderNumber,
     });
     const { dealDate: dealDateFromSnapshot, settlementDateYmd: snapshotSettlementYmd } =
-      resolveDatesFromOrderPricingSnapshot(order.bondDetails, {
+      resolveDatesFromOrderPricingSnapshot(bondDetailsForPdf, {
         requestedDealDate: pdfQuery.dealDate ?? null,
         requestedSettlementDate: pdfQuery.settlementDate ?? null,
       });
@@ -2760,7 +2814,7 @@ export class CrmOrdersService {
         : undefined;
 
     const pdfFinancials = buildPdfFinancialFields(
-      order,
+      orderForPdf,
       settleOrder,
       accruedInterestDaysParam,
     );
@@ -2787,7 +2841,7 @@ export class CrmOrdersService {
         stampDuty: pdfFinancials.stampDuty,
         totalAmount: pdfFinancials.totalConsideration,
         price: pdfFinancials.price,
-        bondDetails: order.bondDetails as { pricing?: Record<string, unknown> } | null,
+        bondDetails: bondDetailsForPdf as { pricing?: Record<string, unknown> } | null,
         metadata: {
           dealId: (metadata.dealId as string) ?? undefined,
           clientOrderSide: (metadata.clientOrderSide as "BUY" | "SELL") ?? undefined,
@@ -2893,6 +2947,13 @@ export class CrmOrdersService {
     const order = actor.orderForPdf;
     const user = actor.user;
 
+    const pricingOverride = parsePricingSnapshotOverride(pdfQuery);
+    const bondDetailsForPdf = bondDetailsWithPricingOverride(
+      order.bondDetails,
+      pricingOverride,
+    );
+    const orderForPdf = { ...order, bondDetails: bondDetailsForPdf };
+
     const bondService = new BondService();
     const bond = await bondService.getBondDetails(order.isin);
     if (!bond) {
@@ -2924,7 +2985,7 @@ export class CrmOrdersService {
       settleTradeNumber: settleOrder?.orderNumber,
     });
     const { dealDate: dealDateFromSnapshot, settlementDateYmd: snapshotSettlementYmd } =
-      resolveDatesFromOrderPricingSnapshot(order.bondDetails, {
+      resolveDatesFromOrderPricingSnapshot(bondDetailsForPdf, {
         requestedDealDate: pdfQuery.dealDate ?? null,
         requestedSettlementDate: pdfQuery.settlementDate ?? null,
       });
@@ -3009,7 +3070,7 @@ export class CrmOrdersService {
         : undefined;
 
     const pdfFinancials = buildPdfFinancialFields(
-      order,
+      orderForPdf,
       settleOrder,
       accruedInterestDaysParam,
     );
@@ -3036,7 +3097,7 @@ export class CrmOrdersService {
         stampDuty: pdfFinancials.stampDuty,
         totalAmount: pdfFinancials.totalConsideration,
         price: pdfFinancials.price,
-        bondDetails: order.bondDetails as { pricing?: Record<string, unknown> } | null,
+        bondDetails: bondDetailsForPdf as { pricing?: Record<string, unknown> } | null,
         metadata: {
           settlementType: rfqDetails?.settlementType ?? 0,
           dealId: (metadata.dealId as string) ?? undefined,
@@ -3145,11 +3206,12 @@ export class CrmOrdersService {
       settlementNumber?: string;
       settlementDateTime?: string;
       settlementDate?: Date;
-      dealDate?: Date,
+      dealDate?: Date;
       lastInterestPaymentDate?: string;
       interestPaymentDates?: string;
       nonAmortizedBond?: boolean;
       amortizedPrincipalPaymentDates?: string;
+      pricingSnapshot?: Record<string, unknown> | string;
     },
   ): Promise<{ messageId?: string; messageIds?: string[] }> {
     const pdfType = body.pdfType;
@@ -3221,6 +3283,12 @@ export class CrmOrdersService {
     }
     if (body.dealDate) {
       pdfQuery.dealDate = body.dealDate.toISOString();
+    }
+    if (body.pricingSnapshot != null) {
+      pdfQuery.pricingSnapshot =
+        typeof body.pricingSnapshot === "string"
+          ? body.pricingSnapshot
+          : JSON.stringify(body.pricingSnapshot);
     }
 
 
