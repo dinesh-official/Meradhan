@@ -17,8 +17,6 @@ async function page({
 }: {
   searchParams: Promise<{ allowDelete?: string }>;
 }) {
-  const params = await searchParams;
-  const showAccountClosure = params.allowDelete === "true";
 
   const cookie = await cookies();
   const customerApi = new apiGateway.crm.customer.CrmCustomerApi(
@@ -39,7 +37,7 @@ async function page({
       }
     >
       <ProfilePage profileData={userData.data.responseData} />
-      {showAccountClosure && <AccountClosureSection />}
+      <AccountClosureSection />
     </AccountViewPort>
   );
 }
