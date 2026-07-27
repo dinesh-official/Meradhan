@@ -47,7 +47,7 @@ export function DatePickerV2({
 
   React.useEffect(() => {
     onChange(date ? date.toISOString().split("T")[0] : "");
-  }, [date, dateValue, month]);
+  }, [date, onChange]);
 
   return (
     <div className="relative flex gap-2">

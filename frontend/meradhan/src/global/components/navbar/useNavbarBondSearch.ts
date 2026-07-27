@@ -65,7 +65,7 @@ export function useNavbarBondSearch() {
     staleTime: 30_000,
   });
 
-  const bonds = data?.responseData?.data ?? [];
+  const bonds = useMemo(() => data?.responseData?.data ?? [], [data]);
 
   // Show ISIN format if any returned bond's ISIN starts with the query — handles partial ISINs naturally.
   const suggestions: SearchSuggestion[] = useMemo(() => {

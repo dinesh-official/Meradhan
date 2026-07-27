@@ -302,7 +302,11 @@ export async function getFileDataUri(
     responseType: "arraybuffer",
   });
 
-  const detectedMime = mimeType || response.headers["content-type"]?.split(";")?.[0] || "image/png";
+  const contentType = response.headers["content-type"];
+  const detectedMime =
+    mimeType ||
+    (typeof contentType === "string" ? contentType.split(";")[0] : undefined) ||
+    "image/png";
   const buffer = Buffer.from(response.data);
 
 
