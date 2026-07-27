@@ -1273,8 +1273,10 @@ jobs:
           INSTANCE_ID:    ${{ steps.create_ec2.outputs.instance_id }}
           RULE_ARNS_CSV:  ${{ steps.tg_listener.outputs.rule_arns }}
           TG_ARNS_CSV:    ${{ steps.tg_listener.outputs.target_group_arns }}
-          ECR_REPOS_CSV:  ${{ steps.create_ecr.outputs.repository_names }}
           PUBLISH_NOW:    ${{ inputs.publish_cleanup_now || 'false' }}
+          # FRONTEND_NAME / BACKEND_NAME / CRM_NAME / WORKER_NAME come from
+          # $GITHUB_ENV (set in the "Generate Resource IDs" step) — no need
+          # to redeclare them here, they're already in this step's env.
         run: |
           set -euo pipefail
 
@@ -1282,6 +1284,17 @@ jobs:
             echo "No instance was created — nothing to build a payload for."
             exit 0
           fi
+
+          # Build the ECR repo CSV directly from the same names used to
+          # create the repos — avoids relying on a separate step output.
+          ECR_REPOS_CSV=""
+          for REPO in "$FRONTEND_NAME" "$BACKEND_NAME" "$CRM_NAME" "$WORKER_NAME"; do
+            [ -z "$REPO" ] && continue
+            ECR_REPOS_CSV="${ECR_REPOS_CSV}${REPO},"
+          done
+          ECR_REPOS_CSV="${ECR_REPOS_CSV%,}"
+
+          echo "ECR repos for cleanup: ${ECR_REPOS_CSV:-none}"
 
           # An empty CSV must yield [] , not [""] .
           EVENT_DETAIL=$(jq -nc \
