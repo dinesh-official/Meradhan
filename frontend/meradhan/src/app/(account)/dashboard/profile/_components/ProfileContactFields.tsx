@@ -136,12 +136,13 @@ function EmailVerification({
       showStatus={true}
       statusLabel={
         !profile.utility.isEmailVerified ? (
-          <span
+          <button
+            type="button"
             className="text-secondary underline cursor-pointer"
             onClick={() => sendEmailOtpMutation.mutate()}
           >
             {sendEmailOtpMutation.isPending ? "Sending.." : "Verify"}
-          </span>
+          </button>
         ) : (
           ""
         )
@@ -150,8 +151,8 @@ function EmailVerification({
       <p className="flex items-center gap-2 font-medium text-sm">
         {profile.emailAddress || "--"}{" "}
         {profile.kycStatus == "PENDING" && (
-          <EmailChangeUpdate profile={profile}>
-            <FaEdit className="cursor-pointer" />
+          <EmailChangeUpdate profile={profile} aria-label="Change email address">
+            <FaEdit aria-hidden="true" className="cursor-pointer" />
           </EmailChangeUpdate>
         )}
       </p>
@@ -210,9 +211,11 @@ function EmailVerification({
 function EmailChangeUpdate({
   children,
   profile,
+  "aria-label": ariaLabel,
 }: {
   children: ReactNode;
   profile: GetCustomerResponseById["responseData"];
+  "aria-label"?: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState<"email" | "otp">("email");
@@ -332,7 +335,7 @@ function EmailChangeUpdate({
         if (!open) resetDialog();
       }}
     >
-      <DialogTrigger onClick={() => setIsOpen(true)}>{children}</DialogTrigger>
+      <DialogTrigger aria-label={ariaLabel} onClick={() => setIsOpen(true)}>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="font-medium">
@@ -516,12 +519,13 @@ function MobileNoVerify({
       showStatus={true}
       statusLabel={
         !profile.utility.isPhoneVerified ? (
-          <span
+          <button
+            type="button"
             className="text-secondary underline cursor-pointer"
             onClick={() => sendMobileOtpMutation.mutate()}
           >
             {sendMobileOtpMutation.isPending ? "Sending.." : "Verify"}
-          </span>
+          </button>
         ) : (
           ""
         )
@@ -530,8 +534,8 @@ function MobileNoVerify({
       <p className="flex items-center gap-2 font-medium text-sm">
         {profile.phoneNo || "--"}{" "}
         {profile.kycStatus == "PENDING" && (
-          <MobileNoUpdate profile={profile}>
-            <FaEdit className="cursor-pointer" />
+          <MobileNoUpdate profile={profile} aria-label="Change mobile number">
+            <FaEdit aria-hidden="true" className="cursor-pointer" />
           </MobileNoUpdate>
         )}
       </p>
@@ -598,9 +602,11 @@ function MobileNoVerify({
 function MobileNoUpdate({
   children,
   profile,
+  "aria-label": ariaLabel,
 }: {
   children: ReactNode;
   profile: GetCustomerResponseById["responseData"];
+  "aria-label"?: string;
 }) {
   const [chcknewWhatsapp, setChcknewWhatsapp] = useState(false);
   const [mobileNumber, setMobileNumber] = useState("");
@@ -686,7 +692,7 @@ function MobileNoUpdate({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger onClick={() => setIsOpen(true)}>{children}</DialogTrigger>
+      <DialogTrigger aria-label={ariaLabel} onClick={() => setIsOpen(true)}>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="font-medium">Update Phone Number</DialogTitle>

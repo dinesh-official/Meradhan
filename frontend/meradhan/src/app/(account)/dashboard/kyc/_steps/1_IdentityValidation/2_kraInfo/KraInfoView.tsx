@@ -260,6 +260,7 @@ export function KraInfoView({
                   Your KRA email does not match your registered email.{" "}
                   <Link
                     href="/dashboard/profile"
+                    aria-label="Update your email in your profile"
                     className="text-primary font-medium underline underline-offset-2"
                   >
                     Click here
@@ -311,6 +312,7 @@ export function KraInfoView({
                   Your KRA mobile number does not match your registered mobile.{" "}
                   <Link
                     href="/dashboard/profile"
+                    aria-label="Update your mobile number in your profile"
                     className="text-primary font-medium underline underline-offset-2"
                   >
                     Click here

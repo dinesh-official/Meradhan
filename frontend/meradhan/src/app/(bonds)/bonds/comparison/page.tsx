@@ -147,7 +147,7 @@ async function page({
                       <span>{bond?.isin}</span>
                       <CopyIsin isin={bond?.isin} />
                     </div>
-                    <DeleteCompare index={i} />
+                    <DeleteCompare index={i} bondName={bond?.bondName} />
                   </>
                 ))}
               />

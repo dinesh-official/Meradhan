@@ -13,30 +13,32 @@ import {
 
 export const getFileIcon = (fileType: string) => {
   const fileData = {
-    pdf: <FaFilePdf size={20} color="#EF4822" />,
-    doc: <BiSolidFileDoc size={20} color="#EF4822" />,
-    docx: <BiSolidFileDoc size={20} color="#EF4822" />,
-    xls: <FaFileExcel size={20} color="#EF4822" />,
-    xlsx: <FaFileExcel size={20} color="#EF4822" />,
-    ppt: <FaFilePowerpoint size={20} color="#EF4822" />,
-    pptx: <FaFilePowerpoint size={20} color="#EF4822" />,
-    zip: <FaFileZipper size={20} color="#EF4822" />,
-    rar: <FaFileZipper size={20} color="#EF4822" />,
-    mp3: <FaFileAudio size={20} color="#EF4822" />,
-    mp4: <FaFileVideo size={20} color="#EF4822" />,
-    mov: <FaFileVideo size={20} color="#EF4822" />,
-    avi: <FaFileVideo size={20} color="#EF4822" />,
-    wmv: <FaFileVideo size={20} color="#EF4822" />,
-    flv: <FaFileVideo size={20} color="#EF4822" />,
-    gif: <FaFileVideo size={20} color="#EF4822" />,
-    jpg: <FaFileImage size={20} color="#EF4822" />,
-    jpeg: <FaFileImage size={20} color="#EF4822" />,
-    png: <FaFileImage size={20} color="#EF4822" />,
-    bmp: <FaFileImage size={20} color="#EF4822" />,
-    csv: <FaFileCsv size={20} color="#EF4822" />,
+    pdf: <FaFilePdf size={20} color="#EF4822" aria-hidden="true" />,
+    doc: <BiSolidFileDoc size={20} color="#EF4822" aria-hidden="true" />,
+    docx: <BiSolidFileDoc size={20} color="#EF4822" aria-hidden="true" />,
+    xls: <FaFileExcel size={20} color="#EF4822" aria-hidden="true" />,
+    xlsx: <FaFileExcel size={20} color="#EF4822" aria-hidden="true" />,
+    ppt: <FaFilePowerpoint size={20} color="#EF4822" aria-hidden="true" />,
+    pptx: <FaFilePowerpoint size={20} color="#EF4822" aria-hidden="true" />,
+    zip: <FaFileZipper size={20} color="#EF4822" aria-hidden="true" />,
+    rar: <FaFileZipper size={20} color="#EF4822" aria-hidden="true" />,
+    mp3: <FaFileAudio size={20} color="#EF4822" aria-hidden="true" />,
+    mp4: <FaFileVideo size={20} color="#EF4822" aria-hidden="true" />,
+    mov: <FaFileVideo size={20} color="#EF4822" aria-hidden="true" />,
+    avi: <FaFileVideo size={20} color="#EF4822" aria-hidden="true" />,
+    wmv: <FaFileVideo size={20} color="#EF4822" aria-hidden="true" />,
+    flv: <FaFileVideo size={20} color="#EF4822" aria-hidden="true" />,
+    gif: <FaFileVideo size={20} color="#EF4822" aria-hidden="true" />,
+    jpg: <FaFileImage size={20} color="#EF4822" aria-hidden="true" />,
+    jpeg: <FaFileImage size={20} color="#EF4822" aria-hidden="true" />,
+    png: <FaFileImage size={20} color="#EF4822" aria-hidden="true" />,
+    bmp: <FaFileImage size={20} color="#EF4822" aria-hidden="true" />,
+    csv: <FaFileCsv size={20} color="#EF4822" aria-hidden="true" />,
   };
 
   return (
-    fileData[fileType.toLowerCase() as keyof typeof fileData] || <FaFile />
+    fileData[fileType.toLowerCase() as keyof typeof fileData] || (
+      <FaFile aria-hidden="true" />
+    )
   );
 };

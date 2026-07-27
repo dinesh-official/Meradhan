@@ -111,12 +111,12 @@ export default function BondCashflowTable({
         <table className="cashflow-table w-full min-w-[640px] text-sm">
           <thead>
             <tr className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-              <th className="px-4 py-3">Period</th>
-              <th className="px-4 py-3">Date</th>
-              <th className="px-4 py-3 text-right">Days</th>
-              <th className="px-4 py-3 text-right">Interest</th>
-              <th className="px-4 py-3 text-right">Principal</th>
-              <th className="px-4 py-3 text-right">Total CF</th>
+              <th scope="col" className="px-4 py-3">Period</th>
+              <th scope="col" className="px-4 py-3">Date</th>
+              <th scope="col" className="px-4 py-3 text-right">Days</th>
+              <th scope="col" className="px-4 py-3 text-right">Interest</th>
+              <th scope="col" className="px-4 py-3 text-right">Principal</th>
+              <th scope="col" className="px-4 py-3 text-right">Total CF</th>
             </tr>
           </thead>
           <tbody>

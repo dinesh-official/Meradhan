@@ -338,6 +338,7 @@ function VerifyOtpPopUp({
                   <button
                     type="button"
                     className="text-primary underline"
+                    aria-label="Change email address"
                     onClick={() => {
                       setShowEmailEdit(true);
                       setShowPhoneEdit(false);
@@ -389,6 +390,7 @@ function VerifyOtpPopUp({
                   <button
                     type="button"
                     className="text-primary underline"
+                    aria-label="Change phone number"
                     onClick={() => {
                       setShowPhoneEdit(true);
                       setShowEmailEdit(false);

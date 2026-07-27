@@ -104,13 +104,13 @@ function ExploreBondsHeader({
             />
             <button
               className="focus:z-10 absolute inset-y-0 flex justify-center items-center disabled:opacity-50 focus-visible:border-ring rounded-e-md outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 w-9 h-full text-muted-foreground/80 hover:text-foreground transition-[color,box-shadow] disabled:cursor-not-allowed disabled:pointer-events-none end-0"
-              aria-label="Subscribe"
+              aria-label="Search"
               disabled={!manager.filters?.search}
               onClick={() => {
                 setDobunce((prev) => prev + 1);
               }}
             >
-              <Search className="mr-3 text-secondary" />
+              <Search aria-hidden="true" className="mr-3 text-secondary" />
             </button>
           </div>
           {/* Centered over the 5 filters only — the leading spacer matches the
@@ -330,9 +330,10 @@ function ExploreBondsHeader({
                   className="flex items-center gap-2 bg-secondary px-3 py-1 rounded-full text-white text-sm"
                 >
                   <span>Maturity: {maturityOption?.title || m}</span>
-                  <Trash2Icon
-                    className="hover:text-red-300 transition-colors cursor-pointer"
-                    size={14}
+                  <button
+                    type="button"
+                    aria-label={`Remove maturity filter: ${maturityOption?.title || m}`}
+                    className="bg-transparent border-0 p-0 m-0"
                     onClick={() => {
                       const newMaturity =
                         manager.filters?.maturity?.filter(
@@ -341,7 +342,13 @@ function ExploreBondsHeader({
                       manager.setMaturity(newMaturity);
                       setDobunce((prev) => prev + 1);
                     }}
-                  />
+                  >
+                    <Trash2Icon
+                      aria-hidden="true"
+                      className="hover:text-red-300 transition-colors cursor-pointer"
+                      size={14}
+                    />
+                  </button>
                 </div>
               );
             })}
@@ -355,9 +362,10 @@ function ExploreBondsHeader({
                   className="flex items-center gap-2 bg-secondary px-3 py-1 rounded-full text-white text-sm"
                 >
                   <span>Rating: {ratingOption?.title || r}</span>
-                  <Trash2Icon
-                    className="hover:text-red-300 transition-colors cursor-pointer"
-                    size={14}
+                  <button
+                    type="button"
+                    aria-label={`Remove rating filter: ${ratingOption?.title || r}`}
+                    className="bg-transparent border-0 p-0 m-0"
                     onClick={() => {
                       const newRating =
                         manager.filters?.rating?.filter((item) => item !== r) ||
@@ -365,7 +373,13 @@ function ExploreBondsHeader({
                       manager.setRating(newRating);
                       setDobunce((prev) => prev + 1);
                     }}
-                  />
+                  >
+                    <Trash2Icon
+                      aria-hidden="true"
+                      className="hover:text-red-300 transition-colors cursor-pointer"
+                      size={14}
+                    />
+                  </button>
                 </div>
               );
             })}
@@ -381,9 +395,10 @@ function ExploreBondsHeader({
                   className="flex items-center gap-2 bg-secondary px-3 py-1 rounded-full text-white text-sm"
                 >
                   <span>Taxation: {taxationOption?.title || t}</span>
-                  <Trash2Icon
-                    className="hover:text-red-300 transition-colors cursor-pointer"
-                    size={14}
+                  <button
+                    type="button"
+                    aria-label={`Remove taxation filter: ${taxationOption?.title || t}`}
+                    className="bg-transparent border-0 p-0 m-0"
                     onClick={() => {
                       const newTaxation =
                         manager.filters?.taxation?.filter(
@@ -392,7 +407,13 @@ function ExploreBondsHeader({
                       manager.setTaxation(newTaxation);
                       setDobunce((prev) => prev + 1);
                     }}
-                  />
+                  >
+                    <Trash2Icon
+                      aria-hidden="true"
+                      className="hover:text-red-300 transition-colors cursor-pointer"
+                      size={14}
+                    />
+                  </button>
                 </div>
               );
             })}
@@ -406,9 +427,10 @@ function ExploreBondsHeader({
                   className="flex items-center gap-2 bg-secondary px-3 py-1 rounded-full text-white text-sm"
                 >
                   <span>Coupon: {couponOption?.title || c}%</span>
-                  <Trash2Icon
-                    className="hover:text-red-300 transition-colors cursor-pointer"
-                    size={14}
+                  <button
+                    type="button"
+                    aria-label={`Remove coupon filter: ${couponOption?.title || c}%`}
+                    className="bg-transparent border-0 p-0 m-0"
                     onClick={() => {
                       const newCoupon =
                         manager.filters?.coupon?.filter((item) => item !== c) ||
@@ -416,7 +438,13 @@ function ExploreBondsHeader({
                       manager.setCoupon(newCoupon);
                       setDobunce((prev) => prev + 1);
                     }}
-                  />
+                  >
+                    <Trash2Icon
+                      aria-hidden="true"
+                      className="hover:text-red-300 transition-colors cursor-pointer"
+                      size={14}
+                    />
+                  </button>
                 </div>
               );
             })}
@@ -432,9 +460,10 @@ function ExploreBondsHeader({
                   className="flex items-center gap-2 bg-secondary px-3 py-1 rounded-full text-white text-sm"
                 >
                   <span>Interest: {interestOption?.title || i}</span>
-                  <Trash2Icon
-                    className="hover:text-red-300 transition-colors cursor-pointer"
-                    size={14}
+                  <button
+                    type="button"
+                    aria-label={`Remove interest payment filter: ${interestOption?.title || i}`}
+                    className="bg-transparent border-0 p-0 m-0"
                     onClick={() => {
                       const newInterest =
                         manager.filters?.interest?.filter(
@@ -443,7 +472,13 @@ function ExploreBondsHeader({
                       manager.setInterest(newInterest);
                       setDobunce((prev) => prev + 1);
                     }}
-                  />
+                  >
+                    <Trash2Icon
+                      aria-hidden="true"
+                      className="hover:text-red-300 transition-colors cursor-pointer"
+                      size={14}
+                    />
+                  </button>
                 </div>
               );
             })}
@@ -454,7 +489,8 @@ function ExploreBondsHeader({
               manager.filters?.taxation?.length ||
               manager.filters?.coupon?.length ||
               manager.filters?.interest?.length ? (
-              <div
+              <button
+                type="button"
                 className="flex items-center gap-2 bg-red-500 hover:bg-red-600 px-3 py-1 rounded-full text-white text-sm transition-colors cursor-pointer"
                 onClick={() => {
                   manager.applyFilterMutation.reset();
@@ -469,8 +505,8 @@ function ExploreBondsHeader({
                 }}
               >
                 <span>Clear All</span>
-                <X size={14} />
-              </div>
+                <X size={14} aria-hidden="true" />
+              </button>
             ) : null}
           </div>
         </div>

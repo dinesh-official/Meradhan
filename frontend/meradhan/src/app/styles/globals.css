@@ -54,11 +54,17 @@ body.high-contrast .meradhan-navbar button,
 body.high-contrast .meradhan-navbar svg {
   color: #ffffff !important;
 }
-body.high-contrast .meradhan-navbar a[href*="sign"],
 body.high-contrast .meradhan-navbar button[class*="bg-"] {
   background-color: #1a4a7a !important;
   color: #ffffff !important;
   border: 1px solid #4a8fd4 !important;
+}
+/* The Sign Up link only wraps the styled button — leave the wrapper itself
+   transparent so it doesn't paint a second, square-cornered box around the
+   button's own rounded background/border. */
+body.high-contrast .meradhan-navbar a[href*="sign"] {
+  background-color: transparent !important;
+  border: none !important;
 }
 
 /* ── Hero section — hide grid canvas so solid bg-primary blue shows ── */
@@ -126,6 +132,18 @@ body.high-contrast .text-black {
 body.high-contrast [class*="text-primary"],
 body.high-contrast .text-primary {
   color: #7eb8f7 !important;
+}
+
+/* ── Colored status/warning text (e.g. amber cashflow-window notices on public
+   bond pages) — whiten sitewide, not just inside .account-viewport ── */
+body.high-contrast [class*="text-amber-"],
+body.high-contrast [class*="text-orange-"],
+body.high-contrast [class*="text-yellow-"],
+body.high-contrast [class*="text-green-"],
+body.high-contrast [class*="text-red-"],
+body.high-contrast [class*="text-blue-"],
+body.high-contrast [class*="text-violet-"] {
+  color: #ffffff !important;
 }
 
 /* ── bg-primary panels (not buttons) — dark navy ── */

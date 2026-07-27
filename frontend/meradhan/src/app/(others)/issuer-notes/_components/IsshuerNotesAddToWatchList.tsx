@@ -52,7 +52,7 @@ function IsshuerNotesAddToWatchList({ issuerId }: { issuerId: string }) {
     return (
       <div className="flex items-center gap-2 cursor-pointer">
         <div className="rounded-sm p-[2px]">
-          <Eye size={16} />
+          <Eye size={16} aria-hidden="true" />
         </div>
         <p className="font-medium text-gray-500 text-sm">Watched</p>
       </div>
@@ -61,7 +61,8 @@ function IsshuerNotesAddToWatchList({ issuerId }: { issuerId: string }) {
 
   return (
     <>
-      <div
+      <button
+        type="button"
         className="flex items-center gap-3 cursor-pointer"
         onClick={() => {
           if (!cookies.userId) {
@@ -72,10 +73,10 @@ function IsshuerNotesAddToWatchList({ issuerId }: { issuerId: string }) {
         }}
       >
         <div className="bg-secondary rounded-sm p-[2px]">
-          <Plus size={18} className="text-white" />
+          <Plus size={18} className="text-white" aria-hidden="true" />
         </div>
-        <p className="font-medium text-gray-500">Watchlist</p>
-      </div>
+        <span className="font-medium text-gray-500">Watchlist</span>
+      </button>
 
       {/* Login Required Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>

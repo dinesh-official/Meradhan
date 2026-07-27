@@ -151,15 +151,24 @@ function DhanGptPopup() {
         </div>
       </div>
 
-      <Image
+      <button
+        type="button"
         onClick={() => setOpen(true)}
-        src="/logo/dhangpt-border.svg"
-        alt="MeraDhan-GPT Illustration"
-        width={100}
-        height={100}
         id="dhanGpt-popup-trigger"
-        className="w-20 fixed md:bottom-8 bottom-4 md:right-8 right-3 cursor-pointer z-40 "
-      />
+        aria-label="Open MeraDhan GPT assistant"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        className="w-20 h-20 fixed md:bottom-8 bottom-4 md:right-8 right-3 cursor-pointer z-40 rounded-full"
+      >
+        <Image
+          src="/logo/dhangpt-border.svg"
+          alt=""
+          aria-hidden="true"
+          width={100}
+          height={100}
+          className="w-20"
+        />
+      </button>
     </>
   );
 }

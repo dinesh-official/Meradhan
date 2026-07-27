@@ -99,7 +99,7 @@ function BondsWatchList() {
                     className="flex items-center gap-3"
                   >
                     {e.isin}{" "}
-                    <BsArrowUpRightSquareFill className="text-secondary" />
+                    <BsArrowUpRightSquareFill aria-hidden="true" className="text-secondary" />
                   </Link>
                 </TableCell>
                 <TableCell className="py-4 px-6">{e.bondName}</TableCell>
@@ -114,14 +114,18 @@ function BondsWatchList() {
                   <Link
                     href={`/bonds/detail/${e.isin}`}
                     className="cursor-pointer"
+                    aria-label={`View ${e.bondName} bond details`}
                   >
-                    <FaEye className="text-primary" />
+                    <FaEye aria-hidden="true" className="text-primary" />
                   </Link>
-                  <FaTrash
-                    size={17}
+                  <button
+                    type="button"
+                    aria-label={`Remove ${e.bondName} from watchlist`}
                     className="text-gray-400 cursor-pointer"
                     onClick={() => addToWatchList.mutate(e.isin)}
-                  />
+                  >
+                    <FaTrash size={17} aria-hidden="true" />
+                  </button>
                 </TableCell>
               </TableRow>
             );

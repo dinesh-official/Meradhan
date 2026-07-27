@@ -67,7 +67,8 @@ function BondAddToWatchList({ isin }: { isin: string }) {
   // MAIN RETURN
   return (
     <>
-      <div
+      <button
+        type="button"
         className="flex items-center gap-3 cursor-pointer"
         onClick={() => {
           if (cookies.userId) {
@@ -80,8 +81,8 @@ function BondAddToWatchList({ isin }: { isin: string }) {
         <div className="bg-secondary rounded-sm p-0.5">
           <Plus size={15} className="text-white" aria-hidden="true" />
         </div>
-        <p className="font-medium text-gray-500 text-sm">WatchList</p>
-      </div>
+        <span className="font-medium text-gray-500 text-sm">WatchList</span>
+      </button>
 
       {/* LOGIN REQUIRED DIALOG */}
       <Dialog open={open} onOpenChange={setOpen}>

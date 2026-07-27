@@ -4,6 +4,7 @@ import React, { memo } from "react";
 import { FaInstagramSquare } from "react-icons/fa";
 import {
   FaFacebook,
+  FaFilePdf,
   FaLinkedin,
   FaLocationDot,
   FaPinterest,
@@ -44,6 +45,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     rel="noopener noreferrer"
                     className="hover:text-[#F25C4C] transition-colors duration-200"
                     aria-label="Facebook"
+                    title="Facebook"
                   >
                     <FaFacebook aria-hidden="true" />
                   </Link>
@@ -55,6 +57,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     rel="noopener noreferrer"
                     className="hover:text-[#F25C4C] transition-colors duration-200"
                     aria-label="Instagram"
+                    title="Instagram"
                   >
                     <FaInstagramSquare aria-hidden="true" />
                   </Link>
@@ -66,6 +69,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     rel="noopener noreferrer"
                     className="hover:text-[#F25C4C] transition-colors duration-200"
                     aria-label="Pinterest"
+                    title="Pinterest"
                   >
                     <FaPinterest aria-hidden="true" />
                   </Link>
@@ -77,6 +81,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     rel="noopener noreferrer"
                     className="hover:text-[#F25C4C] transition-colors duration-200"
                     aria-label="LinkedIn"
+                    title="LinkedIn"
                   >
                     <FaLinkedin aria-hidden="true" />
                   </Link>
@@ -88,6 +93,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     rel="noopener noreferrer"
                     className="hover:text-[#F25C4C] transition-colors duration-200"
                     aria-label="Twitter (X)"
+                    title="Twitter (X)"
                   >
                     <FaXTwitter aria-hidden="true" />
                   </Link>
@@ -126,6 +132,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                   <li>
                     <Link
                       href="/bonds"
+                      title="Bond Directory"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Bond Directory
@@ -136,9 +143,12 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                       href="/docs/Investor-Charter.pdf"
                       target="_blank"
                       rel="noopener noreferrer"
+                      title="Investor Charter"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
-                      Investor Charter<span className="sr-only"> (opens PDF in new tab)</span>
+                      Investor Charter
+                      <FaFilePdf aria-hidden="true" className="inline ml-1 mb-0.5" size={12} />
+                      <span className="sr-only"> (opens PDF in new tab)</span>
                     </Link>
                   </li>
                   <li>
@@ -146,9 +156,12 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                       href="/docs/Regulatory-Disclosure.pdf"
                       target="_blank"
                       rel="noopener noreferrer"
+                      title="Regulatory Disclosure"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
-                      Regulatory Disclosure<span className="sr-only"> (opens PDF in new tab)</span>
+                      Regulatory Disclosure
+                      <FaFilePdf aria-hidden="true" className="inline ml-1 mb-0.5" size={12} />
+                      <span className="sr-only"> (opens PDF in new tab)</span>
                     </Link>
                   </li>
                   <li>
@@ -156,14 +169,18 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                       href="/docs/Investor-Grievance-Redressal-Mechanism.pdf"
                       target="_blank"
                       rel="noopener noreferrer"
+                      title="Investor Grievance"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
-                      Investor Grievance<span className="sr-only"> (opens PDF in new tab)</span>
+                      Investor Grievance
+                      <FaFilePdf aria-hidden="true" className="inline ml-1 mb-0.5" size={12} />
+                      <span className="sr-only"> (opens PDF in new tab)</span>
                     </Link>
                   </li>
                   <li>
                     <Link
                       href="/client-registration-documents"
+                      title="Client Registration Documents"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Client Registration Documents
@@ -177,6 +194,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                   <li>
                     <Link
                       href="/about-us"
+                      title="About Us"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       About Us
@@ -185,6 +203,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                   <li>
                     <Link
                       href="/partners-and-distributors"
+                      title="Partners & Distributors"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Partners & Distributors
@@ -193,6 +212,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                   <li>
                     <Link
                       href="/disclaimer"
+                      title="Disclaimer"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Disclaimer
@@ -201,6 +221,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                   <li>
                     <Link
                       href="/contact-us"
+                      title="Contact Us"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Contact Us
@@ -238,6 +259,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                   <li>
                     <Link
                       href="/glossary"
+                      title="Glossary"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Glossary
@@ -246,6 +268,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                   <li>
                     <Link
                       href="/faqs"
+                      title="FAQs"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       FAQs
@@ -265,18 +288,21 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
           <div className="flex items-center gap-4">
             <Link
               href="/privacy-policy"
+              title="Privacy Policy"
               className="hover:text-secondary transition-colors duration-200"
             >
               Privacy Policy
             </Link>
             <Link
               href="/terms-of-use"
+              title="Terms of Use"
               className="hover:text-secondary transition-colors duration-200"
             >
               Terms of Use
             </Link>
             <Link
               href="/cookie-policy"
+              title="Cookie Policy"
               className="hover:text-secondary transition-colors duration-200"
             >
               Cookie Policy

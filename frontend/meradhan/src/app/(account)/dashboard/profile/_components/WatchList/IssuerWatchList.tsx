@@ -151,7 +151,7 @@ function IssuerWatchListItem({
           href={`/issuer-notes/${slug}`}
           className="flex items-center gap-3 font-semibold"
         >
-          {name} <BsArrowUpRightSquareFill className="text-secondary" />
+          {name} <BsArrowUpRightSquareFill aria-hidden="true" className="text-secondary" />
         </Link>
       </TableCell>
 
@@ -169,16 +169,23 @@ function IssuerWatchListItem({
         {formatDateCustom(data?.maturityDate || "")}
       </TableCell>
       <TableCell className="py-4 px-6 flex items-center gap-4 text-xl">
-        <Link href={`/issuer-notes/${slug}`} className="cursor-pointer">
-          <FaEye className="text-primary" />
+        <Link
+          href={`/issuer-notes/${slug}`}
+          className="cursor-pointer"
+          aria-label={`View ${name} issuer notes`}
+        >
+          <FaEye aria-hidden="true" className="text-primary" />
         </Link>
-        <FaTrash
-          size={17}
+        <button
+          type="button"
+          aria-label={`Remove ${name} from watchlist`}
           className="text-gray-400 cursor-pointer"
           onClick={() => {
             addToWatchList.mutate(documentId);
           }}
-        />
+        >
+          <FaTrash size={17} aria-hidden="true" />
+        </button>
       </TableCell>
     </TableRow>
   );

@@ -66,12 +66,12 @@ function IdentityValidationPanInfo() {
             showStatus
           >
             <p className="font-medium flex items-center gap-2 flex-row">
-              {data.response?.details.pan.id_number}{((data?.panRetryCount || 0) < 3) && !isAllowToContinue && <span className="text-xs text-primary flex items-center gap-2 flex-row cursor-pointer" onClick={() => {
+              {data.response?.details.pan.id_number}{((data?.panRetryCount || 0) < 3) && !isAllowToContinue && <button type="button" className="text-xs text-primary flex items-center gap-2 flex-row cursor-pointer" onClick={() => {
                 prevLocalStep();
                 setTimeout(() => {
                   pushUserKycState();
                 }, 1000);
-              }} >Retry <IoReload className="w-3 h-3" size={10} /></span>}
+              }} >Retry <IoReload aria-hidden="true" className="w-3 h-3" size={10} /></button>}
             </p>
           </DataInfoLabel>
           <DataInfoLabel

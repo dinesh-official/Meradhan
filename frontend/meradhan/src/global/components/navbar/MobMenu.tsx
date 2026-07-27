@@ -9,6 +9,7 @@ import {
 import { ISessionResponse } from "@root/apiGateway";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { AiOutlineMenu } from "react-icons/ai";
 import { IoMdArrowDropdown } from "react-icons/io";
@@ -75,6 +76,7 @@ export default MobMenu;
 /* Recursive Mobile Menu Item */
 const MobileMenuItem = ({ item, level = 0 }: MenuItemProps) => {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
   const hasChildren = item.children && item.children.length > 0;
 
   return (
@@ -87,6 +89,7 @@ const MobileMenuItem = ({ item, level = 0 }: MenuItemProps) => {
         {item.href ? (
           <Link
             href={item.href}
+            aria-current={pathname === item.href ? "page" : undefined}
             className="flex-1"
             onClick={() => setOpen(false)}
           >
