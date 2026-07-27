@@ -1,5 +1,5 @@
 import { db } from "@core/database/database"
-import { ApiError } from "@packages/apiGateway";
+import { ApiError } from "@root/apiGateway";
 import { env } from "@root/config/env";
 import axios from "axios";
 

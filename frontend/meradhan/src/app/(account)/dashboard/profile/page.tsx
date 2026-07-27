@@ -12,7 +12,12 @@ export const generateMetadata = async () => {
   return await getAccountPagesMetaData("dashboard/profile");
 };
 
-async function page() {
+async function page({
+  searchParams,
+}: {
+  searchParams: Promise<{ allowDelete?: string }>;
+}) {
+
   const cookie = await cookies();
   const customerApi = new apiGateway.crm.customer.CrmCustomerApi(
     apiServerCaller
@@ -32,7 +37,7 @@ async function page() {
       }
     >
       <ProfilePage profileData={userData.data.responseData} />
-      {/* <AccountClosureSection /> */}
+      <AccountClosureSection />
     </AccountViewPort>
   );
 }
