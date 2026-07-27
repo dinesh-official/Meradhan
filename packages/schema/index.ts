@@ -42,9 +42,11 @@ export {
 } from "./lib/customers/corporateKyc.schema";
 
 export {
+  getDearLineFromCustomer,
   getEmailSalutationFromGender,
   getEmailSalutationFromSources,
   getOptionalEmailTitleFromSources,
+  isCorporateUserType,
   resolveGenderForEmailSalutation,
   type EmailTitle,
   type GenderSources,
