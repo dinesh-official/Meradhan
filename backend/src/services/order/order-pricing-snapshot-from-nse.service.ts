@@ -443,8 +443,14 @@ async function buildPricingSnapshot(input: {
 export async function proposeOrderPricingFromNseSavedData(
   orderNumber: string,
 ): Promise<ProposeOrderPricingResult> {
-  const order = await db.dataBase.order.findUnique({
-    where: { orderNumber },
+  const order = await db.dataBase.order.findFirst({
+    where: {
+      OR: [
+        { orderNumber },
+        { reqOrderNumber: orderNumber },
+        { paymentId: orderNumber },
+      ],
+    },
     select: {
       id: true,
       orderNumber: true,
