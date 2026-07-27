@@ -119,14 +119,9 @@ export function resolveOrderPdfFinancials(params: {
       principalAmount + accruedInterest,
     ) ?? 0;
 
-  const settlementAmount =
-    firstNum(
-      orderPricing?.settlementAmount,
-      settleOrder?.modConsideration != null
-        ? Number(settleOrder.modConsideration) + stampDutyAmount
-        : null,
-      totalConsideration + stampDutyAmount,
-    ) ?? 0;
+  // Label on PDF is "Settlement Amount (inclusive of Stamp Duty)".
+  // Always add stamp duty here — do not trust a snapshot that may omit it.
+  const settlementAmount = totalConsideration + stampDutyAmount;
 
   const accruedInterestDays = firstNum(
     orderData?.metadata?.accruedInterestDays,
