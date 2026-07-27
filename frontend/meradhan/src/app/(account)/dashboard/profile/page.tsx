@@ -32,7 +32,7 @@ async function page() {
       }
     >
       <ProfilePage profileData={userData.data.responseData} />
-      {/* <AccountClosureSection /> */}
+      <AccountClosureSection />
     </AccountViewPort>
   );
 }

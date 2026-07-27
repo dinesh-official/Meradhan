@@ -22,7 +22,7 @@ import { OrderService } from "@resource/customer/order/order.service";
 import { AppError } from "@utils/error/AppError";
 import logger from "@utils/logger/logger";
 import { db } from "@core/database/database";
-import type { BondDetailsResponse } from "@packages/apiGateway";
+import type { BondDetailsResponse } from "@root/apiGateway";
 import { env } from "@root/config/env";
 import { makeRazorpayRouteTransition, resolveRazorpayRouteEligibility } from "@services/razorpay-route/RPay-route";
 import { CrmOrdersService } from "@resource/crm/orders/orders.service";
