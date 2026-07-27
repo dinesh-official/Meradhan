@@ -1,0 +1,1820 @@
+name: Deploy Application --New
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Deployment Environment"
+        required: true
+        type: choice
+        default: stage
+        options:
+          - stage
+          - prod
+
+      live_time:
+        description: "Preview Environment Lifetime"
+        required: true
+        type: choice
+        default: 1hr
+        options:
+          - 5min
+          - 10min
+          - 1hr
+          - 2hr
+          - 4hr
+          - 8hr
+          - 24hr      
+
+      upline:
+        description: "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈"
+        required: false
+        type: boolean
+        default: false              
+
+      Title:
+        description: "Select the applications to deploy"
+        required: true
+        type: boolean
+        default: true    
+
+      downline:
+        description: "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈"
+        required: false
+        type: boolean
+        default: false
+
+      frontend:
+        description: "Frontend"
+        required: true
+        type: boolean
+        default: true
+
+      backend:
+        description: "Backend"
+        required: true
+        type: boolean
+        default: true
+
+      crm:
+        description: "CRM"
+        required: true
+        type: boolean
+        default: true
+
+      worker:
+        description: "Worker"
+        required: true
+        type: boolean
+        default: true
+
+
+
+env:
+  prod_dns: prod-736795584.ap-south-1.elb.amazonaws.com
+  stage_dns: stttage-1036666024.ap-south-1.elb.amazonaws.com
+  github_pat: ${{ secrets.GITHUB_PAT }}
+  
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    environment: ${{ inputs.environment == 'prod' && 'production' || 'staging' }}
+
+    steps:
+
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Load ALL GitHub Environment Variables + Secrets
+      - name: Export GitHub Variables & Secrets
+        shell: bash
+        env:
+          ALL_SECRETS: ${{ toJSON(secrets) }}
+          ALL_VARS: ${{ toJSON(vars) }}
+        run: |
+          echo "$ALL_VARS" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> $GITHUB_ENV
+          echo "$ALL_SECRETS" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> $GITHUB_ENV
+
+      # Generate .env Automatically
+      - name: Generate .env
+        run: |
+          printenv \
+          | grep -v '^GITHUB_' \
+          | grep -v '^RUNNER_' \
+          | grep -v '^CI=' \
+          | grep -v '^HOME=' \
+          | grep -v '^PATH=' \
+          > .env    
+          
+      - name: Verify .env
+        run: |
+          echo "Current Directory: $(pwd)"
+          ls -la
+          echo "========================"
+          if [ -f .env ]; then
+            echo ".env exists"
+            wc -l .env
+            head -5 .env
+          else
+            echo ".env NOT FOUND"
+            exit 1
+          fi          
+
+
+      - name: Get DNS Value
+        shell: bash
+        run: |
+          if [ "${{ inputs.environment }}" = "stage" ]; then
+            DNS_VAL="stttage-1036666024.ap-south-1.elb.amazonaws.com"
+          else
+            DNS_VAL="prod-736795584.ap-south-1.elb.amazonaws.com"
+          fi
+
+          echo "DNS_VAL=$DNS_VAL" >> "$GITHUB_ENV"
+
+          echo "DNS Value: $DNS_VAL"
+
+
+      - name: Generate Resource IDs
+        id: naming
+        shell: bash
+        run: |
+
+          # Environment Code
+          ENVIRONMENT="${{ inputs.environment }}"
+          ENV_CODE="${ENVIRONMENT:0:1}"
+
+          # Branch Code
+          BRANCH="${GITHUB_REF_NAME}"
+
+          FIRST_CHAR="${BRANCH:0:1}"
+          LAST_CHAR="${BRANCH: -1}"
+          BRANCH_LENGTH=${#BRANCH}
+          MIDDLE_NUM=$((BRANCH_LENGTH - 2))
+
+          BRANCH_CODE="${FIRST_CHAR}${MIDDLE_NUM}${LAST_CHAR}"
+
+          # Resource Names
+          FRONTEND_NAME="${ENV_CODE}${BRANCH_CODE}f"
+          BACKEND_NAME="${ENV_CODE}${BRANCH_CODE}b"
+          CRM_NAME="${ENV_CODE}${BRANCH_CODE}c"
+          WORKER_NAME="${ENV_CODE}${BRANCH_CODE}w"
+
+          # Export Variables
+          echo "ENV_CODE=$ENV_CODE" >> $GITHUB_ENV
+          echo "BRANCH_CODE=$BRANCH_CODE" >> $GITHUB_ENV
+
+          echo "FRONTEND_NAME=$FRONTEND_NAME" >> $GITHUB_ENV
+          echo "BACKEND_NAME=$BACKEND_NAME" >> $GITHUB_ENV
+          echo "CRM_NAME=$CRM_NAME" >> $GITHUB_ENV
+          echo "WORKER_NAME=$WORKER_NAME" >> $GITHUB_ENV
+
+          # Output
+          echo "Environment  : $ENVIRONMENT"
+          echo "Branch       : $BRANCH"
+          echo "ENV_CODE     : $ENV_CODE"
+          echo "BRANCH_CODE  : $BRANCH_CODE"
+          echo "Frontend     : $FRONTEND_NAME"
+          echo "Backend      : $BACKEND_NAME"
+          echo "CRM          : $CRM_NAME"
+          echo "Worker       : $WORKER_NAME"
+
+
+      - name: Create Records
+        id: create_dns
+        env:
+          ZONE_ID: ${{ vars.CLOUDFLARE_ZONE_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ vars.CLOUDFLARE_API_TOKEN }}
+        run: |
+
+          set -e
+
+          RECORD_TYPE="CNAME"
+          TARGET="$DNS_VAL"
+          ROOT_DOMAIN="meradhan.co"
+
+          declare -A SERVICES=(
+            ["frontend"]="$FRONTEND_NAME"
+            ["backend"]="$BACKEND_NAME"
+            ["crm"]="$CRM_NAME"
+            ["worker"]="$WORKER_NAME"
+            ["strapi"]="$STRAPI_NAME"
+          )
+
+          RECORD_IDS=""
+          DOMAINS=""
+          URLS=""
+
+          echo "=========== DNS RECORDS ==========="
+
+          for SERVICE in "${!SERVICES[@]}"
+          do
+
+            SUBDOMAIN="${SERVICES[$SERVICE]}"
+
+            # Skip empty values
+            [ -z "$SUBDOMAIN" ] && continue
+
+            FULL_DOMAIN="${SUBDOMAIN}.${ROOT_DOMAIN}"
+
+            RESPONSE=$(curl -s -X POST \
+              "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records" \
+              -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+              -H "Content-Type: application/json" \
+              --data "{
+                \"type\":\"${RECORD_TYPE}\",
+                \"name\":\"${FULL_DOMAIN}\",
+                \"content\":\"${TARGET}\",
+                \"ttl\":120,
+                \"proxied\":true
+              }")
+
+            SUCCESS=$(echo "$RESPONSE" | jq -r '.success')
+            ERROR_CODE=$(echo "$RESPONSE" | jq -r '.errors[0].code // empty')
+
+            # ---------------------------------------------------------
+            # Record already exists
+            # ---------------------------------------------------------
+            if [ "$ERROR_CODE" = "81053" ]; then
+
+              EXISTING=$(curl -s -X GET \
+                "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records?type=${RECORD_TYPE}&name=${FULL_DOMAIN}" \
+                -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+                -H "Content-Type: application/json")
+
+              RECORD_ID=$(echo "$EXISTING" | jq -r '.result[0].id')
+
+              if [ -z "$RECORD_ID" ] || [ "$RECORD_ID" = "null" ]; then
+                RECORD_ID=$(curl -s -X GET \
+                  "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records?per_page=5000" \
+                  -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+                  -H "Content-Type: application/json" |
+                  jq -r ".result[] | select(.name==\"${FULL_DOMAIN}\") | .id" | head -1)
+              fi
+
+              RECORD_IDS="${RECORD_IDS}${RECORD_ID},"
+              DOMAINS="${DOMAINS}${FULL_DOMAIN},"
+              URLS="${URLS}https://${FULL_DOMAIN},"
+
+              echo "${SERVICE^^}"
+              echo "Status    : Already Exists"
+              echo "URL       : https://${FULL_DOMAIN}"
+              echo "Record ID : ${RECORD_ID}"
+              echo "-------------------------------------------"
+
+              continue
+            fi
+
+            # ---------------------------------------------------------
+            # Any other API error
+            # ---------------------------------------------------------
+            if [ "$SUCCESS" != "true" ]; then
+              echo "Failed to create ${FULL_DOMAIN}"
+              echo "$RESPONSE"
+              exit 1
+            fi
+
+            # ---------------------------------------------------------
+            # Record created successfully
+            # ---------------------------------------------------------
+            RECORD_ID=$(echo "$RESPONSE" | jq -r '.result.id')
+            NAME=$(echo "$RESPONSE" | jq -r '.result.name')
+
+            RECORD_IDS="${RECORD_IDS}${RECORD_ID},"
+            DOMAINS="${DOMAINS}${NAME},"
+            URLS="${URLS}https://${NAME},"
+
+            echo "${SERVICE^^}"
+            echo "Status    : Created"
+            echo "URL       : https://${NAME}"
+            echo "Record ID : ${RECORD_ID}"
+            echo "-------------------------------------------"
+
+          done
+
+          RECORD_IDS="${RECORD_IDS%,}"
+          DOMAINS="${DOMAINS%,}"
+          URLS="${URLS%,}"
+
+          echo ""
+          echo "=========== SUMMARY ==========="
+          echo "Record IDs : ${RECORD_IDS}"
+          echo "Domains    : ${DOMAINS}"
+          echo "URLs       : ${URLS}"
+          echo "==============================="
+
+          echo "record_ids=${RECORD_IDS}" >> "$GITHUB_OUTPUT"
+          echo "domains=${DOMAINS}" >> "$GITHUB_OUTPUT"
+          echo "urls=${URLS}" >> "$GITHUB_OUTPUT"
+
+      ###################################################
+      # Override Required Environment Variables
+      ###################################################
+      
+      - name: Override Required Environment Variables
+        shell: bash
+        run: |
+
+          set -e
+
+          ROOT_DOMAIN="meradhan.co"
+
+          update_env() {
+            local KEY="$1"
+            local VALUE="$2"
+
+            if grep -q "^${KEY}=" .env; then
+              sed -i "s|^${KEY}=.*|${KEY}=${VALUE}|" .env
+            else
+              echo "${KEY}=${VALUE}" >> .env
+            fi
+          }
+
+          
+          # Override Variables
+          #-------------------------------------------------
+
+          #update_env "NEXT_PUBLIC_API_URL" "https://${BACKEND_NAME}.${ROOT_DOMAIN}/api"
+
+          update_env "NEXT_PUBLIC_BACKEND_HOST_URL" "https://${BACKEND_NAME}.${ROOT_DOMAIN}"
+
+          update_env "NEXT_PUBLIC_BACKEND_IP_URL" "https://${BACKEND_NAME}.${ROOT_DOMAIN}"
+
+          update_env "NEXT_PUBLIC_CRM_HOST_URL" "https://${CRM_NAME}.${ROOT_DOMAIN}"
+
+          update_env "NEXT_PUBLIC_FRONTEND_URL" "https://${FRONTEND_NAME}.${ROOT_DOMAIN}"
+
+          update_env "NEXT_PUBLIC_STRAPI_URL" "https://awsstrapi.meradhan.co"
+
+          update_env "NEXT_PUBLIC_STRAPI_HOST_URL" "https://awsstrapi.meradhan.co"
+
+          update_env "STRAPI_API_URL" "https://${STRAPI_NAME}.${ROOT_DOMAIN}/api"
+
+          update_env "NEXT_PUBLIC_HOST_URL" "https://${FRONTEND_NAME}.${ROOT_DOMAIN}"
+
+
+          #update_env "NEXT_PUBLIC_ENV" "${{ inputs.environment }}"
+
+          update_env "ALLOW_ORIGINS" "${{ steps.create_dns.outputs.urls }}"
+
+
+          update_env "DATABASE_URL" "postgresql://postgres:AWSaws198@postgres:5432/meradhan_database?schema=public"
+
+          update_env "DIRECT_URL" "postgresql://postgres:AWSaws198@postgres:5432/meradhan_database?schema=public"
+
+          update_env "REDIS_HOST" "redis"
+
+          update_env "REDIS_PORT" "6379"
+
+   
+          # Verify
+          #--------------------------------------------
+
+          echo "========== UPDATED VARIABLES =========="
+          grep "^NEXT_PUBLIC_" .env
+
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1              
+
+      - name: Create Repositories
+        id: create_ecr
+        shell: bash
+        run: |
+
+          set -e
+
+          REPOSITORIES=(
+            "$FRONTEND_NAME"
+            "$BACKEND_NAME"
+            "$CRM_NAME"
+            "$WORKER_NAME"
+          )
+
+          REPOSITORY_URIS=""
+
+          echo "======================================"
+          echo "Creating ECR Repositories"
+          echo "======================================"
+
+          for REPO in "${REPOSITORIES[@]}"
+          do
+
+            [ -z "$REPO" ] && continue
+
+            echo ""
+            echo "Repository : $REPO"
+
+            EXISTS=$(aws ecr describe-repositories \
+              --repository-names "$REPO" \
+              --query "repositories[0].repositoryName" \
+              --output text 2>/dev/null || true)
+
+            if [ "$EXISTS" = "$REPO" ]; then
+
+              echo "Status : Already Exists"
+
+            else
+
+              aws ecr create-repository \
+                --repository-name "$REPO" \
+                --image-scanning-configuration scanOnPush=true \
+                --image-tag-mutability MUTABLE >/dev/null
+
+              echo "Status : Created"
+
+            fi
+
+            URI=$(aws ecr describe-repositories \
+              --repository-names "$REPO" \
+              --query "repositories[0].repositoryUri" \
+              --output text)
+
+            REPOSITORY_URIS="${REPOSITORY_URIS}${URI},"
+
+            echo "Repository URI : $URI"
+            echo "--------------------------------------"
+
+          done
+
+          echo ""
+          echo "======================================"
+          echo "ECR Repositories Ready"
+          echo "======================================"
+
+          echo "Repository URIs : ${REPOSITORY_URIS%,}"
+
+          echo "repository_uris=${REPOSITORY_URIS%,}" >> "$GITHUB_OUTPUT"    
+
+
+
+      - name: Build & Push Docker Images
+        shell: bash
+        run: |
+
+          set -e
+
+          declare -A SERVICES=()
+
+          if [ "${{ inputs.frontend }}" = "true" ]; then
+            SERVICES["$FRONTEND_NAME"]="frontendDockerfile"
+          fi
+
+          if [ "${{ inputs.backend }}" = "true" ]; then
+            SERVICES["$BACKEND_NAME"]="backenddocker"
+          fi
+
+          if [ "${{ inputs.crm }}" = "true" ]; then
+            SERVICES["$CRM_NAME"]="crmdockerfile"
+          fi
+
+          if [ "${{ inputs.worker }}" = "true" ]; then
+            SERVICES["$WORKER_NAME"]="workerDocker"
+          fi
+
+          if [ ${#SERVICES[@]} -eq 0 ]; then
+            echo "No services selected."
+            #exit 1 
+          fi
+
+          echo "======================================"
+          echo "Building Docker Images"
+          echo "======================================"
+
+          for REPOSITORY in "${!SERVICES[@]}"
+          do
+            (
+              DOCKERFILE="${SERVICES[$REPOSITORY]}"
+              IMAGE="450321244603.dkr.ecr.ap-south-1.amazonaws.com/${REPOSITORY}:latest"
+
+              echo ""
+              echo "Repository : $REPOSITORY"
+              echo "Dockerfile : $DOCKERFILE"
+
+              docker buildx build \
+                --file "$DOCKERFILE" \
+                --tag "$IMAGE" \
+                --cache-from type=gha \
+                --cache-to type=gha,mode=max \
+                --push \
+                .
+
+              #docker push "$IMAGE"
+
+              echo "Completed : $REPOSITORY"
+            ) &
+          done
+
+          wait
+
+          echo ""
+          echo "======================================"
+          echo "All Selected Docker Images Built & Pushed"
+          echo "======================================"          
+
+      - name: Login to Amazon ECR
+        run: |
+          aws ecr get-login-password --region ap-south-1 \
+            | docker login \
+              --username AWS \
+              --password-stdin 450321244603.dkr.ecr.ap-south-1.amazonaws.com
+
+
+
+      - name: Create or Reuse Instance
+        id: create_ec2
+        shell: bash
+        env:
+            AMI_ID: ${{ vars.AMI_ID }}
+            SUBNET_ID: ${{ vars.SUBNET_ID }}
+            SECURITY_GROUP_ID: ${{ vars.SECURITY_GROUP_ID }}
+            KEY_NAME: ${{ vars.KEY_NAME }}
+            INSTANCE_PROFILE: ${{ vars.INSTANCE_PROFILE }}
+            INSTANCE_TYPE: ${{ vars.INSTANCE_TYPE }}
+            ROOT_VOLUME_SIZE: ${{ vars.ROOT_VOLUME_SIZE }}
+            ROOT_VOLUME_TYPE: ${{ vars.ROOT_VOLUME_TYPE }}
+
+        run: |
+            set -e
+
+            BRANCH_NAME="${{ github.ref_name }}"
+            BRANCH_NAME=$(echo "$BRANCH_NAME" | tr '/' '-' | tr '_' '-')
+
+            DEPLOY_TAG="${ENV_CODE}${BRANCH_CODE}"
+
+            echo "======================================"
+            echo "Environment      : ${{ inputs.environment }}"
+            echo "Deployment Tag   : $DEPLOY_TAG"
+            echo "Branch           : $BRANCH_NAME"
+            echo "AMI              : $AMI_ID"
+            echo "Subnet           : $SUBNET_ID"
+            echo "Security Group   : $SECURITY_GROUP_ID"
+            echo "Instance Type    : $INSTANCE_TYPE"
+            echo "Volume Size      : ${ROOT_VOLUME_SIZE} GB"
+            echo "======================================"
+
+            INSTANCE_ID=$(aws ec2 describe-instances \
+            --filters \
+                "Name=tag:branch_deploy,Values=${DEPLOY_TAG}" \
+                "Name=instance-state-name,Values=pending,running,stopping,stopped" \
+            --query "Reservations[0].Instances[0].InstanceId" \
+            --output text)
+
+            if [ "$INSTANCE_ID" != "None" ] && [ -n "$INSTANCE_ID" ]; then
+
+            echo "Existing instance found"
+            echo "Instance ID : $INSTANCE_ID"
+
+            else
+
+            echo "Creating new EC2 instance..."
+
+            INSTANCE_ID=$(aws ec2 run-instances \
+                --image-id "$AMI_ID" \
+                --instance-type "$INSTANCE_TYPE" \
+                --subnet-id "$SUBNET_ID" \
+                --security-group-ids "$SECURITY_GROUP_ID" \
+                --key-name "$KEY_NAME" \
+                --iam-instance-profile Name="$INSTANCE_PROFILE" \
+                --block-device-mappings "[
+                {
+                    \"DeviceName\":\"/dev/sda1\",
+                    \"Ebs\":{
+                    \"VolumeSize\":${ROOT_VOLUME_SIZE},
+                    \"VolumeType\":\"${ROOT_VOLUME_TYPE}\",
+                    \"DeleteOnTermination\":true
+                    }
+                }
+                ]" \
+                --tag-specifications "ResourceType=instance,Tags=[
+                {Key=Name,Value=${DEPLOY_TAG}-${BRANCH_NAME}},
+                {Key=branch_deploy,Value=${DEPLOY_TAG}},
+                {Key=Branch,Value=${BRANCH_NAME}},
+                {Key=Environment,Value=${{ inputs.environment }}},
+                {Key=ssm-dev,Value=allow}
+                ]" \
+                --query "Instances[0].InstanceId" \
+                --output text)
+
+            echo "New instance created"
+            echo "Instance ID : $INSTANCE_ID"
+
+            fi
+
+            if [ -z "$INSTANCE_ID" ] || [ "$INSTANCE_ID" = "None" ]; then
+            echo "Failed to obtain Instance ID."
+            exit 1
+            fi
+
+            echo "INSTANCE_ID=$INSTANCE_ID" >> "$GITHUB_ENV"
+            echo "instance_id=$INSTANCE_ID" >> "$GITHUB_OUTPUT"
+
+            echo ""
+            echo "======================================"
+            echo "Deployment Summary"
+            echo "======================================"
+            echo "Environment    : ${{ inputs.environment }}"
+            echo "Deployment Tag : $DEPLOY_TAG"
+            echo "Instance ID    : $INSTANCE_ID"
+            echo "======================================"
+
+
+      - name: Run commands
+        shell: bash
+        run: |
+          set -e
+
+          INSTANCE_ID="${{ steps.create_ec2.outputs.instance_id }}"
+
+          echo "======================================"
+          echo "Target Instance : $INSTANCE_ID"
+          echo "======================================"
+
+          echo "Waiting for EC2..."
+          aws ec2 wait instance-running --instance-ids "$INSTANCE_ID"
+
+          echo "Waiting for SSM Agent..."
+
+          while true; do
+
+            STATUS=$(aws ssm describe-instance-information \
+              --filters "Key=InstanceIds,Values=$INSTANCE_ID" \
+              --query "InstanceInformationList[0].PingStatus" \
+              --output text 2>/dev/null || true)
+
+            if [ "$STATUS" = "Online" ]; then
+              echo "SSM Agent Online"
+              break
+            fi
+
+            sleep 10
+
+          done
+
+          declare -A SERVICES=()
+
+          if [ "${{ inputs.frontend }}" = "true" ]; then
+            SERVICES["$FRONTEND_NAME"]="4002:4002"
+          fi
+
+          if [ "${{ inputs.backend }}" = "true" ]; then
+            SERVICES["$BACKEND_NAME"]="4000:4000"
+          fi
+
+          if [ "${{ inputs.crm }}" = "true" ]; then
+            SERVICES["$CRM_NAME"]="4001:4001"
+          fi
+
+          if [ "${{ inputs.worker }}" = "true" ]; then
+            SERVICES["$WORKER_NAME"]=""
+          fi
+
+          COMMANDS=""
+
+          COMMANDS+="echo ======================================="$'\n'
+          COMMANDS+="echo Starting Deployment"$'\n'
+          COMMANDS+="echo ======================================="$'\n'
+
+          # Cleanup
+          COMMANDS+="docker image prune -f"$'\n'
+          COMMANDS+="docker builder prune -f"$'\n'
+
+          # Login to ECR
+          COMMANDS+="aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 450321244603.dkr.ecr.ap-south-1.amazonaws.com"$'\n'
+
+          # Docker Network
+          COMMANDS+="docker network inspect deployment_app-network >/dev/null 2>&1 || docker network create deployment_app-network"$'\n'
+
+          # Fresh clone deployment repo
+          COMMANDS+="rm -rf branch-deploy"$'\n'
+          COMMANDS+="git clone --depth 1 https://github.com/bcispl/branch-deploy.git"$'\n'
+
+          COMMANDS+="cd branch-deploy"$'\n'
+          COMMANDS+="pwd"$'\n'
+          COMMANDS+="ls -la"$'\n'
+
+          # Filebeat
+          COMMANDS+="docker compose -f filebeat.yaml up -d"$'\n'
+          COMMANDS+="docker compose -f filebeat.yaml ps"$'\n'
+
+          # PostgreSQL
+          COMMANDS+="docker compose -f pgsql.yaml up -d"$'\n'
+          COMMANDS+="until docker exec postgres pg_isready >/dev/null 2>&1; do sleep 2; done"$'\n'
+          COMMANDS+="docker compose -f pgsql.yaml ps"$'\n'
+
+          # Redis
+          COMMANDS+="docker compose -f redis.yaml up -d"$'\n'
+          COMMANDS+="until docker exec redis redis-cli ping >/dev/null 2>&1; do sleep 2; done"$'\n'
+          COMMANDS+="docker compose -f redis.yaml ps"$'\n'
+
+          # Restore database
+          COMMANDS+="chmod +x restore.sh"$'\n'
+          COMMANDS+="./restore.sh ${{ inputs.environment }}.backup"$'\n'
+
+          COMMANDS+="cd /"$'\n'
+          COMMANDS+="docker ps"$'\n'
+
+          # Deploy Applications
+          for REPO in "${!SERVICES[@]}"
+          do
+              PORT="${SERVICES[$REPO]}"
+              IMAGE="450321244603.dkr.ecr.ap-south-1.amazonaws.com/${REPO}:latest"
+
+              COMMANDS+="echo"$'\n'
+              COMMANDS+="echo ======================================="$'\n'
+              COMMANDS+="echo Deploying ${REPO}"$'\n'
+              COMMANDS+="echo ======================================="$'\n'
+
+              COMMANDS+="docker pull ${IMAGE}"$'\n'
+
+              COMMANDS+="docker rm -f ${REPO} >/dev/null 2>&1 || true"$'\n'
+
+              if [ -n "$PORT" ]; then
+                  COMMANDS+="docker run -d --restart unless-stopped --network deployment_app-network --name ${REPO} -p ${PORT} ${IMAGE}"$'\n'
+              else
+                  COMMANDS+="docker run -d --restart unless-stopped --network deployment_app-network --name ${REPO} ${IMAGE}"$'\n'
+              fi
+          done
+
+          COMMANDS+="echo"$'\n'
+          COMMANDS+="echo ======================================="$'\n'
+          COMMANDS+="echo Running Containers"$'\n'
+          COMMANDS+="echo ======================================="$'\n'
+          COMMANDS+="docker ps"$'\n'
+
+          echo "======================================"
+          echo "Commands to Execute"
+          echo "======================================"
+          echo "$COMMANDS"
+
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "$INSTANCE_ID" \
+            --document-name "AWS-RunShellScript" \
+            --parameters commands="$COMMANDS" \
+            --query "Command.CommandId" \
+            --output text)
+
+          echo "Command ID : $COMMAND_ID"
+
+          while true
+          do
+
+            STATUS=$(aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" \
+              --instance-id "$INSTANCE_ID" \
+              --query "Status" \
+              --output text 2>/dev/null || echo "Pending")
+
+            echo "Status : $STATUS"
+
+            if [[ "$STATUS" == "Success" || "$STATUS" == "Failed" || "$STATUS" == "Cancelled" || "$STATUS" == "TimedOut" ]]; then
+              break
+            fi
+
+            sleep 5
+
+          done
+
+          OUTPUT=$(aws ssm get-command-invocation \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$INSTANCE_ID" \
+            --query "StandardOutputContent" \
+            --output text)
+
+          ERROR=$(aws ssm get-command-invocation \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$INSTANCE_ID" \
+            --query "StandardErrorContent" \
+            --output text)
+
+          echo "======================================"
+          echo "OUTPUT"
+          echo "======================================"
+          echo "$OUTPUT"
+
+          if [ -n "$ERROR" ] && [ "$ERROR" != "None" ]; then
+            echo "======================================"
+            echo "ERROR"
+            echo "======================================"
+            echo "$ERROR"
+          fi
+
+          if [ "$STATUS" != "Success" ]; then
+            echo "Deployment Failed"
+            exit 1
+          fi
+
+          echo ""
+          echo "======================================"
+          echo "Deployment Completed Successfully"
+          echo "======================================"
+
+
+      - name: Get Listener ARN & VPC ID
+        id: get_listener
+        shell: bash
+        run: |
+          set -e
+
+          if [ "${{ inputs.environment }}" = "stage" ]; then
+            LISTENER_ARN_VAL="${{ vars.STAGE_LISTENER_ARN }}"
+            VPC_ID_VAL="${{ vars.STAGE_VPC_ID }}"
+            MISSING_LISTENER_VAR="STAGE_LISTENER_ARN"
+            MISSING_VPC_VAR="STAGE_VPC_ID"
+          else
+            LISTENER_ARN_VAL="${{ vars.PROD_LISTENER_ARN }}"
+            VPC_ID_VAL="${{ vars.PROD_VPC_ID }}"
+            MISSING_LISTENER_VAR="PROD_LISTENER_ARN"
+            MISSING_VPC_VAR="PROD_VPC_ID"
+          fi
+
+          # Trim accidental whitespace/newlines
+          LISTENER_ARN_VAL="$(echo -n "$LISTENER_ARN_VAL" | xargs)"
+          VPC_ID_VAL="$(echo -n "$VPC_ID_VAL" | xargs)"
+
+          echo "======================================"
+          echo "Environment requested : ${{ inputs.environment }}"
+          echo "======================================"
+
+          if [ -z "$LISTENER_ARN_VAL" ] || [ "$LISTENER_ARN_VAL" = "None" ]; then
+            echo ""
+            echo "ERROR: No Listener ARN configured for environment '${{ inputs.environment }}'."
+            echo "Fix: add '${MISSING_LISTENER_VAR}' as a variable:"
+            echo "  Settings -> Environments -> ${{ inputs.environment == 'stage' && 'staging' || 'production' }} -> Variables"
+            exit 1
+          fi
+
+          if [[ ! "$LISTENER_ARN_VAL" =~ ^arn:aws:elasticloadbalancing:.*:listener/ ]]; then
+            echo "ERROR: '${MISSING_LISTENER_VAR}' does not look like a valid ELBv2 listener ARN:"
+            echo "  Got: $LISTENER_ARN_VAL"
+            exit 1
+          fi
+
+          if [ -z "$VPC_ID_VAL" ] || [ "$VPC_ID_VAL" = "None" ]; then
+            echo ""
+            echo "ERROR: No VPC ID configured for environment '${{ inputs.environment }}'."
+            echo "Fix: add '${MISSING_VPC_VAR}' as a variable:"
+            echo "  Settings -> Environments -> ${{ inputs.environment == 'stage' && 'staging' || 'production' }} -> Variables"
+            exit 1
+          fi
+
+          if [[ ! "$VPC_ID_VAL" =~ ^vpc-[a-z0-9]+$ ]]; then
+            echo "ERROR: '${MISSING_VPC_VAR}' does not look like a valid VPC ID:"
+            echo "  Got: $VPC_ID_VAL"
+            exit 1
+          fi
+
+          echo "LISTENER_ARN=$LISTENER_ARN_VAL" >> "$GITHUB_ENV"
+          echo "VPC_ID=$VPC_ID_VAL" >> "$GITHUB_ENV"
+
+          echo "Resolved Listener ARN : $LISTENER_ARN_VAL"
+          echo "Resolved VPC ID       : $VPC_ID_VAL"
+          echo "======================================"
+
+      - name: Create or Reuse Target Groups & Listener Rules
+        id: tg_listener
+        shell: bash
+        run: |
+          set -e
+
+          ROOT_DOMAIN="meradhan.co"
+          INSTANCE_ID="${{ steps.create_ec2.outputs.instance_id }}"
+
+          HEALTH_TIMEOUT_SECONDS=300     # 5 min max wait per target
+          HEALTH_POLL_INTERVAL=10
+          MAX_PRIORITY_RETRIES=10
+          PRIORITY_OFFSET=1          # new rule priority = MAX_PRIORITY + PRIORITY_OFFSET
+
+          if [ -z "$VPC_ID" ]; then
+            echo "ERROR: VPC_ID was not exported by the 'Get Listener ARN & VPC ID' step."
+            exit 1
+          fi
+
+          if [ -z "$LISTENER_ARN" ]; then
+            echo "ERROR: LISTENER_ARN was not exported by the 'Get Listener ARN & VPC ID' step."
+            exit 1
+          fi
+
+          # ---------------------------------------------------------
+          # Output accumulators
+          #
+          # Written via an EXIT trap so that a downstream cleanup job
+          # still learns what was created even if this step fails
+          # (e.g. a target never becomes healthy).
+          # ---------------------------------------------------------
+          RULE_ARNS=""
+          TARGET_GROUP_ARNS=""
+          TG_RULE_MAP=""     # service|tg_arn|rule_arn triplets, comma separated
+
+          write_outputs() {
+            local RC=$?
+            {
+              echo "rule_arns=${RULE_ARNS%,}"
+              echo "target_group_arns=${TARGET_GROUP_ARNS%,}"
+              echo "tg_rule_map=${TG_RULE_MAP%,}"
+            } >> "$GITHUB_OUTPUT" || true
+            return $RC
+          }
+
+          trap write_outputs EXIT
+
+          KIBANA_NAME="${ENV_CODE}${BRANCH_CODE}e"
+
+          declare -A TARGET_GROUPS=()   # tg_name -> "port:idtag"
+          declare -A HOST_HEADERS=()    # tg_name -> full domain
+          declare -A HEALTH_PATHS=()    # tg_name -> health check path
+
+          if [ "${{ inputs.backend }}" = "true" ]; then
+            TARGET_GROUPS["tg-$BACKEND_NAME"]="4000:$BACKEND_NAME"
+            HOST_HEADERS["tg-$BACKEND_NAME"]="${BACKEND_NAME}.${ROOT_DOMAIN}"
+            HEALTH_PATHS["tg-$BACKEND_NAME"]="/health"
+          fi
+
+          if [ "${{ inputs.crm }}" = "true" ]; then
+            TARGET_GROUPS["tg-$CRM_NAME"]="4001:$CRM_NAME"
+            HOST_HEADERS["tg-$CRM_NAME"]="${CRM_NAME}.${ROOT_DOMAIN}"
+            HEALTH_PATHS["tg-$CRM_NAME"]="/login"
+          fi
+
+          if [ "${{ inputs.frontend }}" = "true" ]; then
+            TARGET_GROUPS["tg-$FRONTEND_NAME"]="4002:$FRONTEND_NAME"
+            HOST_HEADERS["tg-$FRONTEND_NAME"]="${FRONTEND_NAME}.${ROOT_DOMAIN}"
+            HEALTH_PATHS["tg-$FRONTEND_NAME"]="/"
+          fi
+
+          # Kibana / observability UI target group (port 5601)
+          # Always created (no toggle input) — add an `inputs.kibana` boolean
+          # gate here later if you want it optional like the others.
+          TARGET_GROUPS["tg-$KIBANA_NAME"]="5601:$KIBANA_NAME"
+          HOST_HEADERS["tg-$KIBANA_NAME"]="${KIBANA_NAME}.${ROOT_DOMAIN}"
+          HEALTH_PATHS["tg-$KIBANA_NAME"]="/api/status"
+
+          if [ ${#TARGET_GROUPS[@]} -eq 0 ]; then
+            echo "No services selected — nothing to do."
+            {
+              echo "## Target Group / Listener Summary"
+              echo "No services were selected in workflow inputs."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          # ---------------------------------------------------------
+          # Helper: find an existing listener rule for an exact host-header
+          # ---------------------------------------------------------
+          find_rule_arn_for_host() {
+            local HOST="$1"
+
+            aws elbv2 describe-rules \
+              --listener-arn "$LISTENER_ARN" \
+              --output json \
+            | jq -r --arg HOST "$HOST" '
+                .Rules[]
+                | select(
+                    (.Conditions[]?
+                      | select(.Field == "host-header")
+                      | ((.Values // [])
+                          + ((.HostHeaderConfig.Values) // []))
+                      | index($HOST)) != null
+                  )
+                | .RuleArn
+              ' \
+            | head -n 1
+          }
+
+          # ---------------------------------------------------------
+          # Helper: get current highest numeric priority on the listener
+          # ---------------------------------------------------------
+          get_max_priority() {
+            local EXISTING_PRIORITIES
+            EXISTING_PRIORITIES=$(aws elbv2 describe-rules \
+              --listener-arn "$LISTENER_ARN" \
+              --query "Rules[?Priority!='default'].Priority" \
+              --output text 2>/dev/null \
+            | tr '\t' '\n' \
+            | sort -n)
+
+            if [ -z "$EXISTING_PRIORITIES" ]; then
+              echo 0
+            else
+              echo "$EXISTING_PRIORITIES" | tail -n 1
+            fi
+          }
+
+          # ---------------------------------------------------------
+          # Helper: get all currently used priorities (for collision check)
+          # ---------------------------------------------------------
+          get_used_priorities() {
+            aws elbv2 describe-rules \
+              --listener-arn "$LISTENER_ARN" \
+              --query "Rules[?Priority!='default'].Priority" \
+              --output text 2>/dev/null \
+            | tr '\t' '\n'
+          }
+
+          # ---------------------------------------------------------
+          # Helper: create a rule with retry-on-priority-conflict.
+          #
+          # IMPORTANT: stdout of this function is CAPTURED by the caller,
+          # so every human-readable line goes to stderr (>&2). The ONLY
+          # thing written to stdout is the final "RULE_ARN|PRIORITY".
+          # ---------------------------------------------------------
+          create_rule_with_retry() {
+            local HOST="$1"
+            local TG_ARN="$2"
+            local ATTEMPT=1
+            local RULE_ARN=""
+
+            local MAX_PRIORITY
+            MAX_PRIORITY=$(get_max_priority)
+            local CANDIDATE=$((MAX_PRIORITY + PRIORITY_OFFSET))
+
+            echo "Highest existing priority : $MAX_PRIORITY" >&2
+            echo "Priority offset           : +${PRIORITY_OFFSET}" >&2
+            echo "Initial candidate priority: $CANDIDATE" >&2
+
+            while [ "$ATTEMPT" -le "$MAX_PRIORITY_RETRIES" ]; do
+
+              local USED_PRIORITIES
+              USED_PRIORITIES=$(get_used_priorities)
+
+              while echo "$USED_PRIORITIES" | grep -qx "$CANDIDATE"; do
+                CANDIDATE=$((CANDIDATE + 1))
+              done
+
+              echo "Attempt ${ATTEMPT}: trying priority ${CANDIDATE}..." >&2
+
+              set +e
+              RULE_ARN=$(aws elbv2 create-rule \
+                --listener-arn "$LISTENER_ARN" \
+                --priority "$CANDIDATE" \
+                --conditions Field=host-header,Values="$HOST" \
+                --actions Type=forward,TargetGroupArn="$TG_ARN" \
+                --query "Rules[0].RuleArn" \
+                --output text 2>/tmp/create_rule_err.log)
+              local RC=$?
+              set -e
+
+              if [ "$RC" -eq 0 ] && [ -n "$RULE_ARN" ] && [ "$RULE_ARN" != "None" ]; then
+                echo "LISTENER_PRIORITY=$CANDIDATE" >> "$GITHUB_ENV"
+                # The ONLY stdout line — this is what the caller parses.
+                echo "$RULE_ARN|$CANDIDATE"
+                return 0
+              fi
+
+              if grep -qi "PriorityInUse" /tmp/create_rule_err.log; then
+                echo "Priority ${CANDIDATE} taken by a concurrent run. Retrying..." >&2
+                ATTEMPT=$((ATTEMPT + 1))
+                CANDIDATE=$((CANDIDATE + 1))
+                sleep $((RANDOM % 3 + 1))
+                continue
+              fi
+
+              echo "ERROR creating listener rule:" >&2
+              cat /tmp/create_rule_err.log >&2
+              return 1
+
+            done
+
+            echo "ERROR: Exhausted ${MAX_PRIORITY_RETRIES} attempts to find a free priority." >&2
+            return 1
+          }
+
+          # ---------------------------------------------------------
+          # Helper: is instance already registered on this TG/port?
+          # ---------------------------------------------------------
+          is_target_registered() {
+            local TG_ARN="$1"
+            local PORT="$2"
+
+            aws elbv2 describe-target-health \
+              --target-group-arn "$TG_ARN" \
+              --query "TargetHealthDescriptions[?Target.Id=='${INSTANCE_ID}' && Target.Port==\`${PORT}\`] | length(@)" \
+              --output text 2>/dev/null || echo "0"
+          }
+
+          # ---------------------------------------------------------
+          # Helper: wait for target to become healthy (bounded timeout)
+          # ---------------------------------------------------------
+          wait_for_target_health() {
+            local TG_ARN="$1"
+            local PORT="$2"
+            local ELAPSED=0
+            local STATE="unknown"
+
+            while [ "$ELAPSED" -lt "$HEALTH_TIMEOUT_SECONDS" ]; do
+
+              STATE=$(aws elbv2 describe-target-health \
+                --target-group-arn "$TG_ARN" \
+                --targets Id="$INSTANCE_ID",Port="$PORT" \
+                --query "TargetHealthDescriptions[0].TargetHealth.State" \
+                --output text 2>/dev/null || echo "unknown")
+
+              echo "Health check (${ELAPSED}s elapsed) : $STATE"
+
+              if [ "$STATE" = "healthy" ]; then
+                return 0
+              fi
+
+              sleep "$HEALTH_POLL_INTERVAL"
+              ELAPSED=$((ELAPSED + HEALTH_POLL_INTERVAL))
+
+            done
+
+            echo "STATE=$STATE"
+            return 1
+          }
+
+          # ---------------------------------------------------------
+          # Main loop
+          # ---------------------------------------------------------
+          SUMMARY_ROWS=""
+
+          echo "======================================"
+          echo "Environment    : ${{ inputs.environment }}"
+          echo "Listener ARN   : $LISTENER_ARN"
+          echo "VPC ID         : $VPC_ID"
+          echo "Instance ID    : $INSTANCE_ID"
+          echo "Services       : ${!TARGET_GROUPS[@]}"
+          echo "======================================"
+
+          for TG_NAME in "${!TARGET_GROUPS[@]}"
+          do
+            INFO="${TARGET_GROUPS[$TG_NAME]}"
+            PORT="${INFO%%:*}"
+            ID_TAG="${INFO##*:}"
+            HOST_HEADER="${HOST_HEADERS[$TG_NAME]}"
+            HEALTH_PATH="${HEALTH_PATHS[$TG_NAME]}"
+
+            echo ""
+            echo "--------------------------------------"
+            echo "Service       : $ID_TAG"
+            echo "Target Group  : $TG_NAME"
+            echo "Port          : $PORT"
+            echo "Host Header   : $HOST_HEADER"
+            echo "Health Path   : $HEALTH_PATH"
+            echo "--------------------------------------"
+
+            # -----------------------------------------------------
+            # 1. Create or reuse Target Group
+            # -----------------------------------------------------
+            TG_ARN=$(aws elbv2 describe-target-groups \
+              --names "$TG_NAME" \
+              --query "TargetGroups[0].TargetGroupArn" \
+              --output text 2>/dev/null || true)
+
+            TG_STATUS="Reused"
+
+            if [ -z "$TG_ARN" ] || [ "$TG_ARN" = "None" ]; then
+
+              echo "Target group not found. Creating..."
+
+              TG_ARN=$(aws elbv2 create-target-group \
+                --name "$TG_NAME" \
+                --protocol HTTP \
+                --port "$PORT" \
+                --vpc-id "$VPC_ID" \
+                --target-type instance \
+                --health-check-protocol HTTP \
+                --health-check-port traffic-port \
+                --health-check-path "$HEALTH_PATH" \
+                --query "TargetGroups[0].TargetGroupArn" \
+                --output text)
+
+              aws elbv2 add-tags \
+                --resource-arns "$TG_ARN" \
+                --tags \
+                  Key=Name,Value="$TG_NAME" \
+                  Key=ID,Value="$ID_TAG" \
+                  Key=Environment,Value="${{ inputs.environment }}"
+
+              TG_STATUS="Created"
+              echo "Target group created : $TG_ARN"
+
+            else
+              echo "Target group already exists. Reusing : $TG_ARN"
+
+              CURRENT_HEALTH_PATH=$(aws elbv2 describe-target-groups \
+                --target-group-arns "$TG_ARN" \
+                --query "TargetGroups[0].HealthCheckPath" \
+                --output text 2>/dev/null || echo "")
+
+              if [ "$CURRENT_HEALTH_PATH" != "$HEALTH_PATH" ]; then
+                echo "Updating health check path: '${CURRENT_HEALTH_PATH}' -> '${HEALTH_PATH}'"
+                aws elbv2 modify-target-group \
+                  --target-group-arn "$TG_ARN" \
+                  --health-check-path "$HEALTH_PATH" >/dev/null
+              else
+                echo "Health check path already correct : $HEALTH_PATH"
+              fi
+            fi
+
+            # Record the TG ARN as soon as it exists, so a TG created here
+            # is still reported even if the listener rule step below fails.
+            TARGET_GROUP_ARNS="${TARGET_GROUP_ARNS}${TG_ARN},"
+
+            # -----------------------------------------------------
+            # 2. Register instance (skip if already registered on this port)
+            # -----------------------------------------------------
+            ALREADY_REGISTERED=$(is_target_registered "$TG_ARN" "$PORT")
+
+            if [ "$ALREADY_REGISTERED" != "0" ] && [ -n "$ALREADY_REGISTERED" ]; then
+              echo "Instance already registered on ${TG_NAME}:${PORT}. Skipping registration."
+            else
+              echo "Registering instance ${INSTANCE_ID} on port ${PORT}..."
+              aws elbv2 register-targets \
+                --target-group-arn "$TG_ARN" \
+                --targets Id="$INSTANCE_ID",Port="$PORT"
+            fi
+
+            # -----------------------------------------------------
+            # 3. Create or reuse Listener Rule FIRST.
+            #    New rules get priority = MAX_PRIORITY + PRIORITY_OFFSET,
+            #    incrementing further only if that slot is taken.
+            # -----------------------------------------------------
+            EXISTING_RULE_ARN=$(find_rule_arn_for_host "$HOST_HEADER")
+
+            RULE_STATUS="Reused"
+            USED_PRIORITY="n/a (reused)"
+
+            if [ -n "$EXISTING_RULE_ARN" ]; then
+
+              echo "Listener rule already exists for ${HOST_HEADER}. Updating target group binding..."
+
+              aws elbv2 modify-rule \
+                --rule-arn "$EXISTING_RULE_ARN" \
+                --actions Type=forward,TargetGroupArn="$TG_ARN" >/dev/null
+
+              RULE_ARN="$EXISTING_RULE_ARN"
+
+              USED_PRIORITY=$(aws elbv2 describe-rules \
+                --rule-arns "$RULE_ARN" \
+                --query "Rules[0].Priority" \
+                --output text 2>/dev/null || echo "unknown")
+
+            else
+
+              echo "No existing rule found for ${HOST_HEADER}. Creating..."
+
+              RESULT=$(create_rule_with_retry "$HOST_HEADER" "$TG_ARN")
+
+              if [ -z "$RESULT" ]; then
+                echo "ERROR: Failed to create listener rule for ${HOST_HEADER}."
+                exit 1
+              fi
+
+              RULE_ARN="${RESULT%%|*}"
+              USED_PRIORITY="${RESULT##*|}"
+
+              RULE_STATUS="Created"
+
+            fi
+
+            echo "Rule ARN      : $RULE_ARN"
+            echo "Rule Priority : $USED_PRIORITY"
+
+            # Record the rule ARN + the service -> tg -> rule mapping.
+            RULE_ARNS="${RULE_ARNS}${RULE_ARN},"
+            TG_RULE_MAP="${TG_RULE_MAP}${ID_TAG}|${TG_ARN}|${RULE_ARN},"
+
+            # -----------------------------------------------------
+            # 4. NOW wait until target is healthy (bounded)
+            # -----------------------------------------------------
+            echo "Waiting for target to become healthy (timeout ${HEALTH_TIMEOUT_SECONDS}s)..."
+
+            if wait_for_target_health "$TG_ARN" "$PORT"; then
+              HEALTH_STATE="healthy"
+              echo "Target is healthy."
+            else
+              HEALTH_STATE="unhealthy/timeout"
+              echo "ERROR: Target did not become healthy within ${HEALTH_TIMEOUT_SECONDS}s."
+              echo "Check security groups, health-check path (${HEALTH_PATH}), and app startup time on port ${PORT}."
+              exit 1
+            fi
+
+            SUMMARY_ROWS="${SUMMARY_ROWS}| ${ID_TAG} | ${TG_NAME} | ${TG_STATUS} | https://${HOST_HEADER} | ${HEALTH_PATH} | ${RULE_STATUS} | ${USED_PRIORITY} | ${HEALTH_STATE} |\n"
+
+          done
+
+          # ---------------------------------------------------------
+          # Write summary table to GitHub Actions UI
+          # ---------------------------------------------------------
+          {
+            echo "## Target Group & Listener Rule Summary"
+            echo ""
+            echo "**Environment:** ${{ inputs.environment }}  "
+            echo "**Instance ID:** ${INSTANCE_ID}  "
+            echo ""
+            echo "| Service | Target Group | TG Status | URL | Health Path | Rule Status | Priority | Health |"
+            echo "|---|---|---|---|---|---|---|---|"
+            echo -e "$SUMMARY_ROWS"
+            echo ""
+            echo "**Target Group ARNs:** \`${TARGET_GROUP_ARNS%,}\`  "
+            echo "**Rule ARNs:** \`${RULE_ARNS%,}\`  "
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          echo ""
+          echo "======================================"
+          echo "Collected Output"
+          echo "======================================"
+          echo "target_group_arns : ${TARGET_GROUP_ARNS%,}"
+          echo "rule_arns         : ${RULE_ARNS%,}"
+          echo "tg_rule_map       : ${TG_RULE_MAP%,}"
+          echo "======================================"
+          echo "All Target Groups & Listener Rules Configured"
+          echo "======================================"
+
+
+      - name: Build / Validate Cleanup Event Payload
+        shell: bash
+        env:
+          EVENT_BUS_NAME: Branch_deploy
+          INSTANCE_ID:    ${{ steps.create_ec2.outputs.instance_id }}
+          RULE_ARNS_CSV:  ${{ steps.tg_listener.outputs.rule_arns }}
+          TG_ARNS_CSV:    ${{ steps.tg_listener.outputs.target_group_arns }}
+          PUBLISH_NOW:    ${{ inputs.publish_cleanup_now || 'false' }}
+          # FRONTEND_NAME / BACKEND_NAME / CRM_NAME / WORKER_NAME come from
+          # $GITHUB_ENV (set in the "Generate Resource IDs" step) — no need
+          # to redeclare them here, they're already in this step's env.
+        run: |
+          set -euo pipefail
+
+          if [ -z "${INSTANCE_ID}" ] || [ "${INSTANCE_ID}" = "None" ]; then
+            echo "No instance was created — nothing to build a payload for."
+            exit 0
+          fi
+
+          # Build the ECR repo CSV directly from the same names used to
+          # create the repos — avoids relying on a separate step output.
+          ECR_REPOS_CSV=""
+          for REPO in "$FRONTEND_NAME" "$BACKEND_NAME" "$CRM_NAME" "$WORKER_NAME"; do
+            [ -z "$REPO" ] && continue
+            ECR_REPOS_CSV="${ECR_REPOS_CSV}${REPO},"
+          done
+          ECR_REPOS_CSV="${ECR_REPOS_CSV%,}"
+
+          echo "ECR repos for cleanup: ${ECR_REPOS_CSV:-none}"
+
+          # An empty CSV must yield [] , not [""] .
+          EVENT_DETAIL=$(jq -nc \
+            --arg instance_id "$INSTANCE_ID" \
+            --arg rules       "$RULE_ARNS_CSV" \
+            --arg tgs         "$TG_ARNS_CSV" \
+            --arg ecrs        "$ECR_REPOS_CSV" \
+            '{
+               instance_id: $instance_id,
+               resources: [
+                 {
+                   rule_arns:
+                     (if $rules == "" then [] else ($rules | split(",")) end),
+                   target_group_arns:
+                     (if $tgs   == "" then [] else ($tgs   | split(",")) end),
+                   ecr_repositories:
+                     (if $ecrs  == "" then [] else ($ecrs  | split(",")) end)
+                 }
+               ]
+             }')
+
+          echo "======================================"
+          echo "Cleanup Event Payload (detail)"
+          echo "======================================"
+          echo "$EVENT_DETAIL" | jq .
+
+          if [ "${PUBLISH_NOW}" != "true" ]; then
+            echo "PUBLISH_NOW is not 'true' — payload validated, nothing published."
+            exit 0
+          fi
+
+          echo "WARNING: publishing cleanup event NOW. The environment will be destroyed."
+
+          # Detail is a JSON *string*, not an object -> --arg, never --argjson.
+          ENTRIES=$(jq -nc \
+            --arg detail "$EVENT_DETAIL" \
+            --arg bus    "$EVENT_BUS_NAME" \
+            '[{
+               Source:       "preview.cleanup",
+               DetailType:   "DeletePreviewResources",
+               EventBusName: $bus,
+               Detail:       $detail
+             }]')
+
+          RESPONSE=$(aws events put-events --entries "$ENTRIES")
+
+          echo "======================================"
+          echo "PutEvents Response"
+          echo "======================================"
+          echo "$RESPONSE" | jq .
+
+          # put-events returns HTTP 200 even when individual entries are
+          # rejected, so the exit code alone is not enough.
+          FAILED=$(echo "$RESPONSE" | jq -r '.FailedEntryCount')
+
+          if [ "$FAILED" != "0" ]; then
+            echo "ERROR: EventBridge rejected ${FAILED} entry/entries."
+            echo "$RESPONSE" | jq -r '.Entries[] | select(.ErrorCode) | "  \(.ErrorCode): \(.ErrorMessage)"'
+            exit 1
+          fi
+
+          # NOTE: FailedEntryCount == 0 only means the bus ACCEPTED the event.
+          # It says nothing about whether any rule matched or any target fired.
+          echo "Cleanup event accepted by bus '${EVENT_BUS_NAME}'."
+
+
+# ---------------------------------------------------------------------
+# STEP 2 — Create/update the one-time schedule.
+# ---------------------------------------------------------------------
+      - name: Schedule Cleanup (EventBridge Scheduler)
+        if: always()
+        shell: bash
+        env:
+          SCHEDULER_ROLE_ARN: ${{ secrets.SCHEDULER_ROLE_ARN }}
+          EVENT_BUS_NAME:     Branch_deploy
+          SCHEDULE_GROUP:     default
+          SCHEDULE_TZ:        Asia/Kolkata
+          # Optional but strongly recommended — without it, a failed target
+          # invocation is completely silent. SQS queue ARN.
+          DLQ_ARN:            ${{ secrets.CLEANUP_DLQ_ARN }}
+          INSTANCE_ID:        ${{ steps.create_ec2.outputs.instance_id }}
+          RULE_ARNS_CSV:      ${{ steps.tg_listener.outputs.rule_arns }}
+          TG_ARNS_CSV:        ${{ steps.tg_listener.outputs.target_group_arns }}
+          LIVE_TIME:          ${{ inputs.live_time }}
+          # FRONTEND_NAME / BACKEND_NAME / CRM_NAME / WORKER_NAME come from
+          # $GITHUB_ENV (set in the "Generate Resource IDs" step).
+        run: |
+          set -euo pipefail
+
+          # =========================================================
+          # 0. Preconditions
+          # =========================================================
+          if [ -z "${INSTANCE_ID}" ] || [ "${INSTANCE_ID}" = "None" ]; then
+            echo "No instance was created — nothing to schedule cleanup for."
+            exit 0
+          fi
+
+          if [ -z "${SCHEDULER_ROLE_ARN}" ]; then
+            echo "ERROR: SCHEDULER_ROLE_ARN is not set."
+            echo "Add it under Settings -> Secrets and variables -> Actions -> Secrets."
+            echo "It must be a role trusted by scheduler.amazonaws.com with"
+            echo "events:PutEvents on the ${EVENT_BUS_NAME} bus."
+            exit 1
+          fi
+
+          # These come from an earlier step (job env / GITHUB_ENV).
+          # If either is empty the schedule name collapses to "cleanup--i-xxxx",
+          # which collides across environments and makes the existence check
+          # match the wrong schedule.
+          : "${ENV_CODE:?ENV_CODE is empty - schedule names would collide}"
+          : "${BRANCH_CODE:?BRANCH_CODE is empty - schedule names would collide}"
+
+          DLQ_ARN="${DLQ_ARN:-}"
+
+          # Build the ECR repo CSV directly from the same names used to
+          # create the repos — same approach as Step 1, kept in sync so
+          # the SCHEDULED payload actually carries the repos too.
+          ECR_REPOS_CSV=""
+          for REPO in "$FRONTEND_NAME" "$BACKEND_NAME" "$CRM_NAME" "$WORKER_NAME"; do
+            [ -z "$REPO" ] && continue
+            ECR_REPOS_CSV="${ECR_REPOS_CSV}${REPO},"
+          done
+          ECR_REPOS_CSV="${ECR_REPOS_CSV%,}"
+
+          echo "ECR repos for scheduled cleanup: ${ECR_REPOS_CSV:-none}"
+
+          # =========================================================
+          # 1. Resolve account + region -> full bus ARN
+          #    Using the ARN (not the bare name) removes any ambiguity
+          #    about which bus/region/account is targeted.
+          # =========================================================
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          REGION="${AWS_REGION:-${AWS_DEFAULT_REGION:-}}"
+          if [ -z "$REGION" ]; then
+            REGION=$(aws configure get region)
+          fi
+          if [ -z "$REGION" ]; then
+            echo "ERROR: could not determine AWS region."
+            exit 1
+          fi
+
+          BUS_ARN="arn:aws:events:${REGION}:${ACCOUNT_ID}:event-bus/${EVENT_BUS_NAME}"
+
+          # =========================================================
+          # 2. Preflight: does the delivery path actually exist?
+          #    A schedule that fires into a bus with no matching rule
+          #    "succeeds" and silently does nothing.
+          # =========================================================
+          echo "======================================"
+          echo "Preflight"
+          echo "======================================"
+
+          if ! aws events describe-event-bus --name "$EVENT_BUS_NAME" >/dev/null 2>&1; then
+            echo "ERROR: event bus '${EVENT_BUS_NAME}' not found in ${REGION}."
+            exit 1
+          fi
+          echo "Bus            : ${BUS_ARN}  [OK]"
+
+          # Non-fatal: needs events:ListRules / events:ListTargetsByRule.
+          MATCHING_RULE=""
+          if RULES_JSON=$(aws events list-rules \
+                            --event-bus-name "$EVENT_BUS_NAME" \
+                            --output json 2>/dev/null); then
+            MATCHING_RULE=$(echo "$RULES_JSON" | jq -r '
+              .Rules[]
+              | select(.EventPattern != null)
+              | select(
+                  (.EventPattern | fromjson)
+                  | (."detail-type" // []) | index("DeletePreviewResources")
+                )
+              | .Name' | head -n1)
+
+            if [ -z "$MATCHING_RULE" ]; then
+              echo "WARNING: no rule on bus '${EVENT_BUS_NAME}' matches"
+              echo "         detail-type 'DeletePreviewResources'."
+              echo "         The schedule will fire and nothing will happen."
+              echo "         Check the rule was created ON THIS BUS, not on 'default'."
+            else
+              echo "Rule           : ${MATCHING_RULE}  [OK]"
+
+              STATE=$(echo "$RULES_JSON" | jq -r --arg n "$MATCHING_RULE" \
+                        '.Rules[] | select(.Name==$n) | .State')
+              [ "$STATE" = "ENABLED" ] \
+                && echo "Rule state     : ENABLED  [OK]" \
+                || echo "WARNING: rule '${MATCHING_RULE}' state is ${STATE}."
+
+              TARGET_COUNT=$(aws events list-targets-by-rule \
+                               --rule "$MATCHING_RULE" \
+                               --event-bus-name "$EVENT_BUS_NAME" \
+                               --query 'length(Targets)' --output text 2>/dev/null || echo "?")
+              if [ "$TARGET_COUNT" = "0" ]; then
+                echo "WARNING: rule '${MATCHING_RULE}' has no targets attached."
+              else
+                echo "Rule targets   : ${TARGET_COUNT}  [OK]"
+              fi
+            fi
+          else
+            echo "(skipped rule check — missing events:ListRules permission)"
+          fi
+
+          # ---------------------------------------------------------
+          # 2b. Can the SCHEDULER'S role actually publish to THIS bus?
+          # ---------------------------------------------------------
+          echo "Scheduler role : ${SCHEDULER_ROLE_ARN}"
+          SIM=$(aws iam simulate-principal-policy \
+                  --policy-source-arn "$SCHEDULER_ROLE_ARN" \
+                  --action-names events:PutEvents \
+                  --resource-arns "$BUS_ARN" \
+                  --query 'EvaluationResults[0].EvalDecision' \
+                  --output text 2>/dev/null || echo "unknown")
+
+          case "$SIM" in
+            allowed)
+              echo "PutEvents sim  : allowed on ${EVENT_BUS_NAME}  [OK]"
+              ;;
+            explicitDeny|implicitDeny)
+              echo "======================================"
+              echo "ERROR: scheduler role is NOT allowed events:PutEvents on this bus."
+              echo "  Role     : ${SCHEDULER_ROLE_ARN}"
+              echo "  Bus      : ${BUS_ARN}"
+              echo "  Decision : ${SIM}"
+              echo ""
+              echo "This is why the schedule fires but nothing gets deleted."
+              echo "Attach this to that role (note the bus name is NOT 'default'):"
+              echo ""
+              echo "  {"
+              echo "    \"Effect\":   \"Allow\","
+              echo "    \"Action\":   \"events:PutEvents\","
+              echo "    \"Resource\": \"${BUS_ARN}\""
+              echo "  }"
+              echo "======================================"
+              exit 1
+              ;;
+            *)
+              echo "PutEvents sim  : skipped (need iam:SimulatePrincipalPolicy)  [--]"
+              ;;
+          esac
+
+          # ---------------------------------------------------------
+          # 2c. Does each Lambda target allow EventBridge to invoke it?
+          # ---------------------------------------------------------
+          if [ -n "$MATCHING_RULE" ]; then
+            LAMBDA_ARNS=$(aws events list-targets-by-rule \
+                            --rule "$MATCHING_RULE" \
+                            --event-bus-name "$EVENT_BUS_NAME" \
+                            --query "Targets[?starts_with(Arn, 'arn:aws:lambda:')].Arn" \
+                            --output text 2>/dev/null || echo "")
+
+            for L in $LAMBDA_ARNS; do
+              FN="${L##*:function:}"
+              FN="${FN%%:*}"                 # strip any :alias / :version suffix
+              if POLICY=$(aws lambda get-policy --function-name "$FN" \
+                            --query Policy --output text 2>/dev/null); then
+                if echo "$POLICY" | grep -q 'events.amazonaws.com'; then
+                  echo "Lambda policy  : ${FN} allows EventBridge  [OK]"
+                else
+                  echo "WARNING: Lambda '${FN}' has a resource policy but none of it"
+                  echo "         grants events.amazonaws.com invoke — it will not fire."
+                fi
+              else
+                echo "WARNING: Lambda '${FN}' has NO resource-based policy;"
+                echo "         EventBridge cannot invoke it. Add one with:"
+                echo "         aws lambda add-permission --function-name ${FN} \\"
+                echo "           --statement-id allow-${MATCHING_RULE} \\"
+                echo "           --action lambda:InvokeFunction \\"
+                echo "           --principal events.amazonaws.com \\"
+                echo "           --source-arn <arn-of-rule-${MATCHING_RULE}>"
+              fi
+            done
+          fi
+
+          # =========================================================
+          # 3. Parse live_time -> minutes
+          # =========================================================
+          RAW_TIME="${LIVE_TIME// /}"    # strip any stray spaces
+
+          if   [[ "$RAW_TIME" =~ ^([0-9]+)min$ ]]; then
+            MINUTES="${BASH_REMATCH[1]}"
+          elif [[ "$RAW_TIME" =~ ^([0-9]+)(hr|h)$ ]]; then
+            MINUTES=$(( ${BASH_REMATCH[1]} * 60 ))
+          elif [[ "$RAW_TIME" =~ ^([0-9]+)$ ]]; then
+            MINUTES=$(( ${BASH_REMATCH[1]} * 60 ))   # bare number -> hours
+          else
+            echo "ERROR: could not parse live_time '${LIVE_TIME}'."
+            echo "Expected one of: 10min, 1hr, 2hr, 4hr, 8hr, 24hr (also 90min, 1h)."
+            exit 1
+          fi
+
+          if [ "$MINUTES" -lt 1 ]; then
+            echo "ERROR: live_time '${LIVE_TIME}' resolves to ${MINUTES} minute(s)."
+            exit 1
+          fi
+
+          # Human-readable lifetime for logs / summary (e.g. "10m", "2h", "1h 30m").
+          if   [ "$MINUTES" -lt 60 ]; then
+            LIFETIME_HUMAN="${MINUTES}m"
+          elif [ $(( MINUTES % 60 )) -eq 0 ]; then
+            LIFETIME_HUMAN="$(( MINUTES / 60 ))h"
+          else
+            LIFETIME_HUMAN="$(( MINUTES / 60 ))h $(( MINUTES % 60 ))m"
+          fi
+
+          # =========================================================
+          # 4. Compute the fire time.
+          # =========================================================
+          NOW_LOCAL=$(TZ="$SCHEDULE_TZ" date '+%Y-%m-%d %H:%M:%S')
+          DESTROY_AT=$(TZ="$SCHEDULE_TZ" date -d "+${MINUTES} minutes" '+%Y-%m-%dT%H:%M:%S')
+          DESTROY_AT_UTC=$(date -u -d "+${MINUTES} minutes" '+%Y-%m-%dT%H:%M:%SZ')
+
+          echo "======================================"
+          echo "Cleanup Schedule"
+          echo "======================================"
+          echo "Timezone     : $SCHEDULE_TZ"
+          echo "Now          : $NOW_LOCAL"
+          echo "Lifetime     : ${LIFETIME_HUMAN}  (${MINUTES}m, input: ${LIVE_TIME})"
+          echo "Destroy at   : ${DESTROY_AT/T/ }  (${SCHEDULE_TZ})"
+          echo "Destroy at   : $DESTROY_AT_UTC  (UTC)"
+          echo "Bus          : $BUS_ARN"
+          echo "======================================"
+
+          # =========================================================
+          # 5. Build the payload — now includes ecr_repositories.
+          # =========================================================
+          EVENT_DETAIL=$(jq -nc \
+            --arg instance_id "$INSTANCE_ID" \
+            --arg rules       "$RULE_ARNS_CSV" \
+            --arg tgs         "$TG_ARNS_CSV" \
+            --arg ecrs        "$ECR_REPOS_CSV" \
+            --arg live_time   "$LIVE_TIME" \
+            --arg destroy_at  "$DESTROY_AT_UTC" \
+            '{
+               instance_id: $instance_id,
+               live_time:   $live_time,
+               destroy_at:  $destroy_at,
+               resources: [
+                 {
+                   rule_arns:
+                     (if $rules == "" then [] else ($rules | split(",")) end),
+                   target_group_arns:
+                     (if $tgs   == "" then [] else ($tgs   | split(",")) end),
+                   ecr_repositories:
+                     (if $ecrs  == "" then [] else ($ecrs  | split(",")) end)
+                 }
+               ]
+             }')
+
+          TARGET=$(jq -nc \
+            --arg bus_arn "$BUS_ARN" \
+            --arg role    "$SCHEDULER_ROLE_ARN" \
+            --arg input   "$EVENT_DETAIL" \
+            --arg dlq     "$DLQ_ARN" \
+            '{
+               Arn:     $bus_arn,
+               RoleArn: $role,
+               Input:   $input,
+               EventBridgeParameters: {
+                 Source:     "preview.cleanup",
+                 DetailType: "DeletePreviewResources"
+               },
+               RetryPolicy: {
+                 MaximumRetryAttempts:     3,
+                 MaximumEventAgeInSeconds: 3600
+               }
+             }
+             + (if $dlq == "" then {} else { DeadLetterConfig: { Arn: $dlq } } end)')
+
+          echo "Event that will be published at the scheduled time:"
+          echo "$EVENT_DETAIL" | jq .
+
+          if [ -z "$DLQ_ARN" ]; then
+            echo "WARNING: no DLQ configured. If PutEvents fails at fire time,"
+            echo "         the failure will be silent and the schedule will still"
+            echo "         self-delete. Set CLEANUP_DLQ_ARN to catch this."
+          fi
+
+          # =========================================================
+          # 6. Schedule name: must match [0-9a-zA-Z-_.]+ and be <= 64 chars.
+          # =========================================================
+          RAW_NAME="cleanup-${ENV_CODE}${BRANCH_CODE}-${INSTANCE_ID}"
+          SCHEDULE_NAME=$(printf '%s' "$RAW_NAME" | tr -c '[:alnum:]._-' '-' | cut -c1-64)
+
+          if [ "$SCHEDULE_NAME" != "$RAW_NAME" ]; then
+            echo "NOTE: schedule name sanitised: '${RAW_NAME}' -> '${SCHEDULE_NAME}'"
+          fi
+
+          # =========================================================
+          # 7. Create or update.
+          # =========================================================
+          ERR_FILE=$(mktemp)
+
+          if aws scheduler get-schedule \
+               --name "$SCHEDULE_NAME" \
+               --group-name "$SCHEDULE_GROUP" >/dev/null 2>"$ERR_FILE"; then
+            ACTION="update-schedule"
+            echo "Schedule '${SCHEDULE_NAME}' exists — extending destroy time."
+          elif grep -q 'ResourceNotFoundException' "$ERR_FILE"; then
+            ACTION="create-schedule"
+            echo "Creating schedule '${SCHEDULE_NAME}'."
+          else
+            echo "ERROR: get-schedule failed for a reason other than 'not found':"
+            cat "$ERR_FILE"
+            rm -f "$ERR_FILE"
+            exit 1
+          fi
+          rm -f "$ERR_FILE"
+
+          aws scheduler "$ACTION" \
+            --name "$SCHEDULE_NAME" \
+            --group-name "$SCHEDULE_GROUP" \
+            --schedule-expression "at(${DESTROY_AT})" \
+            --schedule-expression-timezone "$SCHEDULE_TZ" \
+            --flexible-time-window Mode=OFF \
+            --action-after-completion DELETE \
+            --state ENABLED \
+            --description "Destroy preview env ${ENV_CODE}${BRANCH_CODE} (${INSTANCE_ID}) after ${LIVE_TIME}" \
+            --target "$TARGET" >/dev/null
+
+          echo "Schedule set."
+
+          # =========================================================
+          # 8. Read it back.
+          # =========================================================
+          echo "======================================"
+          echo "Schedule as stored by AWS"
+          echo "======================================"
+          aws scheduler get-schedule \
+            --name "$SCHEDULE_NAME" \
+            --group-name "$SCHEDULE_GROUP" \
+            --query '{
+              Name:       Name,
+              State:      State,
+              Expression: ScheduleExpression,
+              Timezone:   ScheduleExpressionTimezone,
+              TargetArn:  Target.Arn,
+              RoleArn:    Target.RoleArn,
+              Source:     Target.EventBridgeParameters.Source,
+              DetailType: Target.EventBridgeParameters.DetailType,
+              DLQ:        Target.DeadLetterConfig.Arn
+            }' --output table
+
+          # =========================================================
+          # 9. Step summary
+          # =========================================================
+          {
+            echo "## Cleanup Scheduled"
+            echo ""
+            echo "| Field | Value |"
+            echo "|---|---|"
+            echo "| Instance | \`${INSTANCE_ID}\` |"
+            echo "| Event Bus | \`${EVENT_BUS_NAME}\` |"
+            echo "| Rule matched | \`${MATCHING_RULE:-NONE FOUND}\` |"
+            echo "| ECR Repos | \`${ECR_REPOS_CSV:-none}\` |"
+            echo "| Lifetime | ${LIVE_TIME} |"
+            echo "| Destroys at | ${DESTROY_AT/T/ } (${SCHEDULE_TZ}) |"
+            echo "| Destroys at | ${DESTROY_AT_UTC} |"
+            echo "| Schedule | \`${SCHEDULE_NAME}\` |"
+            echo "| DLQ | \`${DLQ_ARN:-none}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
