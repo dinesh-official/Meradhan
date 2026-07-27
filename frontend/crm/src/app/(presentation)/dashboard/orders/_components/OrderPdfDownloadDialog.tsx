@@ -480,7 +480,7 @@ export function OrderPdfDownloadDialog({
     settlementDate?: string;
     dealDate?: string;
     accruedInterestDays?: number;
-    pricingSnapshot?: Record<string, unknown>;
+    useNseSavedPricing?: boolean;
   }> => {
     if (hasPricingSnapshot === true) return { ok: true };
     if (!useNsePricing) {
@@ -520,7 +520,7 @@ export function OrderPdfDownloadDialog({
       settlementDate,
       dealDate,
       accruedInterestDays,
-      pricingSnapshot: pricing,
+      useNseSavedPricing: true,
     };
   };
 
@@ -528,7 +528,7 @@ export function OrderPdfDownloadDialog({
     settlementDate?: string;
     dealDate?: string;
     accruedInterestDays?: number;
-    pricingSnapshot?: Record<string, unknown>;
+    useNseSavedPricing?: boolean;
   }) => {
     const accruedInterestDaysNum =
       overrides?.accruedInterestDays ??
@@ -550,9 +550,7 @@ export function OrderPdfDownloadDialog({
       ...buildPdfOptionPayload(formForPayload, accruedInterestDaysNum, {
         dealDate: overrides?.dealDate ?? resolvedDealDate,
       }),
-      ...(overrides?.pricingSnapshot
-        ? { pricingSnapshot: overrides.pricingSnapshot }
-        : {}),
+      ...(overrides?.useNseSavedPricing ? { useNseSavedPricing: true } : {}),
     };
     const blob =
       pdfType === "deal"
@@ -615,7 +613,7 @@ export function OrderPdfDownloadDialog({
         settlementDate: pricing.settlementDate,
         dealDate: pricing.dealDate,
         accruedInterestDays: pricing.accruedInterestDays,
-        pricingSnapshot: pricing.pricingSnapshot,
+        useNseSavedPricing: pricing.useNseSavedPricing,
       });
       if (ok) onOpenChange(false);
     } catch (err) {

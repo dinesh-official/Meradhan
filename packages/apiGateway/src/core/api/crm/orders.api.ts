@@ -260,6 +260,8 @@ export class CrmOrdersApi {
       amortizedPrincipalPaymentDates?: string;
       /** One-shot NSE pricing for PDF (yield etc.) — not persisted. */
       pricingSnapshot?: Record<string, unknown> | string;
+      /** Rebuild pricing from settle_order / NSE rows server-side for this PDF. */
+      useNseSavedPricing?: boolean;
     },
     config?: AxiosRequestConfig
   ): Promise<Blob> {
@@ -273,6 +275,7 @@ export class CrmOrdersApi {
     if (pdfParams?.interestPaymentDates != null) params.interestPaymentDates = pdfParams.interestPaymentDates;
     if (pdfParams?.nonAmortizedBond !== undefined) params.nonAmortizedBond = String(pdfParams.nonAmortizedBond);
     if (pdfParams?.amortizedPrincipalPaymentDates != null) params.amortizedPrincipalPaymentDates = pdfParams.amortizedPrincipalPaymentDates;
+    if (pdfParams?.useNseSavedPricing === true) params.useNseSavedPricing = "true";
     if (pdfParams?.pricingSnapshot != null) {
       params.pricingSnapshot =
         typeof pdfParams.pricingSnapshot === "string"
@@ -313,6 +316,7 @@ export class CrmOrdersApi {
       nonAmortizedBond?: boolean;
       amortizedPrincipalPaymentDates?: string;
       pricingSnapshot?: Record<string, unknown> | string;
+      useNseSavedPricing?: boolean;
     },
     config?: AxiosRequestConfig
   ): Promise<Blob> {
@@ -326,6 +330,7 @@ export class CrmOrdersApi {
     if (pdfParams?.interestPaymentDates != null) params.interestPaymentDates = pdfParams.interestPaymentDates;
     if (pdfParams?.nonAmortizedBond !== undefined) params.nonAmortizedBond = String(pdfParams.nonAmortizedBond);
     if (pdfParams?.amortizedPrincipalPaymentDates != null) params.amortizedPrincipalPaymentDates = pdfParams.amortizedPrincipalPaymentDates;
+    if (pdfParams?.useNseSavedPricing === true) params.useNseSavedPricing = "true";
     if (pdfParams?.pricingSnapshot != null) {
       params.pricingSnapshot =
         typeof pdfParams.pricingSnapshot === "string"
@@ -370,6 +375,7 @@ export class CrmOrdersApi {
       nonAmortizedBond?: boolean;
       amortizedPrincipalPaymentDates?: string;
       pricingSnapshot?: Record<string, unknown> | string;
+      useNseSavedPricing?: boolean;
     },
     config?: AxiosRequestConfig
   ): Promise<SendOrderPdfEmailResponse> {

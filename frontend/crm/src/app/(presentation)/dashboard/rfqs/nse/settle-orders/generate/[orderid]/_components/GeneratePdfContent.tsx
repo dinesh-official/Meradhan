@@ -1148,7 +1148,7 @@ BSE Member ID: 6963`
     settlementDate?: string;
     dealDate?: string;
     accruedInterestDays?: number;
-    pricingSnapshot?: Record<string, unknown>;
+    useNseSavedPricing?: boolean;
   }> => {
     if (orderHasPricingSnapshot) return { ok: true };
     if (!useNsePricing) {
@@ -1188,7 +1188,7 @@ BSE Member ID: 6963`
       settlementDate,
       dealDate,
       accruedInterestDays,
-      pricingSnapshot: pricing,
+      useNseSavedPricing: true,
     };
   };
 
@@ -1223,9 +1223,7 @@ BSE Member ID: 6963`
           ? { settlementDate: pricing.settlementDate }
           : {}),
         ...(pricing.dealDate ? { dealDate: pricing.dealDate } : {}),
-        ...(pricing.pricingSnapshot
-          ? { pricingSnapshot: pricing.pricingSnapshot }
-          : {}),
+        ...(pricing.useNseSavedPricing ? { useNseSavedPricing: true } : {}),
       };
       const blob =
         type === "deal"
@@ -1299,9 +1297,7 @@ BSE Member ID: 6963`
           ? { settlementDate: pricing.settlementDate }
           : {}),
         ...(pricing.dealDate ? { dealDate: pricing.dealDate } : {}),
-        ...(pricing.pricingSnapshot
-          ? { pricingSnapshot: pricing.pricingSnapshot }
-          : {}),
+        ...(pricing.useNseSavedPricing ? { useNseSavedPricing: true } : {}),
         pdfType: emailPdfType,
         fromEmail: senderEmail,
         toEmail: emailTo.trim(),
