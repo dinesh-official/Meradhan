@@ -45,8 +45,41 @@ const DAYS = [
   "Saturday",
 ] as const;
 
-/** Max buyer cash-flow dates shown on PDF (monthly = 12). */
+/** Default max buyer cash-flow dates on PDF when frequency is unknown (monthly = 12). */
 const MAX_BUYER_CASHFLOWS = 12;
+
+/**
+ * One year of buyer cash-flow dates for the PDF, keyed by coupon frequency.
+ * Yearly = one payment for the whole year → only that order's next entitled date.
+ */
+export function maxBuyerCashFlowsForFrequency(
+  frequency: string | null | undefined,
+): number {
+  if (!frequency || typeof frequency !== "string") return MAX_BUYER_CASHFLOWS;
+  const upper = frequency.toUpperCase().replace(/[\s-]+/g, "_");
+  if (upper.includes("MATURITY") || upper.includes("BULLET") || upper.includes("ON_MATURITY")) {
+    return 1;
+  }
+  if (upper.includes("MONTH") || upper === "12") return 12;
+  if (upper.includes("QUARTER") || upper === "4") return 4;
+  if (
+    upper.includes("HALF") ||
+    upper.includes("SEMI") ||
+    upper === "HALF_YEARLY" ||
+    upper === "2"
+  ) {
+    return 2;
+  }
+  if (
+    upper.includes("YEAR") ||
+    upper.includes("ANNUAL") ||
+    upper === "YEARLY" ||
+    upper === "1"
+  ) {
+    return 1;
+  }
+  return MAX_BUYER_CASHFLOWS;
+}
 
 function pad2(n: number): string {
   return String(n).padStart(2, "0");
@@ -96,12 +129,17 @@ export type ResolveInvestorCouponScheduleInput = {
   settlementYmd: string;
   coupons: InvestorCouponInput[];
   /**
-   * @deprecated Prefer maturity + MAX_BUYER_CASHFLOWS. Kept for callers;
+   * @deprecated Prefer maturity + frequency-based max. Kept for callers;
    * still applied as a soft upper bound when set.
    */
   endLimitYmd?: string | null;
   maturityYmd?: string | null;
-  /** Override max cash flows (default 12). */
+  /**
+   * Bond interest payment frequency (e.g. YEARLY / MONTHLY).
+   * Used to cap PDF cash flows to one year of payments when `maxCashFlows` is omitted.
+   */
+  interestPaymentFrequency?: string | null;
+  /** Override max cash flows (wins over frequency-derived limit). */
   maxCashFlows?: number;
 };
 
@@ -199,7 +237,7 @@ export function resolveInvestorCouponScheduleForPdf(
     Number.isFinite(input.maxCashFlows) &&
     input.maxCashFlows > 0
       ? Math.floor(input.maxCashFlows)
-      : MAX_BUYER_CASHFLOWS;
+      : maxBuyerCashFlowsForFrequency(input.interestPaymentFrequency);
 
   const sorted = [...input.coupons]
     .map((c) => ({
@@ -301,10 +339,16 @@ function settlementYmdFromDate(settlement: Date): string | null {
 
 /**
  * Loads contractual coupon rows for an ISIN and resolves buyer PDF schedule.
+ *
+ * Cash-flow count is capped to one year of payments for the order:
+ * monthly → 12, quarterly → 4, half-yearly → 2, yearly → 1.
  */
 export async function loadInvestorCouponScheduleForPdf(
   isin: string,
   settlement: Date,
+  opts?: {
+    interestPaymentFrequency?: string | null;
+  },
 ): Promise<InvestorCouponScheduleForPdf> {
   const settlementYmd = settlementYmdFromDate(settlement);
   if (!settlementYmd) {
@@ -317,8 +361,15 @@ export async function loadInvestorCouponScheduleForPdf(
     };
   }
 
-  const [meta, rows] = await Promise.all([
+  const [meta, bond, rows] = await Promise.all([
     db.dataBase.bondReferenceMetadata.findUnique({ where: { isin } }),
+    db.dataBase.bonds.findUnique({
+      where: { isin },
+      select: {
+        interestPaymentFrequency: true,
+        interestPaymentMode: true,
+      },
+    }),
     db.dataBase.bondReferenceCouponPaymentDate.findMany({
       where: { isin },
       orderBy: { dueDate: "asc" },
@@ -360,12 +411,19 @@ export async function loadInvestorCouponScheduleForPdf(
     })
     .filter((c): c is NonNullable<typeof c> => c != null);
 
+  const interestPaymentFrequency =
+    opts?.interestPaymentFrequency?.trim() ||
+    bond?.interestPaymentFrequency ||
+    (bond?.interestPaymentMode != null &&
+    String(bond.interestPaymentMode) !== "UNKNOWN"
+      ? String(bond.interestPaymentMode)
+      : null);
+
   return resolveInvestorCouponScheduleForPdf({
     settlementYmd,
     coupons,
-    // No calendar-year endLimit — take up to 12 consecutive coupons from first
-    // buyer cash flow (capped by maturity) so monthly shut cases include the
-    // shifted 12th payment (e.g. Aug…Jul).
+    // Cap to one year of cash flows for this order (yearly → single payment).
+    interestPaymentFrequency,
     maturityYmd: maturityDate ? toUtcYmd(maturityDate) : null,
   });
 }

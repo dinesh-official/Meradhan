@@ -1524,6 +1524,7 @@ export class CrmOrdersService {
     const investorCoupons = await loadInvestorCouponScheduleForPdf(
       bond.isin,
       settlementForCoupons,
+      { interestPaymentFrequency: bond.interestPaymentFrequency },
     );
     if (investorCoupons.lastInterestPaymentDateRaw) {
       lastInterestPaymentDateRaw = investorCoupons.lastInterestPaymentDateRaw;
@@ -1702,6 +1703,7 @@ export class CrmOrdersService {
     const investorCoupons = await loadInvestorCouponScheduleForPdf(
       bond.isin,
       settlementForCoupons,
+      { interestPaymentFrequency: bond.interestPaymentFrequency },
     );
     if (investorCoupons.lastInterestPaymentDateRaw) {
       lastInterestPaymentDateRaw = investorCoupons.lastInterestPaymentDateRaw;
@@ -1795,10 +1797,10 @@ export class CrmOrdersService {
     const amortizedPrincipalPaymentDates =
       isAmortizingBond && calcCfRows
         ? buildAmortizedPrincipalPaymentDates(
-            calcCfRows,
-            orderInfo.pricing.quantity,
-            Number(bond.faceValue),
-          )
+          calcCfRows,
+          orderInfo.pricing.quantity,
+          Number(bond.faceValue),
+        )
         : null;
 
     return {
@@ -1970,6 +1972,7 @@ export class CrmOrdersService {
     const investorCoupons = await loadInvestorCouponScheduleForPdf(
       bond.isin,
       settlementForCoupons,
+      { interestPaymentFrequency: bond.interestPaymentFrequency },
     );
     const pricingLastCoupon = lastCouponDatesFromOrderPricingSnapshot(order.bondDetails);
 
