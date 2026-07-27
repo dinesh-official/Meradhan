@@ -363,6 +363,7 @@ type PdfGreetingUser = Pick<
   firstName?: string | null;
   middleName?: string | null;
   lastName?: string | null;
+  userType?: string | null;
 };
 
 /** Consistent person name: "First Middle Last" with single spaces; skips empty parts. */
@@ -385,11 +386,17 @@ export function isNseRfqParticipantUser(
   return user.id < 0 || orderData?.metadata?.isRfqParticipant === true;
 }
 
+export function isCorporatePdfUser(
+  user: Pick<PdfGreetingUser, "userType">,
+): boolean {
+  return String(user.userType ?? "").trim().toUpperCase() === "CORPORATE";
+}
+
 export function getPdfDearGreeting(
   user: PdfGreetingUser,
   orderData?: { metadata?: { isRfqParticipant?: boolean } },
 ): string {
-  if (isNseRfqParticipantUser(user, orderData)) {
+  if (isNseRfqParticipantUser(user, orderData) || isCorporatePdfUser(user)) {
     return "Dear Sir / Madam,";
   }
   const fullname = formatPdfPersonName(user);
