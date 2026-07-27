@@ -867,6 +867,12 @@ function OrderDetailsView() {
           settleOrderTradeNumber={
             orderInfo?.rfqNumber || order.reqOrderNumber || null
           }
+          hasPricingSnapshot={
+            typeof orderPricing?.dealDate === "string" &&
+            orderPricing.dealDate.trim() !== "" &&
+            typeof orderPricing?.settlementDate === "string" &&
+            orderPricing.settlementDate.trim() !== ""
+          }
         />
       ) : null}
 

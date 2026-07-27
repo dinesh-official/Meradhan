@@ -589,6 +589,36 @@ export interface UpsertReceiptPdfOptionsResponse {
   responseData: CrmOrderReceiptPdfOptionsRow;
 }
 
+/** Proposed checkout pricing built from saved NSE rows (settle_order / negotiation / RFQ master). */
+export interface ProposeOrderPricingSnapshotResponse {
+  responseData: {
+    orderId: number;
+    orderNumber: string;
+    isin: string;
+    bondName: string;
+    tradeNumber: string;
+    alreadyHasPricing: boolean;
+    sources: {
+      settleOrderNumber: string;
+      rfqNumber: string;
+      rfqMasterNumber: string | null;
+    };
+    pricing: Record<string, unknown>;
+  };
+  message?: string;
+  code?: string;
+}
+
+export interface AcceptOrderPricingSnapshotResponse {
+  responseData: {
+    orderId: number;
+    orderNumber: string;
+    pricing: Record<string, unknown>;
+  };
+  message?: string;
+  code?: string;
+}
+
 export type PaymentGatewayMode = "PAYMENT" | "INQUIRY";
 
 export interface GetPaymentGatewaySettingsResponse {

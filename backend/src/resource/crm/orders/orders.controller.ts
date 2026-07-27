@@ -882,6 +882,82 @@ export class CrmOrdersController {
     }
   };
 
+  /**
+   * Propose `bondDetails.pricing` from NSE rows already saved in DB (no write).
+   * Used when PDF download fails with PRICING_SNAPSHOT_MISSING.
+   */
+  proposeOrderPricingSnapshot = async (req: Request, res: Response) => {
+    const orderNumber = req.params.orderNumber;
+    if (!orderNumber || typeof orderNumber !== "string") {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Order number is required",
+      });
+    }
+    try {
+      const data = await this.ordersService.proposeOrderPricingSnapshotFromNse(
+        orderNumber,
+      );
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        responseData: data,
+      });
+    } catch (err) {
+      if (err instanceof AppError) {
+        return res.sendResponse({
+          statusCode: err.statusCode,
+          message: err.message,
+          ...(err.code ? { code: err.code } : {}),
+        });
+      }
+      return res.sendResponse({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message:
+          err instanceof Error
+            ? err.message
+            : "Failed to propose order pricing from NSE data",
+      });
+    }
+  };
+
+  /**
+   * Accept proposed NSE pricing and persist onto `orders.bondDetails.pricing`.
+   */
+  acceptOrderPricingSnapshot = async (req: Request, res: Response) => {
+    const orderNumber = req.params.orderNumber;
+    if (!orderNumber || typeof orderNumber !== "string") {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Order number is required",
+      });
+    }
+    try {
+      const data = await this.ordersService.acceptOrderPricingSnapshotFromNse(
+        orderNumber,
+      );
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        responseData: data,
+        message: "Order pricing snapshot updated from NSE saved data.",
+      });
+    } catch (err) {
+      if (err instanceof AppError) {
+        return res.sendResponse({
+          statusCode: err.statusCode,
+          message: err.message,
+          ...(err.code ? { code: err.code } : {}),
+        });
+      }
+      return res.sendResponse({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message:
+          err instanceof Error
+            ? err.message
+            : "Failed to accept order pricing snapshot",
+      });
+    }
+  };
+
   /** Computes “Receipt PDF options” fields from settlement date for one-click auto-fill. */
   autofillReceiptPdfOptions = async (req: Request, res: Response) => {
     const orderNumber = req.params.orderNumber;
@@ -936,10 +1012,11 @@ export class CrmOrdersController {
       res.send(buffer);
     } catch (err) {
       console.error("Order receipt PDF failed:", err);
-      if (err instanceof AppError && err.statusCode === HttpStatus.NOT_FOUND) {
+      if (err instanceof AppError) {
         return res.sendResponse({
-          statusCode: HttpStatus.NOT_FOUND,
+          statusCode: err.statusCode,
           message: err.message,
+          ...(err.code ? { code: err.code } : {}),
         });
       }
       return res.sendResponse({
@@ -966,10 +1043,11 @@ export class CrmOrdersController {
       res.send(buffer);
     } catch (err) {
       console.error("Deal sheet PDF failed:", err);
-      if (err instanceof AppError && err.statusCode === HttpStatus.NOT_FOUND) {
+      if (err instanceof AppError) {
         return res.sendResponse({
-          statusCode: HttpStatus.NOT_FOUND,
+          statusCode: err.statusCode,
           message: err.message,
+          ...(err.code ? { code: err.code } : {}),
         });
       }
       return res.sendResponse({
