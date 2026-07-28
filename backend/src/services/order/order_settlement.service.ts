@@ -29,7 +29,7 @@ import { CrmOrdersService } from "@resource/crm/orders/orders.service";
 import { CustomerProfileRepo } from "@resource/crm/customers/customer.repo";
 import crypto from "crypto";
 import { RfqMasterService } from "@resource/crm/refq/nse/rfq_master/rfq_master.service";
-import { getEmailSalutationFromSources } from "@root/schema";
+import { getDearLineFromCustomer } from "@root/schema";
 import { formatDateDdMmYyyy, formatDateIstDdMmmYyyy } from "@resource/customer/order/order.utils";
 import { getLastCouponDate, getLastNextCouponDateBasedOnSettlementDate } from "./order-pricing-helper";
 import { sendSettlementAutomationFailureEmail } from "./settlement_automation_alert";
@@ -1177,10 +1177,11 @@ export class OrderSettlementService {
       }
 
       const user = await new CustomerProfileRepo().getFullCustomerProfile(order.customerProfileId);
-      const customerName =
-        [user.firstName, user.middleName, user.lastName].filter(Boolean).join(" ").trim() ||
-        "CUSTOMER";
-      const salutation = getEmailSalutationFromSources({
+      const dearLine = getDearLineFromCustomer({
+        userType: (user as { userType?: string }).userType,
+        firstName: user.firstName,
+        middleName: user.middleName,
+        lastName: user.lastName,
         gender: user.gender,
         panCard: user.panCard,
         aadhaarCard: user.aadhaarCard,
@@ -1197,7 +1198,7 @@ export class OrderSettlementService {
       const buySellYour = side === "SELL" ? "Sell" : "Buy";
 
       const subject = `Order Confirmation & Receipt – Order ID ${orderNumber}`;
-      const messageBody = `Dear ${salutation} ${customerName},
+      const messageBody = `${dearLine}
 
 Your ${buySellLower} order has been successfully placed through MeraDhan and has been executed on the exchange.
 

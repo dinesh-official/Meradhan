@@ -1,5 +1,5 @@
 import { db } from "@core/database/database";
-import { appSchema, getEmailSalutationFromSources } from "@root/schema";
+import { appSchema, getDearLineFromCustomer } from "@root/schema";
 import {
     computeStoredBondOrderPricing,
 } from "@services/order/order-pricing-helper";
@@ -217,8 +217,7 @@ export const placeOrderEmailCustomer = async (orderData: z.infer<typeof appSchem
     }
 
     const pricing = await resolveOrderPricing(orderData, bond);
-    const fullName = `${customer.firstName} ${customer.lastName}`.trim();
-    const salutation = getEmailSalutationFromSources(customer);
+    const dearLine = getDearLineFromCustomer(customer);
     const dealDateLabel = formatDealDateForEmail(orderData.dealDate);
     const settlementDateLabel = pricing
         ? formatDealDateForEmail(pricing.settlementDate)
@@ -263,7 +262,7 @@ export const placeOrderEmailCustomer = async (orderData: z.infer<typeof appSchem
         .map(([label, value]) => `${label}\n${value}`)
         .join("\n\n");
 
-    return `Dear ${salutation} ${fullName},
+    return `${dearLine}
 
 Thank you for placing your buy order on BondNest Capital India Securities Private Limited (MeraDhan). Your order request has been recorded successfully and is currently pending confirmation.
 
