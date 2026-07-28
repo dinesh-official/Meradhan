@@ -692,12 +692,9 @@ jobs:
           # Docker Network
           COMMANDS+="docker network inspect deployment_app-network >/dev/null 2>&1 || docker network create deployment_app-network"$'\n'
 
+          # Fresh clone deployment repo
           COMMANDS+="rm -rf branch-deploy"$'\n'
-          COMMANDS+="mkdir -p branch-deploy"$'\n'
-          COMMANDS+="aws s3 sync s3://meradhan-general/branch_deploy/branch-deploy/ branch-deploy/ --delete || exit 1"$'\n'
-          COMMANDS+="cd branch-deploy"$'\n'  
-          COMMANDS+="pwd"$'\n'
-
+          COMMANDS+="git clone --depth 1 https://github.com/bcispl/branch-deploy.git"$'\n'
 
           COMMANDS+="cd branch-deploy"$'\n'
           COMMANDS+="pwd"$'\n'
@@ -818,6 +815,7 @@ jobs:
           echo "======================================"
           echo "Deployment Completed Successfully"
           echo "======================================"
+
 
 
       - name: Create or Reuse Target Groups & Listener Rules
