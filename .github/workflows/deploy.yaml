@@ -696,6 +696,7 @@ jobs:
           COMMANDS+="rm -rf branch-deploy"$'\n'
           COMMANDS+="mkdir -p branch-deploy"$'\n'
           COMMANDS+="aws s3 sync \"s3://meradhan-general/branch_deploy/branch-deploy/\" branch-deploy/ --delete"$'\n'  
+          
 
           COMMANDS+="cd branch-deploy"$'\n'
           COMMANDS+="pwd"$'\n'
