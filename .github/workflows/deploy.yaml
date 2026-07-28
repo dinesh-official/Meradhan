@@ -676,20 +676,6 @@ jobs:
             SERVICES["$WORKER_NAME"]=""
           fi
 
-          # S3 location holding the deployment scaffolding (pgsql.yaml,
-          # redis.yaml, filebeat.yaml, restore.sh, etc). Keep this bucket
-          # in sync with your branch-deploy repo via a separate
-          # `aws s3 sync` step (in this workflow or another) whenever
-          # those files change — this step only *consumes* it.
-          # NOTE: objects in this bucket are nested one level deeper than
-          # the top-level prefix — e.g. the actual pgsql.yaml lives at
-          # s3://meradhan-general/branch_deploy/branch-deploy/pgsql.yaml.
-          # The prefix below points at that inner folder directly so the
-          # sync lands files at branch-deploy/pgsql.yaml locally, not
-          # branch-deploy/branch-deploy/pgsql.yaml.
-          DEPLOY_BUCKET="meradhan-general"
-          DEPLOY_PREFIX="branch_deploy/branch-deploy"
-
           COMMANDS=""
 
           COMMANDS+="echo ======================================="$'\n'
@@ -706,17 +692,10 @@ jobs:
           # Docker Network
           COMMANDS+="docker network inspect deployment_app-network >/dev/null 2>&1 || docker network create deployment_app-network"$'\n'
 
-          # ------------------------------------------------------------
-          # Fetch deployment scaffolding from S3 instead of git clone.
-          # Uses the EC2 instance's own IAM role — no PAT, no token in
-          # the command text or logs, no dependency on GitHub's uptime.
-          # `s3 sync` only transfers changed/new objects, and `timeout 60`
-          # keeps this from hanging silently if the bucket/role/network is
-          # misconfigured, same treatment as the postgres/redis waits below.
-          # ------------------------------------------------------------
+          # Fetch deployment scaffolding from S3 (instance role auth, no PAT)
           COMMANDS+="rm -rf branch-deploy"$'\n'
           COMMANDS+="mkdir -p branch-deploy"$'\n'
-          COMMANDS+="timeout 60 aws s3 sync \"s3://${DEPLOY_BUCKET}/${DEPLOY_PREFIX}/\" branch-deploy/ --delete || { echo '=== S3 sync failed or timed out ==='; exit 1; }"$'\n'
+          COMMANDS+="aws s3 sync \"s3://meradhan-general/branch_deploy/branch-deploy/\" branch-deploy/ --delete"$'\n'  
 
           COMMANDS+="cd branch-deploy"$'\n'
           COMMANDS+="pwd"$'\n'
@@ -727,40 +706,23 @@ jobs:
           COMMANDS+="docker compose -f filebeat.yaml ps"$'\n'
 
           # PostgreSQL
-          # Bounded readiness check: an unhealthy container fails loudly
-          # at 60s with logs printed, instead of hanging the SSM command
-          # for up to an hour with no visibility.
           COMMANDS+="docker compose -f pgsql.yaml up -d"$'\n'
-          COMMANDS+="timeout 60 bash -c 'until docker exec postgres pg_isready >/dev/null 2>&1; do sleep 2; done' || { echo '=== Postgres failed to become ready within 60s ==='; docker logs postgres --tail 100; exit 1; }"$'\n'
+          COMMANDS+="until docker exec postgres pg_isready >/dev/null 2>&1; do sleep 2; done"$'\n'
           COMMANDS+="docker compose -f pgsql.yaml ps"$'\n'
 
           # Redis
           COMMANDS+="docker compose -f redis.yaml up -d"$'\n'
-          COMMANDS+="timeout 30 bash -c 'until docker exec redis redis-cli ping >/dev/null 2>&1; do sleep 2; done' || { echo '=== Redis failed to become ready within 30s ==='; docker logs redis --tail 100; exit 1; }"$'\n'
+          COMMANDS+="until docker exec redis redis-cli ping >/dev/null 2>&1; do sleep 2; done"$'\n'
           COMMANDS+="docker compose -f redis.yaml ps"$'\n'
 
           # Restore database
           COMMANDS+="chmod +x restore.sh"$'\n'
-          COMMANDS+="./restore.sh ${{ inputs.environment }}.backup || { echo '=== restore.sh failed ==='; docker ps -a; exit 1; }"$'\n'
+          COMMANDS+="./restore.sh ${{ inputs.environment }}.backup"$'\n'
 
           COMMANDS+="cd /"$'\n'
           COMMANDS+="docker ps"$'\n'
 
           # Deploy Applications
-          # Pulls run in parallel so total pull time is bounded by the
-          # single slowest image rather than the sum of all of them.
-          COMMANDS+="echo"$'\n'
-          COMMANDS+="echo ======================================="$'\n'
-          COMMANDS+="echo Pulling images"$'\n'
-          COMMANDS+="echo ======================================="$'\n'
-
-          for REPO in "${!SERVICES[@]}"
-          do
-              IMAGE="450321244603.dkr.ecr.ap-south-1.amazonaws.com/${REPO}:latest"
-              COMMANDS+="docker pull ${IMAGE} &"$'\n'
-          done
-          COMMANDS+="wait"$'\n'
-
           for REPO in "${!SERVICES[@]}"
           do
               PORT="${SERVICES[$REPO]}"
@@ -770,6 +732,8 @@ jobs:
               COMMANDS+="echo ======================================="$'\n'
               COMMANDS+="echo Deploying ${REPO}"$'\n'
               COMMANDS+="echo ======================================="$'\n'
+
+              COMMANDS+="docker pull ${IMAGE}"$'\n'
 
               COMMANDS+="docker rm -f ${REPO} >/dev/null 2>&1 || true"$'\n'
 
@@ -791,45 +755,14 @@ jobs:
           echo "======================================"
           echo "$COMMANDS"
 
-          # ------------------------------------------------------------
-          # Build the send-command request as real JSON via jq instead of
-          # AWS CLI shorthand syntax. Large multi-line strings can be
-          # mis-parsed by the shorthand `commands="$COMMANDS"` form; jq's
-          # --arg always produces a correctly-escaped JSON string.
-          # ------------------------------------------------------------
-          PAYLOAD_FILE=$(mktemp)
-          jq -n \
-            --arg doc "AWS-RunShellScript" \
-            --arg instance_id "$INSTANCE_ID" \
-            --arg cmd "$COMMANDS" \
-            '{
-              DocumentName: $doc,
-              InstanceIds: [$instance_id],
-              Parameters: { commands: [$cmd] }
-            }' > "$PAYLOAD_FILE"
-
-          set +e
           COMMAND_ID=$(aws ssm send-command \
-            --cli-input-json "file://$PAYLOAD_FILE" \
+            --instance-ids "$INSTANCE_ID" \
+            --document-name "AWS-RunShellScript" \
+            --parameters commands="$COMMANDS" \
             --query "Command.CommandId" \
-            --output text 2>send_command_error.log)
-          SEND_STATUS=$?
-          set -e
-          rm -f "$PAYLOAD_FILE"
-
-          if [ $SEND_STATUS -ne 0 ] || [ -z "$COMMAND_ID" ] || [ "$COMMAND_ID" = "None" ]; then
-            echo "======================================"
-            echo "Failed to submit SSM command"
-            echo "======================================"
-            cat send_command_error.log
-            exit 1
-          fi
+            --output text)
 
           echo "Command ID : $COMMAND_ID"
-
-          # Brief pause: get-command-invocation can return
-          # InvocationDoesNotExist for a moment right after send-command.
-          sleep 3
 
           while true
           do
@@ -884,66 +817,6 @@ jobs:
           echo "Deployment Completed Successfully"
           echo "======================================"
 
-      - name: Get Listener ARN & VPC ID
-        id: get_listener
-        shell: bash
-        run: |
-          set -e
-
-          if [ "${{ inputs.environment }}" = "stage" ]; then
-            LISTENER_ARN_VAL="${{ vars.STAGE_LISTENER_ARN }}"
-            VPC_ID_VAL="${{ vars.STAGE_VPC_ID }}"
-            MISSING_LISTENER_VAR="STAGE_LISTENER_ARN"
-            MISSING_VPC_VAR="STAGE_VPC_ID"
-          else
-            LISTENER_ARN_VAL="${{ vars.PROD_LISTENER_ARN }}"
-            VPC_ID_VAL="${{ vars.PROD_VPC_ID }}"
-            MISSING_LISTENER_VAR="PROD_LISTENER_ARN"
-            MISSING_VPC_VAR="PROD_VPC_ID"
-          fi
-
-          # Trim accidental whitespace/newlines
-          LISTENER_ARN_VAL="$(echo -n "$LISTENER_ARN_VAL" | xargs)"
-          VPC_ID_VAL="$(echo -n "$VPC_ID_VAL" | xargs)"
-
-          echo "======================================"
-          echo "Environment requested : ${{ inputs.environment }}"
-          echo "======================================"
-
-          if [ -z "$LISTENER_ARN_VAL" ] || [ "$LISTENER_ARN_VAL" = "None" ]; then
-            echo ""
-            echo "ERROR: No Listener ARN configured for environment '${{ inputs.environment }}'."
-            echo "Fix: add '${MISSING_LISTENER_VAR}' as a variable:"
-            echo "  Settings -> Environments -> ${{ inputs.environment == 'stage' && 'staging' || 'production' }} -> Variables"
-            exit 1
-          fi
-
-          if [[ ! "$LISTENER_ARN_VAL" =~ ^arn:aws:elasticloadbalancing:.*:listener/ ]]; then
-            echo "ERROR: '${MISSING_LISTENER_VAR}' does not look like a valid ELBv2 listener ARN:"
-            echo "  Got: $LISTENER_ARN_VAL"
-            exit 1
-          fi
-
-          if [ -z "$VPC_ID_VAL" ] || [ "$VPC_ID_VAL" = "None" ]; then
-            echo ""
-            echo "ERROR: No VPC ID configured for environment '${{ inputs.environment }}'."
-            echo "Fix: add '${MISSING_VPC_VAR}' as a variable:"
-            echo "  Settings -> Environments -> ${{ inputs.environment == 'stage' && 'staging' || 'production' }} -> Variables"
-            exit 1
-          fi
-
-          if [[ ! "$VPC_ID_VAL" =~ ^vpc-[a-z0-9]+$ ]]; then
-            echo "ERROR: '${MISSING_VPC_VAR}' does not look like a valid VPC ID:"
-            echo "  Got: $VPC_ID_VAL"
-            exit 1
-          fi
-
-          echo "LISTENER_ARN=$LISTENER_ARN_VAL" >> "$GITHUB_ENV"
-          echo "VPC_ID=$VPC_ID_VAL" >> "$GITHUB_ENV"
-
-          echo "Resolved Listener ARN : $LISTENER_ARN_VAL"
-          echo "Resolved VPC ID       : $VPC_ID_VAL"
-          echo "======================================"
 
       - name: Create or Reuse Target Groups & Listener Rules
         id: tg_listener
