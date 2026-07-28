@@ -824,50 +824,14 @@ jobs:
           echo "======================================"
           echo "$COMMANDS"
 
-          # ------------------------------------------------------------
-          # Build the send-command request as real JSON via jq instead of
-          # AWS CLI shorthand syntax. $COMMANDS is large, multi-line, and
-          # contains embedded double quotes (the git config line) — the
-          # shorthand parser (`commands="$COMMANDS"`) can silently
-          # mis-parse or reject input like that, and there was no
-          # fallback if it failed, so `set -e` killed the whole job with
-          # an opaque exit code right after this point. jq's --arg always
-          # produces a correctly-escaped JSON string no matter what's
-          # inside, so this sidesteps that class of failure entirely.
-          # ------------------------------------------------------------
-          PAYLOAD_FILE=$(mktemp)
-          jq -n \
-            --arg doc "AWS-RunShellScript" \
-            --arg instance_id "$INSTANCE_ID" \
-            --arg cmd "$COMMANDS" \
-            '{
-              DocumentName: $doc,
-              InstanceIds: [$instance_id],
-              Parameters: { commands: [$cmd] }
-            }' > "$PAYLOAD_FILE"
-
-          set +e
           COMMAND_ID=$(aws ssm send-command \
-            --cli-input-json "file://$PAYLOAD_FILE" \
+            --instance-ids "$INSTANCE_ID" \
+            --document-name "AWS-RunShellScript" \
+            --parameters commands="$COMMANDS" \
             --query "Command.CommandId" \
-            --output text 2>send_command_error.log)
-          SEND_STATUS=$?
-          set -e
-          rm -f "$PAYLOAD_FILE"
-
-          if [ $SEND_STATUS -ne 0 ] || [ -z "$COMMAND_ID" ] || [ "$COMMAND_ID" = "None" ]; then
-            echo "======================================"
-            echo "Failed to submit SSM command"
-            echo "======================================"
-            cat send_command_error.log
-            exit 1
-          fi
+            --output text)
 
           echo "Command ID : $COMMAND_ID"
-
-          # Brief pause: get-command-invocation can return
-          # InvocationDoesNotExist for a moment right after send-command.
-          sleep 3
 
           while true
           do
@@ -921,6 +885,7 @@ jobs:
           echo "======================================"
           echo "Deployment Completed Successfully"
           echo "======================================"
+
 
       - name: Get Listener ARN & VPC ID
         id: get_listener
