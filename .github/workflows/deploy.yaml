@@ -690,8 +690,11 @@ jobs:
             echo "======================================"
 
 
+
       - name: Run commands
         shell: bash
+        env:
+          GIT_PAT: ${{ vars.GIT_PAT }}
         run: |
           set -e
 
@@ -755,6 +758,9 @@ jobs:
 
           # Docker Network
           COMMANDS+="docker network inspect deployment_app-network >/dev/null 2>&1 || docker network create deployment_app-network"$'\n'
+
+          # Configure GitHub authentication
+          COMMANDS+="git config --global url.\"https://${GIT_PAT}@github.com/\".insteadOf \"https://github.com/\""$'\n'
 
           # Fresh clone deployment repo
           COMMANDS+="rm -rf branch-deploy"$'\n'
