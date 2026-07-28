@@ -129,6 +129,9 @@ export class CustomerProfileManager {
           ...(data.crmRiskProfile !== undefined && {
             crmRiskProfile: data.crmRiskProfile,
           }),
+          ...(data.crmRiskProfileRemarks !== undefined && {
+            crmRiskProfileRemarks: data.crmRiskProfileRemarks?.trim() || null,
+          }),
           utility: {
             update: {
               ...(data.status !== undefined && { accountStatus: data.status }),

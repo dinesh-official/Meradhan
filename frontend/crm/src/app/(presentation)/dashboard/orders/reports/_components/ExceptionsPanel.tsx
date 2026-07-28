@@ -109,7 +109,11 @@ function buildExceptions(failures: LogFailure[], orders: OrderReportRegisterRow[
 
   for (const o of orders) {
     const hours = differenceInHours(Date.now(), new Date(o.createdAt));
-    if (o.paymentStatus === "PENDING" && hours > 24) {
+    if (
+      o.paymentProvider !== "CUSTOM" &&
+      o.paymentStatus === "PENDING" &&
+      hours > 24
+    ) {
       out.push({
         id: `EXC-P${o.id}`,
         type: "Orders without pay-in",
@@ -148,7 +152,7 @@ function buildExceptions(failures: LogFailure[], orders: OrderReportRegisterRow[
         orderNumber: o.orderNumber,
         customer: customerFullName(o),
         isin: o.isin,
-        description: `Workflow: ${mapOrderWorkflowStatus(o.status, o.paymentStatus)}`,
+        description: `Workflow: ${mapOrderWorkflowStatus(o.status)}`,
         severity: "Medium",
         status: "Closed",
         raised: format(new Date(o.createdAt), "dd MMM, HH:mm"),

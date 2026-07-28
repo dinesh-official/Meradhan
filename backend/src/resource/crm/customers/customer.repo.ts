@@ -64,6 +64,7 @@ export class CustomerProfileRepo {
         return {
             ...profile,
             crmRiskProfile: user.crmRiskProfile,
+            crmRiskProfileRemarks: user.crmRiskProfileRemarks,
             kycProgress: profile.kycProgress ?? kycProgress,
         };
     }

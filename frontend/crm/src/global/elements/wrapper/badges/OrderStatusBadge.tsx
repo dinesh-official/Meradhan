@@ -6,21 +6,13 @@ import { getCrmOrderStatusDisplay } from "@/global/constants/order";
 
 export default function OrderStatusBadge({
   status,
-  paymentStatus,
-  paymentProvider,
   prefix,
 }: {
   status: string;
-  paymentStatus?: string | null;
-  paymentProvider?: string | null;
   /** e.g. "Settlement" — shown before the status label */
   prefix?: string;
 }) {
-  const display = getCrmOrderStatusDisplay(
-    status,
-    paymentStatus,
-    paymentProvider,
-  );
+  const display = getCrmOrderStatusDisplay(status);
 
   return (
     <Badge

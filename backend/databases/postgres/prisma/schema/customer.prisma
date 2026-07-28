@@ -99,6 +99,8 @@ model CustomerProfileDataModel {
 
     /// CRM-only risk level (LOW / MEDIUM / HIGH). Not used by KYC questionnaire or customer app.
     crmRiskProfile CrmRiskProfile?
+    /// CRM-only remarks for the manually assigned risk profile.
+    crmRiskProfileRemarks String?
 
     createdAt     DateTime        @default(now())
     updatedAt     DateTime        @updatedAt
