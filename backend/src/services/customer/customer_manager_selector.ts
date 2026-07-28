@@ -31,6 +31,7 @@ export const fullCustomerProfileSelect: DataBaseSchema.CustomerProfileDataModelS
     allowSEBITerms: true,
     isAFatcaCustomer: true,
     crmRiskProfile: true,
+    crmRiskProfileRemarks: true,
 
     riskProfile: true,
     createdAt: true,

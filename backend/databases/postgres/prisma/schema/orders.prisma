@@ -1,3 +1,8 @@
+enum OrderType {
+    BUY
+    SELL
+}
+
 model Order {
     id Int @id @default(autoincrement())
 
@@ -14,14 +19,14 @@ model Order {
     /// `customerProfileId` at the business level — exactly one of the two is
     /// expected to be set for any Order created through the CRM
     /// assign-counterparty flow.
-    linkedRfqParticipantCode String? @db.VarChar(64)
-
+    linkedRfqParticipantCode String?   @db.VarChar(64)
+    orderType                OrderType @default(BUY)
     // Payment Details (Generic)
-    paymentProvider String? // e.g., "RAZORPAY"
-    paymentOrderId  String? @unique // Provider's Order ID (e.g., order_123)
-    paymentId       String? @unique // Provider's Payment ID (e.g., pay_123)
-    transferId      String? // Provider's Payment ID (e.g., pay_123)
-    paymentMetadata Json? // Store signature, method, vpa, etc. here
+    paymentProvider          String? // e.g., "RAZORPAY"
+    paymentOrderId           String?   @unique // Provider's Order ID (e.g., order_123)
+    paymentId                String?   @unique // Provider's Payment ID (e.g., pay_123)
+    transferId               String? // Provider's Payment ID (e.g., pay_123)
+    paymentMetadata          Json? // Store signature, method, vpa, etc. here
 
     paymentStatus PaymentStatus @default(PENDING)
     status        OrderStatus   @default(PENDING)

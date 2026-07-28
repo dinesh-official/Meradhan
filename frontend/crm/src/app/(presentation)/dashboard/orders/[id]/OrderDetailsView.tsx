@@ -624,6 +624,9 @@ function OrderDetailsView() {
     String(paymentProviderDisplay ?? order.paymentProvider ?? "")
       .trim()
       .toUpperCase() === "CUSTOM";
+  // CUSTOM deals have no PG capture — payment status stays PENDING and is not meaningful.
+  const showPaymentStatusBadge =
+    Boolean(paymentStatusDisplay) && !isCustomPaymentProvider;
   const linkedRfqNumber =
     orderInfo?.rfqNumber?.trim() ||
     order.reqOrderNumber?.trim() ||
@@ -650,12 +653,10 @@ function OrderDetailsView() {
           <div className="flex flex-wrap items-center justify-end gap-2">
             <OrderStatusBadge
               status={order.status}
-              paymentStatus={order.paymentStatus}
-              paymentProvider={order.paymentProvider}
               prefix="Settlement"
             />
-            {paymentStatusDisplay ? (
-              <StatusBadge value={paymentStatusDisplay} prefix="Payment" />
+            {showPaymentStatusBadge ? (
+              <StatusBadge value={paymentStatusDisplay!} prefix="Payment" />
             ) : null}
             {showOrderActions ? (
               <DropdownMenu>
@@ -1850,8 +1851,8 @@ function OrderDetailsView() {
                   <CreditCard className="h-4 w-4 text-muted-foreground" />
                   Payment Information
                 </CardTitle>
-                {paymentStatusDisplay ? (
-                  <StatusBadge value={paymentStatusDisplay} />
+                {showPaymentStatusBadge ? (
+                  <StatusBadge value={paymentStatusDisplay!} />
                 ) : null}
               </div>
             </CardHeader>

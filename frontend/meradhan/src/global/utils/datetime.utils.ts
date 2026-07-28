@@ -100,11 +100,28 @@ export const dateTimeUtils = {
       return new Date(y, m - 1, d); // ✅ always local time, no UTC issue
     }
 
-    // --- 2️⃣ DD/MM/YYYY or MM/DD/YYYY ---
+    // --- 2️⃣ DD-MMM-YYYY / DD-MMM-YY (NSE RFQ master + order metadata deal dates) ---
+    const mmmMatch = /^(\d{1,2})[-\/\s]([A-Za-z]{3})[-\/\s](\d{2}|\d{4})$/.exec(
+      str,
+    );
+    if (mmmMatch) {
+      const day = Number(mmmMatch[1]);
+      const monToken = mmmMatch[2].slice(0, 1).toUpperCase() + mmmMatch[2].slice(1).toLowerCase();
+      const month = MONTHS_SHORT.indexOf(monToken);
+      let year = Number(mmmMatch[3]);
+      if (mmmMatch[3].length === 2) {
+        year += year >= 70 ? 1900 : 2000;
+      }
+      if (month >= 0 && day >= 1 && day <= 31) {
+        return new Date(year, month, day);
+      }
+    }
+
+    // --- 3️⃣ DD/MM/YYYY or MM/DD/YYYY (numeric only) ---
     const normalized = str.replace(/[.\-]/g, "/");
     const parts = normalized.split("/");
 
-    if (parts.length === 3) {
+    if (parts.length === 3 && parts.every((p) => /^\d+$/.test(p))) {
       const [a, b, c] = parts.map(Number);
 
       if (a > 31 || b > 31) return null; // sanity check
@@ -123,7 +140,7 @@ export const dateTimeUtils = {
       }
     }
 
-    // --- 3️⃣ Fallback: textual formats ("Nov 2, 2001") ---
+    // --- 4️⃣ Fallback: textual formats ("Nov 2, 2001") ---
     const fallback = new Date(Date.parse(str));
     if (!isNaN(fallback.getTime())) return fallback;
 
