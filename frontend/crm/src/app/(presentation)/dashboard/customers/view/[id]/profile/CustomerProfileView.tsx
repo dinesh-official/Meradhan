@@ -198,6 +198,7 @@ function CustomerProfileView({ profileId }: { profileId: number }) {
         <CustomerCrmRiskProfileSection
           profileId={profileId}
           crmRiskProfile={customer.crmRiskProfile ?? null}
+          crmRiskProfileRemarks={customer.crmRiskProfileRemarks ?? null}
           canEdit={canEditCustomer}
         />
       </div>

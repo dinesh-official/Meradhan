@@ -339,6 +339,8 @@ export type CustomerByIdPayload = {
   isAPep: boolean;
   /** CRM-only risk level. Independent of KYC questionnaire `riskProfile`. */
   crmRiskProfile: CrmRiskProfile | null;
+  /** CRM-only remarks captured while assigning the risk profile. */
+  crmRiskProfileRemarks: string | null;
   utility: DetailCustomerUtility;
 };
 

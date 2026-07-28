@@ -156,6 +156,30 @@ export class OrderService {
     return null;
   }
 
+  private dealDateFromBondDetailsSnapshot(bondDetails: unknown): string | null {
+    if (!bondDetails || typeof bondDetails !== "object" || Array.isArray(bondDetails)) {
+      return null;
+    }
+    const b = bondDetails as Record<string, unknown>;
+    const p = b.pricing;
+    if (!p || typeof p !== "object" || Array.isArray(p)) return null;
+    const dd = (p as Record<string, unknown>).dealDate;
+    if (typeof dd === "string" && dd.trim()) return dd.trim();
+    return null;
+  }
+
+  private dateFromOrderMetadata(
+    metadata: unknown,
+    key: "dealDate" | "settlementDate",
+  ): string | null {
+    if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) {
+      return null;
+    }
+    const raw = (metadata as Record<string, unknown>)[key];
+    if (typeof raw === "string" && raw.trim()) return raw.trim();
+    return null;
+  }
+
   private pricingNumberFromBondDetailsSnapshot(
     bondDetails: unknown,
     key: "accruedInterest" | "settlementAmount",
@@ -431,8 +455,7 @@ export class OrderService {
    * - returns `cancelled: 0` (instead of throwing) when there is nothing to cancel,
    *   so the frontend dismiss handler can fire-and-forget safely.
    *
-   * Pending / cancelled payment maps to dashboard "Not completed"
-   * (see frontend `isCheckoutNotCompleted`).
+   * Pending payment on Razorpay checkout maps to dashboard "Pending" via order status.
    */
   async cancelOrder(
     customerId: number,
@@ -666,18 +689,32 @@ export class OrderService {
         stampDutyAmount: number | null;
       }
     >();
+    const rfqMasterByNumber = new Map<
+      string,
+      { dealDate: string | null; settlementDate: string | null }
+    >();
     if (rfqKeys.length > 0) {
-      const settleRows = await db.dataBase.settleOrderModel.findMany({
-        where: { orderNumber: { in: rfqKeys } },
-        select: {
-          orderNumber: true,
-          settleStatus: true,
-          modSettleDate: true,
-          modAccrInt: true,
-          modConsideration: true,
-          stampDutyAmount: true,
-        },
-      });
+      const [settleRows, rfqMasterRows] = await Promise.all([
+        db.dataBase.settleOrderModel.findMany({
+          where: { orderNumber: { in: rfqKeys } },
+          select: {
+            orderNumber: true,
+            settleStatus: true,
+            modSettleDate: true,
+            modAccrInt: true,
+            modConsideration: true,
+            stampDutyAmount: true,
+          },
+        }),
+        db.dataBase.rFQMasterISIN.findMany({
+          where: { number: { in: rfqKeys } },
+          select: {
+            number: true,
+            date: true,
+            settlementDate: true,
+          },
+        }),
+      ]);
       for (const row of settleRows) {
         if (!settleByRfq.has(row.orderNumber)) {
           settleByRfq.set(row.orderNumber, {
@@ -692,18 +729,42 @@ export class OrderService {
           });
         }
       }
+      for (const row of rfqMasterRows) {
+        if (!rfqMasterByNumber.has(row.number)) {
+          rfqMasterByNumber.set(row.number, {
+            dealDate:
+              row.date != null && String(row.date).trim() !== ""
+                ? String(row.date).trim()
+                : null,
+            settlementDate:
+              row.settlementDate != null && String(row.settlementDate).trim() !== ""
+                ? String(row.settlementDate).trim()
+                : null,
+          });
+        }
+      }
     }
 
     const data = orders.map((order) => {
       const linkKey = this.settleOrderLinkKey(order);
       const info = linkKey != null ? settleByRfq.get(linkKey) : undefined;
+      const rfqMaster = linkKey != null ? rfqMasterByNumber.get(linkKey) : undefined;
       const settleStatus = info?.settleStatus ?? null;
       const nseSettle =
         info?.modSettleDate != null && String(info.modSettleDate).trim() !== ""
           ? String(info.modSettleDate).trim()
           : null;
       const snapshotSettle = this.settlementDateFromBondDetailsSnapshot(order.bondDetails);
-      const settlementDate = nseSettle ?? snapshotSettle;
+      const metadataSettle = this.dateFromOrderMetadata(order.metadata, "settlementDate");
+      const settlementDate =
+        nseSettle ??
+        rfqMaster?.settlementDate ??
+        metadataSettle ??
+        snapshotSettle;
+
+      const snapshotDeal = this.dealDateFromBondDetailsSnapshot(order.bondDetails);
+      const metadataDeal = this.dateFromOrderMetadata(order.metadata, "dealDate");
+      const dealDate = rfqMaster?.dealDate ?? metadataDeal ?? snapshotDeal;
 
       const snapshotAccrued = this.pricingNumberFromBondDetailsSnapshot(
         order.bondDetails,
@@ -732,6 +793,7 @@ export class OrderService {
       return {
         ...order,
         settleStatus,
+        dealDate,
         settlementDate,
         accruedInterest,
         settlementAmount,
