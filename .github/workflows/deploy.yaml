@@ -726,8 +726,14 @@ jobs:
           # in sync with your branch-deploy repo via a separate
           # `aws s3 sync` step (in this workflow or another) whenever
           # those files change — this step only *consumes* it.
+          # NOTE: objects in this bucket are nested one level deeper than
+          # the top-level prefix — e.g. the actual pgsql.yaml lives at
+          # s3://meradhan-general/branch_deploy/branch-deploy/pgsql.yaml.
+          # The prefix below points at that inner folder directly so the
+          # sync lands files at branch-deploy/pgsql.yaml locally, not
+          # branch-deploy/branch-deploy/pgsql.yaml.
           DEPLOY_BUCKET="meradhan-general"
-          DEPLOY_PREFIX="branch_deploy"
+          DEPLOY_PREFIX="branch_deploy/branch-deploy"
 
           COMMANDS=""
 
@@ -745,6 +751,14 @@ jobs:
           # Docker Network
           COMMANDS+="docker network inspect deployment_app-network >/dev/null 2>&1 || docker network create deployment_app-network"$'\n'
 
+          # ------------------------------------------------------------
+          # Fetch deployment scaffolding from S3 instead of git clone.
+          # Uses the EC2 instance's own IAM role — no PAT, no token in
+          # the command text or logs, no dependency on GitHub's uptime.
+          # `s3 sync` only transfers changed/new objects, and `timeout 60`
+          # keeps this from hanging silently if the bucket/role/network is
+          # misconfigured, same treatment as the postgres/redis waits below.
+          # ------------------------------------------------------------
           COMMANDS+="rm -rf branch-deploy"$'\n'
           COMMANDS+="mkdir -p branch-deploy"$'\n'
           COMMANDS+="timeout 60 aws s3 sync \"s3://${DEPLOY_BUCKET}/${DEPLOY_PREFIX}/\" branch-deploy/ --delete || { echo '=== S3 sync failed or timed out ==='; exit 1; }"$'\n'
@@ -757,7 +771,10 @@ jobs:
           COMMANDS+="docker compose -f filebeat.yaml up -d"$'\n'
           COMMANDS+="docker compose -f filebeat.yaml ps"$'\n'
 
-
+          # PostgreSQL
+          # Bounded readiness check: an unhealthy container fails loudly
+          # at 60s with logs printed, instead of hanging the SSM command
+          # for up to an hour with no visibility.
           COMMANDS+="docker compose -f pgsql.yaml up -d"$'\n'
           COMMANDS+="timeout 60 bash -c 'until docker exec postgres pg_isready >/dev/null 2>&1; do sleep 2; done' || { echo '=== Postgres failed to become ready within 60s ==='; docker logs postgres --tail 100; exit 1; }"$'\n'
           COMMANDS+="docker compose -f pgsql.yaml ps"$'\n'
