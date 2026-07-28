@@ -388,68 +388,45 @@ jobs:
         id: create_ecr
         shell: bash
         run: |
-          set -euo pipefail
 
-          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-          REGION="${AWS_REGION:-${AWS_DEFAULT_REGION:-$(aws configure get region)}}"
+          set -e
 
-          echo "======================================"
-          echo "AWS Account : $ACCOUNT_ID"
-          echo "AWS Region  : $REGION"
-          echo "======================================"
+          REPOSITORIES=(
+            "$FRONTEND_NAME"
+            "$BACKEND_NAME"
+            "$CRM_NAME"
+            "$WORKER_NAME"
+          )
 
-          REPOSITORIES=()
-
-          # Add only the selected applications
-          if [ "${{ inputs.frontend }}" = "true" ]; then
-            REPOSITORIES+=("$FRONTEND_NAME")
-          fi
-
-          if [ "${{ inputs.backend }}" = "true" ]; then
-            REPOSITORIES+=("$BACKEND_NAME")
-          fi
-
-          if [ "${{ inputs.crm }}" = "true" ]; then
-            REPOSITORIES+=("$CRM_NAME")
-          fi
-
-          if [ "${{ inputs.worker }}" = "true" ]; then
-            REPOSITORIES+=("$WORKER_NAME")
-          fi
-
-          if [ ${#REPOSITORIES[@]} -eq 0 ]; then
-            echo "ERROR: No repositories selected."
-            exit 1
-          fi
-
-          REPOSITORY_NAMES=""
           REPOSITORY_URIS=""
 
           echo "======================================"
-          echo "Repositories Selected"
-          printf ' - %s\n' "${REPOSITORIES[@]}"
+          echo "Creating ECR Repositories"
           echo "======================================"
 
-          for REPO in "${REPOSITORIES[@]}"; do
+          for REPO in "${REPOSITORIES[@]}"
+          do
+
+            [ -z "$REPO" ] && continue
 
             echo ""
             echo "Repository : $REPO"
 
-            if aws ecr describe-repositories \
-                --repository-names "$REPO" \
-                --region "$REGION" >/dev/null 2>&1; then
+            EXISTS=$(aws ecr describe-repositories \
+              --repository-names "$REPO" \
+              --query "repositories[0].repositoryName" \
+              --output text 2>/dev/null || true)
+
+            if [ "$EXISTS" = "$REPO" ]; then
 
               echo "Status : Already Exists"
 
             else
 
-              echo "Creating repository..."
-
               aws ecr create-repository \
                 --repository-name "$REPO" \
                 --image-scanning-configuration scanOnPush=true \
-                --image-tag-mutability MUTABLE \
-                --region "$REGION" >/dev/null
+                --image-tag-mutability MUTABLE >/dev/null
 
               echo "Status : Created"
 
@@ -457,48 +434,26 @@ jobs:
 
             URI=$(aws ecr describe-repositories \
               --repository-names "$REPO" \
-              --region "$REGION" \
               --query "repositories[0].repositoryUri" \
               --output text)
 
-            if [ -z "$URI" ] || [ "$URI" = "None" ]; then
-              echo "ERROR: Failed to verify repository '$REPO'."
-              exit 1
-            fi
-
-            REPOSITORY_NAMES+="${REPO},"
-            REPOSITORY_URIS+="${URI},"
+            REPOSITORY_URIS="${REPOSITORY_URIS}${URI},"
 
             echo "Repository URI : $URI"
             echo "--------------------------------------"
 
           done
 
-          REPOSITORY_NAMES="${REPOSITORY_NAMES%,}"
-          REPOSITORY_URIS="${REPOSITORY_URIS%,}"
-
           echo ""
           echo "======================================"
           echo "ECR Repositories Ready"
           echo "======================================"
-          echo "Repository Names : $REPOSITORY_NAMES"
-          echo "Repository URIs  : $REPOSITORY_URIS"
 
-          echo "repository_names=$REPOSITORY_NAMES" >> "$GITHUB_OUTPUT"
-          echo "repository_uris=$REPOSITORY_URIS" >> "$GITHUB_OUTPUT"
+          echo "Repository URIs : ${REPOSITORY_URIS%,}"
 
-          echo ""
-          echo "======================================"
-          echo "Verification"
-          echo "======================================"
+          echo "repository_uris=${REPOSITORY_URIS%,}" >> "$GITHUB_OUTPUT"    
 
-          for REPO in "${REPOSITORIES[@]}"; do
-            aws ecr describe-repositories \
-              --repository-names "$REPO" \
-              --region "$REGION" \
-              --query "repositories[0].{Name:repositoryName,URI:repositoryUri}" \
-              --output table
-          done          
+
 
       - name: Build & Push Docker Images
         shell: bash
@@ -737,26 +692,6 @@ jobs:
 
           COMMANDS=""
 
-          COMMANDS+="set -e"$'\n'
-
-          # ------------------------------------------------------------
-          # Global diagnostic trap: if ANY command in this script fails,
-          # dump container status and the last 50 log lines of every
-          # container that exists before exiting. This means whatever
-          # breaks next (not just postgres/redis) is visible in the same
-          # SSM output, without needing a follow-up docker logs round trip.
-          # ------------------------------------------------------------
-          COMMANDS+="on_error() {"$'\n'
-          COMMANDS+="  echo"$'\n'
-          COMMANDS+="  echo '=== FAILURE: dumping container diagnostics ==='"$'\n'
-          COMMANDS+="  docker ps -a"$'\n'
-          COMMANDS+="  for c in \$(docker ps -a --format '{{.Names}}'); do"$'\n'
-          COMMANDS+="    echo; echo \"--- logs: \$c (last 50 lines) ---\";"$'\n'
-          COMMANDS+="    docker logs \"\$c\" --tail 50 2>&1 || true;"$'\n'
-          COMMANDS+="  done"$'\n'
-          COMMANDS+="}"$'\n'
-          COMMANDS+="trap on_error ERR"$'\n'
-
           COMMANDS+="echo ======================================="$'\n'
           COMMANDS+="echo Starting Deployment"$'\n'
           COMMANDS+="echo ======================================="$'\n'
@@ -806,7 +741,7 @@ jobs:
 
           # Restore database
           COMMANDS+="chmod +x restore.sh"$'\n'
-          COMMANDS+="./restore.sh ${{ inputs.environment }}.backup"$'\n'
+          COMMANDS+="./restore.sh ${{ inputs.environment }}.backup || { echo '=== restore.sh failed ==='; docker ps -a; exit 1; }"$'\n'
 
           COMMANDS+="cd /"$'\n'
           COMMANDS+="docker ps"$'\n'
@@ -1078,7 +1013,7 @@ jobs:
           if [ "${{ inputs.frontend }}" = "true" ]; then
             TARGET_GROUPS["tg-$FRONTEND_NAME"]="4002:$FRONTEND_NAME"
             HOST_HEADERS["tg-$FRONTEND_NAME"]="${FRONTEND_NAME}.${ROOT_DOMAIN}"
-            HEALTH_PATHS["tg-$FRONTEND_NAME"]="/faqs"
+            HEALTH_PATHS["tg-$FRONTEND_NAME"]="/"
           fi
 
           # Kibana / observability UI target group (port 5601)
