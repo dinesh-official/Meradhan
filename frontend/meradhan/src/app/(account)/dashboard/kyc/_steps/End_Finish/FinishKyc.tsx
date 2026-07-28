@@ -54,10 +54,10 @@ function FinishKyc() {
             upon completion of the verification.
           </p>
           <div className="mt-3">
-            <Link href="/bonds">
+            <Link href="/bonds" title="Explore Products" aria-label="Explore Products">
               <Button size={`lg`}>
                 Explore Products  <div className="flex justify-center items-center p-0 h-full">
-                  <IoMdArrowDropright className="p-0 text-4xl" />
+                  <IoMdArrowDropright aria-hidden="true" className="p-0 text-4xl" />
                 </div>
               </Button>
             </Link>

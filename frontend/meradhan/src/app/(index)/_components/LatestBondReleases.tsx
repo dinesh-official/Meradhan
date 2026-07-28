@@ -141,6 +141,8 @@ function LatestBondReleases({
           <div className="flex justify-center">
             <Link
               href="/bonds"
+              title="View All Bonds"
+              aria-label="View All Bonds"
               className="inline-flex items-center justify-center gap-1 rounded-md border bg-background px-6 py-2 text-sm font-medium text-foreground shadow-sm transition-all hover:bg-muted active:scale-95"
             >
               View All Bonds <span aria-hidden>→</span>

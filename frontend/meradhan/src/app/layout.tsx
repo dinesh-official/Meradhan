@@ -139,7 +139,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             __html: `(function(){try{if(localStorage.getItem('a11y-high-contrast')==='1'){document.documentElement.classList.add('dark');document.body.classList.add('high-contrast');}var f=localStorage.getItem('a11y-font-scale');if(f){document.documentElement.style.setProperty('--a11y-font-scale',f);}}catch(e){}})();`,
           }}
         />
-        <a href="#main-content" className="skip-to-content">Skip to main content</a>
+        <a href="#main-content" title="Skip to main content" aria-label="Skip to main content" className="skip-to-content">Skip to main content</a>
         <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-PDZ7WFGD"

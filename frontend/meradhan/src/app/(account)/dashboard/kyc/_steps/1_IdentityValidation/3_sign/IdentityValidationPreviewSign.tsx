@@ -32,6 +32,8 @@ function IdentityValidationPreviewSign() {
           <Image
             src={genMediaUrl(state.step_1.sign.url)}
             alt="PAN Card"
+            title="PAN Card"
+            aria-label="PAN Card"
             width={1140}
             height={597}
             className="bg-gray-50 border border-gray-200 rounded-2xl w-80 object-cover"

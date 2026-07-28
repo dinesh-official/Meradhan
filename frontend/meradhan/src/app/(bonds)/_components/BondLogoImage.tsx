@@ -35,6 +35,8 @@ export default function BondLogoImage({
       <Image
         src={src}
         alt={alt}
+        title={alt}
+        aria-label={alt}
         width={96}
         height={96}
         className={cn("h-full w-full object-contain", imgClassName)}

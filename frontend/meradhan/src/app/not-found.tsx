@@ -23,13 +23,15 @@ export default function NotFound() {
           width={1200}
           height={800}
           alt="No found"
+          title="No found"
+          aria-label="No found"
           className="w-80 h-auto"
         />
 
         <p className="max-w-md text-gray-600">
           Oops! The page you’re looking for doesn’t exist or has been moved.
         </p>
-        <Link className="px-6 rounded-xl text-secondary" href={"/"}>
+        <Link className="px-6 rounded-xl text-secondary" href={"/"} title="Go Back Home" aria-label="Go Back Home">
           Go Back Home
         </Link>
       </div>

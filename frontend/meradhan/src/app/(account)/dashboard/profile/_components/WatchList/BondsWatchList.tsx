@@ -96,6 +96,8 @@ function BondsWatchList() {
                 <TableCell className="text-primary  py-4 px-6">
                   <Link
                     href={`/bonds/detail/${e.isin}`}
+                    title={e.isin}
+                    aria-label={e.isin}
                     className="flex items-center gap-3"
                   >
                     {e.isin}{" "}
@@ -115,6 +117,7 @@ function BondsWatchList() {
                     href={`/bonds/detail/${e.isin}`}
                     className="cursor-pointer"
                     aria-label={`View ${e.bondName} bond details`}
+                    title={`View ${e.bondName} bond details`}
                   >
                     <FaEye aria-hidden="true" className="text-primary" />
                   </Link>

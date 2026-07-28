@@ -70,7 +70,7 @@ export async function CorporateESignBanner() {
           </p>
         </div>
       </div>
-      <Link href={`/dashboard/corporate-kyc/e-sign/${firstRequestId}`}>
+      <Link href={`/dashboard/corporate-kyc/e-sign/${firstRequestId}`} title="Sign Now" aria-label="Sign Now">
         <Button variant="secondary" size="sm" className="w-full sm:w-auto">
           Sign Now
         </Button>

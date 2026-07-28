@@ -239,7 +239,7 @@ function VerifyOtpPopUp({
             <p className="text-[#1e3a5f] text-sm">
               We&apos;re here to help. You&apos;ve used all email and mobile OTP
               attempts. Please{" "}
-              <a href="/contact-us" className="text-primary underline">
+              <a href="/contact-us" title="Contact Us" aria-label="Contact Us" className="text-primary underline">
                 contact us
               </a>{" "}
               to verify your account safely.

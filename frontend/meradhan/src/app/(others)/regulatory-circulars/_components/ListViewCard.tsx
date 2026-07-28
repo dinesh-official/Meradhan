@@ -30,6 +30,8 @@ function ListViewCard({
         <img
           src={CMS_URL + item.regulatory_circulars_category.Logo.url}
           alt={item?.File.url}
+          title={item?.File.url}
+          aria-label={item?.File.url}
           className="w-[35px] h-auto"
         />
 
@@ -66,6 +68,8 @@ function ListViewCard({
           target="_blank"
           rel="noopener noreferrer"
           download
+          title={`Download attachment for ${item?.Name}`}
+          aria-label={`Download attachment for ${item?.Name}`}
         >
           {getFileIcon(item?.File?.url.split(".").pop() || "")}
         </a>

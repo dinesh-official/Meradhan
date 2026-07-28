@@ -149,6 +149,8 @@ function IssuerWatchListItem({
       <TableCell className="text-primary  py-4 px-6">
         <Link
           href={`/issuer-notes/${slug}`}
+          title={name}
+          aria-label={name}
           className="flex items-center gap-3 font-semibold"
         >
           {name} <BsArrowUpRightSquareFill aria-hidden="true" className="text-secondary" />
@@ -173,6 +175,7 @@ function IssuerWatchListItem({
           href={`/issuer-notes/${slug}`}
           className="cursor-pointer"
           aria-label={`View ${name} issuer notes`}
+          title={`View ${name} issuer notes`}
         >
           <FaEye aria-hidden="true" className="text-primary" />
         </Link>

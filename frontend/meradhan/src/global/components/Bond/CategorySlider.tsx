@@ -38,6 +38,8 @@ const CategorySlider = ({
         <Link
           href={e.href}
           key={index}
+          title={e.categoryName}
+          aria-label={e.categoryName}
           className="flex flex-col justify-center items-center gap-3 select-none"
         >
           <div className="flex justify-center items-center bg-primary hover:bg-secondary rounded-full w-14 h-14 text-white transition-all cursor-pointer">

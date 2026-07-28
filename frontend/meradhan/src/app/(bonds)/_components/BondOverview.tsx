@@ -274,7 +274,7 @@ export default function BondOverview({
             if (kycOk && kraOk) {
               return (
                 <div className="flex justify-center mt-8">
-                  <Link href={`/place-order/${bond.isin}`}>
+                  <Link href={`/place-order/${bond.isin}`} title="Buy This Bond" aria-label="Buy This Bond">
                     <Button className="px-8 py-2.5 bg-[#002a54] text-white hover:bg-[#001e3d] text-base font-semibold rounded-md transition-all shadow-sm hover:shadow active:scale-95 duration-200">
                       Buy This Bond
                     </Button>
@@ -288,7 +288,7 @@ export default function BondOverview({
                 <p className="text-[#1F2937] text-sm md:text-[15px] font-medium leading-relaxed">
                   You&apos;re just one step away from investing in this bond. Complete your KYC to proceed with order placement.
                 </p>
-                <Link href="/dashboard/kyc">
+                <Link href="/dashboard/kyc" title="Complete KYC" aria-label="Complete KYC">
                   <Button className="px-8 py-2.5 bg-[#E14F26] text-white hover:bg-[#C93F1B] text-base font-semibold rounded-md transition-all shadow-sm hover:shadow active:scale-95 duration-200">
                     Complete KYC
                   </Button>

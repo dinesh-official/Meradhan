@@ -24,10 +24,12 @@ const FeaturedBox = (featured: FeaturedBoxProps) => {;
   return (
     <section className="items-center gap-2 mb-10">
       <article className="w-full">
-        <Link href={`/news/${featured.slug}`}>
+        <Link href={`/news/${featured.slug}`} title={featured.title} aria-label={featured.title}>
           <Image
             src={featured.image}
             alt={featured.title}
+            title={featured.title}
+            aria-label={featured.title}
             width={1140}
             height={597}
             className="rounded-2xl w-full object-cover aspect-[16/9]"
@@ -41,7 +43,7 @@ const FeaturedBox = (featured: FeaturedBoxProps) => {;
           <span className="text-gray-500 text-sm">{featured.date}</span>
         </div>
 
-        <Link href={`/news/${featured.slug}`}>
+        <Link href={`/news/${featured.slug}`} title={featured.title} aria-label={featured.title}>
           <h2 className="mt-3 font-semibold text-2xl hover:underline leading-snug">
             {featured.title}
           </h2>
@@ -54,6 +56,8 @@ const FeaturedBox = (featured: FeaturedBoxProps) => {;
               <Image
                 src={featured.author.avatar}
                 alt={featured.author.name}
+                title={featured.author.name}
+                aria-label={featured.author.name}
                 width={32}
                 height={32}
                 className="w-full h-full object-cover"

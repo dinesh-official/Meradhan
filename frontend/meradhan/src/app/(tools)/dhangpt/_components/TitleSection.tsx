@@ -14,6 +14,8 @@ function TitleSection() {
                   height={60}
                   className="w-12 lg:w-14 h-12 lg:h-14"
                   alt="dhangpt-border.svg"
+                  title="dhangpt-border.svg"
+                  aria-label="dhangpt-border.svg"
                   src={`/static/dhangpt-border.svg`}
                 />
               </span>

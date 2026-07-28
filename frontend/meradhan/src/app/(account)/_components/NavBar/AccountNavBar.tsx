@@ -54,6 +54,7 @@ function AccountNavBar({
           <Link
             href="/"
             aria-label="Go to homepage"
+            title="Go to homepage"
             className="flex items-center meradhan-logo"
           >
             <Image
@@ -61,6 +62,8 @@ function AccountNavBar({
               width={400}
               height={200}
               alt="Mera Dhan Logo"
+              title="Mera Dhan Logo"
+              aria-label="Mera Dhan Logo"
               className="w-auto h-8 lg:h-10 logo-default"
               priority
             />
@@ -69,6 +72,8 @@ function AccountNavBar({
               width={400}
               height={200}
               alt="Mera Dhan Logo"
+              title="Mera Dhan Logo"
+              aria-label="Mera Dhan Logo"
               className="w-auto h-8 lg:h-10 logo-white"
             />
           </Link>
@@ -82,7 +87,7 @@ function AccountNavBar({
           {/* Action Buttons */}
           <div className="right-0 bottom-0 z-40 fixed sm:relative flex justify-between sm:justify-end items-center gap-8 sm:gap-5 bg-white sm:bg-transparent shadow sm:shadow-none px-4 sm:px-0 py-2 lg:py-0 border-gray-100 sm:border-0 border-t w-full sm:w-auto">
             {/* Explore All Bonds Button — always present across all account pages */}
-            <Link href="/bonds">
+            <Link href="/bonds" title="Explore All Bonds" aria-label="Explore All Bonds">
               <Button variant="outline" size="sm">
                 Explore All Bonds
               </Button>
@@ -91,7 +96,7 @@ function AccountNavBar({
             {navActions}
             {/* KYC Button */}
             {session?.kycStatus == "PENDING" && (
-              <Link href={`/dashboard/kyc`}>
+              <Link href={`/dashboard/kyc`} title={hasKycStarted ? "KYC: Pending" : "KYC: Not Started"} aria-label={hasKycStarted ? "KYC: Pending" : "KYC: Not Started"}>
                 <Button
                   variant="secondaryLight"
                   className="gap-3"
@@ -104,12 +109,16 @@ function AccountNavBar({
             )}
 
             {session?.kycStatus == "UNDER_REVIEW" && (
-              <Link href={`/dashboard/kyc`}>
+              <Link
+                href={`/dashboard/kyc`}
+                title={session?.isRekycUnderReview || session?.hasRekycExpiredFlow ? "Rekyc: Under Review" : "KYC: Under Review"}
+                aria-label={session?.isRekycUnderReview || session?.hasRekycExpiredFlow ? "Rekyc: Under Review" : "KYC: Under Review"}
+              >
                 <Button
                   variant="secondaryLight"
                   className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 gap-2"
                 >
-                  <BiSolidFileFind />{" "}
+                  <BiSolidFileFind aria-hidden="true" />{" "}
                   {session?.isRekycUnderReview || session?.hasRekycExpiredFlow
                     ? "Rekyc: Under Review"
                     : "KYC: Under Review"}
@@ -118,12 +127,12 @@ function AccountNavBar({
             )}
 
             {session?.kycStatus == "RE_KYC" && (
-              <Link href={`/dashboard/kyc`}>
+              <Link href={`/dashboard/kyc`} title="Update KYC" aria-label="Update KYC">
                 <Button
                   variant="secondaryLight"
                   className="gap-2"
                 >
-                  <FaUser /> Update KYC
+                  <FaUser aria-hidden="true" /> Update KYC
                 </Button>
               </Link>
             )}
@@ -213,6 +222,8 @@ export function ShowUserBadge(
         <DropdownMenuItem asChild>
           <Link
             href="/dashboard"
+            title="Dashboard"
+            aria-label="Dashboard"
             className="flex items-center gap-2 cursor-pointer"
           >
             <MdDashboard aria-hidden="true" /> Dashboard
@@ -224,6 +235,7 @@ export function ShowUserBadge(
             href="/logout"
             className="flex items-center gap-2 w-full text-left cursor-pointer"
             aria-label="Logout"
+            title="Logout"
           >
             <MdLogout aria-hidden="true" /> Logout
           </Link>

@@ -19,15 +19,17 @@ function NeedKyc({
     <div className="flex flex-col gap-3 py-10 w-full text-center">
       <Image
         alt="Need KYC"
+        title="Need KYC"
+        aria-label="Need KYC"
         src="/static/sad-emoji.svg"
         width={500}
         height={300}
         className="mx-auto w-18 object-cover"
       />
       <p className="mb-3">{title}</p>
-      <Link href={href || `/dashboard/kyc`}>
+      <Link href={href || `/dashboard/kyc`} title={buttonText} aria-label={buttonText}>
         <Button>
-          {buttonText} <IoMdArrowDropright />
+          {buttonText} <IoMdArrowDropright aria-hidden="true" />
         </Button>
       </Link>
       <p>{desc}</p>

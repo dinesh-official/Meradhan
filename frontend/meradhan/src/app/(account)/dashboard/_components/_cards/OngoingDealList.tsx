@@ -20,7 +20,7 @@ export function OngoingDealList({ bond }: OngoingDealListProps) {
         </div>
         <div className="relative lg:flex lg:items-end gap-5 grid grid-cols-2 w-full lg:w-auto">
           <Button variant={`outlineSecondary`} className="w-full lg:w-auto" asChild>
-            <Link href={`/bonds/detail/${bond.isin}`} target="_blank">View Details</Link>
+            <Link href={`/bonds/detail/${bond.isin}`} target="_blank" title="View Details" aria-label="View Details">View Details</Link>
           </Button>
           {/* {bond.allowForPurchase && <Button className="w-full lg:w-auto" asChild>
             <Link href={`/place-order/${bond.isin}`}>Buy Now</Link>

@@ -45,6 +45,8 @@ function Payment({
           height={100}
           className="w-40 h-auto"
           alt="payment"
+          title="payment"
+          aria-label="payment"
         />
         <div className="lg:w-[600px] mx-auto text-center flex flex-col gap-4 mt-5">
           <p>
@@ -65,7 +67,7 @@ function Payment({
       </div>
 
       <div className="flex justify-center items-center gap-4 mt-10">
-        <Link href="/bonds">
+        <Link href="/bonds" title="Explore Bonds" aria-label="Explore Bonds">
           <Button
             className="md:w-auto w-full"
             variant="default"
@@ -78,7 +80,7 @@ function Payment({
             Explore Bonds <IoMdArrowDropright />
           </Button>
         </Link>
-        <Link href="/dashboard/orders">
+        <Link href="/dashboard/orders" title="View Orders" aria-label="View Orders">
           <Button
             className="md:w-auto w-full"
             variant="outline"
@@ -118,7 +120,7 @@ function Payment({
       </div>
 
       <div className="flex justify-center items-center gap-4 mt-12 flex-wrap">
-        <Link href="/bonds">
+        <Link href="/bonds" title="Explore Bonds" aria-label="Explore Bonds">
           <Button
             className="md:w-auto w-full"
             variant="default"
@@ -131,7 +133,7 @@ function Payment({
             Explore Bonds <IoMdArrowDropright />
           </Button>
         </Link>
-        <Link href="/dashboard/orders">
+        <Link href="/dashboard/orders" title="View Orders" aria-label="View Orders">
           <Button
             className="md:w-auto w-full"
             variant="outline"

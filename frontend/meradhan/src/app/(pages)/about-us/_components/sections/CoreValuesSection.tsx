@@ -52,6 +52,8 @@ const CoreValuesSection = () => {
               <img
                 src={item.icon}
                 alt={item.title}
+                title={item.title}
+                aria-label={item.title}
                 width={100}
                 height={100}
                 className="w-[90px] md:w-[110px] h-[90px] md:h-[110px]"

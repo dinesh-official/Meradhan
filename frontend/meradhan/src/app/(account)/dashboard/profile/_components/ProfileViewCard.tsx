@@ -48,6 +48,8 @@ function ProfileViewCard({
             <div className="rounded-full overflow-hidden">
               <Image
                 alt="logo"
+                title="logo"
+                aria-label="logo"
                 src={genMediaUrl(profile.avatar)}
                 width={100}
                 height={100}
@@ -86,7 +88,7 @@ function ProfileViewCard({
                     <span className="sm:hidden">Update Details</span>
                     <IoWarning size={18} />
                   </p>
-                  <Link href={`/dashboard/kyc`} className="shrink-0 md:block">
+                  <Link href={`/dashboard/kyc`} title="Update KYC" aria-label="Update KYC" className="shrink-0 md:block">
                     <Button variant={`secondary`}>
                       Update KYC
                       <div className="w-3 text-3xl">
@@ -185,6 +187,8 @@ function ProfileViewCard({
               <Link
                 href={genMediaUrl(kycPdfUrl || "#")}
                 target="_blank"
+                title="KYC Copy"
+                aria-label="KYC Copy"
               >
                 <Button variant={`defaultLight`}>
                   KYC Copy
@@ -195,7 +199,7 @@ function ProfileViewCard({
               </Link>
             )}
           {profile.kycStatus == "PENDING" && (
-            <Link href={`/dashboard/kyc`} className="block w-full md:w-auto [&>button]:w-full md:[&>button]:w-auto">
+            <Link href={`/dashboard/kyc`} title={`${hasKycStarted ? "Complete" : "Start"} Your KYC`} aria-label={`${hasKycStarted ? "Complete" : "Start"} Your KYC`} className="block w-full md:w-auto [&>button]:w-full md:[&>button]:w-auto">
               <Button variant={`secondary`}>
                 {hasKycStarted ? "Complete" : "Start"}{" "}
                 <span className="hidden md:inline-block">Your</span> KYC

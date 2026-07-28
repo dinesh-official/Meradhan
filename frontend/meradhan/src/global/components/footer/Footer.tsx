@@ -44,8 +44,8 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-[#F25C4C] transition-colors duration-200"
-                    aria-label="Facebook"
-                    title="Facebook"
+                    aria-label="Meradhan Facebook Page"
+                    title="Meradhan Facebook Page"
                   >
                     <FaFacebook aria-hidden="true" />
                   </Link>
@@ -56,8 +56,8 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-[#F25C4C] transition-colors duration-200"
-                    aria-label="Instagram"
-                    title="Instagram"
+                    aria-label="Meradhan Instagram Page"
+                    title="Meradhan Instagram Page"
                   >
                     <FaInstagramSquare aria-hidden="true" />
                   </Link>
@@ -68,8 +68,8 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-[#F25C4C] transition-colors duration-200"
-                    aria-label="Pinterest"
-                    title="Pinterest"
+                    aria-label="Meradhan Pinterest Page"
+                    title="Meradhan Pinterest Page"
                   >
                     <FaPinterest aria-hidden="true" />
                   </Link>
@@ -80,8 +80,8 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-[#F25C4C] transition-colors duration-200"
-                    aria-label="LinkedIn"
-                    title="LinkedIn"
+                    aria-label="Meradhan LinkedIn Page"
+                    title="Meradhan LinkedIn Page"
                   >
                     <FaLinkedin aria-hidden="true" />
                   </Link>
@@ -92,8 +92,8 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-[#F25C4C] transition-colors duration-200"
-                    aria-label="Twitter (X)"
-                    title="Twitter (X)"
+                    aria-label="Meradhan Twitter Page"
+                    title="Meradhan Twitter Page"
                   >
                     <FaXTwitter aria-hidden="true" />
                   </Link>
@@ -133,6 +133,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     <Link
                       href="/bonds"
                       title="Bond Directory"
+                      aria-label="Bond Directory"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Bond Directory
@@ -144,6 +145,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                       target="_blank"
                       rel="noopener noreferrer"
                       title="Investor Charter"
+                      aria-label="Investor Charter"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Investor Charter
@@ -157,6 +159,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                       target="_blank"
                       rel="noopener noreferrer"
                       title="Regulatory Disclosure"
+                      aria-label="Regulatory Disclosure"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Regulatory Disclosure
@@ -170,6 +173,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                       target="_blank"
                       rel="noopener noreferrer"
                       title="Investor Grievance"
+                      aria-label="Investor Grievance"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Investor Grievance
@@ -181,6 +185,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     <Link
                       href="/client-registration-documents"
                       title="Client Registration Documents"
+                      aria-label="Client Registration Documents"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Client Registration Documents
@@ -195,6 +200,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     <Link
                       href="/about-us"
                       title="About Us"
+                      aria-label="About Us"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       About Us
@@ -204,6 +210,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     <Link
                       href="/partners-and-distributors"
                       title="Partners & Distributors"
+                      aria-label="Partners & Distributors"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Partners & Distributors
@@ -213,6 +220,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     <Link
                       href="/disclaimer"
                       title="Disclaimer"
+                      aria-label="Disclaimer"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Disclaimer
@@ -222,6 +230,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     <Link
                       href="/contact-us"
                       title="Contact Us"
+                      aria-label="Contact Us"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Contact Us
@@ -260,6 +269,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     <Link
                       href="/glossary"
                       title="Glossary"
+                      aria-label="Glossary"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Glossary
@@ -269,6 +279,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     <Link
                       href="/faqs"
                       title="FAQs"
+                      aria-label="FAQs"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       FAQs
@@ -289,6 +300,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
             <Link
               href="/privacy-policy"
               title="Privacy Policy"
+              aria-label="Privacy Policy"
               className="hover:text-secondary transition-colors duration-200"
             >
               Privacy Policy
@@ -296,6 +308,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
             <Link
               href="/terms-of-use"
               title="Terms of Use"
+              aria-label="Terms of Use"
               className="hover:text-secondary transition-colors duration-200"
             >
               Terms of Use
@@ -303,6 +316,7 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
             <Link
               href="/cookie-policy"
               title="Cookie Policy"
+              aria-label="Cookie Policy"
               className="hover:text-secondary transition-colors duration-200"
             >
               Cookie Policy

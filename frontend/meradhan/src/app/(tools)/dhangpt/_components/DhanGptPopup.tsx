@@ -22,6 +22,8 @@ function DhanGptPopup() {
           <Image
             src="/logo/dhangpt-border.svg"
             alt="MeraDhan-GPT Illustration"
+            title="MeraDhan-GPT Illustration"
+            aria-label="MeraDhan-GPT Illustration"
             width={100}
             height={100}
             className="w-8"
@@ -66,6 +68,8 @@ function DhanGptPopup() {
               <Image
                 src="/logo/dhangpt-border.svg"
                 alt="MeraDhan-GPT Illustration"
+                title="MeraDhan-GPT Illustration"
+                aria-label="MeraDhan-GPT Illustration"
                 width={300}
                 height={300}
                 className="w-28"

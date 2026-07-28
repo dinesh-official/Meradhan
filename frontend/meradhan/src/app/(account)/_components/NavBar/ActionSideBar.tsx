@@ -122,6 +122,8 @@ const SidebarItem: FC<SidebarItemProps> = ({ icon, label, href, isActive }) => {
       <TooltipTrigger asChild disabled={!collapsed}>
         <Link
           href={href || "#"}
+          title={label}
+          aria-label={label}
           className={cn(
             "flex items-center h-12 transition-all duration-300 cursor-pointer",
             collapsed ? "justify-center" : "gap-4 px-4",

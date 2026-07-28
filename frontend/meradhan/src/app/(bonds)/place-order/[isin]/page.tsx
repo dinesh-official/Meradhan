@@ -103,6 +103,8 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
               <Image
                 src="/images/icons/sad-emoji.svg"
                 alt="KYC Verification"
+                title="KYC Verification"
+                aria-label="KYC Verification"
                 width={60}
                 height={60}
               />
@@ -122,12 +124,12 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
               </p>
               <div className="flex flex-wrap gap-3 justify-center mt-2">
                 {!kycOk ? (
-                  <Link href="/dashboard/kyc">
+                  <Link href="/dashboard/kyc" title="Complete KYC" aria-label="Complete KYC">
                     <Button>Complete KYC</Button>
                   </Link>
                 ) : null}
                 {!kraOk ? (
-                  <Link href="/dashboard/profile">
+                  <Link href="/dashboard/profile" title="View profile" aria-label="View profile">
                     <Button variant={kycOk ? "default" : "outlineSecondary"}>
                       View profile
                     </Button>
@@ -150,6 +152,8 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
               <Image
                 src="/images/icons/sad-emoji.svg"
                 alt={bondDetailsRequestFailed ? "Load error" : "Bond Not Found"}
+                title={bondDetailsRequestFailed ? "Load error" : "Bond Not Found"}
+                aria-label={bondDetailsRequestFailed ? "Load error" : "Bond Not Found"}
                 width={60}
                 height={60}
               />
@@ -167,11 +171,11 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
               <div className="flex flex-wrap gap-3 justify-center mt-2">
                 {bondDetailsRequestFailed ? (
                   <Button asChild>
-                    <Link href={`/place-order/${isin}`}>Try again</Link>
+                    <Link href={`/place-order/${isin}`} title="Try again" aria-label="Try again">Try again</Link>
                   </Button>
                 ) : null}
                 <Button variant="outlineSecondary" asChild>
-                  <Link href="/bonds">Back to Bonds</Link>
+                  <Link href="/bonds" title="Back to Bonds" aria-label="Back to Bonds">Back to Bonds</Link>
                 </Button>
               </div>
             </div>
@@ -192,12 +196,14 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
               <Image
                 src="/images/icons/sad-emoji.svg"
                 alt="Order Not Allowed"
+                title="Order Not Allowed"
+                aria-label="Order Not Allowed"
                 width={60}
                 height={60}
               />
               <h2 className="text-2xl font-semibold mt-4">Order Not Allowed</h2>
               <p className="text-gray-600">The bond you are looking for is not allowed for purchase.</p>
-              <Link href="/bonds" className="mt-6 inline-block">
+              <Link href="/bonds" title="Back to Bonds" aria-label="Back to Bonds" className="mt-6 inline-block">
                 <Button>Back to Bonds</Button>
               </Link>
             </div>
@@ -220,6 +226,8 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
               <Image
                 src="/images/icons/sad-emoji.svg"
                 alt="Order Not Allowed"
+                title="Order Not Allowed"
+                aria-label="Order Not Allowed"
                 width={60}
                 height={60}
               />
@@ -231,7 +239,7 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
                 ) : null
               }
 
-              <Link href="/bonds" className="mt-6 inline-block">
+              <Link href="/bonds" title="Back to Bonds" aria-label="Back to Bonds" className="mt-6 inline-block">
                 <Button>Back to Bonds</Button>
               </Link>
             </div>
@@ -250,6 +258,8 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
               <Image
                 src="/images/icons/sad-emoji.svg"
                 alt="Bond out of stock"
+                title="Bond out of stock"
+                aria-label="Bond out of stock"
                 width={60}
                 height={60}
               />
@@ -260,10 +270,10 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
               </p>
               <div className="flex flex-wrap gap-3 justify-center">
                 <Button variant="outlineSecondary" asChild>
-                  <Link href={`/bonds/detail/${isin}`}>View bond details</Link>
+                  <Link href={`/bonds/detail/${isin}`} title="View bond details" aria-label="View bond details">View bond details</Link>
                 </Button>
                 <Button asChild>
-                  <Link href="/bonds">Back to Bonds</Link>
+                  <Link href="/bonds" title="Back to Bonds" aria-label="Back to Bonds">Back to Bonds</Link>
                 </Button>
               </div>
             </div>
@@ -282,6 +292,8 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
               <Image
                 src="/images/icons/sad-emoji.svg"
                 alt="Profile load error"
+                title="Profile load error"
+                aria-label="Profile load error"
                 width={60}
                 height={60}
               />
@@ -293,10 +305,10 @@ async function page({ params, searchParams }: { params: Promise<{ isin: string }
               </p>
               <div className="flex flex-wrap gap-3 justify-center">
                 <Button asChild>
-                  <Link href={`/place-order/${isin}`}>Try again</Link>
+                  <Link href={`/place-order/${isin}`} title="Try again" aria-label="Try again">Try again</Link>
                 </Button>
                 <Button variant="outlineSecondary" asChild>
-                  <Link href="/dashboard/profile">Profile</Link>
+                  <Link href="/dashboard/profile" title="Profile" aria-label="Profile">Profile</Link>
                 </Button>
               </div>
             </div>

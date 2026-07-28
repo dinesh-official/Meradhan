@@ -169,7 +169,7 @@ async function DashBoardPage() {
                 <p className="text-3xl font-medium">
                   {hasKycStarted ? "Pending" : "Not Started"}
                 </p>
-                <Link href={`/dashboard/kyc`}>
+                <Link href={`/dashboard/kyc`} title={hasKycStarted ? "Complete KYC" : "Start KYC"} aria-label={hasKycStarted ? "Complete KYC" : "Start KYC"}>
                   <Button variant="secondary">
                     {hasKycStarted ? "Complete KYC" : "Start KYC"}
                   </Button>
@@ -179,7 +179,7 @@ async function DashBoardPage() {
             {kycStatus == "RE_KYC" && (
               <div className="flex items-end flex-row justify-between gap-2">
                 <p className="text-3xl font-medium">Update Required</p>
-                <Link href={`/dashboard/kyc`}>
+                <Link href={`/dashboard/kyc`} title="Re KYC" aria-label="Re KYC">
                   <Button variant="secondary">
                     Re KYC
                   </Button>

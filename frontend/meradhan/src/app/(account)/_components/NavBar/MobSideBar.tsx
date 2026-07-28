@@ -49,6 +49,8 @@ function MobSideBar() {
             width={160}
             height={50}
             alt="Mera Dhan"
+            title="Mera Dhan"
+            aria-label="Mera Dhan"
             className="w-auto h-8 logo-default"
             priority
           />
@@ -57,6 +59,8 @@ function MobSideBar() {
             width={160}
             height={50}
             alt="Mera Dhan"
+            title="Mera Dhan"
+            aria-label="Mera Dhan"
             className="w-auto h-8 logo-white"
           />
         </SheetHeader>
@@ -68,6 +72,8 @@ function MobSideBar() {
               <Link
                 href={item.href || "#"}
                 key={i}
+                title={item.label}
+                aria-label={item.label}
                 className={cn(
                   "flex items-center gap-4 px-6 py-4 cursor-pointer select-none",
                   "transition-all duration-200 hover:bg-gray-100 active:bg-gray-200 rounded-md"

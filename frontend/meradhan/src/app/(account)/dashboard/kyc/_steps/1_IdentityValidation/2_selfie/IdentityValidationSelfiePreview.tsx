@@ -30,6 +30,8 @@ function IdentityValidationSelfiePreview() {
           <Image
             src={genMediaUrl(state.step_1.face.url)}
             alt="face"
+            title="face"
+            aria-label="face"
             width={1140}
             height={597}
             className="bg- border border-gray-200 rounded-2xl w-48 object-cover aspect-[3/4]"

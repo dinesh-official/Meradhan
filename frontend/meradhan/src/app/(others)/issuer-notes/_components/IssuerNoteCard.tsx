@@ -50,6 +50,8 @@ export function IssuerNoteCard({
           width={200}
           height={200}
           alt="No found"
+          title="No found"
+          aria-label="No found"
           className="min-w-16 w-20 h-auto"
           // on error image
           onError={(e) => {
@@ -143,12 +145,14 @@ export function IssuerNoteCard({
           >
             <Link
               href={"/issuer-notes/" + data?.Slug}
+              title="View Notes"
+              aria-label="View Notes"
               className={cn(
                 " bg-muted hover:bg-primary  text-nowrap text-primary hover:text-white font-medium lg:w-auto w-full flex justify-center items-center gap-5 rounded-md px-3 py-2",
                 gridMode && "lg:w-full w-full"
               )}
             >
-              View Notes <IoMdArrowDropright className="text-secondary" />
+              View Notes <IoMdArrowDropright className="text-secondary" aria-hidden="true" />
             </Link>
           </div>
         </div>

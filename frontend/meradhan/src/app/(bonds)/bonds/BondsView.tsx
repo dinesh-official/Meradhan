@@ -208,6 +208,8 @@ function NotBondsFound({ onReset, hideBorder }: { onReset: () => void, hideBorde
         <Image
           src="/static/sad-emoji.svg"
           alt="No Data"
+          title="No Data"
+          aria-label="No Data"
           width={100}
           height={100}
           className="w-18 h-18"

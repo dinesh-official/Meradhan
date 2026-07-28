@@ -42,6 +42,8 @@ const ClientRegistrationDocumentsContent = () => {
                 href={language.href}
                 target="_blank"
                 rel="noopener noreferrer"
+                title={language.label}
+                aria-label={language.label}
                 className="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white px-5 py-4 text-sm font-medium text-gray-900 transition hover:border-[#F25C4C] hover:text-[#F25C4C]"
               >
                 <span>{language.label}</span>

@@ -317,6 +317,8 @@ function IdentityValidationAadharInfo() {
               <Image
                 src={genMediaUrl(data.response?.details.aadhaar.image)}
                 alt="PAN Card"
+                title="PAN Card"
+                aria-label="PAN Card"
                 width={840}
                 height={397}
                 className="bg-gray-50 rounded-2xl w-48 object-cover aspect-3/4"
@@ -365,12 +367,14 @@ function IdentityValidationAadharInfo() {
                 href="/docs/self_declaration_in_name_mismatch.pdf"
                 target="_blank"
                 download
+                title="Download Name Mismatch Declaration Form"
+                aria-label="Download Name Mismatch Declaration Form"
               >
                 <Button
                   variant="defaultLight"
                   className="flex items-center gap-3 px-14"
                 >
-                  Download Name Mismatch Declaration Form <FaDownload />
+                  Download Name Mismatch Declaration Form <FaDownload aria-hidden="true" />
                 </Button>
               </Link>
               <p className="mt-2">By continue:</p>
@@ -408,7 +412,7 @@ function IdentityValidationAadharInfo() {
                   on this page relating to name mismatch across my PAN and other
                   documents, and I agree to duly complete, sign, and submit the
                   same by email to{" "}
-                  <a href="mailto:support@meradhan.co" className="text-primary">
+                  <a href="mailto:support@meradhan.co" title="support@meradhan.co" aria-label="support@meradhan.co" className="text-primary">
                     support@meradhan.co
                   </a>
                   .

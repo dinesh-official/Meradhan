@@ -51,7 +51,7 @@ async function page({
                     Email verified
                   </h3>
                   <p>Your email has been successfully verified.</p>
-                  <Link href="/login">
+                  <Link href="/login" title="Go to Login" aria-label="Go to Login">
                     <Button>Go to Login</Button>
                   </Link>
                 </div>
@@ -61,7 +61,7 @@ async function page({
                     Verification failed
                   </h3>
                   <p>{errorMessage}</p>
-                  <Link href="/">
+                  <Link href="/" title="Go Back" aria-label="Go Back">
                     <Button variant="outline">Go Back</Button>
                   </Link>
                 </div>
@@ -72,6 +72,8 @@ async function page({
               <Image
                 src={`/assets/login.svg`}
                 alt="Email Verification"
+                title="Email Verification"
+                aria-label="Email Verification"
                 width={1200}
                 height={800}
                 className="w-72 md:w-80 h-auto object-cover"

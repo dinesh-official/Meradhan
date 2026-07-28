@@ -10,6 +10,8 @@ const MissionVisionSection = () => {
               <img
                 src="/static/target_meradhan.png"
                 alt="Mission target"
+                title="Mission target"
+                aria-label="Mission target"
                 width={260}
                 height={260}
                 className="w-[64px] md:w-[260px] h-[64px] md:h-auto"
@@ -44,6 +46,8 @@ const MissionVisionSection = () => {
               <img
                 src="/static/ideaLamp-meradhan.png" // swap to your bulb art path
                 alt="Vision bulb"
+                title="Vision bulb"
+                aria-label="Vision bulb"
                 width={260}
                 height={260}
                 className="w-[64px] md:w-[260px] h-[64px] md:h-auto"

@@ -18,6 +18,8 @@ const Breadcrumbs = ({ items }: { items: Crumb[] }) => {
               {item.href && !isLast ? (
                 <Link
                   href={item.href}
+                  title={item.label}
+                  aria-label={item.label}
                   className="text-muted-foreground hover:underline"
                 >
                   {item.label}

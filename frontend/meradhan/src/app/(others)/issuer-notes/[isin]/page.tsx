@@ -61,11 +61,11 @@ async function page({ params }: { params: Promise<{ isin: string }> }) {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/">Home</BreadcrumbLink>
+              <BreadcrumbLink href="/" title="Home" aria-label="Home">Home</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href="/issuer-notes">Issuer Notes</BreadcrumbLink>
+              <BreadcrumbLink href="/issuer-notes" title="Issuer Notes" aria-label="Issuer Notes">Issuer Notes</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -148,6 +148,8 @@ async function page({ params }: { params: Promise<{ isin: string }> }) {
                   width={200}
                   height={200}
                   alt="No found"
+                  title="No found"
+                  aria-label="No found"
                   className="p-3 border border- border-gray-200 rounded-lg w-28 h-auto object-contain aspect-square"
                 />
               </div>

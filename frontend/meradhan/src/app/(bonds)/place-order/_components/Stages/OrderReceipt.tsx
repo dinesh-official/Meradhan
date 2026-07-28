@@ -224,6 +224,8 @@ function OrderReceipt({
             <Link
               href="/terms-of-use"
               target="_blank"
+              title="Terms and Conditions"
+              aria-label="Terms and Conditions"
               className="text-primary"
               onClick={(e) => e.stopPropagation()}
             >
@@ -246,6 +248,8 @@ function OrderReceipt({
             order receipt, and I have read the{" "}
             <Link
               href="#"
+              title="Exchange Circular"
+              aria-label="Exchange Circular"
               className="text-primary"
               onClick={(e) => e.stopPropagation()}
             >
