@@ -1,0 +1,189 @@
+      - name: Run commands
+        shell: bash
+        run: |
+          set -e
+
+          INSTANCE_ID="${{ steps.create_ec2.outputs.instance_id }}"
+
+          echo "======================================"
+          echo "Target Instance : $INSTANCE_ID"
+          echo "======================================"
+
+          echo "Waiting for EC2..."
+          aws ec2 wait instance-running --instance-ids "$INSTANCE_ID"
+
+          echo "Waiting for SSM Agent..."
+
+          while true; do
+
+            STATUS=$(aws ssm describe-instance-information \
+              --filters "Key=InstanceIds,Values=$INSTANCE_ID" \
+              --query "InstanceInformationList[0].PingStatus" \
+              --output text 2>/dev/null || true)
+
+            if [ "$STATUS" = "Online" ]; then
+              echo "SSM Agent Online"
+              break
+            fi
+
+            sleep 10
+
+          done
+
+          declare -A SERVICES=()
+
+          if [ "${{ inputs.frontend }}" = "true" ]; then
+            SERVICES["$FRONTEND_NAME"]="4002:4002"
+          fi
+
+          if [ "${{ inputs.backend }}" = "true" ]; then
+            SERVICES["$BACKEND_NAME"]="4000:4000"
+          fi
+
+          if [ "${{ inputs.crm }}" = "true" ]; then
+            SERVICES["$CRM_NAME"]="4001:4001"
+          fi
+
+          if [ "${{ inputs.worker }}" = "true" ]; then
+            SERVICES["$WORKER_NAME"]=""
+          fi
+
+          COMMANDS=""
+
+          COMMANDS+="echo ======================================="$'\n'
+          COMMANDS+="echo Starting Deployment"$'\n'
+          COMMANDS+="echo ======================================="$'\n'
+
+          # Cleanup
+          COMMANDS+="docker image prune -f"$'\n'
+          COMMANDS+="docker builder prune -f"$'\n'
+
+          # Login to ECR
+          COMMANDS+="aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 450321244603.dkr.ecr.ap-south-1.amazonaws.com"$'\n'
+
+          # Docker Network
+          COMMANDS+="docker network inspect deployment_app-network >/dev/null 2>&1 || docker network create deployment_app-network"$'\n'
+
+          # Fresh clone deployment repo
+          COMMANDS+="rm -rf branch-deploy"$'\n'
+          COMMANDS+="git clone --depth 1 https://github.com/bcispl/branch-deploy.git"$'\n'
+
+          COMMANDS+="cd branch-deploy"$'\n'
+          COMMANDS+="pwd"$'\n'
+          COMMANDS+="ls -la"$'\n'
+
+          # Filebeat
+          COMMANDS+="docker compose -f filebeat.yaml up -d"$'\n'
+          COMMANDS+="docker compose -f filebeat.yaml ps"$'\n'
+
+          # PostgreSQL
+          COMMANDS+="docker compose -f pgsql.yaml up -d"$'\n'
+          COMMANDS+="until docker exec postgres pg_isready >/dev/null 2>&1; do sleep 2; done"$'\n'
+          COMMANDS+="docker compose -f pgsql.yaml ps"$'\n'
+
+          # Redis
+          COMMANDS+="docker compose -f redis.yaml up -d"$'\n'
+          COMMANDS+="until docker exec redis redis-cli ping >/dev/null 2>&1; do sleep 2; done"$'\n'
+          COMMANDS+="docker compose -f redis.yaml ps"$'\n'
+
+          # Restore database
+          COMMANDS+="chmod +x restore.sh"$'\n'
+          COMMANDS+="./restore.sh ${{ inputs.environment }}.backup"$'\n'
+
+          COMMANDS+="cd /"$'\n'
+          COMMANDS+="docker ps"$'\n'
+
+          # Deploy Applications
+          for REPO in "${!SERVICES[@]}"
+          do
+              PORT="${SERVICES[$REPO]}"
+              IMAGE="450321244603.dkr.ecr.ap-south-1.amazonaws.com/${REPO}:latest"
+
+              COMMANDS+="echo"$'\n'
+              COMMANDS+="echo ======================================="$'\n'
+              COMMANDS+="echo Deploying ${REPO}"$'\n'
+              COMMANDS+="echo ======================================="$'\n'
+
+              COMMANDS+="docker pull ${IMAGE}"$'\n'
+
+              COMMANDS+="docker rm -f ${REPO} >/dev/null 2>&1 || true"$'\n'
+
+              if [ -n "$PORT" ]; then
+                  COMMANDS+="docker run -d --restart unless-stopped --network deployment_app-network --name ${REPO} -p ${PORT} ${IMAGE}"$'\n'
+              else
+                  COMMANDS+="docker run -d --restart unless-stopped --network deployment_app-network --name ${REPO} ${IMAGE}"$'\n'
+              fi
+          done
+
+          COMMANDS+="echo"$'\n'
+          COMMANDS+="echo ======================================="$'\n'
+          COMMANDS+="echo Running Containers"$'\n'
+          COMMANDS+="echo ======================================="$'\n'
+          COMMANDS+="docker ps"$'\n'
+
+          echo "======================================"
+          echo "Commands to Execute"
+          echo "======================================"
+          echo "$COMMANDS"
+
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "$INSTANCE_ID" \
+            --document-name "AWS-RunShellScript" \
+            --parameters commands="$COMMANDS" \
+            --query "Command.CommandId" \
+            --output text)
+
+          echo "Command ID : $COMMAND_ID"
+
+          while true
+          do
+
+            STATUS=$(aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" \
+              --instance-id "$INSTANCE_ID" \
+              --query "Status" \
+              --output text 2>/dev/null || echo "Pending")
+
+            echo "Status : $STATUS"
+
+            if [[ "$STATUS" == "Success" || "$STATUS" == "Failed" || "$STATUS" == "Cancelled" || "$STATUS" == "TimedOut" ]]; then
+              break
+            fi
+
+            sleep 5
+
+          done
+
+          OUTPUT=$(aws ssm get-command-invocation \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$INSTANCE_ID" \
+            --query "StandardOutputContent" \
+            --output text)
+
+          ERROR=$(aws ssm get-command-invocation \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$INSTANCE_ID" \
+            --query "StandardErrorContent" \
+            --output text)
+
+          echo "======================================"
+          echo "OUTPUT"
+          echo "======================================"
+          echo "$OUTPUT"
+
+          if [ -n "$ERROR" ] && [ "$ERROR" != "None" ]; then
+            echo "======================================"
+            echo "ERROR"
+            echo "======================================"
+            echo "$ERROR"
+          fi
+
+          if [ "$STATUS" != "Success" ]; then
+            echo "Deployment Failed"
+            exit 1
+          fi
+
+          echo ""
+          echo "======================================"
+          echo "Deployment Completed Successfully"
+          echo "======================================"
