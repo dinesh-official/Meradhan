@@ -737,6 +737,26 @@ jobs:
 
           COMMANDS=""
 
+          COMMANDS+="set -e"$'\n'
+
+          # ------------------------------------------------------------
+          # Global diagnostic trap: if ANY command in this script fails,
+          # dump container status and the last 50 log lines of every
+          # container that exists before exiting. This means whatever
+          # breaks next (not just postgres/redis) is visible in the same
+          # SSM output, without needing a follow-up docker logs round trip.
+          # ------------------------------------------------------------
+          COMMANDS+="on_error() {"$'\n'
+          COMMANDS+="  echo"$'\n'
+          COMMANDS+="  echo '=== FAILURE: dumping container diagnostics ==='"$'\n'
+          COMMANDS+="  docker ps -a"$'\n'
+          COMMANDS+="  for c in \$(docker ps -a --format '{{.Names}}'); do"$'\n'
+          COMMANDS+="    echo; echo \"--- logs: \$c (last 50 lines) ---\";"$'\n'
+          COMMANDS+="    docker logs \"\$c\" --tail 50 2>&1 || true;"$'\n'
+          COMMANDS+="  done"$'\n'
+          COMMANDS+="}"$'\n'
+          COMMANDS+="trap on_error ERR"$'\n'
+
           COMMANDS+="echo ======================================="$'\n'
           COMMANDS+="echo Starting Deployment"$'\n'
           COMMANDS+="echo ======================================="$'\n'
@@ -928,7 +948,6 @@ jobs:
           echo "======================================"
           echo "Deployment Completed Successfully"
           echo "======================================"
-
 
       - name: Get Listener ARN & VPC ID
         id: get_listener
