@@ -27,7 +27,15 @@ export interface Order {
    * to a row in `settle_order`. Null when no settlement row exists yet.
    */
   settleStatus?: number | null;
-  /** NSE `settle_order.modSettleDate` when linked via `metadata.rfqNumber` (often DD-MM-YYYY). */
+  /**
+   * Deal / trade date: NSE RFQ master `date`, then `metadata.dealDate`,
+   * then checkout `bondDetails.pricing.dealDate`.
+   */
+  dealDate?: string | null;
+  /**
+   * Settlement date: NSE `settle_order.modSettleDate`, then RFQ master /
+   * metadata / checkout pricing snapshot.
+   */
   settlementDate?: string | null;
   subTotal: string;
   stampDuty: string;

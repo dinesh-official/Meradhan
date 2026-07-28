@@ -205,6 +205,7 @@ const createNewCustomerSchemaBase = z.object({
 
   /** CRM-only: LOW | MEDIUM | HIGH. Independent of KYC risk questionnaire. */
   crmRiskProfile: CrmRiskProfileEnum.nullable().optional(),
+  crmRiskProfileRemarks: z.string().trim().max(1000).nullable().optional(),
 
   // totalInvestment: z.string({
   //     error: "Total investment value is required",

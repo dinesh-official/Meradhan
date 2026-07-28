@@ -114,7 +114,7 @@ function CustomerDetail({
     let totalVal = 0;
     for (const o of custOrders) {
       totalVal += Number(o.totalAmount);
-      const wf = mapOrderWorkflowStatus(o.status, o.paymentStatus);
+      const wf = mapOrderWorkflowStatus(o.status);
       if (wf === "Settled") settled += 1;
       else if (isActiveWorkflowStatus(wf)) pending += 1;
     }
@@ -139,8 +139,6 @@ function CustomerDetail({
           <OrderStatusBadge
             key="s"
             status={o.status}
-            paymentStatus={o.paymentStatus}
-            paymentProvider={o.paymentProvider}
           />,
         ],
       };
@@ -156,7 +154,7 @@ function CustomerDetail({
       formatOrderDate(o.createdAt),
       formatValueCr(Number(o.totalAmount)),
       parseYieldFromBondDetails(o.bondDetails) ?? "—",
-      mapOrderWorkflowStatus(o.status, o.paymentStatus),
+      mapOrderWorkflowStatus(o.status),
     ]);
     const csv = [header, ...csvRows].map((r) => r.join(",")).join("\n");
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
@@ -339,7 +337,7 @@ export function CustomersPanel({
       const last     = r.lastOrderAt ? format(new Date(r.lastOrderAt), "dd MMM yyyy") : "—";
       const pendingCount = orders.filter((o) => {
         if (!orderBelongsToCustomerProfile(o, r.customerProfileId)) return false;
-        return isActiveWorkflowStatus(mapOrderWorkflowStatus(o.status, o.paymentStatus));
+        return isActiveWorkflowStatus(mapOrderWorkflowStatus(o.status));
       }).length;
       return {
         key: r.customerProfileId,

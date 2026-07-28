@@ -28,15 +28,12 @@ export const bondTypeOptions = [
   { title: "Secondary", value: "SECONDARY" },
 ];
 
-export function getOrderStatusBadgeClass(
-  status: string,
-  paymentStatus?: string | null,
-  paymentProvider?: string | null,
-): string {
-  return getCrmOrderStatusDisplay(status, paymentStatus, paymentProvider)
-    .badgeClass;
+export function getOrderStatusBadgeClass(status: string): string {
+  return getCrmOrderStatusDisplay(status).badgeClass;
 }
 
 export function isCrmOrderStatus(status: string): status is CrmOrderStatus {
-  return CRM_ORDER_STATUS_VALUES.includes(status.trim().toUpperCase() as CrmOrderStatus);
+  return CRM_ORDER_STATUS_VALUES.includes(
+    status.trim().toUpperCase() as CrmOrderStatus,
+  );
 }
