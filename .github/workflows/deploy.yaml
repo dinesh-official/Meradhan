@@ -377,14 +377,12 @@ jobs:
           grep "^NEXT_PUBLIC_" .env
 
 
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v5
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1              
-
 
       - name: Create Repositories
         id: create_ecr
@@ -502,13 +500,6 @@ jobs:
               --output table
           done          
 
-      - name: Login to Amazon ECR
-        run: |
-          aws ecr get-login-password --region ap-south-1 \
-            | docker login \
-              --username AWS \
-              --password-stdin 450321244603.dkr.ecr.ap-south-1.amazonaws.com
-
       - name: Build & Push Docker Images
         shell: bash
         run: |
@@ -542,8 +533,6 @@ jobs:
           echo "Building Docker Images"
           echo "======================================"
 
-          declare -A BUILD_PIDS=()
-
           for REPOSITORY in "${!SERVICES[@]}"
           do
             (
@@ -562,33 +551,25 @@ jobs:
                 --push \
                 .
 
+              #docker push "$IMAGE"
+
               echo "Completed : $REPOSITORY"
             ) &
-            BUILD_PIDS["$REPOSITORY"]=$!
           done
 
-          # Bare `wait` always returns 0, which would hide a failed build.
-          # Wait on each PID individually so a non-zero exit fails the step.
-          FAILED=()
-          for REPOSITORY in "${!BUILD_PIDS[@]}"
-          do
-            if ! wait "${BUILD_PIDS[$REPOSITORY]}"; then
-              FAILED+=("$REPOSITORY")
-            fi
-          done
-
-          if [ ${#FAILED[@]} -ne 0 ]; then
-            echo ""
-            echo "======================================"
-            echo "Failed to build/push: ${FAILED[*]}"
-            echo "======================================"
-            exit 1
-          fi
+          wait
 
           echo ""
           echo "======================================"
           echo "All Selected Docker Images Built & Pushed"
-          echo "======================================"
+          echo "======================================"          
+
+      - name: Login to Amazon ECR
+        run: |
+          aws ecr get-login-password --region ap-south-1 \
+            | docker login \
+              --username AWS \
+              --password-stdin 450321244603.dkr.ecr.ap-south-1.amazonaws.com
 
 
 
@@ -690,11 +671,8 @@ jobs:
             echo "======================================"
 
 
-
       - name: Run commands
         shell: bash
-        env:
-          GIT_PAT: ${{ vars.GIT_PAT }}
         run: |
           set -e
 
@@ -758,9 +736,6 @@ jobs:
 
           # Docker Network
           COMMANDS+="docker network inspect deployment_app-network >/dev/null 2>&1 || docker network create deployment_app-network"$'\n'
-
-          # Configure GitHub authentication
-          COMMANDS+="git config --global url.\"https://${GIT_PAT}@github.com/\".insteadOf \"https://github.com/\""$'\n'
 
           # Fresh clone deployment repo
           COMMANDS+="rm -rf branch-deploy"$'\n'
