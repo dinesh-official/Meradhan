@@ -209,6 +209,18 @@ body.high-contrast [data-input-otp] {
   caret-color: transparent !important;
   -webkit-text-fill-color: transparent !important;
 }
+/* The visible OTP digit boxes are plain <div>s (data-slot="input-otp-slot"),
+   not real <input> elements, so the form-input rule above never reaches
+   them. The generic .bg-muted override elsewhere gives them a background
+   (#0d2035) that's nearly indistinguishable from the page background
+   (#0d1117) here, and they have no border by default — so the boxes
+   effectively disappear. Give them the same visible bordered treatment as
+   other form fields. */
+body.high-contrast [data-slot="input-otp-slot"] {
+  background-color: #0d2035 !important;
+  border: 1px solid #4a8fd4 !important;
+  color: #ffffff !important;
+}
 body.high-contrast input::placeholder,
 body.high-contrast textarea::placeholder {
   color: #a0b8cc !important;
