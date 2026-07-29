@@ -739,16 +739,9 @@ jobs:
           COMMANDS+="./restore.sh ${{ inputs.environment }}.backup"$'\n'
 
           COMMANDS+="cd /"$'\n'
-          COMMANDS+="echo"$'\n'
-          COMMANDS+="echo ======================================="$'\n'
-          COMMANDS+="echo 'Containers BEFORE app deployment (infra only: elasticsearch/filebeat/kibana/postgres/redis)'"$'\n'
-          COMMANDS+="echo ======================================="$'\n'
           COMMANDS+="docker ps"$'\n'
 
-          # Deploy Applications — each one is verified still running a
-          # few seconds after start, with its own logs printed immediately
-          # if it exited (crash-looped) instead of just silently missing
-          # from the final docker ps.
+          # Deploy Applications
           for REPO in "${!SERVICES[@]}"
           do
               PORT="${SERVICES[$REPO]}"
@@ -768,20 +761,11 @@ jobs:
               else
                   COMMANDS+="docker run -d --restart unless-stopped --network deployment_app-network --name ${REPO} ${IMAGE}"$'\n'
               fi
-
-              # Verify it's still running a few seconds later.
-              COMMANDS+="sleep 3"$'\n'
-              COMMANDS+="if docker ps --format '{{.Names}}' | grep -qx '${REPO}'; then"$'\n'
-              COMMANDS+="  echo '${REPO}: running'"$'\n'
-              COMMANDS+="else"$'\n'
-              COMMANDS+="  echo 'ERROR: ${REPO} exited immediately after start — logs follow:'"$'\n'
-              COMMANDS+="  docker logs ${REPO} --tail 50 2>&1 || true"$'\n'
-              COMMANDS+="fi"$'\n'
           done
 
           COMMANDS+="echo"$'\n'
           COMMANDS+="echo ======================================="$'\n'
-          COMMANDS+="echo 'Containers AFTER app deployment (should include all selected services)'"$'\n'
+          COMMANDS+="echo Running Containers"$'\n'
           COMMANDS+="echo ======================================="$'\n'
           COMMANDS+="docker ps"$'\n'
 
