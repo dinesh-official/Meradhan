@@ -194,6 +194,19 @@ body.high-contrast select {
   color: #ffffff !important;
   border: 1px solid #4a8fd4 !important;
 }
+/* The rule above also matches input-otp's intentionally invisible phantom
+   <input> (it's a real <input> element), un-hiding its oversized,
+   negative-letter-spaced text — the same overlap bug as Forced Colors
+   Mode, but caused by this site's own high-contrast CSS instead. Keep it
+   genuinely transparent here too; the visible OTP digits come from
+   separate sibling slot elements, unaffected by this rule. */
+body.high-contrast [data-input-otp] {
+  background-color: transparent !important;
+  color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  caret-color: transparent !important;
+}
 body.high-contrast input::placeholder,
 body.high-contrast textarea::placeholder {
   color: #a0b8cc !important;
