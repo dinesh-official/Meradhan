@@ -56,8 +56,8 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-[#F25C4C] transition-colors duration-200"
-                    aria-label="Instagram Page of MeraDhan"
-                    title="Instagram Page of MeraDhan"
+                    aria-label="Instagram Profile of MeraDhan"
+                    title="Instagram Profile of MeraDhan"
                   >
                     <FaInstagramSquare aria-hidden="true" />
                   </Link>
@@ -68,8 +68,8 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-[#F25C4C] transition-colors duration-200"
-                    aria-label="Pinterest Page of MeraDhan"
-                    title="Pinterest Page of MeraDhan"
+                    aria-label="Pinterest Profile of MeraDhan"
+                    title="Pinterest Profile of MeraDhan"
                   >
                     <FaPinterest aria-hidden="true" />
                   </Link>
@@ -80,8 +80,8 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-[#F25C4C] transition-colors duration-200"
-                    aria-label="LinkedIn Page of MeraDhan"
-                    title="LinkedIn Page of MeraDhan"
+                    aria-label="LinkedIn Profile of MeraDhan"
+                    title="LinkedIn Profile of MeraDhan"
                   >
                     <FaLinkedin aria-hidden="true" />
                   </Link>
@@ -92,8 +92,8 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-[#F25C4C] transition-colors duration-200"
-                    aria-label="Twitter Page of MeraDhan"
-                    title="Twitter Page of MeraDhan"
+                    aria-label="Twitter Profile of MeraDhan"
+                    title="Twitter Profile of MeraDhan"
                   >
                     <FaXTwitter aria-hidden="true" />
                   </Link>
