@@ -196,12 +196,41 @@ jobs:
           TARGET="$DNS_VAL"
           ROOT_DOMAIN="meradhan.co"
 
+          ###################################################
+          # Work out the branch/env code (e.g. sc10w)
+          # Prefer an explicit variable; otherwise derive it
+          # by stripping the trailing service letter off any
+          # name that was supplied.
+          ###################################################
+          BASE_CODE="${ENV_BRANCH_CODE}"
+
+          if [ -z "$BASE_CODE" ]; then
+            for N in "$FRONTEND_NAME" "$BACKEND_NAME" "$CRM_NAME" "$WORKER_NAME" "$STRAPI_NAME"; do
+              if [ -n "$N" ]; then
+                BASE_CODE="${N%?}"
+                break
+              fi
+            done
+          fi
+
+          if [ -z "$BASE_CODE" ]; then
+            echo "Could not determine branch code - no service names supplied and ENV_BRANCH_CODE is unset"
+            exit 1
+          fi
+
+          # Always-on record
+          E_NAME="${BASE_CODE}e"
+
+          # Explicit order so the log is identical run to run
+          SERVICE_ORDER=(frontend backend crm worker strapi eapp)
+
           declare -A SERVICES=(
             ["frontend"]="$FRONTEND_NAME"
             ["backend"]="$BACKEND_NAME"
             ["crm"]="$CRM_NAME"
             ["worker"]="$WORKER_NAME"
             ["strapi"]="$STRAPI_NAME"
+            ["eapp"]="$E_NAME"
           )
 
           RECORD_IDS=""
@@ -210,12 +239,12 @@ jobs:
 
           echo "=========== DNS RECORDS ==========="
 
-          for SERVICE in "${!SERVICES[@]}"
+          for SERVICE in "${SERVICE_ORDER[@]}"
           do
 
             SUBDOMAIN="${SERVICES[$SERVICE]}"
 
-            # Skip empty values
+            # Skip empty values (eapp is never empty)
             [ -z "$SUBDOMAIN" ] && continue
 
             FULL_DOMAIN="${SUBDOMAIN}.${ROOT_DOMAIN}"
@@ -304,11 +333,13 @@ jobs:
           echo "Record IDs : ${RECORD_IDS}"
           echo "Domains    : ${DOMAINS}"
           echo "URLs       : ${URLS}"
+          echo "E App URL  : https://${E_NAME}.${ROOT_DOMAIN}"
           echo "==============================="
 
           echo "record_ids=${RECORD_IDS}" >> "$GITHUB_OUTPUT"
           echo "domains=${DOMAINS}" >> "$GITHUB_OUTPUT"
           echo "urls=${URLS}" >> "$GITHUB_OUTPUT"
+          echo "e_url=https://${E_NAME}.${ROOT_DOMAIN}" >> "$GITHUB_OUTPUT"
 
       ###################################################
       # Override Required Environment Variables
