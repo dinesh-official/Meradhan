@@ -1531,6 +1531,13 @@ jobs:
           RULE_ARNS_CSV:      ${{ steps.tg_listener.outputs.rule_arns }}
           TG_ARNS_CSV:        ${{ steps.tg_listener.outputs.target_group_arns }}
           LIVE_TIME:          ${{ inputs.live_time }}
+          # Which apps were actually ticked on dispatch. The *_NAME vars are
+          # always set by "Generate Resource IDs", so selection must be read
+          # from the inputs — not from whether a name is non-empty.
+          DEPLOY_FRONTEND:    ${{ inputs.frontend }}
+          DEPLOY_BACKEND:     ${{ inputs.backend }}
+          DEPLOY_CRM:         ${{ inputs.crm }}
+          DEPLOY_WORKER:      ${{ inputs.worker }}
           # FRONTEND_NAME / BACKEND_NAME / CRM_NAME / WORKER_NAME come from
           # $GITHUB_ENV (set in the "Generate Resource IDs" step).
         run: |
@@ -1561,16 +1568,26 @@ jobs:
 
           DLQ_ARN="${DLQ_ARN:-}"
 
-          # Build the ECR repo CSV directly from the same names used to
-          # create the repos — same approach as Step 1, kept in sync so
-          # the SCHEDULED payload actually carries the repos too.
+          # =========================================================
+          # 0b. ECR repo CSV — ONLY the apps selected for this run.
+          # =========================================================
           ECR_REPOS_CSV=""
-          for REPO in "$FRONTEND_NAME" "$BACKEND_NAME" "$CRM_NAME" "$WORKER_NAME"; do
-            [ -z "$REPO" ] && continue
-            ECR_REPOS_CSV="${ECR_REPOS_CSV}${REPO},"
-          done
+
+          add_repo() {
+            local selected="$1" name="$2"
+            [ "$selected" = "true" ] || return 0
+            [ -n "$name" ] || return 0
+            ECR_REPOS_CSV="${ECR_REPOS_CSV}${name},"
+          }
+
+          add_repo "${DEPLOY_FRONTEND:-false}" "${FRONTEND_NAME:-}"
+          add_repo "${DEPLOY_BACKEND:-false}"  "${BACKEND_NAME:-}"
+          add_repo "${DEPLOY_CRM:-false}"      "${CRM_NAME:-}"
+          add_repo "${DEPLOY_WORKER:-false}"   "${WORKER_NAME:-}"
+
           ECR_REPOS_CSV="${ECR_REPOS_CSV%,}"
 
+          echo "Selected apps  : frontend=${DEPLOY_FRONTEND:-false} backend=${DEPLOY_BACKEND:-false} crm=${DEPLOY_CRM:-false} worker=${DEPLOY_WORKER:-false}"
           echo "ECR repos for scheduled cleanup: ${ECR_REPOS_CSV:-none}"
 
           # =========================================================
@@ -1765,10 +1782,11 @@ jobs:
           echo "Destroy at   : ${DESTROY_AT/T/ }  (${SCHEDULE_TZ})"
           echo "Destroy at   : $DESTROY_AT_UTC  (UTC)"
           echo "Bus          : $BUS_ARN"
+          echo "ECR repos    : ${ECR_REPOS_CSV:-none}"
           echo "======================================"
 
           # =========================================================
-          # 5. Build the payload — now includes ecr_repositories.
+          # 5. Build the payload — only selected repos.
           # =========================================================
           EVENT_DETAIL=$(jq -nc \
             --arg instance_id "$INSTANCE_ID" \
