@@ -706,11 +706,8 @@ jobs:
           COMMANDS+="docker image prune -f"$'\n'
           COMMANDS+="docker builder prune -f"$'\n'
 
-          # Login to ECR — output captured, and re-verified with
-          # get-authorization-token so a stale/expired login shows up
-          # here instead of surfacing later as a mysterious pull failure.
+          # Login to ECR
           COMMANDS+="aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 450321244603.dkr.ecr.ap-south-1.amazonaws.com"$'\n'
-          COMMANDS+="echo 'ECR login exit code:' \$?"$'\n'
 
           # Docker Network
           COMMANDS+="docker network inspect deployment_app-network >/dev/null 2>&1 || docker network create deployment_app-network"$'\n'
@@ -744,10 +741,7 @@ jobs:
           COMMANDS+="cd /"$'\n'
           COMMANDS+="docker ps"$'\n'
 
-          # Deploy Applications — pull and run errors are now captured
-          # and printed explicitly, instead of relying on `set -e`
-          # (which isn't even active in this remote script) to surface
-          # a failure. Each step's real exit code and stderr are shown.
+          # Deploy Applications
           for REPO in "${!SERVICES[@]}"
           do
               PORT="${SERVICES[$REPO]}"
@@ -758,38 +752,15 @@ jobs:
               COMMANDS+="echo Deploying ${REPO}"$'\n'
               COMMANDS+="echo ======================================="$'\n'
 
-              COMMANDS+="echo 'Verifying image exists in ECR before pulling...'"$'\n'
-              COMMANDS+="aws ecr describe-images --repository-name ${REPO} --image-ids imageTag=latest --region ap-south-1 --query 'imageDetails[0].imageTags' --output text || echo 'WARNING: aws ecr describe-images failed or no :latest tag found for ${REPO}'"$'\n'
-
-              COMMANDS+="if ! docker pull ${IMAGE} 2>/tmp/pull_err_${REPO}.log; then"$'\n'
-              COMMANDS+="  echo 'ERROR: docker pull FAILED for ${REPO} — full error below:'"$'\n'
-              COMMANDS+="  cat /tmp/pull_err_${REPO}.log"$'\n'
-              COMMANDS+="  echo 'Skipping ${REPO} — no image available to run.'"$'\n'
-              COMMANDS+="  continue"$'\n'
-              COMMANDS+="fi"$'\n'
-              COMMANDS+="echo '${REPO}: pull succeeded'"$'\n'
+              COMMANDS+="docker pull ${IMAGE}"$'\n'
 
               COMMANDS+="docker rm -f ${REPO} >/dev/null 2>&1 || true"$'\n'
 
               if [ -n "$PORT" ]; then
-                  COMMANDS+="if ! docker run -d --restart unless-stopped --network deployment_app-network --name ${REPO} -p ${PORT} ${IMAGE} 2>/tmp/run_err_${REPO}.log; then"$'\n'
+                  COMMANDS+="docker run -d --restart unless-stopped --network deployment_app-network --name ${REPO} -p ${PORT} ${IMAGE}"$'\n'
               else
-                  COMMANDS+="if ! docker run -d --restart unless-stopped --network deployment_app-network --name ${REPO} ${IMAGE} 2>/tmp/run_err_${REPO}.log; then"$'\n'
+                  COMMANDS+="docker run -d --restart unless-stopped --network deployment_app-network --name ${REPO} ${IMAGE}"$'\n'
               fi
-              COMMANDS+="  echo 'ERROR: docker run FAILED for ${REPO} — full error below:'"$'\n'
-              COMMANDS+="  cat /tmp/run_err_${REPO}.log"$'\n'
-              COMMANDS+="  continue"$'\n'
-              COMMANDS+="fi"$'\n'
-
-              # Verify it's still running a few seconds later — catches
-              # a container that started then immediately crash-looped.
-              COMMANDS+="sleep 3"$'\n'
-              COMMANDS+="if docker ps --format '{{.Names}}' | grep -qx '${REPO}'; then"$'\n'
-              COMMANDS+="  echo '${REPO}: running'"$'\n'
-              COMMANDS+="else"$'\n'
-              COMMANDS+="  echo 'ERROR: ${REPO} exited immediately after start — logs follow:'"$'\n'
-              COMMANDS+="  docker logs ${REPO} --tail 50 2>&1 || true"$'\n'
-              COMMANDS+="fi"$'\n'
           done
 
           COMMANDS+="echo"$'\n'
@@ -797,9 +768,6 @@ jobs:
           COMMANDS+="echo Running Containers"$'\n'
           COMMANDS+="echo ======================================="$'\n'
           COMMANDS+="docker ps"$'\n'
-          COMMANDS+="echo"$'\n'
-          COMMANDS+="echo 'All containers, including any that failed to stay running:'"$'\n'
-          COMMANDS+="docker ps -a"$'\n'
 
           echo "======================================"
           echo "Commands to Execute"
@@ -867,6 +835,7 @@ jobs:
           echo "======================================"
           echo "Deployment Completed Successfully"
           echo "======================================"
+
 
 
       - name: Create or Reuse Target Groups & Listener Rules
