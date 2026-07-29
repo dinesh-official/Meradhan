@@ -333,14 +333,12 @@ jobs:
           echo "Record IDs : ${RECORD_IDS}"
           echo "Domains    : ${DOMAINS}"
           echo "URLs       : ${URLS}"
-          echo "E App URL  : https://${E_NAME}.${ROOT_DOMAIN}"
+          echo "Logs App  : https://${E_NAME}.${ROOT_DOMAIN}"
           echo "==============================="
 
           echo "record_ids=${RECORD_IDS}" >> "$GITHUB_OUTPUT"
           echo "domains=${DOMAINS}" >> "$GITHUB_OUTPUT"
-          echo "urls=${URLS}" >> "$GITHUB_OUTPUT"
-          echo "e_url=https://${E_NAME}.${ROOT_DOMAIN}" >> "$GITHUB_OUTPUT"
-
+          
       ###################################################
       # Override Required Environment Variables
       ###################################################
