@@ -475,6 +475,14 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
 
+      - name: Login to Amazon ECR
+        run: |
+          aws ecr get-login-password --region ap-south-1 \
+            | docker login \
+              --username AWS \
+              --password-stdin 450321244603.dkr.ecr.ap-south-1.amazonaws.com          
+
+
       - name: Build & Push Docker Images
         shell: bash
         run: |
@@ -538,13 +546,6 @@ jobs:
           echo "======================================"
           echo "All Selected Docker Images Built & Pushed"
           echo "======================================"          
-
-      - name: Login to Amazon ECR
-        run: |
-          aws ecr get-login-password --region ap-south-1 \
-            | docker login \
-              --username AWS \
-              --password-stdin 450321244603.dkr.ecr.ap-south-1.amazonaws.com
 
 
 
