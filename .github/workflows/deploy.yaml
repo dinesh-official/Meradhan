@@ -384,75 +384,95 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1              
 
-      - name: Create Repositories
+      - name: Create ECR Repositories
         id: create_ecr
         shell: bash
         run: |
+          set -euo pipefail
 
-          set -e
+          REPOSITORIES=()
 
-          REPOSITORIES=(
-            "$FRONTEND_NAME"
-            "$BACKEND_NAME"
-            "$CRM_NAME"
-            "$WORKER_NAME"
-          )
+          [[ "${{ inputs.frontend }}" == "true" ]] && REPOSITORIES+=("$FRONTEND_NAME")
+          [[ "${{ inputs.backend }}"  == "true" ]] && REPOSITORIES+=("$BACKEND_NAME")
+          [[ "${{ inputs.crm }}"      == "true" ]] && REPOSITORIES+=("$CRM_NAME")
+          [[ "${{ inputs.worker }}"   == "true" ]] && REPOSITORIES+=("$WORKER_NAME")
 
+          if [ ${#REPOSITORIES[@]} -eq 0 ]; then
+            echo "No repositories selected."
+            echo "repository_names=" >> "$GITHUB_OUTPUT"
+            echo "repository_uris=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          REPOSITORY_NAMES=""
           REPOSITORY_URIS=""
 
           echo "======================================"
           echo "Creating ECR Repositories"
           echo "======================================"
 
-          for REPO in "${REPOSITORIES[@]}"
-          do
+          for REPO in "${REPOSITORIES[@]}"; do
 
             [ -z "$REPO" ] && continue
 
-            echo ""
+            echo
             echo "Repository : $REPO"
 
-            EXISTS=$(aws ecr describe-repositories \
-              --repository-names "$REPO" \
-              --query "repositories[0].repositoryName" \
-              --output text 2>/dev/null || true)
+            if DESC=$(aws ecr describe-repositories \
+                --repository-names "$REPO" \
+                --output json 2>/dev/null); then
 
-            if [ "$EXISTS" = "$REPO" ]; then
-
-              echo "Status : Already Exists"
+              URI=$(echo "$DESC" | jq -r '.repositories[0].repositoryUri')
+              echo "Status         : Already Exists"
 
             else
 
-              aws ecr create-repository \
+              CREATE=$(aws ecr create-repository \
                 --repository-name "$REPO" \
                 --image-scanning-configuration scanOnPush=true \
-                --image-tag-mutability MUTABLE >/dev/null
+                --image-tag-mutability MUTABLE \
+                --output json)
 
-              echo "Status : Created"
+              URI=$(echo "$CREATE" | jq -r '.repository.repositoryUri')
+              echo "Status         : Created"
 
             fi
 
-            URI=$(aws ecr describe-repositories \
-              --repository-names "$REPO" \
-              --query "repositories[0].repositoryUri" \
-              --output text)
-
-            REPOSITORY_URIS="${REPOSITORY_URIS}${URI},"
+            REPOSITORY_NAMES+="${REPO},"
+            REPOSITORY_URIS+="${URI},"
 
             echo "Repository URI : $URI"
             echo "--------------------------------------"
 
           done
 
-          echo ""
+          REPOSITORY_NAMES="${REPOSITORY_NAMES%,}"
+          REPOSITORY_URIS="${REPOSITORY_URIS%,}"
+
+          echo
           echo "======================================"
           echo "ECR Repositories Ready"
           echo "======================================"
 
-          echo "Repository URIs : ${REPOSITORY_URIS%,}"
+          echo "Repositories  : $REPOSITORY_NAMES"
+          echo "Repository URIs:"
+          printf '%s\n' "${REPOSITORY_URIS//,/\\n}"
 
-          echo "repository_uris=${REPOSITORY_URIS%,}" >> "$GITHUB_OUTPUT"    
+          {
+            echo "repository_names=$REPOSITORY_NAMES"
+            echo "repository_uris=$REPOSITORY_URIS"
+          } >> "$GITHUB_OUTPUT"
 
+          {
+            echo "## ECR Repositories"
+            echo ""
+            echo "| Repository | Status |"
+            echo "|------------|--------|"
+
+            for REPO in ${REPOSITORY_NAMES//,/ }; do
+              echo "| \`$REPO\` | Ready |"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
 
 
       - name: Build & Push Docker Images
