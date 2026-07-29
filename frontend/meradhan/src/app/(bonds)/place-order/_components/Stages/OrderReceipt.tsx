@@ -224,8 +224,8 @@ function OrderReceipt({
             <Link
               href="/terms-of-use"
               target="_blank"
-              title="Terms and Conditions"
-              aria-label="Terms and Conditions"
+              title="MeraDhan Terms of Use"
+              aria-label="MeraDhan Terms of Use"
               className="text-primary"
               onClick={(e) => e.stopPropagation()}
             >

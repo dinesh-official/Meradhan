@@ -41,7 +41,7 @@ const GlossaryView = ({ pageData }: { pageData: DynamicPageData }) => {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink href="/" title="Home" aria-label="Home">Home</BreadcrumbLink>
+            <BreadcrumbLink href="/" title="MeraDhan Home" aria-label="MeraDhan Home">Home</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>

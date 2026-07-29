@@ -198,8 +198,8 @@ function LoginForm() {
             Please contact our support team for further assistance.{" "}
             <Link
               href="/contact-us"
-              title="Contact Us"
-              aria-label="Contact Us"
+              title="Contact MeraDhan"
+              aria-label="Contact MeraDhan"
               className="text-primary text-center underline"
             >
               Contact Us

@@ -44,8 +44,8 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-[#F25C4C] transition-colors duration-200"
-                    aria-label="Meradhan Facebook Page"
-                    title="Meradhan Facebook Page"
+                    aria-label="Facebook Page of MeraDhan"
+                    title="Facebook Page of MeraDhan"
                   >
                     <FaFacebook aria-hidden="true" />
                   </Link>
@@ -56,8 +56,8 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-[#F25C4C] transition-colors duration-200"
-                    aria-label="Meradhan Instagram Page"
-                    title="Meradhan Instagram Page"
+                    aria-label="Instagram Page of MeraDhan"
+                    title="Instagram Page of MeraDhan"
                   >
                     <FaInstagramSquare aria-hidden="true" />
                   </Link>
@@ -68,8 +68,8 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-[#F25C4C] transition-colors duration-200"
-                    aria-label="Meradhan Pinterest Page"
-                    title="Meradhan Pinterest Page"
+                    aria-label="Pinterest Page of MeraDhan"
+                    title="Pinterest Page of MeraDhan"
                   >
                     <FaPinterest aria-hidden="true" />
                   </Link>
@@ -80,8 +80,8 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-[#F25C4C] transition-colors duration-200"
-                    aria-label="Meradhan LinkedIn Page"
-                    title="Meradhan LinkedIn Page"
+                    aria-label="LinkedIn Page of MeraDhan"
+                    title="LinkedIn Page of MeraDhan"
                   >
                     <FaLinkedin aria-hidden="true" />
                   </Link>
@@ -92,8 +92,8 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-[#F25C4C] transition-colors duration-200"
-                    aria-label="Meradhan Twitter Page"
-                    title="Meradhan Twitter Page"
+                    aria-label="Twitter Page of MeraDhan"
+                    title="Twitter Page of MeraDhan"
                   >
                     <FaXTwitter aria-hidden="true" />
                   </Link>
@@ -120,7 +120,13 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                   <div className="w-4">
                     <MdEmail size={16} aria-hidden="true" />
                   </div>
-                  <p>contact@meradhan.co</p>
+                  <a
+                    href="mailto:contact@meradhan.co"
+                    title="Contact Email of MeraDhan"
+                    aria-label="Contact Email of MeraDhan"
+                  >
+                    contact@meradhan.co
+                  </a>
                 </div>
               </div>
             </div>
@@ -199,8 +205,8 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                   <li>
                     <Link
                       href="/about-us"
-                      title="About Us"
-                      aria-label="About Us"
+                      title="About MeraDhan"
+                      aria-label="About MeraDhan"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       About Us
@@ -209,8 +215,8 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                   <li>
                     <Link
                       href="/partners-and-distributors"
-                      title="Partners & Distributors"
-                      aria-label="Partners & Distributors"
+                      title="MeraDhan Partners and Distributors"
+                      aria-label="MeraDhan Partners and Distributors"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Partners & Distributors
@@ -219,8 +225,8 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                   <li>
                     <Link
                       href="/disclaimer"
-                      title="Disclaimer"
-                      aria-label="Disclaimer"
+                      title="MeraDhan Disclaimer"
+                      aria-label="MeraDhan Disclaimer"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Disclaimer
@@ -229,8 +235,8 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                   <li>
                     <Link
                       href="/contact-us"
-                      title="Contact Us"
-                      aria-label="Contact Us"
+                      title="Contact MeraDhan"
+                      aria-label="Contact MeraDhan"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Contact Us
@@ -268,8 +274,8 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                   <li>
                     <Link
                       href="/glossary"
-                      title="Glossary"
-                      aria-label="Glossary"
+                      title="Bond Investment Glossary"
+                      aria-label="Bond Investment Glossary"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Glossary
@@ -278,8 +284,8 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
                   <li>
                     <Link
                       href="/faqs"
-                      title="FAQs"
-                      aria-label="FAQs"
+                      title="Frequently Asked Questions"
+                      aria-label="Frequently Asked Questions"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       FAQs
@@ -299,24 +305,24 @@ function Footer({ lightModded }: { lightModded?: boolean }) {
           <div className="flex items-center gap-4">
             <Link
               href="/privacy-policy"
-              title="Privacy Policy"
-              aria-label="Privacy Policy"
+              title="MeraDhan Privacy Policy"
+              aria-label="MeraDhan Privacy Policy"
               className="hover:text-secondary transition-colors duration-200"
             >
               Privacy Policy
             </Link>
             <Link
               href="/terms-of-use"
-              title="Terms of Use"
-              aria-label="Terms of Use"
+              title="MeraDhan Terms of Use"
+              aria-label="MeraDhan Terms of Use"
               className="hover:text-secondary transition-colors duration-200"
             >
               Terms of Use
             </Link>
             <Link
               href="/cookie-policy"
-              title="Cookie Policy"
-              aria-label="Cookie Policy"
+              title="MeraDhan Cookie Policy"
+              aria-label="MeraDhan Cookie Policy"
               className="hover:text-secondary transition-colors duration-200"
             >
               Cookie Policy

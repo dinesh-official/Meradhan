@@ -87,11 +87,11 @@ async function page({
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/" title="Home" aria-label="Home">Home</BreadcrumbLink>
+                <BreadcrumbLink href="/" title="MeraDhan Home" aria-label="MeraDhan Home">Home</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href="/" title="Bonds" aria-label="Bonds">Bonds</BreadcrumbLink>
+                <BreadcrumbLink href="/" title="MeraDhan Bonds" aria-label="MeraDhan Bonds">Bonds</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>

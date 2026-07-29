@@ -61,7 +61,7 @@ async function page({ params }: { params: Promise<{ isin: string }> }) {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/" title="Home" aria-label="Home">Home</BreadcrumbLink>
+              <BreadcrumbLink href="/" title="MeraDhan Home" aria-label="MeraDhan Home">Home</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>

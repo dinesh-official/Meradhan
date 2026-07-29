@@ -18,6 +18,22 @@ body.high-contrast .meradhan-logo .logo-white   { display: block !important; }
 html { font-size: calc(var(--a11y-font-scale, 1) * 100%); }
 
 /* ════════════════════════════════════════════
+   OTP INPUT — Windows Forced Colors Mode fix
+   ════════════════════════════════════════════
+   The `input-otp` library (used by SignInOtpInput on the login page) hides
+   one real <input> beneath the visible digit boxes via color/background/
+   border/box-shadow: transparent, with an oversized font-size and heavily
+   negative letter-spacing to compensate — safe only while actually
+   invisible. Windows Forced Colors Mode overrides those transparent values
+   on form controls, un-hiding that oversized/compressed phantom text and
+   making it overlap the real digits. Opt only this element out; the
+   visible slot boxes (real border/background/caret) are unaffected and
+   still participate in forced-colors normally. */
+[data-input-otp] {
+  forced-color-adjust: none;
+}
+
+/* ════════════════════════════════════════════
    HIGH CONTRAST MODE  (body.high-contrast)
    ════════════════════════════════════════════ */
 

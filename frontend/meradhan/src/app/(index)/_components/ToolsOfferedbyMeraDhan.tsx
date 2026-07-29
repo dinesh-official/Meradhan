@@ -51,7 +51,7 @@ function ToolsOfferedByMeraDhan() {
 
                 <div className="flex justify-start">
                   <Button variant={"outline"}>
-                    <Link href={`https://calc.meradhan.co`} title="Calculate YTM" aria-label="Calculate YTM">
+                    <Link href={`https://calc.meradhan.co`} title="Bond Yield to Maturity Calculator" aria-label="Bond Yield to Maturity Calculator">
                       Calculate YTM
                     </Link>
                   </Button>

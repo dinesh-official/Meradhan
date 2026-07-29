@@ -57,16 +57,16 @@ function MobMenu({ session }: { session?: ISessionResponse["responseData"] | nul
         <div className="flex flex-col flex-shrink-0 gap-3 p-4 border-t border-t-gray-200">
           <Link
             href={session?.id ? "/dashboard" : "/login"}
-            title={session?.id ? "Go to Dashboard" : "Login"}
-            aria-label={session?.id ? "Go to Dashboard" : "Login"}
+            title={session?.id ? "Go to MeraDhan Dashboard" : "Login to MeraDhan"}
+            aria-label={session?.id ? "Go to MeraDhan Dashboard" : "Login to MeraDhan"}
             className="bg-primary hover:bg-primary/90 py-2 rounded-md w-full text-white text-center transition"
           >
             {session?.id ? "Go to Dashboard" : "Login"}
           </Link>
           <Link
             href={session?.id ? "/logout" : "/signup"}
-            title={session?.id ? "Logout" : "Sign Up"}
-            aria-label={session?.id ? "Logout" : "Sign Up"}
+            title={session?.id ? "Logout" : "Sign Up for MeraDhan"}
+            aria-label={session?.id ? "Logout" : "Sign Up for MeraDhan"}
             className="hover:bg-primary/10 py-2 border border-primary rounded-md w-full text-primary text-center transition"
           >
             {session?.id ? "Logout" : "Sign Up"}
@@ -96,8 +96,8 @@ const MobileMenuItem = ({ item, level = 0 }: MenuItemProps) => {
           <Link
             href={item.href}
             aria-current={pathname === item.href ? "page" : undefined}
-            title={item.title}
-            aria-label={item.title}
+            title={item.label ?? item.title}
+            aria-label={item.label ?? item.title}
             className="flex-1"
             onClick={() => setOpen(false)}
           >

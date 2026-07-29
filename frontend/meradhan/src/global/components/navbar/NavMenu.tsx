@@ -63,8 +63,8 @@ function NavMenuList({
                 <Link
                   href={subItem.href || "#"}
                   aria-current={pathname === subItem.href ? "page" : undefined}
-                  title={subItem.title}
-                  aria-label={subItem.title}
+                  title={subItem.label ?? subItem.title}
+                  aria-label={subItem.label ?? subItem.title}
                   className="block px-4 py-2 w-full"
                 >
                   {subItem.title}
