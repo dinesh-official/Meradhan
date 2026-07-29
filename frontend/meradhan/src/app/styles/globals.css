@@ -201,11 +201,13 @@ body.high-contrast select {
    genuinely transparent here too; the visible OTP digits come from
    separate sibling slot elements, unaffected by this rule. */
 body.high-contrast [data-input-otp] {
-  background-color: transparent !important;
+  background: transparent !important;
   color: transparent !important;
-  border-color: transparent !important;
+  border: 0 solid transparent !important;
+  outline: 0 solid transparent !important;
   box-shadow: none !important;
   caret-color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
 }
 body.high-contrast input::placeholder,
 body.high-contrast textarea::placeholder {
