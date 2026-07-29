@@ -832,15 +832,39 @@ jobs:
           MAX_PRIORITY_RETRIES=10
           PRIORITY_OFFSET=1          # new rule priority = MAX_PRIORITY + PRIORITY_OFFSET
 
+          # ---------------------------------------------------------
+          # Resolve VPC_ID / LISTENER_ARN from the environment-specific
+          # variables actually exported by "Export GitHub Variables &
+          # Secrets" (STAGE_* / PROD_*). There is no separate "Get
+          # Listener ARN & VPC ID" step in this workflow producing a
+          # plain VPC_ID / LISTENER_ARN, so it's mapped here instead —
+          # this is what was causing the ERROR exits at the top of
+          # this step.
+          # ---------------------------------------------------------
+          if [ "${{ inputs.environment }}" = "prod" ]; then
+            VPC_ID="${PROD_VPC_ID:-}"
+            LISTENER_ARN="${PROD_LISTENER_ARN:-}"
+          else
+            VPC_ID="${STAGE_VPC_ID:-}"
+            LISTENER_ARN="${STAGE_LISTENER_ARN:-}"
+          fi
+
           if [ -z "$VPC_ID" ]; then
-            echo "ERROR: VPC_ID was not exported by the 'Get Listener ARN & VPC ID' step."
+            echo "ERROR: VPC_ID could not be resolved."
+            echo "Checked variable: $([ "${{ inputs.environment }}" = "prod" ] && echo PROD_VPC_ID || echo STAGE_VPC_ID)"
+            echo "Confirm this variable exists under Settings -> Secrets and variables -> Actions -> Variables."
             exit 1
           fi
 
           if [ -z "$LISTENER_ARN" ]; then
-            echo "ERROR: LISTENER_ARN was not exported by the 'Get Listener ARN & VPC ID' step."
+            echo "ERROR: LISTENER_ARN could not be resolved."
+            echo "Checked variable: $([ "${{ inputs.environment }}" = "prod" ] && echo PROD_LISTENER_ARN || echo STAGE_LISTENER_ARN)"
+            echo "Confirm this variable exists under Settings -> Secrets and variables -> Actions -> Variables."
             exit 1
           fi
+
+          echo "Resolved VPC_ID       : $VPC_ID"
+          echo "Resolved LISTENER_ARN : $LISTENER_ARN"
 
           # ---------------------------------------------------------
           # Output accumulators
@@ -1269,6 +1293,101 @@ jobs:
           echo "======================================"
           echo "All Target Groups & Listener Rules Configured"
           echo "======================================"
+
+
+      - name: Build / Validate Cleanup Event Payload
+        shell: bash
+        env:
+          EVENT_BUS_NAME: Branch_deploy
+          INSTANCE_ID:    ${{ steps.create_ec2.outputs.instance_id }}
+          RULE_ARNS_CSV:  ${{ steps.tg_listener.outputs.rule_arns }}
+          TG_ARNS_CSV:    ${{ steps.tg_listener.outputs.target_group_arns }}
+          PUBLISH_NOW:    ${{ inputs.publish_cleanup_now || 'false' }}
+          # FRONTEND_NAME / BACKEND_NAME / CRM_NAME / WORKER_NAME come from
+          # $GITHUB_ENV (set in the "Generate Resource IDs" step) — no need
+          # to redeclare them here, they're already in this step's env.
+        run: |
+          set -euo pipefail
+
+          if [ -z "${INSTANCE_ID}" ] || [ "${INSTANCE_ID}" = "None" ]; then
+            echo "No instance was created — nothing to build a payload for."
+            exit 0
+          fi
+
+          # Build the ECR repo CSV directly from the same names used to
+          # create the repos — avoids relying on a separate step output.
+          ECR_REPOS_CSV=""
+          for REPO in "$FRONTEND_NAME" "$BACKEND_NAME" "$CRM_NAME" "$WORKER_NAME"; do
+            [ -z "$REPO" ] && continue
+            ECR_REPOS_CSV="${ECR_REPOS_CSV}${REPO},"
+          done
+          ECR_REPOS_CSV="${ECR_REPOS_CSV%,}"
+
+          echo "ECR repos for cleanup: ${ECR_REPOS_CSV:-none}"
+
+          # An empty CSV must yield [] , not [""] .
+          EVENT_DETAIL=$(jq -nc \
+            --arg instance_id "$INSTANCE_ID" \
+            --arg rules       "$RULE_ARNS_CSV" \
+            --arg tgs         "$TG_ARNS_CSV" \
+            --arg ecrs        "$ECR_REPOS_CSV" \
+            '{
+               instance_id: $instance_id,
+               resources: [
+                 {
+                   rule_arns:
+                     (if $rules == "" then [] else ($rules | split(",")) end),
+                   target_group_arns:
+                     (if $tgs   == "" then [] else ($tgs   | split(",")) end),
+                   ecr_repositories:
+                     (if $ecrs  == "" then [] else ($ecrs  | split(",")) end)
+                 }
+               ]
+             }')
+
+          echo "======================================"
+          echo "Cleanup Event Payload (detail)"
+          echo "======================================"
+          echo "$EVENT_DETAIL" | jq .
+
+          if [ "${PUBLISH_NOW}" != "true" ]; then
+            echo "PUBLISH_NOW is not 'true' — payload validated, nothing published."
+            exit 0
+          fi
+
+          echo "WARNING: publishing cleanup event NOW. The environment will be destroyed."
+
+          # Detail is a JSON *string*, not an object -> --arg, never --argjson.
+          ENTRIES=$(jq -nc \
+            --arg detail "$EVENT_DETAIL" \
+            --arg bus    "$EVENT_BUS_NAME" \
+            '[{
+               Source:       "preview.cleanup",
+               DetailType:   "DeletePreviewResources",
+               EventBusName: $bus,
+               Detail:       $detail
+             }]')
+
+          RESPONSE=$(aws events put-events --entries "$ENTRIES")
+
+          echo "======================================"
+          echo "PutEvents Response"
+          echo "======================================"
+          echo "$RESPONSE" | jq .
+
+          # put-events returns HTTP 200 even when individual entries are
+          # rejected, so the exit code alone is not enough.
+          FAILED=$(echo "$RESPONSE" | jq -r '.FailedEntryCount')
+
+          if [ "$FAILED" != "0" ]; then
+            echo "ERROR: EventBridge rejected ${FAILED} entry/entries."
+            echo "$RESPONSE" | jq -r '.Entries[] | select(.ErrorCode) | "  \(.ErrorCode): \(.ErrorMessage)"'
+            exit 1
+          fi
+
+          # NOTE: FailedEntryCount == 0 only means the bus ACCEPTED the event.
+          # It says nothing about whether any rule matched or any target fired.
+          echo "Cleanup event accepted by bus '${EVENT_BUS_NAME}'."
 
 
       - name: Build / Validate Cleanup Event Payload
