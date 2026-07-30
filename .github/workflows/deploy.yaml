@@ -1421,14 +1421,25 @@ jobs:
       - name: Build / Validate Cleanup Event Payload
         shell: bash
         env:
-          EVENT_BUS_NAME: Branch_deploy
-          INSTANCE_ID:    ${{ steps.create_ec2.outputs.instance_id }}
-          RULE_ARNS_CSV:  ${{ steps.tg_listener.outputs.rule_arns }}
-          TG_ARNS_CSV:    ${{ steps.tg_listener.outputs.target_group_arns }}
-          PUBLISH_NOW:    ${{ inputs.publish_cleanup_now || 'false' }}
-          # FRONTEND_NAME / BACKEND_NAME / CRM_NAME / WORKER_NAME come from
-          # $GITHUB_ENV (set in the "Generate Resource IDs" step) — no need
-          # to redeclare them here, they're already in this step's env.
+          EVENT_BUS_NAME:     Branch_deploy
+          INSTANCE_ID:        ${{ steps.create_ec2.outputs.instance_id }}
+          RULE_ARNS_CSV:      ${{ steps.tg_listener.outputs.rule_arns }}
+          TG_ARNS_CSV:        ${{ steps.tg_listener.outputs.target_group_arns }}
+          PUBLISH_NOW:        ${{ inputs.publish_cleanup_now || 'false' }}
+          # Which apps were ticked on dispatch. FRONTEND_NAME / BACKEND_NAME /
+          # CRM_NAME / WORKER_NAME are ALWAYS set by "Generate Resource IDs",
+          # so selection has to be read from the inputs — testing whether a
+          # name is non-empty would always pass and send all four repos.
+          DEPLOY_FRONTEND:    ${{ inputs.frontend }}
+          DEPLOY_BACKEND:     ${{ inputs.backend }}
+          DEPLOY_CRM:         ${{ inputs.crm }}
+          DEPLOY_WORKER:      ${{ inputs.worker }}
+          # Cloudflare CNAMEs from the "Create Records" step (id: create_dns).
+          # Zone ID and token live on the Lambda as CF_ZONE_ID / CF_API_TOKEN,
+          # so only the record identifiers travel in the payload — nothing
+          # secret goes through EventBridge.
+          DNS_RECORD_IDS_CSV: ${{ steps.create_dns.outputs.record_ids }}
+          DNS_DOMAINS_CSV:    ${{ steps.create_dns.outputs.domains }}
         run: |
           set -euo pipefail
 
@@ -1437,16 +1448,39 @@ jobs:
             exit 0
           fi
 
-          # Build the ECR repo CSV directly from the same names used to
-          # create the repos — avoids relying on a separate step output.
+          # -------------------------------------------------------
+          # ECR repos — ONLY the apps selected for this run.
+          # -------------------------------------------------------
           ECR_REPOS_CSV=""
-          for REPO in "$FRONTEND_NAME" "$BACKEND_NAME" "$CRM_NAME" "$WORKER_NAME"; do
-            [ -z "$REPO" ] && continue
-            ECR_REPOS_CSV="${ECR_REPOS_CSV}${REPO},"
-          done
+
+          add_repo() {
+            local selected="$1" name="$2"
+            [ "$selected" = "true" ] || return 0
+            [ -n "$name" ] || return 0
+            ECR_REPOS_CSV="${ECR_REPOS_CSV}${name},"
+          }
+
+          add_repo "${DEPLOY_FRONTEND:-false}" "${FRONTEND_NAME:-}"
+          add_repo "${DEPLOY_BACKEND:-false}"  "${BACKEND_NAME:-}"
+          add_repo "${DEPLOY_CRM:-false}"      "${CRM_NAME:-}"
+          add_repo "${DEPLOY_WORKER:-false}"   "${WORKER_NAME:-}"
+
           ECR_REPOS_CSV="${ECR_REPOS_CSV%,}"
 
-          echo "ECR repos for cleanup: ${ECR_REPOS_CSV:-none}"
+          # -------------------------------------------------------
+          # Cloudflare records — everything create_dns produced.
+          # -------------------------------------------------------
+          DNS_RECORD_IDS_CSV="${DNS_RECORD_IDS_CSV:-}"
+          DNS_DOMAINS_CSV="${DNS_DOMAINS_CSV:-}"
+
+          echo "ECR repos for cleanup : ${ECR_REPOS_CSV:-none}"
+          echo "DNS records for cleanup: ${DNS_DOMAINS_CSV:-none}"
+
+          if [ -z "$DNS_RECORD_IDS_CSV" ]; then
+            echo "WARNING: no DNS record IDs — CNAMEs will be left behind."
+            echo "         Check that the 'Create Records' step has id: create_dns"
+            echo "         and runs before this step."
+          fi
 
           # An empty CSV must yield [] , not [""] .
           EVENT_DETAIL=$(jq -nc \
@@ -1454,6 +1488,8 @@ jobs:
             --arg rules       "$RULE_ARNS_CSV" \
             --arg tgs         "$TG_ARNS_CSV" \
             --arg ecrs        "$ECR_REPOS_CSV" \
+            --arg cf_records  "$DNS_RECORD_IDS_CSV" \
+            --arg cf_domains  "$DNS_DOMAINS_CSV" \
             '{
                instance_id: $instance_id,
                resources: [
@@ -1463,7 +1499,13 @@ jobs:
                    target_group_arns:
                      (if $tgs   == "" then [] else ($tgs   | split(",")) end),
                    ecr_repositories:
-                     (if $ecrs  == "" then [] else ($ecrs  | split(",")) end)
+                     (if $ecrs  == "" then [] else ($ecrs  | split(",")) end),
+                   cloudflare: {
+                     record_ids:
+                       (if $cf_records == "" then [] else ($cf_records | split(",")) end),
+                     domains:
+                       (if $cf_domains == "" then [] else ($cf_domains | split(",")) end)
+                   }
                  }
                ]
              }')
