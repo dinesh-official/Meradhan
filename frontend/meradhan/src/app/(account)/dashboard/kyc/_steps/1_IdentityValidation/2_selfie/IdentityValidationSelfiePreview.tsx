@@ -30,12 +30,15 @@ function IdentityValidationSelfiePreview() {
           <Image
             src={genMediaUrl(state.step_1.face.url)}
             alt="face"
+            title="face"
+            aria-label="face"
             width={1140}
             height={597}
             className="bg- border border-gray-200 rounded-2xl w-48 object-cover aspect-[3/4]"
           />
           <div>
-            <p
+            <button
+              type="button"
               className="font-medium text-primary text-sm cursor-pointer"
               onClick={() => {
                 addAuditLog({
@@ -54,7 +57,7 @@ function IdentityValidationSelfiePreview() {
               }}
             >
               Recapture
-            </p>
+            </button>
 
             <Dialog>
               <DialogTrigger>
@@ -92,7 +95,7 @@ function IdentityValidationSelfiePreview() {
         >
           Confirm & Continue
           <div className="flex justify-center items-center p-0 h-full">
-            <IoMdArrowDropright className="p-0 text-4xl" />
+            <IoMdArrowDropright aria-hidden="true" className="p-0 text-4xl" />
           </div>
         </Button>
         <Button

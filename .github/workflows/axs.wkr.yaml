@@ -3,7 +3,7 @@ name: Axs wkr
 on:
   push:
     branches:
-      - saravanan
+      - saravanan-new
 
 jobs:
   deploy:

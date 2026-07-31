@@ -22,7 +22,7 @@ function page() {
               <LoginForm />
               <div className="mt-2 text-center">
                 New User?{" "}
-                <Link className="font-semibold text-primary" href={"/signup"}>
+                <Link className="font-semibold text-primary" href={"/signup"} title="Sign Up for MeraDhan" aria-label="Sign Up for MeraDhan">
                   Sign Up
                 </Link>
               </div>
@@ -30,6 +30,8 @@ function page() {
                 <Link
                   href={`/privacy-policy`}
                   target="_blank"
+                  title="MeraDhan Privacy Policy"
+                  aria-label="MeraDhan Privacy Policy"
                   className="text-primary"
                 >
                   Privacy Policy
@@ -38,6 +40,8 @@ function page() {
                 <Link
                   href={`/terms-of-use`}
                   target="_blank"
+                  title="MeraDhan Terms of Use"
+                  aria-label="MeraDhan Terms of Use"
                   className="text-primary"
                 >
                   Terms of Use
@@ -48,6 +52,8 @@ function page() {
               <Image
                 src={`/assets/login.svg`}
                 alt="blog"
+                title="blog"
+                aria-label="blog"
                 width={1200}
                 height={800}
                 className="w-72 md:w-80 h-auto object-cover"

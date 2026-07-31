@@ -80,31 +80,31 @@ export const SOCIAL_MEDIA_LINKS: readonly SocialMediaItem[] = [
         name: "Facebook",
         href: "https://www.facebook.com/MeraDhanCo/",
         icon: FaFacebook,
-        ariaLabel: "Facebook",
+        ariaLabel: "Facebook Page of MeraDhan",
     },
     {
         name: "Instagram",
         href: "https://www.instagram.com/meradhan/",
         icon: FaInstagramSquare,
-        ariaLabel: "Instagram",
+        ariaLabel: "Instagram Profile of MeraDhan",
     },
     {
         name: "Pinterest",
         href: "https://in.pinterest.com/meradhanco/",
         icon: FaPinterest,
-        ariaLabel: "Pinterest",
+        ariaLabel: "Pinterest Profile of MeraDhan",
     },
     {
         name: "LinkedIn",
         href: "https://www.linkedin.com/company/meradhan/",
         icon: FaLinkedin,
-        ariaLabel: "LinkedIn",
+        ariaLabel: "LinkedIn Profile of MeraDhan",
     },
     {
         name: "Twitter",
         href: "https://x.com/MeraDhanCo",
         icon: FaXTwitter,
-        ariaLabel: "Twitter (X)",
+        ariaLabel: "Twitter Profile of MeraDhan",
     },
 ] as const;
 

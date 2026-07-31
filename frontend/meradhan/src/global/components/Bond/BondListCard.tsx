@@ -71,13 +71,13 @@ export function BondListCard({
                 {/* // make sure 2 buttons on that code deferent places */}
                 {!gridMode && (
                   <div className="hidden lg:flex gap-3 col-span-2 flex-wrap justify-end">
-                    <Link href={`/bonds/detail/` + data.isin} aria-label={`View details for ${data.bondName}`}>
+                    <Link href={`/bonds/detail/` + data.isin} aria-label={`View details for ${data.bondName}`} title={`View details for ${data.bondName}`}>
                       <Button variant={`outline`} className="bg-transparent">
                         View Details
                       </Button>
                     </Link>
                     {showBuy && (
-                      <Link href={`/place-order/${data.isin}`}>
+                      <Link href={`/place-order/${data.isin}`} title={`Buy ${data.bondName} bond`} aria-label={`Buy ${data.bondName} bond`}>
                         <Button title="Place order for this bond">
                           Buy Now
                         </Button>
@@ -181,6 +181,7 @@ export function BondListCard({
                 <Link
                   href={`/bonds/detail/${data.isin}`}
                   aria-label={`View details for ${data.bondName}`}
+                  title={`View details for ${data.bondName}`}
                   className="block w-full"
                 >
                   <Button variant={`outline`} className="bg-transparent w-full">
@@ -188,7 +189,7 @@ export function BondListCard({
                   </Button>
                 </Link>
                 {showBuy && (
-                  <Link href={`/place-order/${data.isin}`} className="block w-full">
+                  <Link href={`/place-order/${data.isin}`} title={`Buy ${data.bondName} bond`} aria-label={`Buy ${data.bondName} bond`} className="block w-full">
                     <Button className="w-full" title="Place order for this bond">
                       Buy Now
                     </Button>

@@ -34,6 +34,8 @@ export function ContactCard({
     return (
       <a
         href={href}
+        title={`${label}: ${value}`}
+        aria-label={`${label}: ${value}`}
         className={cn("contact-card relative flex items-center transition-colors duration-200", className)}
         style={{ gap: "16px", padding: "16px 24px", border: "1px solid #e5e7eb", borderRadius: "6px", maxWidth: "320px", width: "100%" }}
       >

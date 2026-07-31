@@ -119,7 +119,7 @@ const FdCalculatorContent = () => {
           <h3>8. Need Help?</h3>
           <p>
             For feedback or support, write to{" "}
-            <strong>support@meradhan.co</strong>.
+            <strong><a href="mailto:support@meradhan.co" title="Contact Email of MeraDhan" aria-label="Contact Email of MeraDhan">support@meradhan.co</a></strong>.
           </p>
         </div>
       </div>

@@ -1,7 +1,9 @@
+"use client";
 import React from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { MENU_ITEMS } from "@/global/constants/menu.constants";
 
 function NavMenu() {
@@ -33,6 +35,7 @@ function NavMenuList({
   item: (typeof MENU_ITEMS)[number];
   isNested?: boolean;
 }) {
+  const pathname = usePathname();
   return (
     <>
       {item.children && (
@@ -59,6 +62,9 @@ function NavMenuList({
 
                 <Link
                   href={subItem.href || "#"}
+                  aria-current={pathname === subItem.href ? "page" : undefined}
+                  title={subItem.label ?? subItem.title}
+                  aria-label={subItem.label ?? subItem.title}
                   className="block px-4 py-2 w-full"
                 >
                   {subItem.title}

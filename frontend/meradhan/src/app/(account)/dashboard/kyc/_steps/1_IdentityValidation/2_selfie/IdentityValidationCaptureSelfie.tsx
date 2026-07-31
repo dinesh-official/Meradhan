@@ -81,6 +81,8 @@ function HintAllowSelfie() {
         <Image
           src="/static/kyc/disallowFace.svg"
           alt="disallowFace"
+          title="disallowFace"
+          aria-label="disallowFace"
           width={350}
           height={300}
         />
@@ -90,6 +92,8 @@ function HintAllowSelfie() {
         <Image
           src="/static/kyc/allowFace.svg"
           alt="allowFace"
+          title="allowFace"
+          aria-label="allowFace"
           width={100}
           height={100}
         />

@@ -26,6 +26,8 @@ const ListNseData = ({ nseData }: ListNseDataProps) => {
               <Image
                 src="/static/nse_logo.svg"
                 alt={`${item.exchange} logo`}
+                title={`${item.exchange} logo`}
+                aria-label={`${item.exchange} logo`}
                 width={50}
                 height={50}
               />

@@ -48,7 +48,8 @@ function CardPagination({
     targetPage: number,
     label: string,
     isDisabled: boolean,
-    enabledClass: string
+    enabledClass: string,
+    descriptiveLabel: string
   ) => {
     const base = "px-2 py-2 min-w-8 font-medium text-sm text-center transition-colors";
     if (isDisabled || disabled) {
@@ -60,7 +61,12 @@ function CardPagination({
     }
     if (getPageLink) {
       return (
-        <Link href={getPageLink(targetPage)} className={clsx(base, enabledClass)}>
+        <Link
+          href={getPageLink(targetPage)}
+          title={descriptiveLabel}
+          aria-label={descriptiveLabel}
+          className={clsx(base, enabledClass)}
+        >
           {label}
         </Link>
       );
@@ -89,6 +95,8 @@ function CardPagination({
         key={p}
         href={href}
         onClick={(e) => handleClick(p, e)}
+        title={`Go to page ${p}`}
+        aria-label={`Go to page ${p}`}
         className={clsx(
           "px-2 py-2 min-w-8 font-medium text-sm text-center transition-colors",
           isActive
@@ -106,14 +114,14 @@ function CardPagination({
   return (
     <div className="w-full rounded-md bg-white overflow-hidden">
       <div className="flex justify-center items-center">
-        {renderNavButton(1, "«", page === 1, "bg-white hover:bg-blue-100 text-blue-900")}
-        {renderNavButton(page - 1, "‹", page === 1, "bg-gray-100 hover:bg-blue-100 text-blue-900")}
+        {renderNavButton(1, "«", page === 1, "bg-white hover:bg-blue-100 text-blue-900", "Go to first page")}
+        {renderNavButton(page - 1, "‹", page === 1, "bg-gray-100 hover:bg-blue-100 text-blue-900", "Go to previous page")}
 
         {/* Page Numbers */}
         {pages.map((p, i) => renderPage(p, i))}
 
-        {renderNavButton(page + 1, "›", page === totalPages, "bg-gray-100 hover:bg-blue-100 text-blue-900")}
-        {renderNavButton(totalPages, "»", page === totalPages, "bg-gray-100 hover:bg-blue-100 text-blue-900")}
+        {renderNavButton(page + 1, "›", page === totalPages, "bg-gray-100 hover:bg-blue-100 text-blue-900", "Go to next page")}
+        {renderNavButton(totalPages, "»", page === totalPages, "bg-gray-100 hover:bg-blue-100 text-blue-900", "Go to last page")}
       </div>
     </div>
   );

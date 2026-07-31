@@ -269,6 +269,8 @@ function SignUpForm() {
               <Link
                 href="/terms-of-use"
                 target="_blank"
+                title="MeraDhan Terms of Use"
+                aria-label="MeraDhan Terms of Use"
                 className="text-primary underline"
               >
                 Terms & Conditions
@@ -277,6 +279,8 @@ function SignUpForm() {
               <Link
                 href="/privacy-policy"
                 target="_blank"
+                title="MeraDhan Privacy Policy"
+                aria-label="MeraDhan Privacy Policy"
                 className="text-primary underline"
               >
                 Privacy Policy
@@ -316,7 +320,7 @@ function SignUpForm() {
 
         <p className="mt-3 text-sm text-center">
           Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-primary">
+          <Link href="/login" title="Login to MeraDhan" aria-label="Login to MeraDhan" className="font-semibold text-primary">
             Login
           </Link>
         </p>

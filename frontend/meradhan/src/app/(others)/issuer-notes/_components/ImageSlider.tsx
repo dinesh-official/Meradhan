@@ -25,7 +25,7 @@ function ImageSlider({ imaeges }: { imaeges?: string[] }) {
     <Carousel responsive={responsive}>
       {imaeges?.map((imgUrl, index) => (
         <div key={index} className="p-1">
-          <img src={imgUrl} alt={`Image ${index + 1}`} />
+          <img src={imgUrl} alt={`Image ${index + 1}`} title={`Image ${index + 1}`} aria-label={`Image ${index + 1}`} />
         </div>
       ))}
     </Carousel>

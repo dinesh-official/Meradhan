@@ -156,6 +156,8 @@ export default function CompanyDetails({
             <Link
               href={genMediaUrl(entity.panCopyFileUrl)}
               target="_blank"
+              title="View PAN copy"
+              aria-label="View PAN copy"
               className="font-medium text-secondary text-sm underline"
             >
               View PAN copy

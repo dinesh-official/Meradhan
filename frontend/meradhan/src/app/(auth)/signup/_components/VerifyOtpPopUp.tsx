@@ -239,7 +239,7 @@ function VerifyOtpPopUp({
             <p className="text-[#1e3a5f] text-sm">
               We&apos;re here to help. You&apos;ve used all email and mobile OTP
               attempts. Please{" "}
-              <a href="/contact-us" className="text-primary underline">
+              <a href="/contact-us" title="Contact MeraDhan" aria-label="Contact MeraDhan" className="text-primary underline">
                 contact us
               </a>{" "}
               to verify your account safely.
@@ -338,6 +338,7 @@ function VerifyOtpPopUp({
                   <button
                     type="button"
                     className="text-primary underline"
+                    aria-label="Change email address"
                     onClick={() => {
                       setShowEmailEdit(true);
                       setShowPhoneEdit(false);
@@ -389,6 +390,7 @@ function VerifyOtpPopUp({
                   <button
                     type="button"
                     className="text-primary underline"
+                    aria-label="Change phone number"
                     onClick={() => {
                       setShowPhoneEdit(true);
                       setShowEmailEdit(false);

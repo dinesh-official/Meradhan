@@ -55,10 +55,10 @@ function IssuerNotesSearchMode() {
               onClick={() => setSearch("")}
               tabIndex={0}
             >
-              <X className="text-secondary" />
+              <X aria-hidden="true" className="text-secondary" />
             </button>
           ) : (
-            <Search className="text-secondary" />
+            <Search aria-hidden="true" className="text-secondary" />
           )}
         </div>
       </div>
@@ -71,10 +71,10 @@ function IssuerNotesSearchMode() {
       >
         <TabsList className="h-12 bg-white border border-gray-200">
           <TabsTrigger value="list" className="px-5">
-            <List /> LIST
+            <List aria-hidden="true" /> LIST
           </TabsTrigger>
           <TabsTrigger value="grid" className="px-5">
-            <Grid /> GRID
+            <Grid aria-hidden="true" /> GRID
           </TabsTrigger>
         </TabsList>
       </Tabs>

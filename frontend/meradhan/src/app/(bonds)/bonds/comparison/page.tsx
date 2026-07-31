@@ -87,11 +87,11 @@ async function page({
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                <BreadcrumbLink href="/" title="MeraDhan Home" aria-label="MeraDhan Home">Home</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href="/">Bonds</BreadcrumbLink>
+                <BreadcrumbLink href="/" title="MeraDhan Bonds" aria-label="MeraDhan Bonds">Bonds</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
@@ -147,7 +147,7 @@ async function page({
                       <span>{bond?.isin}</span>
                       <CopyIsin isin={bond?.isin} />
                     </div>
-                    <DeleteCompare index={i} />
+                    <DeleteCompare index={i} bondName={bond?.bondName} />
                   </>
                 ))}
               />

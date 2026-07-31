@@ -32,13 +32,16 @@ function IdentityValidationPreviewSign() {
           <Image
             src={genMediaUrl(state.step_1.sign.url)}
             alt="PAN Card"
+            title="PAN Card"
+            aria-label="PAN Card"
             width={1140}
             height={597}
             className="bg-gray-50 border border-gray-200 rounded-2xl w-80 object-cover"
           />
           <div className="flex flex-col gap-2">
-            <p
-              className="font-medium text-primary text-sm cursor-pointer"
+            <button
+              type="button"
+              className="font-medium text-primary text-sm cursor-pointer text-left"
               onClick={() => {
                 addAuditLog({
                   type: "RECAPTURE_SIGN",
@@ -48,7 +51,7 @@ function IdentityValidationPreviewSign() {
               }}
             >
               Remove and Add New Signature
-            </p>
+            </button>
           </div>
         </div>
       </CardContent>
@@ -78,7 +81,7 @@ function IdentityValidationPreviewSign() {
         >
           Confirm & Continue
           <div className="flex justify-center items-center p-0 h-full">
-            <IoMdArrowDropright className="p-0 text-4xl" />
+            <IoMdArrowDropright aria-hidden="true" className="p-0 text-4xl" />
           </div>
         </Button>
         <Button

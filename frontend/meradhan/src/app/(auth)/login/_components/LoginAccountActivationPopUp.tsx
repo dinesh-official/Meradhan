@@ -106,6 +106,7 @@ function LoginAccountActivationPopUp({
                 type="button"
                 className="font-medium text-primary underline"
                 disabled={formManager.sendActivationOtpMutation.isPending}
+                aria-label={`Verify this ${channel === "email" ? "email address" : "mobile number"} and send OTP`}
                 onClick={formManager.handleStartAccountActivation}
               >
                 Click here to verify

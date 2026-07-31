@@ -6,6 +6,7 @@ import React from "react";
 import { FaInstagramSquare } from "react-icons/fa";
 import {
   FaFacebook,
+  FaFilePdf,
   FaLinkedin,
   FaLocationDot,
   FaPinterest,
@@ -45,7 +46,8 @@ export default function Footer({ lightModded }: { lightModded?: boolean }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-[#F25C4C] transition-colors duration-200"
-                    aria-label="Facebook"
+                    aria-label="Facebook Page of MeraDhan"
+                    title="Facebook Page of MeraDhan"
                   >
                     <FaFacebook aria-hidden="true" />
                   </a>
@@ -56,7 +58,8 @@ export default function Footer({ lightModded }: { lightModded?: boolean }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-[#F25C4C] transition-colors duration-200"
-                    aria-label="Instagram"
+                    aria-label="Instagram Profile of MeraDhan"
+                    title="Instagram Profile of MeraDhan"
                   >
                     <FaInstagramSquare aria-hidden="true" />
                   </a>
@@ -67,7 +70,8 @@ export default function Footer({ lightModded }: { lightModded?: boolean }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-[#F25C4C] transition-colors duration-200"
-                    aria-label="Pinterest"
+                    aria-label="Pinterest Profile of MeraDhan"
+                    title="Pinterest Profile of MeraDhan"
                   >
                     <FaPinterest aria-hidden="true" />
                   </a>
@@ -78,7 +82,8 @@ export default function Footer({ lightModded }: { lightModded?: boolean }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-[#F25C4C] transition-colors duration-200"
-                    aria-label="LinkedIn"
+                    aria-label="LinkedIn Profile of MeraDhan"
+                    title="LinkedIn Profile of MeraDhan"
                   >
                     <FaLinkedin aria-hidden="true" />
                   </a>
@@ -89,7 +94,8 @@ export default function Footer({ lightModded }: { lightModded?: boolean }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-[#F25C4C] transition-colors duration-200"
-                    aria-label="Twitter (X)"
+                    aria-label="Twitter Profile of MeraDhan"
+                    title="Twitter Profile of MeraDhan"
                   >
                     <FaXTwitter aria-hidden="true" />
                   </a>
@@ -116,7 +122,13 @@ export default function Footer({ lightModded }: { lightModded?: boolean }) {
                   <div className="w-4">
                     <MdEmail size={16} aria-hidden="true" />
                   </div>
-                  <p>contact@meradhan.co</p>
+                  <a
+                    href="mailto:contact@meradhan.co"
+                    title="Contact Email of MeraDhan"
+                    aria-label="Contact Email of MeraDhan"
+                  >
+                    contact@meradhan.co
+                  </a>
                 </div>
               </div>
             </div>
@@ -128,6 +140,8 @@ export default function Footer({ lightModded }: { lightModded?: boolean }) {
                   <li>
                     <Link
                       href="/bonds"
+                      title="Bond Directory"
+                      aria-label="Bond Directory"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Bond Directory
@@ -138,9 +152,13 @@ export default function Footer({ lightModded }: { lightModded?: boolean }) {
                       href="/docs/Investor-Charter.pdf"
                       target="_blank"
                       rel="noopener noreferrer"
+                      title="Investor Charter"
+                      aria-label="Investor Charter"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
-                      Investor Charter<span className="sr-only"> (opens PDF in new tab)</span>
+                      Investor Charter
+                      <FaFilePdf aria-hidden="true" className="inline ml-1 mb-0.5" size={12} />
+                      <span className="sr-only"> (opens PDF in new tab)</span>
                     </Link>
                   </li>
                   <li>
@@ -148,9 +166,13 @@ export default function Footer({ lightModded }: { lightModded?: boolean }) {
                       href="/docs/Regulatory-Disclosure.pdf"
                       target="_blank"
                       rel="noopener noreferrer"
+                      title="Regulatory Disclosure"
+                      aria-label="Regulatory Disclosure"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
-                      Regulatory Disclosure<span className="sr-only"> (opens PDF in new tab)</span>
+                      Regulatory Disclosure
+                      <FaFilePdf aria-hidden="true" className="inline ml-1 mb-0.5" size={12} />
+                      <span className="sr-only"> (opens PDF in new tab)</span>
                     </Link>
                   </li>
                   <li>
@@ -158,14 +180,20 @@ export default function Footer({ lightModded }: { lightModded?: boolean }) {
                       href="/docs/Investor-Grievance-Redressal-Mechanism.pdf"
                       target="_blank"
                       rel="noopener noreferrer"
+                      title="Investor Grievance"
+                      aria-label="Investor Grievance"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
-                      Investor Grievance<span className="sr-only"> (opens PDF in new tab)</span>
+                      Investor Grievance
+                      <FaFilePdf aria-hidden="true" className="inline ml-1 mb-0.5" size={12} />
+                      <span className="sr-only"> (opens PDF in new tab)</span>
                     </Link>
                   </li>
                   <li>
                     <Link
                       href="/client-registration-documents"
+                      title="Client Registration Documents"
+                      aria-label="Client Registration Documents"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Client Registration Documents
@@ -179,6 +207,8 @@ export default function Footer({ lightModded }: { lightModded?: boolean }) {
                   <li>
                     <Link
                       href="/about-us"
+                      title="About MeraDhan"
+                      aria-label="About MeraDhan"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       About Us
@@ -187,6 +217,8 @@ export default function Footer({ lightModded }: { lightModded?: boolean }) {
                   <li>
                     <Link
                       href="/partners-and-distributors"
+                      title="MeraDhan Partners and Distributors"
+                      aria-label="MeraDhan Partners and Distributors"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Partners & Distributors
@@ -195,6 +227,8 @@ export default function Footer({ lightModded }: { lightModded?: boolean }) {
                   <li>
                     <Link
                       href="/disclaimer"
+                      title="MeraDhan Disclaimer"
+                      aria-label="MeraDhan Disclaimer"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Disclaimer
@@ -203,6 +237,8 @@ export default function Footer({ lightModded }: { lightModded?: boolean }) {
                   <li>
                     <Link
                       href="/contact-us"
+                      title="Contact MeraDhan"
+                      aria-label="Contact MeraDhan"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Contact Us
@@ -240,6 +276,8 @@ export default function Footer({ lightModded }: { lightModded?: boolean }) {
                   <li>
                     <Link
                       href="/glossary"
+                      title="Bond Investment Glossary"
+                      aria-label="Bond Investment Glossary"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       Glossary
@@ -248,6 +286,8 @@ export default function Footer({ lightModded }: { lightModded?: boolean }) {
                   <li>
                     <Link
                       href="/faqs"
+                      title="Frequently Asked Questions"
+                      aria-label="Frequently Asked Questions"
                       className="hover:text-[#F25C4C] transition-colors duration-200"
                     >
                       FAQs
@@ -267,18 +307,24 @@ export default function Footer({ lightModded }: { lightModded?: boolean }) {
           <div className="flex items-center gap-4">
             <Link
               href="/privacy-policy"
+              title="MeraDhan Privacy Policy"
+              aria-label="MeraDhan Privacy Policy"
               className="hover:text-secondary transition-colors duration-200"
             >
               Privacy Policy
             </Link>
             <Link
               href="/terms-of-use"
+              title="MeraDhan Terms of Use"
+              aria-label="MeraDhan Terms of Use"
               className="hover:text-secondary transition-colors duration-200"
             >
               Terms of Use
             </Link>
             <Link
               href="/cookie-policy"
+              title="MeraDhan Cookie Policy"
+              aria-label="MeraDhan Cookie Policy"
               className="hover:text-secondary transition-colors duration-200"
             >
               Cookie Policy

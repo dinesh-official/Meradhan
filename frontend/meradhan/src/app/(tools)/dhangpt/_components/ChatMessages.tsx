@@ -37,6 +37,8 @@ export default function ChatMessages({
                 <Image
                   src="/static/dhangpt-border.svg"
                   alt="Chat Bot"
+                  title="Chat Bot"
+                  aria-label="Chat Bot"
                   width={23}
                   height={23}
                   className="inline-block mr-1 align-middle"
@@ -75,6 +77,8 @@ export default function ChatMessages({
             width={50}
             height={50}
             alt="Typing..."
+            title="Typing..."
+            aria-label="Typing..."
             className="inline-block"
           />
         </p>

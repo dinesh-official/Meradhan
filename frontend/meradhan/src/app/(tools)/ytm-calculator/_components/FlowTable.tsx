@@ -61,11 +61,11 @@ export default function FlowTable({
         <table className="divide-y first:divide-white w-full table-fixed">
           <thead className="rounded overflow-hidden">
             <tr className="bg-[#F5F5F5] p-3 rounded-3xl text-black text-sm">
-              <th className="p-4 text-left">Period</th>
-              <th className="p-4 font-medium text-sm text-left">Date</th>
-              <th className="p-4 font-medium text-sm text-left">Coupon</th>
-              <th className="p-4 font-medium text-sm text-left">Principal</th>
-              <th className="p-4 font-medium text-sm text-left">
+              <th scope="col" className="p-4 text-left">Period</th>
+              <th scope="col" className="p-4 font-medium text-sm text-left">Date</th>
+              <th scope="col" className="p-4 font-medium text-sm text-left">Coupon</th>
+              <th scope="col" className="p-4 font-medium text-sm text-left">Principal</th>
+              <th scope="col" className="p-4 font-medium text-sm text-left">
                 Total Cashflow
               </th>
             </tr>

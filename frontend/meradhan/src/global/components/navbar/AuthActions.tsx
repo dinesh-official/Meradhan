@@ -13,10 +13,10 @@ function AuthActions({
 
   return (
     <>
-      <Link href="/login" className="">
+      <Link href="/login" title="Login to MeraDhan" aria-label="Login to MeraDhan" className="">
         Login
       </Link>
-      <Link href={`/signup`}>
+      <Link href={`/signup`} title="Sign Up for MeraDhan" aria-label="Sign Up for MeraDhan">
         <Button className="px-5">Sign Up</Button>
       </Link>
     </>
