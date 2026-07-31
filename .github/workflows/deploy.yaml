@@ -722,7 +722,10 @@ jobs:
 
           # Fresh clone deployment repo
           COMMANDS+="rm -rf branch-deploy"$'\n'
-          COMMANDS+="git clone --depth 1 https://github.com/bcispl/branch-deploy.git"$'\n'
+          COMMANDS+="aws s3 sync s3://meradhan-general/branch_deploy/ branch-deploy/"$'\n'
+          COMMANDS+="cd branch-deploy"$'\n'
+          COMMANDS+="pwd"$'\n'
+          COMMANDS+="ls -la"$'\n'
 
           COMMANDS+="cd branch-deploy"$'\n'
           COMMANDS+="pwd"$'\n'
