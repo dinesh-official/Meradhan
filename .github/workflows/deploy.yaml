@@ -723,15 +723,16 @@ jobs:
           COMMANDS+="docker network inspect deployment_app-network >/dev/null 2>&1 || docker network create deployment_app-network"$'\n'
 
           # Fresh clone deployment repo
-          COMMANDS+='GH_TOKEN=$(aws ssm get-parameter --name /preview/github/branch_deploy_token --with-decryption --region ap-south-1 --query Parameter.Value --output text 2>/dev/null)'$'\n'
-          COMMANDS+='if [ -z "$GH_TOKEN" ] || [ "$GH_TOKEN" = "None" ]; then echo "ERROR: could not read GitHub token from SSM - check the instance profile has ssm:GetParameter"; exit 1; fi'$'\n'
+          COMMANDS+='set -euo pipefail'$'\n'
+          COMMANDS+='GH_TOKEN=$(aws ssm get-parameter --name /preview/github/branch_deploy_token --with-decryption --region ap-south-1 --query "Parameter.Value" --output text)'$'\n'
+          COMMANDS+='[ -n "$GH_TOKEN" ] || { echo "GitHub token not found"; exit 1; }'$'\n'
           COMMANDS+='AUTH_B64=$(printf "x-access-token:%s" "$GH_TOKEN" | base64 -w0)'$'\n'
           COMMANDS+='rm -rf branch-deploy'$'\n'
           COMMANDS+='git -c http.extraheader="Authorization: Basic ${AUTH_B64}" clone --depth 1 https://github.com/bcispl/branch-deploy.git'$'\n'
           COMMANDS+='unset GH_TOKEN AUTH_B64'$'\n'
-          COMMANDS+="cd branch-deploy"$'\n'
-          COMMANDS+="pwd"$'\n'
-          COMMANDS+="ls -la"$'\n'
+          COMMANDS+='cd branch-deploy'$'\n'
+          COMMANDS+='pwd'$'\n'
+          COMMANDS+='ls -la'$'\n'
 
           # Filebeat
           COMMANDS+="docker compose -f filebeat.yaml up -d"$'\n'
