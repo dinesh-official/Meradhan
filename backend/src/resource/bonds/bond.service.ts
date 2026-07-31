@@ -6,6 +6,7 @@ import { BondQueryBuilder } from "./bond_query_builder";
 import { isISIN } from "@utils/filters/convert";
 import {
   computeBondOrderPricingData,
+  computeStoredBondOrderPricing,
   getLastNextCouponDateBasedOnSettlementDate,
 } from "@services/order/order-pricing-helper";
 import { sendBackOfficeEmail } from "@communication/email_communication";
@@ -17,7 +18,7 @@ import {
 import { AppConfigService } from "@resource/app-config/app-config.service";
 import { AppError } from "@utils/error/AppError";
 import { sanitizeIssuerHtml } from "@utils/html-sanitizer";
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
 import { OrderPdfService } from "@resource/customer/order/order-pdf.service";
 import { OrderService } from "@resource/customer/order/order.service";
 import { CustomerProfileManager } from "@services/customer/customer_manager.service";
@@ -26,6 +27,25 @@ export type GetBondOrderPricingResult =
   | { ok: true; pricing: Awaited<ReturnType<typeof computeBondOrderPricingData>> }
   | { ok: false; reason: "not_found" }
   | { ok: false; reason: "missing_coupon_dates" };
+
+// ─── IST date-only derivation ──────────────────────────────────────────────
+// Every date field on a bond has an `*Ist` (`@db.Date`) counterpart that stores
+// the IST calendar day of the instant. This mirrors the NSDL scraper's
+// `toIstDateOnly` so manual CRM edits stay consistent with scraped data.
+const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+
+function toIstDateOnly(
+  value: Date | string | null | undefined,
+): Date | null {
+  if (value == null) return null;
+  const dt = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(dt.getTime())) return null;
+  // Shift the instant into IST, then keep only the calendar day (UTC midnight).
+  const ist = new Date(dt.getTime() + IST_OFFSET_MS);
+  return new Date(
+    Date.UTC(ist.getUTCFullYear(), ist.getUTCMonth(), ist.getUTCDate()),
+  );
+}
 
 // ─── CRM inventory batch cache ─────────────────────────────────────────────
 // CRM inventory uploads happen manually and are rare, so we cache the latest
@@ -40,8 +60,6 @@ export type GetBondOrderPricingResult =
 // every homepage render fails in lockstep.
 const INVENTORY_BATCH_CACHE_TTL_MS = 60_000;
 const INVENTORY_ENRICH_TIMEOUT_MS = 2_500;
-/** Homepage bond lists change infrequently; cache avoids 3× DB hits per SSR. */
-const HOMEPAGE_BONDS_CACHE_TTL_MS = 60_000;
 const HOMEPAGE_BONDS_MAX_LIMIT = 50;
 
 const HOMEPAGE_ELIGIBLE_CREDIT_RATINGS = [
@@ -65,30 +83,10 @@ const HOMEPAGE_ELIGIBLE_CREDIT_RATINGS = [
 
 let cachedLatestBatchId: { id: number | null; expiresAt: number } | null = null;
 
-type HomepageBondsCacheEntry<T> = { data: T; expiresAt: number };
-const homepageBondsCache = new Map<string, HomepageBondsCacheEntry<unknown>>();
-
 export function parseHomepageBondLimit(raw: unknown, fallback = 3): number {
   const n = raw != null ? parseInt(String(raw), 10) : fallback;
   if (!Number.isFinite(n) || n < 1) return fallback;
   return Math.min(n, HOMEPAGE_BONDS_MAX_LIMIT);
-}
-
-async function cachedHomepageBonds<T>(
-  key: string,
-  fetcher: () => Promise<T>,
-): Promise<T> {
-  const now = Date.now();
-  const hit = homepageBondsCache.get(key);
-  if (hit && hit.expiresAt > now) {
-    return hit.data as T;
-  }
-  const data = await fetcher();
-  homepageBondsCache.set(key, {
-    data,
-    expiresAt: now + HOMEPAGE_BONDS_CACHE_TTL_MS,
-  });
-  return data;
 }
 
 async function getCachedLatestInventoryBatchId(): Promise<number | null> {
@@ -199,70 +197,25 @@ export class BondService {
     isin: string,
     quantityInput?: number,
     settlementType?: "T+0" | "T+1",
-    sellPrice?: number,
+    _sellPrice?: number,
   ): Promise<GetBondOrderPricingResult> {
     const bond = await this.getBondDetails(isin);
     if (!bond) {
       throw new Error("No Bond Found")
     }
 
-    const cleanPrice =
-      sellPrice ?? bond.sellPrice ?? bond.providerPrice ?? bond.issuePrice ?? 0;
-
-    let lastCouponDateStr = bond.lastCouponDateIst?.toISOString() ?? null;
-    let nextCouponDateStr = bond.nextCouponDateIst?.toISOString() ?? null;
-    let recordDays =
-      typeof bond.recordDays === "number" && !Number.isNaN(bond.recordDays)
-        ? bond.recordDays
-        : 7;
-
-    if (!lastCouponDateStr || !nextCouponDateStr) {
-      const couponDates = await getLastNextCouponDateBasedOnSettlementDate(
-        isin,
-        new Date(),
-      );
-      lastCouponDateStr = couponDates.lastCouponDate;
-      nextCouponDateStr = couponDates.nextCouponDate;
-      if (couponDates.recordDays != null && Number.isFinite(couponDates.recordDays)) {
-        recordDays = couponDates.recordDays;
-      }
-    }
-
-    if (!lastCouponDateStr || !nextCouponDateStr) {
-      return { ok: false, reason: "missing_coupon_dates" };
-    }
-
     const rawQuantity = quantityInput ?? 1;
     const quantity =
       Number.isFinite(rawQuantity) && rawQuantity > 0 ? rawQuantity : 1;
-
-    const pricingData = await computeBondOrderPricingData(
-      {
-        isin: bond.isin,
-        faceValue: bond.faceValue,
-        quantity,
-        cleanPrice: cleanPrice ?? 0,
-        couponRate: Number(bond.couponRate),
-        lastCouponDate: lastCouponDateStr,
-        recordDays,
-        nextCouponDate: nextCouponDateStr,
-      },
-      { settlementType },
-    );
-
-    const yieldRaw =
-      pricingData.yield ?? bond.yield ?? bond.buyYield;
-    const yieldNum =
-      yieldRaw != null && Number.isFinite(Number(yieldRaw))
-        ? Number(yieldRaw)
-        : null;
+    const pricingData = await computeStoredBondOrderPricing({
+      isin: bond.isin,
+      quantity,
+      settlementType,
+    });
 
     return {
       ok: true,
-      pricing: {
-        ...pricingData,
-        ...(yieldNum != null ? { yield: yieldNum } : {}),
-      },
+      pricing: pricingData,
     };
   }
 
@@ -370,10 +323,7 @@ export class BondService {
         lastCouponDate: { not: null },
         natureOfInstrument: { not: null },
         dateOfAllotment: { not: null },
-        OR: [
-          { buyYield: { not: null } },
-          { yield: { not: null } },
-        ],
+        yield: { not: null },
         AND: [
           {
             OR: [
@@ -575,113 +525,156 @@ export class BondService {
 
   async getLatestBonds(limit: number = 3) {
     const safeLimit = parseHomepageBondLimit(limit);
-    return cachedHomepageBonds(`latest:${safeLimit}`, async () => {
-      const data = await db.dataBase.bonds.findMany({
-        where: {
-          isListed: { equals: "YES" },
-          allowForPurchase: { equals: true },
-          dateOfAllotment: { lte: new Date() },
-          creditRating: {
-            in: [
-              "AAA",
-              "AA",
-              "AA+",
-              "AAA(CE)",
-              "AA+(CE)",
-              "AA(CE)",
-              "A+(CE)",
-              "AAA",
-              "AA+",
-              "AA",
-              "A+",
-              "A",
-              "A-",
-              "BBB+",
-              "BBB",
-            ],
-          },
+    const data = await db.dataBase.bonds.findMany({
+      where: {
+        isListed: { equals: "YES" },
+        allowForPurchase: { equals: true },
+        dateOfAllotment: { lte: new Date() },
+        creditRating: {
+          in: [
+            "AAA",
+            "AA",
+            "AA+",
+            "AAA(CE)",
+            "AA+(CE)",
+            "AA(CE)",
+            "A+(CE)",
+            "AAA",
+            "AA+",
+            "AA",
+            "A+",
+            "A",
+            "A-",
+            "BBB+",
+            "BBB",
+          ],
         },
+      },
+      orderBy: [
+        { allowForPurchase: "desc" },
+        { dateOfAllotment: "desc" },
+        { creditRating: "asc" },
+      ],
+      take: safeLimit,
+    });
+
+    return this.enrichBondsWithCrmInventory(data);
+  }
+
+  async getHighYieldBonds(limit: number = 3) {
+    const safeLimit = parseHomepageBondLimit(limit);
+    const data = await db.dataBase.bonds.findMany({
+      where: {
+        isListed: { equals: "YES" },
+        allowForPurchase: { equals: true },
+        dateOfAllotment: { lte: new Date() },
+        yield: { gte: 11 },
+        creditRating: {
+          in: [
+            "AAA",
+            "AA",
+            "AA+",
+            "AAA(CE)",
+            "AA+(CE)",
+            "AA(CE)",
+            "A+(CE)",
+            "AAA",
+            "AA+",
+            "AA",
+            "A+",
+            "A",
+            "A-",
+            "BBB+",
+            "BBB",
+          ],
+        },
+      },
+      orderBy: [
+        { allowForPurchase: "desc" },
+        { yield: "desc" },
+        { dateOfAllotment: "desc" },
+      ],
+      take: safeLimit,
+    });
+
+    return this.enrichBondsWithCrmInventory(data);
+  }
+
+  async getZeroCouponBonds(limit: number = 3) {
+    const safeLimit = parseHomepageBondLimit(limit);
+    const data = await db.dataBase.bonds.findMany({
+      where: {
+        isListed: { equals: "YES" },
+        allowForPurchase: { equals: true },
+        dateOfAllotment: { lte: new Date() },
+        categories: { has: "zero-coupon" },
+        creditRating: {
+          in: [
+            "AAA",
+            "AA",
+            "AA+",
+            "AAA(CE)",
+            "AA+(CE)",
+            "AA(CE)",
+            "A+(CE)",
+            "AAA",
+            "AA+",
+            "AA",
+            "A+",
+            "A",
+            "A-",
+            "BBB+",
+            "BBB",
+          ],
+        },
+      },
+      orderBy: [
+        { allowForPurchase: "desc" },
+        { dateOfAllotment: "desc" },
+        { creditRating: "asc" },
+      ],
+      take: safeLimit,
+    });
+
+    return this.enrichBondsWithCrmInventory(data);
+  }
+
+  /**
+   * Single round-trip for the meradhan homepage: three bond lists + one shared
+   * inventory enrichment pass.
+   */
+  async getHomepageBonds(limit: number = 40) {
+    const safeLimit = parseHomepageBondLimit(limit);
+    const baseWhere = {
+      isListed: { equals: "YES" as const },
+      allowForPurchase: { equals: true },
+      dateOfAllotment: { lte: new Date() },
+      creditRating: { in: [...HOMEPAGE_ELIGIBLE_CREDIT_RATINGS] },
+    };
+
+    const [latestRaw, highYieldRaw, zeroCouponRaw] = await Promise.all([
+      db.dataBase.bonds.findMany({
+        where: baseWhere,
         orderBy: [
           { allowForPurchase: "desc" },
           { dateOfAllotment: "desc" },
           { creditRating: "asc" },
         ],
         take: safeLimit,
-      });
-
-      return this.enrichBondsWithCrmInventory(data);
-    });
-  }
-
-  async getHighYieldBonds(limit: number = 3) {
-    const safeLimit = parseHomepageBondLimit(limit);
-    return cachedHomepageBonds(`high-yield:${safeLimit}`, async () => {
-      const data = await db.dataBase.bonds.findMany({
-        where: {
-          isListed: { equals: "YES" },
-          allowForPurchase: { equals: true },
-          dateOfAllotment: { lte: new Date() },
-          yield: { gte: 11 },
-          creditRating: {
-            in: [
-              "AAA",
-              "AA",
-              "AA+",
-              "AAA(CE)",
-              "AA+(CE)",
-              "AA(CE)",
-              "A+(CE)",
-              "AAA",
-              "AA+",
-              "AA",
-              "A+",
-              "A",
-              "A-",
-              "BBB+",
-              "BBB",
-            ],
-          },
-        },
+      }),
+      db.dataBase.bonds.findMany({
+        where: { ...baseWhere, yield: { gte: 11 } },
         orderBy: [
           { allowForPurchase: "desc" },
           { yield: "desc" },
           { dateOfAllotment: "desc" },
         ],
         take: safeLimit,
-      });
-
-      return this.enrichBondsWithCrmInventory(data);
-    });
-  }
-
-  async getZeroCouponBonds(limit: number = 3) {
-    const safeLimit = parseHomepageBondLimit(limit);
-    return cachedHomepageBonds(`zero-coupon:${safeLimit}`, async () => {
-      const data = await db.dataBase.bonds.findMany({
+      }),
+      db.dataBase.bonds.findMany({
         where: {
-          isListed: { equals: "YES" },
-          allowForPurchase: { equals: true },
-          dateOfAllotment: { lte: new Date() },
+          ...baseWhere,
           categories: { has: "zero-coupon" },
-          creditRating: {
-            in: [
-              "AAA",
-              "AA",
-              "AA+",
-              "AAA(CE)",
-              "AA+(CE)",
-              "AA(CE)",
-              "A+(CE)",
-              "AAA",
-              "AA+",
-              "AA",
-              "A+",
-              "A",
-              "A-",
-              "BBB+",
-              "BBB",
-            ],
-          },
         },
         orderBy: [
           { allowForPurchase: "desc" },
@@ -689,74 +682,21 @@ export class BondService {
           { creditRating: "asc" },
         ],
         take: safeLimit,
-      });
+      }),
+    ]);
 
-      return this.enrichBondsWithCrmInventory(data);
-    });
-  }
+    const allEnriched = await this.enrichBondsWithCrmInventory([
+      ...latestRaw,
+      ...highYieldRaw,
+      ...zeroCouponRaw,
+    ]);
 
-  /**
-   * Single round-trip for the meradhan homepage: three bond lists + one shared
-   * inventory enrichment pass. Cached as one bundle so ISR revalidation does
-   * not open three HTTP connections to stage-be (a common ECONNRESET source
-   * during ECS rolling deploys).
-   */
-  async getHomepageBonds(limit: number = 40) {
-    const safeLimit = parseHomepageBondLimit(limit);
-    return cachedHomepageBonds(`homepage-bundle:${safeLimit}`, async () => {
-      const baseWhere = {
-        isListed: { equals: "YES" as const },
-        allowForPurchase: { equals: true },
-        dateOfAllotment: { lte: new Date() },
-        creditRating: { in: [...HOMEPAGE_ELIGIBLE_CREDIT_RATINGS] },
-      };
+    let offset = 0;
+    const latest = allEnriched.slice(offset, (offset += latestRaw.length));
+    const highYield = allEnriched.slice(offset, (offset += highYieldRaw.length));
+    const zeroCoupon = allEnriched.slice(offset);
 
-      const [latestRaw, highYieldRaw, zeroCouponRaw] = await Promise.all([
-        db.dataBase.bonds.findMany({
-          where: baseWhere,
-          orderBy: [
-            { allowForPurchase: "desc" },
-            { dateOfAllotment: "desc" },
-            { creditRating: "asc" },
-          ],
-          take: safeLimit,
-        }),
-        db.dataBase.bonds.findMany({
-          where: { ...baseWhere, yield: { gte: 11 } },
-          orderBy: [
-            { allowForPurchase: "desc" },
-            { yield: "desc" },
-            { dateOfAllotment: "desc" },
-          ],
-          take: safeLimit,
-        }),
-        db.dataBase.bonds.findMany({
-          where: {
-            ...baseWhere,
-            categories: { has: "zero-coupon" },
-          },
-          orderBy: [
-            { allowForPurchase: "desc" },
-            { dateOfAllotment: "desc" },
-            { creditRating: "asc" },
-          ],
-          take: safeLimit,
-        }),
-      ]);
-
-      const allEnriched = await this.enrichBondsWithCrmInventory([
-        ...latestRaw,
-        ...highYieldRaw,
-        ...zeroCouponRaw,
-      ]);
-
-      let offset = 0;
-      const latest = allEnriched.slice(offset, (offset += latestRaw.length));
-      const highYield = allEnriched.slice(offset, (offset += highYieldRaw.length));
-      const zeroCoupon = allEnriched.slice(offset);
-
-      return { latest, highYield, zeroCoupon };
-    });
+    return { latest, highYield, zeroCoupon };
   }
 
   async getLatestBondsTop3(limit: number = 3) {
@@ -845,6 +785,8 @@ export class BondService {
         issuePrice: bondData.issuePrice,
         faceValue: bondData.faceValue,
         stampDutyPercentage: bondData.stampDutyPercentage ?? 0,
+        stampDuty: bondData.stampDuty ?? null,
+        pricingQuantity: bondData.pricingQuantity ?? null,
         allowForPurchase: bondData.allowForPurchase ?? false,
         couponRate: bondData.couponRate,
         interestPaymentFrequency: bondData.interestPaymentFrequency,
@@ -863,45 +805,46 @@ export class BondService {
         isListed: bondData.isListed,
         ratingAgencyName: bondData.ratingAgencyName || null,
         ratingDate: bondData.ratingDate || null,
+        ratingDateIst: toIstDateOnly(bondData.ratingDate),
         categories: bondData.categories || [],
         sectorName: bondData.sectorName || null,
         dateOfAllotment: bondData.dateOfAllotment || null,
+        dateOfAllotmentIst: toIstDateOnly(bondData.dateOfAllotment),
         redemptionDate: bondData.redemptionDate || null,
+        redemptionDateIst: toIstDateOnly(bondData.redemptionDate),
         maturityDate: bondData.maturityDate || null,
+        maturityDateIst: toIstDateOnly(bondData.maturityDate),
+        maturityDateOnly: toIstDateOnly(bondData.maturityDate),
         sortedAt: bondData.sortedAt || 0,
         isConvertedDeal: bondData.isConvertedDeal || null,
         yield: bondData.yield || null,
         lastTradePrice: bondData.lastTradePrice || null,
         lastTradeYield: bondData.lastTradeYield || null,
         nextCouponDate: bondData.nextCouponDate || null,
+        nextCouponDateIst: toIstDateOnly(bondData.nextCouponDate),
         modeOfIssuance: bondData.modeOfIssuance || null,
         couponType: bondData.couponType || null,
         buyYield: bondData.buyYield || null,
         providerName: bondData.providerName || null,
         providerInterestDate: bondData.providerInterestDate || null,
+        providerInterestDateIst: toIstDateOnly(bondData.providerInterestDate),
         providerQuantity: bondData.providerQuantity || null,
         isOngoingDeal: bondData.isOngoingDeal ?? false,
         providerPrice: bondData.providerPrice || null,
+        accruedInterest: bondData.accruedInterest ?? null,
         ignoreAutoUpdate: bondData.ignoreAutoUpdate ?? false,
         allCouponDates: bondData.allCouponDates ?? [],
-        allCouponDatesIst: (bondData.allCouponDates ?? []).map((d) => {
-          const dt = d instanceof Date ? d : new Date(d);
-          if (Number.isNaN(dt.getTime())) return dt;
-          return new Date(
-            Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate()),
-          );
-        }),
+        allCouponDatesIst: (bondData.allCouponDates ?? [])
+          .map((d) => toIstDateOnly(d))
+          .filter((d): d is Date => d != null),
         dayConvention: bondData.dayConvention || null,
         recordDate: bondData.recordDate || null,
+        recordDateIst: toIstDateOnly(bondData.recordDate),
         recordDays: bondData.recordDays ?? null,
-        accruedInterestDays: bondData.accruedInterestDays ?? null,
-        accruedInterest: bondData.accruedInterest ?? null,
-        settlementAmount: bondData.settlementAmount ?? null,
-        principalAmount: bondData.principalAmount ?? null,
-        totalConsideration: bondData.totalConsideration ?? null,
         imDocumentLink: bondData.imDocumentLink || null,
         exchangeListedOn: bondData.exchangeListedOn ?? null,
         lastCouponDate: bondData.lastCouponDate || null,
+        lastCouponDateIst: toIstDateOnly(bondData.lastCouponDate),
         isPerpetual: bondData.isPerpetual ?? null,
         bondType: bondData.bondType ?? null,
         seniority: bondData.seniority ?? null,
@@ -910,7 +853,9 @@ export class BondService {
         sellPrice: bondData.sellPrice ?? null,
         redemptionType: bondData.redemptionType || null,
         startDate: bondData.startDate || null,
+        startDateIst: toIstDateOnly(bondData.startDate),
         endDate: bondData.endDate || null,
+        endDateIst: toIstDateOnly(bondData.endDate),
       },
     });
 
@@ -948,6 +893,8 @@ export class BondService {
         issuePrice: bondData.issuePrice,
         faceValue: bondData.faceValue,
         stampDutyPercentage: bondData.stampDutyPercentage ?? 0,
+        stampDuty: bondData.stampDuty ?? null,
+        pricingQuantity: bondData.pricingQuantity ?? null,
         allowForPurchase: bondData.allowForPurchase ?? false,
         couponRate: bondData.couponRate,
         interestPaymentFrequency: bondData.interestPaymentFrequency,
@@ -966,45 +913,46 @@ export class BondService {
         isListed: bondData.isListed,
         ratingAgencyName: bondData.ratingAgencyName || null,
         ratingDate: bondData.ratingDate || null,
+        ratingDateIst: toIstDateOnly(bondData.ratingDate),
         categories: bondData.categories || [],
         sectorName: bondData.sectorName || null,
         dateOfAllotment: bondData.dateOfAllotment || null,
+        dateOfAllotmentIst: toIstDateOnly(bondData.dateOfAllotment),
         redemptionDate: bondData.redemptionDate || null,
+        redemptionDateIst: toIstDateOnly(bondData.redemptionDate),
         maturityDate: bondData.maturityDate || null,
+        maturityDateIst: toIstDateOnly(bondData.maturityDate),
+        maturityDateOnly: toIstDateOnly(bondData.maturityDate),
         sortedAt: bondData.sortedAt || 0,
         isConvertedDeal: bondData.isConvertedDeal || null,
         yield: bondData.yield || null,
         lastTradePrice: bondData.lastTradePrice || null,
         lastTradeYield: bondData.lastTradeYield || null,
         nextCouponDate: bondData.nextCouponDate || null,
+        nextCouponDateIst: toIstDateOnly(bondData.nextCouponDate),
         modeOfIssuance: bondData.modeOfIssuance || null,
         couponType: bondData.couponType || null,
         buyYield: bondData.buyYield || null,
         providerName: bondData.providerName || null,
         providerInterestDate: bondData.providerInterestDate || null,
+        providerInterestDateIst: toIstDateOnly(bondData.providerInterestDate),
         providerQuantity: bondData.providerQuantity || null,
         isOngoingDeal: bondData.isOngoingDeal ?? false,
         providerPrice: bondData.providerPrice || null,
+        accruedInterest: bondData.accruedInterest ?? null,
         ignoreAutoUpdate: bondData.ignoreAutoUpdate ?? false,
         allCouponDates: bondData.allCouponDates ?? [],
-        allCouponDatesIst: (bondData.allCouponDates ?? []).map((d) => {
-          const dt = d instanceof Date ? d : new Date(d);
-          if (Number.isNaN(dt.getTime())) return dt;
-          return new Date(
-            Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate()),
-          );
-        }),
+        allCouponDatesIst: (bondData.allCouponDates ?? [])
+          .map((d) => toIstDateOnly(d))
+          .filter((d): d is Date => d != null),
         dayConvention: bondData.dayConvention || null,
         recordDate: bondData.recordDate || null,
+        recordDateIst: toIstDateOnly(bondData.recordDate),
         recordDays: bondData.recordDays ?? null,
-        accruedInterestDays: bondData.accruedInterestDays ?? null,
-        accruedInterest: bondData.accruedInterest ?? null,
-        settlementAmount: bondData.settlementAmount ?? null,
-        principalAmount: bondData.principalAmount ?? null,
-        totalConsideration: bondData.totalConsideration ?? null,
         imDocumentLink: bondData.imDocumentLink || null,
         exchangeListedOn: bondData.exchangeListedOn ?? null,
         lastCouponDate: bondData.lastCouponDate || null,
+        lastCouponDateIst: toIstDateOnly(bondData.lastCouponDate),
         isPerpetual: bondData.isPerpetual ?? null,
         bondType: bondData.bondType ?? null,
         seniority: bondData.seniority ?? null,
@@ -1013,7 +961,9 @@ export class BondService {
         sellPrice: bondData.sellPrice ?? null,
         redemptionType: bondData.redemptionType || null,
         startDate: bondData.startDate || null,
+        startDateIst: toIstDateOnly(bondData.startDate),
         endDate: bondData.endDate || null,
+        endDateIst: toIstDateOnly(bondData.endDate),
       },
     });
 

@@ -1,0 +1,47 @@
+---
+description: Frontend-only decimal display rules for order/bond pricing fields (YTM, clean price, unit, INR amounts)
+globs: frontend/crm/**/*,frontend/meradhan/**/*
+alwaysApply: false
+---
+
+# Order / Bond Pricing — Decimal Display (UI only)
+
+Apply these rules only at render time. Never reduce API, database, or calculation precision.
+
+Use `truncateDecimals` (toward zero — **not** round) before formatting money and clean price.
+
+## Exact truncated display
+
+| Field | Decimals | Behavior |
+|-------|----------|----------|
+| Principal amount | **2** | Truncate, then exactly 2 |
+| Accrued / accrual interest | **2** | Truncate, then exactly 2 |
+| Settlement amount | **2** | Truncate, then exactly 2 |
+| Clean price | **4** | Truncate, then exactly 4 |
+
+Examples (truncate, not round):
+- Amounts: `100.126` → `100.12` (display `100.12`)
+- Clean price: `98.123456` → `98.1234`
+
+```ts
+function truncateDecimals(value: number, decimals = 2) {
+  const factor = 10 ** decimals;
+  return Math.trunc(value * factor) / factor;
+}
+
+truncateDecimals(n, 2).toLocaleString("en-IN", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+})
+```
+
+**CRM:** `formatInrMoneyDisplay` / `formatCleanPriceDisplay` in `@/global/utils/pricingDecimalDisplay`  
+**MeraDhan:** `formatInrMoney2dp` / `formatAmount` / `formatCleanPricePercent` in `@/global/utils/formate`
+
+Deal date and settlement date are calendar dates — do not run them through `truncateDecimals`.
+
+## Other pricing fields
+
+- YTM / yield: minimum 2 decimals; preserve additional precision.
+- Unit price: minimum 4 decimals; preserve additional precision.
+- Total consideration and stamp duty: same truncate-to-2 as other INR money when shown via the money helpers.

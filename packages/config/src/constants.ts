@@ -100,3 +100,45 @@ export const SettlementStatus = {
   SUCCESS: "SUCCESS",
   FAILED: "FAILED",
 } as const;
+
+/** Order settlement pipeline stages (matches Prisma OrderSettlementStage). */
+export const OrderPipelineStage = {
+  STARTED: "started",
+  PAYMENT_DONE: "payment_done",
+  ADD_ISIN: "add_isin",
+  QUOTE_ACCEPT: "quote_accept",
+  DEAL_PROPOSE: "deal_propose",
+  DEAL_ACCEPT: "deal_accept",
+  PG_ROUTING: "pg_routing",
+} as const;
+
+export type OrderPipelineStageValue =
+  (typeof OrderPipelineStage)[keyof typeof OrderPipelineStage];
+
+/** Per-row status on order_stages: 0 not started, 1 success, 2 fail, 3 waiting. */
+export const OrderStageStatus = {
+  NOT_STARTED: 0,
+  SUCCESS: 1,
+  FAIL: 2,
+  WAITING: 3,
+} as const;
+
+/** Executable pipeline steps (seeded rows), in order. */
+export const ORDER_STAGE_SEQUENCE = [
+  { stage: OrderPipelineStage.ADD_ISIN, seq: 1 },
+  { stage: OrderPipelineStage.QUOTE_ACCEPT, seq: 2 },
+  { stage: OrderPipelineStage.DEAL_PROPOSE, seq: 3 },
+  { stage: OrderPipelineStage.DEAL_ACCEPT, seq: 4 },
+  { stage: OrderPipelineStage.PG_ROUTING, seq: 5 },
+] as const;
+
+export const ORDER_STAGE_MAX_ATTEMPTS = 20;
+
+export const ORDER_STAGE_LOCK_TTL_SECONDS = 900; // 15 minutes
+
+export const STAGE_TO_SETTLEMENT_STEP = {
+  [OrderPipelineStage.ADD_ISIN]: SettlementStep.ADD_ISIN,
+  [OrderPipelineStage.QUOTE_ACCEPT]: SettlementStep.ACCEPT_NEGOTIATION,
+  [OrderPipelineStage.DEAL_PROPOSE]: SettlementStep.PROPOSE_DEAL,
+  [OrderPipelineStage.DEAL_ACCEPT]: SettlementStep.ACCEPT_OR_REJECT_DEAL,
+} as const;

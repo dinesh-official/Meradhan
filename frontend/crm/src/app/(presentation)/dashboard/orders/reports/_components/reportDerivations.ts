@@ -45,11 +45,8 @@ export function deriveBondCategory(bondName: string, isin?: string): string {
   return "Corporate Bond";
 }
 
-export function mapOrderWorkflowStatus(
-  orderStatus: string,
-  paymentStatus: string,
-): string {
-  return getCrmOrderStatusDisplay(orderStatus, paymentStatus).title;
+export function mapOrderWorkflowStatus(orderStatus: string): string {
+  return getCrmOrderStatusDisplay(orderStatus).title;
 }
 
 export function isActiveWorkflowStatus(label: string): boolean {

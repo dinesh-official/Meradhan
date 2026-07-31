@@ -1,3 +1,5 @@
+"use client";
+
 import DataInfoLabel from "@/app/(account)/_components/cards/DataInfoLabel";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { GetCustomerResponseById } from "@root/apiGateway";
@@ -125,9 +127,9 @@ function FullKycInfo({
         <p className="font-medium text-sm">
           {profile.personalInformation?.dateOfBirth
             ? dateTimeUtils.formatDateTime(
-                profile.personalInformation?.dateOfBirth,
-                "DD MMM YYYY",
-              )
+              profile.personalInformation?.dateOfBirth,
+              "DD MMM YYYY",
+            )
             : "--"}
         </p>
       </DataInfoLabel>

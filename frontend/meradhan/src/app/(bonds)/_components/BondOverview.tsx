@@ -145,13 +145,21 @@ export default function BondOverview({
       <div className="lg:col-span-3">
         <div className="gap-5 grid md:grid-cols-3">
           {/* ── Pricing & size ─────────────────────────────────────── */}
-          <InfoCard title="Issue Price" condition={hasValue(bond.issuePrice, { hideIfZero: true })}>
+          <InfoCard
+            title="Issue Price"
+            condition={hasValue(bond.issuePrice, { hideIfZero: true })}
+            hideWhenEmpty
+          >
             <PiCurrencyInrBold aria-hidden="true" /> {formatNumberTS(bond.issuePrice)}
           </InfoCard>
           <InfoCard title="Face Value" condition={hasValue(bond.faceValue, { hideIfZero: true })}>
             <PiCurrencyInrBold aria-hidden="true" /> {formatNumberTS(bond.faceValue)}
           </InfoCard>
-          <InfoCard title="Issue Size" condition={hasValue(bond.totalIssueSize, { hideIfZero: true })}>
+          <InfoCard
+            title="Issue Size"
+            condition={hasValue(bond.totalIssueSize, { hideIfZero: true })}
+            hideWhenEmpty
+          >
             <PiCurrencyInrBold aria-hidden="true" /> {formatNumberTS(bond.totalIssueSize ?? 0)}
           </InfoCard>
 
@@ -174,7 +182,11 @@ export default function BondOverview({
           >
             {humanize(bond.interestPaymentFrequency)}
           </InfoCard>
-          <InfoCard title="Day Convention" condition={hasValue(bond.dayConvention)}>
+          <InfoCard
+            title="Day Convention"
+            condition={hasValue(bond.dayConvention)}
+            hideWhenEmpty
+          >
             {humanize(bond.dayConvention)}
           </InfoCard>
 
@@ -186,7 +198,11 @@ export default function BondOverview({
             {formatDate(bond.maturityDate)}
           </InfoCard>
 
-          <InfoCard title="Next Interest Payment Date" condition={hasValue(formatDate(bond.nextCouponDate))}>
+          <InfoCard
+            title="Next Interest Payment Date"
+            condition={hasValue(formatDate(bond.nextCouponDate))}
+            hideWhenEmpty
+          >
             {formatDate(bond.nextCouponDate as string)}
           </InfoCard>
 
@@ -198,7 +214,11 @@ export default function BondOverview({
           <InfoCard title="Sector" condition={hasValue(bond.sectorName)}>
             <span className="capitalize">{bond.sectorName}</span>
           </InfoCard>
-          <InfoCard title="Bond Type" condition={hasValue(bond.bondType)}>
+          <InfoCard
+            title="Bond Type"
+            condition={hasValue(bond.bondType)}
+            hideWhenEmpty
+          >
             {humanize(bond.bondType)}
           </InfoCard>
 
@@ -209,7 +229,11 @@ export default function BondOverview({
             {security}
           </InfoCard>
 
-          <InfoCard title="Mode of Issuance" condition={hasValue(bond.modeOfIssuance)}>
+          <InfoCard
+            title="Mode of Issuance"
+            condition={hasValue(bond.modeOfIssuance)}
+            hideWhenEmpty
+          >
             {String(bond.modeOfIssuance)}
           </InfoCard>
           <InfoCard title="Tax Status" condition={hasValue(taxStatus)}>
@@ -223,7 +247,7 @@ export default function BondOverview({
           {/* ── Rating ─────────────────────────────────────────────── */}
 
           {/* ── Put / Call ─────────────────────────────────────────── */}
-          <InfoCard title="Put" condition={hasValue(putText)}>
+          <InfoCard title="Put" condition={hasValue(putText)} hideWhenEmpty>
             <span className="flex items-center gap-1">
               {clip(putText, 15)}
               {putText.length > 15 && (
@@ -238,7 +262,7 @@ export default function BondOverview({
               )}
             </span>
           </InfoCard>
-          <InfoCard title="Call" condition={hasValue(callText)}>
+          <InfoCard title="Call" condition={hasValue(callText)} hideWhenEmpty>
             <span className="flex items-center gap-1 line-clamp-1">
               {clip(callText, 15)}
               {callText.length > 15 && (

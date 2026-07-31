@@ -5,6 +5,7 @@ import { CustomerProfileRepo } from "@resource/crm/customers/customer.repo";
 import logger from "@utils/logger/logger";
 import { getLastCouponDate } from "@services/order/order-pricing-helper";
 import { formatDateIstDdMmmYyyy } from "@resource/customer/order/order.utils";
+import { getDearLineFromCustomer, isCorporateUserType } from "@root/schema";
 
 type OrderEmailParams = {
     orderId: number | string;
@@ -62,9 +63,15 @@ export async function sendOrderReceiptPdfByOrderId(params: OrderEmailParams) {
 
     const crmOrdersService = new CrmOrdersService();
     const user = await new CustomerProfileRepo().getFullCustomerProfile(order.customerProfileId);
-    const customerName = [user.firstName, user.middleName, user.lastName].filter(Boolean).join(" ").trim() || "CUSTOMER";
-    const gender = String((user as unknown as { gender?: string | null }).gender ?? "").trim().toUpperCase();
-    const salutation = gender === "FEMALE" ? "Ms." : gender === "MALE" ? "Mr." : "Mr. / Ms.";
+    const dearLine = getDearLineFromCustomer({
+        userType: (user as { userType?: string }).userType,
+        firstName: user.firstName,
+        middleName: user.middleName,
+        lastName: user.lastName,
+        gender: user.gender,
+        panCard: user.panCard,
+        aadhaarCard: user.aadhaarCard,
+    });
 
     const metadata = (order.metadata as Record<string, unknown> | null) ?? {};
     const dealId = typeof metadata.dealId === "string" ? metadata.dealId : "—";
@@ -74,7 +81,7 @@ export async function sendOrderReceiptPdfByOrderId(params: OrderEmailParams) {
     const buySellYour = side === "SELL" ? "Sell" : "Buy";
 
     const subject = `Order Confirmation & Receipt – Order ID ${orderNumber}`;
-    const messageBody = `Dear ${salutation} ${customerName},
+    const messageBody = `${dearLine}
 
 Your ${buySellLower} order has been successfully placed through MeraDhan and has been executed on the exchange.
 
@@ -121,8 +128,17 @@ MeraDhan Team`;
     try {
         const autofill = await crmOrdersService.autofillReceiptPdfOptions(orderNumber, { settlementDate: settlementDateInput });
         if (autofill?.settlementNumber) settlementNumber = autofill.settlementNumber;
-        const lastCoupon = await getLastCouponDate(order.isin, new Date());
-        if (lastCoupon) lastInterestPaymentDate = lastCoupon;
+        // Last IP must use settlement date (same as cash flows) — not `new Date()`.
+        if (autofill?.lastInterestPaymentDate) {
+            lastInterestPaymentDate = autofill.lastInterestPaymentDate;
+        } else {
+            const settlementDt = new Date(`${settlementDateInput}T00:00:00.000Z`);
+            const lastCoupon = await getLastCouponDate(
+                order.isin,
+                Number.isNaN(settlementDt.getTime()) ? new Date() : settlementDt,
+            );
+            if (lastCoupon) lastInterestPaymentDate = lastCoupon;
+        }
         if (autofill?.interestPaymentDates?.length) interestPaymentDates = autofill.interestPaymentDates.join(", ");
     } catch (err) {
         logger.logError(`Order receipt PDF autofill failed for ${orderNumber}`, err);
@@ -241,13 +257,18 @@ export async function sendDealSheetPdfByOrderId(params: DealSheetEmailParams) {
 
     // Customer name + salutation (same approach as `trySendOrderReceiptPdfEmail`)
     const user = await new CustomerProfileRepo().getFullCustomerProfile(order.customerProfileId);
-    const customerName =
-        [user.firstName, user.middleName, user.lastName].filter(Boolean).join(" ").trim() ||
-        "CUSTOMER";
-    const gender = String((user as unknown as { gender?: string | null }).gender ?? "")
-        .trim()
-        .toUpperCase();
-    const salutation = gender === "FEMALE" ? "Ms." : gender === "MALE" ? "Mr." : "Mr. / Ms.";
+    const dearLine = getDearLineFromCustomer({
+        userType: (user as { userType?: string }).userType,
+        firstName: user.firstName,
+        middleName: user.middleName,
+        lastName: user.lastName,
+        gender: user.gender,
+        panCard: user.panCard,
+        aadhaarCard: user.aadhaarCard,
+    });
+    const isCorporateCustomer = isCorporateUserType(
+        (user as { userType?: string }).userType,
+    );
 
     const metadata = (order as unknown as { metadata?: Record<string, unknown> | null }).metadata ?? null;
     const clientOrderSide =
@@ -260,14 +281,6 @@ export async function sendDealSheetPdfByOrderId(params: DealSheetEmailParams) {
     const bondDetailsAny = order.bondDetails as any;
     const pricing = bondDetailsAny?.pricing ?? {};
     const dealDateText = formatDealDateText(pricing.dealDate ?? order.createdAt);
-
-    const userType = String((user as { userType?: string }).userType ?? "INDIVIDUAL")
-        .trim()
-        .toUpperCase();
-    const isCorporateCustomer = userType === "CORPORATE";
-    const dearLine = isCorporateCustomer
-        ? "Dear Sir / Madam,"
-        : `Dear ${salutation} ${customerName || "CUSTOMER"},`;
     const pdfPasswordExample =
         "You may open it using your date of birth as the password. For example, if your date of birth is 3 April 1996, the password will be 03041996.";
     const dealSheetNote = isCorporateCustomer
@@ -315,8 +328,17 @@ MeraDhan Team`;
         //     if (Number.isFinite(n)) accruedInterestDays = n;
         // }
         if (autofill?.settlementNumber) settlementNumber = autofill.settlementNumber;
-        const setData = await getLastCouponDate(order.isin, new Date());
-        if (setData) lastInterestPaymentDate = setData;
+        // Last IP must use settlement date (same as cash flows) — not `new Date()`.
+        if (autofill?.lastInterestPaymentDate) {
+            lastInterestPaymentDate = autofill.lastInterestPaymentDate;
+        } else {
+            const settlementDt = new Date(`${settlementDateInput}T00:00:00.000Z`);
+            const setData = await getLastCouponDate(
+                order.isin,
+                Number.isNaN(settlementDt.getTime()) ? new Date() : settlementDt,
+            );
+            if (setData) lastInterestPaymentDate = setData;
+        }
         if (autofill?.interestPaymentDates?.length) {
             interestPaymentDates = autofill.interestPaymentDates.join(", ");
         }

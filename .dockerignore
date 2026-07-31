@@ -1,7 +1,8 @@
 # Node/Bun dependencies
 node_modules
 bun_modules
-*.lock
+# Keep package-lock.json for reproducible Docker installs (do not use *.lock)
+bun.lock
 
 # Logs
 npm-debug.log
@@ -28,3 +29,4 @@ Thumbs.db
 # Build output (if any)
 dist
 build
+.next

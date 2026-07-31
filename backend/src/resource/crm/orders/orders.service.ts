@@ -10,15 +10,28 @@ import { BondService } from "@resource/bonds/bond.service";
 import {
   generateDealPdfBuffer,
   generateOrderPdfBuffer,
-  getInterestPaymentSchedule,
-} from "kyc-providers";
+} from "@root/kyc-providers/pdf";
+import { getInterestPaymentSchedule } from "@root/kyc-providers";
 
 import { fetchBankNameFromIfsc } from "@utils/razorpayIfsc";
-import { getDpName } from "dp-id-lookup";
+import { getDpName } from "@root/dp-id-lookup";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import crypto from "crypto";
-import { env } from "@packages/config/src/env";
-import { getPayoutDates } from "@services/order/order-pricing-helper";
+import { env } from "@root/config/env";
+import {
+  formatLastInterestPaymentDateDisplay,
+  loadInvestorCouponScheduleForPdf,
+} from "@services/order/investor-coupon-entitlement";
+import {
+  acceptOrderPricingFromNseSavedData,
+  proposeOrderPricingFromNseSavedData,
+} from "@services/order/order-pricing-snapshot-from-nse.service";
+import { SettlementNoService } from "@services/refq/nse/settlement-no.service";
+import {
+  getLastNextCouponDateBasedOnSettlementDate,
+  settlementDateFromYmd,
+} from "@services/order/order-pricing-helper";
+import { resolveShutPeriod } from "@services/order/shut-period-accrual";
 import { sendBackOfficeEmail } from "@communication/email_communication";
 import { buildOrderEmailHtmlBody } from "@communication/order_email_disclaimer";
 import {
@@ -29,6 +42,9 @@ import { encryptPdfBufferWithPassword } from "@utils/encryptPdfBuffer";
 import { getBondInfoCalcData } from "@resource/bonds/fill-bonds-auto";
 import { OrderService } from "@resource/customer/order/order.service";
 import { orderSettlementQueue } from "@jobs/queue/worker_queues";
+import { OrderSettlementService } from "@services/order/order_settlement.service";
+import { calculateTotalConsideration } from "@utils/truncateDecimals";
+import { getOrderInfo, getOrderInfoByRfqNumber, getOrdersInfo, mapOrderInfoToReceiptPdfAutofill } from "@modules/order/getOrderInfo";
 
 function formatDraftOrderCustomerName(profile: {
   firstName: string;
@@ -52,15 +68,28 @@ function toYyyyMmDd(d: Date): string {
 }
 
 type SettleOrderPdfRow = {
-  modQuantity?: number | string | null;
-  modAccrInt?: number | string | null;
-  modConsideration?: number | string | null;
-  stampDutyAmount?: number | string | null;
+  modQuantity?: number | string | Prisma.Decimal | null;
+  modAccrInt?: number | string | Prisma.Decimal | null;
+  modConsideration?: number | string | Prisma.Decimal | null;
+  stampDutyAmount?: number | string | Prisma.Decimal | null;
 };
 
+function numFromSnap(v: unknown): number | undefined {
+  if (v == null || v === "") return undefined;
+  const n = typeof v === "number" ? v : Number(String(v).replace(/,/g, "").trim());
+  return Number.isFinite(n) ? n : undefined;
+}
+
+/** Checkout pricing snapshot on `order.bondDetails.pricing` — never bonds-table calc columns. */
 function orderPricingSnapshot(bondDetails: unknown): {
+  cleanPrice?: number;
+  principalAmount?: number;
   accruedInterest?: number;
+  totalConsideration?: number;
+  settlementAmount?: number;
+  stampDuty?: number;
   noOfAccrualDays?: number;
+  yield?: number;
 } | null {
   if (!bondDetails || typeof bondDetails !== "object" || Array.isArray(bondDetails)) {
     return null;
@@ -68,30 +97,139 @@ function orderPricingSnapshot(bondDetails: unknown): {
   const p = (bondDetails as Record<string, unknown>).pricing;
   if (!p || typeof p !== "object" || Array.isArray(p)) return null;
   const snap = p as Record<string, unknown>;
-  const accruedInterest =
-    typeof snap.accruedInterest === "number"
-      ? snap.accruedInterest
-      : Number(snap.accruedInterest);
-  const noOfAccrualDays =
-    typeof snap.noOfAccrualDays === "number"
-      ? snap.noOfAccrualDays
-      : Number(snap.noOfAccrualDays);
   return {
-    ...(Number.isFinite(accruedInterest) ? { accruedInterest } : {}),
-    ...(Number.isFinite(noOfAccrualDays) ? { noOfAccrualDays } : {}),
+    ...(numFromSnap(snap.cleanPrice) != null ? { cleanPrice: numFromSnap(snap.cleanPrice) } : {}),
+    ...(numFromSnap(snap.principalAmount) != null
+      ? { principalAmount: numFromSnap(snap.principalAmount) }
+      : {}),
+    ...(numFromSnap(snap.accruedInterest) != null
+      ? { accruedInterest: numFromSnap(snap.accruedInterest) }
+      : {}),
+    ...(numFromSnap(snap.totalConsideration) != null
+      ? { totalConsideration: numFromSnap(snap.totalConsideration) }
+      : {}),
+    ...(numFromSnap(snap.settlementAmount) != null
+      ? { settlementAmount: numFromSnap(snap.settlementAmount) }
+      : {}),
+    ...(numFromSnap(snap.stampDuty) != null ? { stampDuty: numFromSnap(snap.stampDuty) } : {}),
+    ...(numFromSnap(snap.noOfAccrualDays) != null
+      ? { noOfAccrualDays: numFromSnap(snap.noOfAccrualDays) }
+      : {}),
+    ...(numFromSnap(snap.yield) != null ? { yield: numFromSnap(snap.yield) } : {}),
   };
+}
+
+/**
+ * Optional in-request pricing (from CRM “Use NSE saved data” checkbox).
+ * Merged into `bondDetails.pricing` for this PDF only — never persisted.
+ *
+ * Prefer `useNseSavedPricing=true` so the backend reloads from settle_order /
+ * RFQ tables (avoids large GET query truncation of `pricingSnapshot`).
+ */
+function parsePricingSnapshotOverride(
+  pdfQuery: Record<string, string | undefined>,
+): Record<string, unknown> | null {
+  const raw = pdfQuery.pricingSnapshot;
+  if (raw == null || typeof raw !== "string" || raw.trim() === "") return null;
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return null;
+    }
+    return parsed as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+function bondDetailsWithPricingOverride(
+  bondDetails: unknown,
+  pricingOverride: Record<string, unknown> | null,
+): unknown {
+  if (!pricingOverride) return bondDetails;
+  const base =
+    bondDetails &&
+    typeof bondDetails === "object" &&
+    !Array.isArray(bondDetails)
+      ? { ...(bondDetails as Record<string, unknown>) }
+      : {};
+  const existingPricing =
+    base.pricing &&
+    typeof base.pricing === "object" &&
+    !Array.isArray(base.pricing)
+      ? (base.pricing as Record<string, unknown>)
+      : {};
+  return {
+    ...base,
+    pricing: {
+      ...existingPricing,
+      ...pricingOverride,
+    },
+  };
+}
+
+function wantsNseSavedPricing(pdfQuery: Record<string, string | undefined>): boolean {
+  const flag = String(pdfQuery.useNseSavedPricing ?? "").trim().toLowerCase();
+  return flag === "1" || flag === "true" || flag === "yes";
+}
+
+/**
+ * Resolve bondDetails for PDF: optionally rebuild pricing from NSE settle_order
+ * (same source as the CRM checkbox preview).
+ */
+async function resolveBondDetailsForPdf(
+  orderNumber: string,
+  bondDetails: unknown,
+  pdfQuery: Record<string, string | undefined>,
+): Promise<unknown> {
+  if (wantsNseSavedPricing(pdfQuery)) {
+    const proposed = await proposeOrderPricingFromNseSavedData(orderNumber);
+    return bondDetailsWithPricingOverride(
+      bondDetails,
+      proposed.pricing as Record<string, unknown>,
+    );
+  }
+  return bondDetailsWithPricingOverride(
+    bondDetails,
+    parsePricingSnapshotOverride(pdfQuery),
+  );
+}
+
+/**
+ * Build the receipt's amortized principal schedule string
+ * (e.g. "20-Nov-2026 50.0000%, 20-May-2027 50.0000%") from the DeriData calc
+ * cashflow rows. Each row's `principal` ("-" for coupon-only rows, a formatted
+ * decimal on principal-repayment rows) is expressed as a percentage of the
+ * order's total face value (faceValue × quantity). Returns null when the bond
+ * has no principal repayments (bullet) or face value is unknown.
+ */
+function buildAmortizedPrincipalPaymentDates(
+  cfRows: Array<{ date: string; principal: string }>,
+  quantity: number,
+  faceValue: number,
+): string | null {
+  const totalFaceValue = faceValue * quantity;
+  if (!Number.isFinite(totalFaceValue) || totalFaceValue <= 0) return null;
+  const parts: string[] = [];
+  for (const row of cfRows) {
+    const principalNum = Number(String(row.principal ?? "").replace(/,/g, ""));
+    if (!Number.isFinite(principalNum) || principalNum <= 0) continue;
+    const pct = (principalNum / totalFaceValue) * 100;
+    const date = String(row.date ?? "").trim();
+    if (!date) continue;
+    parts.push(`${date} ${pct.toFixed(4)}%`);
+  }
+  return parts.length > 0 ? parts.join(", ") : null;
 }
 
 function buildPdfFinancialFields(
   order: {
-    subTotal: unknown;
+    subTotal?: unknown;
     stampDuty: unknown;
+    totalAmount?: unknown;
+    unitPrice?: unknown;
     quantity: number;
-    bondDetails: unknown;
-  },
-  bond: {
-    accruedInterest?: number | null;
-    accruedInterestDays?: number | null;
+    bondDetails?: unknown;
   },
   settleOrder: SettleOrderPdfRow | null | undefined,
   pdfAccruedInterestDays?: number,
@@ -100,6 +238,8 @@ function buildPdfFinancialFields(
   subTotal: number;
   stampDuty: number;
   totalConsideration: number;
+  settlementAmount: number;
+  price: number;
   accruedInterest?: number;
   accruedInterestDays?: number;
 } {
@@ -108,32 +248,50 @@ function buildPdfFinancialFields(
       ? Number(settleOrder.modQuantity)
       : order.quantity;
   const snap = orderPricingSnapshot(order.bondDetails);
-  const principal = Number(order.subTotal);
+
   const accruedInterest =
     settleOrder?.modAccrInt != null
       ? Number(settleOrder.modAccrInt)
-      : bond.accruedInterest != null && Number.isFinite(Number(bond.accruedInterest))
-        ? Number(bond.accruedInterest) * quantity
-        : snap?.accruedInterest;
+      : snap?.accruedInterest;
   const accruedInterestDays =
-    pdfAccruedInterestDays ??
-    (bond.accruedInterestDays != null && Number.isFinite(bond.accruedInterestDays)
-      ? bond.accruedInterestDays
-      : snap?.noOfAccrualDays);
+    pdfAccruedInterestDays ?? snap?.noOfAccrualDays;
+
+  const principal =
+    snap?.principalAmount ??
+    (Number.isFinite(Number(order.subTotal)) ? Number(order.subTotal) : 0);
+
   const stampDuty =
     settleOrder?.stampDutyAmount != null
       ? Number(settleOrder.stampDutyAmount)
-      : Number(order.stampDuty);
+      : snap?.stampDuty ??
+      (Number.isFinite(Number(order.stampDuty)) ? Number(order.stampDuty) : 0);
+
   const totalConsideration =
     settleOrder?.modConsideration != null
       ? Number(settleOrder.modConsideration)
-      : principal + (accruedInterest ?? 0);
+      : snap?.totalConsideration ??
+      (Number.isFinite(Number(order.totalAmount))
+        ? Number(order.totalAmount)
+        : calculateTotalConsideration(Number(principal), Number(accruedInterest ?? 0)));
+
+  // Settlement amount on PDF is always consideration + stamp duty.
+  const settlementAmount = totalConsideration + stampDuty;
+
+  const settlePrice = numFromSnap(
+    (settleOrder as { price?: unknown } | null | undefined)?.price,
+  );
+  const price =
+    settlePrice ??
+    snap?.cleanPrice ??
+    (Number.isFinite(Number(order.unitPrice)) ? Number(order.unitPrice) : 0);
 
   return {
     quantity,
     subTotal: principal,
     stampDuty,
     totalConsideration,
+    settlementAmount,
+    price,
     ...(accruedInterest != null && Number.isFinite(accruedInterest)
       ? { accruedInterest }
       : {}),
@@ -190,9 +348,155 @@ function parseLooseDate(input: string): Date | null {
     }
   }
 
+  // DD-MM-YYYY (common NSE settle_order.modSettleDate format)
+  const ddMmYyyy = /^(\d{1,2})-(\d{1,2})-(\d{4})$/.exec(s);
+  if (ddMmYyyy) {
+    const day = Number(ddMmYyyy[1]);
+    const month = Number(ddMmYyyy[2]) - 1;
+    const year = Number(ddMmYyyy[3]);
+    const dt = new Date(year, month, day, 12, 0, 0, 0);
+    return Number.isNaN(dt.getTime()) ? null : dt;
+  }
+
   // Fallback (e.g. ISO timestamps)
   const dt = new Date(s);
   return Number.isNaN(dt.getTime()) ? null : dt;
+}
+
+function toBusinessYmd(input: string | null | undefined): string | null {
+  if (!input) return null;
+  const parsed = parseLooseDate(input);
+  return parsed ? toYyyyMmDd(parsed) : null;
+}
+
+/** NSE settle/trade numbers are long digit strings — never CRM order INT4 PKs. */
+function looksLikeNseRfqTradeNumber(value: string): boolean {
+  return /^\d{12,}$/.test(value.trim());
+}
+
+function snapStr(v: unknown): string | null {
+  if (v == null) return null;
+  const s = String(v).trim();
+  return s !== "" ? s : null;
+}
+
+/**
+ * Deal / settlement dates from checkout snapshot on `order.bondDetails.pricing`.
+ * Request overrides may supply dates when the snapshot is missing so PDFs can be
+ * generated without persisting pricing onto the order.
+ */
+function resolveDatesFromOrderPricingSnapshot(
+  bondDetails: unknown,
+  overrides?: {
+    requestedDealDate?: string | null;
+    requestedSettlementDate?: string | null;
+  },
+): {
+  dealDateYmd: string;
+  settlementDateYmd: string;
+  dealDate: Date;
+  settlementType: number | null;
+} {
+  const overrideDeal = toBusinessYmd(overrides?.requestedDealDate);
+  const overrideSettle = toBusinessYmd(overrides?.requestedSettlementDate);
+
+  const snap =
+    bondDetails &&
+    typeof bondDetails === "object" &&
+    !Array.isArray(bondDetails) &&
+    typeof (bondDetails as Record<string, unknown>).pricing === "object" &&
+    (bondDetails as Record<string, unknown>).pricing != null &&
+    !Array.isArray((bondDetails as Record<string, unknown>).pricing)
+      ? ((bondDetails as Record<string, unknown>).pricing as Record<
+          string,
+          unknown
+        >)
+      : null;
+
+  const dealFromSnap = snap ? toBusinessYmd(snapStr(snap.dealDate)) : null;
+  const settleFromSnap = snap
+    ? toBusinessYmd(snapStr(snap.settlementDate))
+    : null;
+
+  const dealDateYmd =
+    overrideDeal ?? dealFromSnap ?? settleFromSnap ?? overrideSettle ?? null;
+  const settlementDateYmd =
+    overrideSettle ?? settleFromSnap ?? dealFromSnap ?? overrideDeal ?? null;
+
+  if (!dealDateYmd || !settlementDateYmd) {
+    throw new AppError(
+      "Order pricing snapshot is missing. bondDetails.pricing must include dealDate and settlementDate.",
+      { statusCode: HttpStatus.BAD_REQUEST, code: "PRICING_SNAPSHOT_MISSING" },
+    );
+  }
+
+  const dealDate = parseLooseDate(dealDateYmd);
+  if (!dealDate) {
+    throw new AppError("Invalid dealDate in order pricing snapshot.", {
+      statusCode: HttpStatus.BAD_REQUEST,
+      code: "PRICING_SNAPSHOT_INVALID",
+    });
+  }
+
+  let settlementType: number | null = null;
+  const settlementOrder = snap ? snapStr(snap.settlementOrder) : null;
+  if (settlementOrder === "T+0" || dealDateYmd === settlementDateYmd) {
+    settlementType = 0;
+  } else if (settlementOrder === "T+1") {
+    settlementType = 1;
+  }
+
+  return { dealDateYmd, settlementDateYmd, dealDate, settlementType };
+}
+
+/** Last coupon date from checkout snapshot on `order.bondDetails.pricing`. */
+function lastCouponDatesFromOrderPricingSnapshot(bondDetails: unknown): {
+  lastInterestPaymentDateRaw: string | null;
+  lastInterestPaymentDate: string | null;
+} {
+  if (!bondDetails || typeof bondDetails !== "object" || Array.isArray(bondDetails)) {
+    return { lastInterestPaymentDateRaw: null, lastInterestPaymentDate: null };
+  }
+  const pricing = (bondDetails as Record<string, unknown>).pricing;
+  if (!pricing || typeof pricing !== "object" || Array.isArray(pricing)) {
+    return { lastInterestPaymentDateRaw: null, lastInterestPaymentDate: null };
+  }
+
+  const ymd = toBusinessYmd(snapStr((pricing as Record<string, unknown>).lastCouponDate));
+  if (!ymd) {
+    return { lastInterestPaymentDateRaw: null, lastInterestPaymentDate: null };
+  }
+
+  return {
+    lastInterestPaymentDateRaw: ymd,
+    lastInterestPaymentDate: formatLastInterestPaymentDateDisplay(
+      settlementDateFromYmd(ymd),
+    ),
+  };
+}
+
+/**
+ * Settlement number for PDFs: look up `nse_settlement_no` by settlement date first.
+ * Form override / settle_order / metadata are used only when no row exists for that date.
+ */
+async function resolveSettlementNumberForPdf(input: {
+  settlementDateYmd: string;
+  requestedSettlementNumber?: string | null;
+  settleOrderSettlementNo?: string | null;
+  metadataSettlementNumber?: string | null;
+}): Promise<string | null> {
+  const byDate = await new SettlementNoService()
+    .getSettlementNo(input.settlementDateYmd)
+    .catch(() => null);
+  const fromDate = byDate?.settlementNo?.trim();
+  if (fromDate) return fromDate;
+
+  return (
+    input.requestedSettlementNumber?.trim() ||
+    input.settleOrderSettlementNo?.trim() ||
+    input.metadataSettlementNumber?.trim() ||
+    null
+  );
 }
 
 function diffDays(start: Date, end: Date): number {
@@ -332,6 +636,61 @@ async function resolveAssignOrderDates(
     dealDateRaw,
     settlementDateRaw,
   };
+}
+
+async function resolveRfqMasterSavedResponse(input: {
+  negotiationRfqNumber?: string | null;
+  metadataRfqNumber?: string | null;
+  settleTradeNumber?: string | null;
+}): Promise<{
+  number: string;
+  date: string | null;
+  quoteTime: string | null;
+  settlementDate: string | null;
+  settlementType: number | null;
+  access: number | null;
+} | null> {
+  const candidates = [
+    ...new Set(
+      [
+        input.negotiationRfqNumber,
+        input.metadataRfqNumber,
+        input.settleTradeNumber,
+      ]
+        .map((v) => (typeof v === "string" ? v.trim() : ""))
+        .filter((v) => v.length > 0),
+    ),
+  ];
+  for (const number of candidates) {
+    const row = await db.dataBase.rFQMasterISIN.findFirst({
+      where: { number },
+      select: {
+        number: true,
+        date: true,
+        quoteTime: true,
+        settlementDate: true,
+        settlementType: true,
+        access: true,
+      },
+    });
+    if (row) return row;
+  }
+  return null;
+}
+
+/**
+ * Order Date & Time on PDFs: RFQ master `date` + `quoteTime` from the saved
+ * NSE RFQ response (not pricing-snapshot midnight / 12:00:00).
+ */
+function resolveOrderDateTimeFromRfqMaster(
+  rfqMaster: { date?: string | null; quoteTime?: string | null } | null | undefined,
+  fallback: Date,
+): Date {
+  return parseRfqMasterDateTime(
+    rfqMaster?.date,
+    rfqMaster?.quoteTime,
+    fallback,
+  );
 }
 
 export class CrmOrdersService {
@@ -544,7 +903,16 @@ export class CrmOrdersService {
               firstName: true,
               lastName: true,
               emailAddress: true,
+              userName: true,
             },
+          },
+          orderStages: {
+            select: {
+              stage: true,
+              status: true,
+              seq: true,
+            },
+            orderBy: { seq: "asc" },
           },
         },
         orderBy: { createdAt: "desc" },
@@ -591,10 +959,16 @@ export class CrmOrdersService {
           : null,
     }));
 
+    const orderInfoById = await getOrdersInfo(data.map((o) => o.id));
+    const dataWithInfo = data.map((o) => ({
+      ...o,
+      orderInfo: orderInfoById[o.id] ?? null,
+    }));
+
     const totalPages = Math.ceil(total / limit);
 
     return {
-      data,
+      data: dataWithInfo,
       meta: {
         total,
         page,
@@ -605,6 +979,14 @@ export class CrmOrdersService {
   }
 
   async getOrderById(orderId: number) {
+    // Fix misleading timeline: pg_routing Done while an earlier stage is Failed.
+    try {
+      const settlementService = new OrderSettlementService();
+      await settlementService.repairPrematurePgRoutingSuccess(orderId);
+    } catch {
+      // Non-fatal — still return order details
+    }
+
     const order = await db.dataBase.order.findUnique({
       where: { id: orderId },
       include: {
@@ -612,13 +994,18 @@ export class CrmOrdersService {
           select: {
             id: true,
             firstName: true,
+            middleName: true,
             lastName: true,
             emailAddress: true,
             phoneNo: true,
+            userName: true,
           },
         },
         orderLogs: {
           orderBy: { createdAt: "desc" },
+        },
+        orderStages: {
+          orderBy: { seq: "asc" },
         },
         customerBonds: true,
       },
@@ -659,6 +1046,7 @@ export class CrmOrdersService {
       ...order,
       rfqParticipantInfo,
       settlementAutomationLogs,
+      orderInfo: await getOrderInfo(order.id).catch(() => null),
     };
   }
 
@@ -681,6 +1069,7 @@ export class CrmOrdersService {
           select: {
             id: true,
             firstName: true,
+            middleName: true,
             lastName: true,
             emailAddress: true,
             phoneNo: true,
@@ -1084,15 +1473,457 @@ export class CrmOrdersService {
     });
   }
 
+  /**
+   * Propose checkout `bondDetails.pricing` from NSE rows already saved in DB.
+   * Does not write — used by CRM reconfirm popup before PDF download.
+   */
+  async proposeOrderPricingSnapshotFromNse(orderNumber: string) {
+    return proposeOrderPricingFromNseSavedData(orderNumber);
+  }
+
+  /**
+   * Persist proposed NSE pricing onto `orders.bondDetails.pricing`.
+   */
+  async acceptOrderPricingSnapshotFromNse(orderNumber: string) {
+    return acceptOrderPricingFromNseSavedData(orderNumber);
+  }
+
   async autofillReceiptPdfOptions(
     orderNumber: string,
-    input: { settlementDate: string },
+    input: { settlementDate?: string | null },
   ): Promise<{
     accruedInterestDays: number;
     settlementNumber: string | null;
     lastInterestPaymentDateRaw: string | null;
     lastInterestPaymentDate: string | null;
     interestPaymentDates: string[] | null;
+    settlementDateTime: string | null;
+    nonAmortizedBond: boolean;
+    amortizedPrincipalPaymentDates: string | null;
+    settlementDate: string;
+    dealDate: string | null;
+    settlementType: number | null;
+  }> {
+    const requestedSettlementDate =
+      typeof input.settlementDate === "string" && input.settlementDate.trim() !== ""
+        ? input.settlementDate.trim()
+        : null;
+
+    // Settle-order generate page (`/settle-orders/generate/<NSE trade no>`):
+    // use only saved DB + RFQ records — never DeriData / daily-data APIs.
+    if (looksLikeNseRfqTradeNumber(orderNumber)) {
+      return this.autofillReceiptPdfOptionsFromSavedRfqData(orderNumber, {
+        settlementDate: requestedSettlementDate,
+      });
+    }
+
+    // CRM order numbers (e.g. MD-DIR-…): shared orderInfo path (may use DeriData
+    // only when settlement is overridden or the bond amortises).
+    try {
+      const orderInfo = await getOrderInfoByRfqNumber(orderNumber);
+      return await this.autofillReceiptPdfOptionsFromOrderInfo(
+        orderInfo,
+        requestedSettlementDate,
+      );
+    } catch (err) {
+      if (
+        !(err instanceof AppError) ||
+        err.code !== "ORDER_NOT_FOUND"
+      ) {
+        throw err;
+      }
+    }
+
+    return this.autofillReceiptPdfOptionsLegacy(orderNumber, {
+      settlementDate: requestedSettlementDate,
+    });
+  }
+
+  /**
+   * PDF autofill for NSE RFQ / settle trade numbers.
+   * Sources: CRM order (if linked), settle_order, RFQ negotiation, bond master,
+   * coupon reference tables, nse_settlement_no. No DeriData / daily-data calls.
+   */
+  private async autofillReceiptPdfOptionsFromSavedRfqData(
+    rfqNumber: string,
+    input: { settlementDate?: string | null },
+  ): Promise<{
+    accruedInterestDays: number;
+    settlementNumber: string | null;
+    lastInterestPaymentDateRaw: string | null;
+    lastInterestPaymentDate: string | null;
+    interestPaymentDates: string[] | null;
+    settlementDateTime: string | null;
+    nonAmortizedBond: boolean;
+    amortizedPrincipalPaymentDates: string | null;
+    settlementDate: string;
+    dealDate: string | null;
+    settlementType: number | null;
+  }> {
+    const requestedSettlementDate =
+      typeof input.settlementDate === "string" && input.settlementDate.trim() !== ""
+        ? input.settlementDate.trim()
+        : null;
+
+    const orderInfo = await getOrderInfoByRfqNumber(rfqNumber);
+    const core = mapOrderInfoToReceiptPdfAutofill(orderInfo, {
+      settlementDate: requestedSettlementDate,
+    });
+
+    if (!core.settlementDate) {
+      throw new AppError("Could not resolve a settlement date for this RFQ.", {
+        statusCode: HttpStatus.BAD_REQUEST,
+        code: "BAD_REQUEST",
+      });
+    }
+
+    const settlementDt = parseLooseDate(core.settlementDate);
+    if (!settlementDt) {
+      throw new AppError("Could not resolve a settlement date for this RFQ.", {
+        statusCode: HttpStatus.BAD_REQUEST,
+        code: "BAD_REQUEST",
+      });
+    }
+    const settlementForCoupons = settlementDateFromYmd(core.settlementDate);
+    const settlementYmd =
+      toBusinessYmd(core.settlementDate) || core.settlementDate.slice(0, 10);
+
+    const settleOrderKey =
+      orderInfo.rfqNumber?.trim() || rfqNumber.trim() || "";
+    const settleOrder = settleOrderKey
+      ? await this.getRfqByOrderNumber(settleOrderKey)
+      : null;
+
+    const bondService = new BondService();
+    const bond = await bondService.getBondDetails(orderInfo.bond.isin);
+    if (!bond) {
+      throw new AppError(`Bond not found for ISIN: ${orderInfo.bond.isin}`, {
+        statusCode: HttpStatus.NOT_FOUND,
+        code: "BOND_NOT_FOUND",
+      });
+    }
+
+    const isAmortizingBond = /amort/i.test(String(bond.redemptionType ?? ""));
+
+    let lastInterestPaymentDateRaw: string | null =
+      core.lastInterestPaymentDateRaw;
+    let lastInterestPaymentDate: string | null = core.lastInterestPaymentDate;
+    let interestPaymentDates = core.interestPaymentDates;
+
+    const investorCoupons = await loadInvestorCouponScheduleForPdf(
+      bond.isin,
+      settlementForCoupons,
+      { interestPaymentFrequency: bond.interestPaymentFrequency },
+    );
+    if (investorCoupons.lastInterestPaymentDateRaw) {
+      lastInterestPaymentDateRaw = investorCoupons.lastInterestPaymentDateRaw;
+      lastInterestPaymentDate = investorCoupons.lastInterestPaymentDate;
+    }
+    if (investorCoupons.interestPaymentDates.length > 0) {
+      interestPaymentDates = investorCoupons.interestPaymentDates;
+    }
+
+    const couponMeta = await getLastNextCouponDateBasedOnSettlementDate(
+      bond.isin,
+      settlementForCoupons,
+    );
+
+    if (!lastInterestPaymentDateRaw) {
+      const recordYmd =
+        couponMeta.recordDate || orderInfo.pricing.recordDate || "";
+      const lastOnOrBefore =
+        couponMeta.lastCouponDate || orderInfo.date.lastCouponDate || "";
+      const nextYmd =
+        couponMeta.nextCouponDate || orderInfo.date.nextCouponDate || "";
+      const underShut =
+        (Boolean(recordYmd) &&
+          Boolean(settlementYmd) &&
+          Boolean(nextYmd) &&
+          settlementYmd >= recordYmd &&
+          settlementYmd < nextYmd) ||
+        couponMeta.isUnderShutPeriod ||
+        (!couponMeta.recordDate &&
+          orderInfo.pricing.is_under_surtpriode === true);
+      const lastRaw = underShut ? nextYmd || lastOnOrBefore : lastOnOrBefore;
+      if (lastRaw) {
+        lastInterestPaymentDateRaw = String(lastRaw).slice(0, 10);
+        lastInterestPaymentDate = formatLastInterestPaymentDateDisplay(
+          settlementDateFromYmd(lastInterestPaymentDateRaw),
+        );
+      }
+    }
+
+    if (!lastInterestPaymentDateRaw && orderInfo.date.lastCouponDate) {
+      lastInterestPaymentDateRaw = orderInfo.date.lastCouponDate;
+      lastInterestPaymentDate = formatLastInterestPaymentDateDisplay(
+        settlementDateFromYmd(lastInterestPaymentDateRaw),
+      );
+    }
+
+    // Accrual days: saved pricing / orderInfo first, else local shut formula
+    // from reference coupon + record dates (no DeriData).
+    let accruedInterestDays = Number.isFinite(orderInfo.pricing.interestDays)
+      ? Math.round(orderInfo.pricing.interestDays)
+      : NaN;
+
+    if (!Number.isFinite(accruedInterestDays) || accruedInterestDays === 0) {
+      const recordYmd =
+        couponMeta.recordDate || orderInfo.pricing.recordDate || "";
+      const nextYmd =
+        couponMeta.nextCouponDate || orderInfo.date.nextCouponDate || "";
+      // Accrual last coupon is always on/before settlement (not shut-flipped PDF last IP).
+      const lastYmd = couponMeta.lastCouponDate || "";
+      if (recordYmd && nextYmd && settlementYmd) {
+        try {
+          const shut = resolveShutPeriod({
+            RECORD_DATE: recordYmd,
+            NEXT_COUPON_DATE: nextYmd,
+            SETTLEMENT_DATE: settlementYmd,
+            LAST_COUPON_DATE: lastYmd || undefined,
+          });
+          accruedInterestDays = shut.accrualDays;
+        } catch {
+          // leave accruedInterestDays as-is
+        }
+      }
+    }
+
+    if (!Number.isFinite(accruedInterestDays)) {
+      accruedInterestDays = Math.max(0, Math.round(core.accruedInterestDays));
+    }
+
+    const settlementOverridden =
+      requestedSettlementDate != null &&
+      requestedSettlementDate !== orderInfo.date.settlementDate;
+
+    let settlementNumber = core.settlementNumber;
+    if (settlementOverridden || !settlementNumber) {
+      settlementNumber = await resolveSettlementNumberForPdf({
+        settlementDateYmd: core.settlementDate,
+        settleOrderSettlementNo: settleOrder?.settlementNo,
+        metadataSettlementNumber: core.settlementNumber,
+      });
+    }
+
+    return {
+      accruedInterestDays: Number.isFinite(accruedInterestDays)
+        ? accruedInterestDays
+        : 0,
+      settlementNumber,
+      lastInterestPaymentDateRaw,
+      lastInterestPaymentDate,
+      interestPaymentDates,
+      settlementDateTime: settleOrder?.payoutTime?.trim() || null,
+      nonAmortizedBond: !isAmortizingBond,
+      // Amortizing principal schedule needs DeriData cf_rows — omit on RFQ path.
+      amortizedPrincipalPaymentDates: null,
+      settlementDate: core.settlementDate,
+      dealDate: core.dealDate,
+      settlementType: core.settlementType,
+    };
+  }
+
+  private async autofillReceiptPdfOptionsFromOrderInfo(
+    orderInfo: Awaited<ReturnType<typeof getOrderInfo>>,
+    requestedSettlementDate: string | null,
+  ): Promise<{
+    accruedInterestDays: number;
+    settlementNumber: string | null;
+    lastInterestPaymentDateRaw: string | null;
+    lastInterestPaymentDate: string | null;
+    interestPaymentDates: string[] | null;
+    settlementDateTime: string | null;
+    nonAmortizedBond: boolean;
+    amortizedPrincipalPaymentDates: string | null;
+    settlementDate: string;
+    dealDate: string | null;
+    settlementType: number | null;
+  }> {
+    const core = mapOrderInfoToReceiptPdfAutofill(orderInfo, {
+      settlementDate: requestedSettlementDate,
+    });
+
+    if (!core.settlementDate) {
+      throw new AppError("Could not resolve a settlement date for this order.", {
+        statusCode: HttpStatus.BAD_REQUEST,
+        code: "BAD_REQUEST",
+      });
+    }
+
+    const settlementDt = parseLooseDate(core.settlementDate);
+    if (!settlementDt) {
+      throw new AppError("Could not resolve a settlement date for this order.", {
+        statusCode: HttpStatus.BAD_REQUEST,
+        code: "BAD_REQUEST",
+      });
+    }
+    const settlementForCoupons = settlementDateFromYmd(core.settlementDate);
+
+    const settleOrderKey =
+      orderInfo.rfqNumber?.trim() || orderInfo.orderId?.trim() || "";
+    const settleOrder = settleOrderKey
+      ? await this.getRfqByOrderNumber(settleOrderKey)
+      : null;
+
+    const bondService = new BondService();
+    const bond = await bondService.getBondDetails(orderInfo.bond.isin);
+    if (!bond) {
+      throw new AppError(`Bond not found for ISIN: ${orderInfo.bond.isin}`, {
+        statusCode: HttpStatus.NOT_FOUND,
+        code: "BOND_NOT_FOUND",
+      });
+    }
+
+    const isAmortizingBond = /amort/i.test(String(bond.redemptionType ?? ""));
+
+    let accruedInterestDays = core.accruedInterestDays;
+    // Seed from orderInfo mapper first — reference coupon tables are often sparse
+    // (missing prior coupons), which makes investor/meta last-IP null.
+    let lastInterestPaymentDateRaw: string | null =
+      core.lastInterestPaymentDateRaw;
+    let lastInterestPaymentDate: string | null = core.lastInterestPaymentDate;
+    let interestPaymentDates = core.interestPaymentDates;
+
+    const settlementOverridden =
+      requestedSettlementDate != null &&
+      requestedSettlementDate !== orderInfo.date.settlementDate;
+
+    // Prefer investor schedule when it can resolve last IP (settlement + record).
+    const investorCoupons = await loadInvestorCouponScheduleForPdf(
+      bond.isin,
+      settlementForCoupons,
+      { interestPaymentFrequency: bond.interestPaymentFrequency },
+    );
+    if (investorCoupons.lastInterestPaymentDateRaw) {
+      lastInterestPaymentDateRaw = investorCoupons.lastInterestPaymentDateRaw;
+      lastInterestPaymentDate = investorCoupons.lastInterestPaymentDate;
+    }
+    if (investorCoupons.interestPaymentDates.length > 0) {
+      interestPaymentDates = investorCoupons.interestPaymentDates;
+    }
+
+    // Fallback when reference coupon rows are sparse: derive shut from
+    // settlement + record date, then pick last-payout vs upcoming coupon.
+    if (!lastInterestPaymentDateRaw) {
+      const couponMeta = await getLastNextCouponDateBasedOnSettlementDate(
+        bond.isin,
+        settlementForCoupons,
+      );
+      const recordYmd =
+        couponMeta.recordDate ||
+        orderInfo.pricing.recordDate ||
+        "";
+      const lastOnOrBefore =
+        couponMeta.lastCouponDate || orderInfo.date.lastCouponDate || "";
+      const nextYmd =
+        couponMeta.nextCouponDate || orderInfo.date.nextCouponDate || "";
+      const settlementYmd =
+        toBusinessYmd(core.settlementDate) || core.settlementDate.slice(0, 10);
+      const underShut =
+        (Boolean(recordYmd) &&
+          Boolean(settlementYmd) &&
+          Boolean(nextYmd) &&
+          settlementYmd >= recordYmd &&
+          settlementYmd < nextYmd) ||
+        couponMeta.isUnderShutPeriod ||
+        (!couponMeta.recordDate &&
+          orderInfo.pricing.is_under_surtpriode === true);
+      const lastRaw = underShut ? nextYmd || lastOnOrBefore : lastOnOrBefore;
+      if (lastRaw) {
+        lastInterestPaymentDateRaw = String(lastRaw).slice(0, 10);
+        lastInterestPaymentDate = formatLastInterestPaymentDateDisplay(
+          settlementDateFromYmd(lastInterestPaymentDateRaw),
+        );
+      }
+    }
+
+    if (!lastInterestPaymentDateRaw && orderInfo.date.lastCouponDate) {
+      lastInterestPaymentDateRaw = orderInfo.date.lastCouponDate;
+      lastInterestPaymentDate = formatLastInterestPaymentDateDisplay(
+        settlementDateFromYmd(lastInterestPaymentDateRaw),
+      );
+    }
+
+    let calcCfRows:
+      | Awaited<ReturnType<typeof getBondInfoCalcData>>["calc"]["cf_rows"]
+      | undefined;
+
+    const needsBondCalc = settlementOverridden || isAmortizingBond;
+    if (needsBondCalc) {
+      const settlementDateStr = [
+        settlementDt.getFullYear(),
+        String(settlementDt.getMonth() + 1).padStart(2, "0"),
+        String(settlementDt.getDate()).padStart(2, "0"),
+      ].join("-");
+      const pricingYield =
+        orderInfo.pricing.yieldToMaturity > 0
+          ? String(orderInfo.pricing.yieldToMaturity)
+          : bond.yield != null && Number.isFinite(Number(bond.yield))
+            ? String(bond.yield)
+            : bond.buyYield != null && Number.isFinite(Number(bond.buyYield))
+              ? String(bond.buyYield)
+              : undefined;
+      const bondData = await getBondInfoCalcData(orderInfo.bond.isin, {
+        settlementDate: settlementDateStr,
+        quantity: orderInfo.pricing.quantity,
+        yeild: pricingYield,
+      });
+      calcCfRows = bondData.calc.cf_rows;
+      if (settlementOverridden) {
+        accruedInterestDays = Number(bondData.calc.accrued_days);
+      }
+    }
+
+    let settlementNumber = core.settlementNumber;
+    if (settlementOverridden || !settlementNumber) {
+      settlementNumber = await resolveSettlementNumberForPdf({
+        settlementDateYmd: core.settlementDate,
+        settleOrderSettlementNo: settleOrder?.settlementNo,
+        metadataSettlementNumber: core.settlementNumber,
+      });
+    }
+
+    const amortizedPrincipalPaymentDates =
+      isAmortizingBond && calcCfRows
+        ? buildAmortizedPrincipalPaymentDates(
+          calcCfRows,
+          orderInfo.pricing.quantity,
+          Number(bond.faceValue),
+        )
+        : null;
+
+    return {
+      accruedInterestDays: Number.isFinite(accruedInterestDays)
+        ? accruedInterestDays
+        : 0,
+      settlementNumber,
+      lastInterestPaymentDateRaw,
+      lastInterestPaymentDate,
+      interestPaymentDates,
+      settlementDateTime: settleOrder?.payoutTime?.trim() || null,
+      nonAmortizedBond: !isAmortizingBond,
+      amortizedPrincipalPaymentDates,
+      settlementDate: core.settlementDate,
+      dealDate: core.dealDate,
+      settlementType: core.settlementType,
+    };
+  }
+
+  private async autofillReceiptPdfOptionsLegacy(
+    orderNumber: string,
+    input: { settlementDate?: string | null },
+  ): Promise<{
+    accruedInterestDays: number;
+    settlementNumber: string | null;
+    lastInterestPaymentDateRaw: string | null;
+    lastInterestPaymentDate: string | null;
+    interestPaymentDates: string[] | null;
+    settlementDateTime: string | null;
+    nonAmortizedBond: boolean;
+    amortizedPrincipalPaymentDates: string | null;
+    settlementDate: string;
+    dealDate: string | null;
+    settlementType: number | null;
   }> {
     // The autofill values (accrued days, settlement no, coupon dates) are all
     // bond + settle-order properties — they don't depend on which customer
@@ -1101,13 +1932,20 @@ export class CrmOrdersService {
     // is available. This unblocks the Generate-PDF page autofill before any
     // counterparty has been assigned.
     const existingOrder = await this.getCustomerByOrderNumber(orderNumber);
-    const settleOrder = await this.getRfqByOrderNumber(orderNumber);
+    // Match the receipt-PDF flow: the settle_order is keyed by the NSE trade
+    // number (reqOrderNumber / metadata.rfqNumber), NOT the CRM order number.
+    // Using the raw order number here left `settlementNo` unresolved.
+    const settleOrderKey = existingOrder
+      ? this.resolveSettleOrderTradeKey(existingOrder)
+      : orderNumber;
+    const settleOrder = await this.getRfqByOrderNumber(settleOrderKey);
 
     type OrderLike = {
       isin: string;
       quantity: number;
       unitPrice: number;
       createdAt: Date;
+      bondDetails?: unknown;
     };
 
     let order: OrderLike | null = null;
@@ -1120,6 +1958,7 @@ export class CrmOrdersService {
           existingOrder.createdAt instanceof Date
             ? existingOrder.createdAt
             : new Date(existingOrder.createdAt),
+        bondDetails: existingOrder.bondDetails,
       };
     } else if (settleOrder) {
       order = {
@@ -1143,20 +1982,34 @@ export class CrmOrdersService {
       );
     }
 
-    const settlementDt = parseLooseDate(input.settlementDate);
+    const orderMeta =
+      (existingOrder?.metadata as Record<string, unknown> | null) ?? {};
+    const pickMetaStr = (v: unknown): string | null => {
+      if (v == null) return null;
+      const s = String(v).trim();
+      return s !== "" ? s : null;
+    };
+
+    const {
+      dealDateYmd,
+      settlementDateYmd: settlementYmd,
+      settlementType: settlementTypeNum,
+    } = resolveDatesFromOrderPricingSnapshot(order.bondDetails, {
+      requestedSettlementDate:
+        typeof input.settlementDate === "string" ? input.settlementDate : null,
+    });
+
+    const settlementDt = parseLooseDate(settlementYmd);
     if (!settlementDt) {
-      throw new AppError("Invalid settlementDate. Expected YYYY-MM-DD.", {
+      throw new AppError("Could not resolve a settlement date for this order.", {
         statusCode: HttpStatus.BAD_REQUEST,
         code: "BAD_REQUEST",
       });
     }
+    const settlementForCoupons = settlementDateFromYmd(settlementYmd);
 
-    const settlementDateStr = [
-      settlementDt.getFullYear(),
-      String(settlementDt.getMonth() + 1).padStart(2, "0"),
-      String(settlementDt.getDate()).padStart(2, "0"),
-    ].join("-");
-
+    // Prefer checkout DeriData pricing snapshot on the order — never bonds-table calc columns.
+    const orderSnap = orderPricingSnapshot(order.bondDetails);
     const bondService = new BondService();
     const bond = await bondService.getBondDetails(order.isin);
     if (!bond) {
@@ -1166,41 +2019,92 @@ export class CrmOrdersService {
       });
     }
 
-    const pricingYield =
-      bond.yield != null && Number.isFinite(Number(bond.yield))
-        ? String(bond.yield)
-        : bond.buyYield != null && Number.isFinite(Number(bond.buyYield))
-          ? String(bond.buyYield)
-          : undefined;
+    // Amortising vs bullet is a pure bond-master property (DeriData
+    // `redemption_type`). Bullet is the overwhelming default → non-amortized.
+    const isAmortizingBond = /amort/i.test(String(bond.redemptionType ?? ""));
 
-    const bondData = await getBondInfoCalcData(order.isin, {
-      settlementDate: settlementDateStr,
-      quantity: order.quantity,
-      yeild: pricingYield,
-    });
+    let accruedInterestDays =
+      orderSnap?.noOfAccrualDays != null && Number.isFinite(orderSnap.noOfAccrualDays)
+        ? Math.round(orderSnap.noOfAccrualDays)
+        : NaN;
 
-    const interestPaymentDates = await getPayoutDates(bond.isin, settlementDt);
-
-    const lastIpRaw = bondData.payload.Last_IP_Date?.trim() || null;
-    let lastInterestPaymentDateRaw: string | null = lastIpRaw;
-    let lastInterestPaymentDate: string | null = null;
-    if (lastIpRaw) {
-      const lastIpDt = parseLooseDate(lastIpRaw);
-      if (lastIpDt) {
-        lastInterestPaymentDateRaw = toYyyyMmDd(lastIpDt);
-        lastInterestPaymentDate = formatDateWithDayNameForPdfOption(lastIpDt);
-      } else {
-        lastInterestPaymentDate = lastIpRaw;
+    // Run the DeriData calc when we still need accrued days OR when the bond
+    // amortises (we read the principal cashflow rows to build the schedule).
+    let calcCfRows:
+      | Awaited<ReturnType<typeof getBondInfoCalcData>>["calc"]["cf_rows"]
+      | undefined;
+    if (!Number.isFinite(accruedInterestDays) || isAmortizingBond) {
+      const settlementDateStr = [
+        settlementDt.getFullYear(),
+        String(settlementDt.getMonth() + 1).padStart(2, "0"),
+        String(settlementDt.getDate()).padStart(2, "0"),
+      ].join("-");
+      const pricingYield =
+        orderSnap?.yield != null && Number.isFinite(orderSnap.yield)
+          ? String(orderSnap.yield)
+          : bond.yield != null && Number.isFinite(Number(bond.yield))
+            ? String(bond.yield)
+            : bond.buyYield != null && Number.isFinite(Number(bond.buyYield))
+              ? String(bond.buyYield)
+              : undefined;
+      const bondData = await getBondInfoCalcData(order.isin, {
+        settlementDate: settlementDateStr,
+        quantity: order.quantity,
+        yeild: pricingYield,
+      });
+      calcCfRows = bondData.calc.cf_rows;
+      if (!Number.isFinite(accruedInterestDays)) {
+        accruedInterestDays = Number(bondData.calc.accrued_days);
       }
     }
 
+    const investorCoupons = await loadInvestorCouponScheduleForPdf(
+      bond.isin,
+      settlementForCoupons,
+      { interestPaymentFrequency: bond.interestPaymentFrequency },
+    );
+    const pricingLastCoupon = lastCouponDatesFromOrderPricingSnapshot(order.bondDetails);
+
+    // Settlement number is keyed by settlement date in `nse_settlement_no`.
+    const settlementNumber = await resolveSettlementNumberForPdf({
+      settlementDateYmd: settlementYmd,
+      settleOrderSettlementNo: settleOrder?.settlementNo,
+      metadataSettlementNumber:
+        pickMetaStr(orderMeta.settlementNumber) ?? pickMetaStr(orderMeta.settlementNo),
+    });
+
+    // For amortising bonds, turn the principal cashflow rows into the
+    // "DD-MMM-YYYY pct%" schedule the receipt renders in place of "100.0000%".
+    const amortizedPrincipalPaymentDates =
+      isAmortizingBond && calcCfRows
+        ? buildAmortizedPrincipalPaymentDates(
+          calcCfRows,
+          order.quantity,
+          Number(bond.faceValue),
+        )
+        : null;
+
     return {
-      accruedInterestDays: Number(bondData.calc.accrued_days),
-      settlementNumber: settleOrder?.settlementNo?.trim() || null,
-      lastInterestPaymentDateRaw,
-      lastInterestPaymentDate,
+      accruedInterestDays: Number.isFinite(accruedInterestDays)
+        ? accruedInterestDays
+        : 0,
+      settlementNumber,
+      lastInterestPaymentDateRaw:
+        investorCoupons.lastInterestPaymentDateRaw ??
+        pricingLastCoupon.lastInterestPaymentDateRaw,
+      lastInterestPaymentDate:
+        investorCoupons.lastInterestPaymentDate ??
+        pricingLastCoupon.lastInterestPaymentDate,
       interestPaymentDates:
-        interestPaymentDates.length > 0 ? interestPaymentDates : null,
+        investorCoupons.interestPaymentDates.length > 0
+          ? investorCoupons.interestPaymentDates
+          : null,
+      settlementDateTime: settleOrder?.payoutTime?.trim() || null,
+      nonAmortizedBond: !isAmortizingBond,
+      amortizedPrincipalPaymentDates,
+      settlementDate: settlementYmd,
+      dealDate: dealDateYmd,
+      settlementType: settlementTypeNum,
     };
   }
 
@@ -1559,6 +2463,8 @@ export class CrmOrdersService {
       customerProfileId: number | null;
       isin: string;
       quantity: number;
+      /** Order pricing snapshot — used for PDF yield (`pricing.yield`). */
+      bondDetails?: unknown;
       totalAmount: number;
       stampDuty: number;
       metadata: unknown;
@@ -1612,6 +2518,7 @@ export class CrmOrdersService {
           customerProfileId,
           isin: customerOrder.isin,
           quantity: customerOrder.quantity,
+          bondDetails: customerOrder.bondDetails,
           totalAmount: Number(customerOrder.totalAmount),
           stampDuty: Number(customerOrder.stampDuty),
           metadata: customerOrder.metadata,
@@ -1677,6 +2584,7 @@ export class CrmOrdersService {
           customerProfileId: null,
           isin: customerOrder.isin,
           quantity: customerOrder.quantity,
+          bondDetails: customerOrder.bondDetails,
           totalAmount: Number(customerOrder.totalAmount),
           stampDuty: Number(customerOrder.stampDuty),
           metadata: customerOrder.metadata,
@@ -1814,6 +2722,14 @@ export class CrmOrdersService {
     const getUserPrimaryBankAccount = actor.primaryBank;
     const primaryDematAccount = actor.primaryDemat;
 
+    // CRM NSE checkbox: rebuild pricing from settle_order / RFQ (same as propose).
+    const bondDetailsForPdf = await resolveBondDetailsForPdf(
+      orderNumber,
+      order.bondDetails,
+      pdfQuery,
+    );
+    const orderForPdf = { ...order, bondDetails: bondDetailsForPdf };
+
     const bondService = new BondService();
     const bond = await bondService.getBondDetails(order.isin);
     if (!bond) {
@@ -1833,22 +2749,41 @@ export class CrmOrdersService {
       },
     });
 
-    const rfqDetails = await db.dataBase.rFQMasterISIN.findFirst({
-      where: {
-        number: negotation?.rfqNumber,
-      },
-    });
     const metadata = (order.metadata as Record<string, unknown> | null) ?? {};
-    console.log(rfqDetails?.date, rfqDetails?.quoteTime,);
-
-
-    const fallbackOrderDate =
-      order.createdAt instanceof Date ? order.createdAt : new Date(order.createdAt);
-    const orderDateForPdf = pdfQuery.dealDate ? new Date(pdfQuery.dealDate) : parseRfqMasterDateTime(
-      rfqDetails?.date,
-      rfqDetails?.quoteTime,
-      fallbackOrderDate,
+    const rfqDetails = await resolveRfqMasterSavedResponse({
+      negotiationRfqNumber: negotation?.rfqNumber,
+      metadataRfqNumber:
+        typeof metadata.rfqNumber === "string" ? metadata.rfqNumber : null,
+      settleTradeNumber: settleOrder?.orderNumber,
+    });
+    const { dealDate: dealDateFromSnapshot, settlementDateYmd: snapshotSettlementYmd } =
+      resolveDatesFromOrderPricingSnapshot(bondDetailsForPdf, {
+        requestedDealDate: pdfQuery.dealDate ?? null,
+        requestedSettlementDate: pdfQuery.settlementDate ?? null,
+      });
+    const orderDateForPdf = resolveOrderDateTimeFromRfqMaster(
+      rfqDetails,
+      dealDateFromSnapshot,
     );
+    // Deal / settlement calendar labels: exact RFQ master strings when present
+    // (e.g. "22-Jul-2026" / "23-Jul-2026"). Query overrides are for calc only.
+    const dealDateDisplay =
+      rfqDetails?.date?.trim() ||
+      (typeof pdfQuery.dealDate === "string" && pdfQuery.dealDate.trim()) ||
+      null;
+    const settlementDateDisplay =
+      rfqDetails?.settlementDate?.trim() ||
+      (typeof pdfQuery.settlementDate === "string" &&
+        pdfQuery.settlementDate.trim()) ||
+      null;
+    const resolvedSettlementDate =
+      toBusinessYmd(
+        typeof pdfQuery.settlementDate === "string"
+          ? pdfQuery.settlementDate
+          : null,
+      ) ||
+      toBusinessYmd(settlementDateDisplay) ||
+      snapshotSettlementYmd;
     const [bankName, dpName] = await Promise.all([
       settleOrder?.ifscCode
         ? fetchBankNameFromIfsc(settleOrder.ifscCode)
@@ -1906,11 +2841,20 @@ export class CrmOrdersService {
         : undefined;
 
     const pdfFinancials = buildPdfFinancialFields(
-      order,
-      bond,
+      orderForPdf,
       settleOrder,
       accruedInterestDaysParam,
     );
+
+    const resolvedSettlementNumber = await resolveSettlementNumberForPdf({
+      settlementDateYmd: resolvedSettlementDate,
+      requestedSettlementNumber: settlementNumberParam,
+      settleOrderSettlementNo: settleOrder?.settlementNo,
+      metadataSettlementNumber:
+        (typeof metadata.settlementNumber === "string" && metadata.settlementNumber.trim()) ||
+        (typeof metadata.settlementNo === "string" && metadata.settlementNo.trim()) ||
+        null,
+    });
 
     const buffer = await generateOrderPdfBuffer({
       user,
@@ -1923,7 +2867,8 @@ export class CrmOrdersService {
         subTotal: pdfFinancials.subTotal,
         stampDuty: pdfFinancials.stampDuty,
         totalAmount: pdfFinancials.totalConsideration,
-        price: Number(settleOrder?.price ?? bond.sellPrice ?? 0),
+        price: pdfFinancials.price,
+        bondDetails: bondDetailsForPdf as { pricing?: Record<string, unknown> } | null,
         metadata: {
           dealId: (metadata.dealId as string) ?? undefined,
           clientOrderSide: (metadata.clientOrderSide as "BUY" | "SELL") ?? undefined,
@@ -1938,16 +2883,16 @@ export class CrmOrdersService {
                 : undefined,
           interestPaymentFrequencyLabel: interestSchedule.frequencyLabel,
           settlementOrderNumber: negotation?.rfqNumber ?? settleOrder?.orderNumber ?? undefined,
-          settlementDate: (pdfQuery?.settlementDate || rfqDetails?.settlementDate || settleOrder?.modSettleDate) ?? undefined as string | undefined,
-          payoutTime: (settleOrder?.payoutTime || settlementDateTimeParam || settleOrder?.modSettleDate) ?? undefined as string | undefined,
+          dealDate: dealDateDisplay ?? undefined,
+          settlementDate: settlementDateDisplay ?? resolvedSettlementDate,
+          payoutTime: settleOrder?.payoutTime?.trim() || settlementDateTimeParam || undefined,
           settlementType: rfqDetails?.settlementType ?? 0,
           valueDate: bond.maturityDate
             ? new Date(bond.maturityDate).toISOString()
             : undefined,
           accruedInterest: pdfFinancials.accruedInterest,
           accruedInterestDays: pdfFinancials.accruedInterestDays,
-          settlementNumber:
-            settlementNumberParam ?? (settleOrder as { settlementNo?: string } | undefined)?.settlementNo,
+          settlementNumber: resolvedSettlementNumber ?? undefined,
           settlementDateTime: settlementDateTimeParam,
           lastInterestPaymentDate: lastInterestPaymentDateParam,
           nonAmortizedBond: nonAmortizedBondParam,
@@ -2029,6 +2974,13 @@ export class CrmOrdersService {
     const order = actor.orderForPdf;
     const user = actor.user;
 
+    const bondDetailsForPdf = await resolveBondDetailsForPdf(
+      orderNumber,
+      order.bondDetails,
+      pdfQuery,
+    );
+    const orderForPdf = { ...order, bondDetails: bondDetailsForPdf };
+
     const bondService = new BondService();
     const bond = await bondService.getBondDetails(order.isin);
     if (!bond) {
@@ -2042,40 +2994,9 @@ export class CrmOrdersService {
       this.resolveSettleOrderTradeKey(order),
     );
 
-    // Settlement status
-    // 0 = Settlement Pending
-    // 1 = Securities Payin Done
-    // 2 = Funds Payin Done
-    // 3 = Payin Completed
-    // 4 = Payout Done Successfully
-    // 5 = Payin reversed
-    // 6 = Settle order expired
-    // 7 = Order not settleable
-    // 8 = Settlement of order cancelled
-    // 9 = Document not received for unregistered participant
-
-    const validSettlementStatus = {
-      0: "Settlement Pending",
-      1: "Securities Payin Done",
-      2: "Funds Payin Done",
-      3: "Payin Completed",
-      4: "Payout Done Successfully",
-      5: "Payin reversed",
-      6: "Settle order expired",
-      7: "Order not settleable",
-      8: "Settlement of order cancelled",
-      9: "Document not received for unregistered participant",
-    }
-
-    if (settleOrder?.settleStatus !== 4) {
-      if (env.CBRICS_ENV === "PROD") {
-        throw new AppError(`Settlement is not completed. Please wait for the settlement to complete. ${validSettlementStatus[settleOrder?.settleStatus as keyof typeof validSettlementStatus] ?? "Unknown"}`, {
-          statusCode: HttpStatus.BAD_REQUEST,
-          code: "SETTLEMENT_NOT_COMPLETED",
-        });
-      }
-    }
-
+    // Deal sheets are allowed before CRM order status is SETTLED (draft /
+    // pre-settlement). Settlement Date & Time uses payoutTime when present;
+    // otherwise the PDF leaves that field blank — do not block generation.
     const getUserPrimaryBankAccount = actor.primaryBank;
     const primaryDematAccount = actor.primaryDemat;
     const negotation = await db.dataBase.rFQNegotiation.findFirst({
@@ -2083,19 +3004,40 @@ export class CrmOrdersService {
         tradeNumber: settleOrder?.orderNumber,
       },
     });
-    const rfqDetails = await db.dataBase.rFQMasterISIN.findFirst({
-      where: {
-        number: negotation?.rfqNumber,
-      },
-    });
     const metadata = (order.metadata as Record<string, unknown> | null) ?? {};
-    const fallbackOrderDateDeal =
-      order.createdAt instanceof Date ? order.createdAt : new Date(order.createdAt);
-    const orderDateForPdf = parseRfqMasterDateTime(
-      rfqDetails?.date,
-      rfqDetails?.quoteTime,
-      fallbackOrderDateDeal,
+    const rfqDetails = await resolveRfqMasterSavedResponse({
+      negotiationRfqNumber: negotation?.rfqNumber,
+      metadataRfqNumber:
+        typeof metadata.rfqNumber === "string" ? metadata.rfqNumber : null,
+      settleTradeNumber: settleOrder?.orderNumber,
+    });
+    const { dealDate: dealDateFromSnapshot, settlementDateYmd: snapshotSettlementYmd } =
+      resolveDatesFromOrderPricingSnapshot(bondDetailsForPdf, {
+        requestedDealDate: pdfQuery.dealDate ?? null,
+        requestedSettlementDate: pdfQuery.settlementDate ?? null,
+      });
+    const orderDateForPdf = resolveOrderDateTimeFromRfqMaster(
+      rfqDetails,
+      dealDateFromSnapshot,
     );
+    // Deal / settlement calendar labels: exact RFQ master strings when present.
+    const dealDateDisplay =
+      rfqDetails?.date?.trim() ||
+      (typeof pdfQuery.dealDate === "string" && pdfQuery.dealDate.trim()) ||
+      null;
+    const settlementDateDisplay =
+      rfqDetails?.settlementDate?.trim() ||
+      (typeof pdfQuery.settlementDate === "string" &&
+        pdfQuery.settlementDate.trim()) ||
+      null;
+    const resolvedSettlementDate =
+      toBusinessYmd(
+        typeof pdfQuery.settlementDate === "string"
+          ? pdfQuery.settlementDate
+          : null,
+      ) ||
+      toBusinessYmd(settlementDateDisplay) ||
+      snapshotSettlementYmd;
 
     const [bankName, dpName] = await Promise.all([
       settleOrder?.ifscCode
@@ -2155,11 +3097,20 @@ export class CrmOrdersService {
         : undefined;
 
     const pdfFinancials = buildPdfFinancialFields(
-      order,
-      bond,
+      orderForPdf,
       settleOrder,
       accruedInterestDaysParam,
     );
+
+    const resolvedSettlementNumberDeal = await resolveSettlementNumberForPdf({
+      settlementDateYmd: resolvedSettlementDate,
+      requestedSettlementNumber: settlementNumberParam,
+      settleOrderSettlementNo: settleOrder?.settlementNo,
+      metadataSettlementNumber:
+        (typeof metadata.settlementNumber === "string" && metadata.settlementNumber.trim()) ||
+        (typeof metadata.settlementNo === "string" && metadata.settlementNo.trim()) ||
+        null,
+    });
 
     const buffer = await generateDealPdfBuffer({
       user,
@@ -2172,7 +3123,8 @@ export class CrmOrdersService {
         subTotal: pdfFinancials.subTotal,
         stampDuty: pdfFinancials.stampDuty,
         totalAmount: pdfFinancials.totalConsideration,
-        price: Number(settleOrder?.price ?? bond.sellPrice ?? 0),
+        price: pdfFinancials.price,
+        bondDetails: bondDetailsForPdf as { pricing?: Record<string, unknown> } | null,
         metadata: {
           settlementType: rfqDetails?.settlementType ?? 0,
           dealId: (metadata.dealId as string) ?? undefined,
@@ -2188,16 +3140,15 @@ export class CrmOrdersService {
                 : undefined,
           interestPaymentFrequencyLabel: interestSchedule.frequencyLabel,
           settlementOrderNumber: negotation?.rfqNumber ?? settleOrder?.orderNumber ?? undefined,
-          settlementDate: rfqDetails?.settlementDate || settleOrder?.modSettleDate,
-          payoutTime: settleOrder?.payoutTime || settlementDateTimeParam || settleOrder?.modSettleDate,
+          dealDate: dealDateDisplay ?? undefined,
+          settlementDate: settlementDateDisplay ?? resolvedSettlementDate,
+          payoutTime: settleOrder?.payoutTime?.trim() || settlementDateTimeParam || undefined,
           valueDate: bond.maturityDate
             ? new Date(bond.maturityDate).toISOString()
             : undefined,
           accruedInterest: pdfFinancials.accruedInterest,
           accruedInterestDays: pdfFinancials.accruedInterestDays,
-          settlementNumber:
-            settlementNumberParam ??
-            (settleOrder as { settlementNo?: string } | undefined)?.settlementNo,
+          settlementNumber: resolvedSettlementNumberDeal ?? undefined,
           settlementDateTime: settlementDateTimeParam,
           lastInterestPaymentDate: lastInterestPaymentDateParam,
           nonAmortizedBond: nonAmortizedBondParamDeal,
@@ -2282,11 +3233,14 @@ export class CrmOrdersService {
       settlementNumber?: string;
       settlementDateTime?: string;
       settlementDate?: Date;
-      dealDate?: Date,
+      dealDate?: Date;
       lastInterestPaymentDate?: string;
       interestPaymentDates?: string;
       nonAmortizedBond?: boolean;
       amortizedPrincipalPaymentDates?: string;
+      pricingSnapshot?: Record<string, unknown> | string;
+      /** When true, rebuild pricing from settle_order / NSE rows for this PDF only. */
+      useNseSavedPricing?: boolean;
     },
   ): Promise<{ messageId?: string; messageIds?: string[] }> {
     const pdfType = body.pdfType;
@@ -2359,6 +3313,15 @@ export class CrmOrdersService {
     if (body.dealDate) {
       pdfQuery.dealDate = body.dealDate.toISOString();
     }
+    if (body.useNseSavedPricing === true) {
+      pdfQuery.useNseSavedPricing = "true";
+    }
+    if (body.pricingSnapshot != null) {
+      pdfQuery.pricingSnapshot =
+        typeof body.pricingSnapshot === "string"
+          ? body.pricingSnapshot
+          : JSON.stringify(body.pricingSnapshot);
+    }
 
 
 
@@ -2384,7 +3347,7 @@ export class CrmOrdersService {
       defaultRecipientEmail = email || undefined;
     } else {
       const customerRepo = new CustomerProfileRepo();
-      user = await customerRepo.getFullCustomerProfile(order.customerProfileId);
+      user = await customerRepo.getFullCustomerProfile(order.customerProfileId!);
 
       const userType = String(
         (user as { userType?: string }).userType ?? "INDIVIDUAL",
@@ -2478,6 +3441,26 @@ export class CrmOrdersService {
       html: htmlBody,
       text: messageBody,
       attachments,
+    });
+
+    // Persist send flags so CRM order details (Settlement Pipeline) can show
+    // whether the order receipt / deal sheet email was delivered.
+    const sentAt = new Date().toISOString();
+    const existingMeta = (order.metadata as Record<string, unknown> | null) ?? {};
+    const metaPatch: Record<string, unknown> = { ...existingMeta };
+    if (pdfType === "order" || pdfType === "both") {
+      metaPatch.orderReceiptEmailSentAt = sentAt;
+      metaPatch.orderReceiptEmailMessageId = messageId;
+      metaPatch.orderReceiptEmailTo = recipientEmail;
+    }
+    if (pdfType === "deal" || pdfType === "both") {
+      metaPatch.dealSheetEmailSentAt = sentAt;
+      metaPatch.dealSheetEmailMessageId = messageId;
+      metaPatch.dealSheetEmailTo = recipientEmail;
+    }
+    await db.dataBase.order.update({
+      where: { id: order.id },
+      data: { metadata: metaPatch as Prisma.InputJsonValue },
     });
 
     return {
@@ -2678,13 +3661,20 @@ export class CrmOrdersService {
     const orderService = new OrderService();
 
     await orderService.updateOrderStatus(order.id, "APPLIED");
-    const job = await orderSettlementQueue.add(
-      {
-        type: "orderSettlement",
-        id: order.id,
-        isNetBanking: false,
-      }
-    );
+    const settlementService = new OrderSettlementService();
+    await settlementService.seedOrderStages(order.id, { isNetBanking: false });
+    const settlementJobId = `order-settlement-${order.id}`;
+    const existingJob = await orderSettlementQueue.getJob(settlementJobId);
+    if (!existingJob) {
+      await orderSettlementQueue.add(
+        {
+          type: "orderSettlement",
+          id: order.id,
+          isNetBanking: false,
+        },
+        { jobId: settlementJobId },
+      );
+    }
     return result;
   }
 
@@ -2735,6 +3725,109 @@ export class CrmOrdersService {
     return {
       id: updated.id,
       status: (updated as { status: OrderStatus }).status,
+    };
+  }
+
+  /**
+   * CRM: enqueue resume-safe settlement.
+   * Starts at the first non-success stage (usually the failed one). The worker
+   * retries that stage, then continues forward only if it succeeds.
+   */
+  async resumeOrderSettlement(orderId: number): Promise<{
+    orderId: number;
+    orderNumber: string;
+    queued: boolean;
+    jobId: string;
+    resumeFromStage: string | null;
+    resumeFromSeq: number | null;
+  }> {
+    const order = await db.dataBase.order.findUnique({
+      where: { id: orderId },
+      select: {
+        id: true,
+        orderNumber: true,
+        paymentMetadata: true,
+        paymentStatus: true,
+      },
+    });
+    if (!order) {
+      throw new AppError("Order not found", {
+        statusCode: HttpStatus.NOT_FOUND,
+        code: "ORDER_NOT_FOUND",
+      });
+    }
+
+    const meta = (order.paymentMetadata ?? {}) as Record<string, unknown>;
+    const nestedMethod = (
+      meta as {
+        payload?: { payment?: { entity?: { method?: string } } };
+      }
+    ).payload?.payment?.entity?.method;
+    const method =
+      typeof meta.method === "string"
+        ? meta.method
+        : typeof nestedMethod === "string"
+          ? nestedMethod
+          : null;
+    const isNetBanking = method === "netbanking";
+
+    const settlementService = new OrderSettlementService();
+    await settlementService.seedOrderStages(order.id, { isNetBanking });
+
+    const stages = await db.dataBase.orderStage.findMany({
+      where: { orderId: order.id },
+      orderBy: { seq: "asc" },
+      select: { stage: true, seq: true, status: true },
+    });
+    const next = stages.find((s) => s.status !== 1) ?? null;
+    const resumeFromStage = next?.stage ?? null;
+    const resumeFromSeq = next?.seq ?? null;
+
+    if (!next) {
+      return {
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        queued: false,
+        jobId: `order-settlement-${order.id}`,
+        resumeFromStage: null,
+        resumeFromSeq: null,
+      };
+    }
+
+    const settlementJobId = `order-settlement-${order.id}`;
+    const existingJob = await orderSettlementQueue.getJob(settlementJobId);
+    if (existingJob) {
+      const state = await existingJob.getState();
+      if (state === "active" || state === "waiting" || state === "delayed") {
+        return {
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+          queued: false,
+          jobId: settlementJobId,
+          resumeFromStage,
+          resumeFromSeq,
+        };
+      }
+      await existingJob.remove().catch(() => undefined);
+    }
+
+    await orderSettlementQueue.add(
+      {
+        type: "orderSettlement",
+        id: order.id,
+        isNetBanking,
+        forceResume: true,
+      },
+      { jobId: settlementJobId },
+    );
+
+    return {
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      queued: true,
+      jobId: settlementJobId,
+      resumeFromStage,
+      resumeFromSeq,
     };
   }
 }

@@ -2,8 +2,7 @@ import apiServerCaller from "@/core/connection/apiServerCaller";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import apiGateway, { BondDetailResponse } from "@root/apiGateway";
 import { redirect } from "next/navigation";
-import { BsInfoCircleFill } from "react-icons/bs";
-import { PiCurrencyInrBold } from "react-icons/pi";
+import { Info, IndianRupee } from "lucide-react";
 import CopyIsin from "./_comparison/CopyIsin";
 import DeleteCompare from "./_comparison/DeleteCampare";
 import ViewPort from "@/global/components/wrapper/ViewPort";
@@ -17,6 +16,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { generatePagesMetaData } from "@/graphql/pagesMetaDataGql_Action";
+import { formatBondListingYieldLabel } from "@/global/utils/bondListingYield";
 
 export const revalidate = 0;
 
@@ -66,7 +66,7 @@ async function page({
       <div className="p-3 w-2/12">
         <span className="flex items-center gap-3">
           {label}{" "}
-          {hasInfoIcon && <BsInfoCircleFill size={14} color="#AAAAAA" />}
+          {hasInfoIcon && <Info size={14} color="#AAAAAA" aria-hidden="true" />}
         </span>
       </div>
       {values.map((val, idx) => (
@@ -158,9 +158,7 @@ async function page({
                 hasInfoIcon
                 values={bondsData.map((bond, i) => (
                   <span key={"yield" + i} className="font-medium">
-                    {bond?.yield !== null && bond?.yield !== undefined
-                      ? `${Number(bond?.yield).toFixed(2)}%`
-                      : "Coming Soon"}
+                    {formatBondListingYieldLabel(bond?.yield)}
                   </span>
                 ))}
               />
@@ -207,7 +205,7 @@ async function page({
                 label="Face Value"
                 values={bondsData.map((bond) => (
                   <span key={bond?.isin} className="flex items-center">
-                    <PiCurrencyInrBold size={16} className="mr-[2px]" />
+                    <IndianRupee size={16} className="mr-[2px]" aria-hidden="true" />
                     {bond?.faceValue?.toLocaleString("en-IN", {
                       minimumFractionDigits: 2,
                     })}

@@ -20,7 +20,7 @@ import type { UnregisteredParticipantRequest } from "@modules/RFQ/nse/cbrics.typ
 import {
   removeLastCommaChunks,
   splitAddressInto3BalancedLines,
-} from "@packages/kyc-providers";
+} from "@root/kyc-providers";
 import { removeCountryCode } from "@utils/filters/convert";
 
 /**
@@ -322,17 +322,19 @@ export function buildCorporateCbricsPayload(
   const dematAccounts = corporateKyc.dematAccounts ?? [];
 
   if (bankAccounts.length === 0) {
-    warnings.push({
+    errors.push({
       field: "bankAccountList",
-      severity: "WARN",
-      message: "No bank accounts on this corporate KYC — CBRICS will receive an empty list.",
+      severity: "ERROR",
+      message:
+        "No bank accounts on this corporate KYC — CBRICS registration requires at least one bank account.",
     });
   }
   if (dematAccounts.length === 0) {
-    warnings.push({
+    errors.push({
       field: "dpAccountList",
-      severity: "WARN",
-      message: "No demat accounts on this corporate KYC — CBRICS will receive an empty list.",
+      severity: "ERROR",
+      message:
+        "No demat accounts on this corporate KYC — CBRICS registration requires at least one demat account.",
     });
   }
 

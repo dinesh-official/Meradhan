@@ -51,6 +51,7 @@ const defaultBankAccount = (): CorporateKycBankAccountPayload => ({
 const defaultDematAccount = (): CorporateKycDematAccountPayload => ({
   depository: "NSDL",
   accountType: "",
+  dpName: "",
   dpId: "",
   clientId: "",
   accountHolderName: "",

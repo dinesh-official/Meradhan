@@ -1,3 +1,11 @@
+import type {
+  PortfolioBondShutFallback,
+  PortfolioCouponScheduleRow,
+} from "./portfolio_cashflow_shut";
+import { shouldSkipCouponPaymentForSettlement } from "./portfolio_cashflow_shut";
+
+export type { PortfolioBondShutFallback, PortfolioCouponScheduleRow };
+
 export const isNA = (value: string): boolean => {
   const v = value.trim().toLowerCase();
   return v === "n/a" || v === "na" || v === "n.a";
@@ -138,6 +146,8 @@ export function enumerateBondPortfolioCashflows(p: {
   interestPaymentMode: string | null | undefined;
   interestPaymentFrequency: string | null | undefined;
   allCouponDates?: Date[] | null;
+  couponSchedule?: PortfolioCouponScheduleRow[] | null;
+  shutFallback?: PortfolioBondShutFallback | null;
 }): BondPortfolioCfEvent[] {
   const events: BondPortfolioCfEvent[] = [];
 
@@ -161,6 +171,17 @@ export function enumerateBondPortfolioCashflows(p: {
   const bullet = isBulletCouponSchedule(p.interestPaymentMode, p.interestPaymentFrequency);
   const masterCouponDates =
     bullet ? [] : uniqSortedUtcDays(p.allCouponDates ?? []);
+
+  const couponSchedule = p.couponSchedule ?? undefined;
+  const shutFallback = p.shutFallback ?? undefined;
+
+  const skipCouponIfShut = (couponDate: Date): boolean =>
+    shouldSkipCouponPaymentForSettlement(
+      settleDate,
+      couponDate,
+      couponSchedule,
+      shutFallback,
+    );
 
   if (bullet) {
     const hasCouponIncome = couponPct > cfAmountEps && settleDate.getTime() < maturity.getTime();
@@ -194,6 +215,11 @@ export function enumerateBondPortfolioCashflows(p: {
         continue;
       }
 
+      if (skipCouponIfShut(d)) {
+        prev = d;
+        continue;
+      }
+
       const amt = parseFloat(calcInterest(annualCoupon, prev, d).toFixed(2));
       if (amt > cfAmountEps) {
         events.push({ type: "INTEREST", date: new Date(d), amount: amt });
@@ -222,11 +248,15 @@ export function enumerateBondPortfolioCashflows(p: {
     cursor = next.getTime() > maturity.getTime() ? new Date(maturity) : new Date(next);
 
     if (cursor.getTime() > adjustedStart.getTime()) {
-      const amt = parseFloat(calcInterest(annualCoupon, lastPayoutDate, cursor).toFixed(2));
-      if (amt > cfAmountEps) {
-        events.push({ type: "INTEREST", date: new Date(cursor), amount: amt });
+      if (skipCouponIfShut(cursor)) {
+        lastPayoutDate = new Date(cursor);
+      } else {
+        const amt = parseFloat(calcInterest(annualCoupon, lastPayoutDate, cursor).toFixed(2));
+        if (amt > cfAmountEps) {
+          events.push({ type: "INTEREST", date: new Date(cursor), amount: amt });
+        }
+        lastPayoutDate = new Date(cursor);
       }
-      lastPayoutDate = new Date(cursor);
     }
 
     if (cursor.getTime() === maturity.getTime()) break;

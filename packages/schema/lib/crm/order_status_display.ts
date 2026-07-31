@@ -14,14 +14,38 @@ export const ORDER_STATUS_CONFIG: Record<
   CrmOrderStatus,
   { title: string; badgeClass: string }
 > = {
-  PENDING: { title: "Not completed", badgeClass: "bg-slate-100 text-slate-700" },
-  IN_PROGRESS: { title: "In progress", badgeClass: "bg-blue-100 text-blue-800" },
-  APPLIED: { title: "In progress", badgeClass: "bg-blue-100 text-blue-800" },
-  SETTLED: { title: "Settled", badgeClass: "bg-green-100 text-green-800" },
-  REJECTED: { title: "Rejected", badgeClass: "bg-red-100 text-red-800" },
-  EXPIRED: { title: "Expired", badgeClass: "bg-gray-200 text-gray-700" },
-  CANCELLED: { title: "Cancelled", badgeClass: "bg-gray-200 text-gray-700" },
+  PENDING: {
+    title: "Not completed",
+    badgeClass: "border border-slate-200 bg-slate-100 text-slate-700",
+  },
+  IN_PROGRESS: {
+    title: "In progress",
+    badgeClass: "border border-blue-200 bg-blue-50 text-blue-700",
+  },
+  APPLIED: {
+    title: "In progress",
+    badgeClass: "border border-blue-200 bg-blue-50 text-blue-700",
+  },
+  SETTLED: {
+    title: "Settled",
+    badgeClass: "border border-emerald-200 bg-emerald-50 text-emerald-700",
+  },
+  REJECTED: {
+    title: "Rejected",
+    badgeClass: "border border-rose-200 bg-rose-50 text-rose-700",
+  },
+  EXPIRED: {
+    title: "Expired",
+    badgeClass: "border border-slate-200 bg-slate-100 text-slate-700",
+  },
+  CANCELLED: {
+    title: "Cancelled",
+    badgeClass: "border border-slate-200 bg-slate-100 text-slate-700",
+  },
 };
+
+const FALLBACK_BADGE =
+  "border border-slate-200 bg-slate-50 text-slate-600" as const;
 
 const PAYMENT_STATUS_LABELS: Record<string, string> = {
   PENDING: "Pending",
@@ -30,43 +54,19 @@ const PAYMENT_STATUS_LABELS: Record<string, string> = {
   CANCELLED: "Cancelled",
 };
 
-function isCheckoutNotCompleted(
-  paymentStatus: string | null | undefined,
-  orderStatus: string,
-): boolean {
-  const ps = paymentStatus == null ? "" : paymentStatus.trim().toUpperCase();
-  if (ps === "PENDING" || ps === "CANCELLED") return true;
-
-  const os = orderStatus.trim().toUpperCase();
-  if (os === "REJECTED" && ps !== "COMPLETED" && ps !== "REFUNDED") return true;
-  if (os === "PENDING" && ps !== "COMPLETED" && ps !== "REFUNDED") return true;
-
-  return false;
+/** Map DB order status → display title + badge class. */
+export function getCrmOrderStatusDisplay(status: string): {
+  title: string;
+  badgeClass: string;
+} {
+  const key = status.trim().toUpperCase() as CrmOrderStatus;
+  const fromConfig = ORDER_STATUS_CONFIG[key];
+  if (fromConfig) return fromConfig;
+  return { title: status, badgeClass: FALLBACK_BADGE };
 }
 
-export function getCrmOrderStatusDisplay(
-  status: string,
-  paymentStatus?: string | null,
-): { title: string; badgeClass: string } {
-  const normalized = status.trim().toUpperCase();
-
-  const fromConfig = ORDER_STATUS_CONFIG[normalized as CrmOrderStatus];
-  if (fromConfig) {
-    return { title: fromConfig.title, badgeClass: fromConfig.badgeClass };
-  }
-
-  if (isCheckoutNotCompleted(paymentStatus, status)) {
-    return ORDER_STATUS_CONFIG.PENDING;
-  }
-
-  return { title: status, badgeClass: "bg-gray-100 text-gray-800" };
-}
-
-export function getOrderStatusLabel(
-  status: string,
-  paymentStatus?: string | null,
-): string {
-  return getCrmOrderStatusDisplay(status, paymentStatus).title;
+export function getOrderStatusLabel(status: string): string {
+  return getCrmOrderStatusDisplay(status).title;
 }
 
 export function getPaymentStatusLabel(paymentStatus: string): string {

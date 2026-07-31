@@ -36,12 +36,18 @@ export class BondAutoUpdateAutofillController {
     const quantity = readNum(body.quantity);
     const settlementDate = readStr(body.settlementDate);
     const pricingYield = readNum(body.pricingYield);
+    const cleanPrice = readNum(body.cleanPrice);
+    const pricingModeRaw = readStr(body.pricingMode);
+    const pricingMode =
+      pricingModeRaw === "cleanPrice" ? "cleanPrice" : "ytm";
 
     try {
       const data = await this.service.buildAutofill(isin, {
         quantity: quantity != null && quantity > 0 ? quantity : 1,
         settlementDate,
         pricingYield,
+        cleanPrice,
+        pricingMode,
       });
       return res.sendResponse({
         statusCode: HttpStatus.OK,
@@ -50,6 +56,47 @@ export class BondAutoUpdateAutofillController {
     } catch (err: unknown) {
       const msg =
         err instanceof Error ? err.message : "Failed to build auto-update autofill";
+      if (isAxiosError(err) && err.response?.data?.error) {
+        return res.sendResponse({
+          statusCode: HttpStatus.BAD_REQUEST,
+          success: false,
+          message: String(err.response.data.error),
+        });
+      }
+      if (msg.toLowerCase().includes("not found")) {
+        return res.sendResponse({
+          statusCode: HttpStatus.NOT_FOUND,
+          success: false,
+          message: msg,
+        });
+      }
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        success: false,
+        message: msg,
+      });
+    }
+  }
+
+  async deridataAutofill(req: Request, res: Response) {
+    const isin = req.params.isin?.toString().trim() ?? "";
+    if (!isin) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        success: false,
+        message: "Missing ISIN",
+      });
+    }
+
+    try {
+      const data = await this.service.buildDeriDataOnlyAutofill(isin);
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        responseData: data,
+      });
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error ? err.message : "Failed to fetch bond from DeriData";
       if (isAxiosError(err) && err.response?.data?.error) {
         return res.sendResponse({
           statusCode: HttpStatus.BAD_REQUEST,

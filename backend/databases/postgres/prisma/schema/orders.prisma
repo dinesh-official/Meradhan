@@ -1,3 +1,8 @@
+enum OrderType {
+    BUY
+    SELL
+}
+
 model Order {
     id Int @id @default(autoincrement())
 
@@ -14,34 +19,38 @@ model Order {
     /// `customerProfileId` at the business level — exactly one of the two is
     /// expected to be set for any Order created through the CRM
     /// assign-counterparty flow.
-    linkedRfqParticipantCode String? @db.VarChar(64)
-
+    linkedRfqParticipantCode String?   @db.VarChar(64)
+    orderType                OrderType @default(BUY)
     // Payment Details (Generic)
-    paymentProvider String? // e.g., "RAZORPAY"
-    paymentOrderId  String? @unique // Provider's Order ID (e.g., order_123)
-    paymentId       String? @unique // Provider's Payment ID (e.g., pay_123)
-    transferId      String? // Provider's Payment ID (e.g., pay_123)
-    paymentMetadata Json? // Store signature, method, vpa, etc. here
+    paymentProvider          String? // e.g., "RAZORPAY"
+    paymentOrderId           String?   @unique // Provider's Order ID (e.g., order_123)
+    paymentId                String?   @unique // Provider's Payment ID (e.g., pay_123)
+    transferId               String? // Provider's Payment ID (e.g., pay_123)
+    paymentMetadata          Json? // Store signature, method, vpa, etc. here
 
     paymentStatus PaymentStatus @default(PENDING)
     status        OrderStatus   @default(PENDING)
 
+    /// Last successfully completed settlement pipeline stage (resume cursor).
+    settlementStage OrderSettlementStage?
+
     // Financials
-    subTotal    Decimal @db.Decimal(15, 2)
-    stampDuty   Decimal @db.Decimal(15, 2)
-    totalAmount Decimal @db.Decimal(15, 2)
+    subTotal    Decimal @db.Decimal(15, 4)
+    stampDuty   Decimal @db.Decimal(15, 4)
+    totalAmount Decimal @db.Decimal(15, 4)
 
     // Bond Snapshot (Single bond per order)
     isin        String
     bondName    String
-    faceValue   Decimal @db.Decimal(15, 2)
+    faceValue   Decimal @db.Decimal(15, 4)
     quantity    Int
-    unitPrice   Decimal @db.Decimal(15, 2)
+    unitPrice   Decimal @db.Decimal(15, 4)
     bondDetails Json // Full bond details
 
     // Relations
     customerBonds CustomerBonds?
     orderLogs     OrderLogs[]
+    orderStages   OrderStage[]
 
     // General Metadata
     metadata       Json?
@@ -55,7 +64,35 @@ model Order {
     @@index([paymentId])
     @@index([orderNumber])
     @@index([linkedRfqParticipantCode])
+    @@index([settlementStage, updatedAt])
     @@map("orders")
+}
+
+/// Durable per-stage settlement tracking for resume-safe order reconciliation.
+model OrderStage {
+    id      Int   @id @default(autoincrement())
+    orderId Int
+    order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+    orderNo String
+    stage   OrderSettlementStage
+    /// 0=not started, 1=success, 2=fail, 3=waiting
+    status  Int                  @default(0)
+
+    payload      Json?
+    response     Json?
+    seq          Int
+    attemptCount Int     @default(0)
+    lastError    String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@unique([orderId, stage])
+    @@index([orderNo])
+    @@index([status, updatedAt])
+    @@index([orderId, seq])
+    @@map("order_stages")
 }
 
 model CustomerBonds {
@@ -70,9 +107,9 @@ model CustomerBonds {
     // Snapshot of bond details at purchase (decoupled from Bonds table)
     isin          String
     bondName      String
-    faceValue     Decimal  @db.Decimal(15, 2)
+    faceValue     Decimal  @db.Decimal(15, 4)
     quantity      Int
-    purchasePrice Decimal  @db.Decimal(15, 2)
+    purchasePrice Decimal  @db.Decimal(15, 4)
     purchaseDate  DateTime @default(now())
 
     metadata Json?
@@ -178,6 +215,16 @@ enum OrderStatus {
     EXPIRED
     CANCELLED
     IN_PROGRESS
+}
+
+enum OrderSettlementStage {
+    started
+    payment_done
+    add_isin
+    quote_accept
+    deal_propose
+    deal_accept
+    pg_routing
 }
 
 model DraftOrders {

@@ -1,3 +1,5 @@
+"use client";
+
 import DataInfoLabel from "@/app/(account)/_components/cards/DataInfoLabel";
 import SignInOtpInput from "@/app/(auth)/login/_components/SignInOtpInput";
 import { Button } from "@/components/ui/button";

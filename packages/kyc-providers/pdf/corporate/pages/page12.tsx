@@ -124,7 +124,7 @@ function CorporateKycPdfPage12Content({ data = {} }: { data?: CorporateKycPdfDat
         </View>
 
         <TableRow srNo="1" particular="Participant Name" value={pdfStr(data.entityName)} />
-        <TableRow srNo="2" particular="Participant Code" value={pdfStr(data.applicationNumber)} />
+        <TableRow srNo="2" particular="Participant Code" value={pdfStr(data.nclParticipantCode ?? data.nclDirectCode ?? data.applicationNumber)} />
         <TableRow srNo="3" particular="Contact Person" value={pdfStr(data.relatedPerson?.name)} />
         <TableRow srNo="4" particular="E-mail id of contact person" value={pdfStr(contact.email)} />
         <TableRow

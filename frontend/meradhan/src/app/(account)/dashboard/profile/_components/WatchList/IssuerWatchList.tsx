@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { queryClient } from "@/core/config/service-clients";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
-import { getRatingColor } from "@/global/components/Bond/CreaditRatingBadge";
+import { getRatingColor } from "@/global/components/Bond/ratingColors";
 import { formatDateCustom } from "@/global/utils/datetime.utils";
 import apiGateway from "@root/apiGateway";
 import { useMutation, useQuery } from "@tanstack/react-query";

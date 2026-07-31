@@ -1,5 +1,5 @@
 import * as argon2 from "argon2";
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
 import type { IHashingUtils } from "./hash_interface";
 
 class HashingUtils implements IHashingUtils {

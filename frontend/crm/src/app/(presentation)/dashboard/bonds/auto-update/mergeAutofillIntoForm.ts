@@ -3,7 +3,12 @@ import { parseApiDateStringToLocalDate } from "../_utils/bondCalendarDates";
 import type { BondFormData } from "../_utils/bondDetailsToFormData";
 export const AUTOFILL_MERGE_KEYS = [
   "bondName",
+  "instrumentName",
+  "description",
+  "sectorName",
   "creditRating",
+  "creditRatingInfo",
+  "ratingAgencyName",
   "allCouponDates",
   "natureOfInstrument",
   "maturityDate",
@@ -12,18 +17,12 @@ export const AUTOFILL_MERGE_KEYS = [
   "nextCouponDate",
   "recordDate",
   "recordDays",
-  "accruedInterestDays",
-  "accruedInterest",
-  "settlementAmount",
-  "principalAmount",
-  "totalConsideration",
   "dayConvention",
   "interestPaymentFrequency",
   "interestPaymentMode",
   "faceValue",
   "couponType",
   "couponRate",
-  "buyYield",
   "yield",
   "sellPrice",
   "bondType",
@@ -32,6 +31,8 @@ export const AUTOFILL_MERGE_KEYS = [
   "taxStatus",
   "isListed",
   "categories",
+  "totalIssueSize",
+  "putCallOptionDetails",
 ] as const;
 
 export type AutofillMergeKey = (typeof AUTOFILL_MERGE_KEYS)[number];
@@ -67,8 +68,23 @@ export function mergeAutofillIntoForm(
   if (include.bondName && suggested.bondName?.trim()) {
     out.bondName = suggested.bondName.trim();
   }
+  if (include.instrumentName && suggested.instrumentName?.trim()) {
+    out.instrumentName = suggested.instrumentName.trim();
+  }
+  if (include.description && suggested.description?.trim()) {
+    out.description = suggested.description.trim();
+  }
+  if (include.sectorName && suggested.sectorName?.trim()) {
+    out.sectorName = suggested.sectorName.trim();
+  }
   if (include.creditRating && suggested.creditRating?.trim()) {
     out.creditRating = suggested.creditRating.trim();
+  }
+  if (include.creditRatingInfo && suggested.creditRatingInfo?.trim()) {
+    out.creditRatingInfo = suggested.creditRatingInfo.trim();
+  }
+  if (include.ratingAgencyName && suggested.ratingAgencyName?.trim()) {
+    out.ratingAgencyName = suggested.ratingAgencyName.trim();
   }
   if (include.allCouponDates) {
     const dates = ymdListToDates(
@@ -102,42 +118,7 @@ export function mergeAutofillIntoForm(
     if (d) out.recordDate = d;
   }
   if (include.recordDays && suggested.recordDays != null && Number.isFinite(suggested.recordDays)) {
-    out.recordDays = Math.round(suggested.recordDays);
-  }
-  if (
-    include.accruedInterestDays &&
-    suggested.accruedInterestDays != null &&
-    Number.isFinite(suggested.accruedInterestDays)
-  ) {
-    out.accruedInterestDays = Math.round(suggested.accruedInterestDays);
-  }
-  if (
-    include.accruedInterest &&
-    suggested.accruedInterest != null &&
-    Number.isFinite(suggested.accruedInterest)
-  ) {
-    out.accruedInterest = Number(suggested.accruedInterest.toFixed(2));
-  }
-  if (
-    include.settlementAmount &&
-    suggested.settlementAmount != null &&
-    Number.isFinite(suggested.settlementAmount)
-  ) {
-    out.settlementAmount = Number(suggested.settlementAmount.toFixed(2));
-  }
-  if (
-    include.principalAmount &&
-    suggested.principalAmount != null &&
-    Number.isFinite(suggested.principalAmount)
-  ) {
-    out.principalAmount = Number(suggested.principalAmount.toFixed(2));
-  }
-  if (
-    include.totalConsideration &&
-    suggested.totalConsideration != null &&
-    Number.isFinite(suggested.totalConsideration)
-  ) {
-    out.totalConsideration = Number(suggested.totalConsideration.toFixed(2));
+    out.recordDays = suggested.recordDays;
   }
   if (include.dayConvention && suggested.dayConvention != null) {
     out.dayConvention = suggested.dayConvention;
@@ -157,13 +138,10 @@ export function mergeAutofillIntoForm(
     out.couponType = suggested.couponType;
   }
   if (include.couponRate && Number.isFinite(suggested.couponRate)) {
-    out.couponRate = Number(suggested.couponRate.toFixed(2));
-  }
-  if (include.buyYield && suggested.buyYield != null && Number.isFinite(suggested.buyYield)) {
-    out.buyYield = Number(suggested.buyYield.toFixed(2));
+    out.couponRate = suggested.couponRate;
   }
   if (include.yield && Number.isFinite(suggested.yield)) {
-    out.yield = Number(suggested.yield.toFixed(2));
+    out.yield = suggested.yield;
   }
   if (include.sellPrice && suggested.sellPrice != null && Number.isFinite(suggested.sellPrice)) {
     out.sellPrice = suggested.sellPrice;
@@ -187,6 +165,17 @@ export function mergeAutofillIntoForm(
   // array would silently clear all listing filters, which is never the intent.
   if (include.categories && suggested.categories && suggested.categories.length > 0) {
     out.categories = suggested.categories;
+  }
+  if (
+    include.totalIssueSize &&
+    suggested.totalIssueSize != null &&
+    Number.isFinite(suggested.totalIssueSize)
+  ) {
+    out.totalIssueSize = suggested.totalIssueSize;
+  }
+  if (include.putCallOptionDetails) {
+    out.putCallOptionDetails =
+      suggested.putCallOptionDetails?.trim() || "Put:NA Call:NA";
   }
 
   return out;

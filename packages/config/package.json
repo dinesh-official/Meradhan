@@ -1,5 +1,5 @@
 {
-  "name": "@packages/config",
+  "name": "@root/config",
   "exports": {
     "./env": "./src/env.ts",
     "./constants": "./src/constants.ts",

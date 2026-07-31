@@ -4,9 +4,14 @@ import type {
   CustomerByIdPayload,
 } from "@root/apiGateway";
 import {
+  formatBondSecurityLabel,
   formatDate,
   formatLastInterestPaymentDateDisplay,
+  formatPdfCalendarDate,
+  formatPdfPersonName,
+  formatPdfSettlementDateTime,
   getPdfDearGreeting,
+  truncateDecimals,
 } from "../helper";
 import { getInterestPaymentSchedule } from "./interestPaymentSchedule";
 import { resolveOrderPdfFinancials } from "./resolveOrderPdfFinancials";
@@ -47,6 +52,8 @@ interface OrderData {
   totalAmount?: number;
   createdAt?: string;
   price?: number;
+  /** Checkout pricing snapshot (`order.bondDetails.pricing`) — preferred over bond DB amounts. */
+  bondDetails?: { pricing?: Record<string, unknown> } | null;
   metadata?: {
     rfqNumber?: string;
     settlementOrderNumber?: string;
@@ -97,10 +104,7 @@ export default function DealPage({
   releasedOrder?: boolean;
   orderData?: OrderData;
 }) {
-  const fullname =
-    user.firstName +
-    `${user.middleName ? `${user.middleName} ` : " "}` +
-    user.lastName;
+  const fullname = formatPdfPersonName(user);
 
   const dearGreeting = getPdfDearGreeting(user, orderData);
 
@@ -124,16 +128,23 @@ export default function DealPage({
     stampDutyAmount,
     totalConsideration,
     settlementAmount,
-  } = resolveOrderPdfFinancials({ bond, orderData, qun });
+  } = resolveOrderPdfFinancials({
+    orderData,
+    qun,
+    faceValue: Number(bond.faceValue) || null,
+  });
   const faceValue = Number(bond.faceValue) || 1000;
 
-  // Format amounts
-  const formatCurrency = (amount: number, fixed = 2) => {
-    return `${amount.toLocaleString("en-IN", {
-      minimumFractionDigits: fixed,
-      maximumFractionDigits: fixed,
-    })}`;
+  const resolveYieldPct = (): string => {
+    const fromPricing = orderData?.bondDetails?.pricing?.yield;
+    const fromBond = bond.yield;
+    const raw = fromPricing ?? fromBond;
+    if (raw == null || raw === "") return "N/A";
+    const n = typeof raw === "number" ? raw : Number(String(raw).replace(/,/g, "").trim());
+    if (!Number.isFinite(n)) return "N/A";
+    return `${n.toFixed(2)}%`;
   };
+  const yieldDisplay = resolveYieldPct();
 
   // Interest payment schedule from order date to maturity based on bond frequency
   const interestSchedule = getInterestPaymentSchedule({
@@ -184,14 +195,18 @@ export default function DealPage({
     ["MeraDhan Order ID", orderId],
     ["MeraDhan Deal ID", dealId],
     ["ISIN", bond.isin],
-    ["Security Name", bond.description],
+    ["Security Name", formatBondSecurityLabel(bond)],
     [
       "Security Nature",
       ("natureOfInstrument" in bond
         ? (bond as { natureOfInstrument?: string }).natureOfInstrument
         : null) || "N.A",
     ],
-    ["Coupon Rate", `${bond.couponRate.toFixed(2) || "N/A"} % `],
+    [
+      "Coupon Rate",
+      `${bond.couponRate.toFixed(2) || "N/A"} % `,
+      `Yield: ${yieldDisplay}`,
+    ],
     [
       "Interest Payment Date",
       `${orderData?.metadata?.interestPaymentFrequencyLabel ?? interestSchedule.frequencyLabel}
@@ -226,36 +241,44 @@ ${getInterestPaymentDatesDisplay()} `,
       (() => {
         const raw = orderData?.metadata?.lastInterestPaymentDate?.trim();
         if (raw) return formatLastInterestPaymentDateDisplay(raw);
-        const d = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-        return formatDate(d.toISOString(), "DD-MMM-YYYY") + ` (${dayNames[d.getDay()]})`;
+        const bondLast =
+          bond.lastCouponDate != null && String(bond.lastCouponDate).trim() !== ""
+            ? String(bond.lastCouponDate).trim()
+            : "";
+        if (bondLast) return formatLastInterestPaymentDateDisplay(bondLast);
+        return "N/A";
       })(),
     ],
-    ["Face Value", `INR ${formatCurrency(faceValue)} `],
+    ["Face Value", `INR ${truncateDecimals(faceValue, 2, true)} `],
     [
       "Quantum",
-      `INR ${formatCurrency(faceValue * effectiveQun)} (No.of Bonds: ${effectiveQun})`,
-      `Clean Price: INR ${formatCurrency(orderData?.price || 0, 4)} `,
+      `INR ${truncateDecimals(faceValue * effectiveQun, 2, true)} (No.of Bonds: ${effectiveQun})`,
+      `Clean Price: INR ${truncateDecimals(orderData?.price || 0, 4, true)} `,
     ],
     [
       "Date",
-      `Deal Date: ${formatDate(orderDate?.toISOString(), "DD-MMM-YYYY")} `,
-      `Settlement Date: ${orderData?.metadata?.settlementDate} `,
+      `Deal Date: ${formatPdfCalendarDate(
+        orderData?.metadata?.dealDate,
+        orderDate?.toISOString(),
+      )} `,
+      `Settlement Date: ${formatPdfCalendarDate(
+        orderData?.metadata?.settlementDate,
+      )} `,
     ],
-    ["Principal Amount", `INR ${formatCurrency(totalConsideration - accruedInterest)}`],
+    ["Principal Amount", `INR ${truncateDecimals(totalConsideration - accruedInterest, 2, true)}`],
     [
       "Accrued / Ex Interest",
-      `${accruedInterest >= 0 ? `INR ${formatCurrency(accruedInterest)} (No. of Days: ${accruedInterestDays ?? orderData?.metadata?.accruedInterestDays ?? "N/A"})` : `${`INR (${formatCurrency(accruedInterest)})`.replaceAll("-", "")} (No. of Days: (${accruedInterestDays ?? orderData?.metadata?.accruedInterestDays ?? "N/A"}))`}`,
+      `${accruedInterest >= 0 ? `INR ${truncateDecimals(accruedInterest, 2, true)}` : `${`INR (${truncateDecimals(accruedInterest, 2, true)})`.replaceAll("-", "")}`}`,
     ],
-    ["Total Consideration", `INR ${formatCurrency(totalConsideration)}`],
+    ["Total Consideration", `INR ${truncateDecimals(totalConsideration, 2, true)}`],
     [
       "Stamp Duty (To be paid by Buyer)",
-      `INR ${formatCurrency(stampDutyAmount, 0)} (${numberToWords(stampDutyAmount)}) To be Retained by Exchange`,
+      `INR ${truncateDecimals(stampDutyAmount, 0, true)} (${numberToWords(stampDutyAmount)}) To be Retained by Exchange`,
     ],
-    ["Brokerage / Convenience Charges", `INR ${formatCurrency(0)} `],
+    ["Brokerage / Convenience Charges", `INR ${truncateDecimals(0, 2, true)} `],
     [
       "Settlement Amount (inclusive of Stamp Duty)",
-      `INR ${formatCurrency(settlementAmount)} (${numberToWords(settlementAmount)})`,
+      `INR ${truncateDecimals(settlementAmount, 2, true)} (${numberToWords(settlementAmount)})`,
     ],
     [
       "Order Date & Time",
@@ -280,7 +303,12 @@ ${getInterestPaymentDatesDisplay()} `,
     ["Exchange Order ID", orderData?.metadata?.rfqNumber || "N.A"],
     [
       "Settlement Date & Time",
-      orderData?.metadata?.payoutTime ? orderData?.metadata?.payoutTime : orderData?.metadata?.settlementDate ? formatDate(orderData?.metadata?.settlementDate, "DD-MMM-YYYY") : "N/A"
+      // payoutTime is optional — leave blank when NSE has not set it yet.
+      orderData?.metadata?.payoutTime?.trim()
+        ? formatPdfSettlementDateTime(orderData.metadata.payoutTime)
+        : orderData?.metadata?.settlementDateTime?.trim()
+          ? formatPdfSettlementDateTime(orderData.metadata.settlementDateTime)
+          : "",
     ],
   ]
 

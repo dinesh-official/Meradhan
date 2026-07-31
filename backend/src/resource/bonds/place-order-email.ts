@@ -1,9 +1,9 @@
 import { db } from "@core/database/database";
-import { appSchema } from "@root/schema";
+import { appSchema, getDearLineFromCustomer } from "@root/schema";
 import {
-    computeBondOrderPricingData,
-    getLastNextCouponDateBasedOnSettlementDate,
+    computeStoredBondOrderPricing,
 } from "@services/order/order-pricing-helper";
+import { calculateTotalConsideration } from "@utils/truncateDecimals";
 import type { z } from "zod";
 
 const MONTH_ABBREV = [
@@ -166,46 +166,29 @@ function amountToWords(amount: number): string {
 
 async function resolveOrderPricing(
     orderData: z.infer<typeof appSchema.bonds.orderPlaceSchema>,
-    bond: {
+    _bond: {
         faceValue: number;
         couponRate: unknown;
         sellPrice: number | null;
+        providerPrice?: number | null;
+        issuePrice?: number | null;
+        yield?: number | null;
+        maturityDate?: Date | null;
+        maturityDateIst?: Date | null;
         lastCouponDate: Date | null;
         nextCouponDate: Date | null;
         recordDays: number | null;
     },
 ) {
-    let lastCouponDateStr = bond.lastCouponDate?.toISOString() ?? null;
-    let nextCouponDateStr = bond.nextCouponDate?.toISOString() ?? null;
-    let recordDays =
-        typeof bond.recordDays === "number" && !Number.isNaN(bond.recordDays) ? bond.recordDays : 7;
-
-    if (!lastCouponDateStr || !nextCouponDateStr) {
-        const couponDates = await getLastNextCouponDateBasedOnSettlementDate(orderData.isin, new Date());
-        lastCouponDateStr = couponDates.lastCouponDate;
-        nextCouponDateStr = couponDates.nextCouponDate;
-        if (couponDates.recordDays != null && Number.isFinite(couponDates.recordDays)) {
-            recordDays = couponDates.recordDays;
-        }
-    }
-
-    if (!lastCouponDateStr || !nextCouponDateStr) {
+    try {
+        return await computeStoredBondOrderPricing({
+            isin: orderData.isin,
+            quantity: orderData.quantity,
+            settlementType: orderData.settlementType,
+        });
+    } catch {
         return null;
     }
-
-    return await computeBondOrderPricingData(
-        {
-            isin: orderData.isin,
-            faceValue: bond.faceValue,
-            quantity: orderData.quantity,
-            cleanPrice: bond.sellPrice ?? 0,
-            couponRate: Number(bond.couponRate),
-            lastCouponDate: lastCouponDateStr,
-            recordDays,
-            nextCouponDate: nextCouponDateStr,
-        },
-        { settlementType: orderData.settlementType },
-    );
 }
 
 export function placeOrderEmailCustomerSubject(
@@ -218,6 +201,10 @@ export function placeOrderEmailCustomerSubject(
 export const placeOrderEmailCustomer = async (orderData: z.infer<typeof appSchema.bonds.orderPlaceSchema>) => {
     const customer = await db.dataBase.customerProfileDataModel.findUnique({
         where: { id: orderData.customerProfileId },
+        include: {
+            panCard: { select: { gender: true } },
+            aadhaarCard: { select: { gender: true } },
+        },
     });
     if (!customer) {
         throw new Error(`Customer with ID ${orderData.customerProfileId} not found`);
@@ -230,8 +217,7 @@ export const placeOrderEmailCustomer = async (orderData: z.infer<typeof appSchem
     }
 
     const pricing = await resolveOrderPricing(orderData, bond);
-    const fullName = `${customer.firstName} ${customer.lastName}`.trim();
-    const salutation = customer.gender === "MALE" ? "Mr." : "Ms.";
+    const dearLine = getDearLineFromCustomer(customer);
     const dealDateLabel = formatDealDateForEmail(orderData.dealDate);
     const settlementDateLabel = pricing
         ? formatDealDateForEmail(pricing.settlementDate)
@@ -241,15 +227,15 @@ export const placeOrderEmailCustomer = async (orderData: z.infer<typeof appSchem
 
     const faceValue = bond.faceValue ?? orderData.faceValue;
     const quantum = faceValue * orderData.quantity;
-    const cleanPrice = pricing?.cleanPrice ?? bond.sellPrice ?? 0;
+    const cleanPrice = pricing?.cleanPrice ?? 0;
     const principalAmount = pricing?.principalAmount ?? orderData.faceValue * orderData.quantity;
     const accruedInterest = pricing?.accruedInterest ?? 0;
     const accrualDays = pricing?.noOfAccrualDays ?? 0;
     const stampDuty = pricing?.stampDuty ?? 0;
-    const totalConsideration = Number(principalAmount) + Number(accruedInterest);
+    const totalConsideration = pricing?.totalConsideration ?? calculateTotalConsideration(Number(principalAmount) ?? 0, Number(accruedInterest) ?? 0);
     const settlementAmount = pricing?.settlementAmount ?? orderData.settlementAmount;
-    const ytm = orderData.yield;
-
+    const ytm = pricing?.yield ?? orderData.yield;
+    // (No. of Days: ${accrualDays})
     const detailsBlock = [
         ["Security Name", bond.bondName],
         ["ISIN", bond.isin],
@@ -266,9 +252,9 @@ export const placeOrderEmailCustomer = async (orderData: z.infer<typeof appSchem
         ["Principal Amount", formatInrCurrency(Number(principalAmount))],
         [
             "Accrued / Ex Interest",
-            `${formatInrCurrency(Number(accruedInterest))} (No. of Days: ${accrualDays})`,
+            `${formatInrCurrency(Number(accruedInterest))}`,
         ],
-        ["Total Consideration", formatInrCurrency(totalConsideration)],
+        ["Total Consideration", formatInrCurrency(Number(totalConsideration))],
         ["Stamp Duty", formatInrNumber(Number(stampDuty), 2)],
         ["Settlement Amount", formatInrCurrency(Number(settlementAmount))],
         ["Amount in Words", amountToWords(Number(settlementAmount))],
@@ -276,7 +262,7 @@ export const placeOrderEmailCustomer = async (orderData: z.infer<typeof appSchem
         .map(([label, value]) => `${label}\n${value}`)
         .join("\n\n");
 
-    return `Dear ${salutation} ${fullName},
+    return `${dearLine}
 
 Thank you for placing your buy order on BondNest Capital India Securities Private Limited (MeraDhan). Your order request has been recorded successfully and is currently pending confirmation.
 

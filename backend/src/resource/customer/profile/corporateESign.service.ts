@@ -9,9 +9,11 @@
  *      N e-sign requests waiting".
  *   2. `getByIdForCustomer` is the per-request detail used by the 2-step
  *      sign page (`/dashboard/corporate-kyc/e-sign/[requestId]`).
- *   3. `kickOffDigio` downloads the operator-uploaded PDF from S3, hands
- *      it to Digio's `esignRequest`, persists the returned doc id /
- *      access-token id, and returns the iframe handoff payload.
+ *   3. `kickOffDigio` ensures a source PDF exists (downloads an operator-
+ *      uploaded file or calls pdf-service `POST /api/corporate/pdf` with
+ *      saved CRM payload + customer risk profile), hands it to Digio's
+ *      `esignRequest`, persists the returned doc id / access-token id, and
+ *      returns the iframe handoff payload.
  *   4. `verifyDigio` is called after the meradhan iframe success
  *      callback. It pulls the signed PDF from Digio, persists it to S3,
  *      and flips the row to COMPLETED.
@@ -24,12 +26,21 @@
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { db } from "@core/database/database";
 import { saveFileOnCloud } from "@modules/file_upload/helpers/save_file_on_cloud";
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
+import { CorporateKycRepo } from "@resource/crm/customers/corporatekyc.repo";
+import { CorporateKycService } from "@resource/crm/customers/corporatekyc.service";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import { makeFullname } from "@utils/generate/generate_username";
 import axios from "axios";
 import * as fs from "fs";
-import { DigioSDK, getPdfPageCount } from "kyc-providers";
+import {
+  DigioSDK,
+  getPdfPageCount,
+  isCorporateRiskProfileCompleteForPdf,
+  normalizeCorporateRiskProfileAnswers,
+  prepareCorporatePdfServicePayloadForEsign,
+} from "@root/kyc-providers";
+import { generateCorporatePdfFromServicePayload } from "@root/kyc-providers/pdf";
 import os from "os";
 import * as path from "path";
 import { Readable } from "stream";
@@ -105,8 +116,48 @@ async function downloadESignSourcePdf(eSignDocumentUrl: string): Promise<Buffer>
   throw new Error("S3 response body had no readable interface.");
 }
 
+/** Backend-generated e-sign PDFs (pdf-service output). These are regenerated on each sign attempt so risk profile stays current. */
+function isBackendGeneratedESignPdf(eSignDocumentUrl: string): boolean {
+  const normalized = eSignDocumentUrl.replace(/^\/+/, "").toLowerCase();
+  return normalized.includes("corporate-kyc/e-sign/generated");
+}
+
+/**
+ * Accurate page count for Digio coordinates. Prefer `pdf-parse` (handles
+ * object streams); fall back to the byte-scan helper.
+ */
+async function countCorporateESignPdfPages(buffer: Buffer): Promise<number> {
+  try {
+    type PdfParseFn = (b: Buffer) => Promise<{ numpages?: number }>;
+    // Import the library module directly — pdf-parse@1's package index runs a
+    // debug sample-PDF load when `module.parent` is falsy under bun/ESM.
+    const pdfParseSpecifier = "pdf-parse/lib/pdf-parse.js";
+    const mod = (await import(pdfParseSpecifier)) as
+      | { default?: PdfParseFn }
+      | PdfParseFn;
+    const pdfParse: PdfParseFn =
+      typeof mod === "function" ? mod : (mod.default as PdfParseFn);
+    const parsed = await pdfParse(buffer);
+    const n = Number(parsed?.numpages);
+    if (Number.isFinite(n) && n >= 1) return Math.floor(n);
+  } catch {
+    // Fall through to byte scan.
+  }
+  return Math.max(1, getPdfPageCount(buffer));
+}
+
+/**
+ * CRM operator uploads land under `corporate-kyc/e-sign/` but not `.../generated/`.
+ * Those are signed as-is; only auto-generated rows are refreshed via pdf-service.
+ */
+function shouldUseExistingESignPdf(eSignDocumentUrl: string | null | undefined): boolean {
+  if (!eSignDocumentUrl?.trim()) return false;
+  return !isBackendGeneratedESignPdf(eSignDocumentUrl);
+}
+
 export class CustomerCorporateESignService {
   private digio = new DigioSDK();
+  private corporateKycService = new CorporateKycService(new CorporateKycRepo());
 
   /**
    * Returns the PENDING corporate e-sign requests for the given customer.
@@ -138,12 +189,128 @@ export class CustomerCorporateESignService {
   }
 
   /**
+   * Ensures the request has a source PDF URL. When the CRM created the row
+   * without an upload, generates the 19-page corporate KYC PDF via the
+   * external pdf-service (`POST /api/corporate/pdf`), using CRM
+   * `lastPdfPayload` when saved (or mapping from KYC), with risk profile
+   * tier taken from the customer's questionnaire answers at sign time.
+   */
+  async ensureESignSourcePdf(userId: number, requestId: number) {
+    const request = await this.getByIdForCustomer(userId, requestId);
+    if (!request) {
+      throw new AppError("E-sign request not found.", {
+        code: "CORP_ESIGN_NOT_FOUND",
+        statusCode: HttpStatus.NOT_FOUND,
+      });
+    }
+    if (shouldUseExistingESignPdf(request.eSignDocumentUrl)) {
+      return request;
+    }
+
+    const kyc = await this.corporateKycService.getByCustomerId(userId);
+    if (!kyc) {
+      throw new AppError(
+        "Corporate KYC data is required before generating the e-sign document.",
+        {
+          code: "CORP_ESIGN_NO_KYC",
+          statusCode: HttpStatus.BAD_REQUEST,
+        },
+      );
+    }
+
+    const profile = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { id: userId },
+      select: {
+        userName: true,
+        emailAddress: true,
+        phoneNo: true,
+        riskProfile: {
+          select: { data: true },
+        },
+      },
+    });
+
+    const riskAnswers = normalizeCorporateRiskProfileAnswers(
+      profile?.riskProfile?.data ?? [],
+    );
+
+    if (!isCorporateRiskProfileCompleteForPdf(riskAnswers)) {
+      throw new AppError(
+        "Please complete all corporate risk profile questions before signing.",
+        {
+          code: "CORP_ESIGN_RISK_PROFILE_INCOMPLETE",
+          statusCode: HttpStatus.BAD_REQUEST,
+        },
+      );
+    }
+
+    const customerForPdf = profile
+      ? {
+          userName: profile.userName ?? undefined,
+          emailAddress: profile.emailAddress ?? undefined,
+          phoneNo: profile.phoneNo ?? "",
+        }
+      : null;
+
+    const payload = prepareCorporatePdfServicePayloadForEsign({
+      kyc,
+      customer: customerForPdf,
+      savedPayload:
+        kyc.lastPdfPayload != null &&
+        typeof kyc.lastPdfPayload === "object" &&
+        !Array.isArray(kyc.lastPdfPayload)
+          ? (kyc.lastPdfPayload as Record<string, unknown>)
+          : null,
+      riskAnswers,
+    });
+
+    let pdfBuffer: Buffer;
+    try {
+      pdfBuffer = await generateCorporatePdfFromServicePayload(payload, {
+        serviceUrl: env.CORPORATE_PDF_SERVICE_URL,
+      });
+    } catch (err) {
+      const detail =
+        err instanceof Error ? err.message : "PDF service request failed";
+      throw new AppError(
+        `Could not generate corporate KYC PDF: ${detail}`,
+        {
+          code: "CORP_ESIGN_PDF_GENERATION_FAILED",
+          statusCode: HttpStatus.BAD_GATEWAY,
+        },
+      );
+    }
+    const tempDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), "corp-esign-gen-"),
+    );
+    const tempFile = path.join(tempDir, `generated-${requestId}.pdf`);
+    try {
+      fs.writeFileSync(tempFile, pdfBuffer);
+      const generatedUrl = await saveFileOnCloud({
+        filePath: tempFile,
+        directory: "corporate-kyc/e-sign/generated",
+      });
+
+      return db.dataBase.corporateESignRequestModel.update({
+        where: { id: requestId },
+        data: { eSignDocumentUrl: generatedUrl },
+      });
+    } finally {
+      try {
+        fs.rmSync(tempDir, { recursive: true, force: true });
+      } catch {
+        // Best-effort temp cleanup.
+      }
+    }
+  }
+
+  /**
    * Starts a Digio signing session for the given request:
    *
    *   1. Loads the request + customer profile (with ownership guard).
    *   2. Streams the operator-uploaded PDF from S3 into a temp file.
-   *   3. Counts the PDF's pages so the `sign_coordinates` Digio expects
-   *      match the actual document (the SDK's default is KYC-PDF sized).
+   *   3. Counts the PDF's pages (via pdf-parse) and places Digio signature
+   *      coordinates on every page of that document.
    *   4. Calls Digio's `esignRequest` with the logged-in customer's
    *      email + name as the signer.
    *   5. Persists `digioDocumentId` / `digioAccessTokenId` /
@@ -156,8 +323,26 @@ export class CustomerCorporateESignService {
    * flips it to COMPLETED.
    */
   async kickOffDigio(userId: number, requestId: number) {
+    const existing = await this.getByIdForCustomer(userId, requestId);
+
+    if (!existing) {
+      throw new AppError("E-sign request not found.", {
+        code: "CORP_ESIGN_NOT_FOUND",
+        statusCode: HttpStatus.NOT_FOUND,
+      });
+    }
+    if (existing.status !== "PENDING") {
+      throw new AppError(
+        `E-sign request is already ${existing.status}. No further action needed.`,
+        {
+          code: "CORP_ESIGN_NOT_PENDING",
+          statusCode: HttpStatus.BAD_REQUEST,
+        },
+      );
+    }
+
     const [request, customer] = await Promise.all([
-      this.getByIdForCustomer(userId, requestId),
+      this.ensureESignSourcePdf(userId, requestId),
       db.dataBase.customerProfileDataModel.findUnique({
         where: { id: userId },
         select: {
@@ -169,26 +354,20 @@ export class CustomerCorporateESignService {
       }),
     ]);
 
-    if (!request) {
-      throw new AppError("E-sign request not found.", {
-        code: "CORP_ESIGN_NOT_FOUND",
-        statusCode: HttpStatus.NOT_FOUND,
-      });
-    }
-    if (request.status !== "PENDING") {
-      throw new AppError(
-        `E-sign request is already ${request.status}. No further action needed.`,
-        {
-          code: "CORP_ESIGN_NOT_PENDING",
-          statusCode: HttpStatus.BAD_REQUEST,
-        },
-      );
-    }
     if (!customer?.emailAddress) {
       throw new AppError("Customer email is required to start e-signing.", {
         code: "CORP_ESIGN_NO_EMAIL",
         statusCode: HttpStatus.BAD_REQUEST,
       });
+    }
+    if (!request.eSignDocumentUrl) {
+      throw new AppError(
+        "Source PDF is not available for this e-sign request.",
+        {
+          code: "CORP_ESIGN_PDF_MISSING",
+          statusCode: HttpStatus.BAD_REQUEST,
+        },
+      );
     }
 
     // Pull the PDF from S3 (or wherever `eSignDocumentUrl` points) and
@@ -227,15 +406,15 @@ export class CustomerCorporateESignService {
         lastName: customer.lastName ?? undefined,
       }).trim() || "Authorised Signatory";
 
-      const pageCount = Math.max(1, getPdfPageCount(pdfBuffer));
+      // Count real pages, then ask Digio to stamp every page (1..N).
+      const pageCount = await countCorporateESignPdfPages(pdfBuffer);
+      const signPages = Array.from({ length: pageCount }, (_, i) => i + 1);
 
       const digioResponse = await this.digio.esignRequest(tempFile, {
         email: customer.emailAddress,
         name: fullName,
-        // The KYC default (44/46) would over-spec sign_coordinates for
-        // the operator-uploaded corporate PDF. Pass the actual page count
-        // so Digio places a signature on every existing page.
         pageCount,
+        signPages,
         reason: "Corporate KYC e-sign",
       });
 

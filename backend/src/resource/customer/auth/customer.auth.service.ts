@@ -6,9 +6,13 @@ import {
   sendKycReminderNotStartedEmail,
 } from "@jobs/helper/send_emails";
 import { sendMobileOtp } from "@jobs/helper/send_sms";
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
 import type { appSchema } from "@root/schema";
 import { CustomerProfileManager } from "@services/customer/customer_manager.service";
+import {
+  assertCustomerAccountCanAuthenticate,
+  issueCustomerAuthToken,
+} from "@services/customer/customer_auth_token.helper";
 import { OtpVerificationService } from "@services/otp_verification.service";
 import { AppError } from "@utils/error/AppError";
 import { removeCountryCode } from "@utils/filters/convert";
@@ -50,15 +54,7 @@ export class CustomerAuthService {
       },
       include: { utility: true },
     });
-    const authToken = tokenUtils.generateToken(
-      {
-        email: user.emailAddress,
-        mobile: user.phoneNo,
-        id: userId,
-        role: "USER",
-      },
-      "1d"
-    );
+    const authToken = issueCustomerAuthToken(user);
     await this.customerProfileService.setLatestLoginTime(user.id);
     return {
       id: user.id,
@@ -189,11 +185,7 @@ export class CustomerAuthService {
       });
     }
 
-    if (user.utility.accountStatus == "SUSPENDED") {
-      throw new AppError("Your account is suspended", {
-        code: "ACCOUNT_SUSPENDED",
-      });
-    }
+    assertCustomerAccountCanAuthenticate(user.utility.accountStatus);
 
     if (this.shouldUseActivationAtLogin(user, data.identifier)) {
       if (data.sendActivationOtp === true) {
@@ -216,6 +208,8 @@ export class CustomerAuthService {
     if (!user) {
       throw new AppError("Invalid email or mobile number", { code: "USER_NOT_FOUND" });
     }
+
+    assertCustomerAccountCanAuthenticate(user.utility.accountStatus);
 
     if (!this.canActivateAtLogin(user)) {
       throw new AppError("Account activation is not available for this sign-in method.", {
@@ -243,17 +237,10 @@ export class CustomerAuthService {
               : { isEmailVerified: true },
         },
       },
+      include: { utility: true },
     });
 
-    const authToken = tokenUtils.generateToken(
-      {
-        email: updated.emailAddress,
-        mobile: updated.phoneNo,
-        id: updated.id,
-        role: "USER",
-      },
-      "1d",
-    );
+    const authToken = issueCustomerAuthToken(updated);
     await this.customerProfileService.setLatestLoginTime(updated.id);
     return {
       id: updated.id,
@@ -368,15 +355,7 @@ export class CustomerAuthService {
       };
     }
 
-    const authToken = tokenUtils.generateToken(
-      {
-        email: user.emailAddress,
-        mobile: user.phoneNo,
-        id: user.id,
-        role: "USER",
-      },
-      "1d"
-    );
+    const authToken = issueCustomerAuthToken(user);
     await this.customerProfileService.setLatestLoginTime(user.id);
     return {
       id: user.id,
@@ -482,15 +461,7 @@ export class CustomerAuthService {
       });
     }
 
-    const authToken = tokenUtils.generateToken(
-      {
-        email: user.emailAddress,
-        mobile: user.phoneNo,
-        id: user.id,
-        role: "USER",
-      },
-      "1d",
-    );
+    const authToken = issueCustomerAuthToken(user);
     await this.customerProfileService.setLatestLoginTime(user.id);
     return {
       id: user.id,
@@ -514,18 +485,12 @@ export class CustomerAuthService {
           signinWith: data.provider,
         },
       },
+      include: { utility: true },
     });
 
     if (isExist) {
-      const authToken = tokenUtils.generateToken(
-        {
-          email: isExist.emailAddress,
-          mobile: isExist.phoneNo,
-          id: isExist.id,
-          role: "USER",
-        },
-        "1d"
-      );
+      assertCustomerAccountCanAuthenticate(isExist.utility.accountStatus);
+      const authToken = issueCustomerAuthToken(isExist);
       await this.customerProfileService.setLatestLoginTime(isExist.id);
       return {
         id: isExist.id,
@@ -585,15 +550,12 @@ export class CustomerAuthService {
       console.log(e);
     }
 
-    const authToken = tokenUtils.generateToken(
-      {
-        email: response.emailAddress,
-        mobile: response.phoneNo,
-        id: response.id,
-        role: "USER",
-      },
-      "1d"
-    );
+    const createdUser = await db.dataBase.customerProfileDataModel.findUnique({
+      where: { id: response.id },
+      include: { utility: true },
+    });
+
+    const authToken = issueCustomerAuthToken(createdUser!);
     return {
       id: response.id,
       email: response.emailAddress,
@@ -816,12 +778,7 @@ export class CustomerAuthService {
         { code: "FACEBOOK_SIGNIN" }
       );
     }
-    if (user.utility.accountStatus == "SUSPENDED") {
-      throw new AppError(
-        "Your account has been suspended. Please contact support for further assistance.",
-        { code: "ACCOUNT_SUSPENDED" }
-      );
-    }
+    assertCustomerAccountCanAuthenticate(user.utility.accountStatus);
     if (identifier == "email" && !user.utility.isEmailVerified) {
       throw new AppError(
         `Your email is not verified. Please login using your verified phone number. Or, <a class='underline text-primary cursor-pointer' role='button' id='resend-email-verification'>Click here</a> to send the email verification link. Once verified, you can login using your email ID as well.`,
@@ -990,12 +947,7 @@ export class CustomerAuthService {
       );
     }
 
-    // Check if account is suspended
-    if (user.utility.accountStatus == "SUSPENDED") {
-      throw new AppError("Your account is suspended", {
-        code: "ACCOUNT_SUSPENDED",
-      });
-    }
+    assertCustomerAccountCanAuthenticate(user.utility.accountStatus);
 
     // Send email verification
     const token = tokenUtils.generateToken(

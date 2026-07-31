@@ -2,7 +2,7 @@ import axios, { type AxiosInstance } from "axios";
 import FormData from "form-data";
 import fs from "fs";
 import { v4 as uuid } from "uuid";
-import { env } from "@packages/config/env";
+import { env } from "@root/config/env";
 import type {
   DigioSignatureResponse,
   TDigioWithTemplateResponse,
@@ -141,20 +141,27 @@ export class DigioSDK {
       name,
       useKraKyc,
       pageCount,
+      signPages,
       reason,
     }: {
       email: string;
       name: string;
       useKraKyc?: boolean;
       /**
-       * Number of pages to draw the signature on. Defaults to the
-       * KYC-flow page counts (`ESIGN_PAGE_COUNT_KRA` / `ESIGN_PAGE_COUNT_DEFAULT`).
-       * For arbitrary documents (e.g. corporate KYC PDFs uploaded by a
-       * CRM operator), the caller should compute the real page count via
-       * {@link getPdfPageCount} and pass it here — otherwise Digio rejects
-       * the request when `sign_coordinates` references non-existent pages.
+       * Total PDF page count (used to validate `signPages` and as the
+       * fallback when signing every page). Defaults to the KYC-flow page
+       * counts (`ESIGN_PAGE_COUNT_KRA` / `ESIGN_PAGE_COUNT_DEFAULT`).
+       * For arbitrary documents (e.g. corporate KYC PDFs), the caller
+       * should compute the real page count via {@link getPdfPageCount}.
        */
       pageCount?: number;
+      /**
+       * Optional 1-based page numbers to place Digio signature boxes on.
+       * When omitted, signatures are placed on every page up to
+       * `pageCount`. Corporate e-sign passes `1..pageCount` after counting
+       * the real PDF so every page is signed.
+       */
+      signPages?: number[];
       /** Free-text "reason" stamped on the Digio signing screen. Defaults to KYC copy. */
       reason?: string;
     },
@@ -167,6 +174,14 @@ export class DigioSDK {
         (useKraKyc
           ? DigioSDK.ESIGN_PAGE_COUNT_KRA
           : DigioSDK.ESIGN_PAGE_COUNT_DEFAULT);
+
+      const pagesToSignRaw =
+        signPages != null && signPages.length > 0
+          ? [...new Set(signPages.filter((p) => p >= 1 && p <= signPageCount))]
+          : Array.from({ length: signPageCount }, (_, i) => i + 1);
+      // Never send Digio an empty coordinate map — fall back to last page.
+      const pagesToSign =
+        pagesToSignRaw.length > 0 ? pagesToSignRaw : [signPageCount];
 
       // Attach the PDF as binary
       // Attach the PDF file as binary stream
@@ -185,8 +200,8 @@ export class DigioSDK {
           display_on_page: "custom",
           sign_coordinates: {
             [email]: Object.fromEntries(
-              Array.from({ length: signPageCount }, (_, i) => [
-                (i + 1).toString(),
+              pagesToSign.map((page) => [
+                page.toString(),
                 [{ llx: 420, lly: 50, urx: 555, ury: 100 }],
               ]),
             ),
@@ -240,6 +255,11 @@ export class DigioSDK {
  * for arbitrary CRM-uploaded PDFs — no `pdf-lib`/`pdfkit` runtime dep.
  * Returns at least `1`, so a corrupt / non-PDF buffer doesn't blow up the
  * request: Digio will reject it cleanly with a clearer error.
+ *
+ * Note: PDFs saved with object streams (pdf-lib default) hide `/Type /Page`
+ * inside compressed streams, so this can under-count. Prefer `pdf-parse`
+ * when available, and save merged corporate packs with
+ * `useObjectStreams: false`.
  */
 export function getPdfPageCount(buffer: Buffer): number {
   // PDF objects are 8-bit clean; reading as latin1 preserves byte values
@@ -247,6 +267,24 @@ export function getPdfPageCount(buffer: Buffer): number {
   const text = buffer.toString("latin1");
   // `/Type /Page` with optional whitespace + a non-`s` lookahead so the
   // parent `/Type /Pages` (the page-tree root) isn't counted.
-  const matches = text.match(/\/Type\s*\/Page(?!s)/g);
-  return matches?.length ?? 1;
+  const typePageMatches = text.match(/\/Type\s*\/Page(?!s)/g);
+  const typePageCount = typePageMatches?.length ?? 0;
+
+  // Fallback when page dicts are compressed: take the largest `/Count N`
+  // near a `/Type /Pages` node (page-tree root usually stays readable).
+  let pagesTreeCount = 0;
+  for (const m of text.matchAll(
+    /\/Type\s*\/Pages\b[\s\S]{0,200}?\/Count\s+(\d+)/g,
+  )) {
+    const n = Number(m[1]);
+    if (Number.isFinite(n) && n > pagesTreeCount) pagesTreeCount = n;
+  }
+  for (const m of text.matchAll(
+    /\/Count\s+(\d+)[\s\S]{0,200}?\/Type\s*\/Pages\b/g,
+  )) {
+    const n = Number(m[1]);
+    if (Number.isFinite(n) && n > pagesTreeCount) pagesTreeCount = n;
+  }
+
+  return Math.max(typePageCount, pagesTreeCount, 1);
 }

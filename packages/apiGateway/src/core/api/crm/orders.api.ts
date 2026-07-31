@@ -14,10 +14,15 @@ import type {
   SendOrderPdfEmailResponse,
   GetReceiptPdfOptionsResponse,
   UpsertReceiptPdfOptionsResponse,
+  ProposeOrderPricingSnapshotResponse,
+  AcceptOrderPricingSnapshotResponse,
   GetPaymentGatewaySettingsResponse,
   GetPaymentProcessLogsResponse,
   PaymentGatewayMode,
   CrmOrderStatus,
+  VerifyOrderPaymentResponse,
+  VerifyOrderSettlementResponse,
+  ResumeOrderSettlementResponse,
 } from "./orders.response";
 import type { IApiCaller } from "../../connection/apiCaller.interface";
 
@@ -136,6 +141,58 @@ export class CrmOrdersApi {
     return data;
   }
 
+  /**
+   * Verify this order's Razorpay payment against the live Razorpay status.
+   * Backend reads the payment reference stored on the order (paymentId /
+   * paymentOrderId). By default this is a *preview* — pass `apply: true`
+   * to commit the resolved status to the database.
+   */
+  async verifyOrderPayment(
+    orderId: number,
+    options?: { apply?: boolean },
+    config?: AxiosRequestConfig
+  ): Promise<VerifyOrderPaymentResponse> {
+    const { data } = await this.apiClient.post<VerifyOrderPaymentResponse>(
+      `/crm/orders/${orderId}/verify-payment`,
+      { apply: options?.apply === true },
+      config
+    );
+    return data;
+  }
+
+  /**
+   * Verify this order's NSE settlement against the live settlement API
+   * (`/settle/order/all`). By default this is a *preview* — pass
+   * `apply: true` to commit the mapped status to the order.
+   */
+  async verifyOrderSettlement(
+    orderId: number,
+    options?: { apply?: boolean },
+    config?: AxiosRequestConfig
+  ): Promise<VerifyOrderSettlementResponse> {
+    const { data } = await this.apiClient.post<VerifyOrderSettlementResponse>(
+      `/crm/orders/${orderId}/verify-settlement`,
+      { apply: options?.apply === true },
+      config
+    );
+    return data;
+  }
+
+  /**
+   * Resume settlement from the first incomplete/failed stage (same Redis job path).
+   */
+  async resumeOrderSettlement(
+    orderId: number,
+    config?: AxiosRequestConfig
+  ): Promise<ResumeOrderSettlementResponse> {
+    const { data } = await this.apiClient.post<ResumeOrderSettlementResponse>(
+      `/crm/orders/${orderId}/resume-settlement`,
+      {},
+      config
+    );
+    return data;
+  }
+
   async getRfqByOrderNumber(
     orderNumber: string,
     config?: AxiosRequestConfig
@@ -193,23 +250,38 @@ export class CrmOrdersApi {
     orderNumber: string,
     pdfParams?: {
       accruedInterestDays?: number;
+      settlementDate?: string;
+      dealDate?: string;
       settlementNumber?: string;
       settlementDateTime?: string;
       lastInterestPaymentDate?: string;
       interestPaymentDates?: string;
       nonAmortizedBond?: boolean;
       amortizedPrincipalPaymentDates?: string;
+      /** One-shot NSE pricing for PDF (yield etc.) — not persisted. */
+      pricingSnapshot?: Record<string, unknown> | string;
+      /** Rebuild pricing from settle_order / NSE rows server-side for this PDF. */
+      useNseSavedPricing?: boolean;
     },
     config?: AxiosRequestConfig
   ): Promise<Blob> {
     const params: Record<string, string | number | undefined> = {};
     if (pdfParams?.accruedInterestDays != null) params.accruedInterestDays = pdfParams.accruedInterestDays;
+    if (pdfParams?.settlementDate != null) params.settlementDate = pdfParams.settlementDate;
+    if (pdfParams?.dealDate != null) params.dealDate = pdfParams.dealDate;
     if (pdfParams?.settlementNumber != null) params.settlementNumber = pdfParams.settlementNumber;
     if (pdfParams?.settlementDateTime != null) params.settlementDateTime = pdfParams.settlementDateTime;
     if (pdfParams?.lastInterestPaymentDate != null) params.lastInterestPaymentDate = pdfParams.lastInterestPaymentDate;
     if (pdfParams?.interestPaymentDates != null) params.interestPaymentDates = pdfParams.interestPaymentDates;
     if (pdfParams?.nonAmortizedBond !== undefined) params.nonAmortizedBond = String(pdfParams.nonAmortizedBond);
     if (pdfParams?.amortizedPrincipalPaymentDates != null) params.amortizedPrincipalPaymentDates = pdfParams.amortizedPrincipalPaymentDates;
+    if (pdfParams?.useNseSavedPricing === true) params.useNseSavedPricing = "true";
+    if (pdfParams?.pricingSnapshot != null) {
+      params.pricingSnapshot =
+        typeof pdfParams.pricingSnapshot === "string"
+          ? pdfParams.pricingSnapshot
+          : JSON.stringify(pdfParams.pricingSnapshot);
+    }
     const response = await this.apiClient.get<Blob>(
       `/crm/orders/receipt-pdf/${encodeURIComponent(orderNumber)}`,
       { ...config, params: { ...config?.params, ...params }, responseType: "blob" }
@@ -235,23 +307,36 @@ export class CrmOrdersApi {
     orderNumber: string,
     pdfParams?: {
       accruedInterestDays?: number;
+      settlementDate?: string;
+      dealDate?: string;
       settlementNumber?: string;
       settlementDateTime?: string;
       lastInterestPaymentDate?: string;
       interestPaymentDates?: string;
       nonAmortizedBond?: boolean;
       amortizedPrincipalPaymentDates?: string;
+      pricingSnapshot?: Record<string, unknown> | string;
+      useNseSavedPricing?: boolean;
     },
     config?: AxiosRequestConfig
   ): Promise<Blob> {
     const params: Record<string, string | number | undefined> = {};
     if (pdfParams?.accruedInterestDays != null) params.accruedInterestDays = pdfParams.accruedInterestDays;
+    if (pdfParams?.settlementDate != null) params.settlementDate = pdfParams.settlementDate;
+    if (pdfParams?.dealDate != null) params.dealDate = pdfParams.dealDate;
     if (pdfParams?.settlementNumber != null) params.settlementNumber = pdfParams.settlementNumber;
     if (pdfParams?.settlementDateTime != null) params.settlementDateTime = pdfParams.settlementDateTime;
     if (pdfParams?.lastInterestPaymentDate != null) params.lastInterestPaymentDate = pdfParams.lastInterestPaymentDate;
     if (pdfParams?.interestPaymentDates != null) params.interestPaymentDates = pdfParams.interestPaymentDates;
     if (pdfParams?.nonAmortizedBond !== undefined) params.nonAmortizedBond = String(pdfParams.nonAmortizedBond);
     if (pdfParams?.amortizedPrincipalPaymentDates != null) params.amortizedPrincipalPaymentDates = pdfParams.amortizedPrincipalPaymentDates;
+    if (pdfParams?.useNseSavedPricing === true) params.useNseSavedPricing = "true";
+    if (pdfParams?.pricingSnapshot != null) {
+      params.pricingSnapshot =
+        typeof pdfParams.pricingSnapshot === "string"
+          ? pdfParams.pricingSnapshot
+          : JSON.stringify(pdfParams.pricingSnapshot);
+    }
     const response = await this.apiClient.get<Blob>(
       `/crm/orders/deal-pdf/${encodeURIComponent(orderNumber)}`,
       { ...config, params: { ...config?.params, ...params }, responseType: "blob" }
@@ -281,12 +366,16 @@ export class CrmOrdersApi {
       fromEmail?: string;
       toEmail?: string;
       accruedInterestDays: number;
+      settlementDate?: string;
+      dealDate?: string;
       settlementNumber?: string;
       settlementDateTime?: string;
       lastInterestPaymentDate?: string;
       interestPaymentDates?: string;
       nonAmortizedBond?: boolean;
       amortizedPrincipalPaymentDates?: string;
+      pricingSnapshot?: Record<string, unknown> | string;
+      useNseSavedPricing?: boolean;
     },
     config?: AxiosRequestConfig
   ): Promise<SendOrderPdfEmailResponse> {
@@ -363,6 +452,31 @@ export class CrmOrdersApi {
     const { data } = await this.apiClient.put<UpsertReceiptPdfOptionsResponse>(
       `/crm/orders/receipt-pdf-options/${encodeURIComponent(orderNumber)}`,
       payload,
+      config
+    );
+    return data;
+  }
+
+  /** Propose checkout pricing from NSE rows already saved in DB (no write). */
+  async proposeOrderPricingSnapshot(
+    orderNumber: string,
+    config?: AxiosRequestConfig
+  ): Promise<ProposeOrderPricingSnapshotResponse> {
+    const { data } = await this.apiClient.get<ProposeOrderPricingSnapshotResponse>(
+      `/crm/orders/${encodeURIComponent(orderNumber)}/pricing-snapshot/propose`,
+      config
+    );
+    return data;
+  }
+
+  /** Persist proposed NSE pricing onto `orders.bondDetails.pricing`. */
+  async acceptOrderPricingSnapshot(
+    orderNumber: string,
+    config?: AxiosRequestConfig
+  ): Promise<AcceptOrderPricingSnapshotResponse> {
+    const { data } = await this.apiClient.post<AcceptOrderPricingSnapshotResponse>(
+      `/crm/orders/${encodeURIComponent(orderNumber)}/pricing-snapshot/accept`,
+      {},
       config
     );
     return data;

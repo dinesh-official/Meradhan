@@ -155,7 +155,7 @@ export function OrdersPanel({
   // Status-only filter — used by Bond Type cards so all types always appear
   const filteredByStatus = useMemo(() =>
     data.filter((r) => {
-      const wf = mapOrderWorkflowStatus(r.status, r.paymentStatus);
+      const wf = mapOrderWorkflowStatus(r.status);
       return statusFilter === "__all__" || wf === statusFilter;
     }),
   [data, statusFilter]);
@@ -180,7 +180,10 @@ export function OrdersPanel({
           <span key="q" className="tabular-nums">{r.quantity.toLocaleString("en-IN")}</span>,
           <span key="v" className="tabular-nums">{formatValueCr(Number(r.totalAmount))}</span>,
           <span key="y" className="tabular-nums text-sm">{yieldStr}</span>,
-          <OrderStatusBadge key="s" status={r.status} paymentStatus={r.paymentStatus} />,
+          <OrderStatusBadge
+            key="s"
+            status={r.status}
+          />,
           <span key="d" className="whitespace-nowrap text-xs text-muted-foreground">
             {formatOrderDate(r.createdAt)}
           </span>,
@@ -315,7 +318,7 @@ export function OrdersPanel({
   }, [filtered]);
 
   const statusOptions = useMemo(() => {
-    const set = new Set(data.map((r) => mapOrderWorkflowStatus(r.status, r.paymentStatus)));
+    const set = new Set(data.map((r) => mapOrderWorkflowStatus(r.status)));
     return [
       { value: "__all__", label: "All Statuses" },
       ...[...set].sort().map((s) => ({ value: s, label: s })),

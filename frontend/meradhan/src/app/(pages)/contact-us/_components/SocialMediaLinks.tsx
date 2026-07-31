@@ -1,17 +1,15 @@
+"use client";
+
+import { SOCIAL_MEDIA_LINKS } from "@/constants/contact";
 import Link from "next/link";
-import type { SocialMediaItem } from "@/types/contact";
 
-interface SocialMediaLinksProps {
-  socialLinks: readonly SocialMediaItem[];
-}
-
-export function SocialMediaLinks({ socialLinks }: SocialMediaLinksProps) {
+export function SocialMediaLinks() {
   return (
     <div className="container">
       <div className="flex justify-center items-center gap-5 py-10">
         <p>Social Media:</p>
         <ul className="flex gap-3 text-primary text-xl">
-          {socialLinks.map((social) => (
+          {SOCIAL_MEDIA_LINKS.map((social) => (
             <li key={social.name}>
               <Link
                 href={social.href}

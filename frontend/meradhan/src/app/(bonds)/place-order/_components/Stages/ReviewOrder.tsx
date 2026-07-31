@@ -18,7 +18,12 @@ import {
 } from "@/components/ui/select";
 import { BondInfoLabel } from "@/global/components/Bond/BondInfoLabel";
 import { dateTimeUtils, formatDateCustom } from "@/global/utils/datetime.utils";
-import { formatCleanPricePercent, formatNumberTS } from "@/global/utils/formate";
+import {
+  calculateTotalConsideration,
+  formatCleanPricePercent,
+  formatInrMoney2dp,
+  formatNumberTS,
+} from "@/global/utils/formate";
 import {
   BondDetailsResponse,
   BondOrderPricingData,
@@ -76,6 +81,17 @@ function ReviewOrder({
 
   const maxOrderQuantity = useMemo(() => getMaxOrderQuantityFromBond(bond), [bond]);
   const outOfStock = !hasCrmInventoryAvailable(bond);
+  const securityLabel = useMemo(() => {
+    const coupon = Number.isFinite(Number(bond.couponRate))
+      ? Number(bond.couponRate).toFixed(2)
+      : "N/A";
+    const name = (bond.bondName ?? "").trim() || "N/A";
+    const maturity = bond.maturityDate
+      ? formatDateCustom(bond.maturityDate)
+      : "N/A";
+    return `${coupon}% ${name} Maturity ${maturity}`;
+  }, [bond.bondName, bond.couponRate, bond.maturityDate]);
+  const creditRating = (bond.creditRating ?? "").trim() || "N/A";
 
   const suppressQuantityReloadRef = useRef(false);
   useEffect(() => {
@@ -114,15 +130,14 @@ function ReviewOrder({
   const bankAccount = customer.bankAccounts.find(
     (account) => account.isPrimary
   );
-  const totalConsideration = bond.issuePrice * quantity;
-  const stampDutyRate = 0.0001; // 0.01%
-  const stampDutyAmount = totalConsideration * stampDutyRate;
-  const otherCharges = 0;
+  const indicativeYield = orderPricing?.yield;
 
   const principalScaled = orderPricing?.principalAmount
   const accruedScaled = orderPricing?.accruedInterest || 0;
-  const stampScaled = orderPricing?.stampDuty
+  const stampScaled = orderPricing?.stampDuty ?? 0;
   const settlementAmount = orderPricing?.settlementAmount ?? 0
+  const totalConsideration =
+    orderPricing?.totalConsideration ?? calculateTotalConsideration(Number(principalScaled) ?? 0, Number(accruedScaled) ?? 0);
 
   return (
     <div className="container">
@@ -163,8 +178,8 @@ function ReviewOrder({
         >
           <p className="font-semibold">Pricing unavailable</p>
           <p className="mt-1">
-            Settlement amounts could not be loaded from the calculator. Change quantity or refresh
-            the page to retry.
+            Settlement amounts could not be loaded from saved bond pricing. Change quantity or
+            refresh the page to retry.
           </p>
         </div>
       )}
@@ -172,11 +187,9 @@ function ReviewOrder({
         <div className="grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2  md:gap-y-10 gap-y-5 gap-x-6">
           <BondInfoLabel title="Yield to Maturity">
             <p className="text-black">
-              {orderPricing?.yield != null && Number.isFinite(orderPricing.yield)
-                ? `${Number(orderPricing.yield).toFixed(2)}%`
-                : bond.yield != null && bond.yield !== ""
-                  ? `${Number(bond.yield).toFixed(2)}%`
-                  : "—"}
+              {indicativeYield != null && Number.isFinite(Number(indicativeYield))
+                ? `${Number(indicativeYield).toFixed(2)}%`
+                : "—"}
             </p>
           </BondInfoLabel>
 
@@ -355,16 +368,14 @@ function ReviewOrder({
         <div className="md:grid md:grid-cols-2 flex justify-between  gap-5 border-t pt-6 mt-6 border-gray-200">
           <div>
             <p className="text-lg text-black">Settlement Amount</p>
-            <p className="text-sm">
-              {orderPricing
-                ? "(Principal + accrued interest + stamp duty · scaled by quantity)"
-                : "(Total Consideration + Stamp Duty + Other Charges)"}
-            </p>
+            {!orderPricing && (
+              <p className="text-sm">(Pricing unavailable)</p>
+            )}
           </div>
           <div>
             <p className="text-lg text-black flex items-center gap-1 font-medium">
               <PiCurrencyInrBold aria-hidden="true" />{" "}
-              {isPricingFetching ? "…" : formatNumberTS(settlementAmount)}
+              {isPricingFetching ? "…" : formatInrMoney2dp(settlementAmount)}
             </p>
             <Dialog>
               <DialogTrigger asChild>
@@ -391,58 +402,40 @@ function ReviewOrder({
                       <div className="flex justify-between">
                         <span>Principal Amount</span>
                         <span className="font-medium">
-                          Rs. {formatNumberTS(principalScaled ?? 0)}
+                          Rs. {formatInrMoney2dp(principalScaled ?? 0)}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Accrued interest</span>
                         <span className="font-medium">
-                          Rs. {formatNumberTS(accruedScaled ?? 0)}
+                          Rs. {formatInrMoney2dp(accruedScaled ?? 0)}
                         </span>
                       </div>
 
                       <div className="flex justify-between">
-                        <span>Total Consideration w/o Stamp Duty</span>
+                        <span>Total Consideration</span>
                         <span className="font-medium">
-                          Rs. {formatNumberTS((principalScaled ?? 0) + (accruedScaled ?? 0))}
+                          Rs. {formatInrMoney2dp(totalConsideration)}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Stamp duty</span>
                         <span className="font-medium">
-                          Rs. {formatNumberTS(stampScaled ?? 0)}
+                          Rs. {formatInrMoney2dp(stampScaled)}
                         </span>
                       </div>
-                      <div className="flex justify-between ">
+                      {/* <div className="flex justify-between ">
                         <span>Accrued Interest Days</span>
                         <span>
                           {orderPricing.noOfAccrualDays}
                         </span>
-                      </div>
+                      </div> */}
                     </>
                   ) : (
-                    <>
-                      <div className="flex justify-between">
-                        <span>Unit Price</span>
-                        <span className="font-medium">Rs. {formatNumberTS(bond.issuePrice)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Total Consideration</span>
-                        <span className="font-medium">
-                          Rs. {formatNumberTS(totalConsideration)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Stamp Duty (0.01%)</span>
-                        <span className="font-medium">
-                          Rs. {formatNumberTS(stampDutyAmount)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Other Charges</span>
-                        <span className="font-medium">Rs. {formatNumberTS(otherCharges)}</span>
-                      </div>
-                    </>
+                    <p className="text-sm text-amber-900 dark:text-amber-200">
+                      Saved bond pricing is unavailable. Refresh or change quantity to
+                      retry.
+                    </p>
                   )}
                   <div className="flex justify-between">
                     <span>Quantity</span>
@@ -451,7 +444,7 @@ function ReviewOrder({
                   <div className="border-t pt-3 flex justify-between text-base">
                     <span className="font-semibold">Settlement Amount</span>
                     <span className="font-semibold">
-                      Rs. {formatNumberTS(settlementAmount)}
+                      Rs. {formatInrMoney2dp(settlementAmount)}
                     </span>
                   </div>
                 </div>
@@ -524,8 +517,8 @@ function ReviewOrder({
                       I confirm that I have read and understood all the documents
                       related to this security. I am aware that the credit rating of
                       the selected security{" "}
-                      <strong>{bond.description}</strong> is{" "}
-                      <strong>{bond.creditRating}</strong>. I am investing in this bond after
+                      <strong>{securityLabel}</strong> is{" "}
+                      <strong>{creditRating}</strong>. I am investing in this bond after
                       fully understanding the risks involved. This investment
                       decision is my own and has not been influenced by any advice,
                       suggestion, or recommendation from MeraDhan.

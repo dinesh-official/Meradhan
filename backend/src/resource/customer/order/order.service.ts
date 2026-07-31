@@ -6,7 +6,7 @@ import type {
 
   Prisma,
 } from "@databases/generated/prisma/postgres";
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
 import {
   generateDealId,
   generateOrderId,
@@ -100,19 +100,19 @@ export class OrderService {
     }
 
     return {
-      subTotal: bond.ok ? bond.pricing.principalAmount : 0,
-      stampDuty: bond.ok ? bond.pricing.stampDuty : 0,
-      totalAmount: bond.ok ? bond.pricing.settlementAmount : 0,
+      subTotal: bond.pricing.principalAmount,
+      stampDuty: bond.pricing.stampDuty,
+      totalAmount: bond.pricing.settlementAmount,
       isin: item.isin,
       bondName: bondDetails?.bondName ?? "",
       quantity: item.quantity,
-      unitPrice: bondDetails?.sellPrice ?? 0,
+      unitPrice: bond.pricing.cleanPrice,
       faceValue: bondDetails?.faceValue ?? 0,
       bondDetails: bondDetails,
-      yield: bondDetails?.yield ?? 0,
+      yield: bond.pricing.yield ?? 0,
       couponRate: bondDetails?.couponRate ?? 0,
       interestPaymentFrequency: bondDetails?.interestPaymentFrequency ?? "",
-      pricing: bond.ok ? bond.pricing : null,
+      pricing: bond.pricing,
     };
   }
 
@@ -153,6 +153,30 @@ export class OrderService {
     if (!p || typeof p !== "object" || Array.isArray(p)) return null;
     const sd = (p as Record<string, unknown>).settlementDate;
     if (typeof sd === "string" && sd.trim()) return sd.trim();
+    return null;
+  }
+
+  private dealDateFromBondDetailsSnapshot(bondDetails: unknown): string | null {
+    if (!bondDetails || typeof bondDetails !== "object" || Array.isArray(bondDetails)) {
+      return null;
+    }
+    const b = bondDetails as Record<string, unknown>;
+    const p = b.pricing;
+    if (!p || typeof p !== "object" || Array.isArray(p)) return null;
+    const dd = (p as Record<string, unknown>).dealDate;
+    if (typeof dd === "string" && dd.trim()) return dd.trim();
+    return null;
+  }
+
+  private dateFromOrderMetadata(
+    metadata: unknown,
+    key: "dealDate" | "settlementDate",
+  ): string | null {
+    if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) {
+      return null;
+    }
+    const raw = (metadata as Record<string, unknown>)[key];
+    if (typeof raw === "string" && raw.trim()) return raw.trim();
     return null;
   }
 
@@ -237,6 +261,9 @@ export class OrderService {
     const issuerName = preview.bondName || (preview.bondDetails as { instrumentName?: string }).instrumentName || "";
     const tempOrderNumber = `MD-DIR-TEMP-${crypto.randomUUID().replace(/-/g, "").slice(0, 32)}`;
 
+
+    console.log(preview.unitPrice);
+
     const order = await db.dataBase.order.create({
       data: {
         customerProfileId: customerId,
@@ -320,7 +347,10 @@ export class OrderService {
     paymentOrderId: string,
     paymentId: string,
     signature?: string,
-  ) {
+  ): Promise<
+    | { status: "success"; orderId: number }
+    | { status: "already_captured"; orderId: number }
+  > {
     const order = await db.dataBase.order.findUnique({
       where: { paymentOrderId },
     });
@@ -328,7 +358,7 @@ export class OrderService {
     if (!order)
       throw new AppError("Order not found", { code: "ORDER_NOT_FOUND" });
     if (order.paymentStatus === PaymentStatus.COMPLETED) {
-      return { message: "Already captured", id: order.id };
+      return { status: "already_captured", orderId: order.id };
     }
     // The customer payment path is for Meradhan-customer orders only;
     // participant-counterparty orders never go through Razorpay.
@@ -360,12 +390,12 @@ export class OrderService {
       }
     }
 
-    await db.dataBase.$transaction(async (tx) => {
-      await tx.order.update({
-        where: { id: order.id },
+    const captured = await db.dataBase.$transaction(async (tx) => {
+      const updated = await tx.order.updateMany({
+        where: { id: order.id, paymentStatus: PaymentStatus.PENDING },
         data: {
           paymentStatus: PaymentStatus.COMPLETED,
-          status: "APPLIED",
+          status: "IN_PROGRESS",
           paymentId,
           paymentMetadata: {
             signature: signature || null,
@@ -374,27 +404,42 @@ export class OrderService {
         },
       });
 
-      await tx.customerBonds.create({
-        data: {
-          customerProfileId,
-          orderId: order.id,
-          isin: order.isin,
-          bondName: order.bondName,
-          faceValue: order.faceValue,
-          quantity: order.quantity,
-          purchasePrice: order.unitPrice,
-          metadata: {
-            ...(order.metadata as any),
-            ...(order.bondDetails as any),
-          },
-        },
-      });
+      if (updated.count === 0) {
+        return false;
+      }
 
-      await this.crmInventoryStock.applyPaidOrderInventoryDecrement(tx, {
-        isin: order.isin,
-        quantity: order.quantity,
+      const existingBond = await tx.customerBonds.findUnique({
+        where: { orderId: order.id },
       });
+      if (!existingBond) {
+        await tx.customerBonds.create({
+          data: {
+            customerProfileId,
+            orderId: order.id,
+            isin: order.isin,
+            bondName: order.bondName,
+            faceValue: order.faceValue,
+            quantity: order.quantity,
+            purchasePrice: order.unitPrice,
+            metadata: {
+              ...(order.metadata as any),
+              ...(order.bondDetails as any),
+            },
+          },
+        });
+
+        await this.crmInventoryStock.applyPaidOrderInventoryDecrement(tx, {
+          isin: order.isin,
+          quantity: order.quantity,
+        });
+      }
+
+      return true;
     });
+
+    if (!captured) {
+      return { status: "already_captured", orderId: order.id };
+    }
 
     return { status: "success", orderId: order.id };
   }
@@ -410,8 +455,7 @@ export class OrderService {
    * - returns `cancelled: 0` (instead of throwing) when there is nothing to cancel,
    *   so the frontend dismiss handler can fire-and-forget safely.
    *
-   * Pending / cancelled payment maps to dashboard "Not completed"
-   * (see frontend `isCheckoutNotCompleted`).
+   * Pending payment on Razorpay checkout maps to dashboard "Pending" via order status.
    */
   async cancelOrder(
     customerId: number,
@@ -645,18 +689,32 @@ export class OrderService {
         stampDutyAmount: number | null;
       }
     >();
+    const rfqMasterByNumber = new Map<
+      string,
+      { dealDate: string | null; settlementDate: string | null }
+    >();
     if (rfqKeys.length > 0) {
-      const settleRows = await db.dataBase.settleOrderModel.findMany({
-        where: { orderNumber: { in: rfqKeys } },
-        select: {
-          orderNumber: true,
-          settleStatus: true,
-          modSettleDate: true,
-          modAccrInt: true,
-          modConsideration: true,
-          stampDutyAmount: true,
-        },
-      });
+      const [settleRows, rfqMasterRows] = await Promise.all([
+        db.dataBase.settleOrderModel.findMany({
+          where: { orderNumber: { in: rfqKeys } },
+          select: {
+            orderNumber: true,
+            settleStatus: true,
+            modSettleDate: true,
+            modAccrInt: true,
+            modConsideration: true,
+            stampDutyAmount: true,
+          },
+        }),
+        db.dataBase.rFQMasterISIN.findMany({
+          where: { number: { in: rfqKeys } },
+          select: {
+            number: true,
+            date: true,
+            settlementDate: true,
+          },
+        }),
+      ]);
       for (const row of settleRows) {
         if (!settleByRfq.has(row.orderNumber)) {
           settleByRfq.set(row.orderNumber, {
@@ -671,18 +729,42 @@ export class OrderService {
           });
         }
       }
+      for (const row of rfqMasterRows) {
+        if (!rfqMasterByNumber.has(row.number)) {
+          rfqMasterByNumber.set(row.number, {
+            dealDate:
+              row.date != null && String(row.date).trim() !== ""
+                ? String(row.date).trim()
+                : null,
+            settlementDate:
+              row.settlementDate != null && String(row.settlementDate).trim() !== ""
+                ? String(row.settlementDate).trim()
+                : null,
+          });
+        }
+      }
     }
 
     const data = orders.map((order) => {
       const linkKey = this.settleOrderLinkKey(order);
       const info = linkKey != null ? settleByRfq.get(linkKey) : undefined;
+      const rfqMaster = linkKey != null ? rfqMasterByNumber.get(linkKey) : undefined;
       const settleStatus = info?.settleStatus ?? null;
       const nseSettle =
         info?.modSettleDate != null && String(info.modSettleDate).trim() !== ""
           ? String(info.modSettleDate).trim()
           : null;
       const snapshotSettle = this.settlementDateFromBondDetailsSnapshot(order.bondDetails);
-      const settlementDate = nseSettle ?? snapshotSettle;
+      const metadataSettle = this.dateFromOrderMetadata(order.metadata, "settlementDate");
+      const settlementDate =
+        nseSettle ??
+        rfqMaster?.settlementDate ??
+        metadataSettle ??
+        snapshotSettle;
+
+      const snapshotDeal = this.dealDateFromBondDetailsSnapshot(order.bondDetails);
+      const metadataDeal = this.dateFromOrderMetadata(order.metadata, "dealDate");
+      const dealDate = rfqMaster?.dealDate ?? metadataDeal ?? snapshotDeal;
 
       const snapshotAccrued = this.pricingNumberFromBondDetailsSnapshot(
         order.bondDetails,
@@ -711,6 +793,7 @@ export class OrderService {
       return {
         ...order,
         settleStatus,
+        dealDate,
         settlementDate,
         accruedInterest,
         settlementAmount,

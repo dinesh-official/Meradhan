@@ -1,74 +1,24 @@
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
+import {
+  getKraStateCodeForName,
+  lookupKraStateByName,
+  normalizeKraStateName,
+} from "@root/schema";
 
 export const kraMobNo = env.KRA_MOB_NO;
-/**
- * Official NDML / CVL KRA state codes — `code` is what gets sent in
- * `APP_COR_STATE` / `APP_PER_STATE` after zero-padding to 3 digits in
- * `getKraState()`.
- *
- * `id` mirrors the row number in NDML's master list so duplicate aliases
- * for the same state (e.g. "Odisha" / "Orissa") share the same id.
- *
- * Source: NDML state-codes table provided by the integration.
- */
-const kraState = [
-  { id: 1, state: "Andaman & Nicobar Islands", code: "035" },
-  { id: 1, state: "Andaman and Nicobar Islands", code: "035" },
-  { id: 2, state: "Andhra Pradesh", code: "028" },
-  { id: 3, state: "Arunachal Pradesh", code: "012" },
-  { id: 4, state: "Assam", code: "013" },
-  { id: 5, state: "Bihar", code: "010" },
-  { id: 6, state: "Chandigarh", code: "004" },
-  { id: 7, state: "Dadra & Nagar Haveli", code: "026" },
-  { id: 7, state: "Dadra and Nagar Haveli", code: "026" },
-  { id: 8, state: "Daman & Diu", code: "025" },
-  { id: 8, state: "Daman and Diu", code: "025" },
-  { id: 9, state: "Delhi", code: "007" },
-  { id: 10, state: "Goa", code: "030" },
-  { id: 11, state: "Gujarat", code: "024" },
-  { id: 12, state: "Haryana", code: "006" },
-  { id: 13, state: "Himachal Pradesh", code: "002" },
-  { id: 14, state: "Jammu & Kashmir", code: "001" },
-  { id: 14, state: "Jammu and Kashmir", code: "001" },
-  { id: 15, state: "Karnataka", code: "029" },
-  { id: 16, state: "Kerala", code: "032" },
-  { id: 17, state: "Lakhswadeep", code: "031" },
-  { id: 17, state: "Lakshadweep", code: "031" },
-  { id: 18, state: "Madhya Pradesh", code: "023" },
-  { id: 19, state: "Maharashtra", code: "027" },
-  { id: 20, state: "Manipur", code: "014" },
-  { id: 21, state: "Meghalaya", code: "017" },
-  { id: 22, state: "Mizoram", code: "015" },
-  { id: 23, state: "Nagaland", code: "018" },
-  { id: 24, state: "Orissa", code: "021" },
-  { id: 24, state: "Odisha", code: "021" },
-  // "Pondicherry" is the legacy name (renamed to Puducherry in 2006);
-  // NDML still uses the legacy spelling in its master list.
-  { id: 25, state: "Pondicherry", code: "034" },
-  { id: 25, state: "Puducherry", code: "034" },
-  { id: 26, state: "Punjab", code: "003" },
-  { id: 27, state: "Rajasthan", code: "008" },
-  { id: 28, state: "Sikkim", code: "011" },
-  { id: 29, state: "Tamil Nadu", code: "033" },
-  { id: 30, state: "Tripura", code: "016" },
-  { id: 31, state: "Uttar Pradesh", code: "009" },
-  { id: 32, state: "West Bengal", code: "019" },
-  { id: 33, state: "Chhattisgarh", code: "022" },
-  { id: 34, state: "Uttaranchal", code: "005" },
-  { id: 34, state: "Uttarakhand", code: "005" },
-  { id: 35, state: "Jharkhand", code: "020" },
-  { id: 36, state: "Telangana", code: "037" },
-  { id: 99, state: "Others (please specify)", code: "099" },
-];
 
+/**
+ * Official NDML / CVL KRA state codes — `code` is sent in `APP_COR_STATE` /
+ * `APP_PER_STATE` after zero-padding to 3 digits.
+ */
 export const getKraState = (name: string) => {
-  const state = kraState.find((e) => {
-    return e.state.trim().toLowerCase() == name.trim().toLowerCase();
-  });
+  const normalized = normalizeKraStateName(name);
+  const state = lookupKraStateByName(normalized || name);
 
   return {
-    ...state,
-    code: state?.code || "099",
+    id: state ? 1 : undefined,
+    state: state?.name ?? (normalized || name),
+    code: state?.code ?? getKraStateCodeForName(name),
   };
 };
 

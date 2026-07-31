@@ -1,5 +1,7 @@
 import { type Request, type Response } from "express";
 import { CrmOrdersService } from "./orders.service";
+import { OrderPaymentVerifyService } from "./order_payment_verify.service";
+import { OrderSettlementVerifyService } from "./order_settlement_verify.service";
 import {
   appSchema,
   getEmailSalutationFromGender,
@@ -11,6 +13,10 @@ import { createCrmActivityLog } from "@resource/crm/auditlogs/auditlog.repo";
 import { sendBackOfficeEmail } from "@communication/email_communication";
 import { AppConfigService } from "@resource/app-config/app-config.service";
 import { db } from "@core/database/database";
+import {
+  processCbricsSettlementWebhook,
+  resolveOrderForNseSettleKey,
+} from "@services/notifications/cbrics_settlement_webhook.service";
 
 function formatProposalDate(value: string | number | Date | null | undefined) {
   if (value == null || value === "") return "—";
@@ -295,6 +301,203 @@ function buildProposalEmailTemplate(payload: {
 export class CrmOrdersController {
   private ordersService = new CrmOrdersService();
   private appConfigService = new AppConfigService();
+  private paymentVerifyService = new OrderPaymentVerifyService();
+  private settlementVerifyService = new OrderSettlementVerifyService();
+
+  /**
+   * Manually verify an order's Razorpay payment and sync `paymentStatus`
+   * from the live Razorpay status. Separate from the reconciliation cron;
+   * status update only (no settlement queueing).
+   */
+  verifyOrderPayment = async (req: Request, res: Response) => {
+    const orderId = Number(req.params.id);
+    if (!orderId || isNaN(orderId)) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid order ID",
+      });
+    }
+    try {
+      const apply = req.body?.apply === true || req.body?.apply === "true";
+      const result = await this.paymentVerifyService.verifyAndUpdate(orderId, {
+        apply,
+      });
+      const message = result.applied
+        ? "Payment status updated in database"
+        : result.willChange
+          ? "Razorpay status verified — accept to update the database"
+          : result.hasDefinitiveStatus
+            ? "Database already matches Razorpay status"
+            : "Payment is still pending on Razorpay";
+
+      await createCrmActivityLog(req, {
+        userId: Number(req.session?.id),
+        action: result.applied
+          ? "ORDER_PAYMENT_VERIFY_UPDATE"
+          : "ORDER_PAYMENT_VERIFY",
+        details: {
+          Reason: message,
+          Mode: apply ? "APPLY" : "PREVIEW",
+          OrderId: result.orderId,
+          OrderNumber: result.orderNumber,
+          RazorpayPaymentId: result.razorpayPaymentId,
+          RazorpayStatus: result.razorpayStatus,
+          CurrentPaymentStatus: result.currentPaymentStatus,
+          ProposedPaymentStatus: result.proposedPaymentStatus,
+          ProposedOrderStatus: result.proposedOrderStatus,
+          Updated: result.applied,
+        },
+        entityType: "rfq",
+        entityId: String(orderId),
+      });
+
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        message,
+        responseData: result,
+      });
+    } catch (err) {
+      if (err instanceof AppError) {
+        return res.sendResponse({
+          statusCode: err.statusCode,
+          message: err.message,
+        });
+      }
+      return res.sendResponse({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: err instanceof Error ? err.message : "Failed to verify payment",
+      });
+    }
+  };
+
+  /**
+   * Manually verify an order's NSE settlement (live `/settle/order/all`) and
+   * sync `status` from the returned `settleStatus`. Preview by default;
+   * pass `apply: true` in the body to commit.
+   */
+  verifyOrderSettlement = async (req: Request, res: Response) => {
+    const orderId = Number(req.params.id);
+    if (!orderId || isNaN(orderId)) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid order ID",
+      });
+    }
+    try {
+      const apply = req.body?.apply === true || req.body?.apply === "true";
+      const result = await this.settlementVerifyService.verifyAndUpdate(orderId, {
+        apply,
+      });
+      const message = result.applied
+        ? "Order status updated from NSE settlement"
+        : result.willChange
+          ? "NSE settlement verified — accept to update the order status"
+          : result.hasDefinitiveStatus
+            ? "Order status already matches NSE settlement"
+            : "No NSE settlement status available yet";
+
+      await createCrmActivityLog(req, {
+        userId: Number(req.session?.id),
+        action: result.applied
+          ? "ORDER_SETTLEMENT_VERIFY_UPDATE"
+          : "ORDER_SETTLEMENT_VERIFY",
+        details: {
+          Reason: message,
+          Mode: apply ? "APPLY" : "PREVIEW",
+          OrderId: result.orderId,
+          OrderNumber: result.orderNumber,
+          NseTradeNumber: result.nseTradeNumber,
+          SettleStatus: result.settleStatus,
+          SettleStatusLabel: result.settleStatusLabel,
+          CurrentOrderStatus: result.currentOrderStatus,
+          ProposedOrderStatus: result.proposedOrderStatus,
+          Updated: result.applied,
+        },
+        entityType: "rfq",
+        entityId: String(orderId),
+      });
+
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        message,
+        responseData: result,
+      });
+    } catch (err) {
+      if (err instanceof AppError) {
+        return res.sendResponse({
+          statusCode: err.statusCode,
+          message: err.message,
+        });
+      }
+      return res.sendResponse({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message:
+          err instanceof Error ? err.message : "Failed to verify settlement",
+      });
+    }
+  };
+
+  /**
+   * Enqueue resume-safe settlement from the first incomplete/failed stage.
+   */
+  resumeOrderSettlement = async (req: Request, res: Response) => {
+    const orderId = Number(req.params.id);
+    if (!orderId || isNaN(orderId)) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Invalid order ID",
+      });
+    }
+    try {
+      const result = await this.ordersService.resumeOrderSettlement(orderId);
+      await createCrmActivityLog(req, {
+        userId: Number(req.session?.id),
+        action: "ORDER_SETTLEMENT_RESUME",
+        details: {
+          Reason: result.queued
+            ? "Settlement resume job queued"
+            : result.resumeFromStage
+              ? "Settlement job already active"
+              : "Settlement pipeline already complete",
+          OrderId: result.orderId,
+          OrderNumber: result.orderNumber,
+          JobId: result.jobId,
+          Queued: result.queued,
+          ResumeFromStage: result.resumeFromStage,
+          ResumeFromSeq: result.resumeFromSeq,
+        },
+        entityType: "order",
+        entityId: String(orderId),
+      });
+
+      const stageLabel = result.resumeFromStage
+        ? String(result.resumeFromStage).replace(/_/g, " ")
+        : null;
+      const message = !result.resumeFromStage
+        ? "Settlement pipeline already complete — nothing to resume"
+        : result.queued
+          ? `Resuming settlement from step: ${stageLabel}`
+          : `Settlement already in progress (will continue from: ${stageLabel})`;
+
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        message,
+        responseData: result,
+      });
+    } catch (err) {
+      if (err instanceof AppError) {
+        return res.sendResponse({
+          statusCode: err.statusCode,
+          message: err.message,
+        });
+      }
+      return res.sendResponse({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message:
+          err instanceof Error ? err.message : "Failed to resume settlement",
+      });
+    }
+  };
 
   getPaymentGatewaySettings = async (_req: Request, res: Response) => {
     const paymentGatewayMode =
@@ -679,8 +882,11 @@ export class CrmOrdersController {
     }
   };
 
-  /** Computes “Receipt PDF options” fields from settlement date for one-click auto-fill. */
-  autofillReceiptPdfOptions = async (req: Request, res: Response) => {
+  /**
+   * Propose `bondDetails.pricing` from NSE rows already saved in DB (no write).
+   * Used when PDF download fails with PRICING_SNAPSHOT_MISSING.
+   */
+  proposeOrderPricingSnapshot = async (req: Request, res: Response) => {
     const orderNumber = req.params.orderNumber;
     if (!orderNumber || typeof orderNumber !== "string") {
       return res.sendResponse({
@@ -688,18 +894,88 @@ export class CrmOrdersController {
         message: "Order number is required",
       });
     }
-    const settlementDate = (req.body as { settlementDate?: unknown })?.settlementDate;
-    const settlementDateStr = typeof settlementDate === "string" ? settlementDate.trim() : "";
-    if (!settlementDateStr) {
+    try {
+      const data = await this.ordersService.proposeOrderPricingSnapshotFromNse(
+        orderNumber,
+      );
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        responseData: data,
+      });
+    } catch (err) {
+      if (err instanceof AppError) {
+        return res.sendResponse({
+          statusCode: err.statusCode,
+          message: err.message,
+          ...(err.code ? { code: err.code } : {}),
+        });
+      }
+      return res.sendResponse({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message:
+          err instanceof Error
+            ? err.message
+            : "Failed to propose order pricing from NSE data",
+      });
+    }
+  };
+
+  /**
+   * Accept proposed NSE pricing and persist onto `orders.bondDetails.pricing`.
+   */
+  acceptOrderPricingSnapshot = async (req: Request, res: Response) => {
+    const orderNumber = req.params.orderNumber;
+    if (!orderNumber || typeof orderNumber !== "string") {
       return res.sendResponse({
         statusCode: HttpStatus.BAD_REQUEST,
-        message: "settlementDate is required (YYYY-MM-DD)",
+        message: "Order number is required",
       });
     }
     try {
-      const data = await this.ordersService.autofillReceiptPdfOptions(orderNumber, {
-        settlementDate: settlementDateStr,
+      const data = await this.ordersService.acceptOrderPricingSnapshotFromNse(
+        orderNumber,
+      );
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        responseData: data,
+        message: "Order pricing snapshot updated from NSE saved data.",
       });
+    } catch (err) {
+      if (err instanceof AppError) {
+        return res.sendResponse({
+          statusCode: err.statusCode,
+          message: err.message,
+          ...(err.code ? { code: err.code } : {}),
+        });
+      }
+      return res.sendResponse({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message:
+          err instanceof Error
+            ? err.message
+            : "Failed to accept order pricing snapshot",
+      });
+    }
+  };
+
+  /** Computes “Receipt PDF options” fields from settlement date for one-click auto-fill. */
+  autofillReceiptPdfOptions = async (req: Request, res: Response) => {
+    const orderNumber = req.params.orderNumber;
+    console.log("orderNumber", orderNumber);
+    if (!orderNumber || typeof orderNumber !== "string") {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Order number is required",
+      });
+    }
+    // settlementDate is optional — when provided, it overrides bondDetails.pricing.settlementDate.
+    const settlementDate = (req.body as { settlementDate?: unknown })?.settlementDate;
+    const settlementDateStr = typeof settlementDate === "string" ? settlementDate.trim() : "";
+    try {
+      const data = await this.ordersService.autofillReceiptPdfOptions(orderNumber, {
+        settlementDate: settlementDateStr || null,
+      });
+      console.log("data", data);
       return res.sendResponse({
         statusCode: HttpStatus.OK,
         responseData: data,
@@ -736,10 +1012,11 @@ export class CrmOrdersController {
       res.send(buffer);
     } catch (err) {
       console.error("Order receipt PDF failed:", err);
-      if (err instanceof AppError && err.statusCode === HttpStatus.NOT_FOUND) {
+      if (err instanceof AppError) {
         return res.sendResponse({
-          statusCode: HttpStatus.NOT_FOUND,
+          statusCode: err.statusCode,
           message: err.message,
+          ...(err.code ? { code: err.code } : {}),
         });
       }
       return res.sendResponse({
@@ -766,10 +1043,11 @@ export class CrmOrdersController {
       res.send(buffer);
     } catch (err) {
       console.error("Deal sheet PDF failed:", err);
-      if (err instanceof AppError && err.statusCode === HttpStatus.NOT_FOUND) {
+      if (err instanceof AppError) {
         return res.sendResponse({
-          statusCode: HttpStatus.NOT_FOUND,
+          statusCode: err.statusCode,
           message: err.message,
+          ...(err.code ? { code: err.code } : {}),
         });
       }
       return res.sendResponse({
@@ -794,12 +1072,17 @@ export class CrmOrdersController {
       messageBody?: string;
       toEmail?: string;
       accruedInterestDays?: number | string;
+      settlementDate?: string;
+      dealDate?: string;
       settlementNumber?: string;
       settlementDateTime?: string;
       lastInterestPaymentDate?: string;
       interestPaymentDates?: string;
       nonAmortizedBond?: boolean;
       amortizedPrincipalPaymentDates?: string;
+      /** One-shot NSE pricing for PDF yield/amounts — not persisted. */
+      pricingSnapshot?: Record<string, unknown> | string;
+      useNseSavedPricing?: boolean;
     };
 
     const pdfType = body.pdfType;
@@ -833,12 +1116,22 @@ export class CrmOrdersController {
         messageBody,
         toEmail: body.toEmail,
         accruedInterestDays: body.accruedInterestDays,
+        settlementDate:
+          typeof body.settlementDate === "string" && body.settlementDate.trim() !== ""
+            ? new Date(body.settlementDate)
+            : undefined,
+        dealDate:
+          typeof body.dealDate === "string" && body.dealDate.trim() !== ""
+            ? new Date(body.dealDate)
+            : undefined,
         settlementNumber: body.settlementNumber,
         settlementDateTime: body.settlementDateTime,
         lastInterestPaymentDate: body.lastInterestPaymentDate,
         interestPaymentDates: body.interestPaymentDates,
         nonAmortizedBond: body.nonAmortizedBond,
         amortizedPrincipalPaymentDates: body.amortizedPrincipalPaymentDates,
+        pricingSnapshot: body.pricingSnapshot,
+        useNseSavedPricing: body.useNseSavedPricing === true,
       });
 
       return res.sendResponse({
@@ -920,9 +1213,9 @@ export class CrmOrdersController {
           customerProfileId != null && Number.isFinite(customerProfileId)
             ? { id: customerProfileId, isDeleted: false }
             : {
-                emailAddress: { equals: recipientEmail, mode: "insensitive" },
-                isDeleted: false,
-              },
+              emailAddress: { equals: recipientEmail, mode: "insensitive" },
+              isDeleted: false,
+            },
         select: {
           gender: true,
           panCard: { select: { gender: true } },
@@ -999,6 +1292,129 @@ export class CrmOrdersController {
       return res.sendResponse({
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: err instanceof Error ? err.message : "Failed to send proposal email",
+      });
+    }
+  };
+
+  /**
+   * Test / replay CBRICS settlement webhook deal-sheet automation for an order.
+   * POST /api/crm/orders/test-deal-sheet-webhook
+   * Body: { orderId?, reqOrderNumber?, dryRun?, send?, force?, toEmail? }
+   */
+  testDealSheetWebhook = async (req: Request, res: Response) => {
+    const body = (req.body ?? {}) as Record<string, unknown>;
+    const orderIdRaw = body.orderId;
+    const orderId =
+      orderIdRaw != null && String(orderIdRaw).trim() !== ""
+        ? Number(orderIdRaw)
+        : undefined;
+    const reqOrderNumber =
+      typeof body.reqOrderNumber === "string" ? body.reqOrderNumber.trim() : "";
+    const dryRun = body.send !== true && body.dryRun !== false;
+    const force = body.force === true;
+    const toEmail =
+      typeof body.toEmail === "string" && body.toEmail.trim()
+        ? body.toEmail.trim()
+        : undefined;
+
+    if ((!orderId || Number.isNaN(orderId)) && !reqOrderNumber) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Provide orderId or reqOrderNumber",
+      });
+    }
+
+    let order =
+      orderId != null && !Number.isNaN(orderId)
+        ? await db.dataBase.order.findUnique({
+          where: { id: orderId },
+          select: {
+            id: true,
+            orderNumber: true,
+            reqOrderNumber: true,
+            status: true,
+            metadata: true,
+            customerProfileId: true,
+          },
+        })
+        : null;
+
+    const nseKey =
+      reqOrderNumber ||
+      order?.reqOrderNumber?.trim() ||
+      null;
+
+    if (!order && nseKey) {
+      order = await resolveOrderForNseSettleKey(nseKey);
+    }
+
+    if (!order) {
+      return res.sendResponse({
+        statusCode: HttpStatus.NOT_FOUND,
+        message: "Order not found",
+      });
+    }
+
+    if (!nseKey) {
+      return res.sendResponse({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: "Order has no reqOrderNumber — pass reqOrderNumber in body",
+      });
+    }
+
+    const payload = {
+      settleOrderList: [
+        {
+          orderNumber: nseKey,
+          settleStatus: 4,
+          modSettleDate: new Date()
+            .toLocaleDateString("en-GB")
+            .replaceAll("/", "-"),
+          settlementNo:
+            typeof body.settlementNo === "string" ? body.settlementNo : "CRM-TEST",
+        },
+      ],
+    };
+
+    try {
+      const result = await processCbricsSettlementWebhook(payload, {
+        dryRun,
+        forceDealSheet: force,
+        toEmail,
+      });
+
+      await createCrmActivityLog(req, {
+        userId: Number(req.session?.id),
+        action: "TEST_DEAL_SHEET_WEBHOOK",
+        entityType: "Order",
+        entityId: String(order.id),
+        details: {
+          dryRun,
+          force,
+          nseKey,
+          result,
+        },
+      });
+
+      return res.sendResponse({
+        statusCode: HttpStatus.OK,
+        message: result.dealSheetSent
+          ? "Deal sheet email sent"
+          : result.dealSheetSkippedReason ?? "Webhook simulation completed",
+        responseData: {
+          order: {
+            id: order.id,
+            orderNumber: order.orderNumber,
+            reqOrderNumber: order.reqOrderNumber,
+          },
+          payload,
+          result,
+        },
+      });
+    } catch (err) {
+      return res.sendResponse({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: err instanceof Error ? err.message : "Deal sheet test failed",
       });
     }
   };

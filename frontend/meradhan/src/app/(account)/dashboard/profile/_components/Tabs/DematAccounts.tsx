@@ -158,7 +158,7 @@ function DematAccounts({
       {allowAddNew && (
         <>
           <div className="flex items-center mt-6">
-            {profile.bankAccounts.length < 5 && (
+            {profile.dematAccounts.length < 5 && (
               <div
                 onClick={() => {
                   setShowNew(!showNew);

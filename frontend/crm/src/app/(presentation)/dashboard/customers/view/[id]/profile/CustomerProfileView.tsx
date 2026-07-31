@@ -30,6 +30,7 @@ import {
   ProfileSectionCard,
 } from "./_components/CustomerAccountSummary";
 import { ContactChannelList } from "./_components/ContactChannelList";
+import { CustomerCrmRiskProfileSection } from "./_components/CustomerCrmRiskProfileSection";
 import { VerifyCustomerOtpDialog } from "./_components/VerifyCustomerOtpDialog";
 
 function CustomerProfileView({ profileId }: { profileId: number }) {
@@ -193,6 +194,13 @@ function CustomerProfileView({ profileId }: { profileId: number }) {
             </div>
           )}
         </ProfileSectionCard>
+
+        <CustomerCrmRiskProfileSection
+          profileId={profileId}
+          crmRiskProfile={customer.crmRiskProfile ?? null}
+          crmRiskProfileRemarks={customer.crmRiskProfileRemarks ?? null}
+          canEdit={canEditCustomer}
+        />
       </div>
 
       {canViewAllInfo && <CustomerTimelineCard customer={customer} />}

@@ -17,6 +17,8 @@ model CustomersAuthDataModel {
     twoFactorEnabled          Boolean   @default(false)
     twoFactorPasscodeHash     String?
     lastLogin                 DateTime?
+    /// Incremented on account closure to invalidate outstanding JWTs
+    tokenVersion              Int       @default(0)
 
     relationshipManager CRMUserDataModel? @relation(fields: [cRMUserDataModelId], references: [id])
     cRMUserDataModelId  Int?
@@ -95,6 +97,11 @@ model CustomerProfileDataModel {
     isAPep           Boolean @default(false)
     allowSEBITerms   Boolean @default(false)
 
+    /// CRM-only risk level (LOW / MEDIUM / HIGH). Not used by KYC questionnaire or customer app.
+    crmRiskProfile CrmRiskProfile?
+    /// CRM-only remarks for the manually assigned risk profile.
+    crmRiskProfileRemarks String?
+
     createdAt     DateTime        @default(now())
     updatedAt     DateTime        @updatedAt
     createdBy     Int?
@@ -106,6 +113,7 @@ model CustomerProfileDataModel {
 
     notificationSavedListMembers CrmNotificationSavedListMemberModel[]
     notificationRecipientLogs    NotificationRecipientLogModel[]
+    serviceRequests              UserServiceRequestModel[]
 
     @@index([emailAddress, userName])
     @@map("customers_profile_data")

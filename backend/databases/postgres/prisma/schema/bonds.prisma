@@ -10,6 +10,10 @@ model Bonds {
     faceValue         Float
 
     stampDutyPercentage Float?   @default(0)
+    /** Stamp duty amount from last DeriData autofill save (reference `pricingQuantity`). */
+    stampDuty           Float?
+    /** Quantity used when `stampDuty` was saved from autofill. */
+    pricingQuantity     Int?
     allowForPurchase    Boolean? @default(false)
 
     couponRate               Float
@@ -54,6 +58,8 @@ model Bonds {
     providerQuantity Int?
     isOngoingDeal    Boolean? @default(false)
     providerPrice    Float?
+    /// Actual accrued interest amount in ₹ (DeriData `accrued_int_bottom`), not % of par.
+    accruedInterest  Float?
     ignoreAutoUpdate Boolean? @default(false)
 
     /// Timestamps
@@ -85,21 +91,6 @@ model Bonds {
 
     /// Business days before record date for shut period (e.g. 7, 15, 20)
     recordDays Int?
-
-    /// Accrued-interest day count from calc API (`accrued_days`) at last autofill save
-    accruedInterestDays Int?
-
-    /// Accrued interest amount (₹) per unit at qty=1 from calc API (`total_ai`) at last autofill save
-    accruedInterest Float?
-
-    /// Settlement amount (₹) per unit at qty=1 from calc API (`settlement_amount`) at last autofill save
-    settlementAmount Float?
-
-    /// Principal amount (₹) per unit at qty=1 from calc API (`principal_amount`) at last autofill save
-    principalAmount Float?
-
-    /// Total consideration w/o stamp (₹) per unit at qty=1 from calc API (`total_consideration`) at last autofill save
-    totalConsideration Float?
 
     imDocumentLink String?
 

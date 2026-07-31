@@ -1,4 +1,4 @@
-import { env } from "@packages/config/env";
+import { env } from "@root/config/env";
 
 /**
  * Complete column reference for customers_profile_data and kyc_dump.

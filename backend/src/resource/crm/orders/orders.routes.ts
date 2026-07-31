@@ -172,6 +172,24 @@ router.patch(
   crmOrdersController.updateOrderStatus
 );
 
+router.post(
+  "/api/crm/orders/:id/verify-payment",
+  allowAccessMiddleware("CRM"),
+  crmOrdersController.verifyOrderPayment
+);
+
+router.post(
+  "/api/crm/orders/:id/verify-settlement",
+  allowAccessMiddleware("CRM"),
+  crmOrdersController.verifyOrderSettlement
+);
+
+router.post(
+  "/api/crm/orders/:id/resume-settlement",
+  allowAccessMiddleware("CRM"),
+  crmOrdersController.resumeOrderSettlement
+);
+
 router.get(
   "/api/crm/orders/rfq/:orderNumber",
   allowAccessMiddleware("CRM"),
@@ -215,6 +233,18 @@ router.post(
 );
 
 router.get(
+  "/api/crm/orders/:orderNumber/pricing-snapshot/propose",
+  allowAccessMiddleware("CRM"),
+  crmOrdersController.proposeOrderPricingSnapshot
+);
+
+router.post(
+  "/api/crm/orders/:orderNumber/pricing-snapshot/accept",
+  allowAccessMiddleware("CRM"),
+  crmOrdersController.acceptOrderPricingSnapshot
+);
+
+router.get(
   "/api/crm/orders/receipt-pdf/:orderNumber",
   allowAccessMiddleware("CRM"),
   crmOrdersController.getOrderReceiptPdf
@@ -236,6 +266,12 @@ router.post(
   "/api/crm/orders/send-proposal-email",
   allowAccessMiddleware("CRM"),
   crmOrdersController.sendProposalEmailToClient
+);
+
+router.post(
+  "/api/crm/orders/test-deal-sheet-webhook",
+  allowAccessMiddleware("CRM"),
+  crmOrdersController.testDealSheetWebhook
 );
 
 export default router;

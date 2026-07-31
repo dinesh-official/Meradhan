@@ -25,6 +25,7 @@ declare global {
         statusCode: HttpStatus;
         success?: boolean;
         message?: string;
+        code?: string;
         responseData?: unknown;
       }) => Response;
     }

@@ -10,6 +10,7 @@ import {
   formatOrderHistoryDate,
   formatOrderYieldPercent,
   getOrderSettlementDateInput,
+  getOrderTradeDateInput,
   getOrderAccruedInterest,
   getOrderSettlementAmount,
 } from "../_utils";
@@ -24,13 +25,11 @@ interface OrderCardProps {
 function OrderCard({ order, showSeparator = false }: OrderCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const statusDisplay = getStatusDisplay(
-    order.status,
-    order.paymentStatus,
-    order.settleStatus,
+  const statusDisplay = getStatusDisplay(order.status, order.settleStatus);
+  const tradeDate = formatOrderHistoryDate(getOrderTradeDateInput(order));
+  const settlementDate = formatOrderHistoryDate(
+    getOrderSettlementDateInput(order),
   );
-  const tradeDate = formatOrderHistoryDate(order.createdAt);
-  const settlementDate = formatOrderHistoryDate(getOrderSettlementDateInput(order));
   const faceValue = formatAmount(parseFloat(order.faceValue));
   const accruedInterest = getOrderAccruedInterest(order);
   const settlementAmount = getOrderSettlementAmount(order);
@@ -114,11 +113,7 @@ function OrderCard({ order, showSeparator = false }: OrderCardProps) {
                   <OrderPdfDownloads
                     orderNumber={order.orderNumber}
                     variant="card"
-                    showDealSheet={isOrderSettled(
-                      order.status,
-                      order.paymentStatus,
-                      order.settleStatus,
-                    )}
+                    showDealSheet={isOrderSettled(order.status)}
                   />
                 </div>
               </div>

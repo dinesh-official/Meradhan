@@ -1,7 +1,7 @@
 import type { DataBaseSchema } from "@core/database/database";
 import { db } from "@core/database/database";
 import type { appSchema } from "@root/schema";
-import { generateCorporateRatePdfBuffer } from "@packages/kyc-providers";
+import { generateCorporateRatePdfBuffer } from "@root/kyc-providers/pdf";
 import { CustomerProfileManager } from "@services/customer/customer_manager.service";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import type z from "zod";
@@ -234,13 +234,19 @@ export class CustomerProfileService extends CustomerProfileManager {
 
   async getCorporatePdf(customerId: number): Promise<{ buffer: Buffer; filename: string }> {
     const corporateKycService = new CorporateKycService(new CorporateKycRepo());
-    const kyc = await corporateKycService.getByCustomerId(customerId);
+    const [kyc, customer] = await Promise.all([
+      corporateKycService.getByCustomerId(customerId),
+      this.customerRepo.getFullCustomerProfile(customerId),
+    ]);
     if (!kyc) {
       throw new AppError("Corporate KYC not found for this customer", {
         statusCode: HttpStatus.NOT_FOUND,
       });
     }
-    const buffer = await generateCorporateRatePdfBuffer(kyc);
+    const buffer = await generateCorporateRatePdfBuffer({
+      ...kyc,
+      nclParticipantCode: customer?.userName?.trim() || undefined,
+    });
     const filename = corporateKycPdfFilename(customerId, kyc.entityName);
     return { buffer, filename };
   }

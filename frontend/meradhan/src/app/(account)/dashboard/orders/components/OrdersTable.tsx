@@ -16,6 +16,7 @@ import {
   formatOrderHistoryDate,
   formatOrderYieldPercent,
   getOrderSettlementDateInput,
+  getOrderTradeDateInput,
   getOrderAccruedInterest,
   getOrderSettlementAmount,
 } from "../_utils";
@@ -91,10 +92,9 @@ function OrdersTable({ orders, isLoading }: OrdersTableProps) {
               {orders.map((order) => {
                 const statusDisplay = getStatusDisplay(
                   order.status,
-                  order.paymentStatus,
                   order.settleStatus,
                 );
-                const tradeDate = formatOrderHistoryDate(order.createdAt);
+                const tradeDate = formatOrderHistoryDate(getOrderTradeDateInput(order));
                 const settlementDate = formatOrderHistoryDate(
                   getOrderSettlementDateInput(order),
                 );
@@ -151,11 +151,7 @@ function OrdersTable({ orders, isLoading }: OrdersTableProps) {
                         <OrderPdfDownloads
                           orderNumber={order.orderNumber}
                           variant="table"
-                          showDealSheet={isOrderSettled(
-                            order.status,
-                            order.paymentStatus,
-                            order.settleStatus,
-                          )}
+                          showDealSheet={isOrderSettled(order.status)}
                         />
                       </div>
                     </TableCell>

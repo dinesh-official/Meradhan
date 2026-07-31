@@ -20,6 +20,23 @@ enum AccountStatus {
   ACTIVE
   /// Account is temporarily or permanently suspended
   SUSPENDED
+  /// Account closed after an approved closure request (terminal for v1)
+  CLOSED
+}
+
+enum ServiceRequestType {
+  CLOSURE
+}
+
+enum ServiceRequestStatus {
+  PENDING
+  DONE
+  REJECTED
+}
+
+enum ServiceRequestReasonStatus {
+  ACTIVE
+  INACTIVE
 }
 
 /// Indicates the login/sign-in method used
@@ -72,6 +89,13 @@ enum KYCStatus {
   VERIFIED
   REJECTED
   RE_KYC
+}
+
+/// CRM-assigned investment risk profile (admin-managed; independent of KYC questionnaire)
+enum CrmRiskProfile {
+  LOW
+  MEDIUM
+  HIGH
 }
 
 // Lead Sources

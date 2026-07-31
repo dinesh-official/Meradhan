@@ -1,0 +1,35 @@
+/// Master list of selectable reasons per service request type (seeded by ops in v1)
+model UserServiceRequestReasonModel {
+    id     Int                        @id @default(autoincrement())
+    type   ServiceRequestType
+    text   String
+    status ServiceRequestReasonStatus @default(ACTIVE)
+
+    requests UserServiceRequestModel[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("user_service_request_reason")
+}
+
+/// Customer-initiated service requests (closure v1; generic type column for future types)
+model UserServiceRequestModel {
+    id           Int                  @id @default(autoincrement())
+    type         ServiceRequestType
+    reasonRemark String?              @db.VarChar(500)
+    status       ServiceRequestStatus @default(PENDING)
+    processedAt  DateTime?
+    processedBy  Int?
+
+    customerProfileDataModel   CustomerProfileDataModel        @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId                     Int
+    reason                     UserServiceRequestReasonModel? @relation(fields: [reasonId], references: [id])
+    reasonId                   Int?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([userId, type, status])
+    @@map("user_service_request")
+}

@@ -4,9 +4,13 @@ import type {
   CustomerByIdPayload,
 } from "@root/apiGateway";
 import {
+  formatBondSecurityLabel,
   formatDate,
   formatLastInterestPaymentDateDisplay,
+  formatPdfCalendarDate,
+  formatPdfPersonName,
   getPdfDearGreeting,
+  truncateDecimals,
 } from "../helper";
 import { getInterestPaymentSchedule } from "./interestPaymentSchedule";
 import { resolveOrderPdfFinancials } from "./resolveOrderPdfFinancials";
@@ -47,6 +51,8 @@ interface OrderData {
   totalAmount?: number;
   createdAt?: string;
   price?: number;
+  /** Checkout pricing snapshot (`order.bondDetails.pricing`) — preferred over bond DB amounts. */
+  bondDetails?: { pricing?: Record<string, unknown> } | null;
   metadata?: {
     rfqNumber?: string;
     settlementOrderNumber?: string;
@@ -57,6 +63,8 @@ interface OrderData {
     accruedInterest?: number;
     /** No. of days for Accrued / Ex Interest */
     accruedInterestDays?: number;
+    /** RFQ master `date` (often DD-MMM-YYYY) — preferred for Deal Date display */
+    dealDate?: string;
     settlementDate?: string;
     payoutTime?: string;
     settlementDateTime?: string;
@@ -100,10 +108,7 @@ export default function OrdersPage({
   releasedOrder?: boolean;
   orderData?: OrderData;
 }) {
-  const fullname =
-    user.firstName +
-    `${user.middleName ? `${user.middleName} ` : " "}` +
-    user.lastName;
+  const fullname = formatPdfPersonName(user);
 
   const dearGreeting = getPdfDearGreeting(user, orderData);
 
@@ -116,7 +121,7 @@ export default function OrdersPage({
     : new Date(now.getTime() + 24 * 60 * 60 * 1000); // Tomorrow
 
 
-  // Calculate financials (settle_order → bond DB → order snapshot)
+  // Financials: settle_order → order checkout pricing snapshot (never bond DB calc columns)
   const {
     effectiveQty: effectiveQun,
     principalAmount,
@@ -125,15 +130,22 @@ export default function OrdersPage({
     stampDutyAmount,
     totalConsideration,
     settlementAmount,
-  } = resolveOrderPdfFinancials({ bond, orderData, qun });
+  } = resolveOrderPdfFinancials({
+    orderData,
+    qun,
+    faceValue: Number(bond.faceValue) || null,
+  });
   const faceValue = Number(bond.faceValue) || 1000;
-  // Format amounts
-  const formatCurrency = (amount: number, fixed = 2) => {
-    return `${amount.toLocaleString("en-IN", {
-      minimumFractionDigits: fixed,
-      maximumFractionDigits: fixed,
-    })}`;
+  const resolveYieldPct = (): string => {
+    const fromPricing = orderData?.bondDetails?.pricing?.yield;
+    const fromBond = bond.yield;
+    const raw = fromPricing ?? fromBond;
+    if (raw == null || raw === "") return "N/A";
+    const n = typeof raw === "number" ? raw : Number(String(raw).replace(/,/g, "").trim());
+    if (!Number.isFinite(n)) return "N/A";
+    return `${n.toFixed(2)}%`;
   };
+  const yieldDisplay = resolveYieldPct();
 
   // Payment day from Last Interest Payment Date (e.g. "16-Feb-2026 (Monday)" → 16)
   const lastInterestRaw = orderData?.metadata?.lastInterestPaymentDate?.trim();
@@ -214,18 +226,28 @@ export default function OrdersPage({
         (!releasedOrder ? "N/A" : "XXXXXXXX")),
     ],
     ["ISIN", bond.isin],
-    ["Security Name", bond.description],
-    ["Coupon Rate", `${bond.couponRate.toFixed(2) || "N/A"}%`],
-    ["Face Value", `INR ${formatCurrency(faceValue)}`],
+    ["Security Name", formatBondSecurityLabel(bond)],
+    [
+      "Coupon Rate",
+      `${bond.couponRate.toFixed(2) || "N/A"}%`,
+      `Yield: ${yieldDisplay}`,
+    ],
+    ["Face Value", `INR ${truncateDecimals(faceValue, 2, true)}`],
     [
       "Quantum",
-      `INR ${formatCurrency(faceValue * effectiveQun)} (No. of Bonds: ${effectiveQun})`,
-      `Clean Price: INR ${formatCurrency(orderData?.price || 0, 4)}`,
+      `INR ${truncateDecimals(faceValue * effectiveQun, 2, true)} (No. of Bonds: ${effectiveQun})`,
+      `Clean Price: INR ${truncateDecimals(orderData?.price || 0, 4, true)}`,
     ],
     [
       "Date",
-      `Deal Date: ${formatDate(dealDate.toISOString(), "DD-MMM-YYYY")}`,
-      `Settlement Date: ${formatDate(new Date(orderData?.metadata?.settlementDate ?? dealDate.toISOString()).toISOString(), "DD-MMM-YYYY")}`,
+      `Deal Date: ${formatPdfCalendarDate(
+        orderData?.metadata?.dealDate,
+        dealDate.toISOString(),
+      )}`,
+      `Settlement Date: ${formatPdfCalendarDate(
+        orderData?.metadata?.settlementDate,
+        dealDate.toISOString(),
+      )}`,
     ],
     ["Name of OBPP", "BondNest Capital India Securities Private Limited"],
     [
@@ -242,9 +264,12 @@ ${getInterestPaymentDatesDisplay()}`,
       (() => {
         const raw = orderData?.metadata?.lastInterestPaymentDate?.trim();
         if (raw) return formatLastInterestPaymentDateDisplay(raw);
-        const d = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-        return formatDate(d.toISOString(), "DD-MMM-YYYY") + ` (${dayNames[d.getDay()]})`;
+        const bondLast =
+          bond.lastCouponDate != null && String(bond.lastCouponDate).trim() !== ""
+            ? String(bond.lastCouponDate).trim()
+            : "";
+        if (bondLast) return formatLastInterestPaymentDateDisplay(bondLast);
+        return "N/A";
       })(),
     ],
     [
@@ -277,22 +302,22 @@ ${getInterestPaymentDatesDisplay()}`,
         ? (bond as { putCallOptionDetails?: string }).putCallOptionDetails
         : null) || "N.A / N.A",
     ],
-    ["Principal Amount", `INR ${formatCurrency(totalConsideration - accruedInterest)}`],
+    ["Principal Amount", `INR ${truncateDecimals(principalAmount, 2, true)}`],
     [
       "Accrued / Ex Interest",
-      `${accruedInterest >= 0 ? `INR ${formatCurrency(accruedInterest)} (No. of Days: ${accruedInterestDays ?? orderData?.metadata?.accruedInterestDays ?? "N/A"})` : `${`INR (${formatCurrency(accruedInterest)})`.replaceAll("-", "")} (No. of Days: (${accruedInterestDays ?? orderData?.metadata?.accruedInterestDays ?? "N/A"}))`}`,
+      `${accruedInterest >= 0 ? `INR ${truncateDecimals(accruedInterest, 2, true)}` : `${`INR (${truncateDecimals(accruedInterest, 2, true)})`.replaceAll("-", "")}`}`,
     ],
-    ["Total Consideration", `INR ${formatCurrency(totalConsideration)}`],
+    ["Total Consideration", `INR ${truncateDecimals(totalConsideration, 2, true)}`],
     [
       "Stamp Duty (To be paid by Buyer)",
-      `INR ${formatCurrency(
-        stampDutyAmount, 0
+      `INR ${truncateDecimals(
+        stampDutyAmount, 0, true
       )} (${numberToWords(stampDutyAmount)}) To be Retained by Exchange`,
     ],
-    ["Brokerage / Convenience Charges", `INR ${formatCurrency(0)}`],
+    ["Brokerage / Convenience Charges", `INR ${truncateDecimals(0, 2, true)}`],
     [
       "Settlement Amount (inclusive of Stamp Duty)",
-      `INR ${formatCurrency(settlementAmount)} (${numberToWords(settlementAmount)})`,
+      `INR ${truncateDecimals(settlementAmount, 2, true)} (${numberToWords(settlementAmount)})`,
     ],
 
   ]

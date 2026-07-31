@@ -81,7 +81,7 @@ function OrderReceipt({
       });
       return false;
     }
-    const yieldVal = Number(bond.buyYield ?? bond.yield);
+    const yieldVal = Number(orderPricing.yield);
     if (!Number.isFinite(yieldVal) || yieldVal < 1) {
       toast({
         title: "Invalid yield",
@@ -149,14 +149,6 @@ function OrderReceipt({
     setTermsHighlight(false);
   };
 
-  const handleAcceptAllChange = (checked: boolean) => {
-    setCheckTaC(checked);
-    setCheckOrderCerTaC(checked);
-    trackCheckboxInteraction(orderId, "AGREE_ALL_TERMS", checked);
-    trackCheckboxInteraction(orderId, "TERMS_AND_CONDITIONS", checked);
-    trackCheckboxInteraction(orderId, "ORDER_CONFIRMATION", checked);
-  };
-
   const handleTermsChange = (checked: boolean) => {
     setCheckTaC(checked);
     trackCheckboxInteraction(orderId, "TERMS_AND_CONDITIONS", checked);
@@ -200,17 +192,6 @@ function OrderReceipt({
             "bg-amber-50/40 p-4 ring-2 ring-amber-400 ring-offset-2",
         )}
       >
-        <label className="flex cursor-pointer items-start gap-3 font-medium text-slate-900">
-          <Checkbox
-            checked={allTermsAccepted}
-            onCheckedChange={(checked) =>
-              handleAcceptAllChange(checked === true)
-            }
-            className="mt-0.5"
-          />
-          <span>Accept all Terms and Conditions</span>
-        </label>
-
         <label className="flex cursor-pointer items-start gap-3">
           <Checkbox
             checked={checkTaC}
@@ -300,7 +281,7 @@ function OrderReceipt({
               try {
                 const okStock = await verifyFreshInventory();
                 if (!okStock) return;
-                const yieldVal = Number(bond.buyYield ?? bond.yield);
+                const yieldVal = Number(orderPricing!.yield);
                 trackButtonClick(orderId, "PLACE_ORDER", {
                   step: 2,
                   isin: bond.isin,

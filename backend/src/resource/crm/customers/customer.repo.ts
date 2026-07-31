@@ -60,7 +60,13 @@ export class CustomerProfileRepo {
         }
         const kycData = new CustomerKycManager();
         const profile = await kycData.getUserKycFlowDataWithFormattedFullProfile(user.id);
-        return { ...profile, kycProgress: profile.kycProgress ?? kycProgress };
+        // KYC-formatted profile omits CRM-only fields — keep them from the DB row.
+        return {
+            ...profile,
+            crmRiskProfile: user.crmRiskProfile,
+            crmRiskProfileRemarks: user.crmRiskProfileRemarks,
+            kycProgress: profile.kycProgress ?? kycProgress,
+        };
     }
 
     async getCustomerByParticipantCode(participantCode: string) {

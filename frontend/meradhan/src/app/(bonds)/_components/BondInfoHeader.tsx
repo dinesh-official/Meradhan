@@ -1,3 +1,6 @@
+"use client";
+
+import { formatBondListingYield } from "@/global/utils/bondListingYield";
 import { cn } from "@/lib/utils";
 import { BondDetailResponse } from "@root/apiGateway";
 import { FaStar } from "react-icons/fa6";
@@ -10,11 +13,9 @@ function hasText(v: string | null | undefined): boolean {
   return !/^(n\/?a|none|-+|null|undefined)$/i.test(t);
 }
 
-/** Formats a yield value as "10.50%", or null when it is absent / zero / non-numeric. */
+/** Formats listing `yield` as "10.50%", or null when absent / invalid. */
 function formatYield(v: string | number | null | undefined): string | null {
-  const n = Number(v);
-  if (!Number.isFinite(n) || n === 0) return null;
-  return `${n.toFixed(2)}%`;
+  return formatBondListingYield(v);
 }
 
 function BondInfoHeader({

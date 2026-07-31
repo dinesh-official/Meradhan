@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { db } from "@core/database/database";
-import type { appSchema } from "@root/schema";
+import { getOptionalEmailTitleFromSources, type appSchema } from "@root/schema";
 import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import { sendBankAccountSubmissionReceivedEmail } from "@jobs/helper/send_emails";
@@ -24,6 +24,15 @@ function formatCaughtError(error: unknown): string {
 const KYC_VERIFIED_REQUIRED_MSG =
   "You cannot add, update, or delete bank or demat accounts until your KYC is verified.";
 
+const CUSTOMER_EMAIL_GENDER_SELECT = {
+  emailAddress: true,
+  firstName: true,
+  lastName: true,
+  gender: true,
+  panCard: { select: { gender: true } },
+  aadhaarCard: { select: { gender: true } },
+} as const;
+
 export class CustomerManageAccountsService {
   private cbricsManager = new ParticipantManager();
 
@@ -39,6 +48,24 @@ export class CustomerManageAccountsService {
         statusCode: 403,
       });
     }
+  }
+
+  /**
+   * CBRICS CRUD is high priority: fail the whole operation if NSE rejects.
+   * Do not swallow — CRM must stay in sync with the participant record.
+   */
+  private throwCbricsFailure(
+    operation: string,
+    error: unknown,
+    context: Record<string, unknown>,
+    code: string,
+  ): never {
+    const msg = formatCaughtError(error) || "CBRICS Request Failed";
+    logger.logError(`CBRICS ${operation} failed`, msg, context);
+    throw new AppError(msg, {
+      statusCode: HttpStatus.BAD_GATEWAY,
+      code,
+    });
   }
 
   async addBankAccount(
@@ -63,7 +90,24 @@ export class CustomerManageAccountsService {
       throw new AppError("Bank account already exists.");
     }
 
-    // unselct existing primary accounts
+    // CBRICS first — if NSE rejects, do not change CRM bank rows.
+    try {
+      await this.cbricsManager.addBankAccount(customerId, {
+        accountNumber: bankDetails.accountNumber,
+        ifscCode: bankDetails.ifscCode,
+        bankName: bankDetails.bankName,
+        isPrimary: bankDetails.isDefault,
+      });
+    } catch (error) {
+      this.throwCbricsFailure(
+        "add bank",
+        error,
+        { customerId },
+        "CBRICS_ADD_BANK_FAILED",
+      );
+    }
+
+    // Unset existing primary accounts only after CBRICS accepts.
     if (bankDetails.isDefault) {
       await db.dataBase.customersBankAccountModel.updateMany({
         where: {
@@ -76,7 +120,6 @@ export class CustomerManageAccountsService {
       });
     }
 
-    // Add bank account logic here (e.g., save to database)
     await db.dataBase.customerProfileDataModel.update({
       where: { id: customerId },
       data: {
@@ -96,27 +139,17 @@ export class CustomerManageAccountsService {
       },
     });
 
-    // Acknowledgement email (KYC verified users only reach this point)
+    // Acknowledgement email (non-blocking)
     try {
       const customer = await db.dataBase.customerProfileDataModel.findUnique({
         where: { id: customerId },
-        select: {
-          emailAddress: true,
-          firstName: true,
-          lastName: true,
-          gender: true,
-        },
+        select: CUSTOMER_EMAIL_GENDER_SELECT,
       });
       if (customer?.emailAddress) {
         const customerName =
           `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim() ||
           "Customer";
-        const title =
-          customer.gender === "MALE"
-            ? ("Mr." as const)
-            : customer.gender === "FEMALE"
-              ? ("Ms." as const)
-              : undefined;
+        const title = getOptionalEmailTitleFromSources(customer);
         const last4Digits = String(bankDetails.accountNumber ?? "")
           .replace(/\s+/g, "")
           .slice(-4);
@@ -128,19 +161,13 @@ export class CustomerManageAccountsService {
         });
       }
     } catch (e) {
-      console.log(e);
+      logger.logError(
+        "Failed sending bank account submission email",
+        formatCaughtError(e),
+        { customerId },
+      );
     }
 
-    try {
-      await this.cbricsManager.addBankAccount(customerId, {
-        accountNumber: bankDetails.accountNumber,
-        ifscCode: bankDetails.ifscCode,
-        bankName: bankDetails.bankName,
-        isPrimary: bankDetails.isDefault,
-      });
-    } catch (error) {
-      console.log(error);
-    }
     return true;
   }
 
@@ -163,11 +190,19 @@ export class CustomerManageAccountsService {
     if (bankAccount.isPrimary) {
       throw new AppError("Cannot remove the primary bank account.");
     }
+
+    // CBRICS first — if NSE rejects, keep CRM row.
     try {
       await this.cbricsManager.deleteBankAccount(customerId, bankAccount);
     } catch (error) {
-      console.log(error);
+      this.throwCbricsFailure(
+        "delete bank",
+        error,
+        { customerId, bankAccountId },
+        "CBRICS_DELETE_BANK_FAILED",
+      );
     }
+
     await db.dataBase.customersBankAccountModel.delete({
       where: {
         id: bankAccountId,
@@ -197,15 +232,12 @@ export class CustomerManageAccountsService {
     try {
       await this.cbricsManager.setDefaultBankAccount(customerId, bankAccount);
     } catch (error) {
-      const msg = formatCaughtError(error) || "CBRICS Request Failed";
-      logger.logError("CBRICS set default bank failed", msg, {
-        customerId,
-        bankAccountId,
-      });
-      throw new AppError(msg, {
-        statusCode: HttpStatus.BAD_GATEWAY,
-        code: "CBRICS_SET_DEFAULT_BANK_FAILED",
-      });
+      this.throwCbricsFailure(
+        "set default bank",
+        error,
+        { customerId, bankAccountId },
+        "CBRICS_SET_DEFAULT_BANK_FAILED",
+      );
     }
 
     // Unset existing primary account
@@ -233,23 +265,13 @@ export class CustomerManageAccountsService {
     try {
       const customer = await db.dataBase.customerProfileDataModel.findUnique({
         where: { id: customerId },
-        select: {
-          emailAddress: true,
-          firstName: true,
-          lastName: true,
-          gender: true,
-        },
+        select: CUSTOMER_EMAIL_GENDER_SELECT,
       });
       if (customer?.emailAddress) {
         const customerName =
           `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim() ||
           "Customer";
-        const title =
-          customer.gender === "MALE"
-            ? ("Mr." as const)
-            : customer.gender === "FEMALE"
-              ? ("Ms." as const)
-              : undefined;
+        const title = getOptionalEmailTitleFromSources(customer);
         const last4Digits = String(bankAccount.accountNumber ?? "")
           .replace(/\s+/g, "")
           .slice(-4);
@@ -297,6 +319,36 @@ export class CustomerManageAccountsService {
       throw new AppError("Demat account already exists.");
     }
 
+    // CBRICS first — if NSE rejects, do not change CRM demat rows.
+    try {
+      await this.cbricsManager.addDpAccount(customerId, {
+        clientId: dematDetails.clientId,
+        dpType: dematDetails.depositoryName,
+        dpId: dematDetails.dpId,
+        isPrimary: dematDetails.isPrimary,
+      });
+    } catch (error) {
+      this.throwCbricsFailure(
+        "add demat",
+        error,
+        { customerId, clientId: dematDetails.clientId },
+        "CBRICS_ADD_DEMAT_FAILED",
+      );
+    }
+
+    // Keep a single primary — mirror bank add behavior.
+    if (dematDetails.isPrimary) {
+      await db.dataBase.customersDematAccountModel.updateMany({
+        where: {
+          customerProfileDataModelId: customerId,
+          isPrimary: true,
+        },
+        data: {
+          isPrimary: false,
+        },
+      });
+    }
+
     await db.dataBase.customerProfileDataModel.update({
       where: { id: customerId },
       data: {
@@ -319,27 +371,17 @@ export class CustomerManageAccountsService {
       },
     });
 
-    // Acknowledgement email (KYC verified users only reach this point)
+    // Acknowledgement email (non-blocking)
     try {
       const customer = await db.dataBase.customerProfileDataModel.findUnique({
         where: { id: customerId },
-        select: {
-          emailAddress: true,
-          firstName: true,
-          lastName: true,
-          gender: true,
-        },
+        select: CUSTOMER_EMAIL_GENDER_SELECT,
       });
       if (customer?.emailAddress) {
         const customerName =
           `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim() ||
           "Customer";
-        const title =
-          customer.gender === "MALE"
-            ? ("Mr." as const)
-            : customer.gender === "FEMALE"
-              ? ("Ms." as const)
-              : undefined;
+        const title = getOptionalEmailTitleFromSources(customer);
         const last4Digits = String(dematDetails.clientId ?? "")
           .replace(/\s+/g, "")
           .slice(-4);
@@ -356,19 +398,13 @@ export class CustomerManageAccountsService {
         });
       }
     } catch (e) {
-      console.log(e);
+      logger.logError(
+        "Failed sending demat account submission email",
+        formatCaughtError(e),
+        { customerId },
+      );
     }
 
-    try {
-      await this.cbricsManager.addDpAccount(customerId, {
-        clientId: dematDetails.clientId,
-        dpType: dematDetails.depositoryName,
-        dpId: dematDetails.dpId,
-        isPrimary: dematDetails.isPrimary,
-      });
-    } catch (error) {
-      console.log(error);
-    }
     return true;
   }
 
@@ -394,11 +430,16 @@ export class CustomerManageAccountsService {
       throw new AppError("Cannot remove the primary demat account.");
     }
 
-    // Delete demat account from nse system here if needed
+    // CBRICS first — if NSE rejects, keep CRM row.
     try {
       await this.cbricsManager.deleteDpAccount(customerId, dematAccount);
     } catch (error) {
-      console.log(error);
+      this.throwCbricsFailure(
+        "delete demat",
+        error,
+        { customerId, dematAccountId },
+        "CBRICS_DELETE_DEMAT_FAILED",
+      );
     }
 
     await db.dataBase.customersDematAccountModel.delete({
@@ -438,15 +479,12 @@ export class CustomerManageAccountsService {
     try {
       await this.cbricsManager.setDefaultDpAccount(customerId, dematAccount);
     } catch (error) {
-      const msg = formatCaughtError(error) || "CBRICS Request Failed";
-      logger.logError("CBRICS set default demat failed", msg, {
-        customerId,
-        dematAccountId,
-      });
-      throw new AppError(msg, {
-        statusCode: HttpStatus.BAD_GATEWAY,
-        code: "CBRICS_SET_DEFAULT_DEMAT_FAILED",
-      });
+      this.throwCbricsFailure(
+        "set default demat",
+        error,
+        { customerId, dematAccountId },
+        "CBRICS_SET_DEFAULT_DEMAT_FAILED",
+      );
     }
 
     // Unset existing primary account
@@ -474,23 +512,13 @@ export class CustomerManageAccountsService {
     try {
       const customer = await db.dataBase.customerProfileDataModel.findUnique({
         where: { id: customerId },
-        select: {
-          emailAddress: true,
-          firstName: true,
-          lastName: true,
-          gender: true,
-        },
+        select: CUSTOMER_EMAIL_GENDER_SELECT,
       });
       if (customer?.emailAddress) {
         const customerName =
           `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim() ||
           "Customer";
-        const title =
-          customer.gender === "MALE"
-            ? ("Mr." as const)
-            : customer.gender === "FEMALE"
-              ? ("Ms." as const)
-              : undefined;
+        const title = getOptionalEmailTitleFromSources(customer);
         const last4Digits = String(dematAccount.clientId ?? "")
           .replace(/\s+/g, "")
           .slice(-4);

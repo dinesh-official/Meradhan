@@ -1,6 +1,7 @@
 import apiGateway from "@root/apiGateway";
 import AccountViewPort from "../../_components/wrapper/AccountViewPort";
 import ProfilePage from "./ProfilePage";
+import AccountClosureSection from "./_components/AccountClosureSection";
 import apiServerCaller from "@/core/connection/apiServerCaller";
 import { cookies } from "next/headers";
 import { getAccountPagesMetaData } from "@/graphql/getAccountPagesMetaData";
@@ -11,7 +12,12 @@ export const generateMetadata = async () => {
   return await getAccountPagesMetaData("dashboard/profile");
 };
 
-async function page() {
+async function page({
+  searchParams,
+}: {
+  searchParams: Promise<{ allowDelete?: string }>;
+}) {
+
   const cookie = await cookies();
   const customerApi = new apiGateway.crm.customer.CrmCustomerApi(
     apiServerCaller
@@ -31,6 +37,7 @@ async function page() {
       }
     >
       <ProfilePage profileData={userData.data.responseData} />
+      <AccountClosureSection />
     </AccountViewPort>
   );
 }

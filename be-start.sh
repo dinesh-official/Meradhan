@@ -1,22 +1,22 @@
 #!/bin/sh
 
-echo " => Running Prisma DB Push..."
+echo "=> Running Prisma DB Push..."
 
 cd /app/backend/databases/postgres || exit 1
 
-# Capture output
 OUTPUT=$(bunx prisma db push 2>&1)
+STATUS=$?
 
-# Print output
 echo "$OUTPUT"
 
-# Optional: fail if command failed
-if [ $? -ne 0 ]; then
-  echo " => Prisma DB Push failed"
-  exit 1
+if [ $STATUS -ne 0 ]; then
+  echo "=> Prisma DB Push failed, continuing startup..."
+else
+  echo "=> Prisma DB Push completed successfully."
 fi
 
-echo " => Starting application..."
+echo "=> Starting application..."
 
 cd ../.. || exit 1
-bun start
+
+exec bun start

@@ -62,7 +62,9 @@ export class ExpressServer implements IServer, IExpressRoute {
     const isProduction = process.env.NODE_ENV === "production";
     const isDevelopment = !isProduction; // Treat anything not production as development
 
-    const allowedOrigins = [
+
+    const allowedOriginsEnv = process.env.ALLOW_ORIGINS?.split(",") || [];
+    const allowedOrigins = Array.from(new Set([
       "https://meradhan.co",
       "https://www.meradhan.co",
       "https://crm.meradhan.co",
@@ -87,7 +89,8 @@ export class ExpressServer implements IServer, IExpressRoute {
           "http://127.0.0.1:4000",
         ]
         : []),
-    ];
+      ...allowedOriginsEnv,
+    ]));
 
     this.app.use(
       cors({

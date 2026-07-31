@@ -1,5 +1,5 @@
 "use client";
-import { getRatingColor } from "@/global/components/Bond/CreaditRatingBadge";
+import { getRatingColor } from "@/global/components/Bond/ratingColors";
 import { CMS_URL, HOST_URL } from "@/global/constants/domains";
 import { SharePopupTrigger } from "@/global/module/share/SharePopupView";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";

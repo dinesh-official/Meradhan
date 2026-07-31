@@ -1,6 +1,7 @@
 import type { CreateCorporateKycPayload } from "@root/schema";
 import { db } from "@core/database/database";
 import { AppError, HttpStatus } from "@utils/error/AppError";
+import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 import { CorporateKycRepo } from "./corporatekyc.repo";
 
 function parseDate(s: string | undefined): Date | undefined {
@@ -57,6 +58,7 @@ function dematAccountsStructuralSignature(
   rows: ReadonlyArray<{
     depository?: string | null;
     accountType?: string | null;
+    dpName?: string | null;
     dpId?: string | null;
     clientId?: string | null;
     accountHolderName?: string | null;
@@ -68,6 +70,7 @@ function dematAccountsStructuralSignature(
     .map((d) =>
       [
         norm(d.depository),
+        norm(d.dpName),
         norm(d.dpId),
         norm(d.clientId),
         norm(d.accountType),
@@ -300,6 +303,7 @@ function mapPayloadToPrismaCreate(customerId: number, payload: CreateCorporateKy
       create: (payload.dematAccounts ?? []).map((d) => ({
         depository: d.depository,
         accountType: d.accountType ?? undefined,
+        dpName: d.dpName?.trim() ? d.dpName.trim() : undefined,
         dpId: d.dpId,
         clientId: d.clientId,
         accountHolderName: d.accountHolderName,
@@ -388,7 +392,33 @@ function mapPayloadToPrismaCreate(customerId: number, payload: CreateCorporateKy
 }
 
 export class CorporateKycService {
+  private cbricsManager = new ParticipantManager();
+
   constructor(private repo: CorporateKycRepo) {}
+
+  /**
+   * Best-effort: push newly saved corporate KYC banks to CBRICS when a
+   * participant already exists. Never fails the KYC save itself.
+   */
+  private async syncBanksToCbricsBestEffort(customerId: number): Promise<void> {
+    try {
+      const result =
+        await this.cbricsManager.syncCorporateKycBanksToCbrics(customerId);
+      if (result.errors.length > 0) {
+        console.error(
+          "[CorporateKycService] CBRICS bank sync errors",
+          customerId,
+          result.errors,
+        );
+      }
+    } catch (err) {
+      console.error(
+        "[CorporateKycService] CBRICS bank sync failed",
+        customerId,
+        err,
+      );
+    }
+  }
 
   async getByCustomerId(customerId: number) {
     await this.repo.ensureCustomerExists(customerId);
@@ -523,6 +553,7 @@ export class CorporateKycService {
                 create: (payload.dematAccounts ?? []).map((d) => ({
                   depository: d.depository,
                   accountType: d.accountType ?? undefined,
+                  dpName: d.dpName?.trim() ? d.dpName.trim() : undefined,
                   dpId: d.dpId,
                   clientId: d.clientId,
                   accountHolderName: d.accountHolderName,
@@ -648,6 +679,8 @@ export class CorporateKycService {
         return this.mapToResponse(refreshed ?? updated);
       }
 
+      // Banks were wiped+recreated — push any missing ones to CBRICS.
+      await this.syncBanksToCbricsBestEffort(customerId);
       return this.mapToResponse(updated);
     }
 
@@ -664,6 +697,7 @@ export class CorporateKycService {
         authorisedSignatories: true,
       },
     });
+    await this.syncBanksToCbricsBestEffort(customerId);
     return this.mapToResponse(created);
   }
 
@@ -748,6 +782,7 @@ export class CorporateKycService {
         id: d.id,
         depository: d.depository,
         accountType: d.accountType ?? undefined,
+        dpName: d.dpName ?? undefined,
         dpId: d.dpId,
         clientId: d.clientId,
         accountHolderName: d.accountHolderName,

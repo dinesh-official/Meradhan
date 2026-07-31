@@ -10,6 +10,64 @@ export const CRM_ORDER_STATUS_VALUES = [
 
 export type CrmOrderStatus = (typeof CRM_ORDER_STATUS_VALUES)[number];
 
+/** Normalized order snapshot from backend `getOrderInfo` / `getOrdersInfo`. */
+export interface CrmOrderInfo {
+  orderDocId: string;
+  orderId: string;
+  dealId: string;
+  orderStatus: string;
+  bond: {
+    name: string;
+    description: string;
+    faceValue: number;
+    isin: string;
+    couponRate: number;
+    couponFrequency: string;
+    allotmentDate: string;
+    maturityDate: string;
+    secured: string;
+    putCall: string;
+  };
+  customer: {
+    name: string;
+    email: string;
+    phone: string;
+    userId: string;
+    userName: string;
+  };
+  pricing: {
+    cleanPrice: number;
+    yieldToMaturity: number;
+    accruedInterest: number;
+    quantum: number;
+    principal: number;
+    is_under_surtpriode: boolean;
+    totalConsiderationAmount: number;
+    stampDuty: number;
+    quantity: number;
+    recordDate: string;
+    interestDays: number;
+    settlementAmount: number;
+  };
+  date: {
+    lastCouponDate: string;
+    nextCouponDate: string;
+    dealDate: string;
+    settlementDate: string;
+    settlementNo: string;
+    cashFlowDate: string[];
+  };
+  payment: {
+    paymentProvider: string;
+    paymentId: string;
+    paymentStatus: string;
+  };
+  rfqNumber: string;
+  /** True when settle_order exists, RFQ master status is T, or negotiation is C/A. */
+  rfqCompleted: boolean;
+  orderDate: string;
+}
+
 export interface CrmOrder {
   id: number;
   orderNumber: string;
@@ -20,9 +78,13 @@ export interface CrmOrder {
   reqOrderNumber?: string | null;
   quantity: number;
   faceValue: string;
+  stampDuty?: string;
   totalAmount: string;
+  paymentStatus?: "PENDING" | "COMPLETED" | "REFUNDED" | "CANCELLED" | string | null;
+  paymentProvider?: string | null;
   status: CrmOrderStatus;
   bondDetails: Record<string, unknown>;
+  metadata?: Record<string, unknown> | null;
   createdAt: string;
   /**
    * Null when this Order's counterparty is an external NSE RFQ participant
@@ -34,6 +96,7 @@ export interface CrmOrder {
     lastName: string;
     emailAddress: string;
     phoneNo?: string;
+    userName?: string | null;
   } | null;
   linkedRfqParticipantCode?: string | null;
   rfqParticipantInfo?: {
@@ -43,6 +106,10 @@ export interface CrmOrder {
     emailList: string[];
     panNo: string | null;
   } | null;
+  /** Settlement pipeline steps (list view). */
+  orderStages?: Pick<CrmOrderStage, "stage" | "status" | "seq">[];
+  /** Normalized display snapshot — prefer this for list columns. */
+  orderInfo?: CrmOrderInfo | null;
 }
 
 export interface GetCrmOrdersResponse {
@@ -130,6 +197,31 @@ export interface OrderSettlementAutomationLog {
   updatedAt: string;
 }
 
+export type CrmOrderSettlementStage =
+  | "started"
+  | "payment_done"
+  | "add_isin"
+  | "quote_accept"
+  | "deal_propose"
+  | "deal_accept"
+  | "pg_routing";
+
+export interface CrmOrderStage {
+  id: number;
+  orderId: number;
+  orderNo: string;
+  stage: CrmOrderSettlementStage;
+  /** 0=not started, 1=success, 2=fail, 3=waiting */
+  status: number;
+  payload: Record<string, unknown> | null;
+  response: Record<string, unknown> | null;
+  seq: number;
+  attemptCount: number;
+  lastError: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface PaymentProcessLogGroup {
   paymentId: string;
   totalLogs: number;
@@ -169,9 +261,11 @@ export interface CrmOrderDetails {
   customerProfile: {
     id: number;
     firstName: string;
+    middleName?: string | null;
     lastName: string;
     emailAddress: string;
     phoneNo: string | null;
+    userName?: string | null;
   } | null;
   rfqParticipantInfo?: {
     code: string;
@@ -183,6 +277,8 @@ export interface CrmOrderDetails {
   } | null;
   orderLogs: OrderLog[];
   settlementAutomationLogs: OrderSettlementAutomationLog[];
+  settlementStage: CrmOrderSettlementStage | null;
+  orderStages: CrmOrderStage[];
   customerBonds: {
     id: number;
     customerProfileId: number;
@@ -197,15 +293,62 @@ export interface CrmOrderDetails {
     createdAt: string;
     updatedAt: string;
   } | null;
+  /** Normalized display snapshot — prefer this for CRM details UI. */
+  orderInfo?: CrmOrderInfo | null;
 }
 
 export interface GetCrmOrderDetailsResponse {
   responseData: CrmOrderDetails;
 }
 
+export interface ResumeOrderSettlementResponse {
+  message?: string;
+  responseData: {
+    orderId: number;
+    orderNumber: string;
+    queued: boolean;
+    jobId: string;
+    /** First incomplete/failed stage the runner will retry (null if none / already complete). */
+    resumeFromStage: CrmOrderSettlementStage | null;
+    resumeFromSeq: number | null;
+  };
+}
+
 export interface GetPaymentProcessLogsResponse {
   responseData: {
     groups: PaymentProcessLogGroup[];
+  };
+}
+
+export interface VerifyOrderPaymentResponse {
+  message?: string;
+  responseData: {
+    orderId: number;
+    orderNumber: string;
+    razorpayPaymentId: string | null;
+    razorpayStatus: string | null;
+    currentPaymentStatus: "PENDING" | "COMPLETED" | "REFUNDED" | "CANCELLED";
+    proposedPaymentStatus: "PENDING" | "COMPLETED" | "REFUNDED" | "CANCELLED";
+    proposedOrderStatus: CrmOrderStatus;
+    hasDefinitiveStatus: boolean;
+    willChange: boolean;
+    applied: boolean;
+  };
+}
+
+export interface VerifyOrderSettlementResponse {
+  message?: string;
+  responseData: {
+    orderId: number;
+    orderNumber: string;
+    nseTradeNumber: string;
+    settleStatus: number | null;
+    settleStatusLabel: string | null;
+    currentOrderStatus: CrmOrderStatus;
+    proposedOrderStatus: CrmOrderStatus;
+    hasDefinitiveStatus: boolean;
+    willChange: boolean;
+    applied: boolean;
   };
 }
 
@@ -444,6 +587,36 @@ export interface GetReceiptPdfOptionsResponse {
 
 export interface UpsertReceiptPdfOptionsResponse {
   responseData: CrmOrderReceiptPdfOptionsRow;
+}
+
+/** Proposed checkout pricing built from saved NSE rows (settle_order / negotiation / RFQ master). */
+export interface ProposeOrderPricingSnapshotResponse {
+  responseData: {
+    orderId: number;
+    orderNumber: string;
+    isin: string;
+    bondName: string;
+    tradeNumber: string;
+    alreadyHasPricing: boolean;
+    sources: {
+      settleOrderNumber: string;
+      rfqNumber: string;
+      rfqMasterNumber: string | null;
+    };
+    pricing: Record<string, unknown>;
+  };
+  message?: string;
+  code?: string;
+}
+
+export interface AcceptOrderPricingSnapshotResponse {
+  responseData: {
+    orderId: number;
+    orderNumber: string;
+    pricing: Record<string, unknown>;
+  };
+  message?: string;
+  code?: string;
 }
 
 export type PaymentGatewayMode = "PAYMENT" | "INQUIRY";

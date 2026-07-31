@@ -323,7 +323,7 @@ export class OrderReportsController {
           esc(r.orderNumber),
           esc(r.createdAt),
           esc(getPaymentStatusLabel(r.paymentStatus)),
-          esc(getOrderStatusLabel(r.status, r.paymentStatus)),
+          esc(getOrderStatusLabel(r.status)),
           r.customerId,
           esc(r.customerEmail),
           esc(r.isin),

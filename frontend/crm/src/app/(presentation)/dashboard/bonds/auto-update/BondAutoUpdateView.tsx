@@ -25,10 +25,8 @@ import {
 } from "@/components/ui/collapsible";
 import {
   DecimalInput,
-  formatDecimalWithMinFractionDigits,
 } from "@/components/ui/decimal-input";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Table,
   TableBody,
@@ -39,6 +37,8 @@ import {
 } from "@/components/ui/table";
 import { apiClientCaller } from "@/core/connection/apiClientCaller";
 import AllowOnlyView from "@/global/elements/permissions/AllowOnlyView";
+import { hasOneOfPermission } from "@/global/utils/role.utils";
+import useAppCookie from "@/hooks/useAppCookie.hook";
 import { cn } from "@/lib/utils";
 import apiGateway from "@root/apiGateway";
 import type {
@@ -61,7 +61,6 @@ import { formatCouponDatesDisplay } from "./couponDatesText";
 
 /** Fields whose calculator values depend on which yield feed was used (non-consolidated vs consolidated). */
 const YIELD_SOURCE_AFFECTED_KEYS: readonly AutofillMergeKey[] = [
-  "buyYield",
   "yield",
   "sellPrice",
 ];
@@ -82,20 +81,42 @@ const bondsApi = new apiGateway.bondsApi.BondsApi(apiClientCaller);
 const autoUpdateAutofillApi =
   new apiGateway.crmBondAutoUpdateApi.CrmBondAutoUpdateApi(apiClientCaller);
 
-/** Empty draft → default autofill; non-empty → must parse as % or fail. */
-function autofillParamsFromCustomYieldDraft(draft: string | undefined):
-  | { ok: true; params: { quantity: number; pricingYield?: number } }
+type PricingMode = "ytm" | "cleanPrice";
+
+/** Empty draft → default autofill; non-empty → parse using selected mode or fail. */
+function autofillParamsFromPricingDraft(
+  draft: string | undefined,
+  mode: PricingMode,
+):
+  | {
+    ok: true;
+    params: {
+      quantity: number;
+      pricingMode: PricingMode;
+      pricingYield?: number;
+      cleanPrice?: number;
+    };
+  }
   | { ok: false; message: string } {
   const raw = (draft ?? "").trim().replace(/,/g, "");
-  if (raw === "") return { ok: true, params: { quantity: 1 } };
+  if (raw === "") return { ok: true, params: { quantity: 1, pricingMode: mode } };
   const n = parseFloat(raw);
   if (!Number.isFinite(n)) {
     return {
       ok: false,
-      message: "Enter a valid custom yield (%), or leave the field empty for default pricing.",
+      message:
+        mode === "cleanPrice"
+          ? "Enter a valid clean price, or leave the field empty for default pricing."
+          : "Enter a valid YTM (%), or leave the field empty for default pricing.",
     };
   }
-  return { ok: true, params: { quantity: 1, pricingYield: n } };
+  return {
+    ok: true,
+    params:
+      mode === "cleanPrice"
+        ? { quantity: 1, pricingMode: mode, cleanPrice: n }
+        : { quantity: 1, pricingMode: mode, pricingYield: n },
+  };
 }
 
 function formatDisplayValue(v: unknown): string {
@@ -112,16 +133,22 @@ function formatDisplayValue(v: unknown): string {
   return String(v);
 }
 
-function parseCalcAmount(s: string | null | undefined): number | null {
-  if (s == null || !String(s).trim()) return null;
-  const n = Number(String(s).replace(/,/g, "").trim());
-  return Number.isFinite(n) ? n : null;
+/** Exact numeric display — no toFixed / fraction-digit rounding. */
+function formatExactNumber(n: number | null | undefined): string {
+  if (n == null || !Number.isFinite(n)) return "—";
+  return String(n);
 }
 
-function formatInr(n: number | null | undefined): string {
-  return n != null && Number.isFinite(n)
-    ? `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`
-    : "—";
+function formatExactInr(n: number | null | undefined): string {
+  if (n == null || !Number.isFinite(n)) return "—";
+  return `₹${String(n)}`;
+}
+
+function getDefaultYtmInputValue(bond: BondDetailsResponse): string {
+  const raw = bond.yield;
+  if (raw == null || raw === "") return "";
+  const n = typeof raw === "number" ? raw : Number(String(raw).replace(/,/g, "").trim());
+  return Number.isFinite(n) ? String(n) : "";
 }
 
 function autofillWarnings(res: BondDealAutofillResponse): string[] {
@@ -142,6 +169,16 @@ function autofillWarnings(res: BondDealAutofillResponse): string[] {
 
 type DraftSuggestions = BondDealAutofillResponse["suggested"];
 
+const PUT_CALL_OPTION_DETAILS_NA = "Put:NA Call:NA";
+
+function withPutCallFallback(suggested: DraftSuggestions): DraftSuggestions {
+  return {
+    ...suggested,
+    putCallOptionDetails:
+      suggested.putCallOptionDetails?.trim() || PUT_CALL_OPTION_DETAILS_NA,
+  };
+}
+
 type BondRowModel = {
   bond: BondDetailsResponse;
   formBase: BondFormData;
@@ -153,6 +190,40 @@ type BondRowModel = {
   /** Row highlight only after Accept (save), Reject, or failed save — not after Load autofill. */
   outcome: "idle" | "success" | "error" | "rejected";
 };
+
+function attachPricingSnapshotToPayload(
+  payload: BondFormData,
+  autofill: BondDealAutofillResponse | null,
+): BondFormData {
+  if (!autofill) return payload;
+  const cleanPrice = autofill.pricing.finalPrice;
+  // DB `accruedInterest` = DeriData `accrued_int_bottom` from the pricing call
+  // that used the computed `cashflow_shut_flag` (Phase 2).
+  const accruedInterestAmount = autofill.pricing.totalAccruedInterest;
+  const stampDuty = autofill.pricing.stampDuty;
+  const pricingQuantity =
+    autofill.quantity != null && autofill.quantity > 0 ? autofill.quantity : 1;
+  const yieldValue = autofill.suggested?.yield;
+  const sellPrice =
+    cleanPrice != null && Number.isFinite(cleanPrice)
+      ? cleanPrice
+      : autofill.suggested?.sellPrice;
+
+  return {
+    ...payload,
+    ...(sellPrice != null && Number.isFinite(sellPrice)
+      ? { sellPrice }
+      : {}),
+    ...(yieldValue != null && Number.isFinite(yieldValue)
+      ? { yield: yieldValue }
+      : {}),
+    ...(accruedInterestAmount != null && Number.isFinite(accruedInterestAmount)
+      ? { accruedInterest: accruedInterestAmount }
+      : {}),
+    ...(stampDuty != null && Number.isFinite(stampDuty) ? { stampDuty } : {}),
+    ...(pricingQuantity > 0 ? { pricingQuantity } : {}),
+  };
+}
 
 function createInitialRow(b: BondDetailsResponse): BondRowModel {
   return {
@@ -169,6 +240,8 @@ function createInitialRow(b: BondDetailsResponse): BondRowModel {
 
 export default function BondAutoUpdateView() {
   const queryClient = useQueryClient();
+  const { cookies } = useAppCookie();
+  const canEditBonds = hasOneOfPermission(cookies.role, ["edit:bonds"]);
   const [rows, setRows] = useState<Record<string, BondRowModel>>({});
   const rowsRef = useRef(rows);
   useEffect(() => {
@@ -221,18 +294,32 @@ export default function BondAutoUpdateView() {
     for (const b of list) ensureRow(b);
   }, [listQuery.data, ensureRow]);
 
-  /** Per-ISIN draft for “custom yield” row; sent in POST body, not query params. */
-  const [customYieldByIsin, setCustomYieldByIsin] = useState<Record<string, string>>(
+  /** Per-ISIN draft for autofill pricing input; sent in POST body, not query params. */
+  const [pricingInputByIsin, setPricingInputByIsin] = useState<Record<string, string>>(
+    {},
+  );
+  const [pricingModeByIsin, setPricingModeByIsin] = useState<Record<string, PricingMode>>(
     {},
   );
 
   const autofillMutation = useMutation({
-    mutationFn: async (args: { isin: string; pricingYield?: number }) => {
-      const { isin, pricingYield } = args;
+    mutationFn: async (
+      args: {
+        isin: string;
+        pricingMode: PricingMode;
+        pricingYield?: number;
+        cleanPrice?: number;
+      },
+    ) => {
+      const { isin, pricingMode, pricingYield, cleanPrice } = args;
       const res = await autoUpdateAutofillApi.postBondAutoUpdateAutofill(isin, {
         quantity: 1,
+        pricingMode,
         ...(pricingYield != null && Number.isFinite(pricingYield)
           ? { pricingYield }
+          : {}),
+        ...(cleanPrice != null && Number.isFinite(cleanPrice)
+          ? { cleanPrice }
           : {}),
       });
       return { isin, data: res.responseData };
@@ -263,7 +350,7 @@ export default function BondAutoUpdateView() {
           [isin]: {
             ...cur,
             autofill: data,
-            draft: { ...data.suggested },
+            draft: withPutCallFallback(data.suggested),
             include: defaultIncludeMap(),
             error: null,
             open: true,
@@ -272,7 +359,15 @@ export default function BondAutoUpdateView() {
       });
       toast.success(`Autofill loaded for ${isin}`);
     },
-    onError: (err: AxiosError, variables: { isin: string; pricingYield?: number }) => {
+    onError: (
+      err: AxiosError,
+      variables: {
+        isin: string;
+        pricingMode: PricingMode;
+        pricingYield?: number;
+        cleanPrice?: number;
+      },
+    ) => {
       const { isin } = variables;
       const msg =
         (err?.response?.data as { message?: string })?.message ||
@@ -358,7 +453,10 @@ export default function BondAutoUpdateView() {
       const b = list[i]!;
       setBulkProgress({ kind: "load", current: i + 1, total: list.length });
       try {
-        const parsed = autofillParamsFromCustomYieldDraft(customYieldByIsin[b.isin]);
+        const parsed = autofillParamsFromPricingDraft(
+          pricingInputByIsin[b.isin],
+          pricingModeByIsin[b.isin] ?? "ytm",
+        );
         if (!parsed.ok) {
           fail++;
           setRows((prev) => {
@@ -404,7 +502,7 @@ export default function BondAutoUpdateView() {
             [b.isin]: {
               ...cur,
               autofill: data,
-              draft: { ...data.suggested },
+              draft: withPutCallFallback(data.suggested),
               include: defaultIncludeMap(),
               error: null,
               open: true,
@@ -434,7 +532,7 @@ export default function BondAutoUpdateView() {
     }
     setBulkProgress(null);
     toast.success(`Load all finished: ${ok} succeeded, ${fail} failed.`);
-  }, [listQuery, customYieldByIsin]);
+  }, [listQuery, pricingInputByIsin, pricingModeByIsin]);
 
   const saveAllWithAutofill = useCallback(async () => {
     const list = listQuery.data?.data ?? [];
@@ -462,7 +560,10 @@ export default function BondAutoUpdateView() {
         continue;
       }
       try {
-        const payload = mergeAutofillIntoForm(row.formBase, row.draft, row.include);
+        const payload = attachPricingSnapshotToPayload(
+          mergeAutofillIntoForm(row.formBase, row.draft, row.include),
+          row.autofill,
+        );
         // Pass autofillSave: true so the backend stamps autofillSavedAt on this bond.
         await bondsApi.updateBond(isin, payload, { autofillSave: true });
         const detail = await bondsApi.getBondDetailsByIsin(isin);
@@ -544,7 +645,10 @@ export default function BondAutoUpdateView() {
   const acceptRow = (isin: string) => {
     const cur = rows[isin];
     if (!cur?.draft) return;
-    const payload = mergeAutofillIntoForm(cur.formBase, cur.draft, cur.include);
+    const payload = attachPricingSnapshotToPayload(
+      mergeAutofillIntoForm(cur.formBase, cur.draft, cur.include),
+      cur.autofill,
+    );
     saveMutation.mutate({ isin, payload });
   };
 
@@ -556,10 +660,13 @@ export default function BondAutoUpdateView() {
     });
   };
 
-  /** Empty field → default autofill; non-empty → must be a valid % (sent as pricingYield in POST body). */
+  /** Empty field → default autofill; non-empty → sent as YTM or clean price per row mode. */
   const loadBondAutofill = (b: BondDetailsResponse) => {
     ensureRow(b);
-    const parsed = autofillParamsFromCustomYieldDraft(customYieldByIsin[b.isin]);
+    const parsed = autofillParamsFromPricingDraft(
+      pricingInputByIsin[b.isin],
+      pricingModeByIsin[b.isin] ?? "ytm",
+    );
     if (!parsed.ok) {
       toast.error(parsed.message);
       return;
@@ -567,7 +674,9 @@ export default function BondAutoUpdateView() {
     const { params } = parsed;
     autofillMutation.mutate({
       isin: b.isin,
+      pricingMode: params.pricingMode,
       ...(params.pricingYield != null ? { pricingYield: params.pricingYield } : {}),
+      ...(params.cleanPrice != null ? { cleanPrice: params.cleanPrice } : {}),
     });
   };
 
@@ -575,6 +684,21 @@ export default function BondAutoUpdateView() {
     () => listQuery.data?.data ?? [],
     [listQuery.data?.data],
   );
+  useEffect(() => {
+    if (!bonds.length) return;
+    setPricingInputByIsin((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      for (const bond of bonds) {
+        if (next[bond.isin] != null) continue;
+        const defaultValue = getDefaultYtmInputValue(bond);
+        if (defaultValue === "") continue;
+        next[bond.isin] = defaultValue;
+        changed = true;
+      }
+      return changed ? next : prev;
+    });
+  }, [bonds]);
   const readyToSaveCount = useMemo(
     () =>
       bonds.filter(
@@ -589,32 +713,41 @@ export default function BondAutoUpdateView() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-muted-foreground text-sm max-w-3xl">
           Bonds with <span className="font-medium text-foreground">Allow for purchase</span> (sale-ready).
-          Load autofill from calc.meradhan.co, review each field, uncheck what you do not want
-          to overwrite, edit values, then accept to save or reject to discard.{" "}
-          <span className="font-medium text-foreground">Load all</span> uses each row&apos;s optional custom yield
-          when filled.
+          {canEditBonds ? (
+            <>
+              {" "}
+              Load pricing autofill, review each field, uncheck what you do not want
+              to overwrite, edit values, then accept to save or reject to discard.{" "}
+              <span className="font-medium text-foreground">Load all</span> uses each row&apos;s selected YTM or clean
+              price input when filled.
+            </>
+          ) : (
+            " You have view-only access on this page."
+          )}
         </p>
         <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:flex-wrap sm:justify-end">
-          <Button
-            type="button"
-            variant="default"
-            size="sm"
-            className="shrink-0 gap-2"
-            onClick={() => void loadAllAutofill()}
-            disabled={
-              bulkBusy ||
-              listQuery.isFetching ||
-              listQuery.isLoading ||
-              bonds.length === 0
-            }
-          >
-            {bulkProgress?.kind === "load" ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Sparkles className="size-4" />
-            )}
-            Load all
-          </Button>
+          {canEditBonds ? (
+            <Button
+              type="button"
+              variant="default"
+              size="sm"
+              className="shrink-0 gap-2"
+              onClick={() => void loadAllAutofill()}
+              disabled={
+                bulkBusy ||
+                listQuery.isFetching ||
+                listQuery.isLoading ||
+                bonds.length === 0
+              }
+            >
+              {bulkProgress?.kind === "load" ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Sparkles className="size-4" />
+              )}
+              Load all
+            </Button>
+          ) : null}
           <AllowOnlyView permissions={["edit:bonds"]}>
             <Button
               type="button"
@@ -743,50 +876,70 @@ export default function BondAutoUpdateView() {
                     </div>
                   </CollapsibleTrigger>
                   <div className="flex flex-wrap items-center gap-2 pl-7 sm:pl-0">
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="text-muted-foreground text-xs whitespace-nowrap">
-                        Custom yield %
-                      </span>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
-                        autoComplete="off"
-                        placeholder="optional"
-                        className="h-9 w-[92px] font-mono text-sm"
-                        value={customYieldByIsin[b.isin] ?? ""}
-                        onChange={(e) =>
-                          setCustomYieldByIsin((prev) => ({
-                            ...prev,
-                            [b.isin]: e.target.value,
-                          }))
-                        }
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            loadBondAutofill(b);
-                          }
-                        }}
-                        disabled={loading}
-                        aria-label={`Optional custom pricing yield percent for ${b.isin}; leave empty for default`}
-                      />
-                    </div>
-                    <Button
-                      type="button"
-                      size="sm"
-                      className="gap-1"
-                      disabled={loading}
-                      onClick={() => loadBondAutofill(b)}
-                    >
-                      {loading ? (
-                        <Loader2 className="size-4 animate-spin" />
-                      ) : (
-                        <Sparkles className="size-4" />
-                      )}
-                      Load autofill
-                    </Button>
-                    <Button type="button" size="sm" variant="secondary" className="gap-1" asChild>
-                      <Link href={`/dashboard/bonds/update/${encodeURIComponent(b.isin)}`}>Edit bond</Link>
-                    </Button>
+                    {canEditBonds ? (
+                      <>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <select
+                            className="h-9 rounded-md border bg-background px-2 text-sm"
+                            value={pricingModeByIsin[b.isin] ?? "ytm"}
+                            onChange={(e) =>
+                              setPricingModeByIsin((prev) => ({
+                                ...prev,
+                                [b.isin]: e.target.value as PricingMode,
+                              }))
+                            }
+                            disabled={loading}
+                            aria-label={`Pricing mode for ${b.isin}`}
+                          >
+                            <option value="ytm">YTM</option>
+                            <option value="cleanPrice">Clean price</option>
+                          </select>
+                          <Input
+                            type="text"
+                            inputMode="decimal"
+                            autoComplete="off"
+                            placeholder={
+                              (pricingModeByIsin[b.isin] ?? "ytm") === "cleanPrice"
+                                ? "clean price"
+                                : "ytm %"
+                            }
+                            className="h-9 w-[110px] font-mono text-sm"
+                            value={pricingInputByIsin[b.isin] ?? ""}
+                            onChange={(e) =>
+                              setPricingInputByIsin((prev) => ({
+                                ...prev,
+                                [b.isin]: e.target.value,
+                              }))
+                            }
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                loadBondAutofill(b);
+                              }
+                            }}
+                            disabled={loading}
+                            aria-label={`Optional pricing input for ${b.isin}; uses selected YTM or clean price mode`}
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="gap-1"
+                          disabled={loading}
+                          onClick={() => loadBondAutofill(b)}
+                        >
+                          {loading ? (
+                            <Loader2 className="size-4 animate-spin" />
+                          ) : (
+                            <Sparkles className="size-4" />
+                          )}
+                          Load autofill
+                        </Button>
+                        <Button type="button" size="sm" variant="secondary" className="gap-1" asChild>
+                          <Link href={`/dashboard/bonds/update/${encodeURIComponent(b.isin)}`}>Edit bond</Link>
+                        </Button>
+                      </>
+                    ) : null}
                   </div>
                 </div>
 
@@ -801,19 +954,35 @@ export default function BondAutoUpdateView() {
                   <div className="border-t px-4 pb-4 pt-2 space-y-4">
                     {!model.autofill || !model.draft ? (
                       <p className="text-muted-foreground text-sm py-4">
-                        Optionally enter <span className="font-medium text-foreground">Custom yield %</span>, then
-                        click <span className="font-medium text-foreground">Load autofill</span> to use it; leave the
-                        field empty for default pricing.
+                        Optionally choose <span className="font-medium text-foreground">YTM</span> or{" "}
+                        <span className="font-medium text-foreground">clean price</span>, enter a value, then click{" "}
+                        <span className="font-medium text-foreground">Load autofill</span> to use it; leave the field
+                        empty for default pricing.
                       </p>
                     ) : (
                       <>
                         <div className="flex flex-wrap items-center gap-2">
                           <Badge variant="outline">Yield: {model.autofill.sources.yieldSource}</Badge>
+                          <Badge variant="outline">
+                            Mode: {model.autofill.sources.pricingMode === "cleanPrice" ? "clean price" : "ytm"}
+                          </Badge>
                           <Badge variant={model.autofill.sources.usedReferenceMetadata ? "default" : "secondary"}>
                             Reference metadata {model.autofill.sources.usedReferenceMetadata ? "on" : "off"}
                           </Badge>
                           <Badge variant={model.autofill.sources.usedCouponSchedule ? "default" : "secondary"}>
                             Coupon schedule {model.autofill.sources.usedCouponSchedule ? "on" : "off"}
+                          </Badge>
+                          <Badge
+                            variant={
+                              model.autofill.sources.usedDeriDataIssueDetail
+                                ? "default"
+                                : "secondary"
+                            }
+                          >
+                            Daily Data{" "}
+                            {model.autofill.sources.usedDeriDataIssueDetail
+                              ? "on"
+                              : "off"}
                           </Badge>
                           {typeof model.autofill.suggested.isUnderShutPeriod === "boolean" ? (
                             <div
@@ -844,11 +1013,13 @@ export default function BondAutoUpdateView() {
                             role="status"
                           >
                             <p className="font-medium text-amber-950 dark:text-amber-100">
-                              Yield not from the consolidated priced list
+                              Pricing not from the consolidated priced list
                             </p>
                             <p className="mt-1 text-amber-900/90 dark:text-amber-100/85">
                               {model.autofill.sources.yieldSource === "override"
-                                ? "Using your pricing yield override."
+                                ? model.autofill.sources.pricingMode === "cleanPrice"
+                                  ? "Using your clean price override."
+                                  : "Using your pricing yield override."
                                 : "Using the bond / margin record."}{" "}
                               Review the highlighted rows before accepting.
                             </p>
@@ -883,82 +1054,101 @@ export default function BondAutoUpdateView() {
                           </p>
                         )}
 
-                        {model.autofill.pricing ? (
-                          <div className="rounded-md border border-primary/15 bg-muted/30 px-3 py-2.5 text-sm">
-                            <p className="font-medium text-foreground">Calc summary</p>
-                            <dl className="mt-2 grid gap-x-4 gap-y-1 sm:grid-cols-2 lg:grid-cols-4">
-                              <div>
-                                <dt className="text-muted-foreground text-xs">Settlement (T+1 IST)</dt>
-                                <dd className="font-medium font-mono text-xs">
-                                  {String(model.autofill.pricing.calc?.settle_dt ?? "—")}
-                                </dd>
-                              </div>
-                              <div>
-                                <dt className="text-muted-foreground text-xs">Settlement amount</dt>
-                                <dd className="font-medium">
-                                  {formatInr(
-                                    parseCalcAmount(
-                                      model.autofill.pricing.calc?.settlement_amount as
-                                        | string
-                                        | undefined,
-                                    ),
-                                  )}
-                                </dd>
-                              </div>
-                              <div>
-                                <dt className="text-muted-foreground text-xs">Accrued interest</dt>
-                                <dd className="font-medium">
-                                  {formatInr(
-                                    parseCalcAmount(
-                                      model.autofill.pricing.calc?.total_ai as string | undefined,
-                                    ),
-                                  )}
-                                </dd>
-                              </div>
-                              <div>
-                                <dt className="text-muted-foreground text-xs">Principal amount</dt>
-                                <dd className="font-medium">
-                                  {formatInr(
-                                    parseCalcAmount(
-                                      model.autofill.pricing.calc?.principal_amount as
-                                        | string
-                                        | undefined,
-                                    ),
-                                  )}
-                                </dd>
-                              </div>
-                              <div>
-                                <dt className="text-muted-foreground text-xs">
-                                  Total consideration (w/o stamp)
-                                </dt>
-                                <dd className="font-medium">
-                                  {formatInr(
-                                    parseCalcAmount(
-                                      model.autofill.pricing.calc?.total_consideration as
-                                        | string
-                                        | undefined,
-                                    ),
-                                  )}
-                                </dd>
-                              </div>
-                              <div>
-                                <dt className="text-muted-foreground text-xs">Accrued days</dt>
-                                <dd className="font-medium">
-                                  {model.autofill.pricing.calc?.accrued_days ?? "—"}
-                                </dd>
-                              </div>
-                            </dl>
-                          </div>
-                        ) : null}
+                        {model.autofill.pricing ? (() => {
+                          const pricing = model.autofill.pricing;
+                          // Prefer API/DeriData amounts as returned (no client-side recalculation).
+                          const amounts = pricing;
+                          return (
+                            <div className="rounded-md border border-primary/15 bg-muted/30 px-3 py-2.5 text-sm">
+                              <p className="font-medium text-foreground">Calc summary</p>
+                              <p className="text-muted-foreground text-xs mt-0.5">
+                                Values from DeriData calculator (clean price, accrued, settlement) with shut/accrual days resolved from cashflows.
+                              </p>
+                              <dl className="mt-2 grid gap-x-4 gap-y-1 sm:grid-cols-2 lg:grid-cols-4">
+                                <div>
+                                  <dt className="text-muted-foreground text-xs">Settlement</dt>
+                                  <dd className="font-medium font-mono text-xs">
+                                    {String(
+                                      pricing.settlementDateYmd ??
+                                      pricing.calc?.settle_dt ??
+                                      "—",
+                                    )}
+                                  </dd>
+                                </div>
+                                <div>
+                                  <dt className="text-muted-foreground text-xs">Settlement amount</dt>
+                                  <dd className="font-medium font-mono text-xs">
+                                    {formatExactInr(amounts.settlementAmount)}
+                                  </dd>
+                                </div>
+                                <div>
+                                  <dt className="text-muted-foreground text-xs">Principal amount</dt>
+                                  <dd className="font-medium font-mono text-xs">
+                                    {formatExactInr(amounts.principalAmount)}
+                                  </dd>
+                                </div>
+                                <div>
+                                  <dt className="text-muted-foreground text-xs">
+                                    Total consideration (w/o stamp)
+                                  </dt>
+                                  <dd className="font-medium font-mono text-xs">
+                                    {formatExactInr(amounts.totalConsideration)}
+                                  </dd>
+                                </div>
+                                <div>
+                                  <dt className="text-muted-foreground text-xs">Accrued interest</dt>
+                                  <dd className="font-medium font-mono text-xs">
+                                    {formatExactInr(amounts.totalAccruedInterest)}
+                                  </dd>
+                                </div>
+                                <div>
+                                  <dt className="text-muted-foreground text-xs">Stamp duty</dt>
+                                  <dd className="font-medium font-mono text-xs">
+                                    {formatExactInr(amounts.stampDuty)}
+                                  </dd>
+                                </div>
+                                <div>
+                                  <dt className="text-muted-foreground text-xs">Accrued days</dt>
+                                  <dd className="font-medium font-mono text-xs">
+                                    {formatExactNumber(
+                                      typeof pricing.accruedDays === "number"
+                                        ? pricing.accruedDays
+                                        : typeof pricing.calc?.accrued_days === "number"
+                                          ? pricing.calc.accrued_days
+                                          : null,
+                                    )}
+                                  </dd>
+                                </div>
+                                <div>
+                                  <dt className="text-muted-foreground text-xs">
+                                    DeriData cashflow_shut_flag
+                                  </dt>
+                                  <dd className="font-medium font-mono text-xs">
+                                    {typeof pricing.calc?.cashflow_shut_flag === "boolean"
+                                      ? String(pricing.calc.cashflow_shut_flag)
+                                      : typeof model.autofill.suggested.isUnderShutPeriod ===
+                                          "boolean"
+                                        ? String(model.autofill.suggested.isUnderShutPeriod)
+                                        : "—"}
+                                  </dd>
+                                </div>
+                              </dl>
+                            </div>
+                          );
+                        })() : null}
 
                         <div className="rounded-md border overflow-x-auto">
-                          <Table>
+                          <Table className="table-fixed w-full min-w-[720px]">
                             <TableHeader>
                               <TableRow>
                                 <TableHead className="w-10">Use</TableHead>
-                                <TableHead>Field</TableHead>
-                                <TableHead>Current (saved)</TableHead>
-                                <TableHead className="min-w-[220px]">New (editable)</TableHead>
+                                <TableHead className="w-[160px]">Field</TableHead>
+                                <TableHead className="w-[200px]">
+                                  Current (saved)
+                                </TableHead>
+                                <TableHead className="w-[220px]">
+                                  New{canEditBonds ? " (editable)" : ""}
+                                </TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -966,6 +1156,14 @@ export default function BondAutoUpdateView() {
                                 const curVal = model.formBase[key as keyof BondFormData];
                                 const draft = model.draft!;
                                 const sug = draft[key as keyof DraftSuggestions];
+                                const curDisplay =
+                                  key === "categories" && Array.isArray(curVal)
+                                    ? (curVal as string[]).join(", ") || "—"
+                                    : formatDisplayValue(curVal);
+                                const sugDisplay =
+                                  key === "categories" && Array.isArray(sug)
+                                    ? (sug as string[]).join(", ") || "—"
+                                    : formatDisplayValue(sug);
                                 const yieldSourceAffected =
                                   model.autofill!.sources.yieldSource !== "consolidated" &&
                                   YIELD_SOURCE_AFFECTED_KEYS.includes(key);
@@ -980,6 +1178,7 @@ export default function BondAutoUpdateView() {
                                     <TableCell>
                                       <Checkbox
                                         checked={model.include[key]}
+                                        disabled={!canEditBonds}
                                         onCheckedChange={(c) =>
                                           toggleInclude(b.isin, key, Boolean(c))
                                         }
@@ -999,35 +1198,42 @@ export default function BondAutoUpdateView() {
                                         ) : null}
                                       </span>
                                     </TableCell>
-                                    <TableCell
-                                      className={cn(
-                                        "text-muted-foreground text-sm max-w-[180px] break-all",
-                                        key === "allCouponDates" && "max-h-28 overflow-y-auto align-top",
-                                      )}
-                                    >
-                                      {key === "categories" && Array.isArray(curVal)
-                                        ? (curVal as string[]).join(", ") || "—"
-                                        : (key === "couponRate" || key === "buyYield" || key === "yield") &&
-                                          typeof curVal === "number" &&
-                                          Number.isFinite(curVal)
-                                        ? formatDecimalWithMinFractionDigits(curVal, 2)
-                                        : key === "sellPrice" &&
-                                          typeof curVal === "number" &&
-                                          Number.isFinite(curVal)
-                                        ? formatDecimalWithMinFractionDigits(curVal, 4)
-                                        : (key === "settlementAmount" ||
-                                            key === "accruedInterest" ||
-                                            key === "principalAmount" ||
-                                            key === "totalConsideration") &&
-                                          typeof curVal === "number" &&
-                                          Number.isFinite(curVal)
-                                        ? formatInr(curVal)
-                                        : formatDisplayValue(curVal)}
+                                    <TableCell className="w-[200px] max-w-[200px] overflow-hidden text-muted-foreground text-sm">
+                                      <span
+                                        className="block max-w-full truncate whitespace-nowrap"
+                                        title={curDisplay}
+                                      >
+                                        {curDisplay}
+                                      </span>
                                     </TableCell>
-                                    <TableCell className="min-w-[220px] align-top">
-                                      {key === "bondName" || key === "creditRating" ? (
+                                    <TableCell className="w-[220px] max-w-[220px] overflow-hidden align-middle">
+                                      {!canEditBonds ? (
+                                        <span
+                                          className="block max-w-full truncate whitespace-nowrap text-sm"
+                                          title={sugDisplay}
+                                        >
+                                          {sugDisplay}
+                                        </span>
+                                      ) : key === "bondName" ||
+                                        key === "creditRating" ||
+                                        key === "instrumentName" ||
+                                        key === "sectorName" ||
+                                        key === "ratingAgencyName" ? (
                                         <Input
-                                          className="h-9 text-sm"
+                                          className="h-9 w-full max-w-full text-sm truncate"
+                                          value={typeof sug === "string" ? sug : ""}
+                                          onChange={(e) =>
+                                            updateDraft(b.isin, {
+                                              [key]: e.target.value,
+                                            } as Partial<DraftSuggestions>)
+                                          }
+                                        />
+                                      ) : key === "description" ||
+                                        key === "creditRatingInfo" ||
+                                        key === "putCallOptionDetails" ? (
+                                        <Input
+                                          className="h-9 w-full max-w-full text-sm truncate"
+                                          title={typeof sug === "string" ? sug : undefined}
                                           value={typeof sug === "string" ? sug : ""}
                                           onChange={(e) =>
                                             updateDraft(b.isin, {
@@ -1037,7 +1243,7 @@ export default function BondAutoUpdateView() {
                                         />
                                       ) : key === "natureOfInstrument" ? (
                                         <Input
-                                          className="h-9 font-mono text-sm"
+                                          className="h-9 w-full max-w-full font-mono text-sm truncate"
                                           placeholder="SECURED | UNSECURED | UNKNOWN"
                                           value={typeof sug === "string" ? sug : ""}
                                           onChange={(e) =>
@@ -1047,13 +1253,17 @@ export default function BondAutoUpdateView() {
                                           }
                                         />
                                       ) : key === "allCouponDates" ? (
-                                        <Textarea
-                                          rows={4}
-                                          className="font-mono text-xs min-w-[220px] max-h-28 resize-none overflow-y-auto"
-                                          placeholder="YYYY-MM-DD per line"
+                                        <Input
+                                          className="h-9 w-full max-w-full font-mono text-xs truncate"
+                                          placeholder="YYYY-MM-DD, …"
+                                          title={
+                                            Array.isArray(sug)
+                                              ? sug.map(String).join(", ")
+                                              : undefined
+                                          }
                                           value={
                                             Array.isArray(sug)
-                                              ? sug.map(String).join("\n")
+                                              ? sug.map(String).join(", ")
                                               : ""
                                           }
                                           onChange={(e) => {
@@ -1067,27 +1277,79 @@ export default function BondAutoUpdateView() {
                                             });
                                           }}
                                         />
-                                      ) : key === "recordDays" || key === "accruedInterestDays" ? (
-                                        <Input
-                                          type="number"
-                                          className="h-9 font-mono text-sm"
-                                          value={sug == null ? "" : String(sug)}
-                                          onChange={(e) => {
-                                            const v = e.target.value;
+                                      ) : key === "recordDays" ? (
+                                        <DecimalInput
+                                          className="h-9 w-full max-w-full font-mono text-sm"
+                                          value={
+                                            sug == null
+                                              ? undefined
+                                              : (() => {
+                                                const n =
+                                                  typeof sug === "number"
+                                                    ? sug
+                                                    : Number(sug);
+                                                return Number.isFinite(n)
+                                                  ? n
+                                                  : undefined;
+                                              })()
+                                          }
+                                          onChange={(n) =>
                                             updateDraft(b.isin, {
-                                              [key]:
-                                                v === "" ? null : Math.round(parseFloat(v)),
-                                            } as Partial<DraftSuggestions>);
+                                              recordDays: n ?? null,
+                                            })
+                                          }
+                                        />
+                                      ) : key === "couponRate" ? (
+                                        <DecimalInput
+                                          className="h-9 w-full max-w-full font-mono text-sm"
+                                          value={
+                                            sug == null
+                                              ? undefined
+                                              : (() => {
+                                                const n =
+                                                  typeof sug === "number"
+                                                    ? sug
+                                                    : Number(sug);
+                                                return Number.isFinite(n)
+                                                  ? n
+                                                  : undefined;
+                                              })()
+                                          }
+                                          onChange={(n) =>
+                                            updateDraft(b.isin, {
+                                              [key]: n ?? null,
+                                            } as Partial<DraftSuggestions>)
+                                          }
+                                        />
+                                      ) : key === "yield" || key === "sellPrice" ? (
+                                        <DecimalInput
+                                          title={
+                                            key === "sellPrice"
+                                              ? "Clean price from DeriData yield/price conversion (read-only)."
+                                              : "Yield from DeriData yield/price conversion (read-only)."
+                                          }
+                                          className="h-9 w-full max-w-full font-mono text-sm truncate"
+                                          disabled
+                                          value={
+                                            sug == null
+                                              ? undefined
+                                              : (() => {
+                                                const n =
+                                                  typeof sug === "number"
+                                                    ? sug
+                                                    : Number(sug);
+                                                return Number.isFinite(n)
+                                                  ? n
+                                                  : undefined;
+                                              })()
+                                          }
+                                          onChange={() => {
+                                            /* read-only — DeriData yield/price conversion */
                                           }}
                                         />
-                                      ) : key === "settlementAmount" ||
-                                        key === "accruedInterest" ||
-                                        key === "principalAmount" ||
-                                        key === "totalConsideration" ? (
+                                      ) : key === "faceValue" || key === "totalIssueSize" ? (
                                         <DecimalInput
-                                          className="h-9 font-mono text-sm"
-                                          minFractionDigits={2}
-                                          maxFractionDigits={2}
+                                          className="h-9 w-full max-w-full font-mono text-sm truncate"
                                           value={
                                             sug == null
                                               ? undefined
@@ -1105,86 +1367,13 @@ export default function BondAutoUpdateView() {
                                             updateDraft(b.isin, {
                                               [key]: n ?? null,
                                             } as Partial<DraftSuggestions>)
-                                          }
-                                        />
-                                      ) : key === "couponRate" ||
-                                        key === "buyYield" ||
-                                        key === "yield" ? (
-                                        <DecimalInput
-                                          className="h-9 font-mono text-sm"
-                                          minFractionDigits={2}
-                                          maxFractionDigits={2}
-                                          value={
-                                            sug == null
-                                              ? undefined
-                                              : (() => {
-                                                const n =
-                                                  typeof sug === "number"
-                                                    ? sug
-                                                    : Number(sug);
-                                                return Number.isFinite(n)
-                                                  ? n
-                                                  : undefined;
-                                              })()
-                                          }
-                                          onChange={(n) =>
-                                            updateDraft(b.isin, {
-                                              [key]: n ?? null,
-                                            } as Partial<DraftSuggestions>)
-                                          }
-                                        />
-                                      ) : key === "faceValue" ? (
-                                        <DecimalInput
-                                          className="h-9 font-mono text-sm"
-                                          value={
-                                            sug == null
-                                              ? undefined
-                                              : (() => {
-                                                const n =
-                                                  typeof sug === "number"
-                                                    ? sug
-                                                    : Number(sug);
-                                                return Number.isFinite(n)
-                                                  ? n
-                                                  : undefined;
-                                              })()
-                                          }
-                                          onChange={(n) =>
-                                            updateDraft(b.isin, {
-                                              [key]: n ?? null,
-                                            } as Partial<DraftSuggestions>)
-                                          }
-                                        />
-                                      ) : key === "sellPrice" ? (
-                                        <DecimalInput
-                                          title="Clean price: at most 4 decimal places (calc rounding). Text field; blur applies."
-                                          className="h-9 font-mono text-sm"
-                                          minFractionDigits={4}
-                                          maxFractionDigits={4}
-                                          value={
-                                            sug == null
-                                              ? undefined
-                                              : (() => {
-                                                const n =
-                                                  typeof sug === "number"
-                                                    ? sug
-                                                    : Number(sug);
-                                                return Number.isFinite(n)
-                                                  ? n
-                                                  : undefined;
-                                              })()
-                                          }
-                                          onChange={(n) =>
-                                            updateDraft(b.isin, {
-                                              sellPrice: n ?? null,
-                                            })
                                           }
                                         />
                                       ) : key === "dayConvention" ||
                                         key === "interestPaymentFrequency" ||
                                         key === "interestPaymentMode" ? (
                                         <Input
-                                          className="h-9 font-mono text-sm"
+                                          className="h-9 w-full max-w-full font-mono text-sm truncate"
                                           value={typeof sug === "string" ? sug : ""}
                                           onChange={(e) =>
                                             updateDraft(b.isin, {
@@ -1194,7 +1383,7 @@ export default function BondAutoUpdateView() {
                                         />
                                       ) : key === "bondType" ? (
                                         <Input
-                                          className="h-9 font-mono text-sm"
+                                          className="h-9 w-full max-w-full font-mono text-sm truncate"
                                           placeholder="GOVERNMENT | CORPORATE | TAX_FREE | PSU | OTHER"
                                           value={typeof sug === "string" ? sug : ""}
                                           onChange={(e) =>
@@ -1205,7 +1394,7 @@ export default function BondAutoUpdateView() {
                                         />
                                       ) : key === "seniority" ? (
                                         <Input
-                                          className="h-9 font-mono text-sm"
+                                          className="h-9 w-full max-w-full font-mono text-sm truncate"
                                           placeholder="SENIOR | TIER_2_SUBORDINATED | UNKNOWN"
                                           value={typeof sug === "string" ? sug : ""}
                                           onChange={(e) =>
@@ -1216,7 +1405,7 @@ export default function BondAutoUpdateView() {
                                         />
                                       ) : key === "redemptionType" ? (
                                         <Input
-                                          className="h-9 font-mono text-sm"
+                                          className="h-9 w-full max-w-full font-mono text-sm truncate"
                                           placeholder="e.g. BULLET, AMORTISING"
                                           value={typeof sug === "string" ? sug : ""}
                                           onChange={(e) =>
@@ -1227,7 +1416,7 @@ export default function BondAutoUpdateView() {
                                         />
                                       ) : key === "taxStatus" ? (
                                         <Input
-                                          className="h-9 font-mono text-sm"
+                                          className="h-9 w-full max-w-full font-mono text-sm truncate"
                                           placeholder="TAXABLE | TAX_FREE | TAX_SAVING | UNKNOWN"
                                           value={typeof sug === "string" ? sug : ""}
                                           onChange={(e) =>
@@ -1238,7 +1427,7 @@ export default function BondAutoUpdateView() {
                                         />
                                       ) : key === "isListed" ? (
                                         <Input
-                                          className="h-9 font-mono text-sm"
+                                          className="h-9 w-full max-w-full font-mono text-sm truncate"
                                           placeholder="YES | NO | UNKNOWN"
                                           value={typeof sug === "string" ? sug : ""}
                                           onChange={(e) =>
@@ -1249,7 +1438,7 @@ export default function BondAutoUpdateView() {
                                         />
                                       ) : key === "couponType" ? (
                                         <Input
-                                          className="h-9 font-mono text-sm"
+                                          className="h-9 w-full max-w-full font-mono text-sm truncate"
                                           placeholder="e.g. Fixed, Floating, Step-Up"
                                           value={typeof sug === "string" ? sug : ""}
                                           onChange={(e) =>
@@ -1259,14 +1448,16 @@ export default function BondAutoUpdateView() {
                                           }
                                         />
                                       ) : key === "categories" ? (
-                                        <div className="grid grid-cols-2 gap-x-6 gap-y-2 py-1 max-w-[300px]">
+                                        <div className="grid w-full max-w-full grid-cols-1 gap-y-1 overflow-hidden py-0.5">
                                           {BOND_LISTING_CATEGORY_OPTIONS.map((opt) => {
-                                            const current = Array.isArray(sug) ? (sug as string[]) : [];
+                                            const current = Array.isArray(sug)
+                                              ? (sug as string[])
+                                              : [];
                                             const checked = current.includes(opt.value);
                                             return (
                                               <label
                                                 key={opt.value}
-                                                className="flex items-center gap-1.5 text-sm font-normal cursor-pointer whitespace-nowrap"
+                                                className="flex min-w-0 items-center gap-1.5 text-xs font-normal cursor-pointer"
                                               >
                                                 <Checkbox
                                                   checked={checked}
@@ -1274,11 +1465,15 @@ export default function BondAutoUpdateView() {
                                                     const on = v === true;
                                                     const next = on
                                                       ? [...current, opt.value]
-                                                      : current.filter((c) => c !== opt.value);
-                                                    updateDraft(b.isin, { categories: next });
+                                                      : current.filter(
+                                                        (c) => c !== opt.value,
+                                                      );
+                                                    updateDraft(b.isin, {
+                                                      categories: next,
+                                                    });
                                                   }}
                                                 />
-                                                {opt.label}
+                                                <span className="truncate">{opt.label}</span>
                                               </label>
                                             );
                                           })}
@@ -1286,7 +1481,7 @@ export default function BondAutoUpdateView() {
                                       ) : (
                                         <Input
                                           type="date"
-                                          className="h-9 font-mono text-sm"
+                                          className="h-9 w-full max-w-full font-mono text-sm truncate"
                                           value={
                                             sug != null &&
                                               typeof sug === "string" &&
@@ -1306,37 +1501,73 @@ export default function BondAutoUpdateView() {
                                   </TableRow>
                                 );
                               })}
+                              <TableRow key="accruedInterest">
+                                <TableCell>
+                                  <Checkbox
+                                    checked
+                                    disabled
+                                    aria-label="Apply accruedInterest"
+                                  />
+                                </TableCell>
+                                <TableCell className="font-mono text-xs whitespace-nowrap">
+                                  accruedInterest
+                                </TableCell>
+                                <TableCell className="w-[200px] max-w-[200px] overflow-hidden text-muted-foreground text-sm">
+                                  <span
+                                    className="block max-w-full truncate whitespace-nowrap font-mono text-xs"
+                                    title={formatExactNumber(model.formBase.accruedInterest)}
+                                  >
+                                    {formatExactNumber(model.formBase.accruedInterest)}
+                                  </span>
+                                </TableCell>
+                                <TableCell className="w-[220px] max-w-[220px] overflow-hidden align-middle">
+                                  <Input
+                                    title="Actual accrued interest amount (₹) — DeriData accrued_int_bottom; saved to bonds.accruedInterest."
+                                    className="h-9 w-full max-w-full font-mono text-sm truncate"
+                                    disabled
+                                    readOnly
+                                    value={
+                                      model.autofill.pricing.totalAccruedInterest != null &&
+                                      Number.isFinite(model.autofill.pricing.totalAccruedInterest)
+                                        ? String(model.autofill.pricing.totalAccruedInterest)
+                                        : ""
+                                    }
+                                  />
+                                </TableCell>
+                              </TableRow>
                             </TableBody>
                           </Table>
                         </div>
 
-                        <div className="flex flex-wrap gap-2 justify-end">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="gap-1"
-                            onClick={() => rejectRow(b.isin)}
-                            disabled={saving}
-                          >
-                            <X className="size-4" />
-                            Reject
-                          </Button>
-                          <AllowOnlyView permissions={["edit:bonds"]}>
+                        {canEditBonds ? (
+                          <div className="flex flex-wrap gap-2 justify-end">
                             <Button
                               type="button"
+                              variant="outline"
                               className="gap-1"
+                              onClick={() => rejectRow(b.isin)}
                               disabled={saving}
-                              onClick={() => acceptRow(b.isin)}
                             >
-                              {saving ? (
-                                <Loader2 className="size-4 animate-spin" />
-                              ) : (
-                                <Check className="size-4" />
-                              )}
-                              Accept &amp; save
+                              <X className="size-4" />
+                              Reject
                             </Button>
-                          </AllowOnlyView>
-                        </div>
+                            <AllowOnlyView permissions={["edit:bonds"]}>
+                              <Button
+                                type="button"
+                                className="gap-1"
+                                disabled={saving}
+                                onClick={() => acceptRow(b.isin)}
+                              >
+                                {saving ? (
+                                  <Loader2 className="size-4 animate-spin" />
+                                ) : (
+                                  <Check className="size-4" />
+                                )}
+                                Accept &amp; save
+                              </Button>
+                            </AllowOnlyView>
+                          </div>
+                        ) : null}
                       </>
                     )}
                   </div>

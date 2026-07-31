@@ -118,6 +118,7 @@ type BondDetailsResponse = {
   providerQuantity: number | null;
   isOngoingDeal: boolean | null;
   providerPrice: number | null;
+  accruedInterest?: number | null;
   ignoreAutoUpdate: boolean | null;
   allCouponDates?: string[] | Date[];
   dayConvention?: string | null;
@@ -214,6 +215,8 @@ function BondForm({ initialData, isin }: BondFormProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const apiCaller = new apiGateway.bondsApi.BondsApi(apiClientCaller);
+  const crmBondAutoUpdateApi =
+    new apiGateway.crmBondAutoUpdateApi.CrmBondAutoUpdateApi(apiClientCaller);
   const isUpdateMode = !!isin && !!initialData;
 
   const form = useForm<BondFormData>({
@@ -289,6 +292,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
         providerQuantity: initialData.providerQuantity || undefined,
         isOngoingDeal: initialData.isOngoingDeal ?? false,
         providerPrice: initialData.providerPrice || undefined,
+        accruedInterest: initialData.accruedInterest ?? undefined,
         ignoreAutoUpdate: initialData.ignoreAutoUpdate ?? false,
         allCouponDates: (initialData.allCouponDates ?? []).map((d) =>
           typeof d === "string"
@@ -428,6 +432,10 @@ function BondForm({ initialData, isin }: BondFormProps) {
     prefix: string,
     s: BondDealAutofillResponse["suggested"],
   ) => {
+    if (!data.sources.usedDeriDataCalculator) {
+      toast.success(`${prefix} bond details loaded from Daily Data for ${data.isin}.`);
+      return;
+    }
     const sale =
       s.sellPrice != null
         ? `₹${s.sellPrice.toLocaleString("en-IN", { maximumFractionDigits: 4 })}`
@@ -448,6 +456,83 @@ function BondForm({ initialData, isin }: BondFormProps) {
     toast.success(
       `${prefix} sale price (clean) ${sale}, yield ${Number.isFinite(s.yield) ? `${s.yield}%` : "—"}.${dueHint} Settlement ${formatInr(settlementAmt)}, accrued ${formatInr(accruedAmt)} (${data.sources.yieldSource} yield).${providerHint}`,
     );
+  };
+
+  const applyDeriDataAutofillResult = (data: BondDealAutofillResponse) => {
+    const s = data.suggested;
+    if (s.bondName?.trim()) form.setValue("bondName", s.bondName.trim());
+    if (s.creditRating?.trim()) form.setValue("creditRating", s.creditRating.trim());
+    if (s.natureOfInstrument) {
+      form.setValue(
+        "natureOfInstrument",
+        s.natureOfInstrument as BondFormData["natureOfInstrument"],
+      );
+    }
+    const toDate = (ymd: string | null | undefined) => {
+      if (!ymd?.trim()) return undefined;
+      const trimmed = ymd.trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+        const [y, m, d] = trimmed.split("-").map(Number);
+        const dt = new Date(y, m - 1, d);
+        return Number.isNaN(dt.getTime()) ? undefined : dt;
+      }
+      const d = new Date(trimmed);
+      return Number.isNaN(d.getTime()) ? undefined : d;
+    };
+    const md = toDate(s.maturityDate);
+    if (md) form.setValue("maturityDate", md);
+    const allot = toDate(s.dateOfAllotment);
+    if (allot) form.setValue("dateOfAllotment", allot);
+    if (s.recordDays != null && Number.isFinite(s.recordDays)) {
+      form.setValue("recordDays", s.recordDays);
+    }
+    if (s.interestPaymentFrequency) {
+      form.setValue(
+        "interestPaymentFrequency",
+        s.interestPaymentFrequency as BondFormData["interestPaymentFrequency"],
+      );
+    }
+    if (s.interestPaymentMode) {
+      form.setValue(
+        "interestPaymentMode",
+        s.interestPaymentMode as BondFormData["interestPaymentMode"],
+      );
+    }
+    if (Number.isFinite(s.faceValue)) form.setValue("faceValue", s.faceValue);
+    if (Number.isFinite(s.couponRate)) form.setValue("couponRate", s.couponRate);
+    if (s.instrumentName?.trim()) {
+      form.setValue("instrumentName", s.instrumentName.trim());
+    }
+    if (s.description?.trim()) form.setValue("description", s.description.trim());
+    if (s.sectorName?.trim()) form.setValue("sectorName", s.sectorName.trim());
+    if (s.creditRatingInfo?.trim()) {
+      form.setValue("creditRatingInfo", s.creditRatingInfo.trim());
+    }
+    if (s.ratingAgencyName?.trim()) {
+      form.setValue("ratingAgencyName", s.ratingAgencyName.trim());
+    }
+    if (s.couponType != null) form.setValue("couponType", s.couponType);
+    if (s.seniority != null) {
+      form.setValue("seniority", s.seniority as BondFormData["seniority"]);
+    }
+    if (s.redemptionType != null) form.setValue("redemptionType", s.redemptionType);
+    if (s.taxStatus != null) {
+      form.setValue("taxStatus", s.taxStatus as BondFormData["taxStatus"]);
+    }
+    if (s.isListed != null) {
+      form.setValue("isListed", s.isListed as BondFormData["isListed"]);
+    }
+    if (s.categories && s.categories.length > 0) {
+      form.setValue("categories", s.categories);
+    }
+    if (s.totalIssueSize != null && Number.isFinite(s.totalIssueSize)) {
+      form.setValue("totalIssueSize", s.totalIssueSize);
+    }
+    form.setValue(
+      "putCallOptionDetails",
+      s.putCallOptionDetails?.trim() || "Put:NA Call:NA",
+    );
+    toast.success(`Bond details loaded from DeriData for ${data.isin}.`);
   };
 
   const applyDealAutofillResult = (data: BondDealAutofillResponse) => {
@@ -518,6 +603,41 @@ function BondForm({ initialData, isin }: BondFormProps) {
     if (s.sellPrice != null && Number.isFinite(s.sellPrice)) {
       form.setValue("sellPrice", s.sellPrice);
     }
+    if (s.instrumentName?.trim()) {
+      form.setValue("instrumentName", s.instrumentName.trim());
+    }
+    if (s.description?.trim()) form.setValue("description", s.description.trim());
+    if (s.sectorName?.trim()) form.setValue("sectorName", s.sectorName.trim());
+    if (s.creditRatingInfo?.trim()) {
+      form.setValue("creditRatingInfo", s.creditRatingInfo.trim());
+    }
+    if (s.ratingAgencyName?.trim()) {
+      form.setValue("ratingAgencyName", s.ratingAgencyName.trim());
+    }
+    if (s.couponType != null) form.setValue("couponType", s.couponType);
+    if (s.bondType != null) {
+      form.setValue("bondType", s.bondType as BondFormData["bondType"]);
+    }
+    if (s.seniority != null) {
+      form.setValue("seniority", s.seniority as BondFormData["seniority"]);
+    }
+    if (s.redemptionType != null) form.setValue("redemptionType", s.redemptionType);
+    if (s.taxStatus != null) {
+      form.setValue("taxStatus", s.taxStatus as BondFormData["taxStatus"]);
+    }
+    if (s.isListed != null) {
+      form.setValue("isListed", s.isListed as BondFormData["isListed"]);
+    }
+    if (s.categories && s.categories.length > 0) {
+      form.setValue("categories", s.categories);
+    }
+    if (s.totalIssueSize != null && Number.isFinite(s.totalIssueSize)) {
+      form.setValue("totalIssueSize", s.totalIssueSize);
+    }
+    form.setValue(
+      "putCallOptionDetails",
+      s.putCallOptionDetails?.trim() || "Put:NA Call:NA",
+    );
     calcResultToast(data, "Filled:", s);
   };
 
@@ -529,10 +649,24 @@ function BondForm({ initialData, isin }: BondFormProps) {
     );
   };
 
+  const deridataAutofillMutation = useMutation({
+    mutationFn: async () => {
+      const typedIsin = String(form.getValues("isin") ?? "")
+        .trim()
+        .toUpperCase();
+      const res = await crmBondAutoUpdateApi.postBondDeriDataAutofill(typedIsin);
+      return res.responseData;
+    },
+    onSuccess: (data) => {
+      if (data) applyDeriDataAutofillResult(data);
+    },
+    onError: autofillErrorToast,
+  });
+
   const dealAutofillMutation = useMutation({
     mutationFn: async (opts?: { pricingYield?: number }) => {
       const res = await apiCaller.getBondDealAutofillCalc(
-        isin!,
+        (isin ?? form.getValues("isin") ?? "").trim(),
         buildDealAutofillParams({ pricingYield: opts?.pricingYield }),
       );
       return res.responseData;
@@ -599,6 +733,18 @@ function BondForm({ initialData, isin }: BondFormProps) {
     dealAutofillMutation.mutate({ pricingYield: py });
   };
 
+  const onFetchIsinClick = () => {
+    const typedIsin = String(form.getValues("isin") ?? "")
+      .trim()
+      .toUpperCase();
+    if (!typedIsin) {
+      toast.error("Enter an ISIN first.");
+      return;
+    }
+    form.setValue("isin", typedIsin);
+    deridataAutofillMutation.mutate();
+  };
+
   const submitBuyYieldThenAutofill = () => {
     const raw = buyYieldDraft.trim().replace(/,/g, "");
     const n = parseFloat(raw);
@@ -622,10 +768,13 @@ function BondForm({ initialData, isin }: BondFormProps) {
     createMutation.isPending ||
     updateMutation.isPending ||
     dealAutofillMutation.isPending ||
+    deridataAutofillMutation.isPending ||
     saveBuyYieldAndAutofillMutation.isPending;
 
   const dealAutofillBusy =
-    dealAutofillMutation.isPending || saveBuyYieldAndAutofillMutation.isPending;
+    dealAutofillMutation.isPending ||
+    deridataAutofillMutation.isPending ||
+    saveBuyYieldAndAutofillMutation.isPending;
 
   return (
     <div className="container mx-auto py-6">
@@ -655,11 +804,30 @@ function BondForm({ initialData, isin }: BondFormProps) {
                     <FormItem>
                       <FormLabel>ISIN *</FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Enter ISIN"
-                          disabled={isUpdateMode}
-                        />
+                        <div className="flex gap-2">
+                          <Input
+                            {...field}
+                            placeholder="Enter ISIN"
+                            disabled={isUpdateMode}
+                            onChange={(e) =>
+                              field.onChange(e.target.value.toUpperCase())
+                            }
+                          />
+                          {!isUpdateMode ? (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={onFetchIsinClick}
+                              disabled={dealAutofillBusy}
+                              className="shrink-0"
+                            >
+                              {dealAutofillBusy ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              ) : null}
+                              Fetch ISIN
+                            </Button>
+                          ) : null}
+                        </div>
                       </FormControl>
                       <FormDescription>
                         International Securities Identification Number
@@ -897,7 +1065,7 @@ function BondForm({ initialData, isin }: BondFormProps) {
                   name="totalIssueSize"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Total Issue Size</FormLabel>
+                      <FormLabel>Total Issue Size (₹)</FormLabel>
                       <FormControl>
                         <DecimalInput
                           {...field}

@@ -7,8 +7,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import ViewPort from "@/global/components/wrapper/ViewPort";
-import { FaCalendarAlt, FaClock, FaEye, FaStar } from "react-icons/fa";
-import { RiShareFill } from "react-icons/ri";
+import { Calendar, Clock, Eye, IndianRupee, Share2, Star } from "lucide-react";
 import IsshuerNotesAddToWatchList from "../_components/IsshuerNotesAddToWatchList";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
@@ -23,7 +22,7 @@ import {
   dateTimeUtils,
 } from "@/global/utils/datetime.utils";
 import { redirect } from "next/navigation";
-import { getRatingColor } from "@/global/components/Bond/CreaditRatingBadge";
+import { getRatingColor } from "@/global/components/Bond/ratingColors";
 import { CMS_URL, HOST_URL } from "@/global/constants/domains";
 import { SharePopupTrigger } from "@/global/module/share/SharePopupView";
 import ImageSlider from "../_components/ImageSlider";
@@ -33,7 +32,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { PiCurrencyInrBold } from "react-icons/pi";
 import { sanitizeStrapiHTML } from "@/global/utils/html-sanitizer";
 
 export const revalidate = 0; // Revalidate the page every hour
@@ -81,7 +79,7 @@ async function page({ params }: { params: Promise<{ isin: string }> }) {
               <div className="flex justify-between lg:justify-start items-center gap-8 w-full lg:w-auto">
                 <div className="flex items-center gap-2 text-gray-500">
                   <div>
-                    <FaCalendarAlt size={18} />
+                    <Calendar size={18} aria-hidden="true" />
                   </div>
                   <p>
                     {dateTimeUtils.formatDateTime(
@@ -91,7 +89,7 @@ async function page({ params }: { params: Promise<{ isin: string }> }) {
                   </p>
                 </div>
                 <div className="flex items-center gap-2 text-gray-500">
-                  <FaClock size={18} />{" "}
+                  <Clock size={18} aria-hidden="true" />{" "}
                   <p>
                     {calculateReadTime(
                       (data?.data?.Content?.Introduction || "") +
@@ -101,7 +99,7 @@ async function page({ params }: { params: Promise<{ isin: string }> }) {
                   </p>
                 </div>
                 <div className="flex items-center gap-2 text-gray-500">
-                  <FaEye size={18} /> <p>{data.data.Views || 0}</p>
+                  <Eye size={18} aria-hidden="true" /> <p>{data.data.Views || 0}</p>
                 </div>
               </div>
               <div className="flex justify-between lg:justify-end items-center gap-5 w-full lg:w-auto">
@@ -111,7 +109,7 @@ async function page({ params }: { params: Promise<{ isin: string }> }) {
                   url={HOST_URL + "/issuer-notes/" + data?.data?.Slug}
                 >
                   <div className="flex items-center gap-2 bg-secondary p-1 rounded-md text-white cursor-pointer">
-                    <RiShareFill size={16} />
+                    <Share2 size={16} aria-hidden="true" />
                   </div>
                 </SharePopupTrigger>
               </div>
@@ -137,7 +135,7 @@ async function page({ params }: { params: Promise<{ isin: string }> }) {
                       ),
                     }}
                   >
-                    <FaStar /> <p>{data?.bondDetails?.creditRating}</p>
+                    <Star aria-hidden="true" /> <p>{data?.bondDetails?.creditRating}</p>
                   </div>
                   <p className="text-gray-600">{data?.bondDetails?.bondName}</p>
                 </div>
@@ -210,7 +208,7 @@ async function page({ params }: { params: Promise<{ isin: string }> }) {
                   {data.bondDetails.creditRating}
                 </SortInfoBox>
                 <SortInfoBox title="Face Value">
-                  <PiCurrencyInrBold aria-hidden="true" />{" "}
+                  <IndianRupee aria-hidden="true" className="inline" size={16} />{" "}
                   {data.bondDetails.faceValue.toLocaleString("en-IN", {
                     minimumFractionDigits: 2,
                   })}

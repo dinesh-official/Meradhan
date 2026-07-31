@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AccountStatusEnum, GenderEnum } from "../enums";
+import { AccountStatusEnum, CrmRiskProfileEnum, GenderEnum } from "../enums";
 
 export const UserAccountType = [
   "INDIVIDUAL",
@@ -203,6 +203,10 @@ const createNewCustomerSchemaBase = z.object({
 
   relationshipManagerId: z.number().optional(),
 
+  /** CRM-only: LOW | MEDIUM | HIGH. Independent of KYC risk questionnaire. */
+  crmRiskProfile: CrmRiskProfileEnum.nullable().optional(),
+  crmRiskProfileRemarks: z.string().trim().max(1000).nullable().optional(),
+
   // totalInvestment: z.string({
   //     error: "Total investment value is required",
   // }).regex(/^\d+(\.\d{1,2})?$/, { message: "Total investment must be a valid number format" }),
@@ -227,7 +231,12 @@ export const updateCustomerProfileSchema = createNewCustomerSchemaBase.partial()
     return typeof data.legalEntityName === "string" && data.legalEntityName.trim().length > 0;
   },
   { message: "Legal entity name is required for Trust, Corporate, HUF, LLP, or Partnership Firm", path: ["legalEntityName"] }
+).refine(
+  (data) => data.status !== "CLOSED",
+  { message: "Account closure must be processed via Service Requests", path: ["status"] }
 );
+
+export * from "./service_requests.schema";
 
 export const createBankAccountSchema = z.object({
   accountHolderName: z.string().min(1, "Account holder name is required"),

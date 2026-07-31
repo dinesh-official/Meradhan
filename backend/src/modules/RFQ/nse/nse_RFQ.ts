@@ -75,7 +75,7 @@ import type {
 } from "./rfq.types";
 import { AppError } from "@utils/error/AppError";
 import { cacheStorage } from "@store/redis_store";
-import { env } from "@packages/config/env";
+import { env } from "@root/config/env";
 
 // :: NOTE -
 // All dates, times and datetimes are represented as strings and in Indian standard time.
@@ -474,6 +474,7 @@ export class NseRfq {
   ): Promise<AcceptNegotiationQuoteResponse> {
     return this.withReLoginRetry(async (loginKey) => {
       console.log(payload);
+      // throw new AppError("Not implemented");
 
       const { data } = await this.client.post<AcceptNegotiationQuoteResponse>(
         "/negotiation/accept",
@@ -503,6 +504,7 @@ export class NseRfq {
     payload: DealProposeRequest
   ): Promise<DealProposeResponse> {
     return this.withReLoginRetry(async (loginKey) => {
+
       const { data } = await this.client.post<DealProposeResponse>(
         "/deal/propose",
         payload,

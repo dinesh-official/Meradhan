@@ -1,5 +1,5 @@
 import { db } from "@core/database/database";
-import { env } from "@packages/config/env";
+import { env } from "@root/config/env";
 import { cacheStorage } from "@store/redis_store";
 import { isAxiosError, type AxiosError } from "axios";
 import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
@@ -7,8 +7,8 @@ import type {
     KraNonIndAppReqRoot,
     T_APP_PAN_INQ,
     T_NON_INDIVIDUAL_PAN_DOWNLOAD,
-} from "kyc-providers";
-import { KraSDK } from "kyc-providers";
+} from "@root/kyc-providers";
+import { KraSDK } from "@root/kyc-providers";
 import { addKraWorkerJob, type KraWorkerJobData } from "./kraWroker.helper";
 import {
     checkKraProcessCheckStatus,
@@ -715,6 +715,11 @@ export class CorporateKraWorkerService {
                 user?.nseDataSet?.participant.loginId &&
                 user?.nseDataSet?.participant.userId === customerId
             ) {
+                // Heal: participant exists but corporate banks may never have
+                // been posted (empty bankAccountList on first /unreg).
+                const bankSync =
+                    await cbricsManager.syncCorporateKycBanksToCbrics(customerId);
+
                 // Update Status: VERIFIED
                 await db.dataBase.customerProfileDataModel.update({
                     where: { id: customerId },
@@ -732,7 +737,10 @@ export class CorporateKraWorkerService {
                         kycId: kycDataStoreId,
                         stage: "CBRICS_ALREADY_EXISTS_VERIFIED",
                         requestData: { customerId, kycDataStoreId } as object,
-                        responseData: { message: "CBRICS already exists" } as object,
+                        responseData: {
+                            message: "CBRICS already exists",
+                            bankSync,
+                        } as object,
                         reqTime: nowIso(),
                         resTime: nowIso(),
                     },

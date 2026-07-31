@@ -597,6 +597,8 @@ export class CustomerKycManager {
       createdAt: user?.createdAt,
       updatedAt: user?.updatedAt,
       createdBy: user?.createdBy || null,
+      crmRiskProfile: user?.crmRiskProfile ?? null,
+      crmRiskProfileRemarks: user?.crmRiskProfileRemarks ?? null,
       useKraKyc:
         user?.useKraKyc ||
         !!(step1 as { usedExistingKra?: boolean } | undefined)?.usedExistingKra,

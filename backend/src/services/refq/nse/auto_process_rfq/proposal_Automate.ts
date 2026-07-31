@@ -7,6 +7,7 @@ import {
 import type { RfqAutoDataPayLoad } from "./rfq_auto_process";
 import { AutoRfqBuyFlow } from "./rfq_auto_process";
 import { sendOrderReceiptPdfByOrderId } from "@services/notifications/send_deal_sheet_nyOrderId";
+import { sendSettlementAutomationFailureEmail } from "@services/order/settlement_automation_alert";
 import crypto from "crypto";
 import type { AxiosError } from "axios";
 
@@ -420,7 +421,9 @@ const createOrderFromProposal = async (data: PRPOSALDATA): Promise<{
         await resolveClientUccCode(data);
 
     const settlementType: 0 | 1 = data.settlementType === "T+0" ? 0 : 1;
-    const yieldValue = data.manualYieldEnabled ? parseFloat(data.manualYield) : bond.yield;
+    const yieldValue = data.manualYieldEnabled
+        ? parseFloat(data.manualYield)
+        : pricing.yield;
 
     const tempOrderNumber = `MD-ASSIST-TEMP-${crypto.randomUUID().replace(/-/g, "").slice(0, 24)}`;
 
@@ -522,14 +525,18 @@ export const proposalProcessing = async (id: number) => {
     }
     const { order, rfqPayload } = await createOrderFromProposal(proposalData);
 
+    let failedStep = "CREATE_RFQ";
     try {
         const rfqFlow = new AutoRfqBuyFlow(rfqPayload);
         const rfq = await rfqFlow.createAIsinRequest();
+        failedStep = "ACCEPT_NEGOTIATION";
         const negotiation = await rfqFlow.acceptNegotiationRequest(rfq!.number);
+        failedStep = "PROPOSE_DEAL";
         const deal = await rfqFlow.proposeDealRequest({
             ngId: negotiation.id,
             ngRfqNumber: negotiation.rfqNumber,
         });
+        failedStep = "ACCEPT_DEAL";
         await rfqFlow.acceptDealRequest({
             ngId: negotiation.id,
             rfqNumber: deal.rfqNumber,
@@ -578,10 +585,32 @@ export const proposalProcessing = async (id: number) => {
             negotiationId: negotiation.id,
         };
     } catch (error) {
+        const failedNote =
+            ((error as AxiosError)?.response?.data)?.toString() ||
+            (error instanceof Error ? error.message : "Failed to proceed RFQ automation");
+
         await db.dataBase.crmSavedProposal.update({
             where: { id },
-            data: { status: "FAILED", failedNote: ((error as AxiosError)?.response?.data)?.toString() || "Failed to Proceeds Rfq Automation" },
+            data: { status: "FAILED", failedNote },
         });
+
+        await sendSettlementAutomationFailureEmail({
+            context: "PROPOSAL",
+            failedStep,
+            error,
+            proposalId: id,
+            orderId: order.id,
+            orderNumber: order.orderNumber,
+            isin: order.isin,
+            quantity: order.quantity,
+            paymentId: order.paymentId,
+            customerName:
+                proposalData.customer?.firstName?.trim() ||
+                proposalData.rfqParticipant?.nameOverride?.trim() ||
+                null,
+            ucc: proposalData.rfqParticipant?.code?.trim() || null,
+        });
+
         console.log((error as AxiosError)?.response?.data || error);
     }
 };

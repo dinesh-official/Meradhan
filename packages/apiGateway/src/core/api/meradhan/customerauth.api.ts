@@ -345,10 +345,14 @@ export class CustomerAuthApi {
     payload: z.infer<typeof appSchema.customer.createDematAccountSchema>,
     config?: AxiosRequestConfig
   ) {
+    const dematConfig: AxiosRequestConfig = {
+      ...config,
+      timeout: config?.timeout ?? 120_000,
+    };
     const { data } = await this.apiClient.post<{ message: string }>(
       "/auth/customer/profile/demat-account",
       payload,
-      config
+      dematConfig
     );
     return data;
   }

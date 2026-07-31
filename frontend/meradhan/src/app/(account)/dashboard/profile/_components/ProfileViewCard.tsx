@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { makeFullname } from "@/global/utils/formate";

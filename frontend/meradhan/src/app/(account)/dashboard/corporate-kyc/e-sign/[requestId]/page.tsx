@@ -6,10 +6,10 @@
  *   `/risk-profile/questions` endpoint and submitted through the existing
  *   `/api/auth/customer/profile/risk-profile` POST).
  *
- * Step 2 — sign the CRM-uploaded PDF via Digio's iframe SDK. The backend
- *   downloads the PDF, hands it to Digio, returns the iframe handoff
- *   payload, and verifies the signed doc id after the iframe success
- *   callback.
+ * Step 2 — sign via Digio's iframe SDK. The backend downloads an
+ * operator-uploaded PDF or generates one from corporate KYC + risk profile,
+ * hands it to Digio, returns the iframe handoff payload, and verifies the
+ * signed doc id after the iframe success callback.
  *
  * This server entry fetches the request detail (ownership-guarded
  * server-side) and bails out early if the row is not PENDING or not

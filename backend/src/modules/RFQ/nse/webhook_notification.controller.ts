@@ -1,9 +1,10 @@
-import { $Enums, db } from "@core/database/database";
+import { db } from "@core/database/database";
 import { HttpStatus } from "@utils/error/AppError";
 import logger from "@utils/logger/logger";
 import { type Request, type Response } from "express";
 import { sendKycApprovedEmail } from "@jobs/helper/send_emails";
-import { sendDealSheetPdfByOrderId } from "@services/notifications/send_deal_sheet_nyOrderId";
+import { processCbricsSettlementWebhook } from "@services/notifications/cbrics_settlement_webhook.service";
+import { getOptionalEmailTitleFromSources } from "@root/schema";
 import { kraStatusFromCbricsWorkflowStatus } from "./cbrics_workflow_kra_map";
 
 const kraStatusFromWorkflowStatus = kraStatusFromCbricsWorkflowStatus;
@@ -66,7 +67,9 @@ export class NseWebhookController {
               firstName: true,
               lastName: true,
               gender: true,
-              kraStatus: true
+              kraStatus: true,
+              panCard: { select: { gender: true } },
+              aadhaarCard: { select: { gender: true } },
             },
           });
           if (!customer) continue;
@@ -84,12 +87,7 @@ export class NseWebhookController {
             const fullName =
               `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim() ||
               "Customer";
-            const title =
-              customer.gender === "MALE"
-                ? ("Mr." as const)
-                : customer.gender === "FEMALE"
-                  ? ("Ms." as const)
-                  : undefined;
+            const title = getOptionalEmailTitleFromSources(customer);
             await sendKycApprovedEmail({
               customerId: customer.id,
               email: customer.emailAddress,
@@ -106,87 +104,15 @@ export class NseWebhookController {
     } catch (e) {
       logger.logError("CBRICS webhook: KYC approved hook failed", { error: e });
     }
-    console.log(payload?.settleOrderList?.[0]?.orderNumber);
-
     try {
-      if (payload?.settleOrderList?.[0]?.orderNumber) {
-        const settleStatus = payload?.settleOrderList?.[0]?.settleStatus;
-        const orderNumber = Number(payload?.settleOrderList?.[0].orderNumber);
-        if (settleStatus == 4) {
-          const order = await db.dataBase.order.findFirst({
-            where: {
-              reqOrderNumber: orderNumber.toString()
-            }
-          })
-          if (!order) {
-            console.warn("No Order from our system " + orderNumber);
-            res.sendResponse({
-              statusCode: HttpStatus.OK,
-              responseData: {
-                status: "ok",
-                message: "Order not found",
-              },
-            });
-            return;
-          }
-          await db.dataBase.order.updateMany({
-            where: {
-              reqOrderNumber: orderNumber.toString()
-            },
-            data: {
-              status: "SETTLED"
-            }
-          })
-
-          await sendDealSheetPdfByOrderId({ orderId: orderNumber })
-
-          console.log("Deal Sheet Send Successfully");
-        } else {
-          /**
-           * NSE `settle_order.settleStatus` → Prisma `OrderStatus`.
-           * 0 Pending · 1–3 In progress · 4 Settled (handled above) · 5 Reversed · 6 Expired ·
-           * 7 Cannot settle · 8 Cancelled · 9 Contact us
-           */
-          const n = typeof settleStatus === "number" ? settleStatus : Number(settleStatus);
-          let nextStatus: $Enums.OrderStatus | null = null;
-          if (Number.isInteger(n)) {
-            switch (n) {
-              case 0:
-                nextStatus = $Enums.OrderStatus.PENDING;
-                break;
-              case 1:
-              case 2:
-              case 3:
-                nextStatus = $Enums.OrderStatus.IN_PROGRESS;
-                break;
-              case 5:
-              case 7:
-              case 9:
-                nextStatus = $Enums.OrderStatus.REJECTED;
-                break;
-              case 6:
-                nextStatus = $Enums.OrderStatus.EXPIRED;
-                break;
-              case 8:
-                nextStatus = $Enums.OrderStatus.CANCELLED;
-                break;
-              default:
-                nextStatus = null;
-            }
-          }
-
-          if (nextStatus != null) {
-            await db.dataBase.order.updateMany({
-              where: {
-                reqOrderNumber: orderNumber.toString(),
-              },
-              data: { status: nextStatus },
-            });
-          }
-        }
+      const settlementResult = await processCbricsSettlementWebhook(payload);
+      if (settlementResult.processed) {
+        logger.logInfo("CBRICS settlement webhook processed", settlementResult);
       }
     } catch (error) {
-      console.error((error as Error)?.message);
+      logger.logError("CBRICS settlement webhook failed", {
+        error: error instanceof Error ? error.message : error,
+      });
     }
 
     res.sendResponse({
@@ -232,6 +158,27 @@ export class NseWebhookController {
         type: "RFQ",
       },
     });
+
+    // Some NSE environments post settlement rows on the RFQS callback URL.
+    const payload = req.body;
+    if (
+      payload &&
+      typeof payload === "object" &&
+      Array.isArray((payload as { settleOrderList?: unknown }).settleOrderList) &&
+      (payload as { settleOrderList: unknown[] }).settleOrderList.length > 0
+    ) {
+      try {
+        const settlementResult = await processCbricsSettlementWebhook(payload);
+        if (settlementResult.processed) {
+          logger.logInfo("RFQS webhook settlement processed", settlementResult);
+        }
+      } catch (error) {
+        logger.logError("RFQS webhook settlement failed", {
+          error: error instanceof Error ? error.message : error,
+        });
+      }
+    }
+
     res.sendResponse({
       statusCode: HttpStatus.OK,
       responseData: {

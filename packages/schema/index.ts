@@ -42,10 +42,27 @@ export {
 } from "./lib/customers/corporateKyc.schema";
 
 export {
+  getDearLineFromCustomer,
   getEmailSalutationFromGender,
+  getEmailSalutationFromSources,
+  getOptionalEmailTitleFromSources,
+  isCorporateUserType,
   resolveGenderForEmailSalutation,
+  type EmailTitle,
   type GenderSources,
 } from "./lib/customers/email_salutation";
+
+export {
+  KRA_STATE_MASTER,
+  getCorporateKycStateOptions,
+  getKraStateCodeForName,
+  getKraStateCodeReferenceRows,
+  lookupKraStateByCode,
+  lookupKraStateByName,
+  normalizeKraStateName,
+  type CorporateKycStateOption,
+  type KraStateEntry,
+} from "./lib/kyc/kraStateMaster";
 
 export {
   CRM_ORDER_STATUS_VALUES,

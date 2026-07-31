@@ -1,4 +1,4 @@
-import "@packages/config/env";
+import "@root/config/env";
 
 import type { Prisma } from "@databases/generated/prisma/postgres";
 import { OrderStatus, PaymentStatus } from "@databases/generated/prisma/postgres";
@@ -11,14 +11,14 @@ import { BondService } from "@resource/bonds/bond.service";
 import {
   generateDealPdfBuffer,
   generateOrderPdfBuffer,
-  getInterestPaymentSchedule,
-} from "kyc-providers";
+} from "@root/kyc-providers/pdf";
+import { getInterestPaymentSchedule } from "@root/kyc-providers";
 
 import { fetchBankNameFromIfsc } from "@utils/razorpayIfsc";
-import { getDpName } from "dp-id-lookup";
+import { getDpName } from "@root/dp-id-lookup";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import crypto from "crypto";
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
 import { computeBondOrderPricingData, getLastNextCouponDateBasedOnSettlementDate, getPayoutDates } from "@services/order/order-pricing-helper";
 import { sendBackOfficeEmail } from "@communication/email_communication";
 import {
@@ -30,6 +30,7 @@ import { getBondInfoCalcData } from "@resource/bonds/fill-bonds-auto";
 import { OrderService } from "@resource/customer/order/order.service";
 import { orderSettlementQueue } from "@jobs/queue/worker_queues";
 import { db } from "@core/database/database";
+import { OrderSettlementService } from "@services/order/order_settlement.service";
 
 function formatDraftOrderCustomerName(profile: {
   firstName: string;
@@ -1687,13 +1688,20 @@ export class CrmOrdersService {
     const orderService = new OrderService();
 
     await orderService.updateOrderStatus(order.id, "APPLIED");
-    const job = await orderSettlementQueue.add(
-      {
-        type: "orderSettlement",
-        id: order.id,
-        isNetBanking: false,
-      }
-    );
+    const settlementService = new OrderSettlementService();
+    await settlementService.seedOrderStages(order.id, { isNetBanking: false });
+    const settlementJobId = `order-settlement-${order.id}`;
+    const existingJob = await orderSettlementQueue.getJob(settlementJobId);
+    if (!existingJob) {
+      await orderSettlementQueue.add(
+        {
+          type: "orderSettlement",
+          id: order.id,
+          isNetBanking: false,
+        },
+        { jobId: settlementJobId },
+      );
+    }
     return result;
   }
 

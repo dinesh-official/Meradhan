@@ -68,28 +68,15 @@ export function displayFromNseSettleStatus(code: number): {
 
 export type OrderStatusInput = Order["status"] | number | string;
 
-export type PaymentStatusInput = Order["paymentStatus"] | string | undefined;
-
-/** Checkout never finished: payment pending / cancelled / rejected without successful payment. */
-function isCheckoutNotCompleted(
-  paymentStatus: PaymentStatusInput,
-  orderStatus: OrderStatusInput,
-): boolean {
-  const ps =
-    paymentStatus == null ? "" : String(paymentStatus).trim().toUpperCase();
-  if (ps === "PENDING" || ps === "CANCELLED") return true;
-
-  const os =
-    typeof orderStatus === "string"
-      ? orderStatus.trim().toUpperCase()
-      : typeof orderStatus === "number"
-        ? String(orderStatus)
-        : "";
-  if (os === "REJECTED" && ps !== "COMPLETED" && ps !== "REFUNDED") return true;
-  if (os === "PENDING" && ps !== "COMPLETED" && ps !== "REFUNDED") return true;
-
-  return false;
-}
+const ORDER_STATUS_TEXT: Record<string, { text: string; className: string }> = {
+  PENDING: { text: "Not completed", className: "text-slate-600" },
+  IN_PROGRESS: { text: "In progress", className: "text-blue-600" },
+  APPLIED: { text: "In progress", className: "text-blue-600" },
+  SETTLED: { text: "Settled", className: "text-green-600" },
+  REJECTED: { text: "Rejected", className: "text-red-600" },
+  EXPIRED: { text: "Expired", className: "text-gray-500" },
+  CANCELLED: { text: "Cancelled", className: "text-gray-600" },
+};
 
 function parseNumericOrderStatus(status: unknown): number | null {
   if (typeof status === "number" && Number.isInteger(status) && status >= 0 && status <= 9) {
@@ -105,41 +92,14 @@ function parseNumericOrderStatus(status: unknown): number | null {
   return null;
 }
 
-/** Prisma `OrderStatus` → dashboard copy (after checkout rules). */
-function displayFromDbOrderStatus(u: string): { text: string; className: string } | null {
-  switch (u) {
-    case "PENDING":
-      // Unpaid checkout — payment capture moves the order to APPLIED.
-      return { text: "Not completed", className: "text-slate-600" };
-    case "IN_PROGRESS":
-    case "APPLIED":
-      return { text: "In progress", className: "text-blue-600" };
-    case "SETTLED":
-      return { text: "Settled", className: "text-green-600" };
-    case "REJECTED":
-      return { text: "Rejected", className: "text-red-600" };
-    case "EXPIRED":
-      return { text: "Expired", className: "text-gray-500" };
-    case "CANCELLED":
-      return { text: "Cancelled", className: "text-gray-600" };
-    default:
-      return null;
-  }
-}
-
+/** Map `Order.status` → display text. Optionally falls back to NSE settle codes. */
 export function getStatusDisplay(
   status: OrderStatusInput,
-  paymentStatus?: PaymentStatusInput,
   settleStatus?: number | null,
 ) {
-  // Prisma `Order.status` (e.g. SETTLED) is the source of truth for list filter + display.
   if (typeof status === "string") {
-    const fromDb = displayFromDbOrderStatus(status.trim().toUpperCase());
-    if (fromDb) return fromDb;
-  }
-
-  if (isCheckoutNotCompleted(paymentStatus, status)) {
-    return { text: "Not completed", className: "text-slate-600" };
+    const key = status.trim().toUpperCase();
+    if (ORDER_STATUS_TEXT[key]) return ORDER_STATUS_TEXT[key];
   }
 
   if (settleStatus != null) {
@@ -161,11 +121,7 @@ export function getStatusDisplay(
 }
 
 /** True when `Order.status` is SETTLED (deal sheet is available). */
-export function isOrderSettled(
-  status: OrderStatusInput,
-  _paymentStatus?: PaymentStatusInput,
-  _settleStatus?: number | null,
-): boolean {
+export function isOrderSettled(status: OrderStatusInput): boolean {
   if (typeof status !== "string") return false;
   return status.trim().toUpperCase() === "SETTLED";
 }
@@ -223,11 +179,41 @@ function bondDetailsRecord(order: Order): Record<string, unknown> {
 
 /**
  * Settlement date for display: NSE-linked `order.settlementDate` when present, otherwise
- * checkout snapshot `bondDetails.pricing.settlementDate` (orders not yet linked to `settle_order`).
+ * checkout snapshot `bondDetails.pricing.settlementDate` / metadata.
  */
 export function getOrderSettlementDateInput(order: Order): string | undefined {
   const top = order.settlementDate;
   if (top != null && String(top).trim() !== "") return String(top).trim();
+  const fromPricing = getOrderPricingSettlementDateInput(order);
+  if (fromPricing) return fromPricing;
+  const meta = order.metadata;
+  if (meta && typeof meta === "object" && !Array.isArray(meta)) {
+    const sd = (meta as Record<string, unknown>).settlementDate;
+    if (typeof sd === "string" && sd.trim()) return sd.trim();
+  }
+  return undefined;
+}
+
+/** Trade (deal) date: API `dealDate`, then pricing snapshot, then metadata. */
+export function getOrderTradeDateInput(order: Order): string | undefined {
+  const top = order.dealDate;
+  if (top != null && String(top).trim() !== "") return String(top).trim();
+  const b = bondDetailsRecord(order);
+  const p = b.pricing;
+  if (p && typeof p === "object" && !Array.isArray(p)) {
+    const dd = (p as Record<string, unknown>).dealDate;
+    if (typeof dd === "string" && dd.trim()) return dd.trim();
+  }
+  const meta = order.metadata;
+  if (meta && typeof meta === "object" && !Array.isArray(meta)) {
+    const dd = (meta as Record<string, unknown>).dealDate;
+    if (typeof dd === "string" && dd.trim()) return dd.trim();
+  }
+  return undefined;
+}
+
+/** Settlement date from checkout `bondDetails.pricing.settlementDate`. */
+export function getOrderPricingSettlementDateInput(order: Order): string | undefined {
   const b = bondDetailsRecord(order);
   const p = b.pricing;
   if (p && typeof p === "object" && !Array.isArray(p)) {
@@ -307,11 +293,18 @@ export function formatMaturityDdMmYyyy(raw: string | undefined): string {
   return "—";
 }
 
-/** Offered / snapshot yield from order `bondDetails` (`buyYield` preferred, else listing `yield`). */
+/** User-facing yield from order snapshot (`pricing.yield` or listing `yield` only). */
 export function formatOrderYieldPercent(order: Order): string {
   const b = bondDetailsRecord(order);
+  const pricing = b.pricing;
+  const pricingYield =
+    pricing != null &&
+      typeof pricing === "object" &&
+      !Array.isArray(pricing)
+      ? parseNumericUnknown((pricing as Record<string, unknown>).yield)
+      : null;
   const y =
-    parseNumericUnknown(b.buyYield) ??
+    pricingYield ??
     parseNumericUnknown(b.yield) ??
     parseNumericUnknown(b.lastTradeYield);
   if (y == null || !Number.isFinite(y) || y < 0) return "—";

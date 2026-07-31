@@ -5,6 +5,7 @@ import { db } from "@core/database/database";
 import logger from "@utils/logger/logger";
 import { PaymentService } from "./payment.service";
 import { orderSettlementQueue } from "@jobs/queue/worker_queues";
+import { OrderSettlementService } from "@services/order/order_settlement.service";
 
 export class PaymentController {
   private paymentService = new PaymentService();
@@ -85,9 +86,12 @@ export class PaymentController {
 
     // Process payment.captured event
     if (body.event === "payment.captured") {
+      const paymentEntity = body.payload?.payment?.entity;
+      const paymentOrderId = paymentEntity?.order_id as string | undefined;
+      const paymentId = paymentEntity?.id as string | undefined;
+
       try {
-        const paymentEntity = body.payload?.payment?.entity;
-        const isNetBanking = body.payload?.payment?.entity.method == "netbanking";
+        const isNetBanking = paymentEntity?.method == "netbanking";
 
         if (!paymentEntity) {
           logger.logError("Payment entity missing in webhook payload");
@@ -100,9 +104,6 @@ export class PaymentController {
             },
           });
         }
-
-        const paymentOrderId = paymentEntity.order_id;
-        const paymentId = paymentEntity.id;
 
         if (!paymentOrderId || !paymentId) {
           logger.logError("Missing payment order ID or payment ID in webhook");
@@ -121,8 +122,12 @@ export class PaymentController {
           paymentId
         );
 
+        const shouldQueueSettlement =
+          orderResult.status === "success" ||
+          orderResult.status === "already_captured";
+
         // Trigger settlement process as background job
-        if (orderResult.status === "success") {
+        if (shouldQueueSettlement) {
           const order =
             await this.orderService.getOrderByPaymentOrderId(paymentOrderId);
           if (!order) {
@@ -135,29 +140,56 @@ export class PaymentController {
             });
           }
 
-          await this.orderService.updateOrderStatus(order.id, "APPLIED");
+          await this.orderService.updateOrderStatus(order.id, "IN_PROGRESS");
           await this.orderService.updateOrderMetadata(order.id, paymentEntity);
-          const job = await orderSettlementQueue.add(
-            {
-              type: "orderSettlement",
-              id: order.id,
-              paymentOrderId,
-              paymentId,
-              paymentEntity,
-              isNetBanking,
 
-            }
-          );
-          console.log(job);
-          logger.logInfo(
-            `Payment captured and settlement job queued for order: ${paymentOrderId}`,
-            {
-              jobId: job.id,
-            }
-          );
+          const settlementService = new OrderSettlementService();
+          await settlementService.seedOrderStages(order.id, { isNetBanking });
+
+          const settlementJobId = `order-settlement-${order.id}`;
+          const existingJob = await orderSettlementQueue.getJob(settlementJobId);
+          if (!existingJob) {
+            const job = await orderSettlementQueue.add(
+              {
+                type: "orderSettlement",
+                id: order.id,
+                paymentOrderId,
+                paymentId,
+                paymentEntity,
+                isNetBanking,
+              },
+              { jobId: settlementJobId },
+            );
+            logger.logInfo(
+              `Payment captured and settlement job queued for order: ${paymentOrderId}`,
+              {
+                jobId: job.id,
+                captureStatus: orderResult.status,
+              },
+            );
+          } else {
+            logger.logInfo(
+              `Settlement job already queued for order: ${paymentOrderId}`,
+              {
+                jobId: existingJob.id,
+                captureStatus: orderResult.status,
+              },
+            );
+          }
         }
       } catch (error) {
-        logger.logError("Error processing payment.captured webhook:", error);
+        const reason =
+          error instanceof AppError
+            ? `${error.message} (code: ${error.code ?? "none"}, status: ${error.statusCode})`
+            : error instanceof Error
+              ? error.message
+              : String(error);
+        logger.logError(`Error processing payment.captured webhook: ${reason}`, {
+          paymentOrderId,
+          paymentId,
+          razorpayEventId: req.headers["x-razorpay-event-id"],
+          error,
+        });
         // Return success to Razorpay even if processing fails
         // This prevents Razorpay from retrying, and we can handle the error internally
         return res.sendResponse({

@@ -1,6 +1,6 @@
 import { db, type CustomerProfileDataModel } from "@core/database/database";
-import { env } from "@packages/config/env";
-import type { Root } from "@packages/kyc-providers/pdf/dataMapper";
+import { env } from "@root/config/env";
+import type { Root } from "@root/kyc-providers/pdf/dataMapper";
 import { ParticipantManager } from "@services/refq/nse/cbrics_manager.service";
 import { cacheStorage } from "@store/redis_store";
 import { removeCountryCode } from "@utils/filters/convert";
@@ -10,12 +10,12 @@ import type {
   T_APP_PAN_INQ,
   T_APP_PAN_INQ_DOWNLOAD,
   T_APP_PAN_REGISTER_REQUEST_PAYLOAD,
-} from "kyc-providers";
+} from "@root/kyc-providers";
 import {
   KraSDK,
   removeLastCommaChunks,
   splitAddressInto3BalancedLines,
-} from "kyc-providers";
+} from "@root/kyc-providers";
 import {
   checkIsKraMatched,
   checkKraProcessCheckStatus,

@@ -17,9 +17,7 @@ import {
 } from "@/global/utils/datetime.utils";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import { FaCalendarAlt } from "react-icons/fa";
-import { FaClock, FaEye } from "react-icons/fa6";
-import { RiShareFill } from "react-icons/ri";
+import { Calendar, Clock, Eye, Share2 } from "lucide-react";
 import AvatarDetailCard from "../../_components/AvatarDatialCard";
 import PostCard from "../../_components/PostCard";
 import { sanitizeStrapiHTML } from "@/global/utils/html-sanitizer";
@@ -76,7 +74,7 @@ async function page({ params }: { params: Promise<{ slug: string }> }) {
               </Badge>
               <div className="flex items-center gap-2 text-gray-500">
                 <div>
-                  <FaCalendarAlt size={18} />
+                  <Calendar size={18} aria-hidden="true" />
                 </div>
                 <p>
                   {post?.createdAt &&
@@ -87,7 +85,7 @@ async function page({ params }: { params: Promise<{ slug: string }> }) {
                 </p>
               </div>
               <div className="flex items-center gap-2 text-gray-500">
-                <FaClock size={18} />{" "}
+                <Clock size={18} aria-hidden="true" />{" "}
                 <p>
                   {calculateReadTime(
                     post.Contents.Introduction +
@@ -99,14 +97,14 @@ async function page({ params }: { params: Promise<{ slug: string }> }) {
             </div>
             <div className="flex justify-between lg:justify-end items-center gap-5 w-full lg:w-auto">
               <div className="flex items-center gap-2 text-gray-500">
-                <FaEye size={18} /> <p>{post?.Views}</p>
+                <Eye size={18} aria-hidden="true" /> <p>{post?.Views}</p>
               </div>
               <div className="flex items-center gap-2 text-gray-500">
                 <SharePopupTrigger
                   title="Share News"
                   url={`${HOST_URL}/news/${post.Slug}`}
                 >
-                  <RiShareFill size={18} className="cursor-pointer" />
+                  <Share2 size={18} className="cursor-pointer" aria-hidden="true" />
                 </SharePopupTrigger>
               </div>
             </div>

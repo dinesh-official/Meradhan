@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
 
 /**
  * Validates the `x-api-key` header against INTERNAL_API_KEY in .env.

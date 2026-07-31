@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import Link from "next/link";
-import { ArrowLeft, UserPlus, FileDown, UserRound } from "lucide-react";
+import { ArrowLeft, UserPlus, FileDown, UserRound, Loader2 } from "lucide-react";
 import PageInfoBar from "@/global/elements/wrapper/PageInfoBar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -43,10 +43,15 @@ import {
   getEmailSalutationFromGender,
   resolveGenderForEmailSalutation,
 } from "@root/schema";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { RfqParticipantInfoDialog } from "@/app/(presentation)/dashboard/rfqs/nse/rfq-participants/_components/RfqParticipantInfoDialog";
+import {
+  formatCleanPriceDisplay,
+  formatInrMoneyDisplay,
+  formatYtmDisplay,
+} from "@/global/utils/pricingDecimalDisplay";
 
 /** Backend `sendResponse` errors expose `message` on the JSON body; axios default `Error.message` is generic. */
 function getApiErrorMessage(err: unknown, fallback: string): string {
@@ -59,6 +64,88 @@ function getApiErrorMessage(err: unknown, fallback: string): string {
     return err.message;
   }
   return fallback;
+}
+
+async function getApiErrorDetails(err: unknown): Promise<{
+  message: string;
+  code?: string;
+}> {
+  if (err instanceof ApiError) {
+    const data = err.response?.data as unknown;
+    if (data && typeof data === "object" && !(data instanceof Blob)) {
+      const obj = data as { message?: string; code?: string };
+      return {
+        message: obj.message?.trim() || err.message,
+        code: typeof obj.code === "string" ? obj.code : undefined,
+      };
+    }
+    if (data instanceof Blob) {
+      try {
+        const j = JSON.parse(await data.text()) as {
+          message?: string;
+          code?: string;
+        };
+        return {
+          message: j.message?.trim() || err.message,
+          code: typeof j.code === "string" ? j.code : undefined,
+        };
+      } catch {
+        // ignore
+      }
+    }
+    return { message: err.message };
+  }
+  if (err instanceof Error) return { message: err.message };
+  return { message: "Unknown error" };
+}
+
+function isPricingSnapshotMissingError(details: {
+  message: string;
+  code?: string;
+}): boolean {
+  if (details.code === "PRICING_SNAPSHOT_MISSING") return true;
+  const msg = details.message.toLowerCase();
+  return (
+    msg.includes("pricing snapshot is missing") ||
+    msg.includes("bonddetails.pricing must include")
+  );
+}
+
+function hasCheckoutPricingSnapshot(bondDetails: unknown): boolean {
+  if (!bondDetails || typeof bondDetails !== "object" || Array.isArray(bondDetails)) {
+    return false;
+  }
+  const pricing = (bondDetails as { pricing?: unknown }).pricing;
+  if (!pricing || typeof pricing !== "object" || Array.isArray(pricing)) {
+    return false;
+  }
+  const snap = pricing as Record<string, unknown>;
+  const deal =
+    typeof snap.dealDate === "string" && snap.dealDate.trim() !== "";
+  const settle =
+    typeof snap.settlementDate === "string" &&
+    snap.settlementDate.trim() !== "";
+  return deal && settle;
+}
+
+type ProposedPricingState = {
+  orderNumber: string;
+  isin: string;
+  bondName: string;
+  tradeNumber: string;
+  sources: {
+    settleOrderNumber: string;
+    rfqNumber: string;
+    rfqMasterNumber: string | null;
+  };
+  pricing: Record<string, unknown>;
+};
+
+function formatPricingField(value: unknown): string {
+  if (value == null) return "—";
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  if (Array.isArray(value)) return value.join(", ");
+  return String(value);
 }
 
 function formatVal(v: string | number | null | undefined): string {
@@ -189,6 +276,39 @@ function ddMmmYyyyToPickerValue(input?: string | null): string {
   return `${yyyy}-${String(mm).padStart(2, "0")}-${String(dd).padStart(2, "0")}`;
 }
 
+/**
+ * Last-resort settlement YMD from settle_order pay-in fields only.
+ * Prefer RFQ master `settlementDate` / `dealDate` from the autofill API —
+ * do not use modSettleDate as the primary seed (it can be a delayed settle day).
+ */
+function settlementDateFallbackFromSettleOrder(
+  rfq: Pick<
+    RfqByOrderNumberSettleOrder,
+    "modSettleDate" | "fundsPayinTime" | "secPayinTime" | "payoutTime" | "createdAt"
+  >,
+): string {
+  return (
+    payinDateTimeToPickerValue(rfq.fundsPayinTime ?? null) ||
+    payinDateTimeToPickerValue(rfq.secPayinTime ?? null) ||
+    payinDateTimeToPickerValue(rfq.payoutTime ?? null) ||
+    ddMmmYyyyToPickerValue(rfq.modSettleDate ?? null) ||
+    ddMmmYyyyToPickerValue(rfq.createdAt ?? null) ||
+    ""
+  );
+}
+
+/** Normalize autofill API deal/settlement values to YYYY-MM-DD for the date picker. */
+function toPickerYmd(value: string | null | undefined): string {
+  const raw = String(value ?? "").trim();
+  if (!raw) return "";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  return (
+    ddMmmYyyyToPickerValue(raw) ||
+    payinDateTimeToPickerValue(raw) ||
+    ""
+  );
+}
+
 function payinDateTimeToPickerValue(input?: string | null): string {
   const s = String(input ?? "").trim();
   if (!s) return "";
@@ -304,6 +424,7 @@ function GeneratePdfContent() {
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
   const [pdfAutofillSettlementDate, setPdfAutofillSettlementDate] = useState("");
+  const [pdfResolvedDealDate, setPdfResolvedDealDate] = useState<string | null>(null);
   const [autofillingPdfOptions, setAutofillingPdfOptions] = useState(false);
   const [pdfAccruedInterestDays, setPdfAccruedInterestDays] = useState("");
   const [pdfSettlementNumber, setPdfSettlementNumber] = useState("");
@@ -313,6 +434,11 @@ function GeneratePdfContent() {
   const [pdfInterestPaymentDates, setPdfInterestPaymentDates] = useState("");
   const [pdfNonAmortizedBond, setPdfNonAmortizedBond] = useState(true);
   const [pdfAmortizedPrincipalPaymentDates, setPdfAmortizedPrincipalPaymentDates] = useState("");
+  const autoAutofillRanForRef = useRef<string | null>(null);
+  const [useNsePricing, setUseNsePricing] = useState(false);
+  const [proposedPricing, setProposedPricing] =
+    useState<ProposedPricingState | null>(null);
+  const [proposingPricing, setProposingPricing] = useState(false);
   const ordersApi = new apiGateway.crm.crmOrdersApi(apiClientCaller);
   const customerApi = new apiGateway.crm.customer.CrmCustomerApi(apiClientCaller);
   const participantsApi = new apiGateway.crm.rfq.participants.RfqParticipantsApi(
@@ -344,6 +470,12 @@ function GeneratePdfContent() {
       setIsAutoFetchedCustomer(false);
     }
   }, [participantCode]);
+
+  useEffect(() => {
+    setUseNsePricing(false);
+    setProposedPricing(null);
+    setProposingPricing(false);
+  }, [orderNumber]);
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["rfq-by-order", orderNumber],
@@ -477,6 +609,10 @@ function GeneratePdfContent() {
   const customerOrder: CustomerFullOrder | null =
     customerOrderData?.responseData ?? null;
 
+  const orderHasPricingSnapshot = hasCheckoutPricingSnapshot(
+    (customerOrder as { bondDetails?: unknown } | null)?.bondDetails,
+  );
+
   // Participant-counterparty resolution. After the new flow runs there is
   // a real Meradhan `Order` row with `customerProfileId = null` and
   // `linkedRfqParticipantCode` set; the legacy `settle_order`-only tag
@@ -564,7 +700,12 @@ function GeneratePdfContent() {
   const effectiveOrderSide: "BUY" | "SELL" =
     metaSide === "BUY" || metaSide === "SELL" ? metaSide : orderSide;
   const transactionLabel = effectiveOrderSide === "SELL" ? "sell" : "buy";
-  const dealDateText = formatDealDateForEmail(rfq?.modSettleDate ?? rfq?.createdAt ?? null);
+  const dealDateText = formatDealDateForEmail(
+    pdfResolvedDealDate ??
+      rfq?.modSettleDate ??
+      rfq?.createdAt ??
+      null,
+  );
 
   const openParticipantInfoDialog = () => {
     if (!linkedParticipantCode) return;
@@ -602,7 +743,9 @@ function GeneratePdfContent() {
 
   useEffect(() => {
     if (!orderNumber) return;
+    autoAutofillRanForRef.current = null;
     setPdfAutofillSettlementDate("");
+    setPdfResolvedDealDate(null);
     setAutofillingPdfOptions(false);
     setPdfAccruedInterestDays("");
     setPdfSettlementNumber("");
@@ -618,34 +761,136 @@ function GeneratePdfContent() {
     if (!pdfOptionsFetched || !orderNumber) return;
     const row = pdfOptionsQuery?.responseData;
     if (!row || row.orderNumber !== orderNumber) return;
-    if (row.accruedInterestDays != null) {
-      setPdfAccruedInterestDays(String(row.accruedInterestDays));
-    }
-    setPdfSettlementNumber(row.settlementNumber ?? "");
-    setPdfSettlementDateTime(row.settlementDateTime ?? "");
-    setPdfLastInterestPaymentDateRaw(row.lastInterestPaymentDateRaw ?? "");
-    setPdfLastInterestPaymentDate(row.lastInterestPaymentDate ?? "");
-    setPdfInterestPaymentDates(interestPaymentDatesToFormText(row.interestPaymentDates));
+    // Keep saved settlement datetime / amortizing flags; coupon + days come from
+    // RFQ autofill (settlement-date dependent) so we don't restore stale values.
+    if (row.settlementDateTime) setPdfSettlementDateTime(row.settlementDateTime);
     setPdfNonAmortizedBond(row.nonAmortizedBond);
     setPdfAmortizedPrincipalPaymentDates(row.amortizedPrincipalPaymentDates ?? "");
   }, [orderNumber, pdfOptionsFetched, pdfOptionsQuery?.responseData]);
 
+  // Seed settlement no from settle_order only. Settlement / deal dates come from
+  // the RFQ master autofill response (not modSettleDate).
   useEffect(() => {
-    if (pdfOptionsQuery?.responseData) return;
-    if (rfq?.settlementNo == null || pdfSettlementNumber !== "") return;
-    setPdfSettlementNumber(String(rfq.settlementNo));
-  }, [rfq?.settlementNo, pdfSettlementNumber, pdfOptionsQuery?.responseData]);
+    if (!rfq) return;
+    if (rfq.settlementNo != null) {
+      setPdfSettlementNumber((prev) =>
+        prev.trim() !== "" ? prev : String(rfq.settlementNo),
+      );
+    }
+  }, [rfq]);
 
+  const autofillReceiptPdfOptions = async (options?: {
+    settlementDate?: string | null;
+    /** When true, omit settlementDate so the backend uses saved RFQ master dates. */
+    preferRfqMasterDates?: boolean;
+    silent?: boolean;
+  }) => {
+    if (!orderNumber) return;
+    const preferRfqMaster = options?.preferRfqMasterDates === true;
+    const settlementDate = preferRfqMaster
+      ? ""
+      : (options?.settlementDate != null
+          ? String(options.settlementDate).trim()
+          : "") ||
+        pdfAutofillSettlementDate.trim() ||
+        "";
+    const silent = options?.silent === true;
+
+    setAutofillingPdfOptions(true);
+    try {
+      const resp = await apiClientCaller.post<{
+        responseData?: {
+          accruedInterestDays: number;
+          settlementNumber: string | null;
+          lastInterestPaymentDateRaw: string | null;
+          lastInterestPaymentDate: string | null;
+          interestPaymentDates: string | string[] | null;
+          settlementDate: string;
+          dealDate: string | null;
+          settlementDateTime?: string | null;
+        };
+        message?: string;
+      }>(
+        `/crm/orders/receipt-pdf-options/${orderNumber}/autofill`,
+        // null → backend resolves settlement + deal from saved RFQ master response
+        { settlementDate: settlementDate || null },
+      );
+
+      const d = resp.data?.responseData;
+      if (!d) {
+        if (!silent) toast.error(resp.data?.message || "Auto-fill failed.");
+        return;
+      }
+      setPdfAccruedInterestDays(String(d.accruedInterestDays ?? ""));
+      const settlementFromApi = toPickerYmd(d.settlementDate);
+      if (settlementFromApi) {
+        setPdfAutofillSettlementDate(settlementFromApi);
+      } else if (settlementDate) {
+        setPdfAutofillSettlementDate(settlementDate);
+      } else if (rfq) {
+        const fallback = settlementDateFallbackFromSettleOrder(rfq);
+        if (fallback) setPdfAutofillSettlementDate(fallback);
+      }
+      if (d.dealDate != null && String(d.dealDate).trim() !== "") {
+        setPdfResolvedDealDate(
+          formatDealDateForEmail(String(d.dealDate).trim()) ||
+            String(d.dealDate).trim(),
+        );
+      }
+      if (d.settlementNumber != null) setPdfSettlementNumber(String(d.settlementNumber));
+      if (
+        d.settlementDateTime != null &&
+        String(d.settlementDateTime).trim() !== ""
+      ) {
+        setPdfSettlementDateTime(String(d.settlementDateTime).trim());
+      }
+      const rawLast = d.lastInterestPaymentDateRaw;
+      const rawLastTrimmed =
+        rawLast != null && String(rawLast).trim() !== "" ? String(rawLast).trim() : "";
+      if (rawLastTrimmed !== "") {
+        setPdfLastInterestPaymentDateRaw(rawLastTrimmed);
+        const apiDisplay =
+          d.lastInterestPaymentDate != null && String(d.lastInterestPaymentDate).trim() !== ""
+            ? String(d.lastInterestPaymentDate).trim()
+            : "";
+        const formatted =
+          apiDisplay && !/^\d{4}-\d{2}-\d{2}$/.test(apiDisplay)
+            ? apiDisplay
+            : formatDateWithDayNameFromPicker(
+              /^\d{4}-\d{2}-\d{2}$/.test(rawLastTrimmed)
+                ? rawLastTrimmed
+                : /^\d{4}-\d{2}-\d{2}$/.test(apiDisplay)
+                  ? apiDisplay
+                  : rawLastTrimmed,
+            );
+        setPdfLastInterestPaymentDate(formatted);
+      } else if (
+        d.lastInterestPaymentDate != null &&
+        String(d.lastInterestPaymentDate).trim() !== ""
+      ) {
+        setPdfLastInterestPaymentDate(String(d.lastInterestPaymentDate).trim());
+      }
+      setPdfInterestPaymentDates(interestPaymentDatesToFormText(d.interestPaymentDates));
+      if (!silent) toast.success("Receipt PDF options auto-filled.");
+    } catch (err) {
+      if (!silent) toast.error(getApiErrorMessage(err, "Auto-fill failed"));
+    } finally {
+      setAutofillingPdfOptions(false);
+    }
+  };
+
+  // Once RFQ is loaded (and owner assigned so the PDF section is shown), autofill
+  // from saved RFQ master settlement + deal dates — not delayed modSettleDate.
   useEffect(() => {
-    if (!rfq || pdfAutofillSettlementDate) return;
-    const guess =
-      payinDateTimeToPickerValue(rfq.fundsPayinTime ?? null) ||
-      payinDateTimeToPickerValue(rfq.secPayinTime ?? null) ||
-      payinDateTimeToPickerValue(rfq.payoutTime ?? null) ||
-      ddMmmYyyyToPickerValue(rfq.modSettleDate ?? null) ||
-      ddMmmYyyyToPickerValue(rfq.createdAt ?? null);
-    if (guess) setPdfAutofillSettlementDate(guess);
-  }, [rfq, pdfAutofillSettlementDate]);
+    if (!orderNumber || !rfq || !hasAssignedOwner || !pdfOptionsFetched) return;
+    if (autoAutofillRanForRef.current === orderNumber) return;
+    autoAutofillRanForRef.current = orderNumber;
+    void autofillReceiptPdfOptions({
+      preferRfqMasterDates: true,
+      silent: true,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orderNumber, rfq, hasAssignedOwner, pdfOptionsFetched]);
 
   useEffect(() => {
     if (emailTo) return;
@@ -767,6 +1012,12 @@ BSE Member ID: 6963`
   };
 
   const buildPdfOptionPayload = (accruedInterestDaysNum: number) => {
+    const settlementDateVal =
+      pdfAutofillSettlementDate.trim() !== "" ? pdfAutofillSettlementDate.trim() : undefined;
+    const dealDateVal =
+      pdfResolvedDealDate != null && pdfResolvedDealDate.trim() !== ""
+        ? pdfResolvedDealDate.trim()
+        : undefined;
     const settlementNumberVal =
       pdfSettlementNumber.trim() !== "" ? pdfSettlementNumber.trim() : undefined;
     const settlementDateTimeVal =
@@ -785,6 +1036,8 @@ BSE Member ID: 6963`
         : undefined;
     return {
       accruedInterestDays: accruedInterestDaysNum,
+      ...(settlementDateVal && { settlementDate: settlementDateVal }),
+      ...(dealDateVal && { dealDate: dealDateVal }),
       ...(settlementNumberVal && { settlementNumber: settlementNumberVal }),
       ...(settlementDateTimeVal && { settlementDateTime: settlementDateTimeVal }),
       ...(lastInterestVal && { lastInterestPaymentDate: lastInterestVal }),
@@ -817,79 +1070,161 @@ BSE Member ID: 6963`
     }
   };
 
-  const autofillReceiptPdfOptions = async () => {
-    if (!orderNumber) return;
-    if (!pdfAutofillSettlementDate) {
-      toast.error("Settlement date is required for auto-fill.");
+  const applyProposedPricingToForm = (pricing: Record<string, unknown>) => {
+    const settlementDate =
+      typeof pricing.settlementDate === "string" ? pricing.settlementDate : null;
+    const dealDate =
+      typeof pricing.dealDate === "string" ? pricing.dealDate : null;
+    const accruedFromPricing =
+      typeof pricing.noOfAccrualDays === "number" &&
+      Number.isFinite(pricing.noOfAccrualDays)
+        ? Math.max(0, Math.floor(pricing.noOfAccrualDays))
+        : null;
+
+    if (settlementDate) setPdfAutofillSettlementDate(settlementDate);
+    if (dealDate) setPdfResolvedDealDate(dealDate);
+    if (accruedFromPricing != null) {
+      setPdfAccruedInterestDays(String(accruedFromPricing));
+    }
+    return { settlementDate, dealDate, accruedFromPricing };
+  };
+
+  const loadNsePricingIntoForm = async (): Promise<ProposedPricingState | null> => {
+    if (!orderNumber) return null;
+    setProposingPricing(true);
+    try {
+      const resp = await ordersApi.proposeOrderPricingSnapshot(orderNumber);
+      const data = resp.responseData;
+      if (!data?.pricing) {
+        toast.error("Could not build pricing from saved NSE data for this order.");
+        return null;
+      }
+      const next: ProposedPricingState = {
+        orderNumber: data.orderNumber,
+        isin: data.isin,
+        bondName: data.bondName,
+        tradeNumber: data.tradeNumber,
+        sources: data.sources,
+        pricing: data.pricing,
+      };
+      setProposedPricing(next);
+      const { settlementDate } = applyProposedPricingToForm(data.pricing);
+      await autofillReceiptPdfOptions({
+        settlementDate: settlementDate || null,
+        silent: true,
+      });
+      toast.success("Pricing loaded from NSE saved data.");
+      return next;
+    } catch (err) {
+      toast.error(
+        getApiErrorMessage(
+          err,
+          "Failed to load pricing from NSE saved data",
+        ),
+      );
+      return null;
+    } finally {
+      setProposingPricing(false);
+    }
+  };
+
+  const handleUseNsePricingChange = async (checked: boolean) => {
+    if (!checked) {
+      setUseNsePricing(false);
+      setProposedPricing(null);
       return;
     }
-    setAutofillingPdfOptions(true);
-    try {
-      const resp = await apiClientCaller.post<{
-        responseData?: {
-          accruedInterestDays: number;
-          settlementNumber: string | null;
-          lastInterestPaymentDateRaw: string | null;
-          lastInterestPaymentDate: string | null;
-          interestPaymentDates: string | string[] | null;
-        };
-        message?: string;
-      }>(
-        `/crm/orders/receipt-pdf-options/${orderNumber}/autofill`,
-        { settlementDate: pdfAutofillSettlementDate },
-      );
-
-      const d = resp.data?.responseData;
-      if (!d) {
-        toast.error(resp.data?.message || "Auto-fill failed.");
-        return;
-      }
-      setPdfAccruedInterestDays(String(d.accruedInterestDays ?? ""));
-      if (d.settlementNumber != null) setPdfSettlementNumber(String(d.settlementNumber));
-      const rawLast = d.lastInterestPaymentDateRaw;
-      const rawLastTrimmed =
-        rawLast != null && String(rawLast).trim() !== "" ? String(rawLast).trim() : "";
-      if (rawLastTrimmed !== "") {
-        setPdfLastInterestPaymentDateRaw(rawLastTrimmed);
-        const apiDisplay =
-          d.lastInterestPaymentDate != null && String(d.lastInterestPaymentDate).trim() !== ""
-            ? String(d.lastInterestPaymentDate).trim()
-            : "";
-        const formatted =
-          apiDisplay && !/^\d{4}-\d{2}-\d{2}$/.test(apiDisplay)
-            ? apiDisplay
-            : formatDateWithDayNameFromPicker(
-              /^\d{4}-\d{2}-\d{2}$/.test(rawLastTrimmed)
-                ? rawLastTrimmed
-                : /^\d{4}-\d{2}-\d{2}$/.test(apiDisplay)
-                  ? apiDisplay
-                  : rawLastTrimmed,
-            );
-        setPdfLastInterestPaymentDate(formatted);
-      } else if (
-        d.lastInterestPaymentDate != null &&
-        String(d.lastInterestPaymentDate).trim() !== ""
-      ) {
-        setPdfLastInterestPaymentDate(String(d.lastInterestPaymentDate).trim());
-      }
-      setPdfInterestPaymentDates(interestPaymentDatesToFormText(d.interestPaymentDates));
-      toast.success("Receipt PDF options auto-filled.");
-    } catch (err) {
-      toast.error(getApiErrorMessage(err, "Auto-fill failed"));
-    } finally {
-      setAutofillingPdfOptions(false);
+    setUseNsePricing(true);
+    const loaded = await loadNsePricingIntoForm();
+    if (!loaded) {
+      setUseNsePricing(false);
+      setProposedPricing(null);
     }
+  };
+
+  /** When pricing is missing, require the NSE checkbox and ensure dates are loaded (no DB write). */
+  const ensureNsePricingForPdf = async (): Promise<{
+    ok: boolean;
+    settlementDate?: string;
+    dealDate?: string;
+    accruedInterestDays?: number;
+    useNseSavedPricing?: boolean;
+  }> => {
+    if (orderHasPricingSnapshot) return { ok: true };
+    if (!useNsePricing) {
+      toast.error("Order pricing snapshot is missing.", {
+        description:
+          'Check “Use pricing from NSE saved data” under Receipt PDF options to load values, then try again.',
+      });
+      return { ok: false };
+    }
+    let loaded = proposedPricing;
+    if (!loaded) {
+      loaded = await loadNsePricingIntoForm();
+      if (!loaded) return { ok: false };
+    }
+
+    const pricing = loaded.pricing;
+    const settlementDate =
+      typeof pricing.settlementDate === "string"
+        ? pricing.settlementDate
+        : pdfAutofillSettlementDate.trim() || undefined;
+    const dealDate =
+      typeof pricing.dealDate === "string"
+        ? pricing.dealDate
+        : pdfResolvedDealDate?.trim() || undefined;
+    const accruedInterestDays =
+      typeof pricing.noOfAccrualDays === "number" &&
+      Number.isFinite(pricing.noOfAccrualDays)
+        ? Math.max(0, Math.floor(pricing.noOfAccrualDays))
+        : undefined;
+
+    if (!settlementDate && !dealDate) {
+      toast.error("Could not resolve deal/settlement dates from NSE data.");
+      return { ok: false };
+    }
+    return {
+      ok: true,
+      settlementDate,
+      dealDate,
+      accruedInterestDays,
+      useNseSavedPricing: true,
+    };
   };
 
   const downloadPdf = async (type: "order" | "deal") => {
     if (!orderNumber) return;
-    const accruedInterestDaysNum = getValidatedAccruedInterestDays();
-    if (accruedInterestDaysNum == null) return;
+
+    if (type === "deal") {
+      const payoutTime = String(rfq?.payoutTime ?? "").trim();
+      if (!payoutTime) {
+        const proceed = window.confirm(
+          "Payout time is not available for this order yet.\n\n" +
+            "Settlement Date & Time will be left blank on the deal sheet.\n\n" +
+            "Do you still want to generate the deal sheet PDF?",
+        );
+        if (!proceed) return;
+      }
+    }
 
     if (type === "order") setDownloadingOrderPdf(true);
     if (type === "deal") setDownloadingDealPdf(true);
     try {
-      const payload = buildPdfOptionPayload(accruedInterestDaysNum);
+      const pricing = await ensureNsePricingForPdf();
+      if (!pricing.ok) return;
+
+      const accruedInterestDaysNum =
+        pricing.accruedInterestDays ?? getValidatedAccruedInterestDays();
+      if (accruedInterestDaysNum == null) return;
+
+      const payload = {
+        ...buildPdfOptionPayload(accruedInterestDaysNum),
+        ...(pricing.settlementDate
+          ? { settlementDate: pricing.settlementDate }
+          : {}),
+        ...(pricing.dealDate ? { dealDate: pricing.dealDate } : {}),
+        ...(pricing.useNseSavedPricing ? { useNseSavedPricing: true } : {}),
+      };
       const blob =
         type === "deal"
           ? await ordersApi.getDealSheetPdf(orderNumber, payload)
@@ -905,7 +1240,15 @@ BSE Member ID: 6963`
       toast.success(type === "deal" ? "Deal sheet PDF downloaded." : "Order receipt PDF downloaded.");
       void persistReceiptPdfOptions(accruedInterestDaysNum);
     } catch (err) {
-      toast.error(getApiErrorMessage(err, "Failed to download PDF"));
+      const details = await getApiErrorDetails(err);
+      if (isPricingSnapshotMissingError(details)) {
+        toast.error("Order pricing snapshot is missing.", {
+          description:
+            'Check “Use pricing from NSE saved data” under Receipt PDF options to load values, then try again.',
+        });
+      } else {
+        toast.error(details.message || "Failed to download PDF");
+      }
     } finally {
       if (type === "order") setDownloadingOrderPdf(false);
       if (type === "deal") setDownloadingDealPdf(false);
@@ -914,8 +1257,6 @@ BSE Member ID: 6963`
 
   const sendPdfByEmail = async () => {
     if (!orderNumber) return;
-    const accruedInterestDaysNum = getValidatedAccruedInterestDays();
-    if (accruedInterestDaysNum == null) return;
     if (!emailSubject.trim()) {
       toast.error("Subject is required.");
       return;
@@ -929,10 +1270,34 @@ BSE Member ID: 6963`
       return;
     }
 
+    if (emailPdfType === "deal") {
+      const payoutTime = String(rfq?.payoutTime ?? "").trim();
+      if (!payoutTime) {
+        const proceed = window.confirm(
+          "Payout time is not available for this order yet.\n\n" +
+            "Settlement Date & Time will be left blank on the deal sheet.\n\n" +
+            "Do you still want to email the deal sheet PDF?",
+        );
+        if (!proceed) return;
+      }
+    }
+
     setSendingPdfEmail(true);
     try {
+      const pricing = await ensureNsePricingForPdf();
+      if (!pricing.ok) return;
+
+      const accruedInterestDaysNum =
+        pricing.accruedInterestDays ?? getValidatedAccruedInterestDays();
+      if (accruedInterestDaysNum == null) return;
+
       const payload = {
         ...buildPdfOptionPayload(accruedInterestDaysNum),
+        ...(pricing.settlementDate
+          ? { settlementDate: pricing.settlementDate }
+          : {}),
+        ...(pricing.dealDate ? { dealDate: pricing.dealDate } : {}),
+        ...(pricing.useNseSavedPricing ? { useNseSavedPricing: true } : {}),
         pdfType: emailPdfType,
         fromEmail: senderEmail,
         toEmail: emailTo.trim(),
@@ -944,7 +1309,15 @@ BSE Member ID: 6963`
       void persistReceiptPdfOptions(accruedInterestDaysNum);
       setSendEmailOpen(false);
     } catch (err) {
-      toast.error(getApiErrorMessage(err, "Failed to send email"));
+      const details = await getApiErrorDetails(err);
+      if (isPricingSnapshotMissingError(details)) {
+        toast.error("Order pricing snapshot is missing.", {
+          description:
+            'Check “Use pricing from NSE saved data” under Receipt PDF options to load values, then try again.',
+        });
+      } else {
+        toast.error(details.message || "Failed to send email");
+      }
     } finally {
       setSendingPdfEmail(false);
     }
@@ -1113,6 +1486,18 @@ BSE Member ID: 6963`
     );
   }
 
+  const pdfActionBusy =
+    downloadingOrderPdf || downloadingDealPdf || proposingPricing;
+
+  const pricingPreviewRows: Array<{ label: string; key: string }> = [
+    { label: "Deal date", key: "dealDate" },
+    { label: "Settlement date", key: "settlementDate" },
+    { label: "Clean price", key: "cleanPrice" },
+    { label: "Yield", key: "yield" },
+    { label: "Accrued interest", key: "accruedInterest" },
+    { label: "Settlement amount", key: "settlementAmount" },
+  ];
+
   return (
     <>
       <PageInfoBar title="Generate PDF" />
@@ -1130,20 +1515,32 @@ BSE Member ID: 6963`
               <Button
                 size="sm"
                 variant="default"
-                disabled={downloadingOrderPdf || downloadingDealPdf || pdfAccruedInterestDays.trim() === ""}
+                disabled={
+                  pdfActionBusy || pdfAccruedInterestDays.trim() === ""
+                }
                 onClick={() => void downloadPdf("order")}
               >
                 <FileDown className="mr-2 h-4 w-4" />
-                {downloadingOrderPdf ? "Generating..." : "Download order receipt PDF"}
+                {proposingPricing
+                  ? "Loading pricing…"
+                  : downloadingOrderPdf
+                    ? "Generating..."
+                    : "Download order receipt PDF"}
               </Button>
               <Button
                 size="sm"
                 variant="secondary"
-                disabled={downloadingOrderPdf || downloadingDealPdf || pdfAccruedInterestDays.trim() === ""}
+                disabled={
+                  pdfActionBusy || pdfAccruedInterestDays.trim() === ""
+                }
                 onClick={() => void downloadPdf("deal")}
               >
                 <FileDown className="mr-2 h-4 w-4" />
-                {downloadingDealPdf ? "Generating..." : "Download deal sheet PDF"}
+                {proposingPricing
+                  ? "Loading pricing…"
+                  : downloadingDealPdf
+                    ? "Generating..."
+                    : "Download deal sheet PDF"}
               </Button>
               {/* Email PDFs: retail customers or NSE participants with email on file. */}
               {canEmailClientPdf && (
@@ -1151,7 +1548,9 @@ BSE Member ID: 6963`
                   <Button
                     size="sm"
                     variant="outline"
-                    disabled={downloadingOrderPdf || downloadingDealPdf || pdfAccruedInterestDays.trim() === ""}
+                    disabled={
+                      pdfActionBusy || pdfAccruedInterestDays.trim() === ""
+                    }
                     onClick={() => {
                       setEmailPdfType("order");
                       applyEmailTemplate("order");
@@ -1163,7 +1562,9 @@ BSE Member ID: 6963`
                   <Button
                     size="sm"
                     variant="outline"
-                    disabled={downloadingOrderPdf || downloadingDealPdf || pdfAccruedInterestDays.trim() === ""}
+                    disabled={
+                      pdfActionBusy || pdfAccruedInterestDays.trim() === ""
+                    }
                     onClick={() => {
                       setEmailPdfType("deal");
                       applyEmailTemplate("deal");
@@ -1176,7 +1577,7 @@ BSE Member ID: 6963`
                     <Button
                       size="sm"
                       variant="default"
-                      disabled={downloadingOrderPdf || downloadingDealPdf}
+                      disabled={pdfActionBusy}
                       onClick={() => setProposalEmailOpen(true)}
                     >
                       Email proposal
@@ -1212,31 +1613,99 @@ BSE Member ID: 6963`
         {hasAssignedOwner && (
           <Section title="Receipt PDF options (fill before generating PDF)">
             <p className="text-muted-foreground text-sm mb-3">
-              Accrued / Ex Interest is taken from settlement (negotiations) data. Values you use are saved for this order number when you download or email a PDF, and will auto-fill next time.
+              Values are auto-filled from the saved RFQ response (deal date + settlement date) when this page opens. You can still edit fields before download or email.
             </p>
+            {!orderHasPricingSnapshot ? (
+              <div className="mb-4 space-y-3 rounded-md border border-amber-200 bg-amber-50/60 p-3">
+                <div className="flex items-start gap-3">
+                  <Checkbox
+                    id="use-nse-pricing"
+                    checked={useNsePricing}
+                    disabled={proposingPricing || pdfActionBusy}
+                    onCheckedChange={(v) => {
+                      void handleUseNsePricingChange(v === true);
+                    }}
+                  />
+                  <div className="space-y-1">
+                    <Label htmlFor="use-nse-pricing" className="cursor-pointer font-medium">
+                      Use pricing from NSE saved data
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Order is missing <code>bondDetails.pricing</code>. Check this to load deal date,
+                      settlement date, and amounts from saved NSE tables for this PDF only — nothing
+                      is written to the order.
+                    </p>
+                    {proposingPricing ? (
+                      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        Loading pricing from NSE saved data…
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+                {useNsePricing && proposedPricing ? (
+                  <div className="rounded-md border bg-background divide-y text-sm">
+                    <div className="px-3 py-2 text-xs text-muted-foreground">
+                      NSE trade {proposedPricing.tradeNumber}
+                      {" · "}
+                      settle_order {proposedPricing.sources.settleOrderNumber}
+                      {" · "}
+                      RFQ {proposedPricing.sources.rfqNumber}
+                      {proposedPricing.sources.rfqMasterNumber
+                        ? ` · master ${proposedPricing.sources.rfqMasterNumber}`
+                        : ""}
+                    </div>
+                    {pricingPreviewRows.map((row) => (
+                      <div
+                        key={row.key}
+                        className="flex items-center justify-between gap-4 px-3 py-1.5"
+                      >
+                        <span className="text-muted-foreground">{row.label}</span>
+                        <span className="font-mono text-right">
+                          {formatPricingField(proposedPricing.pricing[row.key])}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2 sm:col-span-2">
-                <Label htmlFor="pdf-autofill-settlement-date">Settlement date (for auto-fill)</Label>
+                <Label htmlFor="pdf-autofill-settlement-date">Settlement date</Label>
                 <div className="flex flex-col sm:flex-row gap-2">
                   <Input
                     id="pdf-autofill-settlement-date"
                     type="date"
                     value={pdfAutofillSettlementDate}
                     onChange={(e) => setPdfAutofillSettlementDate(e.target.value)}
+                    disabled={autofillingPdfOptions}
                   />
                   <Button
                     type="button"
                     variant="outline"
-                    disabled={autofillingPdfOptions || downloadingOrderPdf || downloadingDealPdf || !pdfAutofillSettlementDate}
-                    onClick={() => void autofillReceiptPdfOptions()}
+                    disabled={autofillingPdfOptions || downloadingOrderPdf || downloadingDealPdf || !orderNumber}
+                    onClick={() =>
+                      void autofillReceiptPdfOptions({
+                        // Empty date → re-resolve from saved RFQ master response
+                        settlementDate: pdfAutofillSettlementDate.trim() || null,
+                        preferRfqMasterDates: !pdfAutofillSettlementDate.trim(),
+                      })
+                    }
                   >
-                    {autofillingPdfOptions ? "Auto-filling..." : "Auto-fill"}
+                    {autofillingPdfOptions ? "Auto-filling..." : "Refresh auto-fill"}
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Pick the settlement date, then click Auto-fill to populate No. of Days, Settlement No., Last coupon date, and Interest Payment Dates.
+                  Taken from the saved RFQ response settlement date (not delayed mod settle). Change the date and refresh if you need a different settlement.
                 </p>
               </div>
+              {pdfResolvedDealDate ? (
+                <div className="space-y-2">
+                  <Label>Deal date</Label>
+                  <Input value={pdfResolvedDealDate} readOnly disabled className="bg-muted/40" />
+                </div>
+              ) : null}
               <div className="space-y-2">
                 <Label htmlFor="pdf-accrued-days">No. of Days *</Label>
                 <Input
@@ -1862,24 +2331,40 @@ BSE Member ID: 6963`
           </Section>
 
           <Section title="Price & value">
-            <InfoRow label="Price" value={rfq.price} />
+            <InfoRow label="Price" value={formatCleanPriceDisplay(rfq.price)} />
             <InfoRow label="Yield Type" value={rfq.yieldType} />
-            <InfoRow label="Yield" value={rfq.yield} />
-            <InfoRow label="Value" value={rfq.value} />
+            <InfoRow label="Yield" value={formatYtmDisplay(rfq.yield)} />
+            <InfoRow
+              label="Value"
+              value={formatInrMoneyDisplay(rfq.value, { withRupee: false })}
+            />
             <InfoRow label="Source" value={rfq.source} />
           </Section>
 
           <Section title="Modification (if any)">
             <InfoRow label="Mod Settle Date" value={rfq.modSettleDate} />
             <InfoRow label="Mod Quantity" value={rfq.modQuantity} />
-            <InfoRow label="Mod Accrued Interest" value={rfq.modAccrInt} />
-            <InfoRow label="Mod Consideration" value={rfq.modConsideration} />
+            <InfoRow
+              label="Mod Accrued Interest"
+              value={formatInrMoneyDisplay(rfq.modAccrInt, { withRupee: false })}
+            />
+            <InfoRow
+              label="Mod Consideration"
+              value={formatInrMoneyDisplay(rfq.modConsideration, {
+                withRupee: false,
+              })}
+            />
           </Section>
 
           <Section title="Settlement">
             <InfoRow label="Settlement No" value={rfq.settlementNo} />
             <InfoRow label="Settle Status" value={rfq.settleStatus} />
-            <InfoRow label="Stamp Duty Amount" value={rfq.stampDutyAmount} />
+            <InfoRow
+              label="Stamp Duty Amount"
+              value={formatInrMoneyDisplay(rfq.stampDutyAmount, {
+                withRupee: false,
+              })}
+            />
             <InfoRow label="Stamp Duty Bearer" value={rfq.stampDutyBearer} />
             <InfoRow label="Buyer Fund Payin Obligation" value={rfq.buyerFundPayinObligation} />
             <InfoRow label="Seller Fund Payout Obligation" value={rfq.sellerFundPayoutObligation} />
@@ -2027,7 +2512,10 @@ BSE Member ID: 6963`
               <div><span className="font-medium text-foreground">ISIN:</span> {rfq?.symbol ?? "—"}</div>
               <div><span className="font-medium text-foreground">Bond:</span> {securityName}</div>
               <div><span className="font-medium text-foreground">Side:</span> {effectiveOrderSide}</div>
-              <div><span className="font-medium text-foreground">Settlement date:</span> {rfq?.modSettleDate ?? "—"}</div>
+              <div><span className="font-medium text-foreground">Settlement date:</span> {pdfAutofillSettlementDate || rfq?.modSettleDate || "—"}</div>
+              {pdfResolvedDealDate ? (
+                <div><span className="font-medium text-foreground">Deal date:</span> {pdfResolvedDealDate}</div>
+              ) : null}
             </div>
           </div>
 

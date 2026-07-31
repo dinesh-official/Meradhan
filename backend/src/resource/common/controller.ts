@@ -1,5 +1,5 @@
 import { db } from "@core/database/database";
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
 import { appSchema } from "@root/schema";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import axios from "axios";

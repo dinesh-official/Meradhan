@@ -1,5 +1,5 @@
 import { db } from "@core/database/database";
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
 import { AppError, HttpStatus } from "@utils/error/AppError";
 import logger from "@utils/logger/logger";
 import crypto from "crypto";

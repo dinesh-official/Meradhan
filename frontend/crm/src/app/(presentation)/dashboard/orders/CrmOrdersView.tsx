@@ -40,7 +40,11 @@ function CrmOrdersView() {
           onBondTypeChange={filterManager.state.setBondTypeFilter}
           date={filterManager.state.date}
           onDateChange={filterManager.state.setDate}
-          onClearFilters={filterManager.state.resetAll}
+          onClearFilters={
+            filterManager.state.hasActiveFilters
+              ? filterManager.state.resetAll
+              : undefined
+          }
         />
         <CardContent>
           <OrderTable

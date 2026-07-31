@@ -20,13 +20,17 @@
     "typescript-eslint": "^8.46.0"
   },
   "peerDependencies": {
-    "typescript": "^5"
+    "typescript": "^5",
+    "@root/kyc-providers": "*"
+  },
+  "peerDependenciesMeta": {
+    "@root/kyc-providers": {
+      "optional": true
+    }
   },
   "dependencies": {
-    "@root/schema": "file:../schema",
+    "@root/schema": "*",
     "axios": "^1.12.2",
-    "backend": "file:../../backend",
-    "kyc-providers": "file:../kyc-providers",
     "zod": "^4.1.11"
   }
 }

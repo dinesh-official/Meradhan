@@ -1,5 +1,6 @@
 import { Text, View } from "@react-pdf/renderer";
 import React from "react";
+import { formatPdfPersonName } from "../helper";
 import { tw } from "../MdPdf";
 
 function Page14({
@@ -19,7 +20,7 @@ function Page14({
   address?: string;
   mobile?: string;
 }) {
-  const fullName = `${firstName}${middleName ? ` ${middleName} ` : " "}${lastName}`.trim();
+  const fullName = formatPdfPersonName({ firstName, middleName, lastName });
 
   const tableData = [
     {

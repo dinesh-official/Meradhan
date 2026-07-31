@@ -12,6 +12,7 @@ import { CustomerKycKycService } from "../kyc_process/customer_kyc.service";
 import { CustomerKycManager } from "@services/customer/kyc/customer_kyc_manager.service";
 import { KraProcess } from "@jobs/kra_worker/KraWorker.service";
 import { addCompleteCustomerKycProfile, addKraWorkerJob } from "@jobs/kra_worker/kraWroker.helper";
+import { getOptionalEmailTitleFromSources } from "@root/schema";
 
 // KYC store controller class to get and set kyc data in kyc_flow table to track kyc progress for customer to resume later
 export class KycStoreController {
@@ -230,6 +231,8 @@ export class KycStoreController {
             lastName: true,
             emailAddress: true,
             gender: true,
+            panCard: { select: { gender: true } },
+            aadhaarCard: { select: { gender: true } },
           },
         });
 
@@ -275,12 +278,7 @@ export class KycStoreController {
         // Send "KYC Submitted" email when status transitions to UNDER_REVIEW (avoid duplicates).
         if (prev?.kycStatus !== "UNDER_REVIEW" && customer?.emailAddress) {
           const customerName = `${customer.firstName ?? ""} ${customer.lastName ?? ""}`.trim() || "Customer";
-          const title =
-            customer.gender === "MALE"
-              ? ("Mr." as const)
-              : customer.gender === "FEMALE"
-                ? ("Ms." as const)
-                : undefined;
+          const title = getOptionalEmailTitleFromSources(customer);
 
           await sendKycSubmittedForVerificationEmail({
             email: customer.emailAddress,

@@ -1,13 +1,30 @@
 // next.config.ts
 import { BASES_URLS } from "@/core/config/base.urls";
 import type { NextConfig } from "next";
+import path from "path";
+
+const reactDir = path.dirname(require.resolve("react/package.json"));
+const reactDomDir = path.dirname(require.resolve("react-dom/package.json"));
 
 // Next.js configuration
 const nextConfig: NextConfig = {
+  // Monorepo: silence multi-lockfile root inference
+  outputFileTracingRoot: path.join(__dirname, "../.."),
   devIndicators: {
     position: "bottom-left",
   },
-  webpack: (config, { webpack }) => {
+  transpilePackages: ["@root/apiGateway", "@root/schema", "@root/config"],
+  // Keep PDF/native deps out of the RSC server graph (avoids createContext errors).
+  serverExternalPackages: [
+    "@react-pdf/renderer",
+    "@ag-media/react-pdf-table",
+    "canvas",
+    "pdf-poppler",
+    "pdf-to-img",
+    "pdf2pic",
+    "react-pdf-tailwind",
+  ],
+  webpack: (config, { isServer, webpack }) => {
     // Prevent canvas.node from being bundled
     config.externals.push({
       canvas: "commonjs canvas",
@@ -17,6 +34,35 @@ const nextConfig: NextConfig = {
     config.plugins.push(
       new webpack.IgnorePlugin({ resourceRegExp: /^webworker-threads$/ }),
     );
+
+    // Deduplicate nested React on the client only — server alias breaks SSR hooks
+    // (NextTopLoader useEffect null).
+    if (!isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        react: reactDir,
+        "react$": reactDir,
+        "react/jsx-runtime": path.join(reactDir, "jsx-runtime.js"),
+        "react/jsx-dev-runtime": path.join(reactDir, "jsx-dev-runtime.js"),
+        "react-dom": reactDomDir,
+        "react-dom$": reactDomDir,
+        "react-dom/client": path.join(reactDomDir, "client.js"),
+      };
+    } else {
+      config.externals.push(
+        ({ request }: { request?: string }, callback: (err?: Error | null, result?: string) => void) => {
+          if (
+            request &&
+            (/^@react-pdf\//.test(request) ||
+              request === "react-pdf-tailwind" ||
+              request === "@ag-media/react-pdf-table")
+          ) {
+            return callback(null, `commonjs ${request}`);
+          }
+          callback();
+        },
+      );
+    }
 
     return config;
   },

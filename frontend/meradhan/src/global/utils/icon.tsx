@@ -1,3 +1,5 @@
+"use client";
+
 import { BiSolidFileDoc } from "react-icons/bi";
 import {
   FaFile,

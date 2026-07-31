@@ -95,6 +95,9 @@ export const bondCreateUpdateSchema = z.object({
     .default(0)
     .optional()
     .nullable(),
+  /** Stamp duty amount (₹) saved from DeriData autofill at `pricingQuantity`. */
+  stampDuty: z.number().nonnegative().optional().nullable(),
+  pricingQuantity: z.number().int().positive().optional().nullable(),
   allowForPurchase: z.boolean().default(false).optional().nullable(),
   couponRate: z.number().nonnegative("Coupon rate must be non-negative"),
   interestPaymentFrequency: z
@@ -136,6 +139,7 @@ export const bondCreateUpdateSchema = z.object({
   providerQuantity: z.number().int().nonnegative().optional().nullable(),
   isOngoingDeal: z.boolean().default(false).optional().nullable(),
   providerPrice: z.number().nonnegative().optional().nullable(),
+  accruedInterest: z.number().optional().nullable(),
   ignoreAutoUpdate: z.boolean().default(false).optional().nullable(),
 
   allCouponDates: z.array(z.coerce.date()).default([]),
@@ -144,15 +148,6 @@ export const bondCreateUpdateSchema = z.object({
   recordDays: z
     .number({ error: () => "Record days is required" })
     .int("Record days must be a whole number"),
-  accruedInterestDays: z
-    .number()
-    .int("Accrued interest days must be a whole number")
-    .optional()
-    .nullable(),
-  accruedInterest: z.number().nonnegative().optional().nullable(),
-  settlementAmount: z.number().nonnegative().optional().nullable(),
-  principalAmount: z.number().nonnegative().optional().nullable(),
-  totalConsideration: z.number().nonnegative().optional().nullable(),
   imDocumentLink: z.string().trim().optional().nullable(),
   exchangeListedOn: STOCK_EXCHANGE_ENUM.optional().nullable(),
   lastCouponDate: z.coerce.date().optional().nullable(),

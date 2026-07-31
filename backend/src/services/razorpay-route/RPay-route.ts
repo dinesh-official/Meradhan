@@ -1,6 +1,6 @@
 import { db } from "@core/database/database"
-import { ApiError } from "@packages/apiGateway";
-import { env } from "@packages/config/src/env";
+import { ApiError } from "@root/apiGateway";
+import { env } from "@root/config/env";
 import axios from "axios";
 
 type RazorpayStakeholderResponse = {
@@ -343,18 +343,89 @@ export type RazorpayTransferInput = {
     on_hold_until?: number;
 };
 
+export type RazorpayPaymentSnapshot = {
+    id: string;
+    status: string;
+    method?: string | null;
+    amount?: number;
+    currency?: string;
+};
+
+export type RazorpayRouteEligibility = {
+    payment: RazorpayPaymentSnapshot;
+    isNetBanking: boolean;
+    canRoute: boolean;
+    skipReason?: "not_netbanking";
+    blockReason?: string;
+};
+
+function razorpayAuthHeader(): string {
+    if (!env.RAZORPAY_KEY_ID || !env.RAZORPAY_KEY_SECRET) {
+        throw new ApiError("Razorpay credentials not configured");
+    }
+    return Buffer.from(
+        `${env.RAZORPAY_KEY_ID}:${env.RAZORPAY_KEY_SECRET}`,
+    ).toString("base64");
+}
+
+/** Live payment fetch — used before route transfer to verify status + method. */
+export const fetchRazorpayPayment = async (
+    paymentId: string,
+): Promise<RazorpayPaymentSnapshot> => {
+    const { data } = await axios.get<RazorpayPaymentSnapshot>(
+        `https://api.razorpay.com/v1/payments/${encodeURIComponent(paymentId)}`,
+        {
+            headers: { Authorization: `Basic ${razorpayAuthHeader()}` },
+            timeout: 60_000,
+        },
+    );
+    return data;
+};
+
+/**
+ * Gate for Razorpay Route transfers:
+ * - skip API when method is not netbanking
+ * - only allow route when status is `captured`
+ */
+export const resolveRazorpayRouteEligibility = async (
+    paymentId: string,
+): Promise<RazorpayRouteEligibility> => {
+    const payment = await fetchRazorpayPayment(paymentId);
+    const method = (payment.method ?? "").toLowerCase();
+    const status = (payment.status ?? "").toLowerCase();
+    const isNetBanking = method === "netbanking";
+
+    if (!isNetBanking) {
+        return {
+            payment,
+            isNetBanking: false,
+            canRoute: false,
+            skipReason: "not_netbanking",
+        };
+    }
+
+    if (status !== "captured") {
+        return {
+            payment,
+            isNetBanking: true,
+            canRoute: false,
+            blockReason: `Razorpay payment ${paymentId} status is "${payment.status}" (required: captured) before route transfer`,
+        };
+    }
+
+    return {
+        payment,
+        isNetBanking: true,
+        canRoute: true,
+    };
+};
+
 export const createTransfer = async (input: {
     /** Razorpay payment id, e.g. `pay_...` */
     paymentId: string;
     transfers: RazorpayTransferInput[];
 }) => {
-    if (!env.RAZORPAY_KEY_ID || !env.RAZORPAY_KEY_SECRET) {
-        throw new ApiError("Razorpay credentials not configured");
-    }
-
-    const authHeader = Buffer.from(
-        `${env.RAZORPAY_KEY_ID}:${env.RAZORPAY_KEY_SECRET}`
-    ).toString("base64");
+    const authHeader = razorpayAuthHeader();
 
     try {
         const { data } = await axios.post(

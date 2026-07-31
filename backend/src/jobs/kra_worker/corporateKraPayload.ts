@@ -11,8 +11,8 @@
  * before any SOAP call goes out.
  */
 
-import { env } from "@packages/config/env";
-import type { KraNonIndAppReqRoot } from "kyc-providers";
+import { env } from "@root/config/env";
+import type { KraNonIndAppReqRoot } from "@root/kyc-providers";
 import { getKraCountry, getKraState } from "./constent";
 import {
   mapAddressProofToNdml,

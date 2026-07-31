@@ -13,10 +13,11 @@
  */
 
 import { db } from "@core/database/database";
-import { env } from "@packages/config/env";
-import { KraSDK, type T_NON_INDIVIDUAL_PAN_DOWNLOAD } from "kyc-providers";
+import { env } from "@root/config/env";
+import { KraSDK, type T_NON_INDIVIDUAL_PAN_DOWNLOAD } from "@root/kyc-providers";
 import { isAxiosError, type AxiosError } from "axios";
 import { AppError, HttpStatus } from "@utils/error/AppError";
+import { normalizeKraStateName } from "@root/schema";
 import {
   decodeKycStatus,
   decodeRejectionReason,
@@ -155,57 +156,10 @@ export function summariseCorporateKraDownload(
 
 /**
  * Reverse-lookup an NDML state code (zero-padded or unpadded) to the
- * canonical state name the CRM frontend stores. Returns "" when unknown.
- *
- * NOTE on Telangana — NDML's master list (and live KRA download responses)
- * uses code `37` for Telangana since the state was created post-split in
- * 2014. The repo's `kraState` master in `constent.ts` historically keeps
- * Telangana at code `36`, so we accept *both* codes here to stay robust.
+ * canonical state name the CRM corporate KYC form stores.
  */
 function stateCodeToName(code: string | null | undefined): string {
-  if (!code) return "";
-  const n = Number(String(code).trim());
-  if (!Number.isFinite(n)) return "";
-  const table: Record<number, string> = {
-    1: "Andaman & Nicobar Islands",
-    2: "Andhra Pradesh",
-    3: "Arunachal Pradesh",
-    4: "Assam",
-    5: "Bihar",
-    6: "Chandigarh",
-    7: "Dadra & Nagar Haveli",
-    8: "Daman & Diu",
-    9: "Delhi",
-    10: "Goa",
-    11: "Gujarat",
-    12: "Haryana",
-    13: "Himachal Pradesh",
-    14: "Jammu & Kashmir",
-    15: "Karnataka",
-    16: "Kerala",
-    17: "Lakshadweep",
-    18: "Madhya Pradesh",
-    19: "Maharashtra",
-    20: "Manipur",
-    21: "Meghalaya",
-    22: "Mizoram",
-    23: "Nagaland",
-    24: "Odisha",
-    25: "Puducherry",
-    26: "Punjab",
-    27: "Rajasthan",
-    28: "Sikkim",
-    29: "Tamil Nadu",
-    30: "Tripura",
-    31: "Uttar Pradesh",
-    32: "West Bengal",
-    33: "Chhattisgarh",
-    34: "Uttarakhand",
-    35: "Jharkhand",
-    36: "Telangana",
-    37: "Telangana",
-  };
-  return table[n] ?? "";
+  return normalizeKraStateName(code);
 }
 
 /** Reverse-lookup an NDML country code → human-readable country name. */

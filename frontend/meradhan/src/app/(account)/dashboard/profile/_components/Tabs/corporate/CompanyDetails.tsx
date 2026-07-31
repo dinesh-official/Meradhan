@@ -1,3 +1,5 @@
+"use client";
+
 import DataInfoLabel from "@/app/(account)/_components/cards/DataInfoLabel";
 import { dateTimeUtils } from "@/global/utils/datetime.utils";
 import { genMediaUrl } from "@/global/utils/url.utils";
@@ -143,9 +145,9 @@ export default function CompanyDetails({
           <p className="font-medium text-sm">
             {showEntityValues
               ? formatEntityConstitutionType(
-                  entity?.entityConstitutionType,
-                  entity?.otherConstitutionType,
-                )
+                entity?.entityConstitutionType,
+                entity?.otherConstitutionType,
+              )
               : "--"}
           </p>
         </DataInfoLabel>
@@ -166,6 +168,7 @@ export default function CompanyDetails({
         </DataInfoLabel>
         <ProfileContactFields profile={profile} variant="corporate" />
       </div>
+
 
       {kycAccessible && (
         <>

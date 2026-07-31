@@ -1,6 +1,10 @@
 import LabelView from "@/global/elements/wrapper/LabelView";
 import { cn } from "@/lib/utils";
 import { CreateNegotiationResponse } from "@root/apiGateway";
+import {
+  formatCleanPriceDisplay,
+  formatInrMoneyDisplay,
+} from "@/global/utils/pricingDecimalDisplay";
 
 const DealSplitInformation = ({
   data,
@@ -20,15 +24,25 @@ const DealSplitInformation = ({
       </LabelView>
 
       <LabelView title="Price">
-        <p className="font-medium text-sm">{Number(data.acceptedPrice).toFixed(2)}</p>
+        <p className="font-medium text-sm">
+          {formatCleanPriceDisplay(data.acceptedPrice)}
+        </p>
       </LabelView>
 
       <LabelView title="Accrued Interest">
-        <p className="font-medium text-sm">{Number(data.acceptedAccruedInterest).toFixed(2)}</p>
+        <p className="font-medium text-sm">
+          {formatInrMoneyDisplay(data.acceptedAccruedInterest, {
+            withRupee: false,
+          })}
+        </p>
       </LabelView>
       <div className="col-span-2">
         <LabelView title="Consideration without stamp duty">
-          <p className="font-medium text-sm">{Number(data.acceptedConsideration).toFixed(2)}</p>
+          <p className="font-medium text-sm">
+            {formatInrMoneyDisplay(data.acceptedConsideration, {
+              withRupee: false,
+            })}
+          </p>
         </LabelView>
       </div>
       <LabelView title="Settlement Date">

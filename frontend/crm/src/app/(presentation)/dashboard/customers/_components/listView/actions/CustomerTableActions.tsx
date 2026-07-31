@@ -32,10 +32,10 @@ const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {
     profileId: profile.id,
   });
 
+  const accountStatus = profile.utility.accountStatus;
   const status =
-    profile.utility.accountStatus == "ACTIVE"
-      ? "Suspend account"
-      : "Active account";
+    accountStatus === "ACTIVE" ? "Suspend account" : "Active account";
+  const canToggleSuspend = accountStatus !== "CLOSED";
 
   return (
     <>
@@ -84,6 +84,7 @@ const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {
             </DropdownMenuItem>
           </ShowOnly>
 
+          <ShowOnly condition={canToggleSuspend}>
           <AllowOnlyView permissions={["delete:customer"]} condition={profile.kycStatus !== "PENDING"}>
             <DropdownMenuItem
               onClick={async () => {
@@ -124,6 +125,7 @@ const CustomerTableActions = ({ profile }: { profile: CustomerProfile }) => {
               {status}
             </DropdownMenuItem>
           </AllowOnlyView>
+          </ShowOnly>
 
           <AllowOnlyView permissions={["delete:customer"]} >
             <DropdownMenuItem

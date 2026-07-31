@@ -71,28 +71,28 @@ export const DecimalInput = React.forwardRef<HTMLInputElement, DecimalInputProps
     },
     ref,
   ) {
-  const [typing, setTyping] = React.useState<string | null>(null);
+    const [typing, setTyping] = React.useState<string | null>(null);
 
-  const formatCommitted = React.useCallback(
-    (n: number) => {
-      const fracDigits =
-        maxFractionDigits != null && maxFractionDigits >= 0
-          ? maxFractionDigits
-          : minFractionDigits != null && minFractionDigits > 0
-            ? minFractionDigits
-            : undefined;
-      if (fracDigits != null) return n.toFixed(fracDigits);
-      return formatNumberForDisplay(n);
-    },
-    [minFractionDigits, maxFractionDigits],
-  );
+    const formatCommitted = React.useCallback(
+      (n: number) => {
+        const fracDigits =
+          maxFractionDigits != null && maxFractionDigits >= 0
+            ? maxFractionDigits
+            : minFractionDigits != null && minFractionDigits > 0
+              ? minFractionDigits
+              : undefined;
+        if (fracDigits != null) return n.toFixed(fracDigits);
+        return formatNumberForDisplay(n);
+      },
+      [minFractionDigits, maxFractionDigits],
+    );
 
-  const display =
-    typing !== null
-      ? typing
-      : value === null || value === undefined || Number.isNaN(value)
-        ? ""
-        : formatCommitted(value);
+    const display =
+      typing !== null
+        ? typing
+        : value === null || value === undefined || Number.isNaN(value)
+          ? ""
+          : formatCommitted(value);
 
     return (
       <Input
@@ -114,8 +114,12 @@ export const DecimalInput = React.forwardRef<HTMLInputElement, DecimalInputProps
         }}
         onChange={(e) => {
           let v = e.target.value.replace(/,/g, "");
+          const negative = v.startsWith("-");
+          const unsigned = negative ? v.slice(1) : v;
           if (maxFractionDigits != null && maxFractionDigits >= 0) {
-            v = limitTypedFractionDigits(v, maxFractionDigits);
+            v = (negative ? "-" : "") + limitTypedFractionDigits(unsigned, maxFractionDigits);
+          } else {
+            v = (negative ? "-" : "") + unsigned.replace(/[^\d.]/g, "");
           }
           setTyping(v);
         }}

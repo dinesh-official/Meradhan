@@ -10,6 +10,8 @@ export interface BondDetailsResponse {
   issuePrice: number
   faceValue: number
   stampDutyPercentage: number
+  stampDuty?: number | null
+  pricingQuantity?: number | null
   allowForPurchase: boolean
   couponRate: number
   interestPaymentFrequency: string
@@ -42,6 +44,7 @@ export interface BondDetailsResponse {
   providerQuantity: string | number | undefined | null
   isOngoingDeal: boolean
   providerPrice: string | number | undefined | null
+  accruedInterest?: number | null
   ignoreAutoUpdate: boolean
   dateOfAllotment: string
   redemptionDate: string
@@ -54,11 +57,6 @@ export interface BondDetailsResponse {
   dayConvention?: string | null
   recordDate?: string | null
   recordDays?: number | null
-  accruedInterestDays?: number | null
-  accruedInterest?: number | null
-  settlementAmount?: number | null
-  principalAmount?: number | null
-  totalConsideration?: number | null
   imDocumentLink?: string | null
   exchangeListedOn?: string | null
   lastCouponDate?: string | null
@@ -147,18 +145,21 @@ export interface BondOrderPricingData {
   settlementDay: string;
   principalAmount: number;
   accruedInterest: number;
+  accruedInterestPerUnit?: number;
   stampDuty: number;
   noOfAccrualDays: number;
   isUnderShutPeriod: boolean;
   recordDate: string;
   settlementAmount: number;
-  /** Indicative yield at checkout (`buyYield` preferred, else listing `yield`). */
+  /** DeriData `total_consideration` (before local stamp duty). */
+  totalConsideration?: number;
+  /** Indicative offered yield at checkout (from DeriData / live pricing). */
   yield?: number;
 }
 
 export type BondOrderPricingResponse = BaseResponseData<BondOrderPricingData>;
 
-/** Snapshot from calc.meradhan.co (fields used by CRM bond autofill). */
+/** Snapshot from DeriData calculator (fields used by CRM bond autofill). */
 export interface BondCalcServiceSnapshot {
   accrued_days: number;
   final_price: string;
@@ -168,13 +169,19 @@ export interface BondCalcServiceSnapshot {
   settlement_amount: string;
   principal_amount: string;
   total_consideration: string;
+  stamp_duty: string;
   settle_dt: string;
   [key: string]: unknown;
 }
 
 export interface BondDealAutofillSuggestions {
   bondName?: string | null;
+  instrumentName?: string | null;
+  description?: string | null;
+  sectorName?: string | null;
   creditRating?: string | null;
+  creditRatingInfo?: string | null;
+  ratingAgencyName?: string | null;
   /** Coupon schedule as `YYYY-MM-DD` (IST calendar days). */
   allCouponDates?: string[];
   allCouponDatesIst?: string[];
@@ -185,16 +192,6 @@ export interface BondDealAutofillSuggestions {
   nextCouponDate: string;
   recordDate: string | null;
   recordDays: number | null;
-  /** Accrued-interest day count from calc API (`accrued_days`). */
-  accruedInterestDays?: number | null;
-  /** Accrued interest amount (₹) per unit at qty=1 from calc API (`total_ai`). */
-  accruedInterest?: number | null;
-  /** Settlement amount (₹) per unit at qty=1 from calc API (`settlement_amount`). */
-  settlementAmount?: number | null;
-  /** Principal amount (₹) per unit at qty=1 from calc API (`principal_amount`). */
-  principalAmount?: number | null;
-  /** Total consideration w/o stamp (₹) per unit at qty=1 from calc API (`total_consideration`). */
-  totalConsideration?: number | null;
   /** Reference coupon-payment `dueDate` (YYYY-MM-DD) */
   dueDate: string | null;
   dayConvention: string | null;
@@ -221,6 +218,9 @@ export interface BondDealAutofillSuggestions {
   couponType?: string | null;
   /** Listing category slugs (e.g. ["tax-free", "banks"]) — controls MeraDhan bond listing filters. */
   categories?: string[];
+  /** Issue size in absolute rupees from DeriData (`total_issue_size_cr` × 10⁷). */
+  totalIssueSize?: number | null;
+  putCallOptionDetails?: string | null;
 }
 
 export interface BondDealAutofillResponse {
@@ -233,6 +233,9 @@ export interface BondDealAutofillResponse {
     usedProviderPrice?: boolean;
     usedProviderQuantity?: boolean;
     usedProviderSettlementDate?: boolean;
+    usedDeriDataCalculator?: boolean;
+    usedDeriDataIssueDetail?: boolean;
+    pricingMode?: "ytm" | "cleanPrice";
   };
   suggested: BondDealAutofillSuggestions;
   pricing: {
@@ -240,8 +243,12 @@ export interface BondDealAutofillResponse {
     finalYieldRaw: number;
     settlementAmount: number | null;
     totalAccruedInterest: number | null;
+    accruedInterestPerUnit?: number | null;
     principalAmount: number | null;
     totalConsideration: number | null;
+    stampDuty?: number | null;
+    settlementDateYmd?: string | null;
+    accruedDays?: number | null;
     calc: BondCalcServiceSnapshot;
   };
   margin: Record<string, unknown>;

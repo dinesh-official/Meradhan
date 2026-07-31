@@ -4,7 +4,7 @@ import { db } from "@core/database/database";
 import { absoluteDataApiFromEnv } from "@modules/absolutedata/absolutedata.api";
 import { BondReferenceDataService } from "@resource/crm/bonds/bond_reference_data.service";
 import { EmailCommunication } from "@communication/email_communication";
-import { env } from "@packages/config/src/env";
+import { env } from "@root/config/env";
 
 const TZ_IST = { timezone: "Asia/Kolkata" } as const;
 
