@@ -2,3 +2,4 @@
 .planning/
 package-lock.json
 packages/node_modules/
+/node_modules
