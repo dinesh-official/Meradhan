@@ -37,6 +37,8 @@ function GridViewCard({
               <img
                 src={logoUrl}
                 alt={item.regulatory_circulars_category?.Title || "logo"}
+                title={item.regulatory_circulars_category?.Title || "logo"}
+                aria-label={item.regulatory_circulars_category?.Title || "logo"}
                 className="h-6 object-contain"
               />
             ) : null}
@@ -85,6 +87,7 @@ function GridViewCard({
               target="_blank"
               download
               aria-label={`Download attachment for ${item?.Name}`}
+              title={`Download attachment for ${item?.Name}`}
             >
               {getFileIcon(fileExt)}
             </a>

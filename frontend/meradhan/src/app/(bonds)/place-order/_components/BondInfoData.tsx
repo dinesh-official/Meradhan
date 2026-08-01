@@ -24,9 +24,11 @@ function BondInfoData({ bondData }: BondInfoDataProps) {
             href={`/bonds/detail/${bondData.isin}`}
             target="_blank"
             rel="noopener noreferrer"
+            title={`View details for ${bondData.isin}`}
+            aria-label={`View details for ${bondData.isin}`}
             className="text-primary flex items-center ml-1 gap-2"
           >
-            {bondData.isin} <BsArrowUpRightSquareFill />
+            {bondData.isin} <BsArrowUpRightSquareFill aria-hidden="true" />
           </Link>
         ) : (
           <span className="text-primary flex items-center ml-1 gap-2">

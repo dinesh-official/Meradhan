@@ -4,12 +4,13 @@ import { useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { FaTrash } from 'react-icons/fa6';
 
-const DeleteCompare = ({ index }: { index: number }) => {
+const DeleteCompare = ({ index, bondName }: { index: number; bondName?: string }) => {
   const params = useSearchParams();
   return (
-    <FaTrash
-      size={14}
-      className="text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
+    <button
+      type="button"
+      aria-label={bondName ? `Remove ${bondName} from comparison` : 'Remove bond from comparison'}
+      className="bg-transparent border-0 p-0 m-0"
       onClick={() => {
         const bonds = params.get('bonds');
         if (bonds) {
@@ -22,7 +23,13 @@ const DeleteCompare = ({ index }: { index: number }) => {
           location.href = '/bonds/comparison?bonds=' + JSON.stringify(bondsArray);
         }
       }}
-    />
+    >
+      <FaTrash
+        size={14}
+        aria-hidden="true"
+        className="text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
+      />
+    </button>
   );
 };
 

@@ -79,6 +79,8 @@ export default function EconomicCalendarTable({
                         ?.toString()
                         .toLowerCase()}.svg`}
                       alt={row.country}
+                      title={row.country}
+                      aria-label={row.country}
                       width={18}
                       height={18}
                     />
@@ -138,6 +140,8 @@ export default function EconomicCalendarTable({
                           ?.toString()
                           .toLowerCase()}.svg`}
                         alt={row.country}
+                        title={row.country}
+                        aria-label={row.country}
                         width={16}
                         height={18}
                       />

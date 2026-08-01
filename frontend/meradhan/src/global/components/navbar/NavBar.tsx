@@ -39,12 +39,14 @@ function NavBar({
       <div className="mx-auto h-full container">
         <div className="flex justify-between items-center h-full gap-4">
           {/* Logo */}
-          <Link href={`/`} aria-label="MeraDhan Home" className="shrink-0 meradhan-logo">
+          <Link href={`/`} aria-label="MeraDhan Home" title="MeraDhan Home" className="shrink-0 meradhan-logo">
             <Image
               src={`/logo/mera-dhan-logo.svg`}
               width={400}
               height={200}
               alt="MeraDhan"
+              title="MeraDhan"
+              aria-label="MeraDhan"
               className="w-auto h-10 logo-default"
             />
             <Image
@@ -52,6 +54,8 @@ function NavBar({
               width={400}
               height={200}
               alt="MeraDhan"
+              title="MeraDhan"
+              aria-label="MeraDhan"
               className="w-auto h-10 logo-white"
             />
           </Link>

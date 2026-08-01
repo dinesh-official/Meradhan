@@ -31,7 +31,7 @@ function ToolsOfferedByMeraDhan() {
                   helps you understand bonds at your own pace—in simple Indian
                   English.
                 </p>
-                <Link href={`#`}>
+                <Link href={`#`} title="Coming Soon" aria-label="Coming Soon">
                   <Button variant={"outline"}>Coming Soon</Button>
                 </Link>
               </div>
@@ -53,7 +53,7 @@ function ToolsOfferedByMeraDhan() {
 
                 <div className="flex justify-start">
                   <Button variant={"outline"}>
-                    <Link href={`https://calc.meradhan.co`}>
+                    <Link href={`https://calc.meradhan.co`} title="Bond Yield to Maturity Calculator" aria-label="Bond Yield to Maturity Calculator">
                       Calculate YTM
                     </Link>
                   </Button>

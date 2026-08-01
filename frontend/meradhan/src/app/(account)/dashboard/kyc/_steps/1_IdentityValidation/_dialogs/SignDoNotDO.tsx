@@ -61,7 +61,7 @@ export default function SignDoNotDO({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <span className="cursor-pointer">{children}</span>
+        <button type="button" className="cursor-pointer">{children}</button>
       </DialogTrigger>
 
       <DialogContent className="p-0 min-w-[50vw]">

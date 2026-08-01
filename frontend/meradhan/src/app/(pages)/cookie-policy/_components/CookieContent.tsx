@@ -59,6 +59,8 @@ const CookieContent = () => {
               href="https://www.aboutcookies.org"
               target="_blank"
               rel="noopener noreferrer"
+              title="www.aboutcookies.org"
+              aria-label="www.aboutcookies.org"
               className="text-primary underline"
             >
               www.aboutcookies.org

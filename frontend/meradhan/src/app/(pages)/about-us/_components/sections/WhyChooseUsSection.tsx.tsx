@@ -76,6 +76,8 @@ const WhyChooseUsSection = () => {
                   href="https://www.meradhan.co"
                   target="_blank"
                   rel="noopener noreferrer"
+                  title="www.MeraDhan.co"
+                  aria-label="www.MeraDhan.co"
                   className="hover:underline"
                 >
                   www.MeraDhan.co
@@ -86,6 +88,8 @@ const WhyChooseUsSection = () => {
                 <Mail size={18} aria-hidden="true" />
                 <a
                   href="mailto:support@meradhan.co"
+                  title="support@meradhan.co"
+                  aria-label="support@meradhan.co"
                   className="hover:underline"
                 >
                   support@meradhan.co
@@ -94,7 +98,7 @@ const WhyChooseUsSection = () => {
 
               <div className="flex items-center gap-3">
                 <Phone size={18} aria-hidden="true" />
-                <a href="tel:+919873373195" className="hover:underline">
+                <a href="tel:+919873373195" title="+91 9873373195" aria-label="+91 9873373195" className="hover:underline">
                   +91 9873373195
                 </a>
               </div>

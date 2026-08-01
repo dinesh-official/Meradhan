@@ -57,9 +57,11 @@ function IWantToQus() {
         {questions[INDEX].options.map((option, index) => {
           const isSelected = answers[INDEX] === option;
           return (
-            <div
+            <button
+              type="button"
               key={index + option}
               onClick={() => handleOptionClick(option)}
+              aria-pressed={isSelected}
               className={`border-[1.5px] select-none cursor-pointer p-3 rounded-sm text-sm text-center transition-all duration-200
                 ${
                   isSelected
@@ -68,7 +70,7 @@ function IWantToQus() {
                 }`}
             >
               {option}
-            </div>
+            </button>
           );
         })}
       </div>

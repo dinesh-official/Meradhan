@@ -18,6 +18,22 @@ body.high-contrast .meradhan-logo .logo-white   { display: block !important; }
 html { font-size: calc(var(--a11y-font-scale, 1) * 100%); }
 
 /* ════════════════════════════════════════════
+   OTP INPUT — Windows Forced Colors Mode fix
+   ════════════════════════════════════════════
+   The `input-otp` library (used by SignInOtpInput on the login page) hides
+   one real <input> beneath the visible digit boxes via color/background/
+   border/box-shadow: transparent, with an oversized font-size and heavily
+   negative letter-spacing to compensate — safe only while actually
+   invisible. Windows Forced Colors Mode overrides those transparent values
+   on form controls, un-hiding that oversized/compressed phantom text and
+   making it overlap the real digits. Opt only this element out; the
+   visible slot boxes (real border/background/caret) are unaffected and
+   still participate in forced-colors normally. */
+[data-input-otp] {
+  forced-color-adjust: none;
+}
+
+/* ════════════════════════════════════════════
    HIGH CONTRAST MODE  (body.high-contrast)
    ════════════════════════════════════════════ */
 
@@ -54,11 +70,17 @@ body.high-contrast .meradhan-navbar button,
 body.high-contrast .meradhan-navbar svg {
   color: #ffffff !important;
 }
-body.high-contrast .meradhan-navbar a[href*="sign"],
 body.high-contrast .meradhan-navbar button[class*="bg-"] {
   background-color: #1a4a7a !important;
   color: #ffffff !important;
   border: 1px solid #4a8fd4 !important;
+}
+/* The Sign Up link only wraps the styled button — leave the wrapper itself
+   transparent so it doesn't paint a second, square-cornered box around the
+   button's own rounded background/border. */
+body.high-contrast .meradhan-navbar a[href*="sign"] {
+  background-color: transparent !important;
+  border: none !important;
 }
 
 /* ── Hero section — hide grid canvas so solid bg-primary blue shows ── */
@@ -128,6 +150,18 @@ body.high-contrast .text-primary {
   color: #7eb8f7 !important;
 }
 
+/* ── Colored status/warning text (e.g. amber cashflow-window notices on public
+   bond pages) — whiten sitewide, not just inside .account-viewport ── */
+body.high-contrast [class*="text-amber-"],
+body.high-contrast [class*="text-orange-"],
+body.high-contrast [class*="text-yellow-"],
+body.high-contrast [class*="text-green-"],
+body.high-contrast [class*="text-red-"],
+body.high-contrast [class*="text-blue-"],
+body.high-contrast [class*="text-violet-"] {
+  color: #ffffff !important;
+}
+
 /* ── bg-primary panels (not buttons) — dark navy ── */
 body.high-contrast div[class*="bg-primary"],
 body.high-contrast section[class*="bg-primary"] {
@@ -159,6 +193,33 @@ body.high-contrast select {
   background-color: #0d2035 !important;
   color: #ffffff !important;
   border: 1px solid #4a8fd4 !important;
+}
+/* The rule above also matches input-otp's intentionally invisible phantom
+   <input> (it's a real <input> element), un-hiding its oversized,
+   negative-letter-spaced text — the same overlap bug as Forced Colors
+   Mode, but caused by this site's own high-contrast CSS instead. Keep it
+   genuinely transparent here too; the visible OTP digits come from
+   separate sibling slot elements, unaffected by this rule. */
+body.high-contrast [data-input-otp] {
+  background: transparent !important;
+  color: transparent !important;
+  border: 0 solid transparent !important;
+  outline: 0 solid transparent !important;
+  box-shadow: none !important;
+  caret-color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+}
+/* The visible OTP digit boxes are plain <div>s (data-slot="input-otp-slot"),
+   not real <input> elements, so the form-input rule above never reaches
+   them. The generic .bg-muted override elsewhere gives them a background
+   (#0d2035) that's nearly indistinguishable from the page background
+   (#0d1117) here, and they have no border by default — so the boxes
+   effectively disappear. Give them the same visible bordered treatment as
+   other form fields. */
+body.high-contrast [data-slot="input-otp-slot"] {
+  background-color: #0d2035 !important;
+  border: 1px solid #4a8fd4 !important;
+  color: #ffffff !important;
 }
 body.high-contrast input::placeholder,
 body.high-contrast textarea::placeholder {

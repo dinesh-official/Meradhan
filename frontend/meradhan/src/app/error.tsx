@@ -24,6 +24,8 @@ export default function Error({
           height={100}
           src="/under-maintenance.svg" // replace with your image path
           alt="Error"
+          title="Error"
+          aria-label="Error"
           className="mb-6 w-40 h-auto"
         />
 
@@ -44,7 +46,7 @@ export default function Error({
           >
             Retry
           </button>
-          <Link href="/" className="px-4 py-2">
+          <Link href="/" title="Go Home" aria-label="Go Home" className="px-4 py-2">
             Go Home
           </Link>
         </div>
@@ -116,7 +118,7 @@ export default function Error({
           >
             Try Again
           </button>
-          <Link href="/" className="bg-gray-600 px-5 py-2 text-white">
+          <Link href="/" title="Go Home" aria-label="Go Home" className="bg-gray-600 px-5 py-2 text-white">
             Go Home
           </Link>
         </div>

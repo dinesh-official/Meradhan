@@ -9,6 +9,7 @@ import {
 import { ISessionResponse } from "@root/apiGateway";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { AiOutlineMenu } from "react-icons/ai";
 import { IoMdArrowDropdown } from "react-icons/io";
@@ -31,12 +32,14 @@ function MobMenu({ session }: { session?: ISessionResponse["responseData"] | nul
         {/* Header */}
         <SheetHeader className="flex-shrink-0 px-4 py-4 border-none">
           <SheetTitle>
-            <Link href={"/"}>
+            <Link href={"/"} title="MeraDhan Home" aria-label="MeraDhan Home">
               <Image
                 src={`/logo/mera-dhan-logo.svg`}
                 width={400}
                 height={200}
                 alt="meradhan"
+                title="meradhan"
+                aria-label="meradhan"
                 className="w-auto h-8"
               />
             </Link>
@@ -54,12 +57,16 @@ function MobMenu({ session }: { session?: ISessionResponse["responseData"] | nul
         <div className="flex flex-col flex-shrink-0 gap-3 p-4 border-t border-t-gray-200">
           <Link
             href={session?.id ? "/dashboard" : "/login"}
+            title={session?.id ? "Go to MeraDhan Dashboard" : "Login to MeraDhan"}
+            aria-label={session?.id ? "Go to MeraDhan Dashboard" : "Login to MeraDhan"}
             className="bg-primary hover:bg-primary/90 py-2 rounded-md w-full text-white text-center transition"
           >
             {session?.id ? "Go to Dashboard" : "Login"}
           </Link>
           <Link
             href={session?.id ? "/logout" : "/signup"}
+            title={session?.id ? "Logout" : "Sign Up for MeraDhan"}
+            aria-label={session?.id ? "Logout" : "Sign Up for MeraDhan"}
             className="hover:bg-primary/10 py-2 border border-primary rounded-md w-full text-primary text-center transition"
           >
             {session?.id ? "Logout" : "Sign Up"}
@@ -75,6 +82,7 @@ export default MobMenu;
 /* Recursive Mobile Menu Item */
 const MobileMenuItem = ({ item, level = 0 }: MenuItemProps) => {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
   const hasChildren = item.children && item.children.length > 0;
 
   return (
@@ -87,6 +95,9 @@ const MobileMenuItem = ({ item, level = 0 }: MenuItemProps) => {
         {item.href ? (
           <Link
             href={item.href}
+            aria-current={pathname === item.href ? "page" : undefined}
+            title={item.label ?? item.title}
+            aria-label={item.label ?? item.title}
             className="flex-1"
             onClick={() => setOpen(false)}
           >

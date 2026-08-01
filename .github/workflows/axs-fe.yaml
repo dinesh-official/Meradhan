@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - saravanan
+      - saravanan-new
 jobs:
   deploy:
     runs-on: ubuntu-latest

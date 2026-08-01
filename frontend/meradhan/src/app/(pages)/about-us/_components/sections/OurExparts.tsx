@@ -63,6 +63,8 @@ export function ExpertProfile({
           <img
             src={imageSrc}
             alt={imageAlt || name}
+            title={imageAlt || name}
+            aria-label={imageAlt || name}
             width={100}
             height={100}
             className="w-full h-full rounded-full object-cover aspect-square"

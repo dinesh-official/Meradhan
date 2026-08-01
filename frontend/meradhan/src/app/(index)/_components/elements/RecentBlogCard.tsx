@@ -8,6 +8,8 @@ export function RecentBlogCard() {
       <Image
         src={`/avatars/blogpage.png`}
         alt="blog"
+        title="blog"
+        aria-label="blog"
         width={1200}
         height={800}
         className="w-full h-52 object-cover"

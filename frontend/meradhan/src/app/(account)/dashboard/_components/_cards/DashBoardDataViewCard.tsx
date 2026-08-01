@@ -57,7 +57,7 @@ export default function DashBoardDataViewCard({
         </CardTitle>
         {headerAction ? (
           <Button variant="outline" size="sm" asChild className="shrink-0">
-            <Link href={headerAction.href}>{headerAction.label}</Link>
+            <Link href={headerAction.href} title={headerAction.label} aria-label={headerAction.label}>{headerAction.label}</Link>
           </Button>
         ) : null}
       </CardHeader>
@@ -72,6 +72,8 @@ export default function DashBoardDataViewCard({
             <Image
               src={emptyImageSrc}
               alt="Empty state illustration"
+              title="Empty state illustration"
+              aria-label="Empty state illustration"
               width={150}
               height={150}
               className="w-20 h-20 object-contain"
@@ -80,7 +82,7 @@ export default function DashBoardDataViewCard({
             <p className="text-gray-600 text-base">{emptyMessage}</p>
             {ctaText && ctaHref ? (
               <Button variant="outline" asChild aria-label={ctaText}>
-                <Link href={ctaHref}>{ctaText}</Link>
+                <Link href={ctaHref} title={ctaText} aria-label={ctaText}>{ctaText}</Link>
               </Button>
             ) : (
               ctaText && (

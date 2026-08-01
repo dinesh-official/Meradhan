@@ -10,11 +10,18 @@ const CopyIsin = ({ isin }: { isin: string }) => {
   };
 
   return (
-    <FaCopy 
-      size={14} 
-      className="text-blue-400 hover:text-blue-600 transition-colors cursor-pointer" 
-      onClick={() => copyToClipboard(isin)} 
-    />
+    <button
+      type="button"
+      aria-label={`Copy ISIN ${isin}`}
+      className="bg-transparent border-0 p-0 m-0"
+      onClick={() => copyToClipboard(isin)}
+    >
+      <FaCopy
+        size={14}
+        aria-hidden="true"
+        className="text-blue-400 hover:text-blue-600 transition-colors cursor-pointer"
+      />
+    </button>
   );
 };
 

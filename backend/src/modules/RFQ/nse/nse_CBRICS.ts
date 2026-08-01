@@ -56,6 +56,7 @@ import type {
 export class NseCBRICS {
   private loginStoreKey = "NSE_CBRICS_LOGIN_KEY";
   private client: Axios;
+  private static readonly REQUEST_TIMEOUT_MS = 120_000;
 
   private credentials = {
     domain: env.CBRICS_DOMAIN,
@@ -66,6 +67,7 @@ export class NseCBRICS {
   constructor() {
     this.client = axios.create({
       baseURL: env.CBRICS_ENV == "PROD" ? "https://bricsonline.nseindia.com/bondsnew/rest/v1" : "https://bricsonlinereguat.nseindia.com/bondsnew/rest/v1",
+      timeout: NseCBRICS.REQUEST_TIMEOUT_MS,
       withCredentials: true,
       headers: {
         "User-Agent":

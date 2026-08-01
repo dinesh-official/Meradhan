@@ -41,7 +41,7 @@ const GlossaryView = ({ pageData }: { pageData: DynamicPageData }) => {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink href="/">Home</BreadcrumbLink>
+            <BreadcrumbLink href="/" title="MeraDhan Home" aria-label="MeraDhan Home">Home</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
@@ -148,6 +148,8 @@ function GlossaryViewNotFound({ onReset }: { onReset: () => void }) {
       <Image
         src="/static/sad-emoji.svg"
         alt="No Data"
+        title="No Data"
+        aria-label="No Data"
         width={100}
         height={100}
         className="w-18 h-18"

@@ -1,5 +1,9 @@
 interface MenuItem {
   title: string;
+  /** Accessible name (title/aria-label) when it should describe the
+   * destination more fully than the visible title alone. Falls back to
+   * `title` when omitted. */
+  label?: string;
   href?: string;
   children?: MenuItem[];
 }
@@ -9,8 +13,8 @@ export const MENU_ITEMS: MenuItem[] = [
     title: "Products",
 
     children: [
-      { title: "All Bonds", href: "/bonds" },
-      { title: "Latest Bonds", href: "/bonds/latest-release" },
+      { title: "All Bonds", label: "Browse All Bonds", href: "/bonds" },
+      { title: "Latest Bonds", label: "Latest Releases Bonds", href: "/bonds/latest-release" },
       { title: "Bank Bonds", href: "/bonds/bank" },
       { title: "Corporate Bonds", href: "/bonds/corporate" },
       { title: "PSU Bonds", href: "/bonds/psu" },
@@ -37,7 +41,7 @@ export const MENU_ITEMS: MenuItem[] = [
     title: "Tools",
 
     children: [
-      { title: "YTM Calculator", href: "https://calc.meradhan.co" },
+      { title: "YTM Calculator", label: "Bond Yield to Maturity Calculator", href: "https://calc.meradhan.co" },
       // { title: "MeraDhan-GPT", href: "/dhangpt" },
       // { title: "FD Calculator", href: "/fd-calculator" },
     ],
@@ -67,6 +71,7 @@ export const MENU_ITEMS: MenuItem[] = [
       // },
       {
         title: "Glossary",
+        label: "Bond Investment Glossary",
         href: "/glossary",
       },
       // {
@@ -79,6 +84,7 @@ export const MENU_ITEMS: MenuItem[] = [
       // },
       {
         title: "FAQs",
+        label: "Frequently Asked Questions",
         href: "/faqs",
       },
     ],

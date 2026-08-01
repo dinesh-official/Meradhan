@@ -31,7 +31,7 @@ const PrivacyPolicyContent = () => {
             voluntarily providing your personal information. The Platform is not
             intended for use by minors. If any personal data of a minor is
             inadvertently shared with us, the parent or guardian should contact
-            us at <strong>support@meradhan.co</strong>.
+            us at <strong><a href="mailto:support@meradhan.co" title="Contact Email of MeraDhan" aria-label="Contact Email of MeraDhan">support@meradhan.co</a></strong>.
           </p>
 
           <p>
@@ -349,7 +349,7 @@ const PrivacyPolicyContent = () => {
           </h3>
           <p>
             To opt out of promotional communications or request data deletion,
-            contact us at <strong>support@deradhan.co</strong>.
+            contact us at <strong><a href="mailto:support@meradhan.co" title="Contact Email of MeraDhan" aria-label="Contact Email of MeraDhan">support@meradhan.co</a></strong>.
           </p>
 
           <h3 className="text-xl   text-primary mt-6">
@@ -370,7 +370,10 @@ const PrivacyPolicyContent = () => {
             <br />
             Name: Arpit Jain
             <br />
-            Email: compliance@meradhan.co
+            Email:{" "}
+            <a href="mailto:compliance@meradhan.co" title="Contact Email of MeraDhan" aria-label="Contact Email of MeraDhan">
+              compliance@meradhan.co
+            </a>
           </p>
         </div>
       </div>

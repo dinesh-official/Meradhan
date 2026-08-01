@@ -81,6 +81,8 @@ function Testimonial() {
         <Image
           src={"/avatars/person.jpeg"}
           alt="person"
+          title="person"
+          aria-label="person"
           width={300}
           height={300}
           className="top-0 left-0 absolute bg-gray-50 mt-6 ml-5 rounded-xl w-44 h-44 object-cover"
