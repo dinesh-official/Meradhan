@@ -381,7 +381,8 @@ jobs:
 
           update_env "NEXT_PUBLIC_STRAPI_HOST_URL" "https://awsstrapi.meradhan.co"
 
-          update_env "STRAPI_API_URL" "https://${STRAPI_NAME}.${ROOT_DOMAIN}/api"
+          #update_env "STRAPI_API_URL" "https://${STRAPI_NAME}.${ROOT_DOMAIN}/api"
+          update_env "STRAPI_API_URL" "https://awsstrapi.${ROOT_DOMAIN}/api"
 
           update_env "NEXT_PUBLIC_HOST_URL" "https://${FRONTEND_NAME}.${ROOT_DOMAIN}"
 
