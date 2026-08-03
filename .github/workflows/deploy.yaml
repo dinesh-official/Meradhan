@@ -20,6 +20,7 @@ on:
         options:
           - 5min
           - 10min
+          - 30min
           - 1hr
           - 2hr
           - 4hr
