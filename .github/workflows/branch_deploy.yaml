@@ -369,7 +369,7 @@ jobs:
 
           #update_env "NEXT_PUBLIC_API_URL" "https://${BACKEND_NAME}.${ROOT_DOMAIN}/api"
 
-          update_env "NEXT_PUBLIC_BACKEND_HOST_URL" "https://${BACKEND_NAME}.${ROOT_DOMAIN}"
+          update_env "NEXT_PUBLIC_BACKEND_HOST_URL" "https://${BACKEND_NAME}:4000"
 
           update_env "NEXT_PUBLIC_BACKEND_IP_URL" "https://${BACKEND_NAME}.${ROOT_DOMAIN}"
 
