@@ -1,12 +1,13 @@
-name : Prod Database Push 
+name: Prod Database Push
 
 on:
   workflow_dispatch:
+
 jobs:
   db_push:
     runs-on: ubuntu-latest
-    steps :
 
+    steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -17,13 +18,18 @@ jobs:
       - name: Login to Amazon ECR
         run: |
           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} \
-          | docker login \
-            --username AWS \
-            --password-stdin 450321244603.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com  
+            | docker login \
+              --username AWS \
+              --password-stdin \
+              450321244603.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
-      - name : Pull the docker images
+      - name: Pull and run the Docker image
         shell: bash
-        runs : | 
-          "docker pull 450321244603.dkr.ecr.ap-south-1.amazonaws.com/prod-meradhan-be"
-          "docker run -d --name backend 450321244603.dkr.ecr.ap-south-1.amazonaws.com/prod-meradhan-be"
-          "docker exec backend /bin/bash -c 'cd ~ && pwd && ls -la'"
+        run: |
+          docker pull 450321244603.dkr.ecr.ap-south-1.amazonaws.com/prod-meradhan-be
+
+          docker run -d \
+            --name backend \
+            450321244603.dkr.ecr.ap-south-1.amazonaws.com/prod-meradhan-be
+
+          docker exec backend /bin/bash -c 'cd ~ && pwd && ls -la'
