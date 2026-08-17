@@ -1,9 +1,9 @@
 name: Prod Database Push
 
 on:
-  Push :
+  push:
     branches:
-    - master-new
+      - master-new
 
 jobs:
   db_push:
@@ -19,7 +19,8 @@ jobs:
 
       - name: Login to Amazon ECR
         run: |
-          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} \
+          aws ecr get-login-password \
+            --region ${{ secrets.AWS_REGION }} \
             | docker login \
               --username AWS \
               --password-stdin \
@@ -28,10 +29,12 @@ jobs:
       - name: Pull and run the Docker image
         shell: bash
         run: |
-          docker pull 450321244603.dkr.ecr.ap-south-1.amazonaws.com/prod-meradhan-be
+          docker pull \
+            450321244603.dkr.ecr.ap-south-1.amazonaws.com/prod-meradhan-be
 
           docker run -d \
             --name backend \
             450321244603.dkr.ecr.ap-south-1.amazonaws.com/prod-meradhan-be
 
-          docker exec backend /bin/bash -c 'cd ~ && pwd && ls -la'
+          docker exec backend \
+            /bin/bash -c 'cd ~ && pwd && ls -la'
