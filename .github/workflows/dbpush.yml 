@@ -2,6 +2,7 @@ name: Prod Database Push
 
 on:
   Push :
+    branches:
     - master-new
 
 jobs:
