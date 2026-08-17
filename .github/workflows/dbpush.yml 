@@ -1,7 +1,8 @@
 name: Prod Database Push
 
 on:
-  workflow_dispatch:
+  Push :
+    - master-new
 
 jobs:
   db_push:
